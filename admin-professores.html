@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Admin — Verificação de Professores</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode:"class",
+    theme:{extend:{colors:{
+      "primary-container":"#6c5ce7","on-surface":"#e1e2eb","surface-container":"#1d2026",
+      "tertiary":"#fabd00","surface-container-lowest":"#0b0e14","surface-container-low":"#191c22",
+      "background":"#10131a","outline-variant":"#474554","on-surface-variant":"#c8c4d7",
+      "primary":"#c6bfff","outline":"#928ea0","error":"#ffb4ab",
+      "surface-container-high":"#272a31","secondary":"#45edee","surface":"#10131a",
+      "surface-container-highest":"#32353c",
+    },fontFamily:{"body":["Inter"]},
+    borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"}}},
+  }
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;background:#0b0e14;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .scrollbar::-webkit-scrollbar{width:5px;}
+  .scrollbar::-webkit-scrollbar-thumb{background:#32353c;border-radius:10px;}
+
+  .status-pendente{background:rgba(250,189,0,.1);color:#fabd00;border:1px solid rgba(250,189,0,.2);}
+  .status-aprovado{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
+  .status-rejeitado{background:rgba(255,180,171,.1);color:#ffb4ab;border:1px solid rgba(255,180,171,.2);}
+
+  .card-prof{background:#1d2026;border:1px solid rgba(71,69,84,.25);border-radius:1rem;transition:all .2s;}
+  .card-prof:hover{border-color:rgba(108,92,231,.3);}
+  .card-prof.selecionado{border-color:#45edee;box-shadow:0 0 0 1px rgba(69,237,238,.2);}
+
+  /* Modal */
+  .modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:1rem;}
+  .modal.aberto{display:flex;}
+
+  /* Toast */
+  #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(5rem);background:#272a31;border:1px solid rgba(255,255,255,.1);color:#e1e2eb;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:300;transition:transform .3s;pointer-events:none;white-space:nowrap;}
+  #toast.show{transform:translateX(-50%) translateY(0);}
+
+  /* Tab ativo */
+  .tab-admin.ativo{background:#6c5ce7;color:white;}
+
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .fade-in{animation:fadeIn .3s ease forwards;}
+</style>
+</head>
+<body class="text-on-surface min-h-screen">
+
+<!-- BG -->
+<div class="fixed inset-0 pointer-events-none -z-10">
+  <div class="absolute top-0 right-0 w-[40%] h-[40%] bg-primary-container/5 rounded-full blur-[120px]"></div>
+  <div class="absolute bottom-0 left-0 w-[30%] h-[30%] bg-secondary/4 rounded-full blur-[100px]"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL: VER DOCUMENTOS -->
+<div class="modal" id="modalDocs">
+  <div style="background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:1.25rem;width:100%;max-width:640px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 32px 64px rgba(0,0,0,.6);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid rgba(71,69,84,.2);flex-shrink:0;">
+      <div>
+        <h3 id="modalProfNome" style="font-weight:700;font-size:1rem;color:#e1e2eb;"></h3>
+        <p id="modalProfEmail" style="font-size:.75rem;color:#928ea0;"></p>
+      </div>
+      <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="scrollbar" style="flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.25rem;">
+
+      <!-- Dados pessoais -->
+      <div style="background:#191c22;border:1px solid rgba(71,69,84,.2);border-radius:.875rem;padding:1.25rem;">
+        <p style="font-size:.7rem;font-weight:700;color:#45edee;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.875rem;">Dados Cadastrais</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+          <div><p style="font-size:.65rem;color:#928ea0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">Nome</p><p id="mdNome" style="font-size:.875rem;color:#e1e2eb;font-weight:600;"></p></div>
+          <div><p style="font-size:.65rem;color:#928ea0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">E-mail</p><p id="mdEmail" style="font-size:.875rem;color:#e1e2eb;"></p></div>
+          <div><p style="font-size:.65rem;color:#928ea0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">Escola</p><p id="mdEscola" style="font-size:.875rem;color:#e1e2eb;"></p></div>
+          <div><p style="font-size:.65rem;color:#928ea0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">Disciplina</p><p id="mdDisciplina" style="font-size:.875rem;color:#e1e2eb;"></p></div>
+          <div><p style="font-size:.65rem;color:#928ea0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">Data do pedido</p><p id="mdData" style="font-size:.875rem;color:#e1e2eb;"></p></div>
+          <div><p style="font-size:.65rem;color:#928ea0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">Status</p><p id="mdStatus" style="font-size:.75rem;font-weight:700;"></p></div>
+        </div>
+      </div>
+
+      <!-- Documentos -->
+      <div style="background:#191c22;border:1px solid rgba(71,69,84,.2);border-radius:.875rem;padding:1.25rem;">
+        <p style="font-size:.7rem;font-weight:700;color:#45edee;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.875rem;">Documentos Enviados</p>
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+          <div style="display:flex;align-items:center;gap:.875rem;padding:.875rem;background:#0b0e14;border:1px solid rgba(71,69,84,.2);border-radius:.75rem;">
+            <div style="width:40px;height:40px;background:rgba(255,180,171,.1);border-radius:.625rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span class="material-symbols-outlined" style="color:#ffb4ab;font-variation-settings:'FILL' 1;">badge</span>
+            </div>
+            <div style="flex:1;">
+              <p style="font-size:.8rem;font-weight:600;color:#e1e2eb;" id="mdDoc1Nome">RG — João_Silva_RG.pdf</p>
+              <p style="font-size:.7rem;color:#928ea0;">Documento de identidade com foto</p>
+            </div>
+            <button onclick="toast('📄 Em produção: documento seria exibido aqui')" style="padding:.5rem .875rem;background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);border-radius:.625rem;color:#c6bfff;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.375rem;">
+              <span class="material-symbols-outlined" style="font-size:.875rem;">visibility</span>Ver
+            </button>
+          </div>
+          <div style="display:flex;align-items:center;gap:.875rem;padding:.875rem;background:#0b0e14;border:1px solid rgba(71,69,84,.2);border-radius:.75rem;">
+            <div style="width:40px;height:40px;background:rgba(198,191,255,.1);border-radius:.625rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span class="material-symbols-outlined" style="color:#c6bfff;font-variation-settings:'FILL' 1;">work</span>
+            </div>
+            <div style="flex:1;">
+              <p style="font-size:.8rem;font-weight:600;color:#e1e2eb;" id="mdDoc2Nome">Declaração_Escola.pdf</p>
+              <p style="font-size:.7rem;color:#928ea0;">Comprovante de vínculo escolar</p>
+            </div>
+            <button onclick="toast('📄 Em produção: documento seria exibido aqui')" style="padding:.5rem .875rem;background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);border-radius:.625rem;color:#c6bfff;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.375rem;">
+              <span class="material-symbols-outlined" style="font-size:.875rem;">visibility</span>Ver
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campo justificativa rejeição -->
+      <div id="campoRejeicao" style="display:none;">
+        <label style="display:block;font-size:.7rem;font-weight:700;color:#ffb4ab;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Motivo da Rejeição *</label>
+        <textarea id="motivoRejeicao" rows="3" placeholder="Explique o motivo para informar ao professor por e-mail..." style="width:100%;background:#0b0e14;border:1px solid rgba(255,180,171,.3);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.85rem;outline:none;resize:none;box-sizing:border-box;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='#ffb4ab'" onblur="this.style.borderColor='rgba(255,180,171,.3)'"></textarea>
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div id="acoesModal" style="padding:1rem 1.5rem;border-top:1px solid rgba(71,69,84,.2);display:flex;gap:.75rem;flex-shrink:0;"></div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR ADMIN -->
+  <aside class="w-60 shrink-0 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50">
+    <div class="px-2 mb-8">
+      <div class="flex items-baseline italic mb-1">
+        <span class="text-2xl font-black text-white tracking-tighter">Reda</span>
+        <span class="text-2xl font-black text-[#45EDEE] tracking-tighter">ON</span>
+      </div>
+      <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg" style="background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.15);">
+        <span class="material-symbols-outlined text-error text-sm" style="font-variation-settings:'FILL' 1;">admin_panel_settings</span>
+        <span class="text-[10px] font-bold text-error uppercase tracking-wider">Painel Admin</span>
+      </div>
+    </div>
+    <nav class="flex-1 space-y-1">
+      <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#1d2026] text-[#45EDEE] border-l-4 border-[#45EDEE] text-sm font-bold" href="#">
+        <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1;">verified_user</span>Verificar Professores
+      </a>
+      <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] hover:text-[#E1E2EB] text-sm font-medium transition-all" href="#">
+        <span class="material-symbols-outlined text-lg">groups</span>Usuários
+      </a>
+      <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] hover:text-[#E1E2EB] text-sm font-medium transition-all" href="#">
+        <span class="material-symbols-outlined text-lg">bar_chart</span>Métricas
+      </a>
+      <a class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] hover:text-[#E1E2EB] text-sm font-medium transition-all" href="#">
+        <span class="material-symbols-outlined text-lg">settings</span>Configurações
+      </a>
+    </nav>
+    <div class="pt-4 border-t border-outline-variant/10">
+      <div class="flex items-center gap-3 px-2 py-2 rounded-xl">
+        <div class="w-9 h-9 rounded-full bg-error/20 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-error text-lg" style="font-variation-settings:'FILL' 1;">shield_person</span>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-on-surface">Admin RedaON</p>
+          <p class="text-[10px] text-on-surface-variant">Acesso total</p>
+        </div>
+      </div>
+      <a href="login.html" class="mt-2 flex items-center gap-3 px-4 py-2 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer text-sm">
+        <span class="material-symbols-outlined text-sm">logout</span>Sair
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- TOP BAR -->
+    <header class="h-16 flex items-center justify-between px-8 bg-[#0b0e14]/80 backdrop-blur-xl border-b border-outline-variant/10 shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">verified_user</span>
+        <h2 class="text-lg font-extrabold text-on-surface">Verificação de Professores</h2>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Métricas rápidas -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full" style="background:rgba(250,189,0,.1);border:1px solid rgba(250,189,0,.2);">
+          <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+          <span class="text-xs font-bold text-tertiary" id="countPendente">0 pendentes</span>
+        </div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full" style="background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);">
+          <span class="w-2 h-2 rounded-full bg-[#4ade80]"></span>
+          <span class="text-xs font-bold text-[#4ade80]" id="countAprovado">0 aprovados</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <div class="flex-1 overflow-hidden flex">
+
+      <!-- LISTA DE SOLICITAÇÕES -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- Tabs e filtros -->
+        <div class="px-6 pt-4 pb-0 border-b border-outline-variant/10 flex items-center justify-between">
+          <div class="flex gap-1">
+            <button onclick="filtrar('todos')" id="tab-todos" class="tab-admin ativo px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant transition-all">Todos</button>
+            <button onclick="filtrar('pendente')" id="tab-pendente" class="tab-admin px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant transition-all hover:bg-surface-container">Pendentes</button>
+            <button onclick="filtrar('aprovado')" id="tab-aprovado" class="tab-admin px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant transition-all hover:bg-surface-container">Aprovados</button>
+            <button onclick="filtrar('rejeitado')" id="tab-rejeitado" class="tab-admin px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant transition-all hover:bg-surface-container">Rejeitados</button>
+          </div>
+          <div class="flex items-center gap-2 bg-surface-container border border-outline-variant/20 rounded-xl px-3 py-2 mb-2">
+            <span class="material-symbols-outlined text-on-surface-variant text-lg">search</span>
+            <input id="campoBusca" class="bg-transparent text-sm text-on-surface outline-none placeholder:text-on-surface-variant/30 w-48" placeholder="Buscar professor..." oninput="buscarProfs(this.value)"/>
+          </div>
+        </div>
+
+        <!-- Cabeçalho tabela -->
+        <div class="grid text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-6 py-3 border-b border-outline-variant/10" style="grid-template-columns:2fr 2fr 1.5fr 1fr 1fr 120px">
+          <span>Professor</span><span>Escola / Disciplina</span><span>Data do Pedido</span><span>Status</span><span>Tempo</span><span class="text-right">Ações</span>
+        </div>
+
+        <!-- Lista -->
+        <div class="flex-1 overflow-y-auto scrollbar divide-y divide-outline-variant/10" id="listaSolicitacoes"></div>
+      </div>
+
+      <!-- PAINEL LATERAL: DETALHE RÁPIDO -->
+      <div class="w-[300px] shrink-0 border-l border-outline-variant/10 flex flex-col overflow-hidden" id="painelDetalhe">
+        <div class="p-5 border-b border-outline-variant/10">
+          <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Resumo Rápido</p>
+        </div>
+        <div class="flex-1 overflow-y-auto scrollbar p-5 space-y-4">
+
+          <!-- Stats -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-4 rounded-xl text-center" style="background:#1d2026;border:1px solid rgba(71,69,84,.2);">
+              <p class="text-2xl font-black text-tertiary" id="statTotal">0</p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">Total</p>
+            </div>
+            <div class="p-4 rounded-xl text-center" style="background:#1d2026;border:1px solid rgba(71,69,84,.2);">
+              <p class="text-2xl font-black text-tertiary" id="statPendente">0</p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">Pendentes</p>
+            </div>
+            <div class="p-4 rounded-xl text-center" style="background:#1d2026;border:1px solid rgba(71,69,84,.2);">
+              <p class="text-2xl font-black text-[#4ade80]" id="statAprovado">0</p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">Aprovados</p>
+            </div>
+            <div class="p-4 rounded-xl text-center" style="background:#1d2026;border:1px solid rgba(71,69,84,.2);">
+              <p class="text-2xl font-black text-error" id="statRejeitado">0</p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">Rejeitados</p>
+            </div>
+          </div>
+
+          <!-- Alerta pendentes -->
+          <div id="alertaPendente" class="hidden p-3 rounded-xl" style="background:rgba(250,189,0,.08);border:1px solid rgba(250,189,0,.2);">
+            <p class="text-xs font-bold text-tertiary flex items-center gap-1.5 mb-1">
+              <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">warning</span>
+              Atenção necessária
+            </p>
+            <p class="text-[11px] text-on-surface-variant" id="alertaTexto"></p>
+          </div>
+
+          <!-- Atividade recente -->
+          <div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Atividade Recente</p>
+            <div class="space-y-2" id="atividadeRecente"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── TOAST ──────────────────────────────────────
+function toast(msg, dur=3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ── DADOS ─────────────────────────────────────
+let solicitacoes = [
+  { id:1, nome:'Carla Mendes', email:'carla.mendes@escola.edu.br', escola:'Colégio Estadual São Paulo', disciplina:'Língua Portuguesa / Redação', data:'2026-03-25', status:'aprovado', doc1:'Carla_RG.pdf', doc2:'Carla_Declaracao.pdf', tempoHoras:12 },
+  { id:2, nome:'Roberto Farias', email:'roberto.farias@gmail.com', escola:'Cursinho Popular ABC', disciplina:'Língua Portuguesa / Redação', data:'2026-03-29', status:'pendente', doc1:'Roberto_CNH.pdf', doc2:'Roberto_Contracheque.pdf', tempoHoras:2 },
+  { id:3, nome:'Juliana Costa', email:'juliana.costa@colegioabc.com', escola:'Colégio ABC', disciplina:'Língua Portuguesa / Redação', data:'2026-03-30', status:'pendente', doc1:'Juliana_RG.jpg', doc2:'Juliana_Cracha.pdf', tempoHoras:18 },
+  { id:4, nome:'Marcos Vieira', email:'marcos.vieira@hotmail.com', escola:'Escola Municipal Norte', disciplina:'Língua Portuguesa / Redação', data:'2026-03-28', status:'pendente', doc1:'Marcos_RNE.pdf', doc2:'Marcos_Declaracao.pdf', tempoHoras:36 },
+  { id:5, nome:'Patrícia Souza', email:'patricia.souza@cursinhopro.com', escola:'Cursinho Pro', disciplina:'Língua Portuguesa / Redação', data:'2026-03-20', status:'rejeitado', doc1:'Patricia_RG.pdf', doc2:'Patricia_Vinculo.pdf', tempoHoras:72 },
+  { id:6, nome:'Eduardo Lima', email:'edu.lima@escola.org', escola:'Instituto Educacional Lima', disciplina:'Língua Portuguesa / Redação', data:'2026-03-31', status:'pendente', doc1:'Eduardo_RG.pdf', doc2:'Eduardo_Contrato.pdf', tempoHoras:1 },
+];
+
+let filtroAtual = 'todos';
+let solAtivada = null;
+let atividade = [];
+
+// ── RENDER ────────────────────────────────────
+function render() {
+  const lista = document.getElementById('listaSolicitacoes');
+  const busca = document.getElementById('campoBusca').value.toLowerCase();
+
+  const filtrado = solicitacoes.filter(s => {
+    const matchFiltro = filtroAtual === 'todos' || s.status === filtroAtual;
+    const matchBusca = !busca || s.nome.toLowerCase().includes(busca) || s.email.toLowerCase().includes(busca) || s.escola.toLowerCase().includes(busca);
+    return matchFiltro && matchBusca;
+  });
+
+  lista.innerHTML = '';
+  filtrado.forEach(s => {
+    const row = document.createElement('div');
+    row.className = `grid items-center px-6 py-4 hover:bg-surface-container/40 transition-all cursor-pointer fade-in ${solAtivada === s.id ? 'bg-surface-container/60' : ''}`;
+    row.style.gridTemplateColumns = '2fr 2fr 1.5fr 1fr 1fr 120px';
+    row.onclick = () => { solAtivada = s.id; render(); abrirModal(s); };
+
+    const statusClass = { pendente:'status-pendente', aprovado:'status-aprovado', rejeitado:'status-rejeitado' }[s.status];
+    const statusLabel = { pendente:'Pendente', aprovado:'Aprovado', rejeitado:'Rejeitado' }[s.status];
+
+    // Tempo formatado
+    let tempoStr = '';
+    if (s.tempoHoras < 1) tempoStr = 'agora';
+    else if (s.tempoHoras < 24) tempoStr = s.tempoHoras + 'h atrás';
+    else tempoStr = Math.floor(s.tempoHoras/24) + 'd atrás';
+
+    // Alerta de urgência
+    const urgente = s.status === 'pendente' && s.tempoHoras >= 24;
+
+    row.innerHTML = `
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-black text-sm" style="background:rgba(108,92,231,.2);color:#c6bfff;">
+          ${s.nome.split(' ').map(p=>p[0]).slice(0,2).join('')}
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-bold text-on-surface truncate">${s.nome}</p>
+          <p class="text-[10px] text-on-surface-variant truncate">${s.email}</p>
+        </div>
+      </div>
+      <div class="min-w-0 pr-2">
+        <p class="text-xs text-on-surface truncate">${s.escola}</p>
+        <p class="text-[10px] text-on-surface-variant">${s.disciplina}</p>
+      </div>
+      <span class="text-xs text-on-surface-variant">${new Date(s.data).toLocaleDateString('pt-BR')}</span>
+      <span class="text-[10px] font-bold px-2 py-1 rounded-full w-fit ${statusClass}">${statusLabel}</span>
+      <span class="text-xs ${urgente ? 'text-error font-bold' : 'text-on-surface-variant'} flex items-center gap-1">
+        ${urgente ? '<span class="material-symbols-outlined text-sm" style="font-variation-settings:\'FILL\' 1;">warning</span>' : ''}
+        ${tempoStr}
+      </span>
+      <div class="flex gap-2 justify-end" onclick="event.stopPropagation()">
+        ${s.status === 'pendente' ? `
+          <button onclick="aprovar(${s.id})" class="px-3 py-1.5 rounded-lg text-[10px] font-bold text-[#002020] transition-all hover:scale-105 active:scale-95" style="background:#4ade80;">✓</button>
+          <button onclick="iniciarRejeicao(${s.id})" class="px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all hover:scale-105 active:scale-95" style="background:rgba(255,180,171,.15);border:1px solid rgba(255,180,171,.3);color:#ffb4ab;">✕</button>
+        ` : `
+          <button onclick="abrirModal(solicitacoes.find(x=>x.id===${s.id}))" class="px-3 py-1.5 rounded-lg text-[10px] font-bold text-on-surface-variant hover:text-white transition-all" style="background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.3);">Ver</button>
+        `}
+      </div>`;
+    lista.appendChild(row);
+  });
+
+  if (filtrado.length === 0) {
+    lista.innerHTML = `<div class="text-center py-16"><span class="material-symbols-outlined text-4xl text-on-surface-variant/30 block mb-3">search_off</span><p class="text-on-surface-variant text-sm">Nenhuma solicitação encontrada.</p></div>`;
+  }
+
+  atualizarStats();
+}
+
+function atualizarStats() {
+  const pendentes = solicitacoes.filter(s=>s.status==='pendente');
+  const aprovados = solicitacoes.filter(s=>s.status==='aprovado');
+  const rejeitados = solicitacoes.filter(s=>s.status==='rejeitado');
+
+  document.getElementById('statTotal').textContent = solicitacoes.length;
+  document.getElementById('statPendente').textContent = pendentes.length;
+  document.getElementById('statAprovado').textContent = aprovados.length;
+  document.getElementById('statRejeitado').textContent = rejeitados.length;
+  document.getElementById('countPendente').textContent = pendentes.length + ' pendentes';
+  document.getElementById('countAprovado').textContent = aprovados.length + ' aprovados';
+
+  const urgentes = pendentes.filter(s=>s.tempoHoras>=24);
+  const alertaEl = document.getElementById('alertaPendente');
+  if (urgentes.length > 0) {
+    alertaEl.classList.remove('hidden');
+    document.getElementById('alertaTexto').textContent = `${urgentes.length} solicitação(ões) com mais de 24h aguardando análise.`;
+  } else {
+    alertaEl.classList.add('hidden');
+  }
+}
+
+// ── FILTROS ───────────────────────────────────
+window.filtrar = function(f) {
+  filtroAtual = f;
+  document.querySelectorAll('.tab-admin').forEach(b=>b.classList.remove('ativo'));
+  document.getElementById('tab-' + f).classList.add('ativo');
+  render();
+};
+
+window.buscarProfs = function() { render(); };
+
+// ── APROVAÇÃO ─────────────────────────────────
+window.aprovar = function(id, fecharMod = false) {
+  const s = solicitacoes.find(x=>x.id===id);
+  if (!s || s.status !== 'pendente') return;
+  s.status = 'aprovado';
+  atividade.unshift({ texto:`✓ ${s.nome} aprovado(a)`, tempo:'agora', cor:'#4ade80' });
+  if (atividade.length > 5) atividade.pop();
+  renderAtividade();
+  render();
+  if (fecharMod) fecharModal();
+  toast(`✅ ${s.nome} aprovado(a)! E-mail de confirmação enviado.`, 4000);
+};
+
+window.iniciarRejeicao = function(id, viaModal = false) {
+  if (viaModal) {
+    document.getElementById('campoRejeicao').style.display = 'block';
+    document.getElementById('acoesModal').innerHTML = `
+      <button onclick="confirmarRejeicao(${id})" style="flex:2;padding:.75rem;background:rgba(255,180,171,.15);border:1px solid rgba(255,180,171,.3);color:#ffb4ab;border-radius:.75rem;font-weight:700;font-size:.85rem;cursor:pointer;">
+        Confirmar Rejeição
+      </button>
+      <button onclick="abrirModal(solicitacoes.find(x=>x.id===${id}))" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.85rem;cursor:pointer;">
+        Cancelar
+      </button>`;
+  } else {
+    solAtivada = id;
+    render();
+    abrirModal(solicitacoes.find(x=>x.id===id));
+    setTimeout(() => iniciarRejeicao(id, true), 100);
+  }
+};
+
+window.confirmarRejeicao = function(id) {
+  const motivo = document.getElementById('motivoRejeicao').value.trim();
+  if (!motivo) { toast('⚠️ Informe o motivo da rejeição!'); return; }
+  const s = solicitacoes.find(x=>x.id===id);
+  s.status = 'rejeitado';
+  atividade.unshift({ texto:`✕ ${s.nome} rejeitado(a)`, tempo:'agora', cor:'#ffb4ab' });
+  if (atividade.length > 5) atividade.pop();
+  renderAtividade();
+  fecharModal();
+  render();
+  toast(`❌ ${s.nome} rejeitado(a). E-mail enviado com o motivo.`, 4000);
+};
+
+// ── MODAL ─────────────────────────────────────
+window.abrirModal = function(s) {
+  document.getElementById('modalProfNome').textContent = s.nome;
+  document.getElementById('modalProfEmail').textContent = s.email;
+  document.getElementById('mdNome').textContent = s.nome;
+  document.getElementById('mdEmail').textContent = s.email;
+  document.getElementById('mdEscola').textContent = s.escola;
+  document.getElementById('mdDisciplina').textContent = s.disciplina;
+  document.getElementById('mdData').textContent = new Date(s.data).toLocaleDateString('pt-BR');
+  document.getElementById('mdDoc1Nome').textContent = s.doc1;
+  document.getElementById('mdDoc2Nome').textContent = s.doc2;
+  document.getElementById('campoRejeicao').style.display = 'none';
+  document.getElementById('motivoRejeicao').value = '';
+
+  const statusEl = document.getElementById('mdStatus');
+  const statusClass = { pendente:'status-pendente', aprovado:'status-aprovado', rejeitado:'status-rejeitado' }[s.status];
+  statusEl.className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass}`;
+  statusEl.textContent = { pendente:'Pendente', aprovado:'Aprovado', rejeitado:'Rejeitado' }[s.status];
+
+  const acoes = document.getElementById('acoesModal');
+  if (s.status === 'pendente') {
+    acoes.innerHTML = `
+      <button onclick="aprovar(${s.id}, true)" style="flex:1;padding:.75rem;background:#4ade80;color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="font-size:1rem;">verified</span> Aprovar Professor
+      </button>
+      <button onclick="iniciarRejeicao(${s.id}, true)" style="flex:1;padding:.75rem;background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.3);color:#ffb4ab;border-radius:.75rem;font-weight:700;font-size:.875rem;cursor:pointer;">
+        Rejeitar
+      </button>`;
+  } else {
+    acoes.innerHTML = `
+      <button onclick="fecharModal()" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.875rem;cursor:pointer;">
+        Fechar
+      </button>`;
+  }
+
+  document.getElementById('modalDocs').classList.add('aberto');
+};
+
+window.fecharModal = function() {
+  document.getElementById('modalDocs').classList.remove('aberto');
+};
+
+document.getElementById('modalDocs').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+
+// ── ATIVIDADE ─────────────────────────────────
+function renderAtividade() {
+  const el = document.getElementById('atividadeRecente');
+  if (atividade.length === 0) {
+    el.innerHTML = '<p class="text-xs text-on-surface-variant/50 italic">Nenhuma ação realizada ainda.</p>';
+    return;
+  }
+  el.innerHTML = atividade.map(a => `
+    <div class="flex items-center gap-2">
+      <div class="w-2 h-2 rounded-full shrink-0" style="background:${a.cor}"></div>
+      <p class="text-xs text-on-surface-variant flex-1">${a.texto}</p>
+      <span class="text-[10px] text-outline">${a.tempo}</span>
+    </div>`).join('');
+}
+
+// ── INIT ──────────────────────────────────────
+render();
+renderAtividade();
+</script>
+</body>
+</html>

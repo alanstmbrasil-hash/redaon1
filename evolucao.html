@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Evolução</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "on-primary-fixed": "#160066", "on-error-container": "#ffdad6", "on-secondary": "#003737",
+          "inverse-on-surface": "#2e3037", "secondary-fixed": "#56f9f9", "surface-container": "#1d2026",
+          "tertiary-container": "#906c00", "tertiary": "#fabd00", "surface-container-lowest": "#0b0e14",
+          "surface-container-low": "#191c22", "background": "#10131a", "primary-fixed-dim": "#c6bfff",
+          "outline-variant": "#474554", "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
+          "on-primary": "#2900a0", "on-primary-container": "#faf6ff", "inverse-surface": "#e1e2eb",
+          "on-error": "#690005", "on-surface": "#e1e2eb", "secondary-fixed-dim": "#26dcdd",
+          "surface-container-highest": "#32353c", "primary": "#c6bfff", "outline": "#928ea0",
+          "on-background": "#e1e2eb", "surface-bright": "#363940", "error-container": "#93000a",
+          "surface-dim": "#10131a", "surface-variant": "#32353c", "error": "#ffb4ab",
+          "surface-container-high": "#272a31", "primary-fixed": "#e4dfff", "on-tertiary-container": "#fff6ec",
+          "secondary": "#45edee", "on-tertiary": "#3f2e00", "secondary-container": "#00d0d1",
+          "tertiary-fixed": "#ffdf9e", "surface": "#10131a", "inverse-primary": "#5847d2"
+        },
+        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background-color: #10131a; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .glass-card { background: rgba(25,28,34,0.8); backdrop-filter: blur(12px); }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
+
+  /* Animações conquistas */
+  @keyframes unlockPulse { 0%,100%{box-shadow:0 0 0 0 rgba(250,189,0,0.4)} 50%{box-shadow:0 0 0 12px rgba(250,189,0,0)} }
+  .conquista-desbloqueada:hover { animation: unlockPulse 1.5s infinite; }
+
+  /* Barra de XP animada */
+  @keyframes fillXP { from{width:0} to{width:72%} }
+  .xp-bar { animation: fillXP 1.5s ease forwards; }
+
+  /* Toast */
+  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* Tooltip conquista */
+  .conquista-tooltip { display:none; position:absolute; bottom:110%; left:50%; transform:translateX(-50%); background:#1d2026; border:1px solid rgba(255,255,255,0.1); color:#c8c4d7; font-size:.7rem; padding:.6rem .9rem; border-radius:.75rem; width:160px; text-align:center; z-index:50; white-space:normal; box-shadow:0 8px 24px rgba(0,0,0,.4); pointer-events:none; }
+  .conquista-card:hover .conquista-tooltip { display:block; }
+</style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-hidden">
+
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
+  <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
+</div>
+
+<div id="toast"></div>
+
+<div class="flex h-screen overflow-hidden relative z-10">
+
+  <!-- SIDEBAR -->
+  <aside class="h-screen w-64 fixed left-0 top-0 bg-[#10131a] shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)] flex flex-col py-6 px-4 z-50 border-r border-outline-variant/10">
+    <div class="flex items-center px-2 mb-10">
+      <div class="flex items-baseline italic">
+        <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
+        <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
+      </div>
+    </div>
+    <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="inicio.html"><span class="material-symbols-outlined">home</span><span class="font-medium text-sm">Início</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span><span class="font-medium text-sm">Nova Redação</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined">description</span><span class="font-medium text-sm">Temas</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Minhas Redações</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="evolucao.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">trending_up</span><span class="font-medium text-sm">Evolução</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html"><span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-outline-variant/10">
+      <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
+        <img alt="Alan Alves" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
+        <div class="flex flex-col"><span class="text-sm font-semibold text-on-surface">Alan Alves</span><span class="text-xs text-on-surface-variant">Estudante Premium</span></div>
+      </div>
+      <a onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
+        <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 ml-64 flex flex-col h-screen relative bg-surface-container-lowest overflow-hidden">
+
+    <!-- TOP BAR -->
+    <header class="h-20 flex items-center justify-between px-10 bg-surface/40 backdrop-blur-md sticky top-0 z-40 border-b border-white/5">
+      <div class="flex items-center gap-4">
+        <button class="text-on-surface-variant hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#45EDEE]" style="font-variation-settings:'FILL' 1;">trending_up</span>
+          <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Evolução</h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
+          <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
+          <span class="text-xs font-bold text-on-surface">940 pts</span>
+        </div>
+        <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <div class="flex-1 overflow-y-auto p-10 custom-scrollbar">
+      <div class="space-y-8 max-w-7xl mx-auto">
+
+        <!-- MÉTRICAS -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <!-- Nível -->
+          <div class="bg-[#191c22] p-6 rounded-2xl border border-white/5 flex flex-col gap-1">
+            <span class="text-[10px] font-bold text-[#c8c4d7] uppercase tracking-wider">Nível Atual</span>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-black text-[#45edee]">Nível 14</span>
+            </div>
+            <span class="text-xs text-[#c8c4d7]/60 italic">Top 5% da plataforma</span>
+          </div>
+          <!-- Média -->
+          <div class="bg-[#191c22] p-6 rounded-2xl border border-white/5 flex flex-col gap-1">
+            <span class="text-[10px] font-bold text-[#c8c4d7] uppercase tracking-wider">Média Geral</span>
+            <div class="flex items-baseline gap-1">
+              <span id="mediaAtual" class="text-3xl font-black text-white">840</span>
+              <span class="text-sm font-medium text-[#c8c4d7]">/1000</span>
+            </div>
+            <span class="text-xs text-[#45edee]">+20 pts vs mês anterior</span>
+          </div>
+          <!-- Redações -->
+          <div class="bg-[#191c22] p-6 rounded-2xl border border-white/5 flex flex-col gap-1">
+            <span class="text-[10px] font-bold text-[#c8c4d7] uppercase tracking-wider">Redações Enviadas</span>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-black text-white">24</span>
+            </div>
+            <span class="text-xs text-[#c8c4d7]/60 italic">8 este mês</span>
+          </div>
+          <!-- Próxima meta -->
+          <div class="bg-[#191c22] p-6 rounded-2xl border border-white/5 flex flex-col gap-2">
+            <span class="text-[10px] font-bold text-[#c8c4d7] uppercase tracking-wider">Próxima Meta</span>
+            <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-[#6c5ce7] to-[#45edee] xp-bar"></div>
+            </div>
+            <span class="text-xs text-white/80 font-medium">920 pts (Mestre) — <span class="text-[#45edee]">80 pts faltam</span></span>
+          </div>
+        </div>
+
+        <!-- GRÁFICOS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+          <!-- Gráfico de Evolução de Notas -->
+          <div class="lg:col-span-2 bg-[#191c22] p-8 rounded-3xl border border-white/5">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-bold text-white">Evolução de Notas</h3>
+              <div class="flex gap-4">
+                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-[#6c5ce7]"></div><span class="text-[10px] text-[#c8c4d7]">Sua Nota</span></div>
+                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-[#fabd00]"></div><span class="text-[10px] text-[#c8c4d7]">Sua Meta</span></div>
+                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-white/30"></div><span class="text-[10px] text-[#c8c4d7]">Média Brasil</span></div>
+              </div>
+            </div>
+            <div style="height:260px;position:relative;">
+              <canvas id="graficoEvolucao"></canvas>
+            </div>
+          </div>
+
+          <!-- Radar C1-C5 -->
+          <div class="bg-[#191c22] p-8 rounded-3xl border border-white/5">
+            <h3 class="text-xl font-bold text-white mb-4">Equilíbrio C1-C5</h3>
+            <div style="height:220px;position:relative;">
+              <canvas id="graficoRadar"></canvas>
+            </div>
+            <p class="text-[11px] text-[#c8c4d7]/60 text-center italic mt-3" id="pontoForte">Ponto forte: Proposta de Intervenção (C5)</p>
+          </div>
+        </div>
+
+        <!-- CONQUISTAS -->
+        <div class="space-y-6">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#FABD00]" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
+            <h3 class="text-xl font-bold text-white">Suas Conquistas de Elite</h3>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="gridConquistas"></div>
+        </div>
+
+        <!-- CARDS DESTAQUE -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
+
+          <!-- Destaque do Repertório -->
+          <div class="bg-gradient-to-br from-[#1d2026] to-[#14171d] p-8 rounded-3xl border border-white/5 hover:border-[#6c5ce7]/30 transition-all group">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 rounded-2xl bg-[#6c5ce7]/10 flex items-center justify-center text-[#6c5ce7]">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
+              </div>
+              <h4 class="text-lg font-bold text-white italic">Destaque do Repertório</h4>
+            </div>
+            <p class="text-[#c8c4d7] text-sm leading-relaxed mb-6">
+              "A persistência das desigualdades estruturais no Brasil contemporâneo reflete, conforme o sociólogo Jessé Souza, uma 'ralé' produzida para manter privilégios..."
+            </p>
+            <div class="flex items-center gap-2 text-[#45edee] text-xs font-bold uppercase tracking-widest">
+              <span>Excelente uso de autoridade</span>
+              <span class="material-symbols-outlined text-sm">trending_up</span>
+            </div>
+          </div>
+
+          <!-- Plano de Ação -->
+          <div class="bg-gradient-to-br from-[#1d2026] to-[#14171d] p-8 rounded-3xl border border-white/5 hover:border-[#fabd00]/30 transition-all group">
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-[#fabd00]/10 flex items-center justify-center text-[#fabd00]">
+                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">assignment_turned_in</span>
+                </div>
+                <h4 class="text-lg font-bold text-white italic">Plano de Ação</h4>
+              </div>
+              <button onclick="toast('Plano exportado! 📋')" class="w-10 h-10 rounded-xl bg-[#45edee] flex items-center justify-center hover:scale-110 transition-all">
+                <span class="material-symbols-outlined text-[#002020] text-lg" style="font-variation-settings:'FILL' 1;">edit</span>
+              </button>
+            </div>
+            <ul class="space-y-3" id="listaPlano"></ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FAB -->
+  <button onclick="window.location.href='nova-redacao.html'" class="fixed bottom-10 right-10 w-16 h-16 rounded-2xl bg-secondary text-on-secondary shadow-lg shadow-secondary/20 flex items-center justify-center transform hover:scale-110 hover:rotate-12 transition-all active:scale-90 z-50">
+    <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">edit</span>
+  </button>
+</div>
+
+<script>
+// ── TOAST ──────────────────────────────────────────
+function toast(msg, dur=3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ── DADOS ──────────────────────────────────────────
+const HISTORICO = [
+  { label:'RED 01', nota:720, data:'Jan/23' },
+  { label:'RED 02', nota:740, data:'Fev/23' },
+  { label:'RED 03', nota:780, data:'Mar/23' },
+  { label:'RED 04', nota:800, data:'Abr/23' },
+  { label:'RED 05', nota:760, data:'Mai/23' },
+  { label:'RED 06', nota:820, data:'Jun/23' },
+  { label:'RED 07', nota:800, data:'Jul/23' },
+  { label:'RED 08', nota:840, data:'Ago/23' },
+  { label:'ATUAL',  nota:840, data:'Set/23' },
+];
+
+const META = 920;
+const MEDIA_BRASIL = 680;
+
+const COMPETENCIAS = {
+  C1: 170, // Domínio da língua
+  C2: 160, // Compreensão do tema
+  C3: 160, // Seleção e organização
+  C4: 150, // Mecanismos linguísticos
+  C5: 180, // Proposta de intervenção
+};
+
+// ── GRÁFICO DE EVOLUÇÃO ────────────────────────────
+const ctxEvolucao = document.getElementById('graficoEvolucao').getContext('2d');
+
+const gradientFill = ctxEvolucao.createLinearGradient(0, 0, 0, 260);
+gradientFill.addColorStop(0, 'rgba(108,92,231,0.3)');
+gradientFill.addColorStop(1, 'rgba(108,92,231,0)');
+
+new Chart(ctxEvolucao, {
+  type: 'bar',
+  data: {
+    labels: HISTORICO.map(h => h.label),
+    datasets: [
+      {
+        label: 'Sua Nota',
+        data: HISTORICO.map(h => h.nota),
+        backgroundColor: HISTORICO.map((h, i) =>
+          i === HISTORICO.length - 1 ? '#6c5ce7' : 'rgba(108,92,231,0.25)'
+        ),
+        borderColor: HISTORICO.map((h, i) =>
+          i === HISTORICO.length - 1 ? '#6c5ce7' : 'rgba(108,92,231,0.4)'
+        ),
+        borderWidth: 1,
+        borderRadius: 6,
+        hoverBackgroundColor: '#6c5ce7',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1d2026',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        titleColor: '#e1e2eb',
+        bodyColor: '#c8c4d7',
+        padding: 12,
+        callbacks: {
+          label: ctx => ` Nota: ${ctx.parsed.y}/1000`,
+          afterLabel: () => `Meta: ${META} · Média BR: ${MEDIA_BRASIL}`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: '#928ea0', font: { size: 10, family: 'Inter' } },
+        border: { display: false }
+      },
+      y: {
+        min: 500,
+        max: 1000,
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: '#928ea0', font: { size: 10, family: 'Inter' }, stepSize: 100 },
+        border: { display: false }
+      }
+    },
+    // Linhas de referência via plugin
+    plugins: {
+      legend: { display: false },
+      annotation: undefined,
+      tooltip: {
+        backgroundColor: '#1d2026',
+        borderColor: 'rgba(255,255,255,0.08)',
+        borderWidth: 1,
+        titleColor: '#e1e2eb',
+        bodyColor: '#c8c4d7',
+        padding: 12,
+      }
+    }
+  },
+  plugins: [{
+    id: 'referenceLines',
+    afterDraw(chart) {
+      const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+      // Linha Meta
+      const yMeta = y.getPixelForValue(META);
+      ctx.save();
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = 'rgba(250,189,0,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(left, yMeta);
+      ctx.lineTo(right, yMeta);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(250,189,0,0.8)';
+      ctx.font = '9px Inter';
+      ctx.fillText('Meta: ' + META, right - 60, yMeta - 4);
+      // Linha Média Brasil
+      const yBr = y.getPixelForValue(MEDIA_BRASIL);
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(left, yBr);
+      ctx.lineTo(right, yBr);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillText('Média BR: ' + MEDIA_BRASIL, right - 80, yBr - 4);
+      ctx.restore();
+    }
+  }]
+});
+
+// ── GRÁFICO RADAR C1-C5 ────────────────────────────
+const ctxRadar = document.getElementById('graficoRadar').getContext('2d');
+const valoresComp = Object.values(COMPETENCIAS);
+const maxComp = 200;
+
+new Chart(ctxRadar, {
+  type: 'radar',
+  data: {
+    labels: ['C1\nLíngua', 'C2\nTema', 'C3\nOrganiz.', 'C4\nLing.', 'C5\nProposta'],
+    datasets: [{
+      label: 'Suas Competências',
+      data: valoresComp,
+      backgroundColor: 'rgba(69,237,238,0.15)',
+      borderColor: '#45edee',
+      borderWidth: 2,
+      pointBackgroundColor: '#45edee',
+      pointBorderColor: '#0b0e14',
+      pointBorderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    }, {
+      label: 'Máximo',
+      data: [200,200,200,200,200],
+      backgroundColor: 'transparent',
+      borderColor: 'rgba(255,255,255,0.06)',
+      borderWidth: 1,
+      pointRadius: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1d2026',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        titleColor: '#45edee',
+        bodyColor: '#c8c4d7',
+        padding: 10,
+        callbacks: { label: ctx => ` ${ctx.parsed.r}/200` }
+      }
+    },
+    scales: {
+      r: {
+        min: 0, max: 200,
+        ticks: { display: false, stepSize: 50 },
+        grid: { color: 'rgba(255,255,255,0.06)' },
+        angleLines: { color: 'rgba(255,255,255,0.06)' },
+        pointLabels: {
+          color: '#928ea0',
+          font: { size: 9, family: 'Inter', weight: 'bold' }
+        }
+      }
+    }
+  }
+});
+
+// Identificar ponto forte e fraco
+const nomes = ['Domínio da Língua (C1)','Compreensão do Tema (C2)','Organização (C3)','Mecanismos Linguísticos (C4)','Proposta de Intervenção (C5)'];
+const maxIdx = valoresComp.indexOf(Math.max(...valoresComp));
+const minIdx = valoresComp.indexOf(Math.min(...valoresComp));
+document.getElementById('pontoForte').textContent =
+  `✦ Forte: ${nomes[maxIdx]} · Melhorar: ${nomes[minIdx].split(' ')[0]}`;
+
+// ── CONQUISTAS ─────────────────────────────────────
+const CONQUISTAS = [
+  { nome:'Lenda do 900', icon:'military_tech', cor:'#FABD00', desbloqueada:true, progresso:100, tooltip:'Obteve nota acima de 900 em uma redação!' },
+  { nome:'Escritor Veloz', icon:'rocket_launch', cor:'#45EDEE', desbloqueada:true, progresso:85, tooltip:'Enviou 5 redações em menos de 7 dias.' },
+  { nome:'Repertório Ouro', icon:'auto_awesome', cor:'#FABD00', desbloqueada:true, progresso:60, tooltip:'Usou repertórios filosóficos em 3 redações.' },
+  { nome:'Mestre Argumentador', icon:'emoji_events', cor:'#928ea0', desbloqueada:false, progresso:30, tooltip:'Obtenha C3 ≥ 180 em 5 redações consecutivas.' },
+  { nome:'Crítico Analítico', icon:'workspace_premium', cor:'#928ea0', desbloqueada:false, progresso:10, tooltip:'Alcance nota 960 ou mais.' },
+];
+
+const grid = document.getElementById('gridConquistas');
+CONQUISTAS.forEach(c => {
+  const card = document.createElement('div');
+  card.className = `conquista-card glass-card p-4 rounded-2xl border border-white/5 flex flex-col items-center gap-3 transition-all duration-300 relative cursor-pointer ${c.desbloqueada ? 'conquista-desbloqueada' : 'opacity-60'}`;
+  card.innerHTML = `
+    <div class="relative flex items-center justify-center">
+      <div class="absolute inset-0 rounded-full blur-xl transition-transform duration-500 scale-0 group-hover:scale-100" style="background:${c.cor}30"></div>
+      <span class="material-symbols-outlined text-4xl drop-shadow-lg" style="color:${c.desbloqueada ? c.cor : '#32353c'};font-variation-settings:'FILL' 1;">${c.icon}</span>
+      ${!c.desbloqueada ? '<span class="material-symbols-outlined absolute text-xs text-white/40 bg-black/40 p-0.5 rounded-full" style="bottom:-4px;right:-4px;">lock</span>' : ''}
+    </div>
+    <div class="flex flex-col items-center gap-1.5 w-full">
+      <span class="text-[11px] font-bold ${c.desbloqueada ? 'text-white' : 'text-[#c8c4d7]/60'} tracking-wide text-center">${c.nome}</span>
+      <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+        <div class="h-full rounded-full transition-all" style="width:${c.progresso}%;background:${c.desbloqueada ? c.cor : 'rgba(200,196,215,0.2)'}"></div>
+      </div>
+      <span class="text-[9px] ${c.desbloqueada ? 'text-on-surface-variant' : 'text-white/20'}">${c.progresso}%</span>
+    </div>
+    <div class="conquista-tooltip">${c.tooltip}</div>`;
+  card.addEventListener('click', () => {
+    if (c.desbloqueada) toast(`🏆 ${c.nome} — Conquista desbloqueada!`);
+    else toast(`🔒 ${c.nome}: ${c.tooltip}`);
+  });
+  grid.appendChild(card);
+});
+
+// ── PLANO DE AÇÃO ──────────────────────────────────
+const PLANO = [
+  { texto:'Revisar conectivos de conclusão para C4.', feito:true },
+  { texto:'Praticar 2 temas sobre Meio Ambiente.', feito:true },
+  { texto:"Aprofundar conceito de 'Modernidade Líquida'.", feito:false },
+  { texto:'Estudar estrutura argumentativa da C3.', feito:false },
+];
+
+const listaPlano = document.getElementById('listaPlano');
+PLANO.forEach((p, i) => {
+  const li = document.createElement('li');
+  li.className = 'flex items-start gap-3 text-sm text-[#c8c4d7] cursor-pointer group';
+  li.innerHTML = `
+    <span class="material-symbols-outlined text-sm mt-0.5 transition-colors ${p.feito ? 'text-[#45edee]' : 'text-white/20 group-hover:text-white/40'}" style="font-variation-settings:'FILL' 1;">${p.feito ? 'check_circle' : 'radio_button_unchecked'}</span>
+    <span class="${p.feito ? '' : 'opacity-60'}">${p.texto}</span>`;
+  li.addEventListener('click', () => {
+    p.feito = !p.feito;
+    listaPlano.innerHTML = '';
+    PLANO.forEach((pp, ii) => listaPlano.appendChild(criarItemPlano(pp, ii)));
+    toast(p.feito ? '✓ Tarefa concluída!' : 'Tarefa reaberta.');
+  });
+  listaPlano.appendChild(li);
+});
+
+function criarItemPlano(p) {
+  const li = document.createElement('li');
+  li.className = 'flex items-start gap-3 text-sm text-[#c8c4d7] cursor-pointer group';
+  li.innerHTML = `
+    <span class="material-symbols-outlined text-sm mt-0.5 transition-colors ${p.feito ? 'text-[#45edee]' : 'text-white/20 group-hover:text-white/40'}" style="font-variation-settings:'FILL' 1;">${p.feito ? 'check_circle' : 'radio_button_unchecked'}</span>
+    <span class="${p.feito ? '' : 'opacity-60'}">${p.texto}</span>`;
+  li.addEventListener('click', () => {
+    p.feito = !p.feito;
+    listaPlano.innerHTML = '';
+    PLANO.forEach(pp => listaPlano.appendChild(criarItemPlano(pp)));
+    toast(p.feito ? '✓ Tarefa concluída!' : 'Tarefa reaberta.');
+  });
+  return li;
+}
+</script>
+</body>
+</html>

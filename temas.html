@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Biblioteca de Temas</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "on-primary-fixed": "#160066", "on-error-container": "#ffdad6", "on-secondary": "#003737",
+          "inverse-on-surface": "#2e3037", "secondary-fixed": "#56f9f9", "surface-container": "#1d2026",
+          "tertiary-container": "#906c00", "tertiary": "#fabd00", "surface-container-lowest": "#0b0e14",
+          "surface-container-low": "#191c22", "background": "#10131a", "primary-fixed-dim": "#c6bfff",
+          "outline-variant": "#474554", "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
+          "on-primary": "#2900a0", "on-primary-container": "#faf6ff", "inverse-surface": "#e1e2eb",
+          "on-error": "#690005", "on-surface": "#e1e2eb", "secondary-fixed-dim": "#26dcdd",
+          "surface-container-highest": "#32353c", "primary": "#c6bfff", "outline": "#928ea0",
+          "on-background": "#e1e2eb", "surface-bright": "#363940", "error-container": "#93000a",
+          "surface-dim": "#10131a", "surface-variant": "#32353c", "error": "#ffb4ab",
+          "surface-container-high": "#272a31", "primary-fixed": "#e4dfff", "on-tertiary-container": "#fff6ec",
+          "secondary": "#45edee", "on-tertiary": "#3f2e00", "secondary-container": "#00d0d1",
+          "tertiary-fixed": "#ffdf9e", "surface": "#10131a", "inverse-primary": "#5847d2"
+        },
+        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background-color: #10131a; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .glass-card { background: rgba(25,28,34,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  #sidebar-toggle:checked ~ aside { transform: translateX(0); }
+  #sidebar-toggle:checked ~ .content-overlay { display: block; }
+
+  .tab-btn.ativo { background: #6c5ce7; color: white; }
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(0.7)} }
+  .card-compartilhado { border: 1px solid rgba(69,237,238,0.15); }
+  .card-compartilhado:hover { border-color: rgba(69,237,238,0.4) !important; }
+  .prazo-urgente { color: #ffb4ab; }
+  .prazo-ok { color: #4ade80; }
+  .tab-btn { transition: all 0.2s; }
+
+  /* Modal sugestão */
+  #modalSugestao { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.75); align-items:center; justify-content:center; padding:1rem; }
+  #modalSugestao.aberto { display:flex; }
+
+  /* Toast */
+  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; white-space:nowrap; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+
+  .nivel-basico { color: #45edee; }
+  .nivel-intermediario { color: #fabd00; }
+  .nivel-avancado { color: #ffb4ab; }
+
+  .card-tema { transition: all 0.3s; }
+  .card-tema:hover { transform: translateY(-4px); border-color: rgba(108,92,231,0.3) !important; }
+  .card-tema.oculto { display: none; }
+
+  /* Instituição dropdown */
+  #painelInstituicoes { display:none; }
+  #painelInstituicoes.aberto { display:block; }
+</style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-x-hidden">
+
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
+  <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL SUGESTÃO -->
+<div id="modalSugestao">
+  <div style="background:#1d2026;border:1px solid rgba(255,255,255,0.08);border-radius:1.25rem;width:100%;max-width:480px;padding:2rem;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h3 style="font-weight:700;font-size:1.1rem;color:#e1e2eb;">💡 Sugerir um Tema</h3>
+      <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;font-size:1.2rem;">✕</button>
+    </div>
+    <div style="space-y:1rem;">
+      <div style="margin-bottom:1rem;">
+        <label style="display:block;font-size:0.75rem;font-weight:600;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Título do Tema</label>
+        <input id="sugestaoTitulo" type="text" placeholder="Ex: Impacto das fake news na democracia" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
+      </div>
+      <div style="margin-bottom:1rem;">
+        <label style="display:block;font-size:0.75rem;font-weight:600;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Eixo Temático</label>
+        <select id="sugestaoEixo" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;">
+          <option>Eixo Social</option>
+          <option>Tecnologia</option>
+          <option>Meio Ambiente</option>
+          <option>Educação</option>
+          <option>Saúde</option>
+          <option>Economia</option>
+          <option>Política</option>
+          <option>Cultura</option>
+        </select>
+      </div>
+      <div style="margin-bottom:1.5rem;">
+        <label style="display:block;font-size:0.75rem;font-weight:600;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Justificativa</label>
+        <textarea id="sugestaoJustificativa" rows="3" placeholder="Por que este tema é relevante para o ENEM?" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;resize:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
+      </div>
+      <button onclick="enviarSugestao()" style="width:100%;padding:.875rem;background:#6c5ce7;color:white;border:none;border-radius:.75rem;font-weight:700;font-size:.9rem;cursor:pointer;letter-spacing:.05em;">
+        Enviar Sugestão
+      </button>
+    </div>
+  </div>
+</div>
+
+<input class="hidden peer" id="sidebar-toggle" type="checkbox"/>
+<label class="content-overlay fixed inset-0 bg-black/60 z-[45] hidden transition-opacity lg:hidden" for="sidebar-toggle"></label>
+
+<div class="flex h-screen overflow-hidden relative z-10">
+
+  <!-- SIDEBAR -->
+  <aside class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50 transition-transform duration-300 -translate-x-full lg:translate-x-0 shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)]">
+    <div class="flex items-center px-2 mb-10">
+      <div class="flex items-baseline italic">
+        <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
+        <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
+      </div>
+    </div>
+    <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="inicio.html"><span class="material-symbols-outlined">home</span><span class="font-medium text-sm">Início</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span><span class="font-medium text-sm">Nova Redação</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span><span class="font-medium text-sm">Temas</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Minhas Redações</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span><span class="font-medium text-sm">Evolução</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html"><span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-outline-variant/10">
+      <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
+        <img alt="Alan Alves" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
+        <div class="flex flex-col"><span class="text-sm font-semibold text-on-surface">Alan Alves</span><span class="text-xs text-on-surface-variant">Estudante Premium</span></div>
+      </div>
+      <a onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
+        <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 flex flex-col h-full relative bg-surface-container-lowest lg:ml-64 w-full">
+
+    <!-- TOP BAR -->
+    <header class="h-20 flex items-center justify-between px-6 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5 w-full">
+      <div class="flex items-center gap-4">
+        <label class="cursor-pointer p-2 rounded-full text-[#E1E2EB] hover:bg-white/10 transition-all lg:hidden" for="sidebar-toggle">
+          <span class="material-symbols-outlined">menu</span>
+        </label>
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">library_books</span>
+          <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Temas</h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 lg:gap-6">
+        <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
+          <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
+          <span class="text-xs font-bold text-on-surface">940 pts</span>
+        </div>
+        <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar">
+      <div class="p-10 max-w-7xl mx-auto space-y-10">
+
+        <!-- CABEÇALHO -->
+        <section>
+          <h2 class="text-4xl font-black text-white tracking-tight mb-2 italic">Biblioteca de Temas</h2>
+          <p class="text-[#c8c4d7] max-w-2xl text-lg font-light leading-relaxed">
+            Escolha um dos temas cuidadosamente selecionados para levar você rumo à Nota 1.000.
+          </p>
+        </section>
+
+        <!-- ABAS -->
+        <section class="flex flex-col gap-6">
+          <div class="flex gap-3 overflow-x-auto pb-2 no-scrollbar flex-wrap">
+            <button onclick="mudarAba('atualidades')" id="tab-atualidades" class="tab-btn ativo px-5 py-2 text-white text-sm font-bold rounded-lg whitespace-nowrap">Atualidades</button>
+            <button onclick="mudarAba('enem')" id="tab-enem" class="tab-btn px-5 py-2 bg-[#1d2026] text-[#c8c4d7] hover:bg-[#272a31] text-sm rounded-lg border border-white/5 whitespace-nowrap">ENEM (2020-2024)</button>
+            <button onclick="mudarAba('top10')" id="tab-top10" class="tab-btn px-5 py-2 bg-[#1d2026] text-[#c8c4d7] hover:bg-[#272a31] text-sm rounded-lg border border-white/5 whitespace-nowrap">Top 10 Universidades</button>
+            <button onclick="mudarAba('regioes')" id="tab-regioes" class="tab-btn px-5 py-2 bg-[#1d2026] text-[#c8c4d7] hover:bg-[#272a31] text-sm rounded-lg border border-white/5 whitespace-nowrap">Melhores por Região</button>
+            <button onclick="mudarAba('meus')" id="tab-meus" class="tab-btn px-5 py-2 bg-[#1d2026] text-[#c8c4d7] hover:bg-[#272a31] text-sm rounded-lg border border-white/5 whitespace-nowrap">Meus Temas</button>
+            <button onclick="mudarAba('compartilhados')" id="tab-compartilhados" class="tab-btn px-5 py-2 bg-[#1d2026] text-[#c8c4d7] hover:bg-[#272a31] text-sm rounded-lg border border-white/5 whitespace-nowrap flex items-center gap-2">
+              <span style="display:inline-block;width:8px;height:8px;background:#45edee;border-radius:50%;animation:pulse-dot 1.5s infinite;"></span>
+              Compartilhados comigo
+            </button>
+          </div>
+
+          <!-- BUSCA -->
+          <div class="flex items-center gap-3 bg-[#1d2026] border border-white/10 rounded-xl px-4 py-3 w-full max-w-2xl">
+            <span class="material-symbols-outlined text-[#6c5ce7]">search</span>
+            <input id="campoBusca" oninput="filtrarTemas()" class="bg-transparent border-none focus:ring-0 text-sm w-full text-white placeholder:text-white/20" placeholder="Buscar temas, eixos sociais, instituições..." type="text"/>
+            <button onclick="limparBusca()" class="text-white/20 hover:text-white/60 transition-colors">
+              <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+          </div>
+
+          <!-- FILTRO DE INSTITUIÇÃO (aparece na aba Instituições) -->
+          <div id="painelInstituicoes" class="bg-[#1d2026] border border-white/10 rounded-2xl p-6">
+            <h3 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Selecionar Instituição</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2" id="listaInstituicoes"></div>
+          </div>
+        </section>
+
+        <!-- GRID DE TEMAS -->
+        <section>
+          <div id="labelAba" class="flex items-center justify-between mb-6">
+            <h3 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+              <span class="w-6 h-1 bg-[#45edee] rounded-full"></span>
+              <span id="tituloAba">Atualidades</span>
+            </h3>
+            <span id="contadorTemas" class="text-xs text-on-surface-variant"></span>
+          </div>
+          <div id="gridTemas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+          <div id="semResultados" class="hidden text-center py-16">
+            <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-4 block">search_off</span>
+            <p class="text-on-surface-variant">Nenhum tema encontrado para sua busca.</p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// BANCO DE DADOS DE TEMAS
+// ═══════════════════════════════════════════════════════
+const TEMAS = [
+
+  // ── ATUALIDADES ──────────────────────────────────────
+  { id:1, aba:'atualidades', titulo:'A invisibilidade e o registro civil no Brasil: garantia de acesso à cidadania', eixo:'Eixo Social', eixoCor:'#fabd00', fonte:'ENEM 2021', nivel:'intermediario', cor:'from-[#6c5ce7]/20' },
+  { id:2, aba:'atualidades', titulo:'Desafios éticos e sociais da Inteligência Artificial no mercado brasileiro', eixo:'Tecnologia', eixoCor:'#45edee', fonte:'Em Alta', nivel:'avancado', cor:'from-[#45edee]/20' },
+  { id:3, aba:'atualidades', titulo:'O impacto do etarismo no mercado de trabalho e na sociedade brasileira', eixo:'Eixo Social', eixoCor:'#fabd00', fonte:'Em Alta', nivel:'intermediario', cor:'from-[#fabd00]/20' },
+  { id:4, aba:'atualidades', titulo:'Saúde mental dos jovens na era das redes sociais', eixo:'Saúde', eixoCor:'#4ade80', fonte:'Tendência 2025', nivel:'basico', cor:'from-[#4ade80]/20' },
+  { id:5, aba:'atualidades', titulo:'A crise hídrica no Brasil e os desafios do saneamento básico', eixo:'Meio Ambiente', eixoCor:'#45edee', fonte:'Tendência 2025', nivel:'intermediario', cor:'from-[#45edee]/15' },
+  { id:6, aba:'atualidades', titulo:'Desigualdade racial no acesso ao ensino superior público', eixo:'Educação', eixoCor:'#c6bfff', fonte:'Em Alta', nivel:'avancado', cor:'from-[#6c5ce7]/20' },
+
+  // ── ENEM ─────────────────────────────────────────────
+  { id:10, aba:'enem', titulo:'O estigma associado às doenças mentais na sociedade brasileira', eixo:'ENEM 2024', eixoCor:'#6c5ce7', fonte:'ENEM 2024', nivel:'avancado', cor:'from-[#6c5ce7]/20', inst:'ENEM' },
+  { id:11, aba:'enem', titulo:'Desafios para o enfrentamento da invisibilidade do trabalho de cuidado realizado pela mulher no Brasil', eixo:'ENEM 2023', eixoCor:'#6c5ce7', fonte:'ENEM 2023', nivel:'avancado', cor:'from-[#45edee]/15', inst:'ENEM' },
+  { id:12, aba:'enem', titulo:'Desafios para a valorização de comunidades e povos tradicionais no Brasil', eixo:'ENEM 2022', eixoCor:'#6c5ce7', fonte:'ENEM 2022', nivel:'avancado', cor:'from-[#fabd00]/15', inst:'ENEM' },
+  { id:13, aba:'enem', titulo:'Invisibilidade e registro civil: o acesso à cidadania no Brasil', eixo:'ENEM 2021', eixoCor:'#6c5ce7', fonte:'ENEM 2021', nivel:'intermediario', cor:'from-[#6c5ce7]/20', inst:'ENEM' },
+  { id:14, aba:'enem', titulo:'O estigma associado às doenças mentais na sociedade brasileira', eixo:'ENEM 2024 — PPL', eixoCor:'#6c5ce7', fonte:'ENEM 2024 PPL', nivel:'avancado', cor:'from-[#c6bfff]/10', inst:'ENEM' },
+  { id:15, aba:'enem', titulo:'Impactos da desinformação na saúde pública no Brasil', eixo:'ENEM 2023 — PPL', eixoCor:'#6c5ce7', fonte:'ENEM 2023 PPL', nivel:'avancado', cor:'from-[#45edee]/10', inst:'ENEM' },
+  { id:16, aba:'enem', titulo:'A falta de acesso à tecnologia como obstáculo à educação no Brasil', eixo:'ENEM 2022 — PPL', eixoCor:'#6c5ce7', fonte:'ENEM 2022 PPL', nivel:'intermediario', cor:'from-[#fabd00]/10', inst:'ENEM' },
+  { id:17, aba:'enem', titulo:'Desafios do sistema de saúde para garantir assistência à pessoa com deficiência', eixo:'ENEM 2021 — PPL', eixoCor:'#6c5ce7', fonte:'ENEM 2021 PPL', nivel:'intermediario', cor:'from-[#6c5ce7]/15', inst:'ENEM' },
+  { id:18, aba:'enem', titulo:'O negacionismo científico e seus impactos na sociedade brasileira', eixo:'ENEM 2020', eixoCor:'#6c5ce7', fonte:'ENEM 2020', nivel:'avancado', cor:'from-[#c6bfff]/15', inst:'ENEM' },
+
+  // ── TOP 10 UNIVERSIDADES ─────────────────────────────
+  // USP
+  { id:20, aba:'top10', titulo:'A crise democrática e o papel das instituições na consolidação do Estado de Direito', eixo:'Política', eixoCor:'#c6bfff', fonte:'USP 2024', nivel:'avancado', cor:'from-[#6c5ce7]/20', inst:'USP' },
+  { id:21, aba:'top10', titulo:'Desigualdade socioeconômica e o acesso à educação no Brasil contemporâneo', eixo:'Educação', eixoCor:'#c6bfff', fonte:'USP 2023', nivel:'avancado', cor:'from-[#6c5ce7]/20', inst:'USP' },
+  { id:22, aba:'top10', titulo:'O papel da ciência e da tecnologia no desenvolvimento sustentável', eixo:'Ciência', eixoCor:'#c6bfff', fonte:'USP 2022', nivel:'avancado', cor:'from-[#6c5ce7]/20', inst:'USP' },
+  { id:23, aba:'top10', titulo:'Mobilidade urbana e o direito à cidade nos grandes centros brasileiros', eixo:'Urbanismo', eixoCor:'#c6bfff', fonte:'USP 2021', nivel:'intermediario', cor:'from-[#6c5ce7]/20', inst:'USP' },
+  { id:24, aba:'top10', titulo:'A pandemia de COVID-19 e seus impactos na saúde mental da população', eixo:'Saúde', eixoCor:'#c6bfff', fonte:'USP 2020', nivel:'intermediario', cor:'from-[#6c5ce7]/20', inst:'USP' },
+  // UNICAMP
+  { id:25, aba:'top10', titulo:'Fake news e a erosão da confiança nas instituições democráticas', eixo:'Comunicação', eixoCor:'#45edee', fonte:'UNICAMP 2024', nivel:'avancado', cor:'from-[#45edee]/20', inst:'UNICAMP' },
+  { id:26, aba:'top10', titulo:'O trabalho informal e a desproteção social no Brasil', eixo:'Trabalho', eixoCor:'#45edee', fonte:'UNICAMP 2023', nivel:'intermediario', cor:'from-[#45edee]/20', inst:'UNICAMP' },
+  { id:27, aba:'top10', titulo:'Mudanças climáticas e a responsabilidade do Brasil no cenário global', eixo:'Meio Ambiente', eixoCor:'#45edee', fonte:'UNICAMP 2022', nivel:'avancado', cor:'from-[#45edee]/20', inst:'UNICAMP' },
+  { id:28, aba:'top10', titulo:'O envelhecimento da população brasileira e os desafios da previdência social', eixo:'Eixo Social', eixoCor:'#45edee', fonte:'UNICAMP 2021', nivel:'avancado', cor:'from-[#45edee]/20', inst:'UNICAMP' },
+  { id:29, aba:'top10', titulo:'Desafios éticos da edição genética e o futuro da humanidade', eixo:'Ciência', eixoCor:'#45edee', fonte:'UNICAMP 2020', nivel:'avancado', cor:'from-[#45edee]/20', inst:'UNICAMP' },
+  // UFRJ
+  { id:30, aba:'top10', titulo:'Violência urbana e o fracasso das políticas públicas de segurança', eixo:'Segurança', eixoCor:'#fabd00', fonte:'UFRJ 2024', nivel:'avancado', cor:'from-[#fabd00]/20', inst:'UFRJ' },
+  { id:31, aba:'top10', titulo:'O racismo estrutural e suas manifestações no cotidiano brasileiro', eixo:'Eixo Social', eixoCor:'#fabd00', fonte:'UFRJ 2023', nivel:'avancado', cor:'from-[#fabd00]/20', inst:'UFRJ' },
+  { id:32, aba:'top10', titulo:'A crise do sistema prisional e a ressocialização no Brasil', eixo:'Direitos Humanos', eixoCor:'#fabd00', fonte:'UFRJ 2022', nivel:'avancado', cor:'from-[#fabd00]/20', inst:'UFRJ' },
+  { id:33, aba:'top10', titulo:'Populismo digital e a polarização política nas redes sociais', eixo:'Política', eixoCor:'#fabd00', fonte:'UFRJ 2021', nivel:'avancado', cor:'from-[#fabd00]/20', inst:'UFRJ' },
+  { id:34, aba:'top10', titulo:'Indígenas e o direito à terra: conflitos e perspectivas no Brasil', eixo:'Eixo Social', eixoCor:'#fabd00', fonte:'UFRJ 2020', nivel:'intermediario', cor:'from-[#fabd00]/20', inst:'UFRJ' },
+  // UFMG
+  { id:35, aba:'top10', titulo:'A feminização da pobreza e as políticas de proteção social', eixo:'Gênero', eixoCor:'#4ade80', fonte:'UFMG 2024', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UFMG' },
+  { id:36, aba:'top10', titulo:'O trabalho infantil e seus impactos no desenvolvimento educacional', eixo:'Educação', eixoCor:'#4ade80', fonte:'UFMG 2023', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UFMG' },
+  { id:37, aba:'top10', titulo:'Segurança alimentar e o combate à fome no Brasil', eixo:'Eixo Social', eixoCor:'#4ade80', fonte:'UFMG 2022', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UFMG' },
+  { id:38, aba:'top10', titulo:'O impacto das queimadas na Amazônia e a soberania ambiental', eixo:'Meio Ambiente', eixoCor:'#4ade80', fonte:'UFMG 2021', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UFMG' },
+  { id:39, aba:'top10', titulo:'Acesso à saúde e as desigualdades regionais no Sistema Único de Saúde', eixo:'Saúde', eixoCor:'#4ade80', fonte:'UFMG 2020', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UFMG' },
+  // UNIFESP
+  { id:40, aba:'top10', titulo:'Automação e o futuro do trabalho: desafios para a classe trabalhadora', eixo:'Tecnologia', eixoCor:'#ffb4ab', fonte:'UNIFESP 2024', nivel:'avancado', cor:'from-[#ffb4ab]/15', inst:'UNIFESP' },
+  { id:41, aba:'top10', titulo:'O acesso à saúde mental como direito fundamental no Brasil', eixo:'Saúde', eixoCor:'#ffb4ab', fonte:'UNIFESP 2023', nivel:'intermediario', cor:'from-[#ffb4ab]/15', inst:'UNIFESP' },
+  { id:42, aba:'top10', titulo:'Medicalização da infância e os desafios do diagnóstico de TDAH', eixo:'Saúde', eixoCor:'#ffb4ab', fonte:'UNIFESP 2022', nivel:'avancado', cor:'from-[#ffb4ab]/15', inst:'UNIFESP' },
+  { id:43, aba:'top10', titulo:'A pandemia e o aprofundamento das desigualdades em saúde no Brasil', eixo:'Saúde', eixoCor:'#ffb4ab', fonte:'UNIFESP 2021', nivel:'avancado', cor:'from-[#ffb4ab]/15', inst:'UNIFESP' },
+  { id:44, aba:'top10', titulo:'Violência obstétrica e os direitos das mulheres na saúde pública', eixo:'Saúde', eixoCor:'#ffb4ab', fonte:'UNIFESP 2020', nivel:'avancado', cor:'from-[#ffb4ab]/15', inst:'UNIFESP' },
+  // UNESP
+  { id:45, aba:'top10', titulo:'Cidades inteligentes e o desafio da inclusão digital na gestão urbana', eixo:'Tecnologia', eixoCor:'#45edee', fonte:'UNESP 2024', nivel:'intermediario', cor:'from-[#45edee]/15', inst:'UNESP' },
+  { id:46, aba:'top10', titulo:'O papel do agronegócio no desenvolvimento e nos conflitos ambientais do Brasil', eixo:'Meio Ambiente', eixoCor:'#45edee', fonte:'UNESP 2023', nivel:'avancado', cor:'from-[#45edee]/15', inst:'UNESP' },
+  { id:47, aba:'top10', titulo:'Cultura do cancelamento e os limites da liberdade de expressão', eixo:'Comunicação', eixoCor:'#45edee', fonte:'UNESP 2022', nivel:'intermediario', cor:'from-[#45edee]/15', inst:'UNESP' },
+  { id:48, aba:'top10', titulo:'A educação no campo e os desafios do acesso ao ensino rural', eixo:'Educação', eixoCor:'#45edee', fonte:'UNESP 2021', nivel:'intermediario', cor:'from-[#45edee]/15', inst:'UNESP' },
+  { id:49, aba:'top10', titulo:'Migração forçada e o Brasil como destino de refugiados', eixo:'Direitos Humanos', eixoCor:'#45edee', fonte:'UNESP 2020', nivel:'avancado', cor:'from-[#45edee]/15', inst:'UNESP' },
+  // UFPR
+  { id:50, aba:'top10', titulo:'Sustentabilidade e o papel do Brasil nas negociações climáticas internacionais', eixo:'Meio Ambiente', eixoCor:'#4ade80', fonte:'UFPR 2024', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UFPR' },
+  { id:51, aba:'top10', titulo:'A reforma tributária e seus impactos nas desigualdades sociais', eixo:'Economia', eixoCor:'#4ade80', fonte:'UFPR 2023', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UFPR' },
+  { id:52, aba:'top10', titulo:'Violência contra a mulher e a eficácia da Lei Maria da Penha', eixo:'Gênero', eixoCor:'#4ade80', fonte:'UFPR 2022', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UFPR' },
+  { id:53, aba:'top10', titulo:'O papel das cooperativas no fortalecimento da economia solidária', eixo:'Economia', eixoCor:'#4ade80', fonte:'UFPR 2021', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UFPR' },
+  { id:54, aba:'top10', titulo:'Desmatamento e conflitos fundiários na região sul do Brasil', eixo:'Meio Ambiente', eixoCor:'#4ade80', fonte:'UFPR 2020', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UFPR' },
+  // UFBA
+  { id:55, aba:'top10', titulo:'O legado da escravidão e seus impactos nas desigualdades raciais contemporâneas', eixo:'História', eixoCor:'#fabd00', fonte:'UFBA 2024', nivel:'avancado', cor:'from-[#fabd00]/20', inst:'UFBA' },
+  { id:56, aba:'top10', titulo:'Turismo e gentrificação: impactos nas comunidades locais', eixo:'Urbanismo', eixoCor:'#fabd00', fonte:'UFBA 2023', nivel:'intermediario', cor:'from-[#fabd00]/20', inst:'UFBA' },
+  { id:57, aba:'top10', titulo:'Representatividade negra na política e nos espaços de poder', eixo:'Política', eixoCor:'#fabd00', fonte:'UFBA 2022', nivel:'avancado', cor:'from-[#fabd00]/20', inst:'UFBA' },
+  { id:58, aba:'top10', titulo:'A seca no Nordeste e os desafios das políticas de convivência com o semiárido', eixo:'Meio Ambiente', eixoCor:'#fabd00', fonte:'UFBA 2021', nivel:'intermediario', cor:'from-[#fabd00]/20', inst:'UFBA' },
+  { id:59, aba:'top10', titulo:'Territorialidade quilombola e o direito à terra no Brasil', eixo:'Direitos Humanos', eixoCor:'#fabd00', fonte:'UFBA 2020', nivel:'avancado', cor:'from-[#fabd00]/20', inst:'UFBA' },
+  // UFRGS
+  { id:60, aba:'top10', titulo:'O papel das universidades públicas no desenvolvimento regional', eixo:'Educação', eixoCor:'#c6bfff', fonte:'UFRGS 2024', nivel:'intermediario', cor:'from-[#6c5ce7]/15', inst:'UFRGS' },
+  { id:61, aba:'top10', titulo:'Inovação tecnológica e soberania nacional no setor de defesa', eixo:'Tecnologia', eixoCor:'#c6bfff', fonte:'UFRGS 2023', nivel:'avancado', cor:'from-[#6c5ce7]/15', inst:'UFRGS' },
+  { id:62, aba:'top10', titulo:'Gaúchos e a identidade regional diante da globalização cultural', eixo:'Cultura', eixoCor:'#c6bfff', fonte:'UFRGS 2022', nivel:'basico', cor:'from-[#6c5ce7]/15', inst:'UFRGS' },
+  { id:63, aba:'top10', titulo:'A crise da representatividade política e a abstenção eleitoral no Brasil', eixo:'Política', eixoCor:'#c6bfff', fonte:'UFRGS 2021', nivel:'avancado', cor:'from-[#6c5ce7]/15', inst:'UFRGS' },
+  { id:64, aba:'top10', titulo:'Fronteiras e mobilidade humana no Sul do Brasil', eixo:'Direitos Humanos', eixoCor:'#c6bfff', fonte:'UFRGS 2020', nivel:'intermediario', cor:'from-[#6c5ce7]/15', inst:'UFRGS' },
+  // UFC
+  { id:65, aba:'top10', titulo:'O semiárido nordestino e as alternativas sustentáveis de desenvolvimento', eixo:'Meio Ambiente', eixoCor:'#ffb4ab', fonte:'UFC 2024', nivel:'intermediario', cor:'from-[#ffb4ab]/15', inst:'UFC' },
+  { id:66, aba:'top10', titulo:'Êxodo rural e o esvaziamento das cidades do interior nordestino', eixo:'Urbanismo', eixoCor:'#ffb4ab', fonte:'UFC 2023', nivel:'intermediario', cor:'from-[#ffb4ab]/15', inst:'UFC' },
+  { id:67, aba:'top10', titulo:'A pesca artesanal e os impactos da exploração de petróleo no litoral cearense', eixo:'Meio Ambiente', eixoCor:'#ffb4ab', fonte:'UFC 2022', nivel:'avancado', cor:'from-[#ffb4ab]/15', inst:'UFC' },
+  { id:68, aba:'top10', titulo:'Informalidade e empreendedorismo no Nordeste brasileiro', eixo:'Economia', eixoCor:'#ffb4ab', fonte:'UFC 2021', nivel:'basico', cor:'from-[#ffb4ab]/15', inst:'UFC' },
+  { id:69, aba:'top10', titulo:'Saneamento básico e saúde pública nas periferias nordestinas', eixo:'Saúde', eixoCor:'#ffb4ab', fonte:'UFC 2020', nivel:'intermediario', cor:'from-[#ffb4ab]/15', inst:'UFC' },
+
+  // ── MELHORES POR REGIÃO ──────────────────────────────
+  // NORTE
+  { id:70, aba:'regioes', titulo:'Bioeconomia e o aproveitamento sustentável da biodiversidade amazônica', eixo:'Norte — UFPA', eixoCor:'#4ade80', fonte:'UFPA 2024', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UFPA', regiao:'Norte' },
+  { id:71, aba:'regioes', titulo:'Mineração e os impactos socioambientais nas comunidades ribeirinhas', eixo:'Norte — UFPA', eixoCor:'#4ade80', fonte:'UFPA 2023', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UFPA', regiao:'Norte' },
+  { id:72, aba:'regioes', titulo:'Desmatamento e soberania territorial: o Brasil no tribunal internacional', eixo:'Norte — UEA', eixoCor:'#4ade80', fonte:'UEA 2024', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UEA', regiao:'Norte' },
+  { id:73, aba:'regioes', titulo:'Povos indígenas e o direito à consulta prévia em projetos de infraestrutura', eixo:'Norte — UFAM', eixoCor:'#4ade80', fonte:'UFAM 2023', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UFAM', regiao:'Norte' },
+  { id:74, aba:'regioes', titulo:'Acesso à internet e inclusão digital nas comunidades isoladas da Amazônia', eixo:'Norte — UNIR', eixoCor:'#4ade80', fonte:'UNIR 2022', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UNIR', regiao:'Norte' },
+  // NORDESTE
+  { id:75, aba:'regioes', titulo:'Cotas raciais e seu impacto na democratização do ensino superior', eixo:'Nordeste — UFBA', eixoCor:'#fabd00', fonte:'UFBA 2024', nivel:'avancado', cor:'from-[#fabd00]/20', inst:'UFBA', regiao:'Nordeste' },
+  { id:76, aba:'regioes', titulo:'A seca no Nordeste e a transposição do Rio São Francisco', eixo:'Nordeste — UFPE', eixoCor:'#fabd00', fonte:'UFPE 2024', nivel:'intermediario', cor:'from-[#fabd00]/20', inst:'UFPE', regiao:'Nordeste' },
+  { id:77, aba:'regioes', titulo:'Turismo e desenvolvimento sustentável no litoral nordestino', eixo:'Nordeste — UFC', eixoCor:'#fabd00', fonte:'UFC 2023', nivel:'basico', cor:'from-[#fabd00]/15', inst:'UFC', regiao:'Nordeste' },
+  { id:78, aba:'regioes', titulo:'O forró e a capoeira como expressões da resistência cultural negra', eixo:'Nordeste — UFRN', eixoCor:'#fabd00', fonte:'UFRN 2023', nivel:'basico', cor:'from-[#fabd00]/15', inst:'UFRN', regiao:'Nordeste' },
+  { id:79, aba:'regioes', titulo:'Violência e tráfico de drogas nas periferias nordestinas', eixo:'Nordeste — UFMA', eixoCor:'#fabd00', fonte:'UFMA 2022', nivel:'avancado', cor:'from-[#fabd00]/15', inst:'UFMA', regiao:'Nordeste' },
+  // CENTRO-OESTE
+  { id:80, aba:'regioes', titulo:'O agronegócio e o conflito entre desenvolvimento e preservação do Cerrado', eixo:'Centro-Oeste — UnB', eixoCor:'#45edee', fonte:'UnB 2024', nivel:'avancado', cor:'from-[#45edee]/20', inst:'UnB', regiao:'Centro-Oeste' },
+  { id:81, aba:'regioes', titulo:'A corrupção sistêmica e seus impactos na democracia brasileira', eixo:'Centro-Oeste — UnB', eixoCor:'#45edee', fonte:'UnB 2023', nivel:'avancado', cor:'from-[#45edee]/20', inst:'UnB', regiao:'Centro-Oeste' },
+  { id:82, aba:'regioes', titulo:'Pantanal em chamas: responsabilidade ambiental e omissão do Estado', eixo:'Centro-Oeste — UFMS', eixoCor:'#45edee', fonte:'UFMS 2024', nivel:'avancado', cor:'from-[#45edee]/15', inst:'UFMS', regiao:'Centro-Oeste' },
+  { id:83, aba:'regioes', titulo:'Brasília como símbolo e contradição do planejamento urbano brasileiro', eixo:'Centro-Oeste — UFG', eixoCor:'#45edee', fonte:'UFG 2023', nivel:'intermediario', cor:'from-[#45edee]/15', inst:'UFG', regiao:'Centro-Oeste' },
+  { id:84, aba:'regioes', titulo:'Expansão da fronteira agrícola e os impactos sobre os povos do Cerrado', eixo:'Centro-Oeste — UFMT', eixoCor:'#45edee', fonte:'UFMT 2022', nivel:'avancado', cor:'from-[#45edee]/15', inst:'UFMT', regiao:'Centro-Oeste' },
+  // SUDESTE
+  { id:85, aba:'regioes', titulo:'Crise habitacional e o direito à moradia nas metrópoles brasileiras', eixo:'Sudeste — USP', eixoCor:'#c6bfff', fonte:'USP 2024', nivel:'avancado', cor:'from-[#6c5ce7]/20', inst:'USP', regiao:'Sudeste' },
+  { id:86, aba:'regioes', titulo:'Violência policial e a seletividade do sistema de justiça criminal', eixo:'Sudeste — UFRJ', eixoCor:'#c6bfff', fonte:'UFRJ 2024', nivel:'avancado', cor:'from-[#6c5ce7]/20', inst:'UFRJ', regiao:'Sudeste' },
+  { id:87, aba:'regioes', titulo:'O papel de São Paulo na economia nacional e as desigualdades intrametropolitanas', eixo:'Sudeste — UNICAMP', eixoCor:'#c6bfff', fonte:'UNICAMP 2023', nivel:'intermediario', cor:'from-[#6c5ce7]/15', inst:'UNICAMP', regiao:'Sudeste' },
+  { id:88, aba:'regioes', titulo:'Trabalho análogo à escravidão: realidade persistente no Brasil do século XXI', eixo:'Sudeste — UFMG', eixoCor:'#c6bfff', fonte:'UFMG 2023', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UFMG', regiao:'Sudeste' },
+  { id:89, aba:'regioes', titulo:'A crise do sistema de saúde pública e a privatização do SUS', eixo:'Sudeste — UNIFESP', eixoCor:'#c6bfff', fonte:'UNIFESP 2022', nivel:'avancado', cor:'from-[#ffb4ab]/15', inst:'UNIFESP', regiao:'Sudeste' },
+  // SUL
+  { id:90, aba:'regioes', titulo:'Imigração europeia e a construção de identidades regionais no Sul do Brasil', eixo:'Sul — UFRGS', eixoCor:'#4ade80', fonte:'UFRGS 2024', nivel:'basico', cor:'from-[#4ade80]/15', inst:'UFRGS', regiao:'Sul' },
+  { id:91, aba:'regioes', titulo:'Catástrofes climáticas e a vulnerabilidade das cidades gaúchas', eixo:'Sul — UFSC', eixoCor:'#4ade80', fonte:'UFSC 2024', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UFSC', regiao:'Sul' },
+  { id:92, aba:'regioes', titulo:'Agropecuária e o modelo de desenvolvimento no Sul do Brasil', eixo:'Sul — UFPR', eixoCor:'#4ade80', fonte:'UFPR 2023', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UFPR', regiao:'Sul' },
+  { id:93, aba:'regioes', titulo:'A indústria catarinense e os desafios da sustentabilidade', eixo:'Sul — UFSC', eixoCor:'#4ade80', fonte:'UFSC 2023', nivel:'intermediario', cor:'from-[#4ade80]/15', inst:'UFSC', regiao:'Sul' },
+  { id:94, aba:'regioes', titulo:'Segurança pública e a atuação do crime organizado na fronteira sul', eixo:'Sul — UNIOESTE', eixoCor:'#4ade80', fonte:'UNIOESTE 2022', nivel:'avancado', cor:'from-[#4ade80]/15', inst:'UNIOESTE', regiao:'Sul' },
+];
+
+// ═══════════════════════════════════════════════════════
+// INSTITUIÇÕES PARA FILTRO
+// ═══════════════════════════════════════════════════════
+const INSTITUICOES_TOP10 = ['USP','UNICAMP','UFRJ','UFMG','UNIFESP','UNESP','UFPR','UFBA','UFRGS','UFC'];
+const INSTITUICOES_REGIOES = {
+  'Norte': ['UFPA','UEA','UFAM','UNIR'],
+  'Nordeste': ['UFBA','UFPE','UFC','UFRN','UFMA'],
+  'Centro-Oeste': ['UnB','UFMS','UFG','UFMT'],
+  'Sudeste': ['USP','UFRJ','UNICAMP','UFMG','UNIFESP'],
+  'Sul': ['UFRGS','UFSC','UFPR','UNIOESTE']
+};
+
+// ═══════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════
+let abaAtual = 'atualidades';
+let instFiltro = null;
+let regFiltro = null;
+
+// ═══════════════════════════════════════════════════════
+// FUNÇÕES
+// ═══════════════════════════════════════════════════════
+function toast(msg, dur = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+function mudarAba(aba) {
+  abaAtual = aba;
+  instFiltro = null;
+  regFiltro = null;
+  document.getElementById('campoBusca').value = '';
+
+  // Atualizar botões
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo','text-white'));
+  const btn = document.getElementById('tab-' + aba);
+  btn.classList.add('ativo');
+
+  // Painel de instituições
+  const painel = document.getElementById('painelInstituicoes');
+  if (aba === 'top10') {
+    painel.classList.add('aberto');
+    renderInstituicoes('top10');
+    document.getElementById('tituloAba').textContent = 'Top 10 Universidades do Brasil';
+  } else if (aba === 'regioes') {
+    painel.classList.add('aberto');
+    renderInstituicoes('regioes');
+    document.getElementById('tituloAba').textContent = 'Melhores Universidades por Região';
+  } else {
+    painel.classList.remove('aberto');
+    const labels = { atualidades:'Atualidades', enem:'ENEM — Últimos 5 Anos', meus:'Meus Temas Salvos', compartilhados:'Compartilhados comigo — Temas da Professora' };
+    document.getElementById('tituloAba').textContent = labels[aba] || aba;
+  }
+
+  renderTemas();
+}
+
+function renderInstituicoes(tipo) {
+  const lista = document.getElementById('listaInstituicoes');
+  lista.innerHTML = '';
+
+  if (tipo === 'top10') {
+    // Botão "Todas"
+    const btnTodas = criarBtnInst('Todas', null, null);
+    lista.appendChild(btnTodas);
+    INSTITUICOES_TOP10.forEach(inst => lista.appendChild(criarBtnInst(inst, 'inst', inst)));
+  } else {
+    // Por região
+    Object.entries(INSTITUICOES_REGIOES).forEach(([reg, insts]) => {
+      const header = document.createElement('div');
+      header.className = 'col-span-2 md:col-span-3 lg:col-span-5 mt-2';
+      header.innerHTML = `<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">${reg}</p>`;
+      lista.appendChild(header);
+
+      const btnReg = criarBtnInst('Todos do ' + reg, 'reg', reg);
+      lista.appendChild(btnReg);
+      insts.forEach(inst => lista.appendChild(criarBtnInst(inst, 'inst', inst)));
+    });
+  }
+}
+
+function criarBtnInst(label, tipo, valor) {
+  const btn = document.createElement('button');
+  btn.textContent = label;
+  btn.className = 'px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ' +
+    ((tipo === 'inst' && instFiltro === valor) || (tipo === 'reg' && regFiltro === valor) || (!tipo && !instFiltro && !regFiltro)
+      ? 'bg-[#6c5ce7] text-white border-[#6c5ce7]'
+      : 'bg-[#0b0e14] text-[#c8c4d7] border-white/10 hover:bg-[#272a31]');
+  btn.onclick = () => {
+    if (!tipo) { instFiltro = null; regFiltro = null; }
+    else if (tipo === 'inst') { instFiltro = valor; regFiltro = null; }
+    else if (tipo === 'reg') { regFiltro = valor; instFiltro = null; }
+    renderInstituicoes(abaAtual === 'top10' ? 'top10' : 'regioes');
+    renderTemas();
+  };
+  return btn;
+}
+
+function renderTemas() {
+  const busca = document.getElementById('campoBusca').value.toLowerCase();
+  const grid = document.getElementById('gridTemas');
+  grid.innerHTML = '';
+
+  let temas = TEMAS.filter(t => {
+    if (abaAtual === 'meus') return false; // placeholder
+    if (abaAtual === 'compartilhados') return false; // renderizado separado
+    if (t.aba !== abaAtual) return false;
+    if (instFiltro && t.inst !== instFiltro) return false;
+    if (regFiltro && t.regiao !== regFiltro) return false;
+    if (busca && !t.titulo.toLowerCase().includes(busca) && !t.eixo.toLowerCase().includes(busca) && !(t.inst||'').toLowerCase().includes(busca)) return false;
+    return true;
+  });
+
+  document.getElementById('contadorTemas').textContent = temas.length + ' temas encontrados';
+  document.getElementById('semResultados').classList.toggle('hidden', temas.length > 0 || abaAtual === 'meus' || abaAtual === 'compartilhados');
+
+  if (abaAtual === 'meus') {
+    grid.innerHTML = `
+      <div class="col-span-3 text-center py-16">
+        <span class="material-symbols-outlined text-4xl text-on-surface-variant mb-4 block">bookmark</span>
+        <p class="text-on-surface-variant mb-2">Você ainda não salvou nenhum tema.</p>
+        <p class="text-xs text-on-surface-variant">Clique em "Salvar" em qualquer tema para adicioná-lo aqui.</p>
+      </div>`;
+    return;
+  }
+
+  if (abaAtual === 'compartilhados') {
+    renderCompartilhados(grid);
+    return;
+  }
+
+  temas.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'card-tema group bg-[#191c22]/80 backdrop-blur-md rounded-3xl overflow-hidden border border-white/5 cursor-pointer';
+    card.innerHTML = `
+      <div class="h-44 bg-gradient-to-br ${t.cor} to-black relative">
+        <span class="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] uppercase font-bold border" style="background:${t.eixoCor}20;color:${t.eixoCor};border-color:${t.eixoCor}40">${t.eixo}</span>
+        <button onclick="salvarTema(event,${t.id})" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-all" title="Salvar tema">
+          <span class="material-symbols-outlined text-sm text-white">bookmark</span>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="flex items-center gap-2 text-[#c8c4d7] text-[10px] mb-3 font-bold uppercase">
+          <span class="material-symbols-outlined text-xs">${t.aba === 'enem' ? 'school' : t.aba === 'top10' || t.aba === 'regioes' ? 'account_balance' : 'trending_up'}</span>
+          ${t.fonte}
+        </div>
+        <h3 class="text-base font-bold text-white leading-tight mb-6 group-hover:text-[#45edee] transition-colors">${t.titulo}</h3>
+        <div class="flex items-center justify-between">
+          <span class="nivel-${t.nivel} text-xs font-bold uppercase">${t.nivel.charAt(0).toUpperCase()+t.nivel.slice(1)}</span>
+          <button onclick="escreverTema(${t.id})" class="bg-[#6c5ce7] text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:scale-105 transition-all">
+            Escrever <span class="material-symbols-outlined text-xs">arrow_forward</span>
+          </button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  // Card "Sugira um Tema"
+  const cardSugerir = document.createElement('div');
+  cardSugerir.className = 'border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center p-8 text-center bg-transparent hover:border-[#6c5ce7]/50 transition-all cursor-pointer';
+  cardSugerir.onclick = abrirModal;
+  cardSugerir.innerHTML = `
+    <div class="w-12 h-12 rounded-full bg-[#6c5ce7]/10 flex items-center justify-center mb-4">
+      <span class="material-symbols-outlined text-[#6c5ce7]">lightbulb</span>
+    </div>
+    <h3 class="text-white font-bold mb-2">Sugira um Tema</h3>
+    <p class="text-[#c8c4d7] text-xs mb-6 px-4">Não encontrou o que procurava? Envie sua sugestão pedagógica.</p>
+    <button class="text-white text-xs font-bold px-6 py-2 rounded-lg border border-white/20 hover:bg-white/5">Sugerir</button>`;
+  grid.appendChild(cardSugerir);
+}
+
+// TEMAS COMPARTILHADOS PELO PROFESSOR
+const TEMAS_PROFESSOR = [
+  {
+    id: 'p1',
+    titulo: 'A importância da literacia digital para o exercício da cidadania no Brasil',
+    eixo: 'Tecnologia & Educação',
+    eixoCor: '#45edee',
+    professora: 'Profa. Carla Mendes',
+    turma: '3º Ano B — Manhã',
+    escola: 'Colégio Estadual São Paulo',
+    prazo: '2026-04-10',
+    nivel: 'intermediario',
+    cor: 'from-[#45edee]/20',
+    instrucoes: 'Abordar obrigatoriamente o papel do Estado na promoção da educação digital. Mínimo 25 linhas.',
+    materiais: [
+      { nome: 'Guia de Competências ENEM 2024.pdf', tipo: 'pdf', desc: 'Base para as 5 competências' },
+      { nome: 'Conectivos e Operadores Argumentativos.pdf', tipo: 'pdf', desc: 'Essencial para C4' },
+      { nome: 'Lei nº 14.533/2023 — Política Nacional de Educação Digital', tipo: 'lei', desc: 'Repertório legal' },
+    ]
+  },
+  {
+    id: 'p2',
+    titulo: 'Violência contra a mulher: desafios para a efetivação da Lei Maria da Penha',
+    eixo: 'Direitos Humanos',
+    eixoCor: '#fabd00',
+    professora: 'Profa. Carla Mendes',
+    turma: '3º Ano B — Manhã',
+    escola: 'Colégio Estadual São Paulo',
+    prazo: '2026-04-25',
+    nivel: 'avancado',
+    cor: 'from-[#fabd00]/20',
+    instrucoes: 'Proposta de intervenção deve envolver pelo menos 2 agentes sociais distintos.',
+    materiais: [
+      { nome: 'Lei Maria da Penha — Lei 11.340/2006', tipo: 'lei', desc: 'Leitura obrigatória' },
+      { nome: 'Modelos de Proposta de Intervenção.pdf', tipo: 'pdf', desc: 'Referência para C5' },
+      { nome: 'Fórum Brasileiro de Segurança Pública 2024', tipo: 'link', desc: 'Dados e estatísticas' },
+    ]
+  },
+  {
+    id: 'p3',
+    titulo: 'Desafios para a preservação da memória cultural dos povos indígenas no Brasil',
+    eixo: 'Cultura & Identidade',
+    eixoCor: '#c6bfff',
+    professora: 'Profa. Carla Mendes',
+    turma: '3º Ano B — Manhã',
+    escola: 'Colégio Estadual São Paulo',
+    prazo: '2026-05-05',
+    nivel: 'avancado',
+    cor: 'from-[#6c5ce7]/20',
+    instrucoes: 'Pesquise sobre a FUNAI e o Estatuto do Índio antes de escrever.',
+    materiais: [
+      { nome: 'Constituição Federal — Art. 231 e 232', tipo: 'lei', desc: 'Base jurídica' },
+      { nome: 'Repertórios Filosóficos para Redação.docx', tipo: 'doc', desc: 'Autores relevantes' },
+      { nome: 'Convenção 169 da OIT', tipo: 'lei', desc: 'Direito internacional' },
+    ]
+  }
+];
+
+function calcularPrazo(prazoStr) {
+  const hoje = new Date();
+  const prazo = new Date(prazoStr);
+  const diff = Math.ceil((prazo - hoje) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return { texto: 'Prazo encerrado', classe: 'prazo-urgente' };
+  if (diff === 0) return { texto: 'Vence hoje!', classe: 'prazo-urgente' };
+  if (diff <= 3) return { texto: diff + ' dia(s) restante(s)', classe: 'prazo-urgente' };
+  return { texto: diff + ' dias restantes', classe: 'prazo-ok' };
+}
+
+const ICONE_MATERIAL = { pdf: 'picture_as_pdf', lei: 'gavel', link: 'link', doc: 'description' };
+const COR_MATERIAL   = { pdf: '#ffb4ab',        lei: '#fabd00', link: '#45edee', doc: '#c6bfff' };
+
+function renderCompartilhados(grid) {
+  grid.innerHTML = '';
+
+  // Header da professora
+  const header = document.createElement('div');
+  header.className = 'col-span-3 bg-[#1d2026] rounded-2xl p-5 border border-[#45edee]/20 mb-2 flex items-center gap-4';
+  header.innerHTML = `
+    <div class="w-12 h-12 rounded-full bg-[#6c5ce7]/20 flex items-center justify-center shrink-0">
+      <span class="material-symbols-outlined text-[#c6bfff]" style="font-variation-settings:'FILL' 1;">school</span>
+    </div>
+    <div class="flex-1">
+      <p class="text-xs text-on-surface-variant uppercase tracking-widest font-bold mb-0.5">Professora responsável</p>
+      <p class="text-white font-bold">Profa. Carla Mendes</p>
+      <p class="text-xs text-on-surface-variant">3º Ano B — Manhã · Colégio Estadual São Paulo</p>
+    </div>
+    <div class="text-right">
+      <p class="text-xs text-on-surface-variant mb-1">${TEMAS_PROFESSOR.length} temas ativos</p>
+      <span class="px-3 py-1 bg-[#45edee]/10 text-[#45edee] text-[10px] font-bold rounded-full border border-[#45edee]/20">Turma conectada</span>
+    </div>`;
+  grid.appendChild(header);
+
+  TEMAS_PROFESSOR.forEach(t => {
+    const prazo = calcularPrazo(t.prazo);
+
+    const card = document.createElement('div');
+    card.className = 'card-compartilhado card-tema group bg-[#191c22]/80 rounded-3xl overflow-hidden transition-all duration-300 col-span-1 md:col-span-3';
+    card.innerHTML = `
+      <!-- Banner do tema -->
+      <div class="h-28 bg-gradient-to-br ${t.cor} to-black relative flex items-end">
+        <span class="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] uppercase font-bold border"
+          style="background:${t.eixoCor}20;color:${t.eixoCor};border-color:${t.eixoCor}40">${t.eixo}</span>
+        <div class="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold ${prazo.classe === 'prazo-urgente' ? 'bg-red-500/20 border border-red-500/30 text-[#ffb4ab]' : 'bg-[#0b0e14]/60 border border-white/10 text-[#c8c4d7]'}">
+          <span class="material-symbols-outlined text-xs">schedule</span>
+          ${prazo.texto} · ${new Date(t.prazo).toLocaleDateString('pt-BR')}
+        </div>
+        <div class="px-6 pb-4">
+          <h3 class="text-white font-black text-base leading-tight group-hover:text-[#45edee] transition-colors">${t.titulo}</h3>
+        </div>
+      </div>
+
+      <!-- Corpo: grid 3 colunas -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-white/5">
+
+        <!-- Coluna 1: Info do tema -->
+        <div class="p-5 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm text-on-surface-variant" style="font-variation-settings:'FILL' 1;">person</span>
+            <span class="text-[11px] text-on-surface-variant">${t.professora} · ${t.turma}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="nivel-${t.nivel} text-xs font-bold uppercase">${t.nivel.charAt(0).toUpperCase()+t.nivel.slice(1)}</span>
+          </div>
+          <button onclick="escreverTema('${t.id}')"
+            class="w-full py-2.5 rounded-xl text-xs font-black text-[#002020] flex items-center justify-center gap-1.5 mt-2 hover:scale-[1.02] active:scale-95 transition-all"
+            style="background:linear-gradient(135deg,#45edee,#6c5ce7);box-shadow:0 0 16px rgba(69,237,238,.2)">
+            <span class="material-symbols-outlined text-sm">edit</span>
+            Escrever Redação
+          </button>
+        </div>
+
+        <!-- Coluna 2: Instruções -->
+        <div class="p-5">
+          <p class="text-[10px] font-bold text-[#c6bfff] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-xs" style="font-variation-settings:'FILL' 1;">info</span>
+            Instruções da Professora
+          </p>
+          <p class="text-xs text-on-surface-variant leading-relaxed">${t.instrucoes}</p>
+        </div>
+
+        <!-- Coluna 3: Materiais de estudo -->
+        <div class="p-5">
+          <p class="text-[10px] font-bold text-[#c6bfff] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-xs" style="font-variation-settings:'FILL' 1;">folder_open</span>
+            Materiais de Estudo
+          </p>
+          <div class="space-y-2">
+            ${t.materiais.map(m => `
+              <button onclick="abrirEstudio('${m.nome}')"
+                class="w-full flex items-center gap-2.5 p-2.5 rounded-xl transition-all hover:scale-[1.01] active:scale-95 text-left group/mat"
+                style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);" onmouseover="this.style.borderColor='${COR_MATERIAL[m.tipo]}40'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  style="background:${COR_MATERIAL[m.tipo]}15">
+                  <span class="material-symbols-outlined text-sm" style="color:${COR_MATERIAL[m.tipo]};font-variation-settings:'FILL' 1;">${ICONE_MATERIAL[m.tipo]}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-bold text-on-surface truncate">${m.nome}</p>
+                  <p class="text-[10px] text-on-surface-variant">${m.desc}</p>
+                </div>
+                <span class="material-symbols-outlined text-xs text-on-surface-variant/40 group-hover/mat:text-[#45edee] transition-colors">open_in_new</span>
+              </button>`).join('')}
+
+            <!-- Botão Estúdio da Blanche -->
+            <button onclick="abrirEstudioCompleto('${t.id}')"
+              class="w-full flex items-center gap-2.5 p-2.5 rounded-xl transition-all mt-1 hover:scale-[1.01] active:scale-95"
+              style="background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.2);">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:rgba(108,92,231,.2)">
+                <span class="material-symbols-outlined text-sm text-[#c6bfff]" style="font-variation-settings:'FILL' 1;">psychology</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-[#c6bfff]">Abrir no Estúdio da Blanche</p>
+                <p class="text-[10px] text-on-surface-variant">Resumo, Quiz, Mapa Mental e mais</p>
+              </div>
+              <span class="material-symbols-outlined text-xs text-[#c6bfff]/40">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      </div>`;
+
+    grid.appendChild(card);
+  });
+}
+
+window.abrirEstudio = function(nomeArquivo) {
+  sessionStorage.setItem('estudio_arquivo', nomeArquivo);
+  toast('📚 Abrindo "' + nomeArquivo + '" no Estúdio da Blanche...');
+  setTimeout(() => window.location.href = 'estudio-blanche.html', 1200);
+};
+
+window.abrirEstudioCompleto = function(temaId) {
+  sessionStorage.setItem('estudio_tema_id', temaId);
+  window.location.href = 'estudio-blanche.html';
+};
+
+function filtrarTemas() { renderTemas(); }
+function limparBusca() { document.getElementById('campoBusca').value = ''; renderTemas(); }
+
+function escreverTema(id) {
+  // Busca em TEMAS (banco principal)
+  let tema = TEMAS.find(t => t.id == id);
+  // Busca também em TEMAS_PROFESSOR (compartilhados)
+  if (!tema) tema = TEMAS_PROFESSOR?.find(t => t.id == id);
+  if (!tema) return;
+  sessionStorage.setItem('tema_selecionado', JSON.stringify(tema));
+  // Vai para o Hub de Preparação antes do editor
+  window.location.href = 'hub-preparacao.html';
+}
+
+function salvarTema(event, id) {
+  event.stopPropagation();
+  const tema = TEMAS.find(t => t.id === id);
+  toast(`"${tema.titulo.substring(0,40)}..." salvo! 📌`);
+}
+
+// Modal sugestão
+function abrirModal() { document.getElementById('modalSugestao').classList.add('aberto'); }
+function fecharModal() { document.getElementById('modalSugestao').classList.remove('aberto'); }
+window.fecharModal = fecharModal;
+
+function enviarSugestao() {
+  const titulo = document.getElementById('sugestaoTitulo').value.trim();
+  if (!titulo) { toast('Preencha o título do tema!'); return; }
+  fecharModal();
+  toast('Sugestão enviada! A equipe RedaON analisará em breve. 🙏', 4000);
+  document.getElementById('sugestaoTitulo').value = '';
+  document.getElementById('sugestaoJustificativa').value = '';
+}
+window.enviarSugestao = enviarSugestao;
+
+// Fechar modal clicando fora
+document.getElementById('modalSugestao').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+
+// Init
+renderTemas();
+</script>
+</body>
+</html>

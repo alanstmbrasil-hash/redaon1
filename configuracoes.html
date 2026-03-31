@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR" id="htmlRoot">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Configurações</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary-container": "#6c5ce7", "on-primary": "#2900a0", "on-surface": "#e1e2eb",
+          "inverse-on-surface": "#2e3037", "tertiary-fixed": "#ffdf9e", "error-container": "#93000a",
+          "secondary-container": "#00d0d1", "primary": "#c6bfff", "on-primary-container": "#faf6ff",
+          "tertiary-fixed-dim": "#fabd00", "on-secondary-container": "#005455", "error": "#ffb4ab",
+          "surface-container-high": "#272a31", "secondary-fixed": "#56f9f9", "primary-fixed": "#e4dfff",
+          "inverse-surface": "#e1e2eb", "on-primary-fixed": "#160066", "surface-container": "#1d2026",
+          "on-tertiary-fixed-variant": "#5b4300", "on-tertiary-container": "#fff6ec",
+          "on-tertiary": "#3f2e00", "surface-bright": "#363940", "secondary": "#45edee",
+          "tertiary-container": "#906c00", "on-error": "#690005", "tertiary": "#fabd00",
+          "on-secondary-fixed-variant": "#004f50", "surface-container-lowest": "#0b0e14",
+          "on-secondary": "#003737", "background": "#10131a", "outline": "#928ea0",
+          "surface-tint": "#c6bfff", "surface-container-highest": "#32353c",
+          "secondary-fixed-dim": "#26dcdd", "on-surface-variant": "#c8c4d7",
+          "primary-fixed-dim": "#c6bfff", "outline-variant": "#474554",
+          "on-secondary-fixed": "#002020", "surface-variant": "#32353c",
+          "surface-container-low": "#191c22", "on-error-container": "#ffdad6",
+          "inverse-primary": "#5847d2", "surface-dim": "#10131a", "surface": "#10131a",
+          "on-tertiary-fixed": "#261a00", "on-primary-fixed-variant": "#4029ba",
+          "on-background": "#e1e2eb"
+        },
+        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .glass-card { background: rgba(25,28,34,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(71,69,84,0.2); }
+  .glow-cyan { box-shadow: 0 0 20px rgba(69,237,238,0.3); }
+  .glow-cyan:hover { box-shadow: 0 0 30px rgba(69,237,238,0.5); }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Light mode overrides */
+  html.light body { background-color: #f4f5fb; color: #1a1c23; }
+  html.light .glass-card { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.08); }
+  html.light aside { background: #ffffff !important; border-right: 1px solid rgba(0,0,0,0.08); }
+  html.light header { background: #ffffff !important; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  html.light .bg-\[\#10131a\] { background: #ffffff; }
+  html.light .text-on-surface { color: #1a1c23; }
+  html.light .text-on-surface-variant { color: #5a5c6a; }
+  html.light .bg-surface-container-lowest { background: #f4f5fb; }
+  html.light .bg-surface-container { background: #ecedf5; }
+  html.light input, html.light select { background: #f0f1f8 !important; color: #1a1c23 !important; }
+  html.light .preview-card { background: #ecedf5 !important; border-color: rgba(0,0,0,0.1) !important; }
+
+  /* Toggle switch */
+  .toggle-bg { transition: background 0.2s; }
+  .toggle-dot { transition: transform 0.2s; }
+
+  /* Toast */
+  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; white-space:nowrap; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* Modal */
+  .modal { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; padding:1rem; }
+  .modal.aberto { display:flex; }
+
+  /* Tema card selecionado */
+  .tema-btn.selecionado { border-color: #45edee !important; box-shadow: 0 0 0 2px rgba(69,237,238,0.3); }
+
+  /* Preview card animado */
+  @keyframes previewPulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+  .preview-update { animation: previewPulse 0.5s ease; }
+
+  /* Input focus */
+  input:focus, select:focus { outline: none; ring: 1px solid rgba(108,92,231,0.4); }
+</style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface no-scrollbar overflow-x-hidden" id="bodyRoot">
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL: ALTERAR SENHA -->
+<div class="modal" id="modalSenha">
+  <div style="background:#1d2026;border:1px solid rgba(255,255,255,0.08);border-radius:1.25rem;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <h3 style="font-weight:700;font-size:1rem;color:#e1e2eb;display:flex;align-items:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="color:#ffb4ab;font-size:1.2rem;">lock</span>
+        Alterar Senha de Acesso
+      </h3>
+      <button onclick="fecharModal('modalSenha')" style="background:none;border:none;color:#928ea0;cursor:pointer;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+      <div>
+        <label style="display:block;font-size:.7rem;font-weight:700;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Senha Atual</label>
+        <input id="senhaAtual" type="password" placeholder="••••••••" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
+      </div>
+      <div>
+        <label style="display:block;font-size:.7rem;font-weight:700;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Nova Senha</label>
+        <input id="senhaNova" type="password" placeholder="mínimo 8 caracteres" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
+      </div>
+      <div>
+        <label style="display:block;font-size:.7rem;font-weight:700;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Confirmar Nova Senha</label>
+        <input id="senhaConfirm" type="password" placeholder="repita a nova senha" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
+      </div>
+      <div id="senhaErro" style="font-size:.75rem;color:#ffb4ab;display:none;padding:.5rem .75rem;background:rgba(255,180,171,0.1);border-radius:.5rem;border:1px solid rgba(255,180,171,0.2);"></div>
+      <button onclick="salvarSenha()" style="width:100%;padding:1rem;background:#6c5ce7;color:white;border:none;border-radius:.75rem;font-weight:700;font-size:.9rem;cursor:pointer;transition:opacity .2s;" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
+        Confirmar Alteração
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: MUDAR PLANO -->
+<div class="modal" id="modalPlano">
+  <div style="background:#1d2026;border:1px solid rgba(255,255,255,0.08);border-radius:1.25rem;width:100%;max-width:560px;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <h3 style="font-weight:700;font-size:1rem;color:#e1e2eb;">Escolher Plano</h3>
+      <button onclick="fecharModal('modalPlano')" style="background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div style="padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <!-- Free -->
+      <div style="border:1px solid rgba(255,255,255,0.1);border-radius:1rem;padding:1.25rem;">
+        <p style="font-size:.7rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;">Gratuito</p>
+        <p style="font-size:1.75rem;font-weight:900;color:#e1e2eb;margin-bottom:.25rem;">R$ 0</p>
+        <p style="font-size:.75rem;color:#928ea0;margin-bottom:1rem;">/mês</p>
+        <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.8rem;color:#c8c4d7;margin-bottom:1rem;">
+          <p>✓ 3 correções/mês</p>
+          <p>✓ Temas públicos</p>
+          <p style="color:#474554;">✕ Mentoria IA</p>
+          <p style="color:#474554;">✕ Elite da PROfa</p>
+        </div>
+        <button onclick="toast('Plano alterado para Gratuito.');fecharModal('modalPlano')" style="width:100%;padding:.625rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;color:#c8c4d7;font-size:.8rem;font-weight:600;cursor:pointer;">Selecionar</button>
+      </div>
+      <!-- Pro -->
+      <div style="border:2px solid #45edee;border-radius:1rem;padding:1.25rem;background:rgba(69,237,238,0.04);position:relative;">
+        <div style="position:absolute;top:-10px;right:12px;background:#45edee;color:#002020;font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:99px;text-transform:uppercase;">ATIVO</div>
+        <p style="font-size:.7rem;font-weight:700;color:#45edee;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;">Pro</p>
+        <p style="font-size:1.75rem;font-weight:900;color:#e1e2eb;margin-bottom:.25rem;">R$ 39,90</p>
+        <p style="font-size:.75rem;color:#928ea0;margin-bottom:1rem;">/mês</p>
+        <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.8rem;color:#c8c4d7;margin-bottom:1rem;">
+          <p>✓ Correções ilimitadas</p>
+          <p>✓ Elite da PROfa Blanche</p>
+          <p>✓ Mentoria IA em tempo real</p>
+          <p>✓ Temas INEP exclusivos</p>
+        </div>
+        <button style="width:100%;padding:.625rem;background:#6c5ce7;border:none;border-radius:.75rem;color:white;font-size:.8rem;font-weight:700;cursor:default;opacity:.7;">Plano atual</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FUNDO -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-20">
+  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-primary blur-[160px]"></div>
+  <div class="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-secondary blur-[140px]"></div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#10131a] flex flex-col py-8 shadow-[24px_0_48px_-12px_rgba(108,92,231,0.08)] border-r border-[#272A31]/20 z-50" id="sidebar">
+  <div class="px-8 mb-10">
+    <h1 class="text-2xl font-extrabold italic tracking-tight">
+      <span class="text-white">Reda</span><span class="text-[#45EDEE]">ON</span>
+    </h1>
+  </div>
+  <nav class="flex-1 px-4 space-y-1">
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="inicio.html"><span class="material-symbols-outlined">home</span> Início</a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="nova-redacao.html"><span class="material-symbols-outlined">edit_note</span> Nova Redação</a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="temas.html"><span class="material-symbols-outlined">topic</span> Temas</a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="minhas-redacoes.html"><span class="material-symbols-outlined">history_edu</span> Minhas Redações</a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="evolucao.html"><span class="material-symbols-outlined">insights</span> Evolução</a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="plano.html"><span class="material-symbols-outlined">auto_stories</span> Plano de Estudo</a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span> Ranking</a>
+    <a class="flex items-center gap-3 px-4 py-3 bg-[#1d2026] text-[#45EDEE] rounded-lg border-l-4 border-[#45EDEE] text-sm font-bold" href="configuracoes.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">settings</span> Configurações</a>
+  </nav>
+  <div class="px-4 mt-auto space-y-2">
+    <div class="p-4 bg-surface-container/40 rounded-xl mb-2">
+      <div class="flex items-center gap-3">
+        <img class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL" alt="Alan Alves"/>
+        <div>
+          <p class="text-sm font-bold text-on-surface" id="sidebarNome">Alan Alves</p>
+          <p class="text-[10px] text-on-surface-variant">Estudante Premium</p>
+        </div>
+      </div>
+    </div>
+    <a onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="flex items-center gap-3 px-4 py-3 text-[#FF8B8B] hover:bg-error-container/10 transition-all rounded-lg text-sm font-medium cursor-pointer">
+      <span class="material-symbols-outlined">logout</span> Sair
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="ml-64 min-h-screen">
+
+  <!-- TOP BAR -->
+  <header class="h-16 flex justify-between items-center w-full px-8 bg-[#10131a] fixed top-0 right-0 left-64 z-40 border-b border-white/5" id="topbar">
+    <div class="flex items-center gap-4">
+      <button class="text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined">menu</span></button>
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">settings</span>
+        <h2 class="text-xl font-bold text-[#E1E2EB] tracking-tight">Configurações</h2>
+      </div>
+    </div>
+    <div class="flex items-center gap-6">
+      <div class="bg-surface-container px-4 py-1.5 rounded-full flex items-center gap-2 border border-outline-variant/20">
+        <span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings:'FILL' 1;">stars</span>
+        <span class="text-sm font-bold text-on-surface">940 pts</span>
+      </div>
+      <div class="flex items-center gap-4 text-on-surface-variant">
+        <span class="material-symbols-outlined cursor-pointer hover:text-secondary transition-colors">notifications</span>
+        <span class="material-symbols-outlined cursor-pointer hover:text-secondary transition-colors" style="font-variation-settings:'FILL' 1;">settings</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO -->
+  <div class="pt-24 pb-12 px-8 max-w-[1400px] mx-auto">
+    <div class="grid grid-cols-12 gap-6">
+
+      <!-- COLUNA ESQUERDA (8 cols) -->
+      <div class="col-span-12 lg:col-span-8 space-y-6">
+
+        <!-- PERFIL DO ALUNO -->
+        <div class="glass-card p-6 rounded-xl">
+          <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">person</span>
+            Perfil do Aluno
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs text-on-surface-variant font-medium ml-1">Nome Completo</label>
+              <input id="inputNome" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface focus:ring-1 focus:ring-primary/40 text-sm" type="text" value="Alan Alves" oninput="atualizarPreview()"/>
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs text-on-surface-variant font-medium ml-1">E-mail de Acesso</label>
+              <input id="inputEmail" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface focus:ring-1 focus:ring-primary/40 text-sm" type="email" value="alan.alves@email.com"/>
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs text-on-surface-variant font-medium ml-1">Série / Ano</label>
+              <select id="inputSerie" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface focus:ring-1 focus:ring-primary/40 text-sm" onchange="atualizarPreview()">
+                <option>3º Ano do Ensino Médio</option>
+                <option>2º Ano do Ensino Médio</option>
+                <option>1º Ano do Ensino Médio</option>
+                <option>Cursinho Pré-Vestibular</option>
+                <option>Treineiro</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button onclick="salvarPerfil()" class="w-full h-[46px] bg-primary-container text-white rounded-lg font-bold text-sm hover:opacity-90 active:scale-95 transition-all">
+                Salvar Alterações
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- IDENTIDADE VISUAL + SEGURANÇA (grid 2 colunas) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- IDENTIDADE VISUAL -->
+          <div class="glass-card p-6 rounded-xl">
+            <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+              <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">palette</span>
+              Identidade Visual
+            </h3>
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Dark Mode -->
+              <button id="btnDark" onclick="setTema('dark')" class="tema-btn selecionado flex flex-col items-center justify-center gap-3 p-5 bg-surface-container-highest border-2 border-secondary rounded-xl transition-all hover:scale-[1.02]">
+                <span class="material-symbols-outlined text-3xl text-secondary" style="font-variation-settings:'FILL' 1;">dark_mode</span>
+                <span class="text-sm font-bold text-on-surface">Dark Mode</span>
+              </button>
+              <!-- Light Mode -->
+              <button id="btnLight" onclick="setTema('light')" class="tema-btn flex flex-col items-center justify-center gap-3 p-5 bg-white border-2 border-transparent rounded-xl transition-all hover:scale-[1.02]">
+                <span class="material-symbols-outlined text-3xl text-slate-700" style="font-variation-settings:'FILL' 1;">light_mode</span>
+                <span class="text-sm font-bold text-slate-800">Light Mode</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- SEGURANÇA & NOTIFICAÇÕES -->
+          <div class="glass-card p-6 rounded-xl">
+            <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+              <span class="material-symbols-outlined text-error" style="font-variation-settings:'FILL' 1;">security</span>
+              Segurança &amp; Notificações
+            </h3>
+            <div class="space-y-4">
+              <!-- Alterar senha -->
+              <button onclick="abrirModal('modalSenha')" class="w-full flex items-center justify-between p-3 bg-surface-container-lowest rounded-lg text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all">
+                <span class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm">lock</span>
+                  Alterar Senha de Acesso
+                </span>
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+              </button>
+              <!-- Toggle notificações -->
+              <div class="flex items-center justify-between p-3">
+                <div>
+                  <p class="text-sm font-medium text-on-surface">Notificações Push</p>
+                  <p class="text-[10px] text-on-surface-variant mt-0.5">Receba alertas de temas e resultados</p>
+                </div>
+                <button id="toggleNotif" onclick="toggleNotificacoes()" class="relative inline-flex h-6 w-11 items-center rounded-full toggle-bg bg-secondary transition-colors" aria-checked="true">
+                  <span id="toggleDot" class="inline-block h-4 w-4 translate-x-6 rounded-full bg-white transition-transform toggle-dot"></span>
+                </button>
+              </div>
+              <!-- Toggle e-mail semanal -->
+              <div class="flex items-center justify-between p-3">
+                <div>
+                  <p class="text-sm font-medium text-on-surface">Resumo Semanal por E-mail</p>
+                  <p class="text-[10px] text-on-surface-variant mt-0.5">Relatório de evolução toda segunda</p>
+                </div>
+                <button id="toggleEmail" onclick="toggleEmailSemanal()" class="relative inline-flex h-6 w-11 items-center rounded-full toggle-bg bg-surface-container-highest transition-colors">
+                  <span id="toggleEmailDot" class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white/40 transition-transform toggle-dot"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLANO -->
+        <div class="glass-card p-8 rounded-xl relative overflow-hidden">
+          <div class="absolute -right-20 -top-20 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
+          <div class="absolute -left-10 -bottom-10 w-48 h-48 bg-secondary/10 rounded-full blur-[60px]"></div>
+          <div class="relative flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="space-y-4 text-center md:text-left">
+              <div class="inline-flex items-center gap-2 px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
+                <span class="w-1.5 h-1.5 rounded-full bg-secondary inline-block"></span>
+                Ativo
+              </div>
+              <h3 class="text-3xl font-black text-on-surface tracking-tight">Plano Pro</h3>
+              <p class="text-on-surface-variant max-w-sm text-sm leading-relaxed">Acesso ilimitado às correções elite, mentoria IA e temas exclusivos do INEP.</p>
+              <div class="flex items-center gap-2 text-sm">
+                <span class="material-symbols-outlined text-primary text-sm">calendar_today</span>
+                <span class="text-on-surface-variant">Próxima renovação: <b class="text-on-surface">15 de Outubro, 2024</b></span>
+              </div>
+            </div>
+            <div class="flex-shrink-0">
+              <button onclick="abrirModal('modalPlano')" class="px-8 py-4 bg-secondary text-on-secondary font-black rounded-xl glow-cyan hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest text-sm">
+                Mudar de Plano
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUNA DIREITA: PREVIEW (4 cols) -->
+      <div class="col-span-12 lg:col-span-4 h-full">
+        <div class="glass-card h-full min-h-[600px] rounded-xl overflow-hidden flex flex-col border-secondary/20 relative">
+          <!-- Background decorativo -->
+          <div class="absolute inset-0 z-0">
+            <img class="w-full h-full object-cover opacity-20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADYJz1n2Cq5nGwPMfOZlh8XOZEE5Ezzrb0eMs8b6o9HlL5_uH3817e7hxnGdI1G9NzVgWA2dPqw_hscdTaIu0997sVWKB5H_68b0zaQZ_wEvKtz_Cjw6ICVf0cU-3fOHggJepzp1tkFBMccmPShq0xL4wdVBX8OOQLvVQF-OHjb6TBAiBxhKdTjcn3bNrC9yAPVlpqO-ohx6BIOI0IjTFLAz7611zQlnMNXlH4n6FXkE8o2gRLeWlMKyKejbWGKvs938BytYFgNOYt" alt=""/>
+            <div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent"></div>
+          </div>
+
+          <div class="relative z-10 p-8 flex flex-col h-full">
+            <!-- Ícone central -->
+            <div class="flex-1 flex flex-col justify-center items-center text-center space-y-6">
+              <div class="w-20 h-20 rounded-full bg-secondary/10 flex items-center justify-center border border-secondary/30" style="box-shadow:0 0 30px rgba(69,237,238,0.15)">
+                <span class="material-symbols-outlined text-4xl text-secondary" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
+              </div>
+              <h4 class="text-2xl font-black text-on-surface leading-tight px-4">
+                Sua RedaON,<br/>do seu jeito.
+              </h4>
+              <p class="text-on-surface-variant text-sm max-w-[240px] leading-relaxed">
+                A configuração do seu ambiente reflete a clareza do seu pensamento. Personalize cada detalhe.
+              </p>
+            </div>
+
+            <!-- Card de preview -->
+            <div class="mt-auto space-y-4">
+              <div class="p-4 bg-surface-container/60 rounded-xl border border-outline-variant/20 backdrop-blur-sm preview-card" id="previewCard">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-xs font-black text-white" id="previewAvatar">AA</div>
+                  <div class="flex-1">
+                    <div class="h-2 rounded-full bg-surface-container-highest mb-1.5" id="previewNomeBar" style="width:60%"></div>
+                    <div class="h-1.5 rounded-full bg-surface-container-highest" style="width:40%"></div>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <div class="h-1.5 w-full bg-surface-container-highest rounded-full"></div>
+                  <div class="h-1.5 w-4/5 bg-surface-container-highest rounded-full"></div>
+                  <div class="h-1.5 w-2/3 bg-surface-container-highest rounded-full"></div>
+                </div>
+                <!-- Preview nome real -->
+                <div class="mt-3 pt-3 border-t border-outline-variant/20">
+                  <p class="text-[10px] text-on-surface-variant">Logado como:</p>
+                  <p class="text-xs font-bold text-secondary" id="previewNomeTexto">Alan Alves</p>
+                  <p class="text-[10px] text-on-surface-variant" id="previewSerieTexto">3º Ano do Ensino Médio</p>
+                </div>
+              </div>
+              <p class="text-[10px] text-center text-on-surface-variant font-medium tracking-widest uppercase">Visualização em Tempo Real</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+// ── TOAST ──────────────────────────────────────
+function toast(msg, dur=3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ── MODAIS ─────────────────────────────────────
+function abrirModal(id) { document.getElementById(id).classList.add('aberto'); }
+function fecharModal(id) { document.getElementById(id).classList.remove('aberto'); }
+window.fecharModal = fecharModal;
+
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('aberto');
+}));
+
+// ── TEMA DARK / LIGHT ──────────────────────────
+let temaAtual = 'dark';
+
+window.setTema = function(tema) {
+  temaAtual = tema;
+  const html = document.getElementById('htmlRoot');
+
+  if (tema === 'light') {
+    html.classList.remove('dark');
+    html.classList.add('light');
+  } else {
+    html.classList.remove('light');
+    html.classList.add('dark');
+  }
+
+  document.getElementById('btnDark').classList.toggle('selecionado', tema === 'dark');
+  document.getElementById('btnDark').style.borderColor = tema === 'dark' ? '#45edee' : 'transparent';
+  document.getElementById('btnLight').classList.toggle('selecionado', tema === 'light');
+  document.getElementById('btnLight').style.borderColor = tema === 'light' ? '#45edee' : 'transparent';
+
+  toast(tema === 'dark' ? '🌙 Dark Mode ativado!' : '☀️ Light Mode ativado!');
+};
+
+// Init borda do botão dark
+document.getElementById('btnDark').style.borderColor = '#45edee';
+
+// ── NOTIFICAÇÕES ───────────────────────────────
+let notifAtiva = true;
+let emailAtivo = false;
+
+window.toggleNotificacoes = function() {
+  notifAtiva = !notifAtiva;
+  const btn = document.getElementById('toggleNotif');
+  const dot = document.getElementById('toggleDot');
+  btn.style.background = notifAtiva ? '#45edee' : '#32353c';
+  dot.style.transform = notifAtiva ? 'translateX(1.5rem)' : 'translateX(0.25rem)';
+  dot.style.opacity = notifAtiva ? '1' : '0.4';
+  toast(notifAtiva ? '🔔 Notificações ativadas!' : '🔕 Notificações desativadas.');
+};
+
+window.toggleEmailSemanal = function() {
+  emailAtivo = !emailAtivo;
+  const btn = document.getElementById('toggleEmail');
+  const dot = document.getElementById('toggleEmailDot');
+  btn.style.background = emailAtivo ? '#45edee' : '#32353c';
+  dot.style.transform = emailAtivo ? 'translateX(1.5rem)' : 'translateX(0.25rem)';
+  dot.style.opacity = emailAtivo ? '1' : '0.4';
+  toast(emailAtivo ? '📧 Resumo semanal ativado!' : '📧 Resumo semanal desativado.');
+};
+
+// ── SALVAR PERFIL ──────────────────────────────
+window.salvarPerfil = function() {
+  const nome = document.getElementById('inputNome').value.trim();
+  const email = document.getElementById('inputEmail').value.trim();
+  if (!nome) { toast('⚠️ O nome não pode estar vazio!'); return; }
+  if (!email.includes('@')) { toast('⚠️ E-mail inválido!'); return; }
+  document.getElementById('sidebarNome').textContent = nome;
+  atualizarPreview();
+  toast('✅ Perfil salvo com sucesso!');
+};
+
+// ── PREVIEW EM TEMPO REAL ──────────────────────
+function atualizarPreview() {
+  const nome = document.getElementById('inputNome').value.trim() || 'Aluno';
+  const serie = document.getElementById('inputSerie').value;
+  const iniciais = nome.split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
+
+  document.getElementById('previewAvatar').textContent = iniciais;
+  document.getElementById('previewNomeTexto').textContent = nome;
+  document.getElementById('previewSerieTexto').textContent = serie;
+
+  // Animação sutil no card
+  const card = document.getElementById('previewCard');
+  card.classList.add('preview-update');
+  setTimeout(() => card.classList.remove('preview-update'), 500);
+}
+
+// ── ALTERAR SENHA ──────────────────────────────
+window.salvarSenha = function() {
+  const atual = document.getElementById('senhaAtual').value;
+  const nova = document.getElementById('senhaNova').value;
+  const confirm = document.getElementById('senhaConfirm').value;
+  const erroEl = document.getElementById('senhaErro');
+
+  erroEl.style.display = 'none';
+
+  if (!atual) { mostrarErroSenha('Digite a senha atual.'); return; }
+  if (nova.length < 8) { mostrarErroSenha('A nova senha deve ter mínimo 8 caracteres.'); return; }
+  if (nova !== confirm) { mostrarErroSenha('As senhas não coincidem.'); return; }
+
+  fecharModal('modalSenha');
+  document.getElementById('senhaAtual').value = '';
+  document.getElementById('senhaNova').value = '';
+  document.getElementById('senhaConfirm').value = '';
+  toast('🔐 Senha alterada com sucesso!');
+};
+
+function mostrarErroSenha(msg) {
+  const el = document.getElementById('senhaErro');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ── INIT ───────────────────────────────────────
+atualizarPreview();
+</script>
+</body>
+</html>

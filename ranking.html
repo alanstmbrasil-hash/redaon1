@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Ranking</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "on-primary-fixed": "#160066", "on-error-container": "#ffdad6", "on-secondary": "#003737",
+          "inverse-on-surface": "#2e3037", "secondary-fixed": "#56f9f9", "surface-container": "#1d2026",
+          "tertiary-container": "#906c00", "tertiary": "#fabd00", "surface-container-lowest": "#0b0e14",
+          "surface-container-low": "#191c22", "background": "#10131a", "primary-fixed-dim": "#c6bfff",
+          "outline-variant": "#474554", "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
+          "on-primary": "#2900a0", "on-primary-container": "#faf6ff", "inverse-surface": "#e1e2eb",
+          "on-error": "#690005", "on-surface": "#e1e2eb", "secondary-fixed-dim": "#26dcdd",
+          "surface-container-highest": "#32353c", "primary": "#c6bfff", "outline": "#928ea0",
+          "on-background": "#e1e2eb", "surface-bright": "#363940", "error-container": "#93000a",
+          "surface-dim": "#10131a", "surface-variant": "#32353c", "error": "#ffb4ab",
+          "surface-container-high": "#272a31", "primary-fixed": "#e4dfff", "on-tertiary-container": "#fff6ec",
+          "secondary": "#45edee", "on-tertiary": "#3f2e00", "secondary-container": "#00d0d1",
+          "tertiary-fixed": "#ffdf9e", "surface": "#10131a", "inverse-primary": "#5847d2"
+        },
+        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background-color: #10131a; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .glass-card { background: rgba(25,28,34,0.8); backdrop-filter: blur(12px); }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(108,92,231,0.1); border-radius: 10px; }
+
+  /* Avatar glow */
+  @keyframes glowRing { 0%,100%{box-shadow:0 0 0 0 rgba(69,237,238,0.4)} 50%{box-shadow:0 0 0 8px rgba(69,237,238,0)} }
+  .avatar-glow { animation: glowRing 2.5s infinite; }
+
+  /* Entrada animada da tabela */
+  @keyframes fadeSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .row-anim { animation: fadeSlide 0.3s ease forwards; }
+
+  /* Botões filtro ativo */
+  .filtro-btn.ativo { background: #6c5ce7; border-color: #6c5ce7; color: white; box-shadow: 0 0 10px rgba(108,92,231,0.5); }
+  .sub-btn.ativo { background: #6c5ce7; color: white; }
+
+  /* Toast */
+  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* Posição medal */
+  .medal-1 { color: #FFD700; }
+  .medal-2 { color: #C0C0C0; }
+  .medal-3 { color: #CD7F32; }
+
+  /* Row do usuário atual */
+  .row-eu { background: rgba(108,92,231,0.1); border-left: 4px solid #6c5ce7; }
+</style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-hidden">
+
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
+  <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
+</div>
+
+<div id="toast"></div>
+
+<div class="flex h-screen overflow-hidden relative z-10">
+
+  <!-- SIDEBAR -->
+  <aside class="h-screen w-64 fixed left-0 top-0 bg-[#10131a] shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)] flex flex-col py-6 px-4 z-50 border-r border-outline-variant/10">
+    <div class="flex items-center px-2 mb-10">
+      <div class="flex items-baseline italic">
+        <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
+        <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
+      </div>
+    </div>
+    <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="inicio.html"><span class="material-symbols-outlined">home</span><span class="font-medium text-sm">Início</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span><span class="font-medium text-sm">Nova Redação</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined">description</span><span class="font-medium text-sm">Temas</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Minhas Redações</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span><span class="font-medium text-sm">Evolução</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html"><span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-outline-variant/10">
+      <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
+        <img alt="Alan Alves" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
+        <div class="flex flex-col"><span class="text-sm font-semibold text-on-surface">Alan Alves</span><span class="text-xs text-on-surface-variant">Estudante Premium</span></div>
+      </div>
+      <a onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-[#FF8B8B] hover:bg-red-500/10 transition-all cursor-pointer">
+        <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 ml-64 flex flex-col h-screen relative bg-surface-container-lowest">
+
+    <!-- TOP BAR -->
+    <header class="h-20 flex items-center justify-between px-10 bg-surface/40 backdrop-blur-md sticky top-0 z-40 border-b border-white/5">
+      <div class="flex items-center gap-4">
+        <button class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined">menu</span></button>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#45EDEE]" style="font-variation-settings:'FILL' 1;">leaderboard</span>
+          <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Ranking</h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
+          <span class="material-symbols-outlined text-[#45EDEE] text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
+          <span class="text-xs font-bold text-on-surface">940 pts</span>
+        </div>
+        <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO -->
+    <div class="flex-1 overflow-y-auto p-10 custom-scrollbar">
+      <div class="grid grid-cols-12 gap-8 pb-12">
+
+        <!-- COLUNA ESQUERDA: CARD DO USUÁRIO -->
+        <div class="col-span-12 lg:col-span-4 space-y-6">
+
+          <!-- Card Status -->
+          <div class="bg-[#191c22] rounded-3xl p-8 border border-white/5 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-[#6c5ce7]/10 rounded-full blur-3xl"></div>
+            <h3 class="text-[10px] font-bold text-[#c8c4d7] uppercase tracking-[0.2em] mb-12 text-center">Seu Status Atual</h3>
+
+            <div class="flex flex-col items-center mb-10">
+              <div class="relative flex items-center justify-center">
+                <!-- Badge Geral -->
+                <div class="absolute -left-16 bg-[#1d2026] border border-[#6c5ce7]/40 px-3 py-1 rounded-lg shadow-2xl z-10">
+                  <p class="text-[8px] text-[#c8c4d7] uppercase font-bold">Geral</p>
+                  <p id="rankGeral" class="text-sm font-black text-white">#42</p>
+                </div>
+                <!-- Avatar -->
+                <div class="w-28 h-28 rounded-full border-4 border-[#45edee]/30 p-1 bg-[#0b0e14] relative z-0 avatar-glow">
+                  <img class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6Dba6OdkUqvSztxUruabDtrVt15RhxFXXMwn1y32jLMsEKHrTbOVqgl1wKLW8Jw7ZcoFD8nFax3Ba9hDV_0PJi4Zlh3AKdKRamHrl45cCvVRIvh9H_NKBrvxCXqO_XsFXhsa3vAiigaHoSzvABiRrveYbLyioQyHPg2DflPGYm0ldEV0xXEZ8rx4OXDt8zYinRrH-iwgy7noGLiRh7XBzmJMlTl9a3wVJ1dyIYap9yHG5D6SayQoyWFAUqfAj_7vG3tVoI8q9ieOo"/>
+                </div>
+                <!-- Badge Série -->
+                <div class="absolute -right-16 bg-[#1d2026] border border-[#45edee]/40 px-3 py-1 rounded-lg shadow-2xl z-10">
+                  <p class="text-[8px] text-[#c8c4d7] uppercase font-bold">Série</p>
+                  <p id="rankSerie" class="text-sm font-black text-[#45edee]">#12</p>
+                </div>
+              </div>
+
+              <div class="mt-8 text-center">
+                <h4 class="text-xl font-bold text-white tracking-tight">Alan Oliveira</h4>
+                <span class="text-[10px] bg-[#6c5ce7]/20 text-[#c6bfff] px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-[#6c5ce7]/30 mt-2 inline-block">Scribe Elite</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-black/20 p-4 rounded-2xl border border-white/5 text-center">
+                <p class="text-[10px] text-[#c8c4d7] uppercase mb-1 font-medium">Média Geral</p>
+                <p class="text-2xl font-black text-[#45edee]">850</p>
+              </div>
+              <div class="bg-black/20 p-4 rounded-2xl border border-white/5 text-center">
+                <p class="text-[10px] text-[#c8c4d7] uppercase mb-1 font-medium">Redações</p>
+                <p class="text-2xl font-black text-white">14</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Rumo ao Top -->
+          <div class="bg-gradient-to-br from-[#1d2026] to-[#0b0e14] p-6 rounded-2xl border border-white/5">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="material-symbols-outlined text-[#fabd00] text-sm" style="font-variation-settings:'FILL' 1;">trending_up</span>
+              <p class="text-sm font-bold text-white">Rumo ao Top 10</p>
+            </div>
+            <p class="text-xs text-[#c8c4d7] leading-relaxed mb-4">
+              Suba mais <span class="text-white font-bold">2 posições</span> na sua série para desbloquear o selo "Luminar".
+            </p>
+            <!-- Progresso para o top -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-[10px] text-on-surface-variant">
+                <span>Posição atual: #12</span><span>Meta: #10</span>
+              </div>
+              <div class="h-1.5 bg-[#32353c] rounded-full">
+                <div class="h-1.5 rounded-full bg-gradient-to-r from-[#6c5ce7] to-[#45edee]" style="width:83%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Histórico de posições -->
+          <div class="bg-[#191c22] p-5 rounded-2xl border border-white/5">
+            <h4 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Histórico de Posições</h4>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-on-surface-variant text-xs">Esta semana</span>
+                <span class="font-bold text-white">#42 <span class="text-[#4ade80] text-xs">↑3</span></span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-on-surface-variant text-xs">Semana passada</span>
+                <span class="font-bold text-on-surface-variant">#45</span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-on-surface-variant text-xs">Mês passado</span>
+                <span class="font-bold text-on-surface-variant">#58 <span class="text-[#4ade80] text-xs">↑16</span></span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-on-surface-variant text-xs">Melhor posição</span>
+                <span class="font-bold text-[#fabd00]">#38 🏆</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUNA DIREITA: TABELA DE RANKING -->
+        <div class="col-span-12 lg:col-span-8">
+          <div class="bg-[#191c22]/80 backdrop-blur-xl rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+
+            <!-- Header com filtros -->
+            <div class="p-8 border-b border-white/5 bg-white/[0.02]">
+              <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+                <div>
+                  <h3 class="text-lg font-bold text-white italic">Elite da Semana</h3>
+                  <p class="text-xs text-[#c8c4d7]">Os melhores desempenhos em nível nacional</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <!-- Filtros de âmbito -->
+                  <button onclick="setFiltro('escola')" id="btn-escola" class="filtro-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-[#c8c4d7] text-[10px] font-bold hover:bg-white/10 transition-all">
+                    <span class="material-symbols-outlined text-sm">school</span> ESCOLA
+                  </button>
+                  <button onclick="setFiltro('cidade')" id="btn-cidade" class="filtro-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-[#c8c4d7] text-[10px] font-bold hover:bg-white/10 transition-all">
+                    <span class="material-symbols-outlined text-sm">location_city</span> CIDADE
+                  </button>
+                  <button onclick="setFiltro('estado')" id="btn-estado" class="filtro-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 text-[#c8c4d7] text-[10px] font-bold hover:bg-white/10 transition-all">
+                    <span class="material-symbols-outlined text-sm">map</span> ESTADO
+                  </button>
+                  <button onclick="setFiltro('brasil')" id="btn-brasil" class="filtro-btn ativo flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-bold transition-all">
+                    <span class="material-symbols-outlined text-sm">public</span> BRASIL
+                  </button>
+                </div>
+              </div>
+
+              <!-- Sub-filtros Geral / Sua Série -->
+              <div class="flex bg-black/20 p-1 rounded-xl border border-white/10 w-fit mt-4">
+                <button onclick="setSubFiltro('geral')" id="sub-geral" class="sub-btn ativo px-5 py-1.5 text-[10px] font-bold text-white rounded-lg shadow-lg transition-all">GERAL</button>
+                <button onclick="setSubFiltro('serie')" id="sub-serie" class="sub-btn px-5 py-1.5 text-[10px] font-bold text-[#c8c4d7] hover:text-white transition-all">SUA SÉRIE</button>
+              </div>
+            </div>
+
+            <!-- Cabeçalho da tabela -->
+            <div class="grid text-[10px] text-white/30 uppercase tracking-[0.2em] border-b border-white/5 px-8 py-4" style="grid-template-columns: 120px 1fr 120px">
+              <span>Posição</span>
+              <span>Estudante</span>
+              <span class="text-right">Média Semanal</span>
+            </div>
+
+            <!-- Linhas do ranking -->
+            <div id="listaRanking" class="divide-y divide-white/5 overflow-y-auto" style="max-height: 480px;"></div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function toast(msg, dur=3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ═══════════════════════════════════════════════
+// CONFIGURAÇÃO DO USUÁRIO
+// ═══════════════════════════════════════════════
+const EU_IMG = 'https://lh3.googleusercontent.com/aida-public/AB6AXuA6Dba6OdkUqvSztxUruabDtrVt15RhxFXXMwn1y32jLMsEKHrTbOVqgl1wKLW8Jw7ZcoFD8nFax3Ba9hDV_0PJi4Zlh3AKdKRamHrl45cCvVRIvh9H_NKBrvxCXqO_XsFXhsa3vAiigaHoSzvABiRrveYbLyioQyHPg2DflPGYm0ldEV0xXEZ8rx4OXDt8zYinRrH-iwgy7noGLiRh7XBzmJMlTl9a3wVJ1dyIYap9yHG5D6SayQoyWFAUqfAj_7vG3tVoI8q9ieOo';
+
+// Posições reais do usuário em cada contexto (simulando 1M+ usuários)
+const MINHA_POSICAO = {
+  brasil:  { geral: 42843, serie: 1247  },
+  estado:  { geral: 3812,  serie: 187   },
+  cidade:  { geral: 521,   serie: 38    },
+  escola:  { geral: 14,    serie: 3     },
+};
+
+// Top 20 para cada contexto (dados fixos — em produção viriam da API)
+const TOP20 = {
+  brasil: {
+    geral: [
+      { nome:'Beatriz Costa',    media:985, cidade:'São Paulo, SP'        },
+      { nome:'Rafael Mendes',    media:972, cidade:'Rio de Janeiro, RJ'   },
+      { nome:'Camila Rocha',     media:961, cidade:'Belo Horizonte, MG'   },
+      { nome:'Lucas Ferreira',   media:958, cidade:'Curitiba, PR'         },
+      { nome:'Ana Paula Silva',  media:950, cidade:'Salvador, BA'         },
+      { nome:'Thiago Santos',    media:944, cidade:'Brasília, DF'         },
+      { nome:'Mariana Lima',     media:940, cidade:'Fortaleza, CE'        },
+      { nome:'Pedro Alves',      media:937, cidade:'Manaus, AM'           },
+      { nome:'Juliana Costa',    media:932, cidade:'Porto Alegre, RS'     },
+      { nome:'Diego Carvalho',   media:928, cidade:'Recife, PE'           },
+      { nome:'Fernanda Souza',   media:921, cidade:'Goiânia, GO'          },
+      { nome:'Gabriel Nunes',    media:916, cidade:'Natal, RN'            },
+      { nome:'Larissa Martins',  media:910, cidade:'Campo Grande, MS'     },
+      { nome:'Bruno Pereira',    media:905, cidade:'Belém, PA'            },
+      { nome:'Isabela Torres',   media:898, cidade:'Florianópolis, SC'    },
+      { nome:'Victor Hugo',      media:894, cidade:'São Paulo, SP'        },
+      { nome:'Amanda Barros',    media:890, cidade:'Maceió, AL'           },
+      { nome:'Rodrigo Lima',     media:886, cidade:'Teresina, PI'         },
+      { nome:'Carolina Dias',    media:882, cidade:'João Pessoa, PB'      },
+      { nome:'Felipe Gomes',     media:878, cidade:'Cuiabá, MT'           },
+    ],
+    serie: [
+      { nome:'Carla Mendes',     media:962, cidade:'São Paulo, SP'        },
+      { nome:'Paulo Barros',     media:955, cidade:'Rio de Janeiro, RJ'   },
+      { nome:'Marina Sousa',     media:948, cidade:'Belo Horizonte, MG'   },
+      { nome:'Roberto Lima',     media:940, cidade:'Curitiba, PR'         },
+      { nome:'Claudia Santos',   media:932, cidade:'Salvador, BA'         },
+      { nome:'Fábio Correia',    media:924, cidade:'Fortaleza, CE'        },
+      { nome:'Simone Alves',     media:918, cidade:'Recife, PE'           },
+      { nome:'Leandro Costa',    media:912, cidade:'Manaus, AM'           },
+      { nome:'Patrícia Dias',    media:906, cidade:'Porto Alegre, RS'     },
+      { nome:'Antonio Rocha',    media:900, cidade:'Brasília, DF'         },
+      { nome:'Silvana Ferreira', media:894, cidade:'Goiânia, GO'          },
+      { nome:'Marcos Teixeira',  media:890, cidade:'Natal, RN'            },
+      { nome:'Renata Vieira',    media:886, cidade:'Campo Grande, MS'     },
+      { nome:'Carlos Mello',     media:882, cidade:'Belém, PA'            },
+      { nome:'Aline Brandão',    media:878, cidade:'Florianópolis, SC'    },
+      { nome:'Diego Freitas',    media:874, cidade:'Maceió, AL'           },
+      { nome:'Luciana Pinto',    media:870, cidade:'Teresina, PI'         },
+      { nome:'Fernando Lopes',   media:866, cidade:'João Pessoa, PB'      },
+      { nome:'Cristina Souza',   media:862, cidade:'Cuiabá, MT'           },
+      { nome:'Eduardo Borges',   media:858, cidade:'Porto Velho, RO'      },
+    ],
+  },
+  estado: {
+    geral: [
+      { nome:'Beatriz Costa',    media:985, cidade:'São Paulo, SP'        },
+      { nome:'Lucas Ferreira',   media:958, cidade:'Campinas, SP'         },
+      { nome:'Thiago Santos',    media:944, cidade:'Santos, SP'           },
+      { nome:'Victor Hugo',      media:894, cidade:'São Paulo, SP'        },
+      { nome:'André Correia',    media:878, cidade:'Sorocaba, SP'         },
+      { nome:'Juliane Farias',   media:874, cidade:'Ribeirão Preto, SP'   },
+      { nome:'Marcos Ramos',     media:870, cidade:'São José dos Campos, SP'},
+      { nome:'Bianca Queiroz',   media:866, cidade:'Osasco, SP'           },
+      { nome:'Thales Mendes',    media:862, cidade:'Santo André, SP'      },
+      { nome:'Vitória Cruz',     media:858, cidade:'Guarulhos, SP'        },
+      { nome:'Nayara Borges',    media:855, cidade:'Mogi das Cruzes, SP'  },
+      { nome:'Renato Figueiredo',media:852, cidade:'Bauru, SP'            },
+      { nome:'Priscila Moraes',  media:851, cidade:'Piracicaba, SP'       },
+      { nome:'Henrique Lima',    media:850, cidade:'São Paulo, SP'        },
+      { nome:'Tatiane Rocha',    media:850, cidade:'Campinas, SP'         },
+      { nome:'Gustavo Souza',    media:850, cidade:'Santos, SP'           },
+      { nome:'Sabrina Neves',    media:850, cidade:'Sorocaba, SP'         },
+      { nome:'Caio Ribeiro',     media:850, cidade:'Ribeirão Preto, SP'   },
+      { nome:'Valeria Silva',    media:850, cidade:'São José dos Campos, SP'},
+      { nome:'Danilo Freitas',   media:850, cidade:'Osasco, SP'           },
+    ],
+    serie: [
+      { nome:'Carla Mendes',     media:920, cidade:'São Paulo, SP'        },
+      { nome:'Fábio Correia',    media:881, cidade:'Campinas, SP'         },
+      { nome:'Patrícia Dias',    media:869, cidade:'Santos, SP'           },
+      { nome:'Rodrigo Lima',     media:858, cidade:'Sorocaba, SP'         },
+      { nome:'Amanda Torres',    media:855, cidade:'Ribeirão Preto, SP'   },
+      { nome:'Eduardo Pinto',    media:852, cidade:'Guarulhos, SP'        },
+      { nome:'Letícia Costa',    media:850, cidade:'São Paulo, SP'        },
+      { nome:'Bruno Souza',      media:850, cidade:'Campinas, SP'         },
+      { nome:'Isabela Rocha',    media:850, cidade:'Santos, SP'           },
+      { nome:'Gabriel Melo',     media:850, cidade:'Sorocaba, SP'         },
+      { nome:'Natália Cruz',     media:850, cidade:'Ribeirão Preto, SP'   },
+      { nome:'Victor Alves',     media:850, cidade:'Guarulhos, SP'        },
+      { nome:'Mariana Lima',     media:850, cidade:'Bauru, SP'            },
+      { nome:'Thiago Borges',    media:850, cidade:'Piracicaba, SP'       },
+      { nome:'Carolina Santos',  media:850, cidade:'Osasco, SP'           },
+      { nome:'Felipe Nunes',     media:850, cidade:'São José dos Campos, SP'},
+      { nome:'Larissa Vieira',   media:850, cidade:'Mogi das Cruzes, SP'  },
+      { nome:'Diego Correia',    media:850, cidade:'Ribeirão Preto, SP'   },
+      { nome:'Priscila Mendes',  media:850, cidade:'São Paulo, SP'        },
+      { nome:'Renata Farias',    media:851, cidade:'Campinas, SP'         },
+    ],
+  },
+  cidade: {
+    geral: [
+      { nome:'Beatriz Costa',    media:985, cidade:'São Paulo, SP'        },
+      { nome:'Victor Hugo',      media:894, cidade:'São Paulo, SP'        },
+      { nome:'André Correia',    media:870, cidade:'São Paulo, SP'        },
+      { nome:'Henrique Lima',    media:850, cidade:'São Paulo, SP'        },
+      { nome:'Carla Mendes',     media:848, cidade:'São Paulo, SP'        },
+      { nome:'Sabrina Neves',    media:845, cidade:'São Paulo, SP'        },
+      { nome:'Bruno Ramos',      media:843, cidade:'São Paulo, SP'        },
+      { nome:'Isabela Torres',   media:841, cidade:'São Paulo, SP'        },
+      { nome:'Gabriel Fonseca',  media:840, cidade:'São Paulo, SP'        },
+      { nome:'Natália Dias',     media:839, cidade:'São Paulo, SP'        },
+      { nome:'Marcos Pereira',   media:838, cidade:'São Paulo, SP'        },
+      { nome:'Letícia Barros',   media:837, cidade:'São Paulo, SP'        },
+      { nome:'Eduardo Costa',    media:836, cidade:'São Paulo, SP'        },
+      { nome:'Carolina Lima',    media:835, cidade:'São Paulo, SP'        },
+      { nome:'Thiago Vieira',    media:834, cidade:'São Paulo, SP'        },
+      { nome:'Mariana Souza',    media:833, cidade:'São Paulo, SP'        },
+      { nome:'Felipe Rocha',     media:832, cidade:'São Paulo, SP'        },
+      { nome:'Larissa Nunes',    media:831, cidade:'São Paulo, SP'        },
+      { nome:'Diego Santos',     media:830, cidade:'São Paulo, SP'        },
+      { nome:'Priscila Oliveira',media:829, cidade:'São Paulo, SP'        },
+    ],
+    serie: [
+      { nome:'Carla Mendes',     media:920, cidade:'São Paulo, SP'        },
+      { nome:'Bruno Ramos',      media:895, cidade:'São Paulo, SP'        },
+      { nome:'Isabela Torres',   media:872, cidade:'São Paulo, SP'        },
+      { nome:'Gabriel Fonseca',  media:868, cidade:'São Paulo, SP'        },
+      { nome:'Natália Dias',     media:864, cidade:'São Paulo, SP'        },
+      { nome:'Marcos Pereira',   media:860, cidade:'São Paulo, SP'        },
+      { nome:'Letícia Barros',   media:857, cidade:'São Paulo, SP'        },
+      { nome:'Eduardo Costa',    media:855, cidade:'São Paulo, SP'        },
+      { nome:'Carolina Lima',    media:853, cidade:'São Paulo, SP'        },
+      { nome:'Thiago Vieira',    media:851, cidade:'São Paulo, SP'        },
+      { nome:'Mariana Souza',    media:850, cidade:'São Paulo, SP'        },
+      { nome:'Felipe Rocha',     media:850, cidade:'São Paulo, SP'        },
+      { nome:'Larissa Nunes',    media:850, cidade:'São Paulo, SP'        },
+      { nome:'Diego Santos',     media:850, cidade:'São Paulo, SP'        },
+      { nome:'Priscila Oliveira',media:850, cidade:'São Paulo, SP'        },
+      { nome:'Victor Alves',     media:850, cidade:'São Paulo, SP'        },
+      { nome:'Amanda Cruz',      media:850, cidade:'São Paulo, SP'        },
+      { nome:'Renata Farias',    media:851, cidade:'São Paulo, SP'        },
+      { nome:'Caio Borges',      media:851, cidade:'São Paulo, SP'        },
+      { nome:'Valeria Neves',    media:851, cidade:'São Paulo, SP'        },
+    ],
+  },
+  escola: {
+    geral: [
+      { nome:'Beatriz Costa',    media:985, cidade:'C.E. São Paulo'       },
+      { nome:'Pedro Alves',      media:937, cidade:'C.E. São Paulo'       },
+      { nome:'Mariana Lima',     media:920, cidade:'C.E. São Paulo'       },
+      { nome:'Thiago Santos',    media:910, cidade:'C.E. São Paulo'       },
+      { nome:'Carla Mendes',     media:905, cidade:'C.E. São Paulo'       },
+      { nome:'Juliana Costa',    media:895, cidade:'C.E. São Paulo'       },
+      { nome:'Rodrigo Lima',     media:886, cidade:'C.E. São Paulo'       },
+      { nome:'Ana Paula',        media:878, cidade:'C.E. São Paulo'       },
+      { nome:'Diego Carvalho',   media:870, cidade:'C.E. São Paulo'       },
+      { nome:'Fernanda Souza',   media:865, cidade:'C.E. São Paulo'       },
+      { nome:'Gabriel Nunes',    media:860, cidade:'C.E. São Paulo'       },
+      { nome:'Larissa Martins',  media:858, cidade:'C.E. São Paulo'       },
+      { nome:'Bruno Pereira',    media:855, cidade:'C.E. São Paulo'       },
+      { nome:'Isabela Torres',   media:852, cidade:'C.E. São Paulo'       },
+      { nome:'Victor Hugo',      media:851, cidade:'C.E. São Paulo'       },
+      { nome:'Amanda Barros',    media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Rodrigo Castro',   media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Carolina Dias',    media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Felipe Gomes',     media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Priscila Vieira',  media:850, cidade:'C.E. São Paulo'       },
+    ],
+    serie: [
+      { nome:'Carla Mendes',     media:920, cidade:'C.E. São Paulo'       },
+      { nome:'Juliana Costa',    media:895, cidade:'C.E. São Paulo'       },
+      { nome:'Thiago Santos',    media:878, cidade:'C.E. São Paulo'       },
+      { nome:'Ana Paula',        media:865, cidade:'C.E. São Paulo'       },
+      { nome:'Diego Carvalho',   media:858, cidade:'C.E. São Paulo'       },
+      { nome:'Fernanda Souza',   media:852, cidade:'C.E. São Paulo'       },
+      { nome:'Gabriel Nunes',    media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Larissa Martins',  media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Bruno Pereira',    media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Isabela Torres',   media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Victor Hugo',      media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Amanda Barros',    media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Rodrigo Castro',   media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Carolina Dias',    media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Felipe Gomes',     media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Priscila Vieira',  media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Victor Alves',     media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Amanda Cruz',      media:850, cidade:'C.E. São Paulo'       },
+      { nome:'Renata Farias',    media:851, cidade:'C.E. São Paulo'       },
+      { nome:'Caio Borges',      media:851, cidade:'C.E. São Paulo'       },
+    ],
+  },
+};
+
+// Vizinhos do usuário (simulando dados em escala real)
+const VIZINHOS = {
+  brasil:  { geral: [
+    { nome:'Nayara Borges',   media:851, cidade:'Campo Grande, MS' },
+    { nome:'Renato Figueiredo',media:851, cidade:'Natal, RN'       },
+    { nome:'Gustavo Lopes',   media:850, cidade:'Fortaleza, CE'    },
+    { nome:'Sabrina Neves',   media:850, cidade:'Recife, PE'       },
+    { nome:'Danilo Freitas',  media:849, cidade:'Salvador, BA'     },
+    { nome:'Tatiane Rocha',   media:849, cidade:'Manaus, AM'       },
+  ], serie: [
+    { nome:'Marcos Teixeira', media:858, cidade:'Natal, RN'        },
+    { nome:'Renata Vieira',   media:857, cidade:'Campo Grande, MS' },
+    { nome:'Carlos Mello',    media:856, cidade:'Belém, PA'        },
+    { nome:'Aline Brandão',   media:855, cidade:'Florianópolis, SC'},
+    { nome:'Diego Freitas',   media:854, cidade:'Maceió, AL'       },
+    { nome:'Luciana Pinto',   media:853, cidade:'Teresina, PI'     },
+  ]},
+  estado:  { geral: [
+    { nome:'Nayara Borges',   media:851, cidade:'Mogi das Cruzes, SP' },
+    { nome:'Renato Figueiredo',media:851, cidade:'Bauru, SP'       },
+    { nome:'Priscila Moraes', media:850, cidade:'Piracicaba, SP'   },
+    { nome:'Henrique Lima',   media:850, cidade:'São Paulo, SP'    },
+    { nome:'Tatiane Rocha',   media:850, cidade:'Campinas, SP'     },
+    { nome:'Gustavo Souza',   media:850, cidade:'Santos, SP'       },
+  ], serie: [
+    { nome:'Diego Correia',   media:851, cidade:'Ribeirão Preto, SP' },
+    { nome:'Priscila Mendes', media:851, cidade:'São Paulo, SP'    },
+    { nome:'Renata Farias',   media:851, cidade:'Campinas, SP'     },
+    { nome:'Caio Ribeiro',    media:850, cidade:'Sorocaba, SP'     },
+    { nome:'Valeria Silva',   media:850, cidade:'São José dos Campos, SP' },
+    { nome:'Danilo Santos',   media:849, cidade:'Guarulhos, SP'    },
+  ]},
+  cidade:  { geral: [
+    { nome:'Caio Borges',     media:852, cidade:'São Paulo, SP'    },
+    { nome:'Valeria Neves',   media:851, cidade:'São Paulo, SP'    },
+    { nome:'Renata Farias',   media:851, cidade:'São Paulo, SP'    },
+    { nome:'Amanda Cruz',     media:850, cidade:'São Paulo, SP'    },
+    { nome:'Victor Alves',    media:850, cidade:'São Paulo, SP'    },
+    { nome:'Marcos Lima',     media:849, cidade:'São Paulo, SP'    },
+  ], serie: [
+    { nome:'Caio Borges',     media:851, cidade:'São Paulo, SP'    },
+    { nome:'Valeria Neves',   media:851, cidade:'São Paulo, SP'    },
+    { nome:'Renata Farias',   media:851, cidade:'São Paulo, SP'    },
+    { nome:'Amanda Cruz',     media:850, cidade:'São Paulo, SP'    },
+    { nome:'Victor Alves',    media:850, cidade:'São Paulo, SP'    },
+    { nome:'Marcos Lima',     media:849, cidade:'São Paulo, SP'    },
+  ]},
+  escola:  { geral: [
+    { nome:'Victor Hugo',     media:851, cidade:'C.E. São Paulo'   },
+    { nome:'Amanda Barros',   media:850, cidade:'C.E. São Paulo'   },
+    { nome:'Rodrigo Castro',  media:850, cidade:'C.E. São Paulo'   },
+    { nome:'Carolina Dias',   media:850, cidade:'C.E. São Paulo'   },
+    { nome:'Felipe Gomes',    media:850, cidade:'C.E. São Paulo'   },
+    { nome:'Priscila Vieira', media:850, cidade:'C.E. São Paulo'   },
+  ], serie: [
+    { nome:'Victor Hugo',     media:851, cidade:'C.E. São Paulo'   },
+    { nome:'Amanda Barros',   media:850, cidade:'C.E. São Paulo'   },
+    { nome:'Rodrigo Castro',  media:850, cidade:'C.E. São Paulo'   },
+    { nome:'Carolina Dias',   media:850, cidade:'C.E. São Paulo'   },
+    { nome:'Felipe Gomes',    media:850, cidade:'C.E. São Paulo'   },
+    { nome:'Priscila Vieira', media:850, cidade:'C.E. São Paulo'   },
+  ]},
+};
+
+// ═══════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════
+let filtroAtual = 'brasil';
+let subFiltroAtual = 'geral';
+
+// ═══════════════════════════════════════════════
+// FUNÇÕES
+// ═══════════════════════════════════════════════
+window.setFiltro = function(f) {
+  filtroAtual = f;
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
+  document.getElementById('btn-' + f).classList.add('ativo');
+  renderRanking();
+};
+
+window.setSubFiltro = function(s) {
+  subFiltroAtual = s;
+  document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('ativo'));
+  document.getElementById('sub-' + s).classList.add('ativo');
+  renderRanking();
+};
+
+// Formata número com ponto: 42843 → 42.843
+function formatPos(n) { return n.toLocaleString('pt-BR'); }
+
+// Totais simulados por contexto
+const TOTAIS = { brasil: 1284736, estado: 94521, cidade: 12847, escola: 312 };
+
+function renderRanking() {
+  const lista = document.getElementById('listaRanking');
+  lista.innerHTML = '';
+
+  const top20 = TOP20[filtroAtual]?.[subFiltroAtual] || [];
+  const vizinhos = VIZINHOS[filtroAtual]?.[subFiltroAtual] || [];
+  const minhaPosObj = MINHA_POSICAO[filtroAtual];
+  const minhaPos = subFiltroAtual === 'geral' ? minhaPosObj.geral : minhaPosObj.serie;
+  const total = TOTAIS[filtroAtual];
+
+  // Atualizar badges do card lateral
+  document.getElementById('rankGeral').textContent = '#' + formatPos(MINHA_POSICAO[filtroAtual].geral);
+  document.getElementById('rankSerie').textContent = '#' + formatPos(MINHA_POSICAO[filtroAtual].serie);
+
+  // Subtitle com total de usuários
+  document.querySelector('.p-8.border-b p.text-xs').textContent =
+    `${formatPos(total)} estudantes em nível ${filtroAtual === 'brasil' ? 'nacional' : filtroAtual}`;
+
+  // ── TOP 20 ──
+  top20.forEach((item, i) => renderRow(lista, item, i + 1, false));
+
+  // ── SEPARADOR "· · ·" ──
+  const entre = minhaPos - 20;
+  if (entre > 1) {
+    const sep = document.createElement('div');
+    sep.className = 'flex flex-col items-center py-5 gap-1';
+    sep.innerHTML = `
+      <div class="flex gap-1.5">
+        <span style="width:4px;height:4px;background:#474554;border-radius:50%;display:inline-block"></span>
+        <span style="width:4px;height:4px;background:#474554;border-radius:50%;display:inline-block"></span>
+        <span style="width:4px;height:4px;background:#474554;border-radius:50%;display:inline-block"></span>
+      </div>
+      <p class="text-[10px] text-on-surface-variant/50 font-medium">${formatPos(entre - 1)} estudantes entre você e o Top 20</p>`;
+    lista.appendChild(sep);
+  }
+
+  // ── VIZINHOS ACIMA ──
+  const acima = vizinhos.slice(0, 2);
+  acima.forEach((item, i) => renderRow(lista, item, minhaPos - 2 + i, false));
+
+  // ── LINHA DO USUÁRIO ──
+  renderRow(lista, {
+    nome: 'Alan Oliveira (Você)',
+    media: 850,
+    cidade: 'São Paulo, SP',
+    eu: true,
+    img: EU_IMG
+  }, minhaPos, true);
+
+  // ── VIZINHOS ABAIXO ──
+  const abaixo = vizinhos.slice(2, 4);
+  abaixo.forEach((item, i) => renderRow(lista, item, minhaPos + 1 + i, false));
+}
+
+function renderRow(lista, item, pos, isEu) {
+  const row = document.createElement('div');
+  row.className = `grid items-center px-8 py-4 transition-all row-anim ${isEu ? 'row-eu' : 'hover:bg-white/[0.03]'}`;
+  row.style.gridTemplateColumns = '130px 1fr 120px';
+
+  // Posição
+  let posHTML = '';
+  if (pos === 1) posHTML = `<div class="flex items-center gap-2"><span class="material-symbols-outlined medal-1 text-xl" style="font-variation-settings:'FILL' 1;">military_tech</span><span class="font-black text-[#FFD700] text-lg">#1</span></div>`;
+  else if (pos === 2) posHTML = `<div class="flex items-center gap-2"><span class="material-symbols-outlined medal-2 text-xl" style="font-variation-settings:'FILL' 1;">military_tech</span><span class="font-black text-[#C0C0C0] text-lg">#2</span></div>`;
+  else if (pos === 3) posHTML = `<div class="flex items-center gap-2"><span class="material-symbols-outlined medal-3 text-xl" style="font-variation-settings:'FILL' 1;">military_tech</span><span class="font-black text-[#CD7F32] text-lg">#3</span></div>`;
+  else posHTML = `<span class="font-black ${isEu ? 'text-[#c6bfff]' : 'text-on-surface-variant'} text-base">#${formatPos(pos)}</span>`;
+
+  // Avatar
+  const avatarHTML = isEu
+    ? `<div class="w-8 h-8 rounded-full border border-[#c6bfff] overflow-hidden shrink-0"><img class="w-full h-full object-cover rounded-full" src="${item.img}"/></div>`
+    : pos <= 3
+      ? `<div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style="background:${['rgba(255,215,0,0.15)','rgba(192,192,192,0.15)','rgba(205,127,50,0.15)'][pos-1]}"><span class="text-xs font-bold" style="color:${['#FFD700','#C0C0C0','#CD7F32'][pos-1]}">${item.nome.charAt(0)}</span></div>`
+      : `<div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><span class="text-xs text-on-surface-variant font-bold">${item.nome.charAt(0)}</span></div>`;
+
+  const notaCor = item.media >= 900 ? '#45edee' : item.media >= 800 ? '#c6bfff' : '#c8c4d7';
+
+  row.innerHTML = `
+    <div>${posHTML}</div>
+    <div class="flex items-center gap-3 min-w-0">
+      ${avatarHTML}
+      <div class="min-w-0">
+        <p class="font-bold text-white text-sm truncate">${item.nome}</p>
+        ${item.cidade ? `<p class="text-[10px] text-on-surface-variant truncate">${item.cidade}</p>` : ''}
+      </div>
+    </div>
+    <div class="text-right">
+      <span class="font-black text-base" style="color:${notaCor}">${item.media}</span>
+    </div>`;
+
+  if (!isEu) {
+    row.addEventListener('click', () => toast(`👤 ${item.nome} · Média: ${item.media}`));
+    row.style.cursor = 'pointer';
+  }
+
+  lista.appendChild(row);
+}
+
+// INIT
+renderRanking();
+</script>
+</body>
+</html>

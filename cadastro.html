@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Criar Conta</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary-container": "#6c5ce7", "on-primary": "#2900a0", "on-surface": "#e1e2eb",
+          "surface-container": "#1d2026", "tertiary": "#fabd00", "surface-container-lowest": "#0b0e14",
+          "surface-container-low": "#191c22", "background": "#10131a", "outline-variant": "#474554",
+          "on-surface-variant": "#c8c4d7", "primary": "#c6bfff", "outline": "#928ea0",
+          "error": "#ffb4ab", "surface-container-high": "#272a31", "secondary": "#45edee",
+          "surface": "#10131a",
+        },
+        fontFamily: { "body": ["Inter"] },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background-color: #0b0e14; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  /* Inputs */
+  .input-field {
+    width: 100%; background: #10131a; border: 1px solid rgba(71,69,84,0.4);
+    border-radius: .75rem; padding: .875rem 1rem; color: #e1e2eb;
+    font-size: .9rem; outline: none; box-sizing: border-box;
+    font-family: 'Inter', sans-serif; transition: border-color .2s;
+  }
+  .input-field:focus { border-color: #45edee; }
+  .input-field::placeholder { color: rgba(200,196,215,0.3); }
+  .label { display:block; font-size:.7rem; font-weight:700; color:#c8c4d7; text-transform:uppercase; letter-spacing:.08em; margin-bottom:.4rem; }
+
+  /* Cards de perfil */
+  .perfil-card { transition: all .25s; cursor: pointer; border: 2px solid rgba(71,69,84,0.3); }
+  .perfil-card:hover { border-color: rgba(69,237,238,0.4); transform: translateY(-2px); }
+  .perfil-card.selecionado { border-color: #45edee; background: rgba(69,237,238,0.05); box-shadow: 0 0 20px rgba(69,237,238,0.15); }
+  .perfil-card.selecionado .perfil-icon { color: #45edee; }
+
+  /* Steps */
+  .step { display: none; }
+  .step.ativo { display: block; }
+
+  /* Progress dots */
+  .prog-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(71,69,84,0.5); transition: all .3s; }
+  .prog-dot.ativo { background: #45edee; width: 24px; border-radius: 4px; }
+  .prog-dot.feito { background: #4ade80; }
+
+  /* Animação de entrada */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .fade-up { animation: fadeUp .4s ease forwards; }
+
+  /* Upload drop zone */
+  .drop-zone { border: 2px dashed rgba(71,69,84,0.4); border-radius: .75rem; padding: 1.5rem; text-align: center; transition: all .2s; cursor: pointer; }
+  .drop-zone:hover, .drop-zone.over { border-color: #6c5ce7; background: rgba(108,92,231,0.05); }
+
+  /* Senha strength */
+  .strength-bar { height: 3px; border-radius: 99px; transition: width .4s, background .4s; }
+
+  /* Shake */
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+  .shake { animation: shake .4s ease; }
+
+  /* Animação de sucesso */
+  @keyframes scaleIn { from{opacity:0;transform:scale(.5)} to{opacity:1;transform:scale(1)} }
+  .scale-in { animation: scaleIn .5s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+  /* Checkmark animado */
+  @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+  .check-path { stroke-dasharray: 50; stroke-dashoffset: 50; animation: drawCheck .6s .3s ease forwards; }
+
+  /* Glow button */
+  .btn-primary { background: linear-gradient(135deg, #6c5ce7, #45edee); color: #002020; font-weight: 800; border: none; border-radius: .875rem; padding: 1rem; font-size: .95rem; cursor: pointer; width: 100%; transition: all .2s; letter-spacing: .03em; }
+  .btn-primary:hover { opacity: .92; transform: scale(1.01); }
+  .btn-primary:active { transform: scale(.98); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  .btn-secondary { background: rgba(255,255,255,0.05); color: #c8c4d7; font-weight: 600; border: 1px solid rgba(71,69,84,0.4); border-radius: .875rem; padding: 1rem; font-size: .9rem; cursor: pointer; width: 100%; transition: all .2s; }
+  .btn-secondary:hover { background: rgba(255,255,255,0.08); border-color: rgba(71,69,84,0.7); }
+
+  /* Password eye */
+  .eye-btn { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #928ea0; cursor: pointer; padding: 0; }
+  .eye-btn:hover { color: #c8c4d7; }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden">
+
+<!-- Background -->
+<div class="fixed inset-0 pointer-events-none -z-10">
+  <div class="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-primary-container/8 rounded-full blur-[140px]"></div>
+  <div class="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-secondary/6 rounded-full blur-[120px]"></div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary-container/4 rounded-full blur-[100px]"></div>
+</div>
+
+<!-- CARD PRINCIPAL -->
+<div class="w-full max-w-[480px] relative" id="mainCard">
+
+  <!-- Logo -->
+  <div class="text-center mb-8">
+    <a href="login.html" class="inline-flex items-baseline italic gap-0 mb-2">
+      <span class="text-4xl font-black text-white tracking-tighter">Reda</span>
+      <span class="text-4xl font-black tracking-tighter" style="color:#45edee">ON</span>
+    </a>
+    <p class="text-on-surface-variant text-sm">Sua jornada rumo à nota 1.000 começa aqui</p>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="flex items-center justify-center gap-2 mb-8" id="progressDots">
+    <div class="prog-dot ativo" id="dot0"></div>
+    <div class="prog-dot" id="dot1"></div>
+    <div class="prog-dot" id="dot2"></div>
+    <div class="prog-dot" id="dot3"></div>
+  </div>
+
+  <!-- CONTAINER DE STEPS -->
+  <div style="background:rgba(25,28,34,0.85);backdrop-filter:blur(20px);border:1px solid rgba(71,69,84,0.25);border-radius:1.5rem;padding:2rem;box-shadow:0 32px 64px rgba(0,0,0,0.4);">
+
+    <!-- ══ STEP 0: ESCOLHA DO PERFIL ══ -->
+    <div class="step ativo fade-up" id="step0">
+      <h2 class="text-2xl font-black text-white mb-1">Criar conta</h2>
+      <p class="text-on-surface-variant text-sm mb-8">Você é estudante ou professor?</p>
+
+      <div class="grid grid-cols-2 gap-4 mb-8">
+        <!-- Aluno -->
+        <div class="perfil-card rounded-2xl p-5 flex flex-col items-center gap-3" id="cardAluno" onclick="selecionarPerfil('aluno')">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background:rgba(108,92,231,0.15)">
+            <span class="material-symbols-outlined text-3xl perfil-icon text-on-surface-variant" style="font-variation-settings:'FILL' 1;">school</span>
+          </div>
+          <div class="text-center">
+            <p class="font-bold text-white text-sm mb-1">Sou Aluno</p>
+            <p class="text-[10px] text-on-surface-variant leading-relaxed">Quero melhorar minha redação e alcançar nota 1.000</p>
+          </div>
+          <div class="w-5 h-5 rounded-full border-2 border-outline-variant/40 flex items-center justify-center" id="radioAluno">
+            <div class="w-2.5 h-2.5 rounded-full bg-secondary hidden" id="radioAlunoInner"></div>
+          </div>
+        </div>
+
+        <!-- Professor -->
+        <div class="perfil-card rounded-2xl p-5 flex flex-col items-center gap-3" id="cardProfessor" onclick="selecionarPerfil('professor')">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background:rgba(69,237,238,0.1)">
+            <span class="material-symbols-outlined text-3xl perfil-icon text-on-surface-variant" style="font-variation-settings:'FILL' 1;">assignment_ind</span>
+          </div>
+          <div class="text-center">
+            <p class="font-bold text-white text-sm mb-1">Sou Professor</p>
+            <p class="text-[10px] text-on-surface-variant leading-relaxed">Quero gerenciar turmas e acompanhar meus alunos</p>
+          </div>
+          <div class="w-5 h-5 rounded-full border-2 border-outline-variant/40 flex items-center justify-center" id="radioProfessor">
+            <div class="w-2.5 h-2.5 rounded-full bg-secondary hidden" id="radioProfessorInner"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="avancarStep0()" id="btnStep0" disabled>
+        Continuar
+      </button>
+      <p class="text-center text-xs text-on-surface-variant mt-4">
+        Já tem conta? <a href="login.html" class="text-secondary font-bold hover:underline">Entrar</a>
+      </p>
+    </div>
+
+    <!-- ══ STEP 1: DADOS PESSOAIS (ALUNO + PROFESSOR) ══ -->
+    <div class="step fade-up" id="step1">
+      <button onclick="voltarStep(0)" class="flex items-center gap-1 text-on-surface-variant text-xs mb-6 hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Voltar
+      </button>
+      <h2 class="text-2xl font-black text-white mb-1">Seus dados</h2>
+      <p class="text-on-surface-variant text-sm mb-6" id="step1Subtitulo">Vamos começar com o básico</p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="label">Nome Completo</label>
+          <input id="s1Nome" class="input-field" type="text" placeholder="Seu nome completo" oninput="validarStep1()"/>
+        </div>
+        <div>
+          <label class="label">E-mail</label>
+          <input id="s1Email" class="input-field" type="email" placeholder="seu@email.com" oninput="validarStep1()"/>
+        </div>
+        <div id="campoSerie">
+          <label class="label">Série / Ano</label>
+          <select id="s1Serie" class="input-field" onchange="validarStep1()">
+            <option value="">Selecione sua série</option>
+            <option>1º Ano do Ensino Médio</option>
+            <option>2º Ano do Ensino Médio</option>
+            <option>3º Ano do Ensino Médio</option>
+            <option>Cursinho Pré-Vestibular</option>
+            <option>Treineiro (Ensino Fundamental)</option>
+          </select>
+        </div>
+        <div id="campoInstituicao" class="hidden">
+          <label class="label">Escola / Cursinho</label>
+          <input id="s1Instituicao" class="input-field" type="text" placeholder="Nome da instituição de ensino" oninput="validarStep1()"/>
+        </div>
+        <div id="campoDisciplina" class="hidden">
+          <label class="label">Disciplina Principal</label>
+          <select id="s1Disciplina" class="input-field" onchange="validarStep1()">
+            <option value="">Selecione</option>
+            <option>Língua Portuguesa / Redação</option>
+            <option>Outro (com foco em redação)</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-primary mt-6" onclick="avancarStep1()" id="btnStep1" disabled>
+        Continuar
+      </button>
+    </div>
+
+    <!-- ══ STEP 2A: SENHA (ALUNO) ══ -->
+    <div class="step fade-up" id="step2aluno">
+      <button onclick="voltarStep(1)" class="flex items-center gap-1 text-on-surface-variant text-xs mb-6 hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Voltar
+      </button>
+      <h2 class="text-2xl font-black text-white mb-1">Crie sua senha</h2>
+      <p class="text-on-surface-variant text-sm mb-6">Mínimo 8 caracteres, use letras e números</p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="label">Senha</label>
+          <div class="relative">
+            <input id="s2Senha" class="input-field pr-12" type="password" placeholder="••••••••" oninput="checkSenha()"/>
+            <button class="eye-btn" type="button" onclick="toggleSenha('s2Senha', this)">
+              <span class="material-symbols-outlined text-xl">visibility</span>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          <div class="flex gap-1 mt-2">
+            <div class="strength-bar flex-1 bg-surface-container-high" id="sb1"></div>
+            <div class="strength-bar flex-1 bg-surface-container-high" id="sb2"></div>
+            <div class="strength-bar flex-1 bg-surface-container-high" id="sb3"></div>
+            <div class="strength-bar flex-1 bg-surface-container-high" id="sb4"></div>
+          </div>
+          <p class="text-[10px] text-on-surface-variant mt-1" id="strengthLabel"></p>
+        </div>
+        <div>
+          <label class="label">Confirmar Senha</label>
+          <div class="relative">
+            <input id="s2SenhaConfirm" class="input-field pr-12" type="password" placeholder="••••••••" oninput="checkSenhaConfirm()"/>
+            <button class="eye-btn" type="button" onclick="toggleSenha('s2SenhaConfirm', this)">
+              <span class="material-symbols-outlined text-xl">visibility</span>
+            </button>
+          </div>
+          <p class="text-[10px] text-error mt-1 hidden" id="senhaMatchErro">As senhas não coincidem</p>
+        </div>
+        <!-- Termos -->
+        <label class="flex items-start gap-3 cursor-pointer group">
+          <input type="checkbox" id="checkTermos" class="mt-1 accent-[#45edee]" onchange="validarStep2Aluno()"/>
+          <span class="text-xs text-on-surface-variant leading-relaxed">
+            Li e aceito os <a href="#" class="text-secondary font-bold hover:underline">Termos de Uso</a> e a <a href="#" class="text-secondary font-bold hover:underline">Política de Privacidade</a> da RedaON.
+          </span>
+        </label>
+      </div>
+
+      <button class="btn-primary mt-6" onclick="criarContaAluno()" id="btnStep2Aluno" disabled>
+        Criar Minha Conta
+      </button>
+    </div>
+
+    <!-- ══ STEP 2B: VERIFICAÇÃO PROFESSOR ══ -->
+    <div class="step fade-up" id="step2professor">
+      <button onclick="voltarStep(1)" class="flex items-center gap-1 text-on-surface-variant text-xs mb-6 hover:text-white transition-colors">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> Voltar
+      </button>
+      <h2 class="text-2xl font-black text-white mb-1">Verificação de identidade</h2>
+      <p class="text-on-surface-variant text-sm mb-2">Para garantir a segurança dos alunos, precisamos confirmar que você é professor.</p>
+
+      <!-- Info box -->
+      <div class="flex gap-3 p-3 rounded-xl mb-6" style="background:rgba(250,189,0,0.08);border:1px solid rgba(250,189,0,0.2)">
+        <span class="material-symbols-outlined text-tertiary text-lg shrink-0 mt-0.5" style="font-variation-settings:'FILL' 1;">info</span>
+        <p class="text-xs text-tertiary leading-relaxed">Análise realizada em <strong>até 48 horas</strong> pela equipe RedaON. Você receberá um e-mail quando sua conta for aprovada.</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Doc identidade -->
+        <div>
+          <label class="label">Documento com Foto (RG, CNH ou RNE)</label>
+          <div class="drop-zone" id="dropDoc" onclick="document.getElementById('inputDoc').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="handleDrop(event,'doc')">
+            <span class="material-symbols-outlined text-3xl text-primary-container/60 mb-2 block">badge</span>
+            <p class="text-sm text-on-surface-variant">Arraste ou clique para enviar</p>
+            <p class="text-xs text-outline mt-1">PDF, JPG ou PNG — máx. 5MB</p>
+            <p class="text-xs text-secondary mt-2 font-bold hidden" id="nomeDoc"></p>
+          </div>
+          <input type="file" id="inputDoc" class="hidden" accept=".pdf,.jpg,.jpeg,.png" onchange="mostrarArquivo(this,'doc')"/>
+        </div>
+
+        <!-- Comprovante vínculo -->
+        <div>
+          <label class="label">Comprovante de Vínculo Escolar</label>
+          <p class="text-[10px] text-on-surface-variant mb-2">Contracheque, declaração da escola ou crachá funcional</p>
+          <div class="drop-zone" id="dropVinculo" onclick="document.getElementById('inputVinculo').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="handleDrop(event,'vinculo')">
+            <span class="material-symbols-outlined text-3xl text-primary-container/60 mb-2 block">work</span>
+            <p class="text-sm text-on-surface-variant">Arraste ou clique para enviar</p>
+            <p class="text-xs text-outline mt-1">PDF, JPG ou PNG — máx. 5MB</p>
+            <p class="text-xs text-secondary mt-2 font-bold hidden" id="nomeVinculo"></p>
+          </div>
+          <input type="file" id="inputVinculo" class="hidden" accept=".pdf,.jpg,.jpeg,.png" onchange="mostrarArquivo(this,'vinculo')"/>
+        </div>
+
+        <!-- Senha -->
+        <div>
+          <label class="label">Criar Senha</label>
+          <div class="relative">
+            <input id="s2pSenha" class="input-field pr-12" type="password" placeholder="••••••••" oninput="validarStep2Prof()"/>
+            <button class="eye-btn" type="button" onclick="toggleSenha('s2pSenha', this)">
+              <span class="material-symbols-outlined text-xl">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Termos -->
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="checkTermosProf" class="mt-1 accent-[#45edee]" onchange="validarStep2Prof()"/>
+          <span class="text-xs text-on-surface-variant leading-relaxed">
+            Li e aceito os <a href="#" class="text-secondary font-bold hover:underline">Termos de Uso</a> e a <a href="#" class="text-secondary font-bold hover:underline">Política de Privacidade</a>.
+          </span>
+        </label>
+      </div>
+
+      <button class="btn-primary mt-6" onclick="enviarVerificacaoProfessor()" id="btnStep2Prof" disabled>
+        Enviar para Verificação
+      </button>
+    </div>
+
+    <!-- ══ STEP 3A: SUCESSO ALUNO ══ -->
+    <div class="step fade-up" id="step3aluno">
+      <div class="text-center py-4">
+        <!-- Check animado -->
+        <div class="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center scale-in" style="background:rgba(74,222,128,0.15);border:2px solid rgba(74,222,128,0.3)">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path class="check-path" d="M12 24 L21 33 L36 15" stroke="#4ade80" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-black text-white mb-2">Conta criada!</h2>
+        <p class="text-on-surface-variant text-sm leading-relaxed mb-2">Bem-vindo(a) à RedaON,<br/><strong class="text-white" id="nomeSuccessAluno"></strong>!</p>
+        <p class="text-xs text-on-surface-variant mb-8">Sua jornada rumo à nota 1.000 começa agora. 🚀</p>
+
+        <!-- Preview do plano -->
+        <div class="p-4 rounded-xl text-left mb-8" style="background:rgba(108,92,231,0.1);border:1px solid rgba(108,92,231,0.2)">
+          <p class="text-xs font-bold text-primary mb-3 uppercase tracking-widest">Plano Gratuito ativo</p>
+          <div class="space-y-2 text-xs text-on-surface-variant">
+            <p class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-secondary" style="font-variation-settings:'FILL' 1;">check_circle</span> 3 correções por mês</p>
+            <p class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-secondary" style="font-variation-settings:'FILL' 1;">check_circle</span> Temas públicos da biblioteca</p>
+            <p class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-secondary" style="font-variation-settings:'FILL' 1;">check_circle</span> Evolução e Ranking</p>
+            <p class="flex items-center gap-2 opacity-40"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">lock</span> Elite da PROfa Blanche (Pro)</p>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="window.location.href='inicio.html'">
+          Começar agora →
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3B: AGUARDANDO VERIFICAÇÃO PROFESSOR ══ -->
+    <div class="step fade-up" id="step3professor">
+      <div class="text-center py-4">
+        <!-- Ícone relógio animado -->
+        <div class="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center scale-in" style="background:rgba(250,189,0,0.1);border:2px solid rgba(250,189,0,0.3)">
+          <span class="material-symbols-outlined text-5xl text-tertiary" style="font-variation-settings:'FILL' 1;">schedule</span>
+        </div>
+        <h2 class="text-2xl font-black text-white mb-2">Documentos enviados!</h2>
+        <p class="text-on-surface-variant text-sm leading-relaxed mb-1">
+          Recebemos sua solicitação,<br/><strong class="text-white" id="nomeSuccessProf"></strong>.
+        </p>
+        <p class="text-xs text-on-surface-variant mb-8 leading-relaxed">
+          Nossa equipe irá analisar seus documentos em <strong class="text-tertiary">até 48 horas</strong>.<br/>
+          Você receberá um e-mail em <strong class="text-white" id="emailSuccessProf"></strong> com o resultado.
+        </p>
+
+        <!-- Timeline do processo -->
+        <div class="text-left space-y-3 mb-8">
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style="background:rgba(74,222,128,0.2);border:1px solid rgba(74,222,128,0.4)">
+              <span class="material-symbols-outlined text-sm text-[#4ade80]" style="font-variation-settings:'FILL' 1;">check_circle</span>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-white">Documentos enviados</p>
+              <p class="text-[10px] text-on-surface-variant">Agora mesmo</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style="background:rgba(250,189,0,0.1);border:1px solid rgba(250,189,0,0.3)">
+              <span class="material-symbols-outlined text-sm text-tertiary" style="font-variation-settings:'FILL' 1;">manage_search</span>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-white">Análise pela equipe RedaON</p>
+              <p class="text-[10px] text-on-surface-variant">Em até 48 horas</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 opacity-40">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style="background:rgba(108,92,231,0.1);border:1px solid rgba(108,92,231,0.2)">
+              <span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings:'FILL' 1;">verified</span>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-white">Portal do Professor liberado</p>
+              <p class="text-[10px] text-on-surface-variant">Após aprovação</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acesso limitado enquanto aguarda -->
+        <div class="p-4 rounded-xl text-left mb-6" style="background:rgba(108,92,231,0.08);border:1px solid rgba(108,92,231,0.15)">
+          <p class="text-xs font-bold text-primary mb-2 uppercase tracking-widest">Enquanto aguarda</p>
+          <p class="text-xs text-on-surface-variant leading-relaxed">Você pode acessar a plataforma como aluno para explorar as funcionalidades. O Portal do Professor será liberado após a verificação.</p>
+        </div>
+
+        <button class="btn-primary mb-3" onclick="window.location.href='inicio.html'">
+          Explorar como aluno →
+        </button>
+        <button class="btn-secondary" onclick="window.location.href='login.html'">
+          Voltar ao login
+        </button>
+      </div>
+    </div>
+
+  </div><!-- fim card -->
+
+  <!-- Link login -->
+  <p class="text-center text-xs text-on-surface-variant mt-6" id="linkLoginBottom">
+    Já tem conta? <a href="login.html" class="text-secondary font-bold hover:underline">Entrar na RedaON</a>
+  </p>
+
+</div><!-- fim mainCard -->
+
+<script>
+// ═══════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════
+let perfil = null; // 'aluno' | 'professor'
+let stepAtual = 0;
+let docEnviado = false;
+let vinculoEnviado = false;
+
+// ═══════════════════════════════════
+// NAVEGAÇÃO DE STEPS
+// ═══════════════════════════════════
+function mostrarStep(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('ativo'));
+  const el = document.getElementById(id);
+  el.classList.add('ativo');
+  el.classList.remove('fade-up');
+  void el.offsetWidth;
+  el.classList.add('fade-up');
+}
+
+function atualizarDots(step) {
+  for (let i = 0; i <= 3; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.classList.remove('ativo','feito');
+    if (i < step) dot.classList.add('feito');
+    else if (i === step) dot.classList.add('ativo');
+  }
+}
+
+function voltarStep(para) {
+  stepAtual = para;
+  atualizarDots(para);
+  if (para === 0) mostrarStep('step0');
+  else if (para === 1) mostrarStep('step1');
+}
+
+// ═══════════════════════════════════
+// STEP 0: SELEÇÃO DE PERFIL
+// ═══════════════════════════════════
+function selecionarPerfil(tipo) {
+  perfil = tipo;
+
+  // Resetar cards
+  ['cardAluno','cardProfessor'].forEach(id => {
+    document.getElementById(id).classList.remove('selecionado');
+  });
+  ['radioAlunoInner','radioProfessorInner'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+
+  // Selecionar
+  document.getElementById('card' + (tipo === 'aluno' ? 'Aluno' : 'Professor')).classList.add('selecionado');
+  document.getElementById('radio' + (tipo === 'aluno' ? 'Aluno' : 'Professor') + 'Inner').classList.remove('hidden');
+
+  document.getElementById('btnStep0').disabled = false;
+}
+
+function avancarStep0() {
+  if (!perfil) return;
+  stepAtual = 1;
+  atualizarDots(1);
+
+  // Configurar step1 conforme perfil
+  if (perfil === 'aluno') {
+    document.getElementById('step1Subtitulo').textContent = 'Vamos começar com o básico';
+    document.getElementById('campoSerie').classList.remove('hidden');
+    document.getElementById('campoInstituicao').classList.add('hidden');
+    document.getElementById('campoDisciplina').classList.add('hidden');
+  } else {
+    document.getElementById('step1Subtitulo').textContent = 'Dados profissionais';
+    document.getElementById('campoSerie').classList.add('hidden');
+    document.getElementById('campoInstituicao').classList.remove('hidden');
+    document.getElementById('campoDisciplina').classList.remove('hidden');
+  }
+
+  mostrarStep('step1');
+}
+
+// ═══════════════════════════════════
+// STEP 1: DADOS PESSOAIS
+// ═══════════════════════════════════
+function validarStep1() {
+  const nome = document.getElementById('s1Nome').value.trim();
+  const email = document.getElementById('s1Email').value.trim();
+  let campoExtra = false;
+
+  if (perfil === 'aluno') {
+    campoExtra = document.getElementById('s1Serie').value !== '';
+  } else {
+    campoExtra = document.getElementById('s1Instituicao').value.trim().length > 2
+      && document.getElementById('s1Disciplina').value !== '';
+  }
+
+  document.getElementById('btnStep1').disabled = !(nome.length > 2 && email.includes('@') && campoExtra);
+}
+
+function avancarStep1() {
+  stepAtual = 2;
+  atualizarDots(2);
+  if (perfil === 'aluno') mostrarStep('step2aluno');
+  else mostrarStep('step2professor');
+}
+
+// ═══════════════════════════════════
+// STEP 2A: SENHA ALUNO
+// ═══════════════════════════════════
+function checkSenha() {
+  const senha = document.getElementById('s2Senha').value;
+  const bars = ['sb1','sb2','sb3','sb4'];
+  const cores = ['#ffb4ab','#fabd00','#4ade80','#45edee'];
+  const labels = ['','Fraca','Razoável','Boa','Forte'];
+
+  let forca = 0;
+  if (senha.length >= 8) forca++;
+  if (/[A-Z]/.test(senha)) forca++;
+  if (/[0-9]/.test(senha)) forca++;
+  if (/[^A-Za-z0-9]/.test(senha)) forca++;
+
+  bars.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.style.background = i < forca ? cores[forca - 1] : '#272a31';
+  });
+
+  document.getElementById('strengthLabel').textContent = labels[forca] ? `Senha ${labels[forca]}` : '';
+  validarStep2Aluno();
+}
+
+function checkSenhaConfirm() {
+  const s = document.getElementById('s2Senha').value;
+  const c = document.getElementById('s2SenhaConfirm').value;
+  const erroEl = document.getElementById('senhaMatchErro');
+  if (c && s !== c) erroEl.classList.remove('hidden');
+  else erroEl.classList.add('hidden');
+  validarStep2Aluno();
+}
+
+function validarStep2Aluno() {
+  const senha = document.getElementById('s2Senha').value;
+  const confirm = document.getElementById('s2SenhaConfirm').value;
+  const termos = document.getElementById('checkTermos').checked;
+  document.getElementById('btnStep2Aluno').disabled = !(senha.length >= 8 && senha === confirm && termos);
+}
+
+function criarContaAluno() {
+  stepAtual = 3;
+  atualizarDots(3);
+  const nome = document.getElementById('s1Nome').value.trim().split(' ')[0];
+  document.getElementById('nomeSuccessAluno').textContent = nome;
+  document.getElementById('linkLoginBottom').classList.add('hidden');
+  mostrarStep('step3aluno');
+}
+
+// ═══════════════════════════════════
+// STEP 2B: VERIFICAÇÃO PROFESSOR
+// ═══════════════════════════════════
+function handleDrop(e, tipo) {
+  e.preventDefault();
+  document.getElementById('drop' + (tipo === 'doc' ? 'Doc' : 'Vinculo')).classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if (file) processarArquivo(file, tipo);
+}
+
+function mostrarArquivo(input, tipo) {
+  if (input.files[0]) processarArquivo(input.files[0], tipo);
+}
+
+function processarArquivo(file, tipo) {
+  const el = document.getElementById('nome' + (tipo === 'doc' ? 'Doc' : 'Vinculo'));
+  el.textContent = '✓ ' + file.name;
+  el.classList.remove('hidden');
+  if (tipo === 'doc') docEnviado = true;
+  else vinculoEnviado = true;
+  validarStep2Prof();
+}
+
+function validarStep2Prof() {
+  const senha = document.getElementById('s2pSenha').value;
+  const termos = document.getElementById('checkTermosProf').checked;
+  document.getElementById('btnStep2Prof').disabled = !(docEnviado && vinculoEnviado && senha.length >= 8 && termos);
+}
+
+function enviarVerificacaoProfessor() {
+  stepAtual = 3;
+  atualizarDots(3);
+  const nome = document.getElementById('s1Nome').value.trim().split(' ')[0];
+  const email = document.getElementById('s1Email').value.trim();
+  document.getElementById('nomeSuccessProf').textContent = nome;
+  document.getElementById('emailSuccessProf').textContent = email;
+  document.getElementById('linkLoginBottom').classList.add('hidden');
+  mostrarStep('step3professor');
+}
+
+// ═══════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════
+function toggleSenha(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const icon = btn.querySelector('.material-symbols-outlined');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.textContent = 'visibility_off';
+  } else {
+    input.type = 'password';
+    icon.textContent = 'visibility';
+  }
+}
+</script>
+</body>
+</html>

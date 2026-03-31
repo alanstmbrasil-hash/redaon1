@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Minhas Redações</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "on-primary-fixed": "#160066", "on-error-container": "#ffdad6", "on-secondary": "#003737",
+          "inverse-on-surface": "#2e3037", "secondary-fixed": "#56f9f9", "surface-container": "#1d2026",
+          "tertiary-container": "#906c00", "tertiary": "#fabd00", "surface-container-lowest": "#0b0e14",
+          "surface-container-low": "#191c22", "background": "#10131a", "primary-fixed-dim": "#c6bfff",
+          "outline-variant": "#474554", "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
+          "on-primary": "#2900a0", "on-primary-container": "#faf6ff", "inverse-surface": "#e1e2eb",
+          "on-error": "#690005", "on-surface": "#e1e2eb", "secondary-fixed-dim": "#26dcdd",
+          "surface-container-highest": "#32353c", "primary": "#c6bfff", "outline": "#928ea0",
+          "on-background": "#e1e2eb", "surface-bright": "#363940", "error-container": "#93000a",
+          "surface-dim": "#10131a", "surface-variant": "#32353c", "error": "#ffb4ab",
+          "surface-container-high": "#272a31", "primary-fixed": "#e4dfff", "on-tertiary-container": "#fff6ec",
+          "secondary": "#45edee", "on-tertiary": "#3f2e00", "secondary-container": "#00d0d1",
+          "tertiary-fixed": "#ffdf9e", "surface": "#10131a", "inverse-primary": "#5847d2"
+        },
+        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      },
+    },
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; background-color: #10131a; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  #sidebar-toggle:checked ~ aside { transform: translateX(0); }
+  #sidebar-toggle:checked ~ .content-overlay { display: block; }
+
+  /* Erros ortográficos destacados */
+  .erro-orto {
+    text-decoration: underline wavy #ef4444;
+    text-decoration-thickness: 2px;
+    cursor: help;
+    background: rgba(239,68,68,0.08);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+  .correcao-insert {
+    color: #4ade80;
+    font-weight: 600;
+    background: rgba(74,222,128,0.1);
+    border-radius: 2px;
+    padding: 0 2px;
+  }
+
+  /* Coluna Elite */
+  .col-elite { background: linear-gradient(180deg, rgba(108,92,231,0.05) 0%, transparent 100%); }
+  .col-elite-header { background: linear-gradient(135deg, rgba(108,92,231,0.15), rgba(69,237,238,0.08)); border-bottom: 1px solid rgba(108,92,231,0.2); }
+
+  /* Card selecionado */
+  .card-redacao.selecionado { border-color: rgba(69,237,238,0.4) !important; background: #1d2026 !important; box-shadow: 0 0 20px rgba(69,237,238,0.08); }
+
+  /* Loading spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 32px; height: 32px; border: 3px solid rgba(108,92,231,0.2); border-top-color: #6c5ce7; border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+  /* Toast */
+  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* Scroll horizontal das colunas */
+  #painelColunas { overflow-x: auto; }
+  #painelColunas::-webkit-scrollbar { height: 6px; }
+  #painelColunas::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
+
+  /* Tooltip "Por que nota 1000?" */
+  .tooltip-elite { display:none; position:absolute; bottom:120%; left:50%; transform:translateX(-50%); background:#1d2026; border:1px solid rgba(108,92,231,0.3); color:#c8c4d7; font-size:.75rem; padding:.75rem 1rem; border-radius:.75rem; width:260px; z-index:50; line-height:1.5; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+  .tooltip-trigger:hover .tooltip-elite { display:block; }
+
+  /* Competências no painel */
+  .comp-barra-bg { background: #32353c; border-radius: 99px; height: 4px; }
+  .comp-barra-fill { height: 4px; border-radius: 99px; transition: width .8s ease; }
+</style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-x-hidden">
+
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
+  <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
+</div>
+
+<div id="toast"></div>
+
+<input class="hidden peer" id="sidebar-toggle" type="checkbox"/>
+<label class="content-overlay fixed inset-0 bg-black/60 z-[45] hidden transition-opacity lg:hidden" for="sidebar-toggle"></label>
+
+<div class="flex h-screen overflow-hidden relative z-10">
+
+  <!-- SIDEBAR -->
+  <aside class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50 transition-transform duration-300 -translate-x-full lg:translate-x-0 shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)]">
+    <div class="flex items-center px-2 mb-10">
+      <div class="flex items-baseline italic">
+        <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
+        <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
+      </div>
+    </div>
+    <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="inicio.html"><span class="material-symbols-outlined">home</span><span class="font-medium text-sm">Início</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span><span class="font-medium text-sm">Nova Redação</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined">description</span><span class="font-medium text-sm">Temas</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="minhas-redacoes.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">edit_note</span><span class="font-medium text-sm">Minhas Redações</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span><span class="font-medium text-sm">Evolução</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html"><span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-outline-variant/10">
+      <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
+        <img alt="Alan Alves" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
+        <div class="flex flex-col"><span class="text-sm font-semibold text-on-surface">Alan Alves</span><span class="text-xs text-on-surface-variant">Estudante Premium</span></div>
+      </div>
+      <a onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
+        <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 flex flex-col h-full relative lg:ml-64 w-full">
+
+    <!-- TOP BAR -->
+    <header class="h-20 flex items-center justify-between px-6 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5 w-full">
+      <div class="flex items-center gap-4">
+        <label class="cursor-pointer p-2 rounded-full text-[#E1E2EB] hover:bg-white/10 lg:hidden" for="sidebar-toggle"><span class="material-symbols-outlined">menu</span></label>
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">edit_note</span>
+          <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Minhas Redações</h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 lg:gap-6">
+        <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
+          <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
+          <span class="text-xs font-bold text-on-surface">940 pts</span>
+        </div>
+        <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL: lista + espelho -->
+    <main class="flex-1 flex overflow-hidden">
+
+      <!-- COLUNA LISTA DE REDAÇÕES -->
+      <section class="w-[360px] shrink-0 border-r border-white/5 bg-surface-container-lowest/30 flex flex-col">
+        <!-- Header da lista -->
+        <div class="flex justify-between items-center px-6 py-4 border-b border-white/5">
+          <h3 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Recentes</h3>
+          <div class="flex gap-2">
+            <button class="p-1.5 text-on-surface-variant hover:text-[#45edee] transition-colors"><span class="material-symbols-outlined text-xl">filter_list</span></button>
+            <button class="p-1.5 text-on-surface-variant hover:text-[#45edee] transition-colors"><span class="material-symbols-outlined text-xl">search</span></button>
+          </div>
+        </div>
+        <!-- Lista scrollável -->
+        <div class="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-3" id="listaRedacoes"></div>
+        <!-- Botão nova redação -->
+        <div class="p-4 border-t border-white/5">
+          <button onclick="window.location.href='nova-redacao.html'" class="w-full py-3 rounded-xl bg-[#6c5ce7] text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95">
+            <span class="material-symbols-outlined text-lg">add_circle</span>
+            Escrever Nova Redação
+          </button>
+        </div>
+      </section>
+
+      <!-- PAINEL DIREITO -->
+      <section class="flex-1 flex flex-col overflow-hidden bg-[#0b0e14]" id="painelDireito">
+
+        <!-- Estado vazio -->
+        <div id="estadoVazio" class="flex-1 flex flex-col items-center justify-center p-12 text-center">
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#6c5ce7]/5 blur-[120px] rounded-full pointer-events-none"></div>
+          <div class="relative z-10 max-w-md">
+            <div class="w-24 h-24 bg-surface-container-low rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/5 rotate-3">
+              <span class="material-symbols-outlined text-5xl text-[#6c5ce7]" style="font-variation-settings:'FILL' 1;">auto_stories</span>
+            </div>
+            <h2 class="text-3xl font-black text-on-surface mb-4 tracking-tight">Selecione uma redação</h2>
+            <p class="text-on-surface-variant text-lg font-medium leading-relaxed mb-10">Clique em um dos seus textos ao lado para visualizar o espelho da correção e feedbacks detalhados.</p>
+            <button onclick="window.location.href='nova-redacao.html'" class="px-8 py-4 bg-[#6c5ce7] text-white font-bold rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2 mx-auto">
+              <span class="material-symbols-outlined">add_circle</span> Enviar Novo Texto
+            </button>
+          </div>
+        </div>
+
+        <!-- Estado carregando -->
+        <div id="estadoCarregando" class="hidden flex-1 flex flex-col items-center justify-center gap-4">
+          <div class="spinner"></div>
+          <p class="text-on-surface-variant text-sm" id="msgCarregando">Blanche está gerando o espelho de correção...</p>
+        </div>
+
+        <!-- Espelho de correção -->
+        <div id="espelhoCorracao" class="hidden flex-1 flex flex-col overflow-hidden">
+
+          <!-- Header do espelho -->
+          <div class="px-8 py-5 border-b border-white/5 flex items-start justify-between shrink-0 bg-[#0b0e14]">
+            <div>
+              <h3 id="tituloEspelho" class="text-lg font-bold text-white leading-tight mb-1"></h3>
+              <p id="metaEspelho" class="text-xs text-on-surface-variant"></p>
+            </div>
+            <div class="text-right shrink-0 ml-6">
+              <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Nota Final</p>
+              <p id="notaEspelho" class="text-4xl font-black text-[#45edee]"></p>
+            </div>
+          </div>
+
+          <!-- Barras de competência -->
+          <div id="barrasComp" class="px-8 py-3 border-b border-white/5 flex gap-6 shrink-0 bg-[#0b0e14]/80 flex-wrap">
+          </div>
+
+          <!-- 3 COLUNAS: Original | Correções | Elite da PROfa -->
+          <div id="painelColunas" class="flex-1 flex overflow-x-auto">
+
+            <!-- C1: Texto Original -->
+            <div class="min-w-[340px] flex-1 flex flex-col border-r border-white/5">
+              <div class="px-5 py-3 border-b border-white/5 bg-[#10131a] flex items-center gap-2 shrink-0">
+                <span class="material-symbols-outlined text-on-surface-variant text-sm">article</span>
+                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Texto Original</span>
+              </div>
+              <div id="colOriginal" class="flex-1 overflow-y-auto custom-scrollbar p-6 text-sm text-gray-700 leading-7 font-serif bg-[#fdfdfb]" style="font-family:'EB Garamond',serif;font-size:1rem;"></div>
+            </div>
+
+            <!-- C2: Correções -->
+            <div class="min-w-[340px] flex-1 flex flex-col border-r border-white/5">
+              <div class="px-5 py-3 border-b border-white/5 bg-[#10131a] flex items-center gap-2 shrink-0">
+                <span class="material-symbols-outlined text-[#ef4444] text-sm">error</span>
+                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Correções</span>
+                <span id="badgeErros" class="ml-auto px-2 py-0.5 bg-red-500/10 text-red-400 text-[10px] font-bold rounded-full border border-red-500/20"></span>
+              </div>
+              <div id="colCorrecoes" class="flex-1 overflow-y-auto custom-scrollbar p-6 text-sm leading-7 font-serif bg-[#fdfdfb]" style="font-family:'EB Garamond',serif;font-size:1rem;"></div>
+              <div class="px-5 py-3 border-t border-white/5 bg-[#10131a] shrink-0">
+                <button id="btnCorrecaoCompleta" onclick="verCorrecaoCompleta()" class="w-full py-2 rounded-lg border border-red-400/30 text-red-400 text-xs font-bold hover:bg-red-500/10 transition-all">
+                  Ver Correção Completa
+                </button>
+              </div>
+            </div>
+
+            <!-- C3: Elite da PROfa (Versão Nota 1000) -->
+            <div class="min-w-[380px] flex-1 flex flex-col col-elite">
+              <div class="px-5 py-3 col-elite-header flex items-center gap-2 shrink-0">
+                <span class="material-symbols-outlined text-[#45edee] text-sm" style="font-variation-settings:'FILL' 1;">psychology</span>
+                <span class="text-xs font-bold text-[#45edee] uppercase tracking-widest">Elite da PROfa — Nota 1000</span>
+              </div>
+              <div id="colElite" class="flex-1 overflow-y-auto custom-scrollbar p-6 text-sm leading-7 bg-[#fdfdfb]" style="font-family:'EB Garamond',serif;font-size:1rem;color:#1a1a2e;"></div>
+              <div class="px-5 py-3 border-t border-[#6c5ce7]/20 bg-[#0b0e14] shrink-0">
+                <div class="relative tooltip-trigger inline-block w-full">
+                  <button class="w-full py-2 rounded-lg border border-[#45edee]/30 text-[#45edee] text-xs font-bold hover:bg-[#45edee]/10 transition-all flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-sm">help</span>
+                    Por que esta versão é Nota 1000?
+                  </button>
+                  <div class="tooltip-elite" id="tooltipElite"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Modal correção completa -->
+        <div id="modalCorrecao" class="hidden fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
+          <div class="bg-[#1d2026] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
+            <div class="flex items-center justify-between p-6 border-b border-white/5">
+              <h3 class="font-bold text-white">Correção Completa da Blanche</h3>
+              <button onclick="fecharModal()" class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div id="correcaoCompletaTexto" class="flex-1 overflow-y-auto custom-scrollbar p-6 text-sm text-on-surface-variant leading-relaxed"></div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+</div>
+
+<script type="module">
+  import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
+  const API_KEY = "AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU";
+  const genAI = new GoogleGenerativeAI(API_KEY);
+
+  // ── TOAST ──────────────────────────────────────────
+  function toast(msg, dur = 3000) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
+  }
+
+  // ── BANCO DE REDAÇÕES (simulado + sessionStorage) ──
+  const REDACOES_DEMO = [
+    {
+      id: 1,
+      titulo: 'Os desafios da mobilidade urbana no Brasil do século XXI',
+      data: '12 Out 2023',
+      fonte: 'ENEM',
+      nota: 960,
+      status: 'corrigida',
+      texto: `A mobilidade urbana no Brasil do século XXI representa um dos maiores desafios para a gestão das cidades. Com o crescimento desordenado das metrópoles, o transporte público tornou-se precário, forçando a população a depender de veículos particulares. Essa situação gera congestionamentos, poluição atmosférica e exclusão social das camadas mais vulneráveis.
+
+Nesse contexto, é fundamental que o poder público invista em transporte coletivo eficiente e acessível. Políticas como a expansão do metrô, a criação de corredores de ônibus e a implantação de ciclovias são essenciais para transformar a realidade urbana. Alem disso, a educação para o transito consciente deve ser incentivada desde a escola.
+
+Portanto, enfrentar os desafios da mobilidade urbana exige um esforço conjunto do Estado, da sociedade e do setor privado, com planejamento integrado e investimentos sustentáveis que garantam o direito de ir e vir a todos os cidadãos brasileiros.`
+    },
+    {
+      id: 2,
+      titulo: 'A manipulação do comportamento do usuário pelo controle de dados',
+      data: '05 Out 2023',
+      fonte: 'ENEM',
+      nota: 920,
+      status: 'corrigida',
+      texto: `Na era digital, as grandes empresas de tecnologia acumularam um poder sem precedentes: o controle sobre os dados pessoais de bilhões de usuários. Através de algorítmos sofisticados, essas corporações são capazes de prever, influenciar e até manipular o comportamento humano, transformando pessoas em produtos rentáveis.
+
+Essa realidade levanta questões eticas fundamentais sobre privacidade e autonomia individual. Quando um usuário consente com os termos de uso de uma plataforma, raramente compreende a extensão com que seus dados serão explorados. A falta de literacia digital agrava esse problema, tornando a população vulneravel a manipulações politicas e comerciais.
+
+Assim, torna-se urgente a regulamentação rigorosa do uso de dados pessoais no Brasil, à semelhança da GDPR europeia, garantindo transparência, consentimento informado e o direito ao esquecimento digital, pilares de uma sociedade democrática e justa.`
+    }
+  ];
+
+  // Verificar se há redação recém-salva
+  const redacaoSalva = sessionStorage.getItem('redacao_titulo');
+  if (redacaoSalva) {
+    REDACOES_DEMO.unshift({
+      id: 0,
+      titulo: redacaoSalva,
+      data: new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'numeric'}),
+      fonte: 'ENEM',
+      nota: parseInt(sessionStorage.getItem('redacao_nota') || '0') || null,
+      status: sessionStorage.getItem('redacao_nota') ? 'corrigida' : 'pendente',
+      texto: sessionStorage.getItem('redacao_texto') || ''
+    });
+  }
+
+  // ── RENDERIZAR LISTA ───────────────────────────────
+  function renderLista() {
+    const lista = document.getElementById('listaRedacoes');
+    lista.innerHTML = '';
+    REDACOES_DEMO.forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'card-redacao group p-5 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-white/5 transition-all duration-300 cursor-pointer';
+      card.id = 'card-' + r.id;
+      card.innerHTML = `
+        <div class="flex justify-between items-start mb-3">
+          <span class="px-3 py-1 ${r.status === 'corrigida' ? 'bg-[#45edee]/10 text-[#45edee] border border-[#45edee]/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'} text-[10px] font-bold rounded-full uppercase">
+            ${r.status === 'corrigida' ? 'Corrigida' : 'Pendente'}
+          </span>
+          ${r.nota ? `<div class="text-right"><span class="text-2xl font-black text-[#45edee] block">${r.nota}</span><span class="text-[10px] block text-on-surface-variant uppercase font-bold tracking-tight">Nota Final</span></div>` : '<span class="text-xs text-on-surface-variant">Aguardando...</span>'}
+        </div>
+        <h4 class="text-on-surface font-semibold leading-snug mb-4 group-hover:text-white transition-colors text-sm">${r.titulo}</h4>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3 text-on-surface-variant text-[10px]">
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">calendar_month</span> ${r.data}</span>
+            <span class="flex items-center gap-1 uppercase font-bold"><span class="material-symbols-outlined text-xs">school</span> ${r.fonte}</span>
+          </div>
+          <button onclick="selecionarRedacao(${r.id})" class="px-4 py-1.5 bg-surface-container-highest text-white text-[10px] font-bold rounded-lg hover:bg-[#6c5ce7] transition-colors">
+            ${r.status === 'corrigida' ? 'Ver Detalhes' : 'Revisar'}
+          </button>
+        </div>`;
+      card.addEventListener('click', () => selecionarRedacao(r.id));
+      lista.appendChild(card);
+    });
+  }
+
+  // ── SELECIONAR REDAÇÃO ─────────────────────────────
+  window.selecionarRedacao = async function(id) {
+    const redacao = REDACOES_DEMO.find(r => r.id === id);
+    if (!redacao || !redacao.texto) { toast('Redação sem conteúdo disponível.'); return; }
+
+    // Destacar card
+    document.querySelectorAll('.card-redacao').forEach(c => c.classList.remove('selecionado'));
+    document.getElementById('card-' + id)?.classList.add('selecionado');
+
+    // Mostrar loading
+    document.getElementById('estadoVazio').classList.add('hidden');
+    document.getElementById('espelhoCorracao').classList.add('hidden');
+    document.getElementById('estadoCarregando').classList.remove('hidden');
+
+    // Preencher header
+    document.getElementById('tituloEspelho').textContent = redacao.titulo;
+    document.getElementById('metaEspelho').textContent = `Enviada em ${redacao.data} · ${redacao.fonte}`;
+    document.getElementById('notaEspelho').textContent = redacao.nota || '—';
+
+    try {
+      document.getElementById('msgCarregando').textContent = 'Blanche está gerando o espelho de correção...';
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+      const prompt = `Você é a Profa. Blanche da RedaON, especialista em redação ENEM.
+Analise a redação abaixo e retorne APENAS JSON válido, sem markdown:
+{
+  "competencias": [<C1 0-200>,<C2 0-200>,<C3 0-200>,<C4 0-200>,<C5 0-200>],
+  "erros": [{"original":"<trecho errado>","correto":"<trecho correto>","tipo":"ortografia|coesao|argumento"}],
+  "texto_corrigido": "<texto completo com erros marcados como [ERRO: palavra] -> [CORRETO: palavra]>",
+  "versao_elite": "<redação completamente reescrita com nota 1000, mantendo o tema mas elevando todos os critérios do ENEM>",
+  "por_que_elite": "<explicação de 2-3 frases sobre o que torna a versão elite superior em cada competência>",
+  "correcao_completa": "<análise detalhada de cada parágrafo, apontando erros e sugestões>"
+}
+
+Redação:
+${redacao.texto}`;
+
+      const result = await model.generateContent(prompt);
+      const json = result.response.text().trim().replace(/```json|```/g,'').trim();
+      const dados = JSON.parse(json);
+
+      renderEspelho(redacao, dados);
+
+    } catch(err) {
+      console.error(err);
+      // Fallback: mostrar texto original sem análise IA
+      renderEspelhoFallback(redacao);
+    } finally {
+      document.getElementById('estadoCarregando').classList.add('hidden');
+    }
+  };
+
+  function renderEspelho(redacao, dados) {
+    // Barras de competência
+    const nomes = ['C1','C2','C3','C4','C5'];
+    const cores = ['#45edee','#6c5ce7','#6c5ce7','#fabd00','#fabd00'];
+    const barras = document.getElementById('barrasComp');
+    barras.innerHTML = (dados.competencias||[200,200,200,200,200]).map((v,i) => `
+      <div class="flex flex-col gap-1 min-w-[80px]">
+        <div class="flex justify-between text-[9px] font-bold">
+          <span class="text-on-surface-variant">${nomes[i]}</span>
+          <span style="color:${cores[i]}">${v}/200</span>
+        </div>
+        <div class="comp-barra-bg w-20">
+          <div class="comp-barra-fill" style="width:${Math.round(v/200*100)}%;background:${cores[i]}"></div>
+        </div>
+      </div>`).join('');
+
+    // Coluna 1: Texto Original
+    document.getElementById('colOriginal').innerHTML =
+      `<p class="text-gray-800 leading-8 text-justify whitespace-pre-line">${escapeHtml(redacao.texto)}</p>`;
+
+    // Coluna 2: Correções (com erros sublinhados)
+    let textoCorrigido = escapeHtml(redacao.texto);
+    let qtdErros = 0;
+    if (dados.erros && dados.erros.length) {
+      qtdErros = dados.erros.length;
+      dados.erros.forEach(e => {
+        if (!e.original) return;
+        const escaped = escapeHtml(e.original);
+        textoCorrigido = textoCorrigido.replace(
+          new RegExp(escaped.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'g'),
+          `<span class="erro-orto" title="Correto: ${escapeHtml(e.correto)}">${escaped}</span>`
+        );
+      });
+    }
+    document.getElementById('colCorrecoes').innerHTML =
+      `<p class="text-gray-800 leading-8 text-justify">${textoCorrigido}</p>`;
+    document.getElementById('badgeErros').textContent = qtdErros + ' marcações';
+
+    // Coluna 3: Elite da PROfa
+    document.getElementById('colElite').innerHTML =
+      `<p class="leading-8 text-justify whitespace-pre-line" style="color:#1a1a2e">${escapeHtml(dados.versao_elite || '')}</p>`;
+
+    // Tooltip "Por que nota 1000?"
+    document.getElementById('tooltipElite').innerHTML =
+      `<strong style="color:#45edee;display:block;margin-bottom:.4rem;">Por que esta versão é Nota 1000?</strong>${escapeHtml(dados.por_que_elite || '')}`;
+
+    // Guardar correção completa
+    window._correcaoCompleta = dados.correcao_completa || 'Análise detalhada não disponível.';
+
+    // Mostrar espelho
+    document.getElementById('espelhoCorracao').classList.remove('hidden');
+  }
+
+  function renderEspelhoFallback(redacao) {
+    document.getElementById('barrasComp').innerHTML = '<p class="text-xs text-on-surface-variant">Análise indisponível no momento.</p>';
+    document.getElementById('colOriginal').innerHTML = `<p class="text-gray-800 leading-8 text-justify whitespace-pre-line">${escapeHtml(redacao.texto)}</p>`;
+    document.getElementById('colCorrecoes').innerHTML = `<p class="text-gray-500 italic text-sm">Não foi possível gerar as correções. Tente novamente.</p>`;
+    document.getElementById('colElite').innerHTML = `<p class="text-gray-500 italic text-sm">Não foi possível gerar a versão Elite. Tente novamente.</p>`;
+    document.getElementById('badgeErros').textContent = '—';
+    window._correcaoCompleta = '';
+    document.getElementById('espelhoCorracao').classList.remove('hidden');
+    toast('Erro ao gerar análise. Exibindo texto original.');
+  }
+
+  // ── MODAL CORREÇÃO COMPLETA ────────────────────────
+  window.verCorrecaoCompleta = function() {
+    if (!window._correcaoCompleta) return;
+    document.getElementById('correcaoCompletaTexto').innerHTML =
+      `<p class="whitespace-pre-line">${escapeHtml(window._correcaoCompleta)}</p>`;
+    document.getElementById('modalCorrecao').classList.remove('hidden');
+  };
+
+  window.fecharModal = function() {
+    document.getElementById('modalCorrecao').classList.add('hidden');
+  };
+
+  document.getElementById('modalCorrecao').addEventListener('click', function(e) {
+    if (e.target === this) window.fecharModal();
+  });
+
+  // ── UTILITÁRIOS ────────────────────────────────────
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── INIT ───────────────────────────────────────────
+  renderLista();
+</script>
+</body>
+</html>

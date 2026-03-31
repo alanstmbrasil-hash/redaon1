@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Hub de Preparação</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode:"class",
+    theme:{extend:{colors:{
+      "primary-container":"#6c5ce7","on-surface":"#e1e2eb","surface-container":"#1d2026",
+      "tertiary":"#fabd00","surface-container-lowest":"#0b0e14","surface-container-low":"#191c22",
+      "background":"#10131a","outline-variant":"#474554","on-surface-variant":"#c8c4d7",
+      "primary":"#c6bfff","outline":"#928ea0","error":"#ffb4ab",
+      "surface-container-high":"#272a31","secondary":"#45edee","surface":"#10131a",
+      "surface-container-highest":"#32353c",
+    },fontFamily:{"body":["Inter"]},
+    borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"}}},
+  }
+</script>
+<style>
+  body{font-family:'Inter',sans-serif;background:#0b0e14;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  .scrollbar::-webkit-scrollbar{width:5px;}
+  .scrollbar::-webkit-scrollbar-thumb{background:#32353c;border-radius:10px;}
+  .rep-card{background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:1rem;transition:all .25s;}
+  .rep-card:hover{border-color:rgba(108,92,231,.4);}
+  @keyframes pulseBorder{0%,100%{box-shadow:0 0 0 0 rgba(69,237,238,.3)}50%{box-shadow:0 0 0 6px rgba(69,237,238,0)}}
+  .rep-card.carregando{border-color:#45edee;animation:pulseBorder 1.5s infinite;}
+  .rep-card.pronto{border-color:rgba(74,222,128,.4);}
+  .rep-body{max-height:0;overflow:hidden;transition:max-height .45s ease,opacity .3s ease;opacity:0;}
+  .rep-body.aberto{max-height:1200px;opacity:1;}
+  .rep-chevron{transition:transform .3s;}
+  .rep-chevron.aberto{transform:rotate(180deg);}
+  .saida-card{background:#191c22;border:1px solid rgba(71,69,84,.25);border-radius:1rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+  .saida-card:hover{border-color:rgba(108,92,231,.5);background:#1d2026;transform:translateY(-3px);box-shadow:0 10px 28px rgba(108,92,231,.15);}
+  .saida-card .shine{position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%);transform:translateX(-100%);transition:transform .6s;}
+  .saida-card:hover .shine{transform:translateX(100%);}
+  #modalResultado{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
+  #modalResultado.aberto{display:flex;}
+  #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(5rem);background:#272a31;border:1px solid rgba(255,255,255,.1);color:#e1e2eb;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:300;transition:transform .3s;pointer-events:none;white-space:nowrap;}
+  #toast.show{transform:translateX(-50%) translateY(0);}
+  @keyframes typing{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
+  .dot{width:6px;height:6px;background:#45edee;border-radius:50%;animation:typing 1.2s infinite;display:inline-block;margin:0 2px;}
+  .dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .fade-up{animation:fadeUp .4s ease forwards;}
+  .fade-up-2{animation:fadeUp .4s .1s ease both;}
+  .fade-up-3{animation:fadeUp .4s .2s ease both;}
+  .secao-titulo{font-size:.65rem;font-weight:800;color:#928ea0;text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:.75rem;}
+  .secao-titulo::after{content:'';flex:1;height:1px;background:rgba(71,69,84,.25);}
+  .flashcard{perspective:800px;cursor:pointer;}
+  .flashcard-inner{position:relative;width:100%;height:130px;transform-style:preserve-3d;transition:transform .5s;}
+  .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+  .flashcard-front,.flashcard-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:.875rem;display:flex;align-items:center;justify-content:center;padding:1rem;text-align:center;}
+  .flashcard-front{background:#1d2026;border:1px solid rgba(69,237,238,.2);}
+  .flashcard-back{background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);transform:rotateY(180deg);}
+  .step-check{width:22px;height:22px;border-radius:50%;border:2px solid rgba(71,69,84,.4);display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;}
+  .step-check.feito{background:#4ade80;border-color:#4ade80;}
+</style>
+</head>
+<body class="text-on-surface min-h-screen">
+<div class="fixed inset-0 pointer-events-none -z-10">
+  <div class="absolute top-0 right-0 w-[45%] h-[45%] bg-primary-container/6 rounded-full blur-[150px]"></div>
+  <div class="absolute bottom-0 left-0 w-[35%] h-[35%] bg-secondary/5 rounded-full blur-[120px]"></div>
+</div>
+<div id="toast"></div>
+<!-- MODAL -->
+<div id="modalResultado">
+  <div style="background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:1.25rem;width:100%;max-width:780px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 32px 64px rgba(0,0,0,.6);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid rgba(71,69,84,.2);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <span id="modalIcon" class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;font-size:1.4rem;"></span>
+        <div><p id="modalTitulo" style="font-weight:700;font-size:.95rem;color:#e1e2eb;"></p>
+        <p style="font-size:.7rem;color:#928ea0;">Gerado pela Blanche · Gemini 2.0 Flash</p></div>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button onclick="copiarResultado()" style="background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);border-radius:.625rem;padding:.5rem .875rem;color:#c8c4d7;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.375rem;"><span class="material-symbols-outlined" style="font-size:1rem;">content_copy</span>Copiar</button>
+        <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">close</span></button>
+      </div>
+    </div>
+    <div id="modalConteudo" class="scrollbar" style="flex:1;overflow-y:auto;padding:1.5rem;font-size:.9rem;line-height:1.85;color:#c8c4d7;"></div>
+    <div style="padding:1rem 1.5rem;border-top:1px solid rgba(71,69,84,.2);display:flex;gap:.75rem;flex-shrink:0;">
+      <button onclick="irEscrever()" style="flex:2;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:900;font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;"><span class="material-symbols-outlined" style="font-size:1rem;">edit</span>Escrever Redação Agora</button>
+      <button onclick="fecharModal()" style="padding:.875rem 1.25rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.875rem;cursor:pointer;">Fechar</button>
+    </div>
+  </div>
+</div>
+<!-- SIDEBAR -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50">
+  <div class="flex items-baseline italic px-2 mb-10"><span class="text-3xl font-black text-white tracking-tighter">Reda</span><span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span></div>
+  <nav class="flex-1 space-y-1 overflow-y-auto scrollbar">
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="inicio.html"><span class="material-symbols-outlined">home</span>Início</a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span>Nova Redação</a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] text-sm font-bold" href="temas.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span>Temas</a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span>Minhas Redações</a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span>Evolução</a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="plano.html"><span class="material-symbols-outlined">menu_book</span>Plano de Estudo</a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="estudio-blanche.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">psychology</span>Elite da PROfa</a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span>Ranking</a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="configuracoes.html"><span class="material-symbols-outlined">settings</span>Configurações</a>
+  </nav>
+  <div class="mt-auto pt-6 border-t border-outline-variant/10">
+    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container cursor-pointer">
+      <img alt="Alan" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
+      <div><p class="text-xs font-bold text-on-surface">Alan Alves</p><p class="text-[10px] text-on-surface-variant">Estudante Premium</p></div>
+    </div>
+    <a onclick="if(confirm('Sair?'))window.location.href='login.html'" class="mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 cursor-pointer text-sm transition-all"><span class="material-symbols-outlined text-sm">logout</span>Sair</a>
+  </div>
+</aside>
+<!-- MAIN -->
+<main class="ml-64 min-h-screen pb-20">
+  <header class="h-16 sticky top-0 z-40 flex items-center justify-between px-8 bg-[#0b0e14]/80 backdrop-blur-xl border-b border-outline-variant/10">
+    <div class="flex items-center gap-3">
+      <a href="temas.html" class="flex items-center gap-1.5 text-on-surface-variant hover:text-white transition-colors text-sm"><span class="material-symbols-outlined text-lg">arrow_back</span>Temas</a>
+      <span class="text-outline-variant/40">/</span>
+      <span class="text-sm text-on-surface font-semibold truncate max-w-xs" id="breadcrumb">Hub de Preparação</span>
+    </div>
+    <button onclick="irEscrever()" class="px-5 py-2.5 rounded-xl text-xs font-black text-[#002020] flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all" style="background:linear-gradient(135deg,#45edee,#6c5ce7);box-shadow:0 0 18px rgba(69,237,238,.25);">
+      <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">edit</span>Escrever Agora
+    </button>
+  </header>
+  <div class="max-w-4xl mx-auto px-8 pt-10 space-y-12">
+
+    <!-- 1. CABEÇALHO -->
+    <section class="fade-up">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-5 text-[10px] font-bold uppercase tracking-widest" style="background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);color:#c6bfff;">
+        <span class="material-symbols-outlined text-xs" style="font-variation-settings:'FILL' 1;">hub</span>Hub de Preparação
+      </div>
+      <h1 id="tituloPagina" class="text-3xl font-black text-white leading-tight mb-3"></h1>
+      <p id="descPagina" class="text-on-surface-variant text-base leading-relaxed mb-5"></p>
+      <div class="flex flex-wrap gap-2" id="tagsTema"></div>
+    </section>
+
+    <!-- 2. BARRA DE PROGRESSO -->
+    <section class="fade-up-2">
+      <div class="p-5 rounded-2xl flex items-center gap-6 flex-wrap" style="background:#1d2026;border:1px solid rgba(71,69,84,.25);">
+        <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest shrink-0">Sua preparação</p>
+        <div class="flex items-center gap-4 flex-wrap flex-1">
+          <div class="flex items-center gap-2">
+            <div class="step-check" id="check-repertorio"><span class="material-symbols-outlined text-xs text-[#002020] hidden" id="icoRep" style="font-variation-settings:'FILL' 1;">check</span></div>
+            <span class="text-xs text-on-surface-variant">Repertório</span>
+          </div>
+          <div class="w-8 h-px bg-outline-variant/30"></div>
+          <div class="flex items-center gap-2">
+            <div class="step-check" id="check-estudio"><span class="material-symbols-outlined text-xs text-[#002020] hidden" id="icoEst" style="font-variation-settings:'FILL' 1;">check</span></div>
+            <span class="text-xs text-on-surface-variant">Material de Estudo</span>
+          </div>
+          <div class="w-8 h-px bg-outline-variant/30"></div>
+          <div class="flex items-center gap-2">
+            <div class="step-check" style="border-color:rgba(69,237,238,.3);"><span class="material-symbols-outlined text-xs text-secondary" style="font-variation-settings:'FILL' 1;">edit</span></div>
+            <span class="text-xs text-secondary font-bold">Escrever</span>
+          </div>
+        </div>
+        <button onclick="irEscrever()" class="shrink-0 px-5 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:text-white transition-all" style="background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.3);">Pular e escrever →</button>
+      </div>
+    </section>
+
+    <!-- 3. REPERTÓRIO SOCIOCULTURAL -->
+    <section class="fade-up-2 space-y-5">
+      <div class="secao-titulo"><span class="material-symbols-outlined text-sm" style="color:#c6bfff;font-variation-settings:'FILL' 1;">library_books</span>Repertório Sociocultural</div>
+      <p class="text-sm text-on-surface-variant">Clique em cada bloco para expandir. A Blanche gera o conteúdo com base no tema escolhido.</p>
+      <button onclick="carregarTudo()" id="btnGerarTudo" class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-95" style="background:rgba(108,92,231,.12);border:1px solid rgba(108,92,231,.25);color:#c6bfff;">
+        <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1;">bolt</span>Gerar Todo o Repertório de Uma Vez
+      </button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="rep-card" id="card-legislacao">
+          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('legislacao')">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(250,189,0,.12);"><span class="material-symbols-outlined text-tertiary" style="font-variation-settings:'FILL' 1;">gavel</span></div>
+            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Legislação</p><p class="text-[10px] text-on-surface-variant">Constituição Federal e leis específicas</p></div>
+            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-legislacao">expand_more</span>
+          </button>
+          <div class="rep-body px-5 pb-5" id="body-legislacao"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-legislacao"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando legislação...</span></div></div></div>
+        </div>
+        <div class="rep-card" id="card-historia">
+          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('historia')">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(198,191,255,.1);"><span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">history_edu</span></div>
+            <div class="flex-1"><p class="text-sm font-bold text-on-surface">História</p><p class="text-[10px] text-on-surface-variant">Contexto histórico e marcos temporais</p></div>
+            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-historia">expand_more</span>
+          </button>
+          <div class="rep-body px-5 pb-5" id="body-historia"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-historia"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando contexto histórico...</span></div></div></div>
+        </div>
+        <div class="rep-card" id="card-especialistas">
+          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('especialistas')">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(69,237,238,.1);"><span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">groups</span></div>
+            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Especialistas</p><p class="text-[10px] text-on-surface-variant">Filósofos, sociólogos e autores</p></div>
+            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-especialistas">expand_more</span>
+          </button>
+          <div class="rep-body px-5 pb-5" id="body-especialistas"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-especialistas"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando especialistas...</span></div></div></div>
+        </div>
+        <div class="rep-card" id="card-atualidades">
+          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('atualidades')">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(255,180,171,.1);"><span class="material-symbols-outlined text-error" style="font-variation-settings:'FILL' 1;">newspaper</span></div>
+            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Atualidades</p><p class="text-[10px] text-on-surface-variant">Dados recentes e estatísticas</p></div>
+            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-atualidades">expand_more</span>
+          </button>
+          <div class="rep-body px-5 pb-5" id="body-atualidades"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-atualidades"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando atualidades...</span></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIVISOR -->
+    <div class="flex items-center gap-4">
+      <div class="flex-1 h-px" style="background:linear-gradient(90deg,transparent,rgba(71,69,84,.4))"></div>
+      <div class="flex items-center gap-2 px-4 py-1.5 rounded-full" style="background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.2);">
+        <span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
+        <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Estúdio da Blanche</span>
+      </div>
+      <div class="flex-1 h-px" style="background:linear-gradient(90deg,rgba(71,69,84,.4),transparent)"></div>
+    </div>
+
+    <!-- 4. ESTÚDIO -->
+    <section class="fade-up-3 space-y-5">
+      <div class="secao-titulo"><span class="material-symbols-outlined text-sm" style="color:#45edee;font-variation-settings:'FILL' 1;">psychology</span>Materiais de Estudo — Gerados pela Blanche</div>
+      <p class="text-sm text-on-surface-variant">Escolha o formato que melhor se adapta ao seu jeito de estudar.</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="saida-card p-5" onclick="gerarSaida('resumo','article','Resumo em Texto')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-primary mb-3 block" style="font-variation-settings:'FILL' 1;">article</span><p class="text-sm font-bold text-on-surface">Resumo em Texto</p><p class="text-[10px] text-on-surface-variant mt-1">Síntese completa do tema</p></div>
+        <div class="saida-card p-5" onclick="gerarSaida('audio','spatial_audio','Resumo em Áudio')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-secondary mb-3 block" style="font-variation-settings:'FILL' 1;">spatial_audio</span><p class="text-sm font-bold text-on-surface">Resumo em Áudio</p><p class="text-[10px] text-on-surface-variant mt-1">Roteiro de podcast de estudo</p></div>
+        <div class="saida-card p-5" onclick="gerarSaida('video','smart_display','Roteiro de Vídeo')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-error mb-3 block" style="font-variation-settings:'FILL' 1;">smart_display</span><p class="text-sm font-bold text-on-surface">Roteiro de Vídeo</p><p class="text-[10px] text-on-surface-variant mt-1">Script de vídeo-aula</p></div>
+        <div class="saida-card p-5" onclick="gerarSaida('mapa','account_tree','Mapa Mental')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-tertiary mb-3 block" style="font-variation-settings:'FILL' 1;">account_tree</span><p class="text-sm font-bold text-on-surface">Mapa Mental</p><p class="text-[10px] text-on-surface-variant mt-1">Estrutura visual dos argumentos</p></div>
+        <div class="saida-card p-5" onclick="gerarFlashcards()"><div class="shine"></div><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#4ade80;font-variation-settings:'FILL' 1;">style</span><p class="text-sm font-bold text-on-surface">Cartões de Memória</p><p class="text-[10px] text-on-surface-variant mt-1">Flashcards — clique para virar</p></div>
+        <div class="saida-card p-5" onclick="gerarQuiz()"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-primary mb-3 block" style="font-variation-settings:'FILL' 1;">quiz</span><p class="text-sm font-bold text-on-surface">Teste / Quiz</p><p class="text-[10px] text-on-surface-variant mt-1">Questões estilo ENEM</p></div>
+        <div class="saida-card p-5" onclick="gerarSaida('infografico','bar_chart','Infográfico')"><div class="shine"></div><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#c6bfff;font-variation-settings:'FILL' 1;">bar_chart</span><p class="text-sm font-bold text-on-surface">Infográfico</p><p class="text-[10px] text-on-surface-variant mt-1">Dados e números do tema</p></div>
+        <div class="saida-card p-5" onclick="gerarSaida('relatorio','assessment','Relatório Completo')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-secondary mb-3 block" style="font-variation-settings:'FILL' 1;">assessment</span><p class="text-sm font-bold text-on-surface">Relatório</p><p class="text-[10px] text-on-surface-variant mt-1">Análise acadêmica aprofundada</p></div>
+        <div class="saida-card p-5" onclick="gerarSaida('redacao_modelo','auto_fix_high','Redação Modelo Nota 1000')"><div class="shine"></div><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#45edee;font-variation-settings:'FILL' 1;">auto_fix_high</span><p class="text-sm font-bold text-on-surface">Redação Modelo</p><p class="text-[10px] text-on-surface-variant mt-1">Exemplo nota 1000 da Blanche</p></div>
+      </div>
+      <!-- Flashcards inline -->
+      <div id="areaFlashcards" class="hidden pt-2">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-sm font-bold text-on-surface flex items-center gap-2"><span class="material-symbols-outlined" style="color:#4ade80;font-variation-settings:'FILL' 1;">style</span>Cartões de Memória</p>
+          <div class="flex items-center gap-3"><span class="text-[10px] text-on-surface-variant" id="labelFlashcard"></span><button onclick="document.getElementById('areaFlashcards').classList.add('hidden')" class="text-xs text-on-surface-variant hover:text-white transition-colors">Fechar</button></div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="gridFlashcards"></div>
+      </div>
+      <!-- Quiz inline -->
+      <div id="areaQuiz" class="hidden pt-2">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-sm font-bold text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">quiz</span>Teste Rápido</p>
+          <button onclick="document.getElementById('areaQuiz').classList.add('hidden')" class="text-xs text-on-surface-variant hover:text-white transition-colors">Fechar</button>
+        </div>
+        <div id="containerQuiz" class="space-y-4"></div>
+      </div>
+    </section>
+
+    <!-- 5. CTA FINAL -->
+    <section class="py-8 border-t border-outline-variant/15 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div><p class="text-xl font-black text-white mb-1">Pronto para escrever? ✍️</p><p class="text-sm text-on-surface-variant">Você explorou o tema. Hora de colocar tudo em prática.</p></div>
+      <button onclick="irEscrever()" class="px-10 py-4 rounded-2xl font-black text-[#002020] flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap" style="background:linear-gradient(135deg,#45edee,#6c5ce7);box-shadow:0 0 28px rgba(69,237,238,.3);font-size:1rem;">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">edit</span>Escrever Redação Agora →
+      </button>
+    </section>
+  </div>
+</main>
+<script type="module">
+import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
+const API_KEY = "AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU";
+const genAI = new GoogleGenerativeAI(API_KEY);
+window.toast = function(msg,dur=3000){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),dur);};
+const temaRaw=sessionStorage.getItem('tema_selecionado');
+let tema=null;try{if(temaRaw)tema=JSON.parse(temaRaw);}catch(e){}
+if(!tema)tema={titulo:'Desafios para a valorização de comunidades e povos tradicionais no Brasil',eixo:'ENEM 2022',fonte:'ENEM 2022',nivel:'avancado'};
+const TITULO=tema.titulo;
+document.getElementById('tituloPagina').textContent=TITULO;
+document.getElementById('breadcrumb').textContent=TITULO.length>40?TITULO.substring(0,40)+'...':TITULO;
+document.getElementById('descPagina').textContent=`Tema ${tema.fonte?'oficial do '+tema.fonte:'selecionado'}. Explore o repertório e escolha os materiais de estudo antes de escrever para garantir a nota máxima.`;
+const COR_NIVEL={avancado:'#ffb4ab',intermediario:'#fabd00',basico:'#45edee'};
+const nivel=tema.nivel||'avancado';
+document.getElementById('tagsTema').innerHTML=[{label:tema.fonte||'Tema',cor:'#6c5ce7'},{label:tema.eixo||'Eixo Social',cor:'#45edee'},{label:nivel.charAt(0).toUpperCase()+nivel.slice(1),cor:COR_NIVEL[nivel]||'#fabd00'}].map(t=>`<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider" style="background:${t.cor}18;border:1px solid ${t.cor}35;color:${t.cor}">${t.label}</span>`).join('');
+let repFeito=false,estFeito=false;
+function marcarPasso(p){const c=document.getElementById('check-'+p);const i=document.getElementById(p==='repertorio'?'icoRep':'icoEst');if(c)c.classList.add('feito');if(i)i.classList.remove('hidden');}
+const gerado={legislacao:false,historia:false,especialistas:false,atualidades:false};
+const PR={legislacao:`Liste os 5 principais artigos da Constituição Federal e leis relevantes para o tema: "${TITULO}". Para cada: número, nome e aplicação ao tema em 1 frase. Use marcadores.`,historia:`Explique o contexto histórico de "${TITULO}" com 5 marcos temporais numerados. Cada: data/período, fato e relevância para o Brasil.`,especialistas:`Liste 5 especialistas (filósofos/sociólogos) relevantes para "${TITULO}". Para cada: nome, área, obra principal e 1 ideia aplicável ao ENEM.`,atualidades:`Liste 5 dados estatísticos recentes (IBGE, OMS, ONU) sobre "${TITULO}". Para cada: fonte, dado numérico e como usar como argumento.`};
+window.toggleRep=async function(tipo){const body=document.getElementById('body-'+tipo);const chevron=document.getElementById('chevron-'+tipo);const card=document.getElementById('card-'+tipo);if(body.classList.contains('aberto')){body.classList.remove('aberto');chevron.classList.remove('aberto');return;}body.classList.add('aberto');chevron.classList.add('aberto');if(gerado[tipo])return;gerado[tipo]=true;card.classList.add('carregando');try{const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});const result=await model.generateContent(PR[tipo]+'
+
+Use markdown leve. Português.');card.classList.remove('carregando');card.classList.add('pronto');document.getElementById('conteudo-'+tipo).innerHTML=md(result.response.text());if(!repFeito){repFeito=true;marcarPasso('repertorio');}}catch(err){card.classList.remove('carregando');document.getElementById('conteudo-'+tipo).innerHTML='<p class="text-xs text-error">Erro. Tente novamente.</p>';gerado[tipo]=false;}};
+window.carregarTudo=async function(){const btn=document.getElementById('btnGerarTudo');btn.disabled=true;btn.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ml-2">Blanche gerando tudo...</span>';for(const tipo of['legislacao','historia','especialistas','atualidades']){document.getElementById('body-'+tipo).classList.add('aberto');document.getElementById('chevron-'+tipo).classList.add('aberto');if(!gerado[tipo])await window.toggleRep(tipo);}btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1;">check_circle</span><span>Repertório completo!</span>';btn.style.cssText='background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:#4ade80;';};
+let resultadoAtual='';
+const PS={resumo:`Crie um RESUMO DIDÁTICO de "${TITULO}" para redação ENEM. Problema, causas, consequências, dados e soluções.`,audio:`ROTEIRO DE PODCAST sobre "${TITULO}". Tom conversacional, com [pausa]. ~8 minutos.`,video:`ROTEIRO DE VÍDEO-AULA sobre "${TITULO}" em cenas numeradas. Fala + recurso visual sugerido. ~10 minutos.`,mapa:`MAPA MENTAL hierárquico de "${TITULO}" com →. Ramos: Causas, Consequências, Legislação, Especialistas, Dados, Soluções.`,infografico:`CONTEÚDO DE INFOGRÁFICO sobre "${TITULO}": título, seções, dados, comparações, timeline e curiosidades.`,relatorio:`RELATÓRIO ACADÊMICO sobre "${TITULO}": Resumo, Introdução, Contexto, Análise, Legislação, Especialistas, Dados, Perspectivas, Conclusão.`,redacao_modelo:`REDAÇÃO NOTA 1000 sobre "${TITULO}". Introdução com repertório + 2 parágrafos + conclusão com proposta de intervenção completa. 28-30 linhas. Linguagem formal.`};
+window.gerarSaida=async function(tipo,icone,titulo){document.getElementById('modalResultado').classList.add('aberto');document.getElementById('modalTitulo').textContent=titulo;document.getElementById('modalIcon').textContent=icone;document.getElementById('modalConteudo').innerHTML='<div style="display:flex;align-items:center;gap:.75rem;padding:1rem 0;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;font-size:.85rem;">Blanche gerando...</span></div>';try{const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});const result=await model.generateContent(PS[tipo]+'
+
+Português brasileiro com markdown.');resultadoAtual=result.response.text();document.getElementById('modalConteudo').innerHTML=md(resultadoAtual);if(!estFeito){estFeito=true;marcarPasso('estudio');}}catch(err){document.getElementById('modalConteudo').innerHTML='<p style="color:#ffb4ab">Erro. Tente novamente.</p>';}};
+window.gerarFlashcards=async function(){toast('🃏 Gerando cartões...');const prompt=`Crie 8 flashcards sobre "${TITULO}" para o ENEM. APENAS JSON: [{"frente":"...","verso":"..."}]`;try{const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});const result=await model.generateContent(prompt);const cards=JSON.parse(result.response.text().replace(/\`\`\`json|\`\`\`/g,'').trim());const area=document.getElementById('areaFlashcards');area.classList.remove('hidden');document.getElementById('areaQuiz').classList.add('hidden');document.getElementById('labelFlashcard').textContent=cards.length+' cartões · clique para virar';const grid=document.getElementById('gridFlashcards');grid.innerHTML='';cards.forEach(c=>{const div=document.createElement('div');div.className='flashcard';div.onclick=()=>div.classList.toggle('flipped');div.innerHTML=`<div class="flashcard-inner"><div class="flashcard-front"><div><p class="text-[9px] text-secondary font-bold uppercase tracking-widest mb-2">Frente</p><p class="text-sm font-bold text-on-surface">${c.frente}</p></div></div><div class="flashcard-back"><div><p class="text-[9px] text-primary font-bold uppercase tracking-widest mb-2">Verso</p><p class="text-xs text-on-surface leading-relaxed">${c.verso}</p></div></div></div>`;grid.appendChild(div);});area.scrollIntoView({behavior:'smooth',block:'start'});if(!estFeito){estFeito=true;marcarPasso('estudio');}toast('✓ '+cards.length+' cartões gerados!');}catch(err){toast('Erro ao gerar flashcards.');}};
+let quizR={};
+window.gerarQuiz=async function(){toast('🧪 Gerando quiz...');const prompt=`5 questões ENEM sobre "${TITULO}". APENAS JSON: [{"pergunta":"...","alternativas":["A)...","B)...","C)...","D)...","E)..."],"correta":0,"explicacao":"..."}]`;try{const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});const result=await model.generateContent(prompt);const qs=JSON.parse(result.response.text().replace(/\`\`\`json|\`\`\`/g,'').trim());quizR={};const area=document.getElementById('areaQuiz');area.classList.remove('hidden');document.getElementById('areaFlashcards').classList.add('hidden');const cont=document.getElementById('containerQuiz');cont.innerHTML='';qs.forEach((q,qi)=>{const div=document.createElement('div');div.className='p-5 rounded-2xl';div.style.cssText='background:#191c22;border:1px solid rgba(71,69,84,.25);';div.innerHTML=`<p class="text-xs font-bold text-on-surface-variant mb-3">Questão ${qi+1} / ${qs.length}</p><p class="text-sm font-bold text-on-surface mb-4">${q.pergunta}</p><div class="space-y-2" id="alt${qi}">${q.alternativas.map((a,ai)=>`<button onclick="resp(${qi},${ai},${q.correta},'${q.explicacao.replace(/'/g,"\'")}',this)" class="w-full text-left px-4 py-3 rounded-xl border text-sm transition-all hover:border-secondary/40" style="background:#0b0e14;border-color:rgba(71,69,84,.3);color:#c8c4d7;">${a}</button>`).join('')}</div><div id="exp${qi}" class="hidden mt-3 p-3 rounded-xl text-xs leading-relaxed"></div>`;cont.appendChild(div);});area.scrollIntoView({behavior:'smooth',block:'start'});if(!estFeito){estFeito=true;marcarPasso('estudio');}toast('✓ Quiz gerado!');}catch(err){toast('Erro ao gerar quiz.');}};
+window.resp=function(qi,ai,correta,explicacao){if(quizR[qi]!==undefined)return;quizR[qi]=ai;document.getElementById('alt'+qi).querySelectorAll('button').forEach((b,i)=>{b.disabled=true;if(i===correta){b.style.borderColor='#4ade80';b.style.color='#4ade80';b.style.background='rgba(74,222,128,.08)';}else if(i===ai&&ai!==correta){b.style.borderColor='#ffb4ab';b.style.color='#ffb4ab';b.style.background='rgba(255,180,171,.08)';}});const e=document.getElementById('exp'+qi);e.textContent=(ai===correta?'✓ Correto! ':'✗ Errado. ')+explicacao;e.classList.remove('hidden');e.style.cssText=`border-radius:.625rem;padding:.75rem;font-size:.75rem;background:${ai===correta?'rgba(74,222,128,.06)':'rgba(255,180,171,.06)'};border:1px solid ${ai===correta?'rgba(74,222,128,.2)':'rgba(255,180,171,.2)'};color:${ai===correta?'#4ade80':'#ffb4ab'};`;};
+window.fecharModal=function(){document.getElementById('modalResultado').classList.remove('aberto');};
+document.getElementById('modalResultado').addEventListener('click',function(e){if(e.target===this)window.fecharModal();});
+window.copiarResultado=function(){navigator.clipboard.writeText(resultadoAtual).then(()=>toast('✓ Copiado!'));};
+window.irEscrever=function(){window.location.href='nova-redacao.html';};
+function md(t){return t.replace(/\*\*(.*?)\*\*/g,'<strong style="color:#e1e2eb">$1</strong>').replace(/^### (.*)/gm,'<p style="font-size:.875rem;font-weight:700;color:#45edee;margin:.75rem 0 .25rem">$1</p>').replace(/^## (.*)/gm,'<p style="font-size:1rem;font-weight:700;color:#e1e2eb;margin:.875rem 0 .3rem">$1</p>').replace(/^# (.*)/gm,'<p style="font-size:1.1rem;font-weight:800;color:#45edee;margin:1rem 0 .4rem">$1</p>').replace(/^[-—•] (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0;color:#c8c4d7">• $1</p>').replace(/^(\d+)\. (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0"><strong style="color:#45edee">$1.</strong> $2</p>').replace(/\[pausa\]/gi,'<span style="color:#fabd00;font-style:italic">[pausa]</span>').replace(/
+
+/g,'<br/><br/>').replace(/
+/g,'<br/>');}
+</script>
+</body>
+</html>

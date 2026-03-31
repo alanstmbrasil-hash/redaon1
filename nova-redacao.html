@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Nova Redação</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "inverse-on-surface": "#2e3037", "surface-container-high": "#272a31",
+          "surface": "#10131a", "inverse-primary": "#5847d2", "on-secondary": "#003737",
+          "surface-dim": "#10131a", "on-primary": "#2900a0", "on-secondary-fixed-variant": "#004f50",
+          "on-secondary-fixed": "#002020", "primary": "#c6bfff", "primary-container": "#6c5ce7",
+          "on-primary-fixed-variant": "#4029ba", "on-primary-container": "#faf6ff",
+          "surface-bright": "#363940", "inverse-surface": "#e1e2eb", "on-error-container": "#ffdad6",
+          "on-tertiary": "#3f2e00", "outline-variant": "#474554", "tertiary-container": "#906c00",
+          "surface-container": "#1d2026", "on-surface": "#e1e2eb", "secondary": "#45edee",
+          "error-container": "#93000a", "tertiary": "#fabd00", "on-primary-fixed": "#160066",
+          "tertiary-fixed-dim": "#fabd00", "secondary-fixed": "#56f9f9", "on-background": "#e1e2eb",
+          "on-surface-variant": "#c8c4d7", "on-error": "#690005", "surface-variant": "#32353c",
+          "secondary-fixed-dim": "#26dcdd", "primary-fixed": "#e4dfff", "primary-fixed-dim": "#c6bfff",
+          "surface-container-lowest": "#0b0e14", "error": "#ffb4ab", "on-secondary-container": "#005455",
+          "tertiary-fixed": "#ffdf9e", "outline": "#928ea0", "surface-container-low": "#191c22",
+          "on-tertiary-fixed": "#261a00", "on-tertiary-fixed-variant": "#5b4300", "background": "#10131a",
+          "on-tertiary-container": "#fff6ec", "surface-tint": "#c6bfff", "secondary-container": "#00d0d1",
+          "surface-container-highest": "#32353c"
+        },
+        fontFamily: {
+          "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"],
+          "handwriting": ["'EB Garamond'", "serif"]
+        },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { background-color: #0B0E14; color: #E1E2EB; font-family: 'Inter', sans-serif; }
+
+  /* ── Folha de Redação ── */
+  .redacao-sheet {
+    background-color: #fdfdfb;
+    background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 100% 2.25rem;
+    line-height: 2.25rem;
+    position: relative;
+  }
+  .redacao-sheet::before {
+    content: "REDAÇÃO OFICIAL";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 5rem; font-weight: 900;
+    color: rgba(0,0,0,0.03);
+    pointer-events: none; white-space: nowrap; z-index: 0;
+  }
+  .line-numbers { border-right: 1px solid #d1d5db; user-select: none; }
+  .writing-area { line-height: 2.25rem; background: transparent; z-index: 1; }
+
+  /* ── Método de Envio ── */
+  .metodo-btn.ativo { background: #6c5ce7 !important; border-color: #6c5ce7 !important; }
+  .metodo-btn.ativo span { color: white !important; }
+
+  /* ── Tempo ── */
+  .tempo-card.ativo { border-color: #6c5ce7 !important; box-shadow: 0 0 0 1px #6c5ce7; }
+  #display-tempo { font-variant-numeric: tabular-nums; }
+  .tempo-vermelho { color: #ffb4ab !important; }
+
+  /* ── Voz ── */
+  @keyframes pulse-mic { 0%,100%{box-shadow:0 0 0 0 rgba(108,92,231,0.5)} 50%{box-shadow:0 0 0 10px rgba(108,92,231,0)} }
+  .gravando { animation: pulse-mic 1s infinite; }
+
+  /* ── Painel Blanche ── */
+  #painel-blanche { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.75); align-items:center; justify-content:center; padding:1rem; }
+  #painel-blanche.aberto { display:flex; }
+  .painel-interno { background:#1d2026; border:1px solid rgba(255,255,255,0.08); border-radius:1.25rem; width:100%; max-width:720px; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,0.6); }
+  .painel-header { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0; }
+  .painel-body { overflow-y:auto; padding:1.5rem; flex:1; }
+  .painel-body::-webkit-scrollbar { width:6px; }
+  .painel-body::-webkit-scrollbar-thumb { background:#32353c; border-radius:10px; }
+  .nota-numero { font-size:3rem; font-weight:800; line-height:1; background:linear-gradient(135deg,#6c5ce7,#45edee); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .comp-card { background:#10131a; border:1px solid rgba(255,255,255,0.06); border-radius:.75rem; padding:1rem; margin-bottom:.75rem; }
+  .barra-bg { background:#32353c; border-radius:99px; height:6px; }
+  .barra-fill { height:6px; border-radius:99px; background:linear-gradient(90deg,#6c5ce7,#45edee); transition:width .8s ease; }
+  .secao-tit { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#928ea0; margin:1.25rem 0 .5rem; }
+  .lista-it { display:flex; gap:.5rem; font-size:.8rem; color:#c8c4d7; margin-bottom:.4rem; line-height:1.5; }
+  .coment-geral { background:rgba(108,92,231,.1); border:1px solid rgba(108,92,231,.25); border-radius:.75rem; padding:1rem; font-size:.82rem; color:#c8c4d7; line-height:1.6; margin-top:1rem; font-style:italic; }
+  .loading-b { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem; gap:1rem; }
+  .spinner { width:40px; height:40px; border:3px solid rgba(108,92,231,.2); border-top-color:#6c5ce7; border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ── Toast ── */
+  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; box-shadow:0 8px 32px rgba(0,0,0,.4); z-index:300; transition:transform .3s ease; pointer-events:none; white-space:nowrap; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* ── Arquivo preview ── */
+  #area-arquivo { display:none; margin:.5rem 1rem; background:rgba(108,92,231,.08); border:1px dashed rgba(108,92,231,.3); border-radius:.75rem; padding:.6rem 1rem; font-size:.8rem; color:#c8c4d7; align-items:center; gap:.75rem; }
+  #area-arquivo.visivel { display:flex; }
+  #inputPDF, #inputImagem { display:none; }
+
+  /* Status voz */
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .blink { animation: blink 1s infinite; }
+</style>
+</head>
+<body class="flex min-h-screen">
+
+<!-- PAINEL BLANCHE -->
+<div id="painel-blanche">
+  <div class="painel-interno">
+    <div class="painel-header">
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <span class="material-symbols-outlined" style="color:#6c5ce7;font-size:1.3rem;">psychology</span>
+        <span style="font-weight:700;font-size:1rem;color:#e1e2eb;">Análise da Profa. Blanche</span>
+      </div>
+      <button onclick="fecharPainel()" style="background:none;border:none;color:#928ea0;cursor:pointer;display:flex;padding:.25rem;border-radius:.5rem;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="painel-body" id="painel-conteudo"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- INPUTS OCULTOS -->
+<input type="file" id="inputPDF" accept=".pdf"/>
+<input type="file" id="inputImagem" accept="image/*"/>
+
+<!-- SIDEBAR -->
+<aside class="h-screen w-64 fixed left-0 top-0 z-40 bg-[#0B0E14] flex flex-col p-4 gap-y-4 border-r border-[#C8C4D7]/10">
+  <div class="mb-8 px-2 flex items-center gap-3">
+    <span class="text-lg font-bold tracking-tight text-white">Reda<i class="font-black italic text-[#45EDEE]">ON</i></span>
+  </div>
+  <nav class="flex-1 space-y-1">
+    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="inicio.html">
+      <span class="material-symbols-outlined">home</span><span>Início</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium bg-[#1d2026] text-[#45EDEE] rounded-lg border-l-4 border-[#6C5CE7]" href="nova-redacao.html">
+      <span class="material-symbols-outlined">edit_note</span><span>Nova Redação</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="temas.html">
+      <span class="material-symbols-outlined">library_books</span><span>Temas</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="minhas-redacoes.html">
+      <span class="material-symbols-outlined">history_edu</span><span>Minhas Redações</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="evolucao.html">
+      <span class="material-symbols-outlined">trending_up</span><span>Evolução</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="plano.html">
+      <span class="material-symbols-outlined">calendar_today</span><span>Plano de Estudo</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="ranking.html">
+      <span class="material-symbols-outlined">leaderboard</span><span>Ranking</span>
+    </a>
+    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="configuracoes.html">
+      <span class="material-symbols-outlined">settings</span><span>Configurações</span>
+    </a>
+  </nav>
+  <div class="mt-auto pt-4 border-t border-outline-variant/20 space-y-1">
+    <div class="flex items-center gap-3 px-3 py-4 mb-2">
+      <div class="w-10 h-10 rounded-full border-2 border-primary/30 overflow-hidden shrink-0">
+        <img alt="Perfil" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDz3KCoSN2SuKE7VDpxtTtkQNaLLXiJEt7Yb-533rnAn_Dzod38lUgJ2sih3BAI2iktNZa2NPYyh8BTIVh7REUNJHHGF-_It0Zd58qo2IppgioO9lwyJHiKMX3XuVeLyj_eTV_iNFrsgNKKABTQhy66qcLjutbsT71u1fmShDkYNcDZva5stmLqRdrG0NWKSpdWCR3DKaAmmkqIdItYwq5na4irIOGPOUzmQZUjSx2wPs_1hBnONn6BX3rtudxwzjfYdWCnWNX4tne"/>
+      </div>
+      <div class="flex flex-col min-w-0">
+        <span class="text-sm font-semibold text-[#E1E2EB] truncate">Eduardo Silva</span>
+        <span class="text-[10px] font-bold text-primary uppercase tracking-wider">Nível 12</span>
+      </div>
+    </div>
+    <a onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-red-400 rounded-lg transition-all cursor-pointer">
+      <span class="material-symbols-outlined">logout</span><span>Sair</span>
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 ml-64 min-h-screen flex flex-col relative">
+
+  <!-- TOP BAR -->
+  <header class="sticky top-0 z-50 bg-[#10131a]/80 backdrop-blur-xl border-b border-[#C8C4D7]/20 flex justify-between items-center w-full px-8 py-3">
+    <div class="flex items-center gap-6">
+      <button class="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors mr-2">
+        <span class="material-symbols-outlined text-[#C8C4D7]">menu</span>
+      </button>
+      <div class="flex items-center gap-3 text-[#45EDEE]">
+        <span class="material-symbols-outlined text-2xl">edit_note</span>
+        <span class="font-semibold tracking-tight text-xl">Nova Redação</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="p-2 rounded-full hover:bg-white/5 transition-colors relative">
+        <span class="material-symbols-outlined text-[#C8C4D7]">notifications</span>
+        <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-[#10131a]"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="p-8 grid grid-cols-12 gap-8">
+
+    <!-- COLUNA ESQUERDA -->
+    <div class="col-span-8 space-y-8">
+
+      <div class="grid grid-cols-2 gap-6">
+
+        <!-- GESTÃO DE TEMPO -->
+        <section>
+          <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Gestão de Tempo</h2>
+          <div class="flex items-center gap-3 mb-3">
+            <span id="display-tempo" class="text-2xl font-bold text-primary">00:00:00</span>
+            <button onclick="toggleTempo()" id="btnToggleTempo" class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center hover:opacity-80 transition-all">
+              <span id="iconeTempo" class="material-symbols-outlined text-white text-base" style="font-variation-settings:'FILL' 1;">play_arrow</span>
+            </button>
+            <button onclick="resetarTempo()" class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center hover:opacity-80 transition-all">
+              <span class="material-symbols-outlined text-on-surface-variant text-base">restart_alt</span>
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div id="cardLivre" onclick="selecionarModo('livre')" class="tempo-card ativo bg-surface-container rounded-xl p-4 border border-outline-variant/10 cursor-pointer">
+              <div class="flex items-center justify-between mb-2">
+                <span class="material-symbols-outlined text-secondary">schedule</span>
+                <span class="text-[10px] font-bold text-secondary uppercase tracking-tighter">Cronômetro</span>
+              </div>
+              <h3 class="text-on-surface font-semibold text-sm">Modo Livre</h3>
+              <p class="text-on-surface-variant text-xs mt-1">Tempo progressivo</p>
+            </div>
+            <div id="cardSimulado" onclick="selecionarModo('simulado')" class="tempo-card bg-surface-container rounded-xl p-4 border border-outline-variant/10 cursor-pointer">
+              <div class="flex items-center justify-between mb-2">
+                <span class="material-symbols-outlined text-tertiary">hourglass_empty</span>
+                <span class="text-[10px] font-bold text-tertiary uppercase tracking-tighter">Temporizador</span>
+              </div>
+              <h3 class="text-on-surface font-semibold text-sm">Modo Simulado</h3>
+              <select id="selectTempo" onclick="event.stopPropagation()" onchange="atualizarTemporizador()" class="mt-2 w-full bg-surface-container-lowest border-none text-[10px] rounded-lg py-1 text-on-surface-variant focus:ring-1 focus:ring-primary/40">
+                <option value="3600">60 minutos</option>
+                <option value="5400">90 minutos</option>
+                <option value="7200">120 minutos</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- MÉTODO DE ENVIO -->
+        <section>
+          <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Método de Envio</h2>
+          <div id="status-voz" class="hidden mb-3 flex items-center gap-2 text-xs text-secondary">
+            <span class="material-symbols-outlined text-sm blink" style="font-variation-settings:'FILL' 1;">fiber_manual_record</span>
+            <span>Gravando... clique em Voz para parar</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2">
+            <button id="btnTexto" onclick="selecionarMetodo('texto')" class="metodo-btn ativo flex flex-col items-center justify-center p-3 rounded-xl bg-primary-container border border-outline-variant/10 transition-all group">
+              <span class="material-symbols-outlined text-white mb-1">text_fields</span>
+              <span class="text-[10px] font-bold text-white">Texto</span>
+            </button>
+            <button id="btnVoz" onclick="selecionarMetodo('voz')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container border border-outline-variant/10 hover:bg-primary-container transition-all group">
+              <span class="material-symbols-outlined text-primary mb-1 group-hover:text-white">mic</span>
+              <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-white">Voz</span>
+            </button>
+            <button id="btnPdf" onclick="selecionarMetodo('pdf')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container border border-outline-variant/10 hover:bg-primary-container transition-all group">
+              <span class="material-symbols-outlined text-primary mb-1 group-hover:text-white">description</span>
+              <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-white">PDF</span>
+            </button>
+            <button id="btnImagem" onclick="selecionarMetodo('imagem')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container border border-outline-variant/10 hover:bg-primary-container transition-all group">
+              <span class="material-symbols-outlined text-primary mb-1 group-hover:text-white">image</span>
+              <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-white">Imagem</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- EDITOR OFICIAL -->
+      <section class="flex flex-col flex-1 bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden shadow-2xl">
+        <div class="bg-surface-container px-6 py-3 border-b border-outline-variant/5 flex items-center justify-between">
+          <div class="flex gap-4">
+            <span onclick="formatarTexto('bold')" class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary select-none">format_bold</span>
+            <span onclick="formatarTexto('italic')" class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary select-none">format_italic</span>
+            <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary select-none">format_list_bulleted</span>
+          </div>
+          <div class="text-[10px] font-bold text-tertiary bg-tertiary/10 px-2 py-1 rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs" style="font-variation-settings:'FILL' 1;">warning</span>
+            Mínimo 100 palavras
+          </div>
+        </div>
+
+        <!-- Preview arquivo -->
+        <div id="area-arquivo">
+          <span class="material-symbols-outlined text-primary">attach_file</span>
+          <span id="nome-arquivo" class="flex-1 truncate text-xs"></span>
+          <button onclick="removerArquivo()" style="background:none;border:none;color:#928ea0;cursor:pointer;display:flex;">
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+
+        <!-- Folha com linhas numeradas -->
+        <div class="redacao-sheet flex min-h-[680px]">
+          <div class="line-numbers w-12 flex flex-col items-center pt-2 text-[10px] font-bold text-gray-400">
+            <span style="height:2.25rem;display:flex;align-items:center;">01</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">02</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">03</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">04</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">05</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">06</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">07</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">08</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">09</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">10</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">11</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">12</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">13</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">14</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">15</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">16</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">17</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">18</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">19</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">20</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">21</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">22</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">23</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">24</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">25</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">26</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">27</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">28</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">29</span>
+            <span style="height:2.25rem;display:flex;align-items:center;">30</span>
+          </div>
+          <textarea id="textoRedacao" class="writing-area flex-1 w-full bg-transparent p-0 px-4 pt-0 text-gray-800 leading-[2.25rem] resize-none focus:ring-0 border-none placeholder:text-gray-300 text-xl font-handwriting italic" placeholder="Comece a escrever sua redação oficial..."></textarea>
+        </div>
+
+        <!-- Rodapé -->
+        <div class="bg-surface-container-lowest px-6 py-4 flex items-center justify-between border-t border-outline-variant/5">
+          <div class="flex gap-6">
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Contagem</span>
+              <span id="contPalavras" class="text-sm font-bold text-primary">0 PALAVRAS</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Extensão</span>
+              <span id="contChars" class="text-sm font-bold text-secondary">0 CARACTERES</span>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <button id="btnRevisar" class="px-6 py-2.5 rounded-xl border border-outline-variant/20 text-secondary font-semibold text-sm hover:bg-secondary/5 transition-all">
+              Revisão de texto
+            </button>
+            <button id="btnEnviar" class="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary-container to-primary-container/80 text-white font-bold text-sm shadow-lg hover:scale-[1.02] transition-all active:scale-95">
+              Enviar para correção
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- COLUNA DIREITA -->
+    <div class="col-span-4 space-y-6">
+      <section>
+        <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-lg">auto_stories</span>
+          Material de Apoio
+        </h2>
+        <div class="space-y-4">
+          <div class="bg-surface-container rounded-xl p-4 border-l-4 border-primary hover:bg-surface-container-high transition-all cursor-pointer">
+            <div class="flex items-start gap-4">
+              <div class="bg-primary/10 p-2 rounded-lg"><span class="material-symbols-outlined text-primary">balance</span></div>
+              <div><h4 class="text-sm font-bold text-on-surface">Legislação</h4><p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Artigos da Constituição Federal e leis específicas para embasamento.</p></div>
+            </div>
+          </div>
+          <div class="bg-surface-container rounded-xl p-4 border-l-4 border-secondary hover:bg-surface-container-high transition-all cursor-pointer">
+            <div class="flex items-start gap-4">
+              <div class="bg-secondary/10 p-2 rounded-lg"><span class="material-symbols-outlined text-secondary">history</span></div>
+              <div><h4 class="text-sm font-bold text-on-surface">História</h4><p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Contexto histórico, revoluções e marcos temporais relevantes.</p></div>
+            </div>
+          </div>
+          <div class="bg-surface-container rounded-xl p-4 border-l-4 border-tertiary hover:bg-surface-container-high transition-all cursor-pointer">
+            <div class="flex items-start gap-4">
+              <div class="bg-tertiary/10 p-2 rounded-lg"><span class="material-symbols-outlined text-tertiary">psychology</span></div>
+              <div><h4 class="text-sm font-bold text-on-surface">Especialistas</h4><p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Conceitos, estudos e análises de especialistas de renome.</p></div>
+            </div>
+          </div>
+          <div class="bg-surface-container rounded-xl p-4 border-l-4 border-green-400 hover:bg-surface-container-high transition-all cursor-pointer">
+            <div class="flex items-start gap-4">
+              <div class="bg-green-400/10 p-2 rounded-lg"><span class="material-symbols-outlined text-green-400">public</span></div>
+              <div><h4 class="text-sm font-bold text-on-surface">Atualidades</h4><p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Notícias recentes sobre o tema e estatísticas atualizadas.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-primary-container to-primary text-white">
+        <div class="relative z-10">
+          <span class="material-symbols-outlined text-3xl mb-4 block" style="font-variation-settings:'FILL' 1;">lightbulb</span>
+          <h3 class="font-bold text-lg mb-2">Dica do Mestre</h3>
+          <p class="text-sm opacity-90 leading-relaxed">Tente iniciar seu texto com uma citação direta da Constituição. Isso demonstra repertório sociocultural sólido desde a introdução.</p>
+        </div>
+        <div class="absolute -right-10 -bottom-10 opacity-20">
+          <span class="material-symbols-outlined text-[150px]">edit_square</span>
+        </div>
+      </div>
+
+      <!-- CARD ELITE DA PROfa BLANCHE -->
+      <div class="relative overflow-hidden rounded-2xl border border-[#45edee]/20 bg-[#0b0e14]">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#6c5ce7]/10 to-[#45edee]/5 pointer-events-none"></div>
+        <div class="relative z-10 p-5">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-full border-2 border-[#45edee] p-0.5 shrink-0" style="box-shadow:0 0 12px rgba(69,237,238,0.4)">
+              <img alt="Profa. Blanche" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAzbjLUeSynIahzqHhjuL6QtKvLVlZpX3W1gxGRp60MaqJ-uW5TRqxEntmJYZdO17VE0ZWThnoFQQj9Aqq2RQvDsUjyXNrz8RRoEAoAPWp7VxNwRaKrgdkf-zhhwMCYMNvlbaam2Vol0qJQL1gKAlA0LA-WRuacFFZvXGaJRmZVRVZ9kggpUyPqwY1ckzypA6aEcsLybPJvNsqI7dXM99kQfk9UF7dQt_0vdiqQ35L823HrdbZODZ2b78kk13BhlWvjoz3a3Oe1okQ"/>
+            </div>
+            <div>
+              <p class="text-[10px] font-black text-[#45edee] uppercase tracking-widest">⭐ Plano Elite</p>
+              <h3 class="font-black text-white text-sm leading-tight">Mentor IA PROfa Blanche</h3>
+            </div>
+          </div>
+          <p class="text-xs text-on-surface-variant leading-relaxed mb-4">
+            A Blanche analisa <span class="text-[#45edee] font-bold">cada linha</span> em tempo real, destaca lacunas argumentativas e reescreve seus parágrafos enquanto você escreve.
+          </p>
+          <div class="space-y-1.5 mb-5">
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="text-[#45edee]">✓</span> Nota estimada ao vivo (C1 a C5)</div>
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="text-[#45edee]">✓</span> Destaques automáticos no texto</div>
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="text-[#45edee]">✓</span> Reescrita de argumentos com 1 clique</div>
+          </div>
+          <button onclick="window.location.href='elite-profa.html'" class="w-full py-3 rounded-xl font-black text-sm uppercase tracking-widest text-[#002020] transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2" style="background:linear-gradient(135deg,#45edee,#6c5ce7);box-shadow:0 0 20px rgba(69,237,238,0.3)">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1;">psychology</span>
+            Ir para a Elite da PROfa
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-[-1] overflow-hidden">
+  <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]"></div>
+  <div class="absolute bottom-0 left-64 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px]"></div>
+</div>
+
+<script type="module">
+  import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
+  const API_KEY = "AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU";
+  const genAI = new GoogleGenerativeAI(API_KEY);
+
+  // ── TOAST ──────────────────────────────────────────
+  function toast(msg, dur = 3000) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
+  }
+
+  // ── CONTADOR ───────────────────────────────────────
+  const textarea = document.getElementById('textoRedacao');
+  textarea.addEventListener('input', atualizarContador);
+  function atualizarContador() {
+    const t = textarea.value;
+    const p = t.trim() ? t.trim().split(/\s+/).length : 0;
+    document.getElementById('contPalavras').textContent = p + ' PALAVRAS';
+    document.getElementById('contChars').textContent = t.length + ' CARACTERES';
+  }
+
+  // ── GESTÃO DE TEMPO ────────────────────────────────
+  let modoTempo = 'livre', tempoSeg = 0, tempoLimite = 3600;
+  let timerAtivo = false, intervalId = null;
+
+  window.selecionarModo = (modo) => {
+    modoTempo = modo; resetarTempo();
+    document.getElementById('cardLivre').classList.toggle('ativo', modo === 'livre');
+    document.getElementById('cardSimulado').classList.toggle('ativo', modo === 'simulado');
+    if (modo === 'simulado') atualizarTemporizador();
+  };
+
+  window.atualizarTemporizador = () => {
+    tempoLimite = parseInt(document.getElementById('selectTempo').value);
+    tempoSeg = tempoLimite; renderTempo();
+  };
+
+  window.toggleTempo = () => { timerAtivo ? pararTempo() : iniciarTempo(); };
+
+  function iniciarTempo() {
+    timerAtivo = true;
+    document.getElementById('iconeTempo').textContent = 'pause';
+    if (modoTempo === 'simulado' && tempoSeg === 0) tempoSeg = tempoLimite;
+    intervalId = setInterval(() => {
+      modoTempo === 'livre' ? tempoSeg++ : tempoSeg--;
+      if (modoTempo === 'simulado' && tempoSeg <= 0) {
+        tempoSeg = 0; pararTempo();
+        toast('⏰ Tempo esgotado! Envie sua redação agora.');
+      }
+      renderTempo();
+    }, 1000);
+  }
+
+  function pararTempo() {
+    timerAtivo = false; clearInterval(intervalId);
+    document.getElementById('iconeTempo').textContent = 'play_arrow';
+  }
+
+  window.resetarTempo = () => {
+    pararTempo();
+    tempoSeg = modoTempo === 'simulado' ? tempoLimite : 0;
+    renderTempo();
+  };
+
+  function renderTempo() {
+    const h = Math.floor(tempoSeg / 3600);
+    const m = Math.floor((tempoSeg % 3600) / 60);
+    const s = tempoSeg % 60;
+    const el = document.getElementById('display-tempo');
+    el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.classList.toggle('tempo-vermelho', modoTempo === 'simulado' && tempoSeg <= 300 && timerAtivo);
+  }
+
+  // ── MÉTODO DE ENVIO ────────────────────────────────
+  let metodoAtivo = 'texto', gravando = false, reconhecimento = null;
+  let arquivoBase64 = null, arquivoMime = null;
+
+  window.selecionarMetodo = (metodo) => {
+    if (gravando && metodo !== 'voz') pararVoz();
+    ['Texto','Voz','Pdf','Imagem'].forEach(m =>
+      document.getElementById('btn'+m).classList.remove('ativo'));
+    metodoAtivo = metodo;
+    document.getElementById('btn'+metodo.charAt(0).toUpperCase()+metodo.slice(1)).classList.add('ativo');
+    if (metodo === 'voz') toggleVoz();
+    else if (metodo === 'pdf') document.getElementById('inputPDF').click();
+    else if (metodo === 'imagem') document.getElementById('inputImagem').click();
+    else textarea.focus();
+  };
+
+  function toggleVoz() { gravando ? pararVoz() : iniciarVoz(); }
+
+  function iniciarVoz() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { toast('Use Chrome para reconhecimento de voz.'); return; }
+    reconhecimento = new SR();
+    reconhecimento.lang = 'pt-BR';
+    reconhecimento.continuous = true;
+    reconhecimento.interimResults = true;
+    let textoFinal = textarea.value;
+    reconhecimento.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        e.results[i].isFinal ? textoFinal += e.results[i][0].transcript + ' ' : interim = e.results[i][0].transcript;
+      }
+      textarea.value = textoFinal + interim;
+      atualizarContador();
+    };
+    reconhecimento.onerror = (e) => { toast('Erro no microfone: ' + e.error); pararVoz(); };
+    reconhecimento.start();
+    gravando = true;
+    document.getElementById('status-voz').classList.remove('hidden');
+    document.getElementById('btnVoz').classList.add('gravando');
+    toast('🎙️ Gravando... fale sua redação!');
+  }
+
+  function pararVoz() {
+    if (reconhecimento) reconhecimento.stop();
+    gravando = false;
+    document.getElementById('status-voz').classList.add('hidden');
+    document.getElementById('btnVoz').classList.remove('gravando');
+    toast('Gravação encerrada.');
+  }
+
+  document.getElementById('inputPDF').addEventListener('change', (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      arquivoBase64 = ev.target.result.split(',')[1]; arquivoMime = 'application/pdf';
+      mostrarArquivo(file.name);
+      textarea.value = ''; textarea.placeholder = 'PDF carregado: ' + file.name + '\n\nA Blanche irá analisar ao enviar.';
+      atualizarContador(); toast('PDF carregado!');
+    };
+    reader.readAsDataURL(file); e.target.value = '';
+  });
+
+  document.getElementById('inputImagem').addEventListener('change', (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      arquivoBase64 = ev.target.result.split(',')[1]; arquivoMime = file.type;
+      mostrarArquivo(file.name);
+      textarea.value = ''; textarea.placeholder = 'Imagem carregada: ' + file.name + '\n\nA Blanche irá ler o texto ao enviar.';
+      atualizarContador(); toast('Imagem carregada!');
+    };
+    reader.readAsDataURL(file); e.target.value = '';
+  });
+
+  function mostrarArquivo(nome) {
+    document.getElementById('nome-arquivo').textContent = nome;
+    document.getElementById('area-arquivo').classList.add('visivel');
+  }
+
+  window.removerArquivo = () => {
+    arquivoBase64 = null; arquivoMime = null;
+    document.getElementById('area-arquivo').classList.remove('visivel');
+    textarea.placeholder = 'Comece a escrever sua redação oficial...';
+    textarea.value = ''; atualizarContador();
+  };
+
+  // ── FORMATAÇÃO ─────────────────────────────────────
+  window.formatarTexto = (cmd) => {
+    const start = textarea.selectionStart, end = textarea.selectionEnd;
+    const sel = textarea.value.substring(start, end);
+    if (!sel) { textarea.focus(); return; }
+    const tag = cmd === 'bold' ? '**' : '_';
+    textarea.value = textarea.value.substring(0,start) + tag + sel + tag + textarea.value.substring(end);
+    atualizarContador();
+  };
+
+  // ── PAINEL BLANCHE ─────────────────────────────────
+  window.fecharPainel = () => document.getElementById('painel-blanche').classList.remove('aberto');
+
+  function abrirLoading() {
+    document.getElementById('painel-conteudo').innerHTML = `<div class="loading-b"><div class="spinner"></div><p style="color:#c8c4d7;font-size:.9rem;">Blanche está analisando sua redação...</p></div>`;
+    document.getElementById('painel-blanche').classList.add('aberto');
+  }
+
+  function renderResultado(d) {
+    const nomes = ["Domínio da língua escrita","Compreensão do tema","Seleção e organização das informações","Conhecimento dos mecanismos linguísticos","Proposta de intervenção"];
+    const comps = (d.competencias||[]).map((c,i) => {
+      const pct = Math.round((c.nota/200)*100);
+      return `<div class="comp-card"><div style="display:flex;justify-content:space-between;margin-bottom:.5rem;"><span style="font-size:.8rem;font-weight:600;color:#c8c4d7;">C${i+1} — ${nomes[i]}</span><span style="font-size:.8rem;font-weight:700;color:#45edee;">${c.nota}/200</span></div><div class="barra-bg"><div class="barra-fill" style="width:${pct}%"></div></div>${c.comentario?`<p style="font-size:.75rem;color:#928ea0;margin-top:.5rem;line-height:1.5;">${c.comentario}</p>`:''}</div>`;
+    }).join('');
+    const pts = (d.pontos_fortes||[]).map(p=>`<div class="lista-it"><span style="color:#4ade80;">✓</span><span>${p}</span></div>`).join('');
+    const mel = (d.melhorias||[]).map(m=>`<div class="lista-it"><span style="color:#fabd00;">→</span><span>${m}</span></div>`).join('');
+    document.getElementById('painel-conteudo').innerHTML = `
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:.75rem;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;">Nota Total</div>
+        <div class="nota-numero">${d.nota_total||'—'}</div>
+        <div style="font-size:.75rem;color:#928ea0;">/1000 pontos</div>
+      </div>${comps}
+      ${pts?`<div class="secao-tit">Pontos fortes</div>${pts}`:''}
+      ${mel?`<div class="secao-tit">O que melhorar</div>${mel}`:''}
+      ${d.comentario_geral?`<div class="coment-geral">"${d.comentario_geral}"</div>`:''}`;
+  }
+
+  function renderErro(msg) {
+    document.getElementById('painel-conteudo').innerHTML = `<div style="text-align:center;padding:2rem;color:#928ea0;"><span class="material-symbols-outlined" style="font-size:2.5rem;color:#ff6b6b;display:block;margin-bottom:1rem;">error</span><p>${msg}</p></div>`;
+  }
+
+  // ── ENVIO ──────────────────────────────────────────
+  async function enviar() {
+    const texto = textarea.value.trim();
+    const temArquivo = !!arquivoBase64;
+    if (!texto && !temArquivo) { toast('Escreva sua redação ou envie um arquivo!'); return; }
+    if (!temArquivo && texto.split(/\s+/).length < 50) { toast('Mínimo de 50 palavras para enviar.'); return; }
+    setBotoes(true); abrirLoading();
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const instrucao = `Você é a Profa. Blanche da RedaON, mentora especialista em redação ENEM. Avalie pelas 5 competências do ENEM (0 a 200 cada). Responda APENAS com JSON válido, sem markdown: {"nota_total":<soma>,"competencias":[{"nota":<0-200>,"comentario":"<breve>"},{"nota":<0-200>,"comentario":"<breve>"},{"nota":<0-200>,"comentario":"<breve>"},{"nota":<0-200>,"comentario":"<breve>"},{"nota":<0-200>,"comentario":"<breve>"}],"pontos_fortes":["<p1>","<p2>","<p3>"],"melhorias":["<m1>","<m2>","<m3>"],"comentario_geral":"<mensagem motivacional>"}`;
+      let result;
+      if (temArquivo) {
+        result = await model.generateContent([instrucao + "\n\nAnalise o texto da redação neste arquivo:", { inlineData: { data: arquivoBase64, mimeType: arquivoMime } }]);
+      } else {
+        result = await model.generateContent(instrucao + "\n\nRedação:\n" + texto);
+      }
+      const json = result.response.text().trim().replace(/```json|```/g,'').trim();
+      renderResultado(JSON.parse(json));
+    } catch(err) {
+      console.error(err); renderErro("Erro na conexão com a Mestra Blanche. Tente novamente.");
+    } finally { setBotoes(false); }
+  }
+
+  function setBotoes(loading) {
+    document.getElementById('btnEnviar').textContent = loading ? 'Analisando...' : 'Enviar para correção';
+    document.getElementById('btnEnviar').disabled = loading;
+  }
+
+  document.getElementById('btnEnviar').addEventListener('click', enviar);
+  document.getElementById('btnRevisar').addEventListener('click', () => {
+    if (!textarea.value.trim()) { toast('Escreva algo antes de revisar!'); return; }
+    toast('Função de revisão em breve! 🚀');
+  });
+</script>
+</body>
+</html>

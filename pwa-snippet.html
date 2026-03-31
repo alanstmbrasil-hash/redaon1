@@ -1,0 +1,109 @@
+<!-- ════════════════════════════════════════════════
+     REDAON PWA — Cole este bloco no <head> de
+     todas as páginas HTML, antes do </head>
+     ════════════════════════════════════════════════ -->
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json"/>
+
+<!-- Theme color (barra do navegador) -->
+<meta name="theme-color" content="#45edee"/>
+<meta name="background-color" content="#0b0e14"/>
+
+<!-- iOS / Safari PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="RedaON"/>
+<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png"/>
+<link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144.png"/>
+
+<!-- Android -->
+<meta name="mobile-web-app-capable" content="yes"/>
+
+<!-- Microsoft Tiles -->
+<meta name="msapplication-TileImage" content="/icons/icon-144.png"/>
+<meta name="msapplication-TileColor" content="#0b0e14"/>
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-96.png"/>
+<link rel="shortcut icon" href="/icons/icon-96.png"/>
+
+<!-- SEO básico -->
+<meta name="description" content="RedaON — Plataforma de redação ENEM com mentoria IA da Profa. Blanche. Corrija, evolua e alcance a nota 1.000."/>
+<meta name="keywords" content="redação ENEM, correção redação, nota 1000, Blanche, mentoria IA"/>
+<meta property="og:title" content="RedaON — Redação ENEM"/>
+<meta property="og:description" content="Corrija sua redação com IA e alcance a nota 1.000 no ENEM."/>
+<meta property="og:image" content="/icons/icon-512.png"/>
+<meta property="og:type" content="website"/>
+
+<!-- ════════════════════════════════════════════════
+     REDAON PWA — Cole este bloco antes do </body>
+     ════════════════════════════════════════════════ -->
+<script>
+// Registrar Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+      console.log('[RedaON] Service Worker registrado:', reg.scope);
+
+      // Verificar atualizações a cada 30 minutos
+      setInterval(() => reg.update(), 30 * 60 * 1000);
+
+      reg.addEventListener('updatefound', () => {
+        const novo = reg.installing;
+        novo.addEventListener('statechange', () => {
+          if (novo.state === 'installed' && navigator.serviceWorker.controller) {
+            mostrarBannerAtualizacao();
+          }
+        });
+      });
+    } catch (err) {
+      console.warn('[RedaON] Service Worker não registrado:', err);
+    }
+  });
+}
+
+// Banner de atualização disponível
+function mostrarBannerAtualizacao() {
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:#1d2026;border:1px solid rgba(69,237,238,.3);color:#e1e2eb;padding:.875rem 1.5rem;border-radius:.875rem;z-index:9999;display:flex;align-items:center;gap:1rem;box-shadow:0 8px 32px rgba(0,0,0,.4);font-family:Inter,sans-serif;font-size:.85rem;';
+  banner.innerHTML = `
+    <span>🔄 Nova versão disponível!</span>
+    <button onclick="window.location.reload()" style="background:#45edee;color:#002020;border:none;padding:.4rem .875rem;border-radius:.5rem;font-weight:700;cursor:pointer;font-size:.8rem;">Atualizar</button>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#928ea0;cursor:pointer;font-size:1.1rem;">✕</button>`;
+  document.body.appendChild(banner);
+  setTimeout(() => banner?.remove(), 15000);
+}
+
+// Botão "Instalar App" (aparece quando navegador suporta)
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Mostrar botão de instalação se existir na página
+  const btnInstalar = document.getElementById('btnInstalarApp');
+  if (btnInstalar) {
+    btnInstalar.style.display = 'flex';
+    btnInstalar.addEventListener('click', async () => {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('[RedaON] Instalação:', outcome);
+      deferredPrompt = null;
+      btnInstalar.style.display = 'none';
+    });
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('[RedaON] App instalado com sucesso!');
+  deferredPrompt = null;
+});
+
+// Detectar modo standalone (app instalado)
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  console.log('[RedaON] Rodando como PWA instalado');
+  document.documentElement.classList.add('pwa-mode');
+}
+</script>

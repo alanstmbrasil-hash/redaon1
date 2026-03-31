@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Elite Login</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-container-low": "#191c22", "secondary": "#45edee",
+          "on-surface-variant": "#c8c4d7", "on-error": "#690005",
+          "surface": "#10131a", "on-primary": "#2900a0", "outline-variant": "#474554",
+          "outline": "#928ea0", "on-primary-container": "#faf6ff",
+          "on-background": "#e1e2eb", "on-surface": "#e1e2eb",
+          "surface-container-lowest": "#0b0e14", "surface-container": "#1d2026",
+          "surface-container-high": "#272a31", "primary-container": "#6c5ce7",
+          "primary": "#c6bfff", "background": "#10131a", "error": "#ffb4ab",
+        },
+        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    background-color: #0b0e14;
+    color: #e1e2eb;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .luminous-mesh {
+    background: radial-gradient(circle at top right, rgba(108,92,231,0.08), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(69,237,238,0.05), transparent 40%);
+  }
+  .elite-glow { box-shadow: 0 0 20px rgba(108,92,231,0.5), 0 0 40px rgba(108,92,231,0.2); }
+  .elite-glow:hover { box-shadow: 0 0 30px rgba(108,92,231,0.7), 0 0 60px rgba(108,92,231,0.3); }
+  .input-glow:focus-within { box-shadow: 0 0 15px rgba(69,237,238,0.15); }
+
+  /* Shake animation para erro */
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-8px)}
+    40%{transform:translateX(8px)}
+    60%{transform:translateX(-5px)}
+    80%{transform:translateX(5px)}
+  }
+  .shake { animation: shake 0.4s ease; }
+
+  /* Mensagem de erro */
+  .campo-erro { border-color: #ffb4ab !important; box-shadow: 0 0 10px rgba(255,100,80,0.2); }
+  .msg-erro { color: #ffb4ab; font-size: 0.75rem; margin-top: 0.35rem; margin-left: 0.25rem; display: none; }
+  .msg-erro.visivel { display: block; }
+
+  /* Loading spinner no botão */
+  .btn-spinner { display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(5rem); background: #1d2026; border: 1px solid rgba(255,255,255,0.1); color: #e1e2eb; padding: .75rem 1.5rem; border-radius: .75rem; font-size: .85rem; box-shadow: 0 8px 32px rgba(0,0,0,.5); z-index: 999; transition: transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.sucesso { border-color: rgba(69,237,238,0.3); color: #45edee; }
+  #toast.erro { border-color: rgba(255,100,80,0.3); color: #ffb4ab; }
+</style>
+</head>
+<body class="h-screen w-screen m-0 p-0 overflow-hidden">
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<main class="w-full h-full grid md:grid-cols-2">
+
+  <!-- LADO ESQUERDO: Imagem -->
+  <section class="hidden md:flex flex-col items-center justify-center relative overflow-hidden h-full">
+    <div class="absolute inset-0 z-0">
+      <img alt="Biblioteca atmosférica" class="w-full h-full object-cover opacity-40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDA5W1_IHPuNlz8cGlguv_TP9uxNk3JXkysCbowkUtwCO6t7Ri77LWRch2dHfKcKrMh1B_hD2VHAtO0AsNQbjlsOXM41rNtCYc3eTbwZfg75O6EQHQO5jk2BLyPSYqT0P4_HTCasH6oAMVYo6PQftDNrZJrhv04gjRVIa8rnC4oFJpJ6C9QMkIcAGYK_xX1zeeB9B8iWbvLAWnYCsS7C5jeotOHH7iVcs3SNTB6yRHdEjj-JhSPaPryl-lE-hG7lj7pdiopKTB-1m"/>
+      <div class="absolute inset-0 bg-gradient-to-br from-[#0b0e14]/80 via-transparent to-[#0b0e14]/80"></div>
+    </div>
+    <div class="relative z-10 flex flex-col items-center justify-center text-center p-12">
+      <div class="inline-block">
+        <div class="italic font-extrabold text-6xl md:text-8xl leading-none tracking-tighter select-none mb-6 flex justify-center">
+          <span class="text-white">Reda</span><span class="text-[#45EDEE]">ON</span>
+        </div>
+        <p class="text-xl md:text-2xl font-bold text-white tracking-wide whitespace-nowrap border-t border-white/10 pt-6">Sua nota 1.000 começa aqui.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LADO DIREITO: Formulário -->
+  <section class="h-full flex flex-col justify-center items-center bg-[#0b0e14] luminous-mesh p-8 md:p-16 relative">
+
+    <!-- Logo mobile -->
+    <div class="md:hidden flex items-center gap-2 mb-12 absolute top-12">
+      <span class="italic font-extrabold text-2xl tracking-tighter">
+        <span class="text-white">Reda</span><span class="text-[#45EDEE]">ON</span>
+      </span>
+    </div>
+
+    <div class="w-full max-w-md">
+      <div class="mb-10">
+        <h2 class="text-3xl font-bold text-on-surface mb-2 tracking-tight">Bem-vindo de volta</h2>
+        <p class="text-on-surface-variant font-medium">Acesse sua conta para continuar sua jornada</p>
+      </div>
+
+      <form id="formLogin" class="space-y-6" novalidate>
+
+        <!-- Email -->
+        <div class="space-y-1">
+          <label class="block text-sm font-semibold text-on-surface-variant ml-1 uppercase tracking-wider" for="email">Email</label>
+          <div class="relative group input-glow" id="wrapEmail">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-[#45edee] transition-colors">mail</span>
+            <input id="email" class="w-full h-14 pl-12 pr-4 bg-surface-container-lowest border border-outline-variant/20 rounded-xl text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#45edee]/20 focus:border-[#45edee] transition-all duration-200" placeholder="seu@email.com" type="email" autocomplete="email"/>
+          </div>
+          <p class="msg-erro" id="erroEmail">Por favor, insira um e-mail válido.</p>
+        </div>
+
+        <!-- Senha -->
+        <div class="space-y-1">
+          <div class="flex justify-between items-center ml-1">
+            <label class="block text-sm font-semibold text-on-surface-variant uppercase tracking-wider" for="password">Senha</label>
+            <a class="text-sm font-medium text-[#45edee] hover:brightness-125 transition-all" href="#">Esqueci minha senha</a>
+          </div>
+          <div class="relative group input-glow" id="wrapSenha">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-[#45edee] transition-colors">lock</span>
+            <input id="password" class="w-full h-14 pl-12 pr-12 bg-surface-container-lowest border border-outline-variant/20 rounded-xl text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#45edee]/20 focus:border-[#45edee] transition-all duration-200" placeholder="••••••••" type="password" autocomplete="current-password"/>
+            <!-- Botão mostrar/ocultar senha -->
+            <button type="button" id="btnToggleSenha" onclick="toggleSenha()" class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-[#45edee] transition-colors">
+              <span class="material-symbols-outlined" id="iconeSenha">visibility</span>
+            </button>
+          </div>
+          <p class="msg-erro" id="erroSenha">A senha deve ter pelo menos 6 caracteres.</p>
+        </div>
+
+        <!-- Botão principal -->
+        <button id="btnEntrar" type="submit" class="w-full h-14 bg-[#6c5ce7] text-white font-black text-lg rounded-xl elite-glow hover:brightness-110 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 tracking-widest uppercase">
+          <span id="btnTexto">Entrar para a Elite</span>
+          <span class="material-symbols-outlined text-xl text-[#45edee]" id="btnIcone">arrow_forward</span>
+          <div class="btn-spinner" id="btnSpinner"></div>
+        </button>
+      </form>
+
+      <!-- Divisor -->
+      <div class="relative my-10 flex items-center">
+        <div class="flex-grow border-t border-outline-variant/20"></div>
+        <span class="mx-4 text-sm font-semibold text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Ou entre com</span>
+        <div class="flex-grow border-t border-outline-variant/20"></div>
+      </div>
+
+      <!-- Botões sociais -->
+      <div class="grid grid-cols-2 gap-4">
+        <button onclick="loginSocial('Google')" class="h-14 flex items-center justify-center gap-3 bg-[#1d2026] border border-outline-variant/10 rounded-xl font-semibold hover:bg-surface-container-high transition-colors text-on-surface">
+          <img alt="Google" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0uvGkV1JwqjoMU7Wt1-iCsumfdog_Ivjd2dAoI5_Rt734a4HIReQMT44hHDrK_d_3tnICx3Rc5wPEfAABURHUf2k29G1pyO9i3G8o7Qe3jTg23t-2O5HIhNThvBmyFKfxDm0L6Hblx3mU_vsZ2c-B-H_T9BAM5W-usUPQWmsEhXpcBUEA2j8auNedJ1z7Gj7qJBTDNVmU0oLrr66rUYcmaH0yg3rVZIP0ZJK4EWEI49hET1rX3BaKp8DSLGwpmIvR0wiVZ1l-0LRM"/>
+          Google
+        </button>
+        <button onclick="loginSocial('Apple')" class="h-14 flex items-center justify-center gap-3 bg-[#1d2026] border border-outline-variant/10 rounded-xl font-semibold hover:bg-surface-container-high transition-colors text-on-surface">
+          <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1;">ios</span>
+          Apple
+        </button>
+      </div>
+
+      <!-- Cadastro -->
+      <p class="mt-12 text-center text-on-surface-variant font-medium">
+        Não tem uma conta?
+        <a class="text-[#45edee] font-bold hover:underline underline-offset-4 decoration-2 decoration-[#45edee]/30 ml-1" href="cadastro.html">Cadastre-se</a>
+      </p>
+    </div>
+  </section>
+</main>
+
+<!-- Decoração -->
+<div class="fixed bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+<div class="fixed top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 text-[15vw] font-black text-white/5 select-none pointer-events-none z-[-1] uppercase whitespace-nowrap">REDAÇÃO</div>
+
+<script>
+  // ── TOAST ──────────────────────────────────────────
+  function toast(msg, tipo = '', dur = 3500) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show ' + tipo;
+    setTimeout(() => el.className = '', dur);
+  }
+
+  // ── MOSTRAR / OCULTAR SENHA ────────────────────────
+  window.toggleSenha = function() {
+    const input = document.getElementById('password');
+    const icone = document.getElementById('iconeSenha');
+    const visivel = input.type === 'text';
+    input.type = visivel ? 'password' : 'text';
+    icone.textContent = visivel ? 'visibility' : 'visibility_off';
+  };
+
+  // ── VALIDAÇÃO ──────────────────────────────────────
+  function validarEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function mostrarErro(inputId, erroId, wrapId, mostrar) {
+    const input = document.getElementById(inputId);
+    const erro = document.getElementById(erroId);
+    const wrap = document.getElementById(wrapId);
+    if (mostrar) {
+      input.classList.add('campo-erro');
+      erro.classList.add('visivel');
+      wrap.classList.add('shake');
+      setTimeout(() => wrap.classList.remove('shake'), 400);
+    } else {
+      input.classList.remove('campo-erro');
+      erro.classList.remove('visivel');
+    }
+    return !mostrar;
+  }
+
+  // ── LOADING NO BOTÃO ───────────────────────────────
+  function setBtnLoading(loading) {
+    document.getElementById('btnTexto').style.display = loading ? 'none' : 'inline';
+    document.getElementById('btnIcone').style.display = loading ? 'none' : 'inline';
+    document.getElementById('btnSpinner').style.display = loading ? 'block' : 'none';
+    document.getElementById('btnEntrar').disabled = loading;
+  }
+
+  // ── LOGIN SOCIAL (placeholder) ─────────────────────
+  window.loginSocial = function(provider) {
+    toast(`Login com ${provider} em breve! 🚀`);
+  };
+
+  // ── SUBMIT DO FORMULÁRIO ───────────────────────────
+  document.getElementById('formLogin').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('password').value;
+
+    // Validação
+    const emailOk = mostrarErro('email', 'erroEmail', 'wrapEmail', !validarEmail(email));
+    const senhaOk = mostrarErro('password', 'erroSenha', 'wrapSenha', senha.length < 6);
+
+    if (!emailOk || !senhaOk) return;
+
+    // Simula autenticação (substituir por backend real)
+    setBtnLoading(true);
+    await new Promise(r => setTimeout(r, 1500));
+    setBtnLoading(false);
+
+    // ✅ Login bem-sucedido → redireciona para o dashboard
+    toast('Bem-vindo de volta! Redirecionando...', 'sucesso', 2000);
+    setTimeout(() => {
+      // Simula detecção de perfil (em produção viria do backend)
+      // Emails com 'prof' redirecionam para portal do professor
+      const emailVal = document.getElementById('email').value.toLowerCase();
+      if (emailVal.includes('prof') || emailVal.includes('professor')) {
+        window.location.href = 'professor.html';
+      } else {
+        window.location.href = 'inicio.html';
+      }
+    }, 2000);
+  });
+
+  // Limpar erros ao digitar
+  document.getElementById('email').addEventListener('input', () =>
+    mostrarErro('email', 'erroEmail', 'wrapEmail', false));
+  document.getElementById('password').addEventListener('input', () =>
+    mostrarErro('password', 'erroSenha', 'wrapSenha', false));
+</script>
+</body>
+</html>

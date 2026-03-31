@@ -1,0 +1,61 @@
+{
+  "name": "RedaON — Redação ENEM",
+  "short_name": "RedaON",
+  "description": "Plataforma de redação ENEM com mentoria IA da Profa. Blanche",
+  "start_url": "/login.html",
+  "display": "standalone",
+  "background_color": "#0b0e14",
+  "theme_color": "#45edee",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "icons/icon-72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-128.png",  "sizes": "128x128", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-144.png",  "sizes": "144x144", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-152.png",  "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-192.png",  "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-384.png",  "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nova Redação",
+      "short_name": "Escrever",
+      "description": "Iniciar uma nova redação",
+      "url": "/nova-redacao.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Meus Temas",
+      "short_name": "Temas",
+      "description": "Ver biblioteca de temas",
+      "url": "/temas.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Minhas Redações",
+      "short_name": "Redações",
+      "description": "Ver redações corrigidas",
+      "url": "/minhas-redacoes.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "RedaON no Desktop"
+    },
+    {
+      "src": "screenshots/mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "RedaON no Celular"
+    }
+  ]
+}
