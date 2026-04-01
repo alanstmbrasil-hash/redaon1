@@ -10,6 +10,15 @@
     });
   });
 </script>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "ced19395-bdaf-47e0-90d4-eb39698dbdad",
+    });
+  });
+</script>
 ```
 
 Depois clique em **"Commit changes..."** e repita a mensagem:
