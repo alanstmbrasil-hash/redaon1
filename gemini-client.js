@@ -75,7 +75,7 @@
   // Mantém compatibilidade enquanto o backend não está pronto
   async function chamarLocal(tipo, payload = {}) {
     // Chave temporária de dev — REMOVER em produção
-    const DEV_KEY = 'AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU';
+    const DEV_KEY = '';
 
     try {
       const { GoogleGenerativeAI } = await import(
