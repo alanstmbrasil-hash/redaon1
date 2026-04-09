@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "ced19395-bdaf-47e0-90d4-eb39698dbdad",
-    });
-  });
-</script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Início</title>
@@ -23,22 +14,15 @@
     theme: {
       extend: {
         colors: {
-          "on-primary-fixed": "#160066", "on-error-container": "#ffdad6", "on-secondary": "#003737",
-          "inverse-on-surface": "#2e3037", "secondary-fixed": "#56f9f9", "surface-container": "#1d2026",
-          "tertiary-container": "#906c00", "tertiary": "#fabd00", "surface-container-lowest": "#0b0e14",
-          "surface-container-low": "#191c22", "on-tertiary-fixed-variant": "#5b4300", "background": "#10131a",
-          "primary-fixed-dim": "#c6bfff", "outline-variant": "#474554", "on-surface-variant": "#c8c4d7",
-          "on-primary-fixed-variant": "#4029ba", "primary-container": "#6c5ce7", "surface-tint": "#c6bfff",
-          "on-primary": "#2900a0", "on-primary-container": "#faf6ff", "inverse-surface": "#e1e2eb",
-          "on-error": "#690005", "on-surface": "#e1e2eb", "secondary-fixed-dim": "#26dcdd",
-          "surface-container-highest": "#32353c", "tertiary-fixed-dim": "#fabd00", "on-tertiary-fixed": "#261a00",
-          "primary": "#c6bfff", "outline": "#928ea0", "on-secondary-container": "#005455",
-          "on-background": "#e1e2eb", "surface-bright": "#363940", "error-container": "#93000a",
-          "surface-dim": "#10131a", "surface-variant": "#32353c", "on-secondary-fixed": "#002020",
-          "error": "#ffb4ab", "surface-container-high": "#272a31", "primary-fixed": "#e4dfff",
-          "on-tertiary-container": "#fff6ec", "secondary": "#45edee", "on-tertiary": "#3f2e00",
-          "on-secondary-fixed-variant": "#004f50", "secondary-container": "#00d0d1",
-          "tertiary-fixed": "#ffdf9e", "surface": "#10131a", "inverse-primary": "#5847d2"
+          "surface-container": "#1d2026", "tertiary": "#fabd00",
+          "surface-container-lowest": "#0b0e14", "surface-container-low": "#191c22",
+          "background": "#10131a", "outline-variant": "#474554",
+          "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
+          "primary": "#c6bfff", "outline": "#928ea0",
+          "on-background": "#e1e2eb", "on-surface": "#e1e2eb",
+          "surface-container-highest": "#32353c",
+          "secondary": "#45edee", "surface": "#10131a",
+          "error": "#ffb4ab", "surface-container-high": "#272a31",
         },
         fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
         borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
@@ -53,13 +37,47 @@
   .custom-scrollbar::-webkit-scrollbar { width: 6px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
-  #sidebar-toggle:checked ~ aside { transform: translateX(0); }
-  #sidebar-toggle:checked ~ .content-overlay { display: block; }
-
-  /* Animação contador */
   @keyframes countUp { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
   .count-anim { animation: countUp 0.6s ease forwards; }
+
+  /* ── Sidebar hambúrguer ── */
+  #sidebar {
+    position: fixed; left: 0; top: 0; height: 100%; width: 256px;
+    transform: translateX(-256px);
+    transition: transform .3s ease;
+    z-index: 50;
+  }
+  #sidebar.open { transform: translateX(0); }
+  #overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.6); z-index: 45;
+  }
+  #overlay.open { display: block; }
+
+  /* Desktop: sidebar sempre visível */
+  @media (min-width: 1024px) {
+    #sidebar { transform: translateX(0) !important; }
+    #overlay { display: none !important; }
+    #main-content { margin-left: 256px; }
+    #btnHamburger { display: none !important; }
+  }
+  @media (max-width: 1023px) {
+    #main-content { margin-left: 0 !important; }
+  }
+
+  /* Badge dos vídeos */
+  .video-badge {
+    display: inline-block;
+    padding: .2rem .6rem;
+    border-radius: 9999px;
+    font-size: .65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-right: .4rem;
+  }
 </style>
+<script src="supabase-auth.js"></script>
 </head>
 <body class="bg-background text-on-surface antialiased overflow-x-hidden">
 
@@ -68,263 +86,270 @@
   <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
 </div>
 
-<input class="hidden peer" id="sidebar-toggle" type="checkbox"/>
-<label class="content-overlay fixed inset-0 bg-black/60 z-[45] hidden transition-opacity lg:hidden" for="sidebar-toggle"></label>
+<!-- Overlay -->
+<div id="overlay" onclick="toggleSidebar()"></div>
 
-<div class="flex h-screen overflow-hidden relative z-10">
-
-  <!-- SIDEBAR -->
-  <aside class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50 transition-transform duration-300 -translate-x-full lg:translate-x-0 shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)]">
-    <div class="flex items-center px-2 mb-10">
-      <div class="flex items-baseline italic">
-        <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
-        <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
-      </div>
+<!-- SIDEBAR -->
+<aside id="sidebar" class="bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)]">
+  <div class="flex items-center px-2 mb-10">
+    <div class="flex items-baseline italic">
+      <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
+      <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
     </div>
-    <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="inicio.html">
-        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span>
-        <span class="font-medium text-sm">Início</span>
-      </a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="redaon.html">
-        <span class="material-symbols-outlined">add_circle</span>
-        <span class="font-medium text-sm">Nova Redação</span>
-      </a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="temas.html">
-        <span class="material-symbols-outlined">description</span>
-        <span class="font-medium text-sm">Temas</span>
-      </a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html">
-        <span class="material-symbols-outlined">edit_note</span>
-        <span class="font-medium text-sm">Minhas Redações</span>
-      </a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="evolucao.html">
-        <span class="material-symbols-outlined">trending_up</span>
-        <span class="font-medium text-sm">Evolução</span>
-      </a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html">
-        <span class="material-symbols-outlined">menu_book</span>
-        <span class="font-medium text-sm">Plano de Estudo</span>
-      </a>
+  </div>
+  <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="inicio.html">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span>
+      <span class="font-medium text-sm">Início</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="nova-redacao.html">
+      <span class="material-symbols-outlined">add_circle</span>
+      <span class="font-medium text-sm">Nova Redação</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="temas.html">
+      <span class="material-symbols-outlined">description</span>
+      <span class="font-medium text-sm">Temas</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html">
+      <span class="material-symbols-outlined">edit_note</span>
+      <span class="font-medium text-sm">Minhas Redações</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="evolucao.html">
+      <span class="material-symbols-outlined">trending_up</span>
+      <span class="font-medium text-sm">Evolução</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html">
+      <span class="material-symbols-outlined">menu_book</span>
+      <span class="font-medium text-sm">Plano de Estudo</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Estúdio <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html">
-        <span class="material-symbols-outlined">leaderboard</span>
-        <span class="font-medium text-sm">Ranking</span>
-      </a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html">
-        <span class="material-symbols-outlined">settings</span>
-        <span class="font-medium text-sm">Configurações</span>
-      </a>
-    </nav>
-    <!-- Footer Profile -->
-    <div class="mt-auto pt-6 border-t border-outline-variant/10">
-      <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
-        <img alt="Alan Alves" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
-        <div class="flex flex-col">
-          <span class="text-sm font-semibold text-on-surface">Alan Alves</span>
-          <span class="text-xs text-on-surface-variant">Estudante Premium</span>
-        </div>
+      <span class="material-symbols-outlined">leaderboard</span>
+      <span class="font-medium text-sm">Ranking</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html">
+      <span class="material-symbols-outlined">settings</span>
+      <span class="font-medium text-sm">Configurações</span>
+    </a>
+  </nav>
+  <div class="mt-auto pt-6 border-t border-outline-variant/10">
+    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
+      <img alt="Usuário" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
+      <div class="flex flex-col">
+        <span id="nomeUsuarioSidebar" class="text-sm font-semibold text-on-surface">Estudante</span>
+        <span class="text-xs text-on-surface-variant">Estudante Premium</span>
       </div>
-      <a onclick="sair()" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 cursor-pointer">
-        <span class="material-symbols-outlined text-sm">logout</span>
-        <span class="font-medium text-sm">Sair</span>
-      </a>
     </div>
-  </aside>
+    <a onclick="sair()" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 cursor-pointer">
+      <span class="material-symbols-outlined text-sm">logout</span>
+      <span class="font-medium text-sm">Sair</span>
+    </a>
+  </div>
+</aside>
 
-  <!-- MAIN -->
-  <main class="flex-1 flex flex-col h-full relative bg-surface-container-lowest lg:ml-64 w-full">
+<!-- MAIN -->
+<div id="main-content" class="flex flex-col min-h-screen relative z-10">
 
-    <!-- TOP BAR -->
-    <header class="h-20 flex items-center justify-between px-6 lg:px-10 bg-surface/40 backdrop-blur-md sticky top-0 z-40 border-b border-white/5 w-full">
-      <div class="flex items-center gap-4">
-        <label class="cursor-pointer p-1 text-on-surface lg:hidden" for="sidebar-toggle">
-          <span class="material-symbols-outlined">menu</span>
-        </label>
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">home</span>
-          <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Início</h2>
-        </div>
+  <!-- TOP BAR -->
+  <header class="h-20 flex items-center justify-between px-4 lg:px-10 bg-surface/40 backdrop-blur-md sticky top-0 z-40 border-b border-white/5 w-full">
+    <div class="flex items-center gap-3">
+      <!-- Botão hambúrguer — apenas mobile/tablet -->
+      <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">home</span>
+        <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Início</h2>
       </div>
-      <div class="flex items-center gap-4 lg:gap-6">
-        <div class="hidden sm:flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
-          <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
-          <span class="text-xs font-bold text-on-surface">940 pts</span>
-        </div>
-        <button onclick="toggleNotificacoes()" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
-          <span class="material-symbols-outlined">notifications</span>
-          <span id="badgeNotif" class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
-        </button>
-      </div>
-    </header>
-
-    <!-- CONTEÚDO -->
-    <div class="flex-1 overflow-y-auto p-6 lg:p-10 custom-scrollbar space-y-12">
-
-      <!-- BANNER -->
-      <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#6c5ce7] to-[#45edee] p-8 lg:p-12 flex flex-col xl:flex-row justify-between items-center gap-8 shadow-2xl">
-        <div class="relative z-10 text-center xl:text-left">
-          <h1 id="saudacao" class="text-4xl lg:text-5xl xl:text-6xl font-black italic text-white mb-6 tracking-tight drop-shadow-lg leading-tight">
-            Bom dia,<br/>Alan Alves,
-          </h1>
-          <p class="text-white/90 text-base lg:text-lg max-w-md font-medium mx-auto xl:mx-0">
-            Sua jornada rumo à nota 1000 continua hoje. Explore seu potencial máximo.
-          </p>
-        </div>
-        <div class="flex flex-wrap justify-center gap-4 relative z-10 w-full xl:w-auto">
-          <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[120px] flex-1 sm:flex-none">
-            <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Média</span>
-            <span id="statMedia" class="text-white text-3xl font-black count-anim">760</span>
-          </div>
-          <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[120px] flex-1 sm:flex-none">
-            <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Ranking</span>
-            <span id="statRanking" class="text-white text-3xl font-black count-anim">#42</span>
-          </div>
-          <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[120px] flex-1 sm:flex-none">
-            <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Evolução</span>
-            <span id="statEvolucao" class="text-white text-3xl font-black count-anim">+40</span>
-          </div>
-        </div>
-        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-      </section>
-
-      <!-- POTENCIALIZE SUA ESCRITA -->
-      <section>
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-lg lg:text-xl font-black text-on-surface tracking-widest uppercase flex items-center gap-3">
-            <span class="w-8 h-1 bg-[#45edee] rounded-full"></span>
-            Potencialize sua Escrita
-          </h2>
-          <button class="text-[#45edee] text-sm font-bold hover:underline">Ver Todos</button>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div onclick="acessarAula('Sugestão da Blanche')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full cursor-pointer">
-            <div class="w-12 h-12 rounded-2xl bg-[#6c5ce7]/20 flex items-center justify-center text-[#6c5ce7] mb-6">
-              <span class="material-symbols-outlined text-3xl">psychology</span>
-            </div>
-            <h3 class="text-lg font-bold text-white mb-2">Sugestão da Blanche</h3>
-            <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Repertórios críticos e análises sociológicas personalizadas.</p>
-            <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
-              <span>Acessar Aula</span>
-              <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </div>
-          </div>
-          <div onclick="acessarAula('Projeto de Texto')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full cursor-pointer">
-            <div class="w-12 h-12 rounded-2xl bg-secondary/20 flex items-center justify-center text-secondary mb-6">
-              <span class="material-symbols-outlined text-3xl">architecture</span>
-            </div>
-            <h3 class="text-lg font-bold text-white mb-2">Projeto de Texto</h3>
-            <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Estruturação lógica para garantir a nota máxima na C3.</p>
-            <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
-              <span>Acessar Aula</span>
-              <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </div>
-          </div>
-          <div onclick="acessarAula('Proposta Premium')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 border-l-2 border-[#45edee] flex flex-col h-full cursor-pointer">
-            <div class="w-12 h-12 rounded-2xl bg-tertiary/20 flex items-center justify-center text-tertiary mb-6">
-              <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">star</span>
-            </div>
-            <h3 class="text-lg font-bold text-white mb-2">Proposta Premium</h3>
-            <p class="text-on-surface-variant text-sm leading-relaxed mb-6">O segredo dos 200 pontos na Competência 5.</p>
-            <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
-              <span>Acessar Aula</span>
-              <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </div>
-          </div>
-          <div onclick="acessarAula('Gramática Ágil')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full cursor-pointer">
-            <div class="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary mb-6">
-              <span class="material-symbols-outlined text-3xl">history_edu</span>
-            </div>
-            <h3 class="text-lg font-bold text-white mb-2">Gramática Ágil</h3>
-            <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Erros comuns que tiram pontos preciosos na C1.</p>
-            <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
-              <span>Acessar Aula</span>
-              <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- EXPLORE E INSPIRE-SE -->
-      <section class="pb-24 lg:pb-10">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-lg lg:text-xl font-black text-on-surface tracking-widest uppercase flex items-center gap-3">
-            <span class="w-8 h-1 bg-[#6c5ce7] rounded-full"></span>
-            Explore e Inspire-se
-          </h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <!-- Vídeo 1 -->
-          <div onclick="assistirVideo('Como estruturar a Tese 1 e 2 com clareza')" class="group relative bg-[#1d2026] rounded-3xl overflow-hidden border border-white/5 shadow-lg cursor-pointer">
-            <div class="aspect-video relative overflow-hidden">
-              <img alt="Video Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4yXHFvsa61Gr0AcJW22PaxbuzAKVPrQzAgg9UmwRwG4qhA16LlQKbBXwD9pW9F0PCQLyMaMILMIHS1WLyiF-84Clw30Ct7s-c5vOVaTvXW-ikWP_erQAansgQT3fq7GZnuQ9wWBTStdpmZQktWf2OKCbx_gCgGuEUAc5uwUBWzjpaTjAjpDUXOKRFEVD_MjKwRn7xJjJgXADsbmPHuUjLOswOYLX-s_l4HrTZZQSXQLu4AIBrnMe0EkKAIqS7dakX5DOmpi-Zo_dN"/>
-              <div class="absolute inset-0 flex items-center justify-center">
-                <button class="w-14 h-14 rounded-full bg-[#45edee] text-[#002020] flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
-                  <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
-                </button>
-              </div>
-              <div class="absolute top-4 left-4 bg-[#45edee] px-3 py-1 rounded-full text-[10px] font-black text-[#002020] uppercase tracking-wider">Correção Guiada</div>
-              <div class="absolute bottom-4 right-4 bg-black/60 px-2 py-1 rounded-md text-[10px] font-bold text-white backdrop-blur-sm">08:42</div>
-            </div>
-            <div class="p-6">
-              <h4 class="text-white font-bold mb-2">Como estruturar a Tese 1 e 2 com clareza</h4>
-              <p class="text-on-surface-variant text-xs">Aumente sua coesão textual hoje mesmo.</p>
-            </div>
-          </div>
-          <!-- Vídeo 2 -->
-          <div onclick="assistirVideo('Repertórios de Filosofia para Redação')" class="group relative bg-[#1d2026] rounded-3xl overflow-hidden border border-white/5 shadow-lg cursor-pointer">
-            <div class="aspect-video relative overflow-hidden">
-              <img alt="Video Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZr8Wt_eY6zvZSZ-BBGrKZjkuKd84NTPlBtIORQNQMCmoyYAFTtH2FaXzUKOhtoGPDSI-jkePpEXMHgKuTNPQKdApT1dBySLBSC_SpEnW02uEB0jVtoLUd8BwRauO93Luj_ejSdMjXWL9JyMmG_9dQa1m8y7UCsFxvySFafxuyulPFAsCdxwSqB0c3pLRWN9eWRsutsuh6KVYG-tmifQr3Pd6ImM-Saoi3233qA9EhAwy0MQ2EdweYeOWrVbJsfalT4xtUsm5zB9wi"/>
-              <div class="absolute inset-0 flex items-center justify-center">
-                <button class="w-14 h-14 rounded-full bg-[#45edee] text-[#002020] flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
-                  <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
-                </button>
-              </div>
-              <div class="absolute top-4 left-4 bg-[#45edee] px-3 py-1 rounded-full text-[10px] font-black text-[#002020] uppercase tracking-wider">Rota 1.000</div>
-              <div class="absolute bottom-4 right-4 bg-black/60 px-2 py-1 rounded-md text-[10px] font-bold text-white backdrop-blur-sm">12:15</div>
-            </div>
-            <div class="p-6">
-              <h4 class="text-white font-bold mb-2">Repertórios de Filosofia para Redação</h4>
-              <p class="text-on-surface-variant text-xs">Possíveis caminhos para este tema polêmico.</p>
-            </div>
-          </div>
-          <!-- Vídeo 3 -->
-          <div onclick="assistirVideo('O Impacto do Etarismo no Brasil')" class="group relative bg-[#1d2026] rounded-3xl overflow-hidden border border-white/5 shadow-lg cursor-pointer">
-            <div class="aspect-video relative overflow-hidden">
-              <img alt="Video Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZD5oRBiylbdtIJaSmhxfo0uFY7YJ2fM396jdaqdVKD4h1nRXMuW3bFrsl2hyej-Ii5nwIb-YI_jLcT0rlVJJs01vB1WX_IEkpz5pv8rg-baXrGhZ4no09_x6XQCYXnaLY5IdSPI7FSDBILJsCf6o3fJTC_zXJGYzD7_z8_AqN3Ehze-_qegh1g8uSLdKGPmo5UAW7Ztv_DnmrOjoci4PDFLtX99EegOTIkTpxeLVFYfvpGcIaQXBIvzpAMA1OfaEiNMD3l0eSQmAc"/>
-              <div class="absolute inset-0 flex items-center justify-center">
-                <button class="w-14 h-14 rounded-full bg-[#45edee] text-[#002020] flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
-                  <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
-                </button>
-              </div>
-              <div class="absolute top-4 left-4 bg-[#FABD00] px-3 py-1 rounded-full text-[10px] font-black text-[#261a00] uppercase tracking-wider">Aposta da Semana</div>
-              <div class="absolute bottom-4 right-4 bg-black/60 px-2 py-1 rounded-md text-[10px] font-bold text-white backdrop-blur-sm">15:50</div>
-            </div>
-            <div class="p-6">
-              <h4 class="text-white font-bold mb-2">O Impacto do Etarismo no Brasil</h4>
-              <p class="text-on-surface-variant text-xs">Comece sua redação de forma impactante.</p>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
-  </main>
+    <div class="flex items-center gap-4 lg:gap-6">
+      <div class="hidden sm:flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
+        <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
+        <span class="text-xs font-bold text-on-surface">940 pts</span>
+      </div>
+      <button onclick="toggleNotificacoes()" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
+        <span class="material-symbols-outlined">notifications</span>
+        <span id="badgeNotif" class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
+      </button>
+    </div>
+  </header>
 
-  <!-- FAB -->
-  <button onclick="window.location.href='redaon.html'" class="fixed bottom-6 right-6 lg:bottom-10 lg:right-10 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#45edee] text-[#002020] shadow-[0_0_30px_rgba(69,237,238,0.4)] hover:shadow-[0_0_50px_rgba(69,237,238,0.6)] transform hover:scale-105 transition-all active:scale-95 z-[60] font-black italic tracking-tighter">
-    <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">edit_square</span>
-    <span class="uppercase text-sm">Escrever Redação</span>
-  </button>
+  <!-- CONTEÚDO -->
+  <div class="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar space-y-12">
 
+    <!-- BANNER -->
+    <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#6c5ce7] to-[#45edee] p-8 lg:p-12 flex flex-col xl:flex-row justify-between items-center gap-8 shadow-2xl">
+      <div class="relative z-10 text-center xl:text-left">
+        <h1 id="saudacao" class="text-4xl lg:text-5xl xl:text-6xl font-black italic text-white mb-6 tracking-tight drop-shadow-lg leading-tight">
+          Bom dia,<br/><span id="nomeUsuarioBanner">Estudante</span>,
+        </h1>
+        <p class="text-white/90 text-base lg:text-lg max-w-md font-medium mx-auto xl:mx-0">
+          Explore seu potencial máximo!
+        </p>
+      </div>
+      <div class="flex flex-wrap justify-center gap-4 relative z-10 w-full xl:w-auto">
+        <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
+          <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Média</span>
+          <span class="text-white text-3xl font-black count-anim">760</span>
+        </div>
+        <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
+          <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Ranking</span>
+          <span class="text-white text-3xl font-black count-anim">#42</span>
+        </div>
+        <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
+          <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Evolução</span>
+          <span class="text-white text-3xl font-black count-anim">+40</span>
+        </div>
+      </div>
+      <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+    </section>
+
+    <!-- POTENCIALIZE SUA ESCRITA -->
+    <section>
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-lg lg:text-xl font-black text-on-surface tracking-widest uppercase flex items-center gap-3">
+          <span class="w-8 h-1 bg-[#45edee] rounded-full"></span>
+          Potencialize sua Escrita
+        </h2>
+        <button class="text-[#45edee] text-sm font-bold hover:underline">Ver Todos</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div onclick="acessarAula('Sugestão da PROfa')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full cursor-pointer">
+          <div class="w-12 h-12 rounded-2xl bg-[#6c5ce7]/20 flex items-center justify-center text-[#6c5ce7] mb-6">
+            <span class="material-symbols-outlined text-3xl">psychology</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Sugestão da PROfa</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Repertórios críticos e análises sociológicas personalizadas.</p>
+          <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
+            <span>Acessar Aula</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </div>
+        </div>
+        <div onclick="acessarAula('Projeto de Texto')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full cursor-pointer">
+          <div class="w-12 h-12 rounded-2xl bg-secondary/20 flex items-center justify-center text-secondary mb-6">
+            <span class="material-symbols-outlined text-3xl">architecture</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Projeto de Texto</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Estruturação lógica para garantir a nota máxima na C3.</p>
+          <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
+            <span>Acessar Aula</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </div>
+        </div>
+        <div onclick="acessarAula('Proposta Premium')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 border-l-2 border-[#45edee] flex flex-col h-full cursor-pointer">
+          <div class="w-12 h-12 rounded-2xl bg-tertiary/20 flex items-center justify-center text-tertiary mb-6">
+            <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">star</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Proposta Premium</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">O segredo dos 200 pontos na Competência 5.</p>
+          <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
+            <span>Acessar Aula</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </div>
+        </div>
+        <div onclick="acessarAula('Gramática Ágil')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full cursor-pointer">
+          <div class="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary mb-6">
+            <span class="material-symbols-outlined text-3xl">history_edu</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Gramática Ágil</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Erros comuns que tiram pontos preciosos na C1.</p>
+          <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
+            <span>Acessar Aula</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPLORE E INSPIRE-SE -->
+    <section class="pb-24 lg:pb-10">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-lg lg:text-xl font-black text-on-surface tracking-widest uppercase flex items-center gap-3">
+          <span class="w-8 h-1 bg-[#6c5ce7] rounded-full"></span>
+          Explore e Inspire-se
+        </h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+        <!-- Vídeo 1 -->
+        <div onclick="assistirVideo('Como estruturar a Tese 1 e 2 com clareza')" class="group bg-[#1d2026] rounded-3xl overflow-hidden border border-white/5 shadow-lg cursor-pointer hover:border-white/10 transition-all">
+          <div class="aspect-video relative overflow-hidden">
+            <img alt="Video Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4yXHFvsa61Gr0AcJW22PaxbuzAKVPrQzAgg9UmwRwG4qhA16LlQKbBXwD9pW9F0PCQLyMaMILMIHS1WLyiF-84Clw30Ct7s-c5vOVaTvXW-ikWP_erQAansgQT3fq7GZnuQ9wWBTStdpmZQktWf2OKCbx_gCgGuEUAc5uwUBWzjpaTjAjpDUXOKRFEVD_MjKwRn7xJjJgXADsbmPHuUjLOswOYLX-s_l4HrTZZQSXQLu4AIBrnMe0EkKAIqS7dakX5DOmpi-Zo_dN"/>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <button class="w-14 h-14 rounded-full bg-[#45edee] text-[#002020] flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
+                <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
+              </button>
+            </div>
+            <div class="absolute bottom-3 right-3 bg-black/60 px-2 py-1 rounded-md text-[10px] font-bold text-white backdrop-blur-sm">08:42</div>
+          </div>
+          <div class="p-5">
+            <span class="video-badge bg-[#45edee] text-[#002020]">Correção Guiada</span>
+            <h4 class="text-white font-bold mt-2 mb-1">Como estruturar a Tese 1 e 2 com clareza</h4>
+            <p class="text-on-surface-variant text-xs">Aumente sua coesão textual hoje mesmo.</p>
+          </div>
+        </div>
+
+        <!-- Vídeo 2 -->
+        <div onclick="assistirVideo('Repertórios de Filosofia para Redação')" class="group bg-[#1d2026] rounded-3xl overflow-hidden border border-white/5 shadow-lg cursor-pointer hover:border-white/10 transition-all">
+          <div class="aspect-video relative overflow-hidden">
+            <img alt="Video Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZr8Wt_eY6zvZSZ-BBGrKZjkuKd84NTPlBtIORQNQMCmoyYAFTtH2FaXzUKOhtoGPDSI-jkePpEXMHgKuTNPQKdApT1dBySLBSC_SpEnW02uEB0jVtoLUd8BwRauO93Luj_ejSdMjXWL9JyMmG_9dQa1m8y7UCsFxvySFafxuyulPFAsCdxwSqB0c3pLRWN9eWRsutsuh6KVYG-tmifQr3Pd6ImM-Saoi3233qA9EhAwy0MQ2EdweYeOWrVbJsfalT4xtUsm5zB9wi"/>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <button class="w-14 h-14 rounded-full bg-[#45edee] text-[#002020] flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
+                <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
+              </button>
+            </div>
+            <div class="absolute bottom-3 right-3 bg-black/60 px-2 py-1 rounded-md text-[10px] font-bold text-white backdrop-blur-sm">12:15</div>
+          </div>
+          <div class="p-5">
+            <span class="video-badge bg-[#45edee] text-[#002020]">Rota 1.000</span>
+            <h4 class="text-white font-bold mt-2 mb-1">Repertórios de Filosofia para Redação</h4>
+            <p class="text-on-surface-variant text-xs">Possíveis caminhos para este tema polêmico.</p>
+          </div>
+        </div>
+
+        <!-- Vídeo 3 -->
+        <div onclick="assistirVideo('O Impacto do Etarismo no Brasil')" class="group bg-[#1d2026] rounded-3xl overflow-hidden border border-white/5 shadow-lg cursor-pointer hover:border-white/10 transition-all">
+          <div class="aspect-video relative overflow-hidden">
+            <img alt="Video Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZD5oRBiylbdtIJaSmhxfo0uFY7YJ2fM396jdaqdVKD4h1nRXMuW3bFrsl2hyej-Ii5nwIb-YI_jLcT0rlVJJs01vB1WX_IEkpz5pv8rg-baXrGhZ4no09_x6XQCYXnaLY5IdSPI7FSDBILJsCf6o3fJTC_zXJGYzD7_z8_AqN3Ehze-_qegh1g8uSLdKGPmo5UAW7Ztv_DnmrOjoci4PDFLtX99EegOTIkTpxeLVFYfvpGcIaQXBIvzpAMA1OfaEiNMD3l0eSQmAc"/>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <button class="w-14 h-14 rounded-full bg-[#45edee] text-[#002020] flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
+                <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
+              </button>
+            </div>
+            <div class="absolute bottom-3 right-3 bg-black/60 px-2 py-1 rounded-md text-[10px] font-bold text-white backdrop-blur-sm">15:50</div>
+          </div>
+          <div class="p-5">
+            <span class="video-badge bg-[#FABD00] text-[#261a00]">Aposta da Semana</span>
+            <h4 class="text-white font-bold mt-2 mb-1">O Impacto do Etarismo no Brasil</h4>
+            <p class="text-on-surface-variant text-xs">Comece sua redação de forma impactante.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
 </div>
 
+<!-- FAB -->
+<button onclick="window.location.href='nova-redacao.html'" class="fixed bottom-6 right-6 lg:bottom-10 lg:right-10 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#45edee] text-[#002020] shadow-[0_0_30px_rgba(69,237,238,0.4)] hover:shadow-[0_0_50px_rgba(69,237,238,0.6)] transform hover:scale-105 transition-all active:scale-95 z-[60] font-black italic tracking-tighter">
+  <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">edit_square</span>
+  <span class="uppercase text-sm">Escrever Redação</span>
+</button>
+
 <script>
-  // ── SAUDAÇÃO DINÂMICA POR HORÁRIO ──────────────────
-  function saudacao() {
-    const h = new Date().getHours();
-    const s = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-    document.getElementById('saudacao').innerHTML = `${s},<br/>Alan Alves,`;
+  authGuard('aluno');
+
+  // ── NOME DO USUÁRIO ─────────────────────────────────
+  const NOME_USUARIO = authGetNome();
+  document.getElementById('nomeUsuarioSidebar').textContent = NOME_USUARIO;
+  document.getElementById('nomeUsuarioBanner').textContent = NOME_USUARIO;
+
+  // ── SAUDAÇÃO DINÂMICA ──────────────────────────────
+  const h = new Date().getHours();
+  const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  document.getElementById('saudacao').innerHTML = `${saudacao},<br/><span id="nomeUsuarioBanner">${NOME_USUARIO}</span>,`;
+
+  // ── SIDEBAR HAMBÚRGUER ─────────────────────────────
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
   }
-  saudacao();
 
   // ── NOTIFICAÇÕES ───────────────────────────────────
   let notifLidas = false;
@@ -335,7 +360,6 @@
 
   // ── AULAS ──────────────────────────────────────────
   window.acessarAula = function(nome) {
-    // Placeholder — conectar à página de aulas quando disponível
     const toast = document.createElement('div');
     toast.textContent = `Acessando: ${nome} 📚`;
     toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1d2026;border:1px solid rgba(69,237,238,0.3);color:#45edee;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:999;';
@@ -355,7 +379,7 @@
   // ── SAIR ───────────────────────────────────────────
   window.sair = function() {
     if (confirm('Deseja sair da sua conta?')) {
-      window.location.href = 'login.html';
+      authLogout();
     }
   };
 </script>

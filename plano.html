@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "ced19395-bdaf-47e0-90d4-eb39698dbdad",
-    });
-  });
-</script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Plano de Estudo</title>
@@ -51,7 +42,7 @@
   }
 </script>
 <style>
-  body { font-family: 'Inter', sans-serif; background-color: #0b0e14; }
+  body { word-break: normal; overflow-wrap: break-word; font-family: 'Inter', sans-serif; background-color: #0b0e14; }
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
   .glass-card { background: rgba(29,32,38,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(71,69,84,0.2); }
   .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -92,7 +83,62 @@
   /* Botão Iniciar Estudo pulse */
   @keyframes pulseBtn { 0%,100%{box-shadow:0 0 0 0 rgba(108,92,231,0.4)} 50%{box-shadow:0 0 0 12px rgba(108,92,231,0)} }
   .btn-iniciar { animation: pulseBtn 2s infinite; }
+
+  /* ── Hamburger sidebar ─────────────────────────────── */
+  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
+  #sidebar.open { transform: translateX(0); }
+  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:44; }
+  #overlay.open { display:block; }
+  @media(min-width:1024px){
+    #sidebar { transform: translateX(0) !important; }
+    #overlay { display:none !important; }
+    .main-with-sidebar { margin-left:256px; }
+  }
+  @media(max-width:1023px){
+    .main-with-sidebar { margin-left:0 !important; }
+  }
+  @media(min-width:1024px){
+    #btnHamburger { display: none !important; }
+    #main-header { padding-left: calc(256px + 1.5rem) !important; padding-right: 2rem !important; }
+  }
+
+  /* Calendário mobile */
+  @media(max-width:640px){
+    .cal-day-name { font-size: .6rem !important; letter-spacing: 0 !important; white-space: nowrap !important; overflow: hidden; }
+    .cal-cell { min-width: 0 !important; padding: .2rem !important; font-size: .75rem !important; }
+    .cal-grid { gap: .1rem !important; }
+  }
+  /* Garantir que células do calendário não quebrem */
+  [class*="grid-cols-7"] > * { min-width: 0; overflow: hidden; }
+  [class*="grid-cols-7"] span, [class*="grid-cols-7"] button { 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: clip;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  /* Fix texto quebrando letra por letra no mobile */
+  h1, h2, h3, h4, p, span, a, button, div {
+    word-break: normal !important;
+    overflow-wrap: break-word;
+    hyphens: none !important;
+  }
+  /* Garantir que textos grandes não quebrem letra a letra */
+  .text-3xl, .text-2xl, .text-xl { word-break: keep-all; overflow-wrap: normal; }
+
+  .glass-card p, .glass-card span, .glass-card h3, .glass-card h4 { word-break: normal; overflow-wrap: break-word; }
+  @media(max-width:640px){ .glass-card { padding:1rem; } }
+
+  /* ── Scrollbar sidebar invisível no desktop ── */
+  #sidebar nav::-webkit-scrollbar { width: 4px; }
+  #sidebar nav::-webkit-scrollbar-track { background: transparent; }
+  #sidebar nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 10px; }
+  #sidebar nav:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+  #sidebar nav { scrollbar-width: none; }
+  #sidebar nav:hover { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
 </style>
+<script src="supabase-auth.js"></script>
 </head>
 <body class="bg-surface-container-lowest text-on-surface min-h-screen overflow-x-hidden">
 
@@ -131,7 +177,8 @@
 <div id="toast"></div>
 
 <!-- SIDEBAR -->
-<aside class="fixed left-0 top-0 h-screen w-64 border-r border-[#ffffff05] bg-[#10131a] flex flex-col py-8 px-4 z-50 shadow-[24px_0px_48px_-12px_rgba(108,92,231,0.08)]">
+<div id="overlay" onclick="toggleSidebar()"></div>
+<aside id="sidebar" class="fixed left-0 top-0 h-screen w-64 border-r border-[#ffffff05] bg-[#10131a] flex flex-col py-8 px-4 z-50 shadow-[24px_0px_48px_-12px_rgba(108,92,231,0.08)]">
   <div class="flex items-center gap-3 px-4 mb-10">
     <h1 class="text-3xl font-bold tracking-tighter italic">
       <span class="text-white">Reda</span><span class="neon-text-cyan">ON</span>
@@ -144,18 +191,19 @@
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="minhas-redacoes.html"><span class="material-symbols-outlined">history_edu</span><span>Minhas Redações</span></a>
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span><span>Evolução</span></a>
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] text-sm font-medium" href="plano.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">calendar_today</span><span>Plano de Estudo</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span>Ranking</span></a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Estúdio <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span>Ranking</span></a>
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span>Configurações</span></a>
   </nav>
   <div class="mt-auto pt-6 border-t border-outline-variant/10 space-y-4">
     <div class="flex items-center gap-3 px-2">
-      <img alt="Alan Scribe" class="w-10 h-10 rounded-xl object-cover ring-2 ring-primary-container/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAN4tXdr_PfH7PbRRrAHtyG_f7DdWEDLuw0xBbquImBKqQGVxgcbBgqlqKHoh_izQpHyo3c_rNqKV7WbAAoW7zblYpskKslm-mKVPxZ9rqBaJkRI2Zbk8QeZSb_Uc0PFycbCNjCemmM7ORacZrPhbq_U132tkl-zBpuFUMErz2HCL3rUpjZYJ6jn_vHojwaShCgT8rm5qvqhK1pgXooF3MURjffDx7SkJhP0y-5ARPNYV5cVmdu3ykbPlEijNFHUZ9e2XNarLCtoBSj"/>
+      <img alt="{{USUARIO}}" class="w-10 h-10 rounded-xl object-cover ring-2 ring-primary-container/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAN4tXdr_PfH7PbRRrAHtyG_f7DdWEDLuw0xBbquImBKqQGVxgcbBgqlqKHoh_izQpHyo3c_rNqKV7WbAAoW7zblYpskKslm-mKVPxZ9rqBaJkRI2Zbk8QeZSb_Uc0PFycbCNjCemmM7ORacZrPhbq_U132tkl-zBpuFUMErz2HCL3rUpjZYJ6jn_vHojwaShCgT8rm5qvqhK1pgXooF3MURjffDx7SkJhP0y-5ARPNYV5cVmdu3ykbPlEijNFHUZ9e2XNarLCtoBSj"/>
       <div class="flex-1 min-w-0">
-        <p class="text-xs font-bold text-on-surface truncate leading-tight">Alan Scribe</p>
+        <p class="text-xs font-bold text-on-surface truncate leading-tight">{{USUARIO}}</p>
         <p class="text-[10px] text-secondary font-medium uppercase tracking-tighter">Elite Member</p>
       </div>
     </div>
-    <button onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-error-container/10 transition-colors text-[#FF8B8B]">
+    <button onclick="authLogout()" class="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-error-container/10 transition-colors text-[#FF8B8B]">
       <span class="material-symbols-outlined text-xl">logout</span>
       <span class="text-sm font-semibold">Sair</span>
     </button>
@@ -163,18 +211,18 @@
 </aside>
 
 <!-- TOP BAR -->
-<header class="fixed top-0 right-0 left-0 h-20 z-40 bg-[#0B0E14]/80 backdrop-blur-xl flex items-center justify-between pl-[256px] pr-8 w-full border-b border-white/5">
-  <div class="flex items-center gap-4">
-    <button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors">
+<header class="fixed top-0 left-0 right-0 h-20 z-40 bg-[#0B0E14]/80 backdrop-blur-xl flex items-center justify-between px-4 w-full border-b border-white/5" id="main-header" style="padding-left:1rem;">
+  <div class="flex items-center gap-3">
+    <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden">
       <span class="material-symbols-outlined">menu</span>
     </button>
     <div class="flex items-center gap-2">
-      <span class="material-symbols-outlined text-[#45EDEE]" style="font-variation-settings:'FILL' 1;">calendar_today</span>
-      <h2 class="text-2xl font-bold text-[#C6BFFF]">Plano de Estudo</h2>
+      <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">calendar_today</span>
+      <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Plano de Estudo</h2>
     </div>
   </div>
-  <div class="flex items-center gap-6">
-    <div class="px-4 py-2 bg-surface-container rounded-full flex items-center gap-2 border border-outline-variant/20">
+  <div class="flex items-center gap-4">
+    <div class="hidden sm:flex px-4 py-2 bg-surface-container rounded-full items-center gap-2 border border-outline-variant/20">
       <span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings:'FILL' 1;">stars</span>
       <span class="text-sm font-bold text-on-surface">940 pts</span>
     </div>
@@ -186,12 +234,12 @@
 </header>
 
 <!-- MAIN -->
-<main class="pl-64 pt-20 min-h-screen">
+<main class="pt-20 min-h-screen main-with-sidebar" id="main-content">
   <div class="p-8 max-w-[1600px] mx-auto">
 
     <!-- SAUDAÇÃO -->
     <section class="mb-10">
-      <h1 class="text-3xl font-black text-on-surface tracking-tight mb-2">Olá, Alan.</h1>
+      <h1 class="text-3xl font-black text-on-surface tracking-tight mb-2" id="saudacaoPlano">Olá, Estudante.</h1>
       <p class="text-on-surface-variant text-lg max-w-2xl">
         Seu cronograma para a <span class="text-secondary font-semibold">Competência 2</span> está aguardando você hoje. Faltam apenas <span id="topicosRestantes" class="font-bold text-white">3</span> tópicos para o próximo nível.
       </p>
@@ -202,7 +250,7 @@
 
       <!-- COLUNA ESQUERDA: CALENDÁRIO (8 cols) -->
       <div class="col-span-12 lg:col-span-8 space-y-6">
-        <div class="glass-card rounded-2xl p-6">
+        <div class="glass-card rounded-2xl p-4" style="overflow:hidden;">
 
           <!-- Header do calendário -->
           <div class="flex items-center justify-between mb-6">
@@ -218,18 +266,17 @@
           </div>
 
           <!-- Grid do calendário -->
-          <div class="grid grid-cols-7 gap-2" id="gridCalendario">
-            <!-- Cabeçalho dias da semana -->
-            <div class="text-center text-xs font-bold text-on-surface-variant pb-2 uppercase tracking-widest">Dom</div>
-            <div class="text-center text-xs font-bold text-on-surface-variant pb-2 uppercase tracking-widest">Seg</div>
-            <div class="text-center text-xs font-bold text-on-surface-variant pb-2 uppercase tracking-widest">Ter</div>
-            <div class="text-center text-xs font-bold text-on-surface-variant pb-2 uppercase tracking-widest">Qua</div>
-            <div class="text-center text-xs font-bold text-on-surface-variant pb-2 uppercase tracking-widest">Qui</div>
-            <div class="text-center text-xs font-bold text-on-surface-variant pb-2 uppercase tracking-widest">Sex</div>
-            <div class="text-center text-xs font-bold text-on-surface-variant pb-2 uppercase tracking-widest">Sab</div>
+          <!-- Calendário: wrapper com grid fixo -->
+          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.2rem;width:100%;overflow:hidden;" id="gridCalendario">
+            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">D</div>
+            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">S</div>
+            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">T</div>
+            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">Q</div>
+            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">Q</div>
+            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">S</div>
+            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">S</div>
           </div>
-          <!-- Dias renderizados por JS abaixo do grid de cabeçalho -->
-          <div class="grid grid-cols-7 gap-2 mt-1" id="diasCalendario"></div>
+          <div id="diasCalendario" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.2rem;width:100%;margin-top:.15rem;overflow:hidden;"></div>
 
           <!-- Legenda + Sincronizar -->
           <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
@@ -302,17 +349,17 @@
             <p class="text-xs text-on-surface-variant font-medium">Sequência de Estudos</p>
             <p class="text-xl font-black text-on-surface">7 dias 🔥</p>
           </div>
-          <div class="ml-auto">
-            <div class="flex gap-1">
-              <div class="w-4 h-4 rounded-sm bg-[#ff6b35]" title="Seg"></div>
-              <div class="w-4 h-4 rounded-sm bg-[#ff6b35]" title="Ter"></div>
-              <div class="w-4 h-4 rounded-sm bg-[#ff6b35]" title="Qua"></div>
-              <div class="w-4 h-4 rounded-sm bg-[#ff6b35]" title="Qui"></div>
-              <div class="w-4 h-4 rounded-sm bg-[#ff6b35]" title="Sex"></div>
-              <div class="w-4 h-4 rounded-sm bg-[#ff6b35]" title="Sab"></div>
-              <div class="w-4 h-4 rounded-sm bg-[#ff6b35]" title="Dom"></div>
+          <div class="ml-auto flex flex-col items-end gap-1">
+            <div class="flex gap-0.5">
+              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Seg"></div>
+              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Ter"></div>
+              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Qua"></div>
+              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Qui"></div>
+              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Sex"></div>
+              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Sab"></div>
+              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Dom"></div>
             </div>
-            <p class="text-[9px] text-on-surface-variant mt-1 text-center">última semana</p>
+            <p class="text-[9px] text-on-surface-variant">última semana</p>
           </div>
         </div>
 
@@ -328,9 +375,9 @@
 
       <!-- C1: Concluído -->
       <div class="glass-card rounded-2xl overflow-hidden" id="trilhaC1">
-        <div onclick="toggleTrilha('C1')" class="p-5 flex items-center justify-between cursor-pointer hover:bg-surface-container-high transition-colors">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full border-2 border-primary-container/30 flex items-center justify-center text-primary-container font-black">C1</div>
+        <div onclick="toggleTrilha('C1')" class="p-4 flex items-center justify-between cursor-pointer hover:bg-surface-container-high transition-colors">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="w-9 h-9 rounded-full border-2 border-primary-container/30 flex items-center justify-center text-primary-container font-black text-sm shrink-0">C1</div>
             <div>
               <h4 class="font-bold text-on-surface">Domínio da Norma Culta</h4>
               <p class="text-xs text-on-surface-variant">Concluído em 15 de Set • 100%</p>
@@ -355,9 +402,9 @@
 
       <!-- C2: Em andamento (FOCO DA SEMANA) -->
       <div class="glass-card rounded-2xl overflow-hidden border-2 border-secondary/40 shadow-[0_0_30px_rgba(69,237,238,0.05)]" id="trilhaC2">
-        <div onclick="toggleTrilha('C2')" class="p-5 bg-secondary/10 flex items-center justify-between border-b border-outline-variant/10 cursor-pointer hover:bg-secondary/15 transition-colors">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-black shadow-lg shadow-secondary/20">C2</div>
+        <div onclick="toggleTrilha('C2')" class="p-4 bg-secondary/10 flex items-center justify-between border-b border-outline-variant/10 cursor-pointer hover:bg-secondary/15 transition-colors">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="w-9 h-9 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-black text-sm shadow-lg shadow-secondary/20 shrink-0">C2</div>
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <h4 class="font-extrabold text-on-surface">Compreender a Proposta</h4>
@@ -380,15 +427,18 @@
 
             <!-- Aula em destaque -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-              <div class="relative group cursor-pointer overflow-hidden rounded-2xl aspect-video border border-outline-variant/20" onclick="abrirVideo('Aula 05: Estrutura Dissertativa-Argumentativa')">
-                <img alt="Video thumbnail" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzZZR4voNnJpsf9o9CqhhjGf2OXH4nh0Y5HIUR1bhSMWVv_Y9EnNgZGOOxbMYwwAyFNGvRYM5dPPKL84-gyzsWjYFDC0Akq6-3BqF0wRo9oTDSnV09W1q8FWOos_WMyT-CcYjhKmJi4xhpeUKyLnjLoPoARrqXQ_0kLLGw2-bjXt-1ENsNS0i8Vdemf0efIVQxt_232wWxpqbwfzjm97tBS08llzTeFsMRFcf6p_9rBQmN9Z5wZ05vyg0aPXKqfmLGlChs8O7RD3u1"/>
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center shadow-2xl shadow-secondary/50 transform transition-transform group-hover:scale-110">
-                    <span class="material-symbols-outlined text-on-secondary text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
+              <div class="rounded-2xl overflow-hidden border border-outline-variant/20 cursor-pointer" onclick="abrirVideo('Aula 05: Estrutura Dissertativa-Argumentativa')">
+                <div class="relative group aspect-video overflow-hidden">
+                  <img alt="Video thumbnail" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzZZR4voNnJpsf9o9CqhhjGf2OXH4nh0Y5HIUR1bhSMWVv_Y9EnNgZGOOxbMYwwAyFNGvRYM5dPPKL84-gyzsWjYFDC0Akq6-3BqF0wRo9oTDSnV09W1q8FWOos_WMyT-CcYjhKmJi4xhpeUKyLnjLoPoARrqXQ_0kLLGw2-bjXt-1ENsNS0i8Vdemf0efIVQxt_232wWxpqbwfzjm97tBS08llzTeFsMRFcf6p_9rBQmN9Z5wZ05vyg0aPXKqfmLGlChs8O7RD3u1"/>
+                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center shadow-2xl shadow-secondary/50 transform transition-transform group-hover:scale-110">
+                      <span class="material-symbols-outlined text-on-secondary text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
+                    </div>
                   </div>
                 </div>
-                <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                  <p class="text-sm font-bold text-white">Aula 05: Estrutura Dissertativa-Argumentativa</p>
+                <div class="p-3 bg-surface-container">
+                  <p class="text-sm font-bold text-on-surface">Aula 05: Estrutura Dissertativa-Argumentativa</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">Clique para assistir</p>
                 </div>
               </div>
 
@@ -462,6 +512,8 @@
 </main>
 
 <script>
+  authGuard('aluno');
+
 // ═══════════════════════════════════════════════
 // TOAST
 // ═══════════════════════════════════════════════
@@ -501,11 +553,14 @@ function renderCalendario() {
   const totalDias = new Date(anoAtual, mesAtual + 1, 0).getDate();
   const diasMesAnterior = new Date(anoAtual, mesAtual, 0).getDate();
 
+  // Estilo base das células — sem altura fixa, número sempre em linha única
+  const estiloBase = 'display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:.4rem .1rem;border-radius:.375rem;min-width:0;box-sizing:border-box;overflow:hidden;';
+
   // Dias do mês anterior (inativos)
   for (let i = primeiroDia - 1; i >= 0; i--) {
     const d = document.createElement('div');
-    d.className = 'h-20 bg-surface-container-lowest/30 rounded-lg p-2 text-on-surface-variant opacity-30';
-    d.innerHTML = `<span class="text-sm">${diasMesAnterior - i}</span>`;
+    d.style.cssText = estiloBase + 'background:rgba(13,16,22,0.3);opacity:.35;';
+    d.innerHTML = `<span style="font-size:.7rem;font-weight:500;color:#928ea0;white-space:nowrap;">${diasMesAnterior - i}</span>`;
     container.appendChild(d);
   }
 
@@ -516,21 +571,19 @@ function renderCalendario() {
     const eventos = EVENTOS[chave] || [];
 
     const d = document.createElement('div');
-    d.className = `h-20 rounded-lg p-2 border transition-all dia-evento relative ${
-      ehHoje
-        ? 'bg-surface-container-high ring-2 ring-secondary/50 border-secondary/30'
-        : 'bg-surface-container-low border-outline-variant/10'
-    }`;
+    const bgHoje = ehHoje ? 'background:rgba(69,237,238,0.08);border:1px solid rgba(69,237,238,0.4);' : 'background:rgba(25,28,34,0.6);border:1px solid rgba(71,69,84,0.15);';
+    d.style.cssText = estiloBase + bgHoje + 'cursor:pointer;transition:all .2s;';
 
-    d.innerHTML = `
-      <span class="text-sm ${ehHoje ? 'font-bold text-secondary' : 'text-on-surface-variant'}">${dia}</span>
-      ${eventos.length ? `<div class="absolute bottom-2 left-2 flex gap-1">
-        ${eventos.map(e => `<div class="evento-dot" style="background:${e.cor}" title="${e.desc}"></div>`).join('')}
+    const corNum = ehHoje ? '#45edee' : '#c8c4d7';
+    const pesoNum = ehHoje ? '800' : '500';
+
+    d.innerHTML = `<span style="font-size:.7rem;font-weight:${pesoNum};color:${corNum};white-space:nowrap;line-height:1.4;">${dia}</span>
+      ${eventos.length ? `<div style="display:flex;gap:2px;margin-top:2px;flex-wrap:wrap;justify-content:center;">
+        ${eventos.map(e => `<div style="width:5px;height:5px;border-radius:50%;background:${e.cor};flex-shrink:0;"></div>`).join('')}
       </div>` : ''}`;
 
     if (eventos.length) {
       d.addEventListener('click', () => {
-        const lista = eventos.map(e => `• ${e.comp}: ${e.desc}`).join('\n');
         toast(`📅 ${dia}/${mesAtual+1}: ${eventos[0].desc}${eventos.length > 1 ? ' e mais...' : ''}`);
       });
     }
@@ -542,8 +595,8 @@ function renderCalendario() {
   const diasExtras = totalCelulas % 7 === 0 ? 0 : 7 - (totalCelulas % 7);
   for (let i = 1; i <= diasExtras; i++) {
     const d = document.createElement('div');
-    d.className = 'h-20 bg-surface-container-lowest/30 rounded-lg p-2 text-on-surface-variant opacity-30';
-    d.innerHTML = `<span class="text-sm">${i}</span>`;
+    d.style.cssText = estiloBase + 'background:rgba(13,16,22,0.3);opacity:.35;';
+    d.innerHTML = `<span style="font-size:.7rem;font-weight:500;color:#928ea0;white-space:nowrap;">${i}</span>`;
     container.appendChild(d);
   }
 }
@@ -677,6 +730,17 @@ renderCalendario();
 renderFoco();
 renderAulasC2();
 renderAulasC1();
+</script>
+<script>
+  const NOME_USUARIO = authGetNome();
+  const el = document.getElementById('saudacaoPlano');
+  if (el) el.textContent = 'Olá, ' + NOME_USUARIO + '.';
+</script>
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
 </script>
 </body>
 </html>

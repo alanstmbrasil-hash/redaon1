@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "ced19395-bdaf-47e0-90d4-eb39698dbdad",
-    });
-  });
-</script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Hub de Preparação</title>
@@ -70,7 +61,29 @@
   .flashcard-back{background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);transform:rotateY(180deg);}
   .step-check{width:22px;height:22px;border-radius:50%;border:2px solid rgba(71,69,84,.4);display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;}
   .step-check.feito{background:#4ade80;border-color:#4ade80;}
+
+  /* ── Hamburger sidebar ─────────────────────────────── */
+  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
+  #sidebar.open { transform: translateX(0); }
+  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:44; }
+  #overlay.open { display:block; }
+  @media(min-width:1024px){
+    #sidebar { transform: translateX(0) !important; }
+    #overlay { display:none !important; }
+    .main-with-sidebar { margin-left:256px; }
+  }
+  @media(max-width:1023px){
+    .main-with-sidebar { margin-left:0 !important; }
+  }
 </style>
+<!-- toggleSidebar em escopo global — fora do type="module" -->
+<script>
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+</script>
+<script src="supabase-auth.js"></script>
 </head>
 <body class="text-on-surface min-h-screen">
 <div class="fixed inset-0 pointer-events-none -z-10">
@@ -85,7 +98,7 @@
       <div style="display:flex;align-items:center;gap:.75rem;">
         <span id="modalIcon" class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;font-size:1.4rem;"></span>
         <div><p id="modalTitulo" style="font-weight:700;font-size:.95rem;color:#e1e2eb;"></p>
-        <p style="font-size:.7rem;color:#928ea0;">Gerado pela Blanche · Gemini 2.0 Flash</p></div>
+        <p style="font-size:.7rem;color:#928ea0;">Gerado pela PROfa · Gemini 2.0 Flash</p></div>
       </div>
       <div style="display:flex;gap:.5rem;">
         <button onclick="copiarResultado()" style="background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);border-radius:.625rem;padding:.5rem .875rem;color:#c8c4d7;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.375rem;"><span class="material-symbols-outlined" style="font-size:1rem;">content_copy</span>Copiar</button>
@@ -100,7 +113,8 @@
   </div>
 </div>
 <!-- SIDEBAR -->
-<aside class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50">
+<div id="overlay" onclick="toggleSidebar()"></div>
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50">
   <div class="flex items-baseline italic px-2 mb-10"><span class="text-3xl font-black text-white tracking-tighter">Reda</span><span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span></div>
   <nav class="flex-1 space-y-1 overflow-y-auto scrollbar">
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="inicio.html"><span class="material-symbols-outlined">home</span>Início</a>
@@ -109,37 +123,40 @@
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span>Minhas Redações</a>
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span>Evolução</a>
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="plano.html"><span class="material-symbols-outlined">menu_book</span>Plano de Estudo</a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="estudio-blanche.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">psychology</span>Elite da PROfa</a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Estúdio <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span>Ranking</a>
     <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="configuracoes.html"><span class="material-symbols-outlined">settings</span>Configurações</a>
   </nav>
   <div class="mt-auto pt-6 border-t border-outline-variant/10">
     <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container cursor-pointer">
       <img alt="Alan" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
-      <div><p class="text-xs font-bold text-on-surface">Alan Alves</p><p class="text-[10px] text-on-surface-variant">Estudante Premium</p></div>
+      <div><p class="text-xs font-bold text-on-surface">{{USUARIO}}</p><p class="text-[10px] text-on-surface-variant">Estudante Premium</p></div>
     </div>
     <a onclick="if(confirm('Sair?'))window.location.href='login.html'" class="mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 cursor-pointer text-sm transition-all"><span class="material-symbols-outlined text-sm">logout</span>Sair</a>
   </div>
 </aside>
 <!-- MAIN -->
-<main class="ml-64 min-h-screen pb-20">
-  <header class="h-16 sticky top-0 z-40 flex items-center justify-between px-8 bg-[#0b0e14]/80 backdrop-blur-xl border-b border-outline-variant/10">
-    <div class="flex items-center gap-3">
-      <a href="temas.html" class="flex items-center gap-1.5 text-on-surface-variant hover:text-white transition-colors text-sm"><span class="material-symbols-outlined text-lg">arrow_back</span>Temas</a>
-      <span class="text-outline-variant/40">/</span>
-      <span class="text-sm text-on-surface font-semibold truncate max-w-xs" id="breadcrumb">Hub de Preparação</span>
+<main class="ml-64 main-with-sidebar min-h-screen pb-20">
+  <header class="h-16 sticky top-0 z-40 flex items-center px-4 md:px-8 bg-[#0b0e14]/80 backdrop-blur-xl border-b border-outline-variant/10 gap-3">
+    <!-- Hambúrguer (mobile) -->
+    <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden shrink-0"><span class="material-symbols-outlined">menu</span></button>
+    <!-- Seta voltar -->
+    <a href="temas.html" class="flex items-center text-on-surface-variant hover:text-white transition-colors shrink-0">
+      <span class="material-symbols-outlined text-lg">arrow_back</span>
+    </a>
+    <!-- Breadcrumb -->
+    <span class="text-on-surface-variant text-sm shrink-0">Temas</span>
+    <span class="text-outline-variant/40 shrink-0">/</span>
+    <!-- Ícone hub ciano + nome Preparação -->
+    <div class="flex items-center gap-1.5 shrink-0">
+      <span class="material-symbols-outlined text-sm shrink-0" style="color:#45edee;font-variation-settings:'FILL' 1;">hub</span>
+      <span class="text-sm font-bold text-white">Preparação</span>
     </div>
-    <button onclick="irEscrever()" class="px-5 py-2.5 rounded-xl text-xs font-black text-[#002020] flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all" style="background:linear-gradient(135deg,#45edee,#6c5ce7);box-shadow:0 0 18px rgba(69,237,238,.25);">
-      <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">edit</span>Escrever Agora
-    </button>
   </header>
   <div class="max-w-4xl mx-auto px-8 pt-10 space-y-12">
 
     <!-- 1. CABEÇALHO -->
     <section class="fade-up">
-      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-5 text-[10px] font-bold uppercase tracking-widest" style="background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);color:#c6bfff;">
-        <span class="material-symbols-outlined text-xs" style="font-variation-settings:'FILL' 1;">hub</span>Hub de Preparação
-      </div>
       <h1 id="tituloPagina" class="text-3xl font-black text-white leading-tight mb-3"></h1>
       <p id="descPagina" class="text-on-surface-variant text-base leading-relaxed mb-5"></p>
       <div class="flex flex-wrap gap-2" id="tagsTema"></div>
@@ -147,32 +164,67 @@
 
     <!-- 2. BARRA DE PROGRESSO -->
     <section class="fade-up-2">
-      <div class="p-5 rounded-2xl flex items-center gap-6 flex-wrap" style="background:#1d2026;border:1px solid rgba(71,69,84,.25);">
-        <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest shrink-0">Sua preparação</p>
-        <div class="flex items-center gap-4 flex-wrap flex-1">
-          <div class="flex items-center gap-2">
-            <div class="step-check" id="check-repertorio"><span class="material-symbols-outlined text-xs text-[#002020] hidden" id="icoRep" style="font-variation-settings:'FILL' 1;">check</span></div>
-            <span class="text-xs text-on-surface-variant">Repertório</span>
+      <div class="p-5 rounded-2xl" style="background:#1d2026;border:1px solid rgba(71,69,84,.25);">
+        <!-- Título -->
+        <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Sua preparação</p>
+
+        <!-- Mobile: empilhado vertical | Desktop: linha horizontal -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3 mb-4">
+
+          <!-- Passo 1: Repertório -->
+          <div class="flex items-center gap-3 flex-1">
+            <div class="step-check shrink-0" id="check-repertorio">
+              <span class="material-symbols-outlined text-xs text-[#002020] hidden" id="icoRep" style="font-variation-settings:'FILL' 1;">check</span>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-on-surface">Repertório</p>
+              <p class="text-[10px] text-on-surface-variant">Legislação, história, especialistas</p>
+            </div>
           </div>
-          <div class="w-8 h-px bg-outline-variant/30"></div>
-          <div class="flex items-center gap-2">
-            <div class="step-check" id="check-estudio"><span class="material-symbols-outlined text-xs text-[#002020] hidden" id="icoEst" style="font-variation-settings:'FILL' 1;">check</span></div>
-            <span class="text-xs text-on-surface-variant">Material de Estudo</span>
+
+          <!-- Conector (só desktop) -->
+          <div class="hidden sm:block w-8 h-px bg-outline-variant/30 shrink-0"></div>
+          <!-- Separador (só mobile) -->
+          <div class="block sm:hidden h-px w-full bg-outline-variant/15"></div>
+
+          <!-- Passo 2: Material de Estudo -->
+          <div class="flex items-center gap-3 flex-1">
+            <div class="step-check shrink-0" id="check-estudio">
+              <span class="material-symbols-outlined text-xs text-[#002020] hidden" id="icoEst" style="font-variation-settings:'FILL' 1;">check</span>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-on-surface">Material de Estudo</p>
+              <p class="text-[10px] text-on-surface-variant">Resumos, flashcards, quiz</p>
+            </div>
           </div>
-          <div class="w-8 h-px bg-outline-variant/30"></div>
-          <div class="flex items-center gap-2">
-            <div class="step-check" style="border-color:rgba(69,237,238,.3);"><span class="material-symbols-outlined text-xs text-secondary" style="font-variation-settings:'FILL' 1;">edit</span></div>
-            <span class="text-xs text-secondary font-bold">Escrever</span>
+
+          <!-- Conector (só desktop) -->
+          <div class="hidden sm:block w-8 h-px bg-outline-variant/30 shrink-0"></div>
+          <!-- Separador (só mobile) -->
+          <div class="block sm:hidden h-px w-full bg-outline-variant/15"></div>
+
+          <!-- Passo 3: Escrever -->
+          <div class="flex items-center gap-3 flex-1">
+            <div class="step-check shrink-0" style="border-color:rgba(69,237,238,.3);">
+              <span class="material-symbols-outlined text-xs text-secondary" style="font-variation-settings:'FILL' 1;">edit</span>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-secondary">Escrever</p>
+              <p class="text-[10px] text-on-surface-variant">Hora de colocar em prática</p>
+            </div>
           </div>
+
         </div>
-        <button onclick="irEscrever()" class="shrink-0 px-5 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:text-white transition-all" style="background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.3);">Pular e escrever →</button>
+
+        <!-- Pular e escrever — largura total -->
+        <button onclick="irEscrever()" class="w-full py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-white transition-all text-center" style="background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.3);">Pular e escrever →</button>
       </div>
     </section>
 
     <!-- 3. REPERTÓRIO SOCIOCULTURAL -->
     <section class="fade-up-2 space-y-5">
       <div class="secao-titulo"><span class="material-symbols-outlined text-sm" style="color:#c6bfff;font-variation-settings:'FILL' 1;">library_books</span>Repertório Sociocultural</div>
-      <p class="text-sm text-on-surface-variant">Clique em cada bloco para expandir. A Blanche gera o conteúdo com base no tema escolhido.</p>
+      <p class="text-sm text-on-surface-variant">Clique em cada bloco para expandir. A PROfa gera o conteúdo com base no tema escolhido.</p>
       <button onclick="carregarTudo()" id="btnGerarTudo" class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-95" style="background:rgba(108,92,231,.12);border:1px solid rgba(108,92,231,.25);color:#c6bfff;">
         <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1;">bolt</span>Gerar Todo o Repertório de Uma Vez
       </button>
@@ -217,14 +269,14 @@
       <div class="flex-1 h-px" style="background:linear-gradient(90deg,transparent,rgba(71,69,84,.4))"></div>
       <div class="flex items-center gap-2 px-4 py-1.5 rounded-full" style="background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.2);">
         <span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
-        <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Estúdio da Blanche</span>
+        <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Estúdio PRO</span>
       </div>
       <div class="flex-1 h-px" style="background:linear-gradient(90deg,rgba(71,69,84,.4),transparent)"></div>
     </div>
 
     <!-- 4. ESTÚDIO -->
     <section class="fade-up-3 space-y-5">
-      <div class="secao-titulo"><span class="material-symbols-outlined text-sm" style="color:#45edee;font-variation-settings:'FILL' 1;">psychology</span>Materiais de Estudo — Gerados pela Blanche</div>
+      <div class="secao-titulo"><span class="material-symbols-outlined text-sm" style="color:#45edee;font-variation-settings:'FILL' 1;">psychology</span>Materiais de Estudo — Gerados pela PROfa</div>
       <p class="text-sm text-on-surface-variant">Escolha o formato que melhor se adapta ao seu jeito de estudar.</p>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div class="saida-card p-5" onclick="gerarSaida('resumo','article','Resumo em Texto')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-primary mb-3 block" style="font-variation-settings:'FILL' 1;">article</span><p class="text-sm font-bold text-on-surface">Resumo em Texto</p><p class="text-[10px] text-on-surface-variant mt-1">Síntese completa do tema</p></div>
@@ -235,7 +287,6 @@
         <div class="saida-card p-5" onclick="gerarQuiz()"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-primary mb-3 block" style="font-variation-settings:'FILL' 1;">quiz</span><p class="text-sm font-bold text-on-surface">Teste / Quiz</p><p class="text-[10px] text-on-surface-variant mt-1">Questões estilo ENEM</p></div>
         <div class="saida-card p-5" onclick="gerarSaida('infografico','bar_chart','Infográfico')"><div class="shine"></div><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#c6bfff;font-variation-settings:'FILL' 1;">bar_chart</span><p class="text-sm font-bold text-on-surface">Infográfico</p><p class="text-[10px] text-on-surface-variant mt-1">Dados e números do tema</p></div>
         <div class="saida-card p-5" onclick="gerarSaida('relatorio','assessment','Relatório Completo')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-secondary mb-3 block" style="font-variation-settings:'FILL' 1;">assessment</span><p class="text-sm font-bold text-on-surface">Relatório</p><p class="text-[10px] text-on-surface-variant mt-1">Análise acadêmica aprofundada</p></div>
-        <div class="saida-card p-5" onclick="gerarSaida('redacao_modelo','auto_fix_high','Redação Modelo Nota 1000')"><div class="shine"></div><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#45edee;font-variation-settings:'FILL' 1;">auto_fix_high</span><p class="text-sm font-bold text-on-surface">Redação Modelo</p><p class="text-[10px] text-on-surface-variant mt-1">Exemplo nota 1000 da Blanche</p></div>
       </div>
       <!-- Flashcards inline -->
       <div id="areaFlashcards" class="hidden pt-2">
@@ -282,14 +333,100 @@ document.getElementById('tagsTema').innerHTML=[{label:tema.fonte||'Tema',cor:'#6
 let repFeito=false,estFeito=false;
 function marcarPasso(p){const c=document.getElementById('check-'+p);const i=document.getElementById(p==='repertorio'?'icoRep':'icoEst');if(c)c.classList.add('feito');if(i)i.classList.remove('hidden');}
 const gerado={legislacao:false,historia:false,especialistas:false,atualidades:false};
+const quizRepR={};
+const LABELS={legislacao:'Legislação',historia:'História',especialistas:'Especialistas',atualidades:'Atualidades'};
 const PR={legislacao:`Liste os 5 principais artigos da Constituição Federal e leis relevantes para o tema: "${TITULO}". Para cada: número, nome e aplicação ao tema em 1 frase. Use marcadores.`,historia:`Explique o contexto histórico de "${TITULO}" com 5 marcos temporais numerados. Cada: data/período, fato e relevância para o Brasil.`,especialistas:`Liste 5 especialistas (filósofos/sociólogos) relevantes para "${TITULO}". Para cada: nome, área, obra principal e 1 ideia aplicável ao ENEM.`,atualidades:`Liste 5 dados estatísticos recentes (IBGE, OMS, ONU) sobre "${TITULO}". Para cada: fonte, dado numérico e como usar como argumento.`};
-window.toggleRep=async function(tipo){const body=document.getElementById('body-'+tipo);const chevron=document.getElementById('chevron-'+tipo);const card=document.getElementById('card-'+tipo);if(body.classList.contains('aberto')){body.classList.remove('aberto');chevron.classList.remove('aberto');return;}body.classList.add('aberto');chevron.classList.add('aberto');if(gerado[tipo])return;gerado[tipo]=true;card.classList.add('carregando');try{const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});const result=await model.generateContent(PR[tipo]+'
 
-Use markdown leve. Português.');card.classList.remove('carregando');card.classList.add('pronto');document.getElementById('conteudo-'+tipo).innerHTML=md(result.response.text());if(!repFeito){repFeito=true;marcarPasso('repertorio');}}catch(err){card.classList.remove('carregando');document.getElementById('conteudo-'+tipo).innerHTML='<p class="text-xs text-error">Erro. Tente novamente.</p>';gerado[tipo]=false;}};
-window.carregarTudo=async function(){const btn=document.getElementById('btnGerarTudo');btn.disabled=true;btn.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ml-2">Blanche gerando tudo...</span>';for(const tipo of['legislacao','historia','especialistas','atualidades']){document.getElementById('body-'+tipo).classList.add('aberto');document.getElementById('chevron-'+tipo).classList.add('aberto');if(!gerado[tipo])await window.toggleRep(tipo);}btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1;">check_circle</span><span>Repertório completo!</span>';btn.style.cssText='background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:#4ade80;';};
+window.toggleRep=async function(tipo){
+  const body=document.getElementById('body-'+tipo);
+  const chevron=document.getElementById('chevron-'+tipo);
+  const card=document.getElementById('card-'+tipo);
+  if(body.classList.contains('aberto')){body.classList.remove('aberto');chevron.classList.remove('aberto');return;}
+  body.classList.add('aberto');chevron.classList.add('aberto');
+  if(gerado[tipo])return;
+  gerado[tipo]=true;card.classList.add('carregando');
+  try{
+    const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});
+    const result=await model.generateContent(PR[tipo]+'\n\nUse markdown leve. Português.');
+    card.classList.remove('carregando');card.classList.add('pronto');
+    document.getElementById('conteudo-'+tipo).innerHTML=
+      md(result.response.text())+
+      /* Botão quiz inline */
+      `<div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(71,69,84,.2);">
+        <button onclick="gerarQuizRep('${tipo}')" id="btnQuizRep-${tipo}"
+          style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:rgba(69,237,238,.08);border:1px solid rgba(69,237,238,.2);border-radius:.75rem;font-size:.75rem;font-weight:700;color:#45edee;cursor:pointer;transition:all .2s;"
+          onmouseover="this.style.background='rgba(69,237,238,.15)'" onmouseout="this.style.background='rgba(69,237,238,.08)'">
+          <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1;">quiz</span>
+          Testar meu conhecimento sobre ${LABELS[tipo]}
+        </button>
+        <div id="quizRep-${tipo}" style="display:none;margin-top:1rem;"></div>
+      </div>`;
+    if(!repFeito){repFeito=true;marcarPasso('repertorio');}
+  }catch(err){
+    card.classList.remove('carregando');
+    document.getElementById('conteudo-'+tipo).innerHTML='<p class="text-xs text-error">Erro. Tente novamente.</p>';
+    gerado[tipo]=false;
+  }
+};
+
+window.gerarQuizRep=async function(tipo){
+  const btn=document.getElementById('btnQuizRep-'+tipo);
+  const area=document.getElementById('quizRep-'+tipo);
+  btn.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:.5rem;">Gerando quiz...</span>';
+  btn.disabled=true;
+  const subTema={
+    legislacao:`legislação e leis relacionadas ao tema "${TITULO}"`,
+    historia:`contexto histórico e marcos temporais do tema "${TITULO}"`,
+    especialistas:`especialistas, filósofos e sociólogos relevantes ao tema "${TITULO}"`,
+    atualidades:`dados estatísticos e atualidades sobre o tema "${TITULO}"`
+  };
+  const prompt=`Crie 3 questões objetivas sobre ${subTema[tipo]}, no estilo ENEM. APENAS JSON, sem mais nada: [{"pergunta":"...","alternativas":["A) ...","B) ...","C) ...","D) ...","E) ..."],"correta":0,"explicacao":"..."}]`;
+  try{
+    const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});
+    const result=await model.generateContent(prompt);
+    const qs=JSON.parse(result.response.text().replace(/```json|```/g,'').trim());
+    if(!quizRepR[tipo])quizRepR[tipo]={};
+    area.style.display='block';
+    area.innerHTML=`<p style="font-size:.7rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;">Quiz — ${LABELS[tipo]}</p>`+
+      qs.map((q,qi)=>`
+        <div style="background:#0b0e14;border:1px solid rgba(71,69,84,.25);border-radius:.875rem;padding:1rem;margin-bottom:.75rem;">
+          <p style="font-size:.75rem;font-weight:700;color:#928ea0;margin-bottom:.5rem;">Questão ${qi+1} / ${qs.length}</p>
+          <p style="font-size:.85rem;font-weight:700;color:#e1e2eb;margin-bottom:.75rem;">${q.pergunta}</p>
+          <div id="altRep-${tipo}-${qi}" style="display:flex;flex-direction:column;gap:.375rem;">
+            ${q.alternativas.map((a,ai)=>`<button onclick="respRep('${tipo}',${qi},${ai},${q.correta},'${q.explicacao.replace(/'/g,"\\'")}',this)"
+              style="text-align:left;padding:.6rem .875rem;border-radius:.625rem;border:1px solid rgba(71,69,84,.3);background:#1d2026;color:#c8c4d7;font-size:.8rem;cursor:pointer;transition:all .2s;"
+              onmouseover="this.style.borderColor='rgba(69,237,238,.3)'" onmouseout="if(!this.disabled)this.style.borderColor='rgba(71,69,84,.3)'">${a}</button>`).join('')}
+          </div>
+          <div id="expRep-${tipo}-${qi}" style="display:none;margin-top:.625rem;padding:.625rem;border-radius:.625rem;font-size:.75rem;line-height:1.6;"></div>
+        </div>`).join('');
+    btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:\'FILL\' 1;">check_circle</span><span style="margin-left:.375rem;">Quiz gerado!</span>';
+    btn.style.background='rgba(74,222,128,.08)';btn.style.borderColor='rgba(74,222,128,.25)';btn.style.color='#4ade80';
+    area.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }catch(err){
+    btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;">quiz</span><span style="margin-left:.375rem;">Testar meu conhecimento sobre ${LABELS[tipo]}</span>';
+    btn.disabled=false;
+    toast('Erro ao gerar quiz. Tente novamente.');
+  }
+};
+
+window.respRep=function(tipo,qi,ai,correta,explicacao){
+  if(quizRepR[tipo]&&quizRepR[tipo][qi]!==undefined)return;
+  if(!quizRepR[tipo])quizRepR[tipo]={};
+  quizRepR[tipo][qi]=ai;
+  document.getElementById('altRep-'+tipo+'-'+qi).querySelectorAll('button').forEach((b,i)=>{
+    b.disabled=true;b.onmouseover=null;b.onmouseout=null;
+    if(i===correta){b.style.borderColor='#4ade80';b.style.color='#4ade80';b.style.background='rgba(74,222,128,.08)';}
+    else if(i===ai&&ai!==correta){b.style.borderColor='#ffb4ab';b.style.color='#ffb4ab';b.style.background='rgba(255,180,171,.08)';}
+  });
+  const e=document.getElementById('expRep-'+tipo+'-'+qi);
+  e.textContent=(ai===correta?'✓ Correto! ':'✗ Errado. ')+explicacao;
+  e.style.display='block';
+  e.style.cssText+=`background:${ai===correta?'rgba(74,222,128,.06)':'rgba(255,180,171,.06)'};border:1px solid ${ai===correta?'rgba(74,222,128,.2)':'rgba(255,180,171,.2)'};color:${ai===correta?'#4ade80':'#ffb4ab'};`;
+};
+window.carregarTudo=async function(){const btn=document.getElementById('btnGerarTudo');btn.disabled=true;btn.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ml-2">PROfa gerando tudo...</span>';for(const tipo of['legislacao','historia','especialistas','atualidades']){document.getElementById('body-'+tipo).classList.add('aberto');document.getElementById('chevron-'+tipo).classList.add('aberto');if(!gerado[tipo])await window.toggleRep(tipo);}btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1;">check_circle</span><span>Repertório completo!</span>';btn.style.cssText='background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:#4ade80;';};
 let resultadoAtual='';
 const PS={resumo:`Crie um RESUMO DIDÁTICO de "${TITULO}" para redação ENEM. Problema, causas, consequências, dados e soluções.`,audio:`ROTEIRO DE PODCAST sobre "${TITULO}". Tom conversacional, com [pausa]. ~8 minutos.`,video:`ROTEIRO DE VÍDEO-AULA sobre "${TITULO}" em cenas numeradas. Fala + recurso visual sugerido. ~10 minutos.`,mapa:`MAPA MENTAL hierárquico de "${TITULO}" com →. Ramos: Causas, Consequências, Legislação, Especialistas, Dados, Soluções.`,infografico:`CONTEÚDO DE INFOGRÁFICO sobre "${TITULO}": título, seções, dados, comparações, timeline e curiosidades.`,relatorio:`RELATÓRIO ACADÊMICO sobre "${TITULO}": Resumo, Introdução, Contexto, Análise, Legislação, Especialistas, Dados, Perspectivas, Conclusão.`,redacao_modelo:`REDAÇÃO NOTA 1000 sobre "${TITULO}". Introdução com repertório + 2 parágrafos + conclusão com proposta de intervenção completa. 28-30 linhas. Linguagem formal.`};
-window.gerarSaida=async function(tipo,icone,titulo){document.getElementById('modalResultado').classList.add('aberto');document.getElementById('modalTitulo').textContent=titulo;document.getElementById('modalIcon').textContent=icone;document.getElementById('modalConteudo').innerHTML='<div style="display:flex;align-items:center;gap:.75rem;padding:1rem 0;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;font-size:.85rem;">Blanche gerando...</span></div>';try{const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});const result=await model.generateContent(PS[tipo]+'
+window.gerarSaida=async function(tipo,icone,titulo){document.getElementById('modalResultado').classList.add('aberto');document.getElementById('modalTitulo').textContent=titulo;document.getElementById('modalIcon').textContent=icone;document.getElementById('modalConteudo').innerHTML='<div style="display:flex;align-items:center;gap:.75rem;padding:1rem 0;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;font-size:.85rem;">PROfa gerando...</span></div>';try{const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});const result=await model.generateContent(PS[tipo]+'
 
 Português brasileiro com markdown.');resultadoAtual=result.response.text();document.getElementById('modalConteudo').innerHTML=md(resultadoAtual);if(!estFeito){estFeito=true;marcarPasso('estudio');}}catch(err){document.getElementById('modalConteudo').innerHTML='<p style="color:#ffb4ab">Erro. Tente novamente.</p>';}};
 window.gerarFlashcards=async function(){toast('🃏 Gerando cartões...');const prompt=`Crie 8 flashcards sobre "${TITULO}" para o ENEM. APENAS JSON: [{"frente":"...","verso":"..."}]`;try{const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});const result=await model.generateContent(prompt);const cards=JSON.parse(result.response.text().replace(/\`\`\`json|\`\`\`/g,'').trim());const area=document.getElementById('areaFlashcards');area.classList.remove('hidden');document.getElementById('areaQuiz').classList.add('hidden');document.getElementById('labelFlashcard').textContent=cards.length+' cartões · clique para virar';const grid=document.getElementById('gridFlashcards');grid.innerHTML='';cards.forEach(c=>{const div=document.createElement('div');div.className='flashcard';div.onclick=()=>div.classList.toggle('flipped');div.innerHTML=`<div class="flashcard-inner"><div class="flashcard-front"><div><p class="text-[9px] text-secondary font-bold uppercase tracking-widest mb-2">Frente</p><p class="text-sm font-bold text-on-surface">${c.frente}</p></div></div><div class="flashcard-back"><div><p class="text-[9px] text-primary font-bold uppercase tracking-widest mb-2">Verso</p><p class="text-xs text-on-surface leading-relaxed">${c.verso}</p></div></div></div>`;grid.appendChild(div);});area.scrollIntoView({behavior:'smooth',block:'start'});if(!estFeito){estFeito=true;marcarPasso('estudio');}toast('✓ '+cards.length+' cartões gerados!');}catch(err){toast('Erro ao gerar flashcards.');}};

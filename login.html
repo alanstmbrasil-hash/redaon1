@@ -1,282 +1,371 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR">
+<html lang="pt-BR">
 <head>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "ced19395-bdaf-47e0-90d4-eb39698dbdad",
-    });
-  });
-</script>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Elite Login</title>
-<script>tailwind = { config: {} };</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,800&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "surface-container-low": "#191c22", "secondary": "#45edee",
-          "on-surface-variant": "#c8c4d7", "on-error": "#690005",
-          "surface": "#10131a", "on-primary": "#2900a0", "outline-variant": "#474554",
-          "outline": "#928ea0", "on-primary-container": "#faf6ff",
-          "on-background": "#e1e2eb", "on-surface": "#e1e2eb",
-          "surface-container-lowest": "#0b0e14", "surface-container": "#1d2026",
-          "surface-container-high": "#272a31", "primary-container": "#6c5ce7",
-          "primary": "#c6bfff", "background": "#10131a", "error": "#ffb4ab",
-        },
-        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
-        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-      },
-    },
-  }
-</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RedaON — Login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="supabase-auth.js"></script>
 <style>
-  body {
-    background-color: #0b0e14;
-    color: #e1e2eb;
-    font-family: 'Inter', sans-serif;
-    overflow: hidden;
+  *{word-break:normal!important;overflow-wrap:break-word}
+  body{background:#0b0e14;font-family:'Segoe UI',sans-serif}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#0b0e14}::-webkit-scrollbar-thumb{background:#45edee44;border-radius:2px}
+  scrollbar-width:thin;scrollbar-color:#45edee44 #0b0e14;
+
+  .input-field{
+    background:#13161f;
+    border:1.5px solid #1e2330;
+    color:#fff;
+    border-radius:10px;
+    padding:14px 16px;
+    width:100%;
+    font-size:15px;
+    transition:border-color .2s;
+    outline:none;
   }
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  .luminous-mesh {
-    background: radial-gradient(circle at top right, rgba(108,92,231,0.08), transparent 40%),
-                radial-gradient(circle at bottom left, rgba(69,237,238,0.05), transparent 40%);
+  .input-field:focus{border-color:#45edee}
+  .input-field::placeholder{color:#4a5568}
+
+  .btn-primary{
+    background:linear-gradient(135deg,#45edee,#6c5ce7);
+    color:#0b0e14;
+    font-weight:700;
+    border-radius:10px;
+    padding:14px;
+    width:100%;
+    font-size:16px;
+    border:none;
+    cursor:pointer;
+    transition:opacity .2s,transform .1s;
   }
-  .elite-glow { box-shadow: 0 0 20px rgba(108,92,231,0.5), 0 0 40px rgba(108,92,231,0.2); }
-  .elite-glow:hover { box-shadow: 0 0 30px rgba(108,92,231,0.7), 0 0 60px rgba(108,92,231,0.3); }
-  .input-glow:focus-within { box-shadow: 0 0 15px rgba(69,237,238,0.15); }
+  .btn-primary:hover{opacity:.9}
+  .btn-primary:active{transform:scale(.98)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
 
-  /* Shake animation para erro */
-  @keyframes shake {
-    0%,100%{transform:translateX(0)}
-    20%{transform:translateX(-8px)}
-    40%{transform:translateX(8px)}
-    60%{transform:translateX(-5px)}
-    80%{transform:translateX(5px)}
+  .card{
+    background:#13161f;
+    border:1px solid #1e2330;
+    border-radius:16px;
   }
-  .shake { animation: shake 0.4s ease; }
 
-  /* Mensagem de erro */
-  .campo-erro { border-color: #ffb4ab !important; box-shadow: 0 0 10px rgba(255,100,80,0.2); }
-  .msg-erro { color: #ffb4ab; font-size: 0.75rem; margin-top: 0.35rem; margin-left: 0.25rem; display: none; }
-  .msg-erro.visivel { display: block; }
+  .logo-text{font-style:italic;font-weight:800;font-size:2rem;letter-spacing:-1px}
+  .logo-on{color:#45edee}
 
-  /* Loading spinner no botão */
-  .btn-spinner { display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .tab-btn{
+    flex:1;padding:10px;border-radius:8px;font-weight:600;font-size:14px;
+    transition:all .2s;cursor:pointer;border:none;
+  }
+  .tab-btn.active{background:linear-gradient(135deg,#45edee22,#6c5ce722);color:#45edee;border:1px solid #45edee44}
+  .tab-btn.inactive{background:transparent;color:#6b7280;border:1px solid transparent}
 
-  /* Toast */
-  #toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(5rem); background: #1d2026; border: 1px solid rgba(255,255,255,0.1); color: #e1e2eb; padding: .75rem 1.5rem; border-radius: .75rem; font-size: .85rem; box-shadow: 0 8px 32px rgba(0,0,0,.5); z-index: 999; transition: transform 0.3s ease; pointer-events: none; white-space: nowrap; }
-  #toast.show { transform: translateX(-50%) translateY(0); }
-  #toast.sucesso { border-color: rgba(69,237,238,0.3); color: #45edee; }
-  #toast.erro { border-color: rgba(255,100,80,0.3); color: #ffb4ab; }
+  .error-msg{background:#e74c3c22;border:1px solid #e74c3c44;color:#f87171;border-radius:8px;padding:12px 14px;font-size:14px;display:none}
+  .success-msg{background:#45edee22;border:1px solid #45edee44;color:#45edee;border-radius:8px;padding:12px 14px;font-size:14px;display:none}
+
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{width:20px;height:20px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .fade-in{animation:fadeIn .35s ease-out}
 </style>
 </head>
-<body class="h-screen w-screen m-0 p-0 overflow-hidden">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-<!-- Toast -->
-<div id="toast"></div>
+<!-- Background decorativo -->
+<div style="position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0">
+  <div style="position:absolute;top:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,#45edee08 0%,transparent 70%);border-radius:50%"></div>
+  <div style="position:absolute;bottom:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,#6c5ce708 0%,transparent 70%);border-radius:50%"></div>
+</div>
 
-<main class="w-full h-full grid md:grid-cols-2">
+<div class="w-full max-w-sm fade-in" style="position:relative;z-index:1">
 
-  <!-- LADO ESQUERDO: Imagem -->
-  <section class="hidden md:flex flex-col items-center justify-center relative overflow-hidden h-full">
-    <div class="absolute inset-0 z-0">
-      <img alt="Biblioteca atmosférica" class="w-full h-full object-cover opacity-40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDA5W1_IHPuNlz8cGlguv_TP9uxNk3JXkysCbowkUtwCO6t7Ri77LWRch2dHfKcKrMh1B_hD2VHAtO0AsNQbjlsOXM41rNtCYc3eTbwZfg75O6EQHQO5jk2BLyPSYqT0P4_HTCasH6oAMVYo6PQftDNrZJrhv04gjRVIa8rnC4oFJpJ6C9QMkIcAGYK_xX1zeeB9B8iWbvLAWnYCsS7C5jeotOHH7iVcs3SNTB6yRHdEjj-JhSPaPryl-lE-hG7lj7pdiopKTB-1m"/>
-      <div class="absolute inset-0 bg-gradient-to-br from-[#0b0e14]/80 via-transparent to-[#0b0e14]/80"></div>
-    </div>
-    <div class="relative z-10 flex flex-col items-center justify-center text-center p-12">
-      <div class="inline-block">
-        <div class="italic font-extrabold text-6xl md:text-8xl leading-none tracking-tighter select-none mb-6 flex justify-center">
-          <span class="text-white">Reda</span><span class="text-[#45EDEE]">ON</span>
-        </div>
-        <p class="text-xl md:text-2xl font-bold text-white tracking-wide whitespace-nowrap border-t border-white/10 pt-6">Sua nota 1.000 começa aqui.</p>
-      </div>
-    </div>
-  </section>
+  <!-- Logo -->
+  <div class="text-center mb-8">
+    <div class="logo-text text-white">Reda<span class="logo-on">ON</span></div>
+    <p style="color:#6b7280;font-size:14px;margin-top:4px">Plataforma de redação para o ENEM</p>
+  </div>
 
-  <!-- LADO DIREITO: Formulário -->
-  <section class="h-full flex flex-col justify-center items-center bg-[#0b0e14] luminous-mesh p-8 md:p-16 relative">
+  <!-- Card principal -->
+  <div class="card p-6">
 
-    <!-- Logo mobile -->
-    <div class="md:hidden flex items-center gap-2 mb-12 absolute top-12">
-      <span class="italic font-extrabold text-2xl tracking-tighter">
-        <span class="text-white">Reda</span><span class="text-[#45EDEE]">ON</span>
-      </span>
+    <!-- Tabs Aluno / Professor -->
+    <div class="flex gap-2 mb-6 p-1" style="background:#0b0e14;border-radius:10px">
+      <button class="tab-btn active" id="tab-aluno" onclick="setTab('aluno')">👨‍🎓 Aluno</button>
+      <button class="tab-btn inactive" id="tab-professor" onclick="setTab('professor')">👩‍🏫 Professor</button>
     </div>
 
-    <div class="w-full max-w-md">
-      <div class="mb-10">
-        <h2 class="text-3xl font-bold text-on-surface mb-2 tracking-tight">Bem-vindo de volta</h2>
-        <p class="text-on-surface-variant font-medium">Acesse sua conta para continuar sua jornada</p>
+    <!-- Sub-tabs: Entrar / Cadastrar -->
+    <div class="flex gap-4 mb-6" style="border-bottom:1px solid #1e2330">
+      <div id="sub-login" onclick="setSubTab('login')"
+        style="padding-bottom:10px;font-size:15px;font-weight:600;color:#45edee;border-bottom:2px solid #45edee;margin-bottom:-1px;cursor:pointer;transition:all .2s">
+        Entrar
       </div>
+      <div id="sub-cadastro" onclick="setSubTab('cadastro')"
+        style="padding-bottom:10px;font-size:15px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:all .2s">
+        Criar conta
+      </div>
+    </div>
 
-      <form id="formLogin" class="space-y-6" novalidate>
-
-        <!-- Email -->
-        <div class="space-y-1">
-          <label class="block text-sm font-semibold text-on-surface-variant ml-1 uppercase tracking-wider" for="email">Email</label>
-          <div class="relative group input-glow" id="wrapEmail">
-            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-[#45edee] transition-colors">mail</span>
-            <input id="email" class="w-full h-14 pl-12 pr-4 bg-surface-container-lowest border border-outline-variant/20 rounded-xl text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#45edee]/20 focus:border-[#45edee] transition-all duration-200" placeholder="seu@email.com" type="email" autocomplete="email"/>
-          </div>
-          <p class="msg-erro" id="erroEmail">Por favor, insira um e-mail válido.</p>
+    <!-- FORM: LOGIN -->
+    <div id="form-login">
+      <div class="mb-4">
+        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">E-mail</label>
+        <input id="login-email" type="email" class="input-field" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="mb-2">
+        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Senha</label>
+        <div style="position:relative">
+          <input id="login-senha" type="password" class="input-field" placeholder="••••••••" autocomplete="current-password" style="padding-right:48px">
+          <button onclick="toggleSenha('login-senha',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#6b7280;cursor:pointer;font-size:18px">👁</button>
         </div>
-
-        <!-- Senha -->
-        <div class="space-y-1">
-          <div class="flex justify-between items-center ml-1">
-            <label class="block text-sm font-semibold text-on-surface-variant uppercase tracking-wider" for="password">Senha</label>
-            <a class="text-sm font-medium text-[#45edee] hover:brightness-125 transition-all" href="#">Esqueci minha senha</a>
-          </div>
-          <div class="relative group input-glow" id="wrapSenha">
-            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-[#45edee] transition-colors">lock</span>
-            <input id="password" class="w-full h-14 pl-12 pr-12 bg-surface-container-lowest border border-outline-variant/20 rounded-xl text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#45edee]/20 focus:border-[#45edee] transition-all duration-200" placeholder="••••••••" type="password" autocomplete="current-password"/>
-            <!-- Botão mostrar/ocultar senha -->
-            <button type="button" id="btnToggleSenha" onclick="toggleSenha()" class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-[#45edee] transition-colors">
-              <span class="material-symbols-outlined" id="iconeSenha">visibility</span>
-            </button>
-          </div>
-          <p class="msg-erro" id="erroSenha">A senha deve ter pelo menos 6 caracteres.</p>
-        </div>
-
-        <!-- Botão principal -->
-        <button id="btnEntrar" type="submit" class="w-full h-14 bg-[#6c5ce7] text-white font-black text-lg rounded-xl elite-glow hover:brightness-110 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 tracking-widest uppercase">
-          <span id="btnTexto">Entrar para a Elite</span>
-          <span class="material-symbols-outlined text-xl text-[#45edee]" id="btnIcone">arrow_forward</span>
-          <div class="btn-spinner" id="btnSpinner"></div>
-        </button>
-      </form>
-
-      <!-- Divisor -->
-      <div class="relative my-10 flex items-center">
-        <div class="flex-grow border-t border-outline-variant/20"></div>
-        <span class="mx-4 text-sm font-semibold text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Ou entre com</span>
-        <div class="flex-grow border-t border-outline-variant/20"></div>
+      </div>
+      <div class="text-right mb-5">
+        <a href="recuperar-senha.html" style="color:#45edee;font-size:13px;text-decoration:none">Esqueci minha senha</a>
       </div>
 
-      <!-- Botões sociais -->
-      <div class="grid grid-cols-2 gap-4">
-        <button onclick="loginSocial('Google')" class="h-14 flex items-center justify-center gap-3 bg-[#1d2026] border border-outline-variant/10 rounded-xl font-semibold hover:bg-surface-container-high transition-colors text-on-surface">
-          <img alt="Google" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0uvGkV1JwqjoMU7Wt1-iCsumfdog_Ivjd2dAoI5_Rt734a4HIReQMT44hHDrK_d_3tnICx3Rc5wPEfAABURHUf2k29G1pyO9i3G8o7Qe3jTg23t-2O5HIhNThvBmyFKfxDm0L6Hblx3mU_vsZ2c-B-H_T9BAM5W-usUPQWmsEhXpcBUEA2j8auNedJ1z7Gj7qJBTDNVmU0oLrr66rUYcmaH0yg3rVZIP0ZJK4EWEI49hET1rX3BaKp8DSLGwpmIvR0wiVZ1l-0LRM"/>
-          Google
-        </button>
-        <button onclick="loginSocial('Apple')" class="h-14 flex items-center justify-center gap-3 bg-[#1d2026] border border-outline-variant/10 rounded-xl font-semibold hover:bg-surface-container-high transition-colors text-on-surface">
-          <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1;">ios</span>
-          Apple
-        </button>
-      </div>
+      <div class="error-msg mb-4" id="login-error"></div>
+      <div class="success-msg mb-4" id="login-success"></div>
 
-      <!-- Cadastro -->
-      <p class="mt-12 text-center text-on-surface-variant font-medium">
-        Não tem uma conta?
-        <a class="text-[#45edee] font-bold hover:underline underline-offset-4 decoration-2 decoration-[#45edee]/30 ml-1" href="cadastro.html">Cadastre-se</a>
+      <button class="btn-primary" id="btn-login" onclick="fazerLogin()">Entrar</button>
+
+      <p style="text-align:center;color:#6b7280;font-size:13px;margin-top:16px">
+        Não tem conta? <span onclick="setSubTab('cadastro')" style="color:#45edee;cursor:pointer;font-size:13px">Criar agora</span>
       </p>
     </div>
-  </section>
-</main>
 
-<!-- Decoração -->
-<div class="fixed bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
-<div class="fixed top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 text-[15vw] font-black text-white/5 select-none pointer-events-none z-[-1] uppercase whitespace-nowrap">REDAÇÃO</div>
+    <!-- FORM: CADASTRO -->
+    <div id="form-cadastro" style="display:none">
+      <div class="mb-4">
+        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Nome completo</label>
+        <input id="cad-nome" type="text" class="input-field" placeholder="Seu nome" autocomplete="name">
+      </div>
+      <div class="mb-4">
+        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">E-mail</label>
+        <input id="cad-email" type="email" class="input-field" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      <div class="mb-4">
+        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Senha</label>
+        <div style="position:relative">
+          <input id="cad-senha" type="password" class="input-field" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="padding-right:48px">
+          <button onclick="toggleSenha('cad-senha',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#6b7280;cursor:pointer;font-size:18px">👁</button>
+        </div>
+      </div>
+
+      <!-- Campo extra para professor -->
+      <div id="campo-escola" style="display:none" class="mb-4">
+        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Escola onde leciona</label>
+        <input id="cad-escola" type="text" class="input-field" placeholder="Nome da escola">
+      </div>
+
+      <div class="error-msg mb-4" id="cad-error"></div>
+      <div class="success-msg mb-4" id="cad-success"></div>
+
+      <button class="btn-primary" id="btn-cadastro" onclick="fazerCadastro()">Criar conta</button>
+
+      <!-- Aviso para professor -->
+      <div id="aviso-professor" style="display:none;background:#6c5ce722;border:1px solid #6c5ce744;border-radius:8px;padding:12px;margin-top:16px">
+        <p style="color:#9ca3af;font-size:13px;text-align:center">
+          ⚠️ Contas de professor passam por <strong style="color:#fff">aprovação manual</strong>.<br>
+          Você receberá um e-mail em até 48h.
+        </p>
+      </div>
+
+      <p style="text-align:center;color:#6b7280;font-size:13px;margin-top:16px">
+        Já tem conta? <span onclick="setSubTab('login')" style="color:#45edee;cursor:pointer;font-size:13px">Entrar</span>
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Link admin -->
+  <p style="text-align:center;margin-top:20px">
+    <a href="admin-professores.html" style="color:#374151;font-size:12px;text-decoration:none">Acesso Admin</a>
+  </p>
+
+</div>
 
 <script>
-  // ── TOAST ──────────────────────────────────────────
-  function toast(msg, tipo = '', dur = 3500) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = 'show ' + tipo;
-    setTimeout(() => el.className = '', dur);
-  }
+  // ── Estado ──────────────────────────────────
+  let tabAtual = 'aluno';
+  let subTabAtual = 'login';
 
-  // ── MOSTRAR / OCULTAR SENHA ────────────────────────
-  window.toggleSenha = function() {
-    const input = document.getElementById('password');
-    const icone = document.getElementById('iconeSenha');
-    const visivel = input.type === 'text';
-    input.type = visivel ? 'password' : 'text';
-    icone.textContent = visivel ? 'visibility' : 'visibility_off';
-  };
-
-  // ── VALIDAÇÃO ──────────────────────────────────────
-  function validarEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  function mostrarErro(inputId, erroId, wrapId, mostrar) {
-    const input = document.getElementById(inputId);
-    const erro = document.getElementById(erroId);
-    const wrap = document.getElementById(wrapId);
-    if (mostrar) {
-      input.classList.add('campo-erro');
-      erro.classList.add('visivel');
-      wrap.classList.add('shake');
-      setTimeout(() => wrap.classList.remove('shake'), 400);
-    } else {
-      input.classList.remove('campo-erro');
-      erro.classList.remove('visivel');
+  // ── Redirecionar se já logado ───────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    if (authEstaLogado()) {
+      const tipo = authGetTipo();
+      const rotas = { aluno: 'inicio.html', professor: 'professor.html', admin: 'admin-professores.html' };
+      window.location.href = rotas[tipo] || 'inicio.html';
     }
-    return !mostrar;
-  }
-
-  // ── LOADING NO BOTÃO ───────────────────────────────
-  function setBtnLoading(loading) {
-    document.getElementById('btnTexto').style.display = loading ? 'none' : 'inline';
-    document.getElementById('btnIcone').style.display = loading ? 'none' : 'inline';
-    document.getElementById('btnSpinner').style.display = loading ? 'block' : 'none';
-    document.getElementById('btnEntrar').disabled = loading;
-  }
-
-  // ── LOGIN SOCIAL (placeholder) ─────────────────────
-  window.loginSocial = function(provider) {
-    toast(`Login com ${provider} em breve! 🚀`);
-  };
-
-  // ── SUBMIT DO FORMULÁRIO ───────────────────────────
-  document.getElementById('formLogin').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const email = document.getElementById('email').value.trim();
-    const senha = document.getElementById('password').value;
-
-    // Validação
-    const emailOk = mostrarErro('email', 'erroEmail', 'wrapEmail', !validarEmail(email));
-    const senhaOk = mostrarErro('password', 'erroSenha', 'wrapSenha', senha.length < 6);
-
-    if (!emailOk || !senhaOk) return;
-
-    // Simula autenticação (substituir por backend real)
-    setBtnLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setBtnLoading(false);
-
-    // ✅ Login bem-sucedido → redireciona para o dashboard
-    toast('Bem-vindo de volta! Redirecionando...', 'sucesso', 2000);
-    setTimeout(() => {
-      // Simula detecção de perfil (em produção viria do backend)
-      // Emails com 'prof' redirecionam para portal do professor
-      const emailVal = document.getElementById('email').value.toLowerCase();
-      if (emailVal.includes('prof') || emailVal.includes('professor')) {
-        window.location.href = 'professor.html';
-      } else {
-        window.location.href = 'inicio.html';
-      }
-    }, 2000);
   });
 
-  // Limpar erros ao digitar
-  document.getElementById('email').addEventListener('input', () =>
-    mostrarErro('email', 'erroEmail', 'wrapEmail', false));
-  document.getElementById('password').addEventListener('input', () =>
-    mostrarErro('password', 'erroSenha', 'wrapSenha', false));
+  // ── Tabs ─────────────────────────────────────
+  window.setTab = function setTab(tab) {
+    tabAtual = tab;
+    document.getElementById('tab-aluno').className = 'tab-btn ' + (tab === 'aluno' ? 'active' : 'inactive');
+    document.getElementById('tab-professor').className = 'tab-btn ' + (tab === 'professor' ? 'active' : 'inactive');
+    document.getElementById('campo-escola').style.display = tab === 'professor' ? 'block' : 'none';
+    document.getElementById('aviso-professor').style.display = (tab === 'professor' && subTabAtual === 'cadastro') ? 'block' : 'none';
+    limparMensagens();
+  }
+
+  window.setSubTab = function setSubTab(sub) {
+    subTabAtual = sub;
+    document.getElementById('form-login').style.display = sub === 'login' ? 'block' : 'none';
+    document.getElementById('form-cadastro').style.display = sub === 'cadastro' ? 'block' : 'none';
+
+    const btnLogin = document.getElementById('sub-login');
+    const btnCad = document.getElementById('sub-cadastro');
+    if (sub === 'login') {
+      btnLogin.style.cssText = 'padding-bottom:10px;font-size:15px;font-weight:600;color:#45edee;border-bottom:2px solid #45edee;margin-bottom:-1px;cursor:pointer;transition:all .2s';
+      btnCad.style.cssText = 'padding-bottom:10px;font-size:15px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:all .2s';
+    } else {
+      btnCad.style.cssText = 'padding-bottom:10px;font-size:15px;font-weight:600;color:#45edee;border-bottom:2px solid #45edee;margin-bottom:-1px;cursor:pointer;transition:all .2s';
+      btnLogin.style.cssText = 'padding-bottom:10px;font-size:15px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:all .2s';
+    }
+
+    document.getElementById('aviso-professor').style.display = (tabAtual === 'professor' && sub === 'cadastro') ? 'block' : 'none';
+    limparMensagens();
+  }
+
+  // ── Mostrar/ocultar senha ────────────────────
+  window.toggleSenha = function toggleSenha(id, btn) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+    else { input.type = 'password'; btn.textContent = '👁'; }
+  }
+
+  // ── Mensagens ────────────────────────────────
+  function limparMensagens() {
+    ['login-error','login-success','cad-error','cad-success'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.display = 'none'; el.textContent = ''; }
+    });
+  }
+
+  function mostrarErro(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function mostrarSucesso(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function setBtnLoading(id, loading, textoNormal) {
+    const btn = document.getElementById(id);
+    btn.disabled = loading;
+    btn.innerHTML = loading ? '<span class="spinner"></span> Aguardando...' : textoNormal;
+  }
+
+  // ── LOGIN ────────────────────────────────────
+  window.fazerLogin = async function fazerLogin() {
+    limparMensagens();
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+
+    if (!email || !senha) { mostrarErro('login-error', 'Preencha e-mail e senha.'); return; }
+
+    setBtnLoading('btn-login', true, 'Entrar');
+    try {
+      const { perfil } = await authLogin(email, senha);
+      
+      // Verificar se professor está aprovado
+      if (perfil?.perfil === 'professor') {
+        // Buscar status no banco
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/professores?id=eq.${perfil.id}&select=status`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${authGetToken()}` }
+        });
+        const dados = await res.json();
+        const status = dados[0]?.status;
+        if (status === 'pendente') {
+          mostrarErro('login-error', '⏳ Sua conta está aguardando aprovação. Você receberá um e-mail em breve.');
+          authLogout();
+          setBtnLoading('btn-login', false, 'Entrar');
+          return;
+        }
+        if (status === 'rejeitado') {
+          mostrarErro('login-error', '❌ Seu acesso foi negado. Entre em contato pelo suporte.');
+          authLogout();
+          setBtnLoading('btn-login', false, 'Entrar');
+          return;
+        }
+      }
+
+      // Redirecionar pelo perfil
+      const rotas = { aluno: 'inicio.html', professor: 'professor.html', admin: 'admin-professores.html' };
+      window.location.href = rotas[perfil?.perfil] || 'inicio.html';
+
+    } catch (err) {
+      setBtnLoading('btn-login', false, 'Entrar');
+      const msg = traduzirErroAuth(err.message);
+      mostrarErro('login-error', msg);
+    }
+  }
+
+  // ── CADASTRO ─────────────────────────────────
+  window.fazerCadastro = async function fazerCadastro() {
+    limparMensagens();
+    const nome = document.getElementById('cad-nome').value.trim();
+    const email = document.getElementById('cad-email').value.trim();
+    const senha = document.getElementById('cad-senha').value;
+    const escola = document.getElementById('cad-escola').value.trim();
+
+    if (!nome) { mostrarErro('cad-error', 'Informe seu nome completo.'); return; }
+    if (!email) { mostrarErro('cad-error', 'Informe seu e-mail.'); return; }
+    if (!senha || senha.length < 6) { mostrarErro('cad-error', 'Senha deve ter pelo menos 6 caracteres.'); return; }
+    if (tabAtual === 'professor' && !escola) { mostrarErro('cad-error', 'Informe a escola onde leciona.'); return; }
+
+    setBtnLoading('btn-cadastro', true, 'Criar conta');
+    try {
+      await authCadastro({
+        nome,
+        email,
+        senha,
+        perfil: tabAtual,
+        escola: escola || null
+      });
+
+      if (tabAtual === 'professor') {
+        mostrarSucesso('cad-success', '✅ Cadastro enviado! Aguarde a aprovação por e-mail (até 48h).');
+      } else {
+        mostrarSucesso('cad-success', '✅ Conta criada! Verifique seu e-mail para confirmar e depois faça login.');
+      }
+      
+      // Limpar campos
+      document.getElementById('cad-nome').value = '';
+      document.getElementById('cad-email').value = '';
+      document.getElementById('cad-senha').value = '';
+      document.getElementById('cad-escola').value = '';
+
+    } catch (err) {
+      const msg = traduzirErroAuth(err.message);
+      mostrarErro('cad-error', msg);
+    } finally {
+      setBtnLoading('btn-cadastro', false, 'Criar conta');
+    }
+  }
+
+  // ── Traduzir erros do Supabase ───────────────
+  function traduzirErroAuth(msg) {
+    if (!msg) return 'Erro desconhecido. Tente novamente.';
+    if (msg.includes('Invalid login credentials')) return '❌ E-mail ou senha incorretos.';
+    if (msg.includes('Email not confirmed')) return '📧 Confirme seu e-mail antes de entrar.';
+    if (msg.includes('User already registered')) return '📧 E-mail já cadastrado. Faça login.';
+    if (msg.includes('Password should be')) return '🔒 Senha deve ter pelo menos 6 caracteres.';
+    if (msg.includes('Unable to validate')) return '❌ Credenciais inválidas.';
+    if (msg.includes('rate limit')) return '⏳ Muitas tentativas. Aguarde alguns minutos.';
+    return msg;
+  }
+
+  // ── Enter para submeter ──────────────────────
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (subTabAtual === 'login') fazerLogin();
+    else fazerCadastro();
+  });
+
 </script>
 </body>
 </html>

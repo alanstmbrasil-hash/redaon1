@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Relatórios</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  body{font-family:'Inter',sans-serif;background:#0b0e14;color:#e1e2eb;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  h1,h2,h3,h4,p,span,a,button,div{word-break:normal!important;overflow-wrap:break-word;hyphens:none!important;}
+  #sidebar{position:fixed;left:0;top:0;height:100%;width:256px;transform:translateX(-256px);transition:transform .3s;z-index:50;background:#0b0e14;border-right:1px solid rgba(71,69,84,.2);display:flex;flex-direction:column;padding:1.5rem 1rem;overflow-y:auto;}
+  #sidebar::-webkit-scrollbar{width:4px;}
+  #sidebar::-webkit-scrollbar-thumb{background:#32353c;border-radius:10px;}
+  #sidebar{scrollbar-width:thin;scrollbar-color:#32353c transparent;}
+  #sidebar.open{transform:translateX(0);}
+  #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:45;}
+  #overlay.open{display:block;}
+  @media(min-width:1024px){#sidebar{transform:translateX(0)!important;}#overlay{display:none!important;}#main-content{margin-left:256px;}#btnHamburger{display:none!important;}}
+  .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;transition:all .2s;cursor:pointer;text-decoration:none;}
+  .nav-item:hover{background:#1d2026;color:#e1e2eb;}
+  .nav-item.ativo{background:#1d2026;color:#45edee;border-right:3px solid #45edee;}
+  .nav-section-label{font-size:.65rem;font-weight:700;color:#474554;text-transform:uppercase;letter-spacing:.1em;padding:.5rem 1rem .25rem;}
+  .filtro-select{background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.5rem .875rem;color:#e1e2eb;font-size:.8rem;outline:none;cursor:pointer;}
+  .filtro-select:focus{border-color:#45edee;}
+  .card{background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;padding:1.25rem;}
+  .grupo-tag{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .625rem;border-radius:9999px;font-size:.7rem;font-weight:700;}
+  .grupo-c1{background:rgba(255,180,171,.1);color:#ffb4ab;border:1px solid rgba(255,180,171,.2);}
+  .grupo-c2{background:rgba(250,189,0,.1);color:#fabd00;border:1px solid rgba(250,189,0,.2);}
+  .grupo-c3{background:rgba(198,191,255,.1);color:#c6bfff;border:1px solid rgba(198,191,255,.2);}
+  .grupo-c5{background:rgba(69,237,238,.1);color:#45edee;border:1px solid rgba(69,237,238,.2);}
+  #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(5rem);background:#272a31;border:1px solid rgba(255,255,255,.1);color:#e1e2eb;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:300;transition:transform .3s;pointer-events:none;}
+  #toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+<script src="supabase-auth.js"></script>
+</head>
+<body>
+<div id="toast"></div>
+<div id="overlay" onclick="toggleSidebar()"></div>
+
+<aside id="sidebar">
+  <div style="display:flex;align-items:baseline;padding:.5rem .5rem 2rem;font-style:italic;">
+    <span style="font-size:1.75rem;font-weight:900;color:white;letter-spacing:-.05em;">Reda</span>
+    <span style="font-size:1.75rem;font-weight:900;color:#45edee;letter-spacing:-.05em;">ON</span>
+    
+  </div>
+  <nav style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.25rem;">
+    <div class="nav-section-label">Portal</div>
+    <a class="nav-item" href="professor.html"><span class="material-symbols-outlined">school</span>Dashboard</a>
+    <div class="nav-section-label" style="margin-top:.5rem;">Gestão</div>
+    <a class="nav-item" href="professor-alunos.html"><span class="material-symbols-outlined">group</span>Gerenciar Alunos</a>
+    <a class="nav-item" href="professor-redacoes.html"><span class="material-symbols-outlined">edit_note</span>Redações dos Alunos</a>
+    <a class="nav-item ativo" href="professor-relatorios.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">bar_chart</span>Relatórios</a>
+    <div class="nav-section-label" style="margin-top:.5rem;">Conteúdo</div>
+    <a class="nav-item" href="professor-estudio.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">neurology</span><span>Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span></a>
+    <a class="nav-item" href="temas.html"><span class="material-symbols-outlined">description</span>Temas</a>
+    <a class="nav-item" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span>Ranking</a>
+    <a class="nav-item" href="configuracoes.html"><span class="material-symbols-outlined">settings</span>Configurações</a>
+  </nav>
+  <div style="border-top:1px solid rgba(71,69,84,.2);padding-top:1rem;margin-top:1rem;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;margin-bottom:.5rem;">
+      <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(108,92,231,.2);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="color:#c6bfff;">person</span></div>
+      <div><p id="nomeProf" style="font-size:.85rem;font-weight:700;">Professor</p><p style="font-size:.7rem;color:#6c5ce7;font-weight:700;">⭐ Portal Pro</p></div>
+    </div>
+    <a onclick="if(confirm('Sair?'))window.location.href='login.html'" style="display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.75rem;color:#ff8b8b;font-size:.85rem;cursor:pointer;" onmouseover="this.style.background='rgba(255,100,100,.1)'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1.1rem;">logout</span>Sair
+    </a>
+  </div>
+</aside>
+
+<div id="main-content" style="min-height:100vh;display:flex;flex-direction:column;">
+  <header style="position:sticky;top:0;z-index:40;background:rgba(11,14,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(71,69,84,.15);">
+    <div style="height:3.5rem;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;">
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <button id="btnHamburger" onclick="toggleSidebar()" style="padding:.5rem;border-radius:.5rem;background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">menu</span></button>
+        <span class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;">bar_chart</span>
+        <h2 style="font-size:1rem;font-weight:800;">Relatórios</h2>
+      </div>
+<button onclick="irModoAluno()" style="display:flex;align-items:center;gap:.375rem;padding:.4rem .875rem;background:rgba(71,69,84,.15);border:1px solid rgba(71,69,84,.3);border-radius:.75rem;color:#928ea0;font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;" onmouseover="this.style.color='#e1e2eb';this.style.borderColor='rgba(71,69,84,.5)'" onmouseout="this.style.color='#928ea0';this.style.borderColor='rgba(71,69,84,.3)'">
+        <span class="material-symbols-outlined" style="font-size:.9rem;">open_in_new</span>
+        Ver como aluno
+      </button>
+    </div>
+    <div style="display:flex;gap:.5rem;padding:.5rem 1rem .625rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+      <select id="selEscola" class="filtro-select" style="flex-shrink:0;" onchange="onEscolaChange()">
+        <option value="">Todas as Escolas</option>
+      </select>
+      <select id="selTurma" class="filtro-select" style="flex-shrink:0;" onchange="onTurmaChange()">
+        <option value="">Todas as Turmas</option>
+      </select>
+      <select id="selAluno" class="filtro-select" style="flex-shrink:0;" onchange="renderRelatorios()">
+        <option value="">Todos os Alunos</option>
+      </select>
+    </div>
+  </header>
+
+  <div style="flex:1;padding:1.5rem;max-width:1400px;margin:0 auto;width:100%;box-sizing:border-box;">
+
+    <!-- Stats rápidos -->
+    <div id="statsRapidos" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;"></div>
+
+    <!-- Grid gráficos -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+      <div class="card">
+        <h3 style="font-size:.8rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem;">Evolução das Notas</h3>
+        <canvas id="graficoLinha" height="200"></canvas>
+      </div>
+      <div class="card">
+        <h3 style="font-size:.8rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem;">Média por Competência</h3>
+        <canvas id="graficoRadar" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Grupos por carência -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+        <h3 style="font-size:.8rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;">Grupos por Carência Detectada</h3>
+        <p style="font-size:.75rem;color:#474554;">Alunos agrupados pela competência mais fraca</p>
+      </div>
+      <div id="gruposCarencia" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;"></div>
+    </div>
+
+    <!-- Ranking alunos -->
+    <div class="card">
+      <h3 style="font-size:.8rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem;">Ranking da Turma</h3>
+      <div id="rankingAlunos" style="display:flex;flex-direction:column;gap:.5rem;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  authGuard('professor');
+
+document.getElementById('nomeProf').textContent = authGetNome();
+
+const DADOS = JSON.parse(localStorage.getItem('prof_dados') || '{"escolas":[{"id":1,"nome":"E.E. Rui Barbosa","turmas":[{"id":1,"nome":"3\u00ba A \u2014 Manh\u00e3","disciplina":"Reda\u00e7\u00e3o","alunos":38,"aulas_semana":2},{"id":2,"nome":"3\u00ba B \u2014 Manh\u00e3","disciplina":"Reda\u00e7\u00e3o","alunos":40,"aulas_semana":2},{"id":3,"nome":"2\u00ba A \u2014 Tarde","disciplina":"Portugu\u00eas","alunos":37,"aulas_semana":3}]},{"id":2,"nome":"E.M. Jo\u00e3o Pessoa","turmas":[{"id":4,"nome":"3\u00ba A \u2014 Noite","disciplina":"Reda\u00e7\u00e3o","alunos":32,"aulas_semana":2},{"id":5,"nome":"2\u00ba B \u2014 Tarde","disciplina":"Portugu\u00eas","alunos":35,"aulas_semana":3}]}]}');
+
+const ALUNOS_SIM = [
+  {id:1,nome:'Ana Souza',escola:1,turma:1,notas:[700,750,800,820,880],comp:[160,180,160,160,200]},
+  {id:2,nome:'Carlos Lima',escola:1,turma:1,notas:[500,560,620,680,720],comp:[120,160,120,160,160]},
+  {id:3,nome:'Beatriz Santos',escola:1,turma:2,notas:[800,820,840,860,880],comp:[200,160,160,160,200]},
+  {id:4,nome:'Fernanda Costa',escola:2,turma:4,notas:[650,700,730,780,800],comp:[160,160,160,120,200]},
+  {id:5,nome:'Rafael Mendes',escola:1,turma:1,notas:[580,600,640,660,720],comp:[120,160,120,120,200]},
+  {id:6,nome:'Juliana Melo',escola:1,turma:1,notas:[760,780,800,840,900],comp:[200,160,200,160,180]},
+  {id:7,nome:'Pedro Alves',escola:2,turma:4,notas:[440,480,520,560,600],comp:[80,120,120,120,160]},
+  {id:8,nome:'Mariana Nunes',escola:1,turma:2,notas:[680,700,720,760,800],comp:[160,160,160,160,160]},
+];
+
+const MESES = ['Nov','Dez','Jan','Fev','Mar'];
+let chartLinha = null, chartRadar = null;
+
+// Preencher escolas
+const selEscola = document.getElementById('selEscola');
+DADOS.escolas.forEach(e => {
+  const o = document.createElement('option'); o.value = e.id; o.textContent = e.nome;
+  selEscola.appendChild(o);
+});
+
+window.onEscolaChange = function() {
+  const selTurma = document.getElementById('selTurma');
+  const selAluno = document.getElementById('selAluno');
+  selTurma.innerHTML = '<option value="">Todas as Turmas</option>';
+  selAluno.innerHTML = '<option value="">Todos os Alunos</option>';
+  const escolaId = parseInt(selEscola.value);
+  if (escolaId) {
+    const escola = DADOS.escolas.find(e => e.id === escolaId);
+    escola.turmas.forEach(t => {
+      const o = document.createElement('option'); o.value = t.id; o.textContent = t.nome + ' (' + t.disciplina + ')';
+      selTurma.appendChild(o);
+    });
+  }
+  renderRelatorios();
+};
+
+window.onTurmaChange = function() {
+  const selAluno = document.getElementById('selAluno');
+  selAluno.innerHTML = '<option value="">Todos os Alunos</option>';
+  const escolaId = parseInt(selEscola.value);
+  const turmaId = parseInt(document.getElementById('selTurma').value);
+  if (escolaId && turmaId) {
+    ALUNOS_SIM.filter(a => a.escola === escolaId && a.turma === turmaId).forEach(a => {
+      const o = document.createElement('option'); o.value = a.id; o.textContent = a.nome;
+      selAluno.appendChild(o);
+    });
+  }
+  renderRelatorios();
+};
+
+window.renderRelatorios = function() {
+  const escolaId = parseInt(selEscola.value) || null;
+  const turmaId = parseInt(document.getElementById('selTurma').value) || null;
+  const alunoId = parseInt(document.getElementById('selAluno').value) || null;
+
+  const alunosFiltrados = ALUNOS_SIM.filter(a =>
+    (!escolaId || a.escola === escolaId) &&
+    (!turmaId || a.turma === turmaId) &&
+    (!alunoId || a.id === alunoId)
+  );
+
+  renderStats(alunosFiltrados);
+  renderGraficos(alunosFiltrados);
+  renderGrupos(alunosFiltrados);
+  renderRanking(alunosFiltrados);
+};
+
+function renderStats(alunos) {
+  const medias = alunos.map(a => a.notas[a.notas.length-1]);
+  const mediaGeral = medias.length ? Math.round(medias.reduce((s,v)=>s+v,0)/medias.length) : 0;
+  const maior = medias.length ? Math.max(...medias) : 0;
+  const menor = medias.length ? Math.min(...medias) : 0;
+  const acima800 = medias.filter(n => n >= 800).length;
+
+  document.getElementById('statsRapidos').innerHTML =
+    stat('Média Geral', mediaGeral, '#45edee', 'trending_up') +
+    stat('Maior Nota', maior, '#4ade80', 'emoji_events') +
+    stat('Menor Nota', menor, '#fabd00', 'arrow_downward') +
+    stat('Acima de 800', acima800 + '/' + alunos.length, '#c6bfff', 'stars');
+}
+
+function stat(label, val, cor, icon) {
+  return '<div class="card"><div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;"><span class="material-symbols-outlined" style="color:' + cor + ';font-variation-settings:\'FILL\' 1;">' + icon + '</span><span style="font-size:.7rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;">' + label + '</span></div><p style="font-size:1.75rem;font-weight:900;color:' + cor + ';">' + val + '</p></div>';
+}
+
+function renderGraficos(alunos) {
+  const ctx1 = document.getElementById('graficoLinha').getContext('2d');
+  const ctx2 = document.getElementById('graficoRadar').getContext('2d');
+  if (chartLinha) chartLinha.destroy();
+  if (chartRadar) chartRadar.destroy();
+
+  // Média de notas por mês
+  const datasets = alunos.length <= 3 ? alunos.map((a,i) => ({
+    label: a.nome.split(' ')[0],
+    data: a.notas,
+    borderColor: ['#45edee','#c6bfff','#4ade80','#fabd00','#ffb4ab'][i % 5],
+    backgroundColor: 'transparent',
+    tension: .4, pointRadius: 4
+  })) : [{
+    label: 'Média da Turma',
+    data: MESES.map((_,mi) => Math.round(alunos.reduce((s,a)=>s+(a.notas[mi]||0),0)/alunos.length)),
+    borderColor: '#45edee',
+    backgroundColor: 'rgba(69,237,238,.1)',
+    tension: .4, fill: true, pointRadius: 4
+  }];
+
+  chartLinha = new Chart(ctx1, {
+    type: 'line',
+    data: { labels: MESES, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { color: '#928ea0', font: { size: 11 } } } },
+      scales: {
+        y: { min: 300, max: 1000, grid: { color: 'rgba(71,69,84,.2)' }, ticks: { color: '#474554' } },
+        x: { grid: { color: 'rgba(71,69,84,.1)' }, ticks: { color: '#474554' } }
+      }
+    }
+  });
+
+  // Radar competências
+  const compLabels = ['C1 Língua','C2 Proposta','C3 Argumento','C4 Coesão','C5 Intervenção'];
+  const mediaComp = compLabels.map((_,ci) =>
+    alunos.length ? Math.round(alunos.reduce((s,a)=>s+(a.comp[ci]||0),0)/alunos.length) : 0
+  );
+
+  chartRadar = new Chart(ctx2, {
+    type: 'radar',
+    data: {
+      labels: compLabels,
+      datasets: [{
+        label: 'Média',
+        data: mediaComp,
+        borderColor: '#6c5ce7',
+        backgroundColor: 'rgba(108,92,231,.2)',
+        pointBackgroundColor: '#6c5ce7',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 200,
+          grid: { color: 'rgba(71,69,84,.2)' },
+          ticks: { color: '#474554', backdropColor: 'transparent', stepSize: 40 },
+          pointLabels: { color: '#928ea0', font: { size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+function renderGrupos(alunos) {
+  const GRUPOS = [
+    {key:'c1', label:'C1 — Língua Portuguesa', classe:'grupo-c1', icon:'spellcheck', desc:'Domínio da norma culta'},
+    {key:'c2', label:'C2 — Proposta', classe:'grupo-c2', icon:'description', desc:'Compreensão do tema'},
+    {key:'c3', label:'C3 — Argumentação', classe:'grupo-c3', icon:'forum', desc:'Estrutura argumentativa'},
+    {key:'c5', label:'C5 — Intervenção', classe:'grupo-c5', icon:'lightbulb', desc:'Proposta de intervenção'},
+  ];
+
+  const container = document.getElementById('gruposCarencia');
+  container.innerHTML = '';
+  GRUPOS.forEach((g,gi) => {
+    const ci = [0,1,2,4][gi];
+    const fracos = alunos.filter(a => {
+      const min = Math.min(...a.comp);
+      return a.comp[ci] === min && a.comp[ci] < 160;
+    });
+    const div = document.createElement('div');
+    div.style.cssText = 'background:#10131a;border-radius:.75rem;padding:.875rem;border:1px solid rgba(71,69,84,.15);';
+    div.innerHTML =
+      '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;">' +
+        '<span class="material-symbols-outlined" style="font-size:1rem;color:#928ea0;">' + g.icon + '</span>' +
+        '<span class="grupo-tag ' + g.classe + '">' + g.label + '</span>' +
+      '</div>' +
+      '<p style="font-size:.7rem;color:#474554;margin-bottom:.5rem;">' + g.desc + '</p>' +
+      (fracos.length ?
+        fracos.map(a => '<p style="font-size:.78rem;color:#c8c4d7;padding:.2rem 0;border-bottom:1px solid rgba(71,69,84,.1);">• ' + a.nome + '</p>').join('') :
+        '<p style="font-size:.78rem;color:#4ade80;">✓ Nenhum aluno neste grupo</p>');
+    container.appendChild(div);
+  });
+}
+
+function renderRanking(alunos) {
+  const sorted = [...alunos].sort((a,b) => b.notas[b.notas.length-1] - a.notas[a.notas.length-1]);
+  const container = document.getElementById('rankingAlunos');
+  container.innerHTML = '';
+  sorted.forEach((a,i) => {
+    const nota = a.notas[a.notas.length-1];
+    const cor = nota >= 800 ? '#4ade80' : nota >= 600 ? '#fabd00' : '#ffb4ab';
+    const medalha = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + 'º';
+    const turma = getTurmaNome(a.escola, a.turma);
+    const el = document.createElement('div');
+    el.style.cssText = 'display:flex;align-items:center;gap:.75rem;padding:.75rem;background:#10131a;border-radius:.75rem;border:1px solid rgba(71,69,84,.1);';
+    el.innerHTML =
+      '<span style="font-size:1rem;min-width:2rem;text-align:center;">' + medalha + '</span>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<p style="font-size:.85rem;font-weight:700;color:#e1e2eb;">' + a.nome + '</p>' +
+        '<p style="font-size:.7rem;color:#474554;">' + turma + '</p>' +
+      '</div>' +
+      '<div style="text-align:right;">' +
+        '<p style="font-size:1.1rem;font-weight:900;color:' + cor + ';">' + nota + '</p>' +
+        '<p style="font-size:.65rem;color:#474554;">' + evolucao(a.notas) + '</p>' +
+      '</div>';
+    container.appendChild(el);
+  });
+}
+
+function getTurmaNome(escolaId, turmaId) {
+  const escola = DADOS.escolas.find(e => e.id === escolaId);
+  const turma = escola?.turmas.find(t => t.id === turmaId);
+  return (escola?.nome || '') + ' · ' + (turma?.nome || '');
+}
+
+function evolucao(notas) {
+  if (notas.length < 2) return '';
+  const diff = notas[notas.length-1] - notas[notas.length-2];
+  return diff > 0 ? '↑ +' + diff : diff < 0 ? '↓ ' + diff : '→ Estável';
+}
+
+function toast(msg,dur=3000){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),dur);}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function irModoAluno(){if(confirm('Abrir o RedaON como aluno em uma nova aba?')){localStorage.setItem('modo_professor_ativo','1');window.open('inicio.html','_blank');}}
+
+renderRelatorios();
+</script>
+</body>
+</html>

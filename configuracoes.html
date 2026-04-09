@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html class="dark" lang="pt-BR" id="htmlRoot">
 <head>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "ced19395-bdaf-47e0-90d4-eb39698dbdad",
-    });
-  });
-</script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Configurações</title>
@@ -62,6 +53,14 @@
   html.light body { background-color: #f4f5fb; color: #1a1c23; }
   html.light .glass-card { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.08); }
   html.light aside { background: #ffffff !important; border-right: 1px solid rgba(0,0,0,0.08); }
+  html.light aside a { color: #1a1c23 !important; }
+  html.light aside a:hover { background: #f0f1f8 !important; color: #1a1c23 !important; }
+  html.light aside .text-\[\#45EDEE\] { color: #0099a8 !important; }
+  html.light aside .text-\[\#C8C4D7\] { color: #4a4c5a !important; }
+  html.light aside span { color: inherit !important; }
+  html.light #topbar { background: #ffffff !important; }
+  html.light #topbar h2 { color: #1a1c23 !important; }
+  html.light #topbar span { color: #4a4c5a !important; }
   html.light header { background: #ffffff !important; border-bottom: 1px solid rgba(0,0,0,0.06); }
   html.light .bg-\[\#10131a\] { background: #ffffff; }
   html.light .text-on-surface { color: #1a1c23; }
@@ -69,7 +68,22 @@
   html.light .bg-surface-container-lowest { background: #f4f5fb; }
   html.light .bg-surface-container { background: #ecedf5; }
   html.light input, html.light select { background: #f0f1f8 !important; color: #1a1c23 !important; }
+  
+  html.light .text-outline { color: #5a5c6a !important; }
+  html.light .text-on-surface-variant { color: #4a4c5a !important; }
+  html.light h1,html.light h2,html.light h3,html.light h4,html.light p,html.light span,html.light label,html.light a { color: #1a1c23; }
+  html.light .text-\[\#45edee\] { color: #0099a8 !important; }
+  html.light .text-primary { color: #5847d2 !important; }
+  html.light .text-secondary { color: #0099a8 !important; }
+  html.light .bg-surface-container-highest { background: #e0e1ea !important; }
+  html.light .border-outline-variant\/10 { border-color: rgba(0,0,0,0.1) !important; }
+  html.light nav a, html.light .text-on-surface { color: #1a1c23 !important; }
+  html.light .glass-card { color: #1a1c23; }
   html.light .preview-card { background: #ecedf5 !important; border-color: rgba(0,0,0,0.1) !important; }
+  html.light .sua-redaon-section { background: linear-gradient(135deg, #e8eaf6, #e0f7fa) !important; }
+  html.light .sua-redaon-section h4 { color: #1a1c23 !important; }
+  html.light .sua-redaon-section p { color: #3a3c4a !important; }
+  html.light .sua-redaon-section .text-on-surface-variant { color: #4a4c5a !important; }
 
   /* Toggle switch */
   .toggle-bg { transition: background 0.2s; }
@@ -92,9 +106,45 @@
 
   /* Input focus */
   input:focus, select:focus { outline: none; ring: 1px solid rgba(108,92,231,0.4); }
+
+  /* ── Hamburger sidebar ─────────────────────────────── */
+  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
+  #sidebar.open { transform: translateX(0); }
+  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:44; }
+  #overlay.open { display:block; }
+  @media(min-width:1024px){
+    #sidebar { transform: translateX(0) !important; }
+    #overlay { display:none !important; }
+    .main-with-sidebar { margin-left:256px; }
+  }
+  @media(max-width:1023px){
+    .main-with-sidebar { margin-left:0 !important; }
+  }
+
+  /* ── Scrollbar sidebar invisível no desktop ── */
+  #sidebar nav::-webkit-scrollbar { width: 4px; }
+  #sidebar nav::-webkit-scrollbar-track { background: transparent; }
+  #sidebar nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 10px; }
+  #sidebar nav:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+  #sidebar nav { scrollbar-width: none; }
+  #sidebar nav:hover { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
+  @media(min-width:1024px){ #btnHamburger { display:none !important; } }
 </style>
+<script src="supabase-auth.js"></script>
 </head>
 <body class="bg-surface-container-lowest text-on-surface no-scrollbar overflow-x-hidden" id="bodyRoot">
+
+<!-- BARRA MODO PROFESSOR — visível quando professor navega como aluno -->
+<div id="barraModoProf" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(135deg,#6c5ce7,#45edee);padding:.5rem 1rem;display:none;align-items:center;justify-content:space-between;gap:.5rem;">
+  <div style="display:flex;align-items:center;gap:.5rem;">
+    <span class="material-symbols-outlined" style="font-size:1rem;color:white;font-variation-settings:'FILL' 1;">visibility</span>
+    <span style="font-size:.78rem;font-weight:700;color:white;">Modo Visualização — você está navegando como aluno</span>
+  </div>
+  <a href="configuracoes.html" style="display:flex;align-items:center;gap:.375rem;padding:.3rem .75rem;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:.625rem;color:white;font-size:.75rem;font-weight:700;text-decoration:none;white-space:nowrap;">
+    <span class="material-symbols-outlined" style="font-size:.85rem;">swap_horiz</span>
+    Voltar ao Portal
+  </a>
+</div>
 
 <!-- TOAST -->
 <div id="toast"></div>
@@ -159,7 +209,7 @@
         <p style="font-size:.75rem;color:#928ea0;margin-bottom:1rem;">/mês</p>
         <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.8rem;color:#c8c4d7;margin-bottom:1rem;">
           <p>✓ Correções ilimitadas</p>
-          <p>✓ Elite da PROfa Blanche</p>
+          <p>✓ Elite da PROfa</p>
           <p>✓ Mentoria IA em tempo real</p>
           <p>✓ Temas INEP exclusivos</p>
         </div>
@@ -176,6 +226,7 @@
 </div>
 
 <!-- SIDEBAR -->
+<div id="overlay" onclick="toggleSidebar()"></div>
 <aside class="fixed left-0 top-0 h-full w-64 bg-[#10131a] flex flex-col py-8 shadow-[24px_0_48px_-12px_rgba(108,92,231,0.08)] border-r border-[#272A31]/20 z-50" id="sidebar">
   <div class="px-8 mb-10">
     <h1 class="text-2xl font-extrabold italic tracking-tight">
@@ -189,46 +240,49 @@
     <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="minhas-redacoes.html"><span class="material-symbols-outlined">history_edu</span> Minhas Redações</a>
     <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="evolucao.html"><span class="material-symbols-outlined">insights</span> Evolução</a>
     <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="plano.html"><span class="material-symbols-outlined">auto_stories</span> Plano de Estudo</a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span> Estúdio PRO</a>
     <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span> Ranking</a>
     <a class="flex items-center gap-3 px-4 py-3 bg-[#1d2026] text-[#45EDEE] rounded-lg border-l-4 border-[#45EDEE] text-sm font-bold" href="configuracoes.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">settings</span> Configurações</a>
   </nav>
   <div class="px-4 mt-auto space-y-2">
     <div class="p-4 bg-surface-container/40 rounded-xl mb-2">
       <div class="flex items-center gap-3">
-        <img class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL" alt="Alan Alves"/>
+        <img class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL" alt="{{USUARIO}}"/>
         <div>
-          <p class="text-sm font-bold text-on-surface" id="sidebarNome">Alan Alves</p>
+          <p class="text-sm font-bold text-on-surface" id="sidebarNome">{{USUARIO}}</p>
           <p class="text-[10px] text-on-surface-variant">Estudante Premium</p>
         </div>
       </div>
     </div>
-    <a onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="flex items-center gap-3 px-4 py-3 text-[#FF8B8B] hover:bg-error-container/10 transition-all rounded-lg text-sm font-medium cursor-pointer">
+    <a onclick="authLogout()" class="flex items-center gap-3 px-4 py-3 text-[#FF8B8B] hover:bg-error-container/10 transition-all rounded-lg text-sm font-medium cursor-pointer">
       <span class="material-symbols-outlined">logout</span> Sair
     </a>
   </div>
 </aside>
 
 <!-- MAIN -->
-<main class="ml-64 min-h-screen">
+<main class="ml-64 main-with-sidebar min-h-screen">
 
   <!-- TOP BAR -->
-  <header class="h-16 flex justify-between items-center w-full px-8 bg-[#10131a] fixed top-0 right-0 left-64 z-40 border-b border-white/5" id="topbar">
-    <div class="flex items-center gap-4">
-      <button class="text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined">menu</span></button>
+  <header class="h-16 flex justify-between items-center w-full px-4 lg:px-8 bg-[#10131a] fixed top-0 right-0 left-0 lg:left-64 z-40 border-b border-white/5" id="topbar">
+    <div class="flex items-center gap-3">
+      <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
       <div class="flex items-center gap-2">
         <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">settings</span>
         <h2 class="text-xl font-bold text-[#E1E2EB] tracking-tight">Configurações</h2>
       </div>
     </div>
-    <div class="flex items-center gap-6">
-      <div class="bg-surface-container px-4 py-1.5 rounded-full flex items-center gap-2 border border-outline-variant/20">
+    <div class="flex items-center gap-4">
+      <div class="hidden sm:flex bg-surface-container px-4 py-1.5 rounded-full items-center gap-2 border border-outline-variant/20">
         <span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings:'FILL' 1;">stars</span>
         <span class="text-sm font-bold text-on-surface">940 pts</span>
       </div>
-      <div class="flex items-center gap-4 text-on-surface-variant">
-        <span class="material-symbols-outlined cursor-pointer hover:text-secondary transition-colors">notifications</span>
-        <span class="material-symbols-outlined cursor-pointer hover:text-secondary transition-colors" style="font-variation-settings:'FILL' 1;">settings</span>
-      </div>
+      <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
+      </button>
     </div>
   </header>
 
@@ -248,7 +302,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="space-y-1.5">
               <label class="text-xs text-on-surface-variant font-medium ml-1">Nome Completo</label>
-              <input id="inputNome" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface focus:ring-1 focus:ring-primary/40 text-sm" type="text" value="Alan Alves" oninput="atualizarPreview()"/>
+              <input id="inputNome" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface focus:ring-1 focus:ring-primary/40 text-sm" type="text" value="{{USUARIO}}" oninput="atualizarPreview()"/>
             </div>
             <div class="space-y-1.5">
               <label class="text-xs text-on-surface-variant font-medium ml-1">E-mail de Acesso</label>
@@ -287,11 +341,12 @@
                 <span class="material-symbols-outlined text-3xl text-secondary" style="font-variation-settings:'FILL' 1;">dark_mode</span>
                 <span class="text-sm font-bold text-on-surface">Dark Mode</span>
               </button>
-              <!-- Light Mode -->
-              <button id="btnLight" onclick="setTema('light')" class="tema-btn flex flex-col items-center justify-center gap-3 p-5 bg-white border-2 border-transparent rounded-xl transition-all hover:scale-[1.02]">
-                <span class="material-symbols-outlined text-3xl text-slate-700" style="font-variation-settings:'FILL' 1;">light_mode</span>
-                <span class="text-sm font-bold text-slate-800">Light Mode</span>
-              </button>
+              <!-- Light Mode — Em breve -->
+              <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;padding:1.25rem 1rem;background:#1d2026;border:2px dashed rgba(71,69,84,.3);border-radius:.875rem;opacity:.5;cursor:not-allowed;user-select:none;">
+                <span class="material-symbols-outlined text-3xl" style="color:#928ea0;font-variation-settings:'FILL' 1;">light_mode</span>
+                <span class="text-sm font-bold" style="color:#928ea0;">Light Mode</span>
+                <span style="position:absolute;top:.4rem;right:.4rem;font-size:.6rem;font-weight:800;color:#6c5ce7;background:rgba(108,92,231,.15);padding:.15rem .5rem;border-radius:9999px;text-transform:uppercase;letter-spacing:.06em;">Em breve</span>
+              </div>
             </div>
           </div>
 
@@ -358,9 +413,38 @@
             </div>
           </div>
         </div>
-      </div>
+        <!-- CONTA E ACESSO — visível apenas para professores -->
+        <div class="glass-card p-6 rounded-xl" id="secaoContaAcesso" style="display:none;">
+          <h3 class="text-lg font-bold mb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined text-tertiary" style="font-variation-settings:'FILL' 1;">school</span>
+            Conta e Acesso
+          </h3>
+          <p class="text-xs text-on-surface-variant mb-6">Disponível apenas para professores com portal PRO ativo.</p>
+          <div class="space-y-4">
+            <!-- Toggle perfil ativo -->
+            <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-xl border border-outline-variant/20">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;" id="iconeModoAtual">school</span>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-on-surface">Perfil ativo</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5" id="labelModoAtual">Você está como <strong class="text-secondary">Professor</strong></p>
+                </div>
+              </div>
+              <button id="btnAlternarModo" onclick="alternarModoAcessoProf()" class="px-4 py-2 rounded-xl text-sm font-bold border transition-all" style="background:rgba(69,237,238,.1);border-color:rgba(69,237,238,.3);color:#45edee;">
+                Ver como aluno
+              </button>
+            </div>
+            <!-- Info -->
+            <div class="flex items-start gap-3 p-3 rounded-lg" style="background:rgba(250,189,0,.06);border:1px solid rgba(250,189,0,.15);">
+              <span class="material-symbols-outlined text-tertiary text-sm mt-0.5 shrink-0">info</span>
+              <p class="text-xs text-on-surface-variant leading-relaxed">Ao alternar para o modo Aluno, você poderá navegar pelo RedaON como seus alunos. Uma barra de aviso ficará visível em todas as telas para que você possa retornar ao portal do professor a qualquer momento.</p>
+            </div>
+          </div>
+        </div>
 
-      <!-- COLUNA DIREITA: PREVIEW (4 cols) -->
+      </div>
       <div class="col-span-12 lg:col-span-4 h-full">
         <div class="glass-card h-full min-h-[600px] rounded-xl overflow-hidden flex flex-col border-secondary/20 relative">
           <!-- Background decorativo -->
@@ -375,7 +459,7 @@
               <div class="w-20 h-20 rounded-full bg-secondary/10 flex items-center justify-center border border-secondary/30" style="box-shadow:0 0 30px rgba(69,237,238,0.15)">
                 <span class="material-symbols-outlined text-4xl text-secondary" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
               </div>
-              <h4 class="text-2xl font-black text-on-surface leading-tight px-4">
+              <h4 class="text-2xl font-black text-on-surface leading-tight px-4 sua-redaon-section">
                 Sua RedaON,<br/>do seu jeito.
               </h4>
               <p class="text-on-surface-variant text-sm max-w-[240px] leading-relaxed">
@@ -401,7 +485,7 @@
                 <!-- Preview nome real -->
                 <div class="mt-3 pt-3 border-t border-outline-variant/20">
                   <p class="text-[10px] text-on-surface-variant">Logado como:</p>
-                  <p class="text-xs font-bold text-secondary" id="previewNomeTexto">Alan Alves</p>
+                  <p class="text-xs font-bold text-secondary" id="previewNomeTexto">{{USUARIO}}</p>
                   <p class="text-[10px] text-on-surface-variant" id="previewSerieTexto">3º Ano do Ensino Médio</p>
                 </div>
               </div>
@@ -416,6 +500,8 @@
 </main>
 
 <script>
+  authGuard('aluno');
+
 // ── TOAST ──────────────────────────────────────
 function toast(msg, dur=3000) {
   const el = document.getElementById('toast');
@@ -450,9 +536,6 @@ window.setTema = function(tema) {
 
   document.getElementById('btnDark').classList.toggle('selecionado', tema === 'dark');
   document.getElementById('btnDark').style.borderColor = tema === 'dark' ? '#45edee' : 'transparent';
-  document.getElementById('btnLight').classList.toggle('selecionado', tema === 'light');
-  document.getElementById('btnLight').style.borderColor = tema === 'light' ? '#45edee' : 'transparent';
-
   toast(tema === 'dark' ? '🌙 Dark Mode ativado!' : '☀️ Light Mode ativado!');
 };
 
@@ -536,8 +619,79 @@ function mostrarErroSenha(msg) {
   el.style.display = 'block';
 }
 
+// ── MODO PROFESSOR / ALUNO ─────────────────────
+// No protótipo, força visualização como professor para demonstração
+// Em produção: verificar perfil via backend
+const ehProfessor = localStorage.getItem('modo_professor_ativo') === '1' || true; // força true no protótipo
+const modoAtualProf = localStorage.getItem('perfil_modo') || 'professor';
+
+// Mostra seção apenas para professores
+if (ehProfessor) {
+  document.getElementById('secaoContaAcesso').style.display = 'block';
+  atualizarUIModoProfessor();
+}
+
+// Barra de aviso nas telas do aluno
+if (ehProfessor && modoAtualProf === 'aluno') {
+  const barra = document.getElementById('barraModoProf');
+  if (barra) {
+    barra.style.display = 'flex';
+    // Compensa a barra no conteúdo
+    document.body.style.paddingTop = '2.5rem';
+  }
+}
+
+function atualizarUIModoProfessor() {
+  const icone = document.getElementById('iconeModoAtual');
+  const label = document.getElementById('labelModoAtual');
+  const btn   = document.getElementById('btnAlternarModo');
+  if (!icone) return;
+
+  if (modoAtualProf === 'professor') {
+    icone.textContent = 'school';
+    label.innerHTML = 'Você está como <strong style="color:#45edee">Professor</strong>';
+    btn.textContent = 'Ver como aluno';
+    btn.style.background = 'rgba(69,237,238,.1)';
+    btn.style.borderColor = 'rgba(69,237,238,.3)';
+    btn.style.color = '#45edee';
+  } else {
+    icone.textContent = 'face';
+    label.innerHTML = 'Você está como <strong style="color:#c6bfff">Aluno</strong>';
+    btn.textContent = 'Voltar ao portal';
+    btn.style.background = 'rgba(108,92,231,.15)';
+    btn.style.borderColor = 'rgba(108,92,231,.4)';
+    btn.style.color = '#c6bfff';
+  }
+}
+
+window.alternarModoAcessoProf = function() {
+  if (modoAtualProf === 'professor') {
+    // Muda para aluno — abre em nova aba
+    localStorage.setItem('perfil_modo', 'aluno');
+    toast('Abrindo modo aluno em nova aba...');
+    setTimeout(() => window.open('inicio.html', '_blank'), 800);
+  } else {
+    // Volta para professor
+    localStorage.setItem('perfil_modo', 'professor');
+    atualizarUIModoProfessor();
+    toast('✓ Modo Professor ativado!');
+    setTimeout(() => window.location.href = 'professor.html', 1000);
+  }
+};
+
 // ── INIT ───────────────────────────────────────
 atualizarPreview();
+</script>
+<script>
+  // ── Sidebar hambúrguer ──────────────────────────────
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+  document.getElementById('overlay').addEventListener('click', function(){
+    document.getElementById('sidebar').classList.remove('open');
+    this.classList.remove('open');
+  });
 </script>
 </body>
 </html>

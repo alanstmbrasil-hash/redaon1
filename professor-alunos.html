@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Gerenciar Alunos</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  body{font-family:'Inter',sans-serif;background:#0b0e14;color:#e1e2eb;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  h1,h2,h3,h4,p,span,a,button,div{word-break:normal!important;overflow-wrap:break-word;hyphens:none!important;}
+  #sidebar{position:fixed;left:0;top:0;height:100%;width:256px;transform:translateX(-256px);transition:transform .3s;z-index:50;background:#0b0e14;border-right:1px solid rgba(71,69,84,.2);display:flex;flex-direction:column;padding:1.5rem 1rem;overflow-y:auto;}
+  #sidebar.open{transform:translateX(0);}
+  /* Scrollbar fina padrão RedaON */
+  #sidebar::-webkit-scrollbar{width:4px;}
+  #sidebar::-webkit-scrollbar-thumb{background:#32353c;border-radius:10px;}
+  #sidebar{scrollbar-width:thin;scrollbar-color:#32353c transparent;}
+  #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:45;}
+  #overlay.open{display:block;}
+  @media(min-width:1024px){
+    #sidebar{transform:translateX(0)!important;}
+    #overlay{display:none!important;}
+    #main-content{margin-left:256px;}
+    #btnHamburger{display:none!important;}
+  }
+  .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;transition:all .2s;cursor:pointer;text-decoration:none;}
+  .nav-item:hover{background:#1d2026;color:#e1e2eb;}
+  .nav-item.ativo{background:#1d2026;color:#45edee;border-right:3px solid #45edee;}
+  .nav-section-label{font-size:.65rem;font-weight:700;color:#474554;text-transform:uppercase;letter-spacing:.1em;padding:.5rem 1rem .25rem;}
+  .filtro-select{background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.5rem .875rem;color:#e1e2eb;font-size:.8rem;outline:none;cursor:pointer;}
+  .filtro-select:focus{border-color:#45edee;}
+  .modo-toggle{display:flex;background:#1d2026;border-radius:9999px;padding:3px;border:1px solid rgba(71,69,84,.3);}
+  .modo-btn{padding:.35rem .9rem;border-radius:9999px;font-size:.75rem;font-weight:700;cursor:pointer;border:none;background:transparent;}
+  .modo-btn.ativo{background:#6c5ce7;color:white;}
+  .modo-btn:not(.ativo){color:#928ea0;}
+  .aluno-card{background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:.875rem;padding:1rem;transition:all .2s;cursor:default;}
+  .aluno-card:hover{border-color:rgba(69,237,238,.3);}
+  .status-ativo{display:inline-flex;align-items:center;padding:.2rem .6rem;border-radius:9999px;font-size:.7rem;font-weight:700;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
+  .status-inativo{display:inline-flex;align-items:center;padding:.2rem .6rem;border-radius:9999px;font-size:.7rem;font-weight:700;background:rgba(71,69,84,.2);color:#928ea0;border:1px solid rgba(71,69,84,.3);}
+  #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(5rem);background:#272a31;border:1px solid rgba(255,255,255,.1);color:#e1e2eb;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:300;transition:transform .3s;pointer-events:none;}
+  #toast.show{transform:translateX(-50%) translateY(0);}
+  .link-card{background:#1d2026;border:1px solid rgba(69,237,238,.15);border-radius:.875rem;padding:1rem;transition:border-color .2s;}
+  .link-card:hover{border-color:rgba(69,237,238,.35);}
+  .link-box{background:#10131a;border:1px solid rgba(71,69,84,.3);border-radius:.625rem;padding:.5rem .875rem;font-size:.72rem;color:#45edee;font-family:monospace;word-break:break-all;margin:.625rem 0;line-height:1.5;}
+  .btn-copiar{display:flex;align-items:center;gap:.375rem;padding:.4rem .875rem;background:rgba(69,237,238,.1);border:1px solid rgba(69,237,238,.25);border-radius:.625rem;color:#45edee;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .btn-copiar:hover{background:rgba(69,237,238,.18);}
+  .btn-copiar:active{transform:scale(.96);}
+  .btn-whatsapp{display:flex;align-items:center;gap:.375rem;padding:.4rem .875rem;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);border-radius:.625rem;color:#25d366;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .btn-whatsapp:hover{background:rgba(37,211,102,.18);}
+  #modalAluno{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:45;align-items:center;justify-content:center;padding:1rem;}
+  #modalAluno.open{display:flex;}
+  .modal-box{background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:1.25rem;padding:2rem;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;margin-top:3.5rem;}
+</style>
+<script src="supabase-auth.js"></script>
+</head>
+<body>
+<div id="toast"></div>
+<div id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- Modal Novo Aluno -->
+<div id="modalAluno">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <h2 style="font-size:1.1rem;font-weight:800;">Adicionar Aluno</h2>
+      <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <div>
+        <label style="font-size:.75rem;font-weight:700;color:#928ea0;display:block;margin-bottom:.4rem;">Nome completo</label>
+        <input id="novoNome" type="text" placeholder="Ex: João Silva" style="width:100%;background:#10131a;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.85rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(71,69,84,.3)'"/>
+      </div>
+      <div>
+        <label style="font-size:.75rem;font-weight:700;color:#928ea0;display:block;margin-bottom:.4rem;">E-mail</label>
+        <input id="novoEmail" type="email" placeholder="joao@email.com" style="width:100%;background:#10131a;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.85rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(71,69,84,.3)'"/>
+      </div>
+      <div>
+        <label style="font-size:.75rem;font-weight:700;color:#928ea0;display:block;margin-bottom:.4rem;">Escola</label>
+        <select id="novaEscola" class="filtro-select" style="width:100%;" onchange="preencherTurmasModal()">
+          <option value="">Selecione</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.75rem;font-weight:700;color:#928ea0;display:block;margin-bottom:.4rem;">Turma</label>
+        <select id="novaTurma" class="filtro-select" style="width:100%;"><option value="">Selecione a escola primeiro</option></select>
+      </div>
+      <button onclick="adicionarAluno()" style="padding:.875rem;background:#45edee;color:#002020;font-weight:900;border:none;border-radius:.75rem;font-size:.875rem;cursor:pointer;margin-top:.5rem;">Adicionar Aluno</button>
+    </div>
+  </div>
+</div>
+
+<aside id="sidebar">
+  <div style="display:flex;align-items:baseline;padding:.5rem .5rem 2rem;font-style:italic;">
+    <span style="font-size:1.75rem;font-weight:900;color:white;letter-spacing:-.05em;">Reda</span>
+    <span style="font-size:1.75rem;font-weight:900;color:#45edee;letter-spacing:-.05em;">ON</span>
+    
+  </div>
+  <nav style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.25rem;">
+    <div class="nav-section-label">Portal</div>
+    <a class="nav-item" href="professor.html"><span class="material-symbols-outlined">school</span>Dashboard</a>
+    <div class="nav-section-label" style="margin-top:.5rem;">Gestão</div>
+    <a class="nav-item ativo" href="professor-alunos.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">group</span>Gerenciar Alunos</a>
+    <a class="nav-item" href="professor-redacoes.html"><span class="material-symbols-outlined">edit_note</span>Redações dos Alunos</a>
+    <a class="nav-item" href="professor-relatorios.html"><span class="material-symbols-outlined">bar_chart</span>Relatórios</a>
+    <div class="nav-section-label" style="margin-top:.5rem;">Conteúdo</div>
+    <a class="nav-item" href="professor-estudio.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">neurology</span><span>Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span></a>
+    <a class="nav-item" href="temas.html"><span class="material-symbols-outlined">description</span>Temas</a>
+    <a class="nav-item" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span>Ranking</a>
+    <a class="nav-item" href="configuracoes.html"><span class="material-symbols-outlined">settings</span>Configurações</a>
+  </nav>
+  <div style="border-top:1px solid rgba(71,69,84,.2);padding-top:1rem;margin-top:1rem;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;margin-bottom:.5rem;">
+      <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(108,92,231,.2);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="color:#c6bfff;">person</span></div>
+      <div><p id="nomeProf" style="font-size:.85rem;font-weight:700;">Professor</p><p style="font-size:.7rem;color:#6c5ce7;font-weight:700;">⭐ Portal Pro</p></div>
+    </div>
+    <a onclick="if(confirm('Sair?'))window.location.href='login.html'" style="display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.75rem;color:#ff8b8b;font-size:.85rem;cursor:pointer;" onmouseover="this.style.background='rgba(255,100,100,.1)'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1.1rem;">logout</span>Sair
+    </a>
+  </div>
+</aside>
+
+<div id="main-content" style="min-height:100vh;display:flex;flex-direction:column;">
+  <header style="position:sticky;top:0;z-index:40;background:rgba(11,14,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(71,69,84,.15);">
+    <div style="height:3.5rem;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;">
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <button id="btnHamburger" onclick="toggleSidebar()" style="padding:.5rem;border-radius:.5rem;background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">menu</span></button>
+        <span class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;">group</span>
+        <h2 style="font-size:1rem;font-weight:800;">Gerenciar Alunos</h2>
+      </div>
+      <!-- Opção B: botão discreto "Ver como aluno" -->
+      <button onclick="irModoAluno()" style="display:flex;align-items:center;gap:.375rem;padding:.4rem .875rem;background:rgba(71,69,84,.15);border:1px solid rgba(71,69,84,.3);border-radius:.75rem;color:#928ea0;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.color='#e1e2eb';this.style.borderColor='rgba(71,69,84,.5)'" onmouseout="this.style.color='#928ea0';this.style.borderColor='rgba(71,69,84,.3)'">
+        <span class="material-symbols-outlined" style="font-size:.9rem;">open_in_new</span>
+        Ver como aluno
+      </button>
+    </div>
+    <div style="display:flex;gap:.5rem;padding:.5rem 1rem .625rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+      <select id="selEscola" class="filtro-select" style="flex-shrink:0;" onchange="onEscolaChange()">
+        <option value="">Todas as Escolas</option>
+      </select>
+      <select id="selTurma" class="filtro-select" style="flex-shrink:0;" onchange="renderAlunos()">
+        <option value="">Todas as Turmas</option>
+      </select>
+      <select id="selStatus" class="filtro-select" style="flex-shrink:0;" onchange="renderAlunos()">
+        <option value="">Todos</option>
+        <option value="ativo">Ativos</option>
+        <option value="inativo">Inativos</option>
+      </select>
+    </div>
+  </header>
+
+  <div style="flex:1;padding:1.5rem;max-width:1400px;margin:0 auto;width:100%;box-sizing:border-box;">
+
+    <!-- Links de Turma -->
+    <div id="secaoLinks" style="margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <span class="material-symbols-outlined" style="color:#45edee;font-size:1.1rem;font-variation-settings:'FILL' 1;">link</span>
+          <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#928ea0;">Links de Matrícula por Turma</h3>
+        </div>
+        <button onclick="toggleSecaoLinks()" id="btnToggleLinks" style="font-size:.72rem;font-weight:600;color:#45edee;background:rgba(69,237,238,.08);border:1px solid rgba(69,237,238,.2);border-radius:.625rem;padding:.3rem .75rem;cursor:pointer;">Ocultar</button>
+      </div>
+      <div id="gridLinks" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.75rem;"></div>
+    </div>
+
+    <!-- Stats + busca + botão -->
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <div style="flex:1;min-width:220px;">
+        <input type="text" id="busca" placeholder="Buscar aluno por nome..." oninput="renderAlunos()" style="width:100%;background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.7rem 1rem;color:#e1e2eb;font-size:.85rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(71,69,84,.3)'"/>
+      </div>
+      <button onclick="abrirModal()" style="padding:.7rem 1.25rem;background:#45edee;color:#002020;font-weight:900;border:none;border-radius:.75rem;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem;white-space:nowrap;">
+        <span class="material-symbols-outlined" style="font-size:1.1rem;">person_add</span>Adicionar Aluno
+      </button>
+    </div>
+
+    <!-- Stats rápidos -->
+    <div id="statsAlunos" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.875rem;margin-bottom:1.5rem;"></div>
+
+    <!-- Grid alunos -->
+    <div id="gridAlunos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;"></div>
+  </div>
+</div>
+
+<script>
+  authGuard('professor');
+
+document.getElementById('nomeProf').textContent = authGetNome();
+
+const DADOS = JSON.parse(localStorage.getItem('prof_dados') || '{"escolas":[{"id":1,"nome":"E.E. Rui Barbosa","turmas":[{"id":1,"nome":"3\u00ba A \u2014 Manh\u00e3","disciplina":"Reda\u00e7\u00e3o","alunos":38,"aulas_semana":2},{"id":2,"nome":"3\u00ba B \u2014 Manh\u00e3","disciplina":"Reda\u00e7\u00e3o","alunos":40,"aulas_semana":2},{"id":3,"nome":"2\u00ba A \u2014 Tarde","disciplina":"Portugu\u00eas","alunos":37,"aulas_semana":3}]},{"id":2,"nome":"E.M. Jo\u00e3o Pessoa","turmas":[{"id":4,"nome":"3\u00ba A \u2014 Noite","disciplina":"Reda\u00e7\u00e3o","alunos":32,"aulas_semana":2},{"id":5,"nome":"2\u00ba B \u2014 Tarde","disciplina":"Portugu\u00eas","alunos":35,"aulas_semana":3}]}]}');
+
+let ALUNOS = [
+  {id:1,nome:'Ana Souza',email:'ana@email.com',escola:1,turma:1,nota:880,redacoes:8,status:'ativo'},
+  {id:2,nome:'Carlos Lima',email:'carlos@email.com',escola:1,turma:1,nota:720,redacoes:5,status:'ativo'},
+  {id:3,nome:'Beatriz Santos',email:'bia@email.com',escola:1,turma:2,nota:880,redacoes:10,status:'ativo'},
+  {id:4,nome:'Fernanda Costa',email:'fe@email.com',escola:2,turma:4,nota:800,redacoes:7,status:'ativo'},
+  {id:5,nome:'Rafael Mendes',email:'rafa@email.com',escola:1,turma:1,nota:720,redacoes:4,status:'ativo'},
+  {id:6,nome:'Juliana Melo',email:'ju@email.com',escola:1,turma:1,nota:900,redacoes:9,status:'ativo'},
+  {id:7,nome:'Pedro Alves',email:'pedro@email.com',escola:2,turma:4,nota:600,redacoes:3,status:'inativo'},
+  {id:8,nome:'Mariana Nunes',email:'mari@email.com',escola:1,turma:2,nota:800,redacoes:6,status:'ativo'},
+  {id:9,nome:'Lucas Ferreira',email:'lucas@email.com',escola:1,turma:3,nota:640,redacoes:4,status:'ativo'},
+  {id:10,nome:'Camila Rocha',email:'cami@email.com',escola:2,turma:5,nota:760,redacoes:5,status:'ativo'},
+];
+
+// Preencher escolas
+const selEscola = document.getElementById('selEscola');
+const novaEscolaEl = document.getElementById('novaEscola');
+DADOS.escolas.forEach(e => {
+  [selEscola, novaEscolaEl].forEach(sel => {
+    const o = document.createElement('option'); o.value = e.id; o.textContent = e.nome;
+    sel.appendChild(o);
+  });
+});
+
+window.onEscolaChange = function() {
+  const selTurma = document.getElementById('selTurma');
+  selTurma.innerHTML = '<option value="">Todas as Turmas</option>';
+  const escolaId = parseInt(selEscola.value);
+  if (escolaId) {
+    const escola = DADOS.escolas.find(e => e.id === escolaId);
+    escola.turmas.forEach(t => {
+      const o = document.createElement('option'); o.value = t.id; o.textContent = t.nome + ' (' + t.disciplina + ')';
+      selTurma.appendChild(o);
+    });
+  }
+  renderAlunos();
+};
+
+window.preencherTurmasModal = function() {
+  const sel = document.getElementById('novaTurma');
+  sel.innerHTML = '<option value="">Selecione a turma</option>';
+  const escolaId = parseInt(novaEscolaEl.value);
+  if (escolaId) {
+    const escola = DADOS.escolas.find(e => e.id === escolaId);
+    escola.turmas.forEach(t => {
+      const o = document.createElement('option'); o.value = t.id; o.textContent = t.nome + ' (' + t.disciplina + ')';
+      sel.appendChild(o);
+    });
+  }
+};
+
+window.renderAlunos = function() {
+  const busca = document.getElementById('busca').value.toLowerCase();
+  const escolaId = parseInt(selEscola.value) || null;
+  const turmaId = parseInt(document.getElementById('selTurma').value) || null;
+  const status = document.getElementById('selStatus').value;
+
+  const filtrados = ALUNOS.filter(a =>
+    (!escolaId || a.escola === escolaId) &&
+    (!turmaId || a.turma === turmaId) &&
+    (!status || a.status === status) &&
+    (!busca || a.nome.toLowerCase().includes(busca))
+  );
+
+  // Stats
+  const ativos = filtrados.filter(a => a.status === 'ativo').length;
+  const media = filtrados.length ? Math.round(filtrados.reduce((s,a)=>s+a.nota,0)/filtrados.length) : 0;
+  document.getElementById('statsAlunos').innerHTML =
+    miniStat(filtrados.length, 'Total', '#45edee') +
+    miniStat(ativos, 'Ativos', '#4ade80') +
+    miniStat(filtrados.length - ativos, 'Inativos', '#928ea0') +
+    miniStat(media, 'Média Geral', '#c6bfff');
+
+  // Grid
+  const grid = document.getElementById('gridAlunos');
+  if (!filtrados.length) {
+    grid.innerHTML = '<p style="color:#474554;font-size:.85rem;grid-column:1/-1;text-align:center;padding:3rem;">Nenhum aluno encontrado.</p>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  filtrados.forEach(a => {
+    const escola = DADOS.escolas.find(e => e.id === a.escola);
+    const turma = escola?.turmas.find(t => t.id === a.turma);
+    const corNota = a.nota >= 800 ? '#4ade80' : a.nota >= 600 ? '#fabd00' : '#ffb4ab';
+    const iniciais = a.nome.split(' ').slice(0,2).map(n=>n[0]).join('');
+    const card = document.createElement('div');
+    card.className = 'aluno-card';
+    card.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;">' +
+        '<div style="display:flex;align-items:center;gap:.75rem;">' +
+          '<div style="width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(108,92,231,.2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:#c6bfff;">' + iniciais + '</div>' +
+          '<div>' +
+            '<p style="font-size:.85rem;font-weight:700;color:#e1e2eb;">' + a.nome + '</p>' +
+            '<p style="font-size:.7rem;color:#474554;">' + a.email + '</p>' +
+          '</div>' +
+        '</div>' +
+        '<span class="status-' + a.status + '">' + (a.status === 'ativo' ? '● Ativo' : '○ Inativo') + '</span>' +
+      '</div>' +
+      '<p style="font-size:.72rem;color:#928ea0;margin-bottom:.75rem;">' + (escola?.nome || '') + ' · ' + (turma?.nome || '') + '</p>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<div>' +
+          '<p style="font-size:.7rem;color:#474554;">Melhor nota</p>' +
+          '<p style="font-size:1.25rem;font-weight:900;color:' + corNota + ';">' + a.nota + '</p>' +
+        '</div>' +
+        '<div style="text-align:right;">' +
+          '<p style="font-size:.7rem;color:#474554;">Redações</p>' +
+          '<p style="font-size:1.25rem;font-weight:900;color:#c6bfff;">' + a.redacoes + '</p>' +
+        '</div>' +
+        '<div style="display:flex;gap:.4rem;">' +
+          '<button onclick="verAluno(' + a.id + ')" style="padding:.4rem .75rem;background:rgba(69,237,238,.08);border:1px solid rgba(69,237,238,.2);border-radius:.5rem;color:#45edee;font-size:.72rem;cursor:pointer;">Ver</button>' +
+          '<button onclick="toggleStatus(' + a.id + ')" style="padding:.4rem .75rem;background:rgba(71,69,84,.15);border:1px solid rgba(71,69,84,.3);border-radius:.5rem;color:#928ea0;font-size:.72rem;cursor:pointer;">' + (a.status === 'ativo' ? 'Desativar' : 'Ativar') + '</button>' +
+        '</div>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+};
+
+function miniStat(val, label, cor) {
+  return '<div style="background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:.875rem;padding:.875rem;"><p style="font-size:.7rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">' + label + '</p><p style="font-size:1.5rem;font-weight:900;color:' + cor + ';">' + val + '</p></div>';
+}
+
+window.verAluno = function(id) {
+  const a = ALUNOS.find(x => x.id === id);
+  if (!a) return;
+  toast('Ver detalhes de ' + a.nome + ' — em breve!');
+};
+
+window.toggleStatus = function(id) {
+  const a = ALUNOS.find(x => x.id === id);
+  if (!a) return;
+  a.status = a.status === 'ativo' ? 'inativo' : 'ativo';
+  renderAlunos();
+  toast(a.nome + ' agora está ' + a.status + '.');
+};
+
+window.abrirModal = function() { document.getElementById('modalAluno').classList.add('open'); };
+window.fecharModal = function() { document.getElementById('modalAluno').classList.remove('open'); };
+
+window.adicionarAluno = function() {
+  const nome = document.getElementById('novoNome').value.trim();
+  const email = document.getElementById('novoEmail').value.trim();
+  const escolaId = parseInt(document.getElementById('novaEscola').value);
+  const turmaId = parseInt(document.getElementById('novaTurma').value);
+  if (!nome || !email || !escolaId || !turmaId) { toast('Preencha todos os campos!'); return; }
+  const novo = {id:Date.now(),nome,email,escola:escolaId,turma:turmaId,nota:0,redacoes:0,status:'ativo'};
+  ALUNOS.push(novo);
+  fecharModal();
+  renderAlunos();
+  toast('✓ ' + nome + ' adicionado com sucesso!');
+};
+
+function toast(msg,dur=3000){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),dur);}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function irModoAluno(){
+  if(confirm('Abrir o RedaON como aluno em uma nova aba?')){
+    localStorage.setItem('modo_professor_ativo','1');
+    window.open('inicio.html','_blank');
+  }
+}
+
+// ══ LINKS DE TURMA ══════════════════════════════
+function gerarCodigoTurma(escolaId, turmaId) {
+  const base = `redaon-${escolaId}-${turmaId}`;
+  let hash = 0;
+  for (let i = 0; i < base.length; i++) { hash = ((hash << 5) - hash) + base.charCodeAt(i); hash |= 0; }
+  return Math.abs(hash).toString(36).toUpperCase().substring(0, 6);
+}
+
+function gerarLinkTurma(escolaId, turmaId) {
+  return `redaon.com.br/turma/${gerarCodigoTurma(escolaId, turmaId)}`;
+}
+
+function renderLinks() {
+  const escolaId = parseInt(selEscola.value) || null;
+  const turmaIdFiltro = parseInt(document.getElementById('selTurma').value) || null;
+  const grid = document.getElementById('gridLinks');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  DADOS.escolas.forEach(escola => {
+    if (escolaId && escola.id !== escolaId) return;
+    escola.turmas.forEach(turma => {
+      if (turmaIdFiltro && turma.id !== turmaIdFiltro) return;
+      const link = gerarLinkTurma(escola.id, turma.id);
+      const alunosNaTurma = ALUNOS.filter(a => a.escola === escola.id && a.turma === turma.id).length;
+      const card = document.createElement('div');
+      card.className = 'link-card';
+      card.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.5rem;">
+          <div>
+            <p style="font-size:.8rem;font-weight:700;color:#e1e2eb;">${turma.nome}</p>
+            <p style="font-size:.7rem;color:#928ea0;">${escola.nome} · ${turma.disciplina}</p>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <p style="font-size:1.1rem;font-weight:900;color:#45edee;">${alunosNaTurma}</p>
+            <p style="font-size:.65rem;color:#928ea0;">alunos</p>
+          </div>
+        </div>
+        <div class="link-box" id="linkbox-${escola.id}-${turma.id}">🔗 ${link}</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="btn-copiar" onclick="copiarLink('${link}','${escola.id}-${turma.id}')">
+            <span class="material-symbols-outlined" style="font-size:.9rem;">content_copy</span>Copiar link
+          </button>
+          <button class="btn-whatsapp" onclick="compartilharWhatsApp('${link}','${turma.nome}','${escola.nome}')">
+            <span class="material-symbols-outlined" style="font-size:.9rem;">share</span>WhatsApp
+          </button>
+        </div>`;
+      grid.appendChild(card);
+    });
+  });
+}
+
+window.copiarLink = function(link, id) {
+  navigator.clipboard.writeText('https://' + link).then(() => {
+    const el = document.getElementById('linkbox-' + id);
+    if (el) { el.style.borderColor='#4ade80'; el.style.color='#4ade80'; setTimeout(()=>{el.style.borderColor='';el.style.color='#45edee';},1500); }
+    toast('✓ Link copiado! Cole no WhatsApp da turma.');
+  });
+};
+
+window.compartilharWhatsApp = function(link, turma, escola) {
+  const msg = encodeURIComponent(`📚 *RedaON — Matrícula na Turma*\n\nOlá! Acesse o link abaixo para se matricular na turma *${turma}* (${escola}):\n\n🔗 https://${link}\n\nClique, faça seu cadastro e já estará na turma!`);
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+};
+
+let linksVisiveis = true;
+window.toggleSecaoLinks = function() {
+  const grid = document.getElementById('gridLinks');
+  const btn  = document.getElementById('btnToggleLinks');
+  linksVisiveis = !linksVisiveis;
+  grid.style.display = linksVisiveis ? 'grid' : 'none';
+  btn.textContent = linksVisiveis ? 'Ocultar' : 'Mostrar';
+};
+
+// Hooks para atualizar links junto com filtros
+const _origOnEscolaChange = window.onEscolaChange;
+window.onEscolaChange = function() { _origOnEscolaChange(); renderLinks(); };
+
+renderLinks();
+renderAlunos();
+</script>
+</body>
+</html>

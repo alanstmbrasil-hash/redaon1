@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | PedagoIA</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  body{font-family:'Inter',sans-serif;background:#0b0e14;color:#e1e2eb;}
+  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+  h1,h2,h3,h4,p,span,a,button,div{word-break:normal!important;overflow-wrap:break-word;hyphens:none!important;}
+
+  /* Sidebar */
+  #sidebar{position:fixed;left:0;top:0;height:100%;width:256px;transform:translateX(-256px);transition:transform .3s;z-index:50;background:#0b0e14;border-right:1px solid rgba(71,69,84,.2);display:flex;flex-direction:column;padding:1.5rem 1rem;overflow-y:auto;}
+  #sidebar::-webkit-scrollbar{width:4px;}
+  #sidebar::-webkit-scrollbar-thumb{background:#32353c;border-radius:10px;}
+  #sidebar{scrollbar-width:thin;scrollbar-color:#32353c transparent;}
+  #sidebar.open{transform:translateX(0);}
+  #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:45;}
+  #overlay.open{display:block;}
+  @media(min-width:1024px){
+    #sidebar{transform:translateX(0)!important;}
+    #overlay{display:none!important;}
+    #main-content{margin-left:256px;}
+    #btnHamburger{display:none!important;}
+  }
+  .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;transition:all .2s;cursor:pointer;text-decoration:none;}
+  .nav-item:hover{background:#1d2026;color:#e1e2eb;}
+  .nav-item.ativo{background:#1d2026;color:#45edee;border-right:3px solid #45edee;}
+  .nav-section-label{font-size:.65rem;font-weight:700;color:#474554;text-transform:uppercase;letter-spacing:.1em;padding:.5rem 1rem .25rem;}
+
+  /* Toast */
+  #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(5rem);background:#272a31;border:1px solid rgba(255,255,255,.1);color:#e1e2eb;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:300;transition:transform .3s;pointer-events:none;white-space:nowrap;}
+  #toast.show{transform:translateX(-50%) translateY(0);}
+
+  /* Modal sugestão */
+  #modalSugestao{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:1rem;}
+  #modalSugestao.aberto{display:flex;}
+
+  /* Cards de material */
+  .tipo-card{background:#1d2026;border:2px solid rgba(71,69,84,.2);border-radius:1rem;padding:1.25rem 1rem;cursor:pointer;transition:all .2s;text-align:center;}
+  .tipo-card:hover{border-color:rgba(69,237,238,.35);transform:translateY(-2px);}
+  .tipo-card.selecionado{border-color:#45edee;background:rgba(69,237,238,.06);}
+  .tipo-card .bncc-tag{font-size:.6rem;font-weight:700;color:#6c5ce7;background:rgba(108,92,231,.12);padding:.1rem .4rem;border-radius:9999px;margin-top:.375rem;display:inline-block;}
+
+  /* Nível */
+  .nivel-btn{padding:.375rem .875rem;border-radius:9999px;font-size:.75rem;font-weight:700;cursor:pointer;border:1px solid rgba(71,69,84,.3);background:transparent;color:#928ea0;transition:all .2s;}
+  .nivel-btn.ativo{background:#6c5ce7;color:white;border-color:#6c5ce7;}
+
+  /* Resultado */
+  .scroll-y{overflow-y:auto;scrollbar-width:thin;scrollbar-color:#32353c transparent;}
+  .scroll-y::-webkit-scrollbar{width:4px;}
+  .scroll-y::-webkit-scrollbar-thumb{background:#32353c;border-radius:10px;}
+
+  /* Spinner */
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes typing{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
+  .dot{width:6px;height:6px;background:#45edee;border-radius:50%;animation:typing 1.2s infinite;display:inline-block;margin:0 2px;}
+  .dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+
+  /* Banco de salvos */
+  .salvo-card{background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:.875rem;padding:.875rem 1rem;display:flex;align-items:center;gap:.875rem;flex-wrap:wrap;}
+</style>
+<script src="supabase-auth.js"></script>
+</head>
+<body>
+<div id="toast"></div>
+<div id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- MODAL SUGESTÃO -->
+<div id="modalSugestao">
+  <div style="background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:1.25rem;width:100%;max-width:480px;padding:2rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;gap:.625rem;">
+        <span class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;">lightbulb</span>
+        <h3 style="font-size:1rem;font-weight:800;">Sugestões & Perguntas Frequentes</h3>
+      </div>
+      <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;font-size:1.25rem;">×</button>
+    </div>
+
+    <!-- FAQ -->
+    <div style="margin-bottom:1.5rem;">
+      <p style="font-size:.72rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;">Perguntas Frequentes</p>
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <div style="background:#10131a;border-radius:.75rem;padding:.75rem 1rem;">
+          <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.25rem;">Como os materiais são gerados?</p>
+          <p style="font-size:.75rem;color:#928ea0;line-height:1.5;">A PROfa usa IA (Gemini) para criar materiais personalizados com base no tema, nível da turma e habilidades BNCC relevantes para redação ENEM.</p>
+        </div>
+        <div style="background:#10131a;border-radius:.75rem;padding:.75rem 1rem;">
+          <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.25rem;">Os materiais são alinhados à BNCC?</p>
+          <p style="font-size:.75rem;color:#928ea0;line-height:1.5;">Sim! Cada material gerado inclui as habilidades da BNCC correspondentes — prontos para entregar ao coordenador pedagógico.</p>
+        </div>
+        <div style="background:#10131a;border-radius:.75rem;padding:.75rem 1rem;">
+          <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.25rem;">Posso salvar e reutilizar os materiais?</p>
+          <p style="font-size:.75rem;color:#928ea0;line-height:1.5;">Sim! Clique em "Salvar" após gerar. Os materiais ficam no seu banco pessoal e podem ser acessados a qualquer momento.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Envio de sugestão -->
+    <div>
+      <p style="font-size:.72rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.625rem;">Enviar Sugestão</p>
+      <textarea id="txtSugestao" rows="3" placeholder="Qual tipo de material você gostaria de ver? O que posso melhorar?" style="width:100%;background:#10131a;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.85rem;outline:none;resize:none;box-sizing:border-box;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(71,69,84,.3)'"></textarea>
+      <button onclick="enviarSugestao()" style="margin-top:.75rem;width:100%;padding:.75rem;background:#45edee;color:#002020;font-weight:800;border:none;border-radius:.75rem;font-size:.875rem;cursor:pointer;">Enviar Sugestão</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div style="display:flex;align-items:baseline;padding:.5rem .5rem 2rem;font-style:italic;">
+    <span style="font-size:1.75rem;font-weight:900;color:white;letter-spacing:-.05em;">Reda</span>
+    <span style="font-size:1.75rem;font-weight:900;color:#45edee;letter-spacing:-.05em;">ON</span>
+  </div>
+  <nav style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.25rem;">
+    <div class="nav-section-label">Portal</div>
+    <a class="nav-item" href="professor.html"><span class="material-symbols-outlined">school</span>Dashboard</a>
+    <div class="nav-section-label" style="margin-top:.5rem;">Gestão</div>
+    <a class="nav-item" href="professor-alunos.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">group</span>Gerenciar Alunos</a>
+    <a class="nav-item" href="professor-redacoes.html"><span class="material-symbols-outlined">edit_note</span>Redações dos Alunos</a>
+    <a class="nav-item" href="professor-relatorios.html"><span class="material-symbols-outlined">bar_chart</span>Relatórios</a>
+    <div class="nav-section-label" style="margin-top:.5rem;">Conteúdo</div>
+    <a class="nav-item ativo" href="professor-estudio.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">neurology</span><span>Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span></a>
+    <a class="nav-item" href="temas.html"><span class="material-symbols-outlined">description</span>Temas</a>
+    <a class="nav-item" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span>Ranking</a>
+    <a class="nav-item" href="configuracoes.html"><span class="material-symbols-outlined">settings</span>Configurações</a>
+  </nav>
+  <div style="border-top:1px solid rgba(71,69,84,.2);padding-top:1rem;margin-top:1rem;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;margin-bottom:.5rem;">
+      <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(108,92,231,.2);display:flex;align-items:center;justify-content:center;">
+        <span class="material-symbols-outlined" style="color:#c6bfff;">person</span>
+      </div>
+      <div><p id="nomeProf" style="font-size:.85rem;font-weight:700;">Professor</p><p style="font-size:.7rem;color:#6c5ce7;font-weight:700;">⭐ Portal Pro</p></div>
+    </div>
+    <a onclick="if(confirm('Sair?'))window.location.href='login.html'" style="display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.75rem;color:#ff8b8b;font-size:.85rem;cursor:pointer;" onmouseover="this.style.background='rgba(255,100,100,.1)'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1.1rem;">logout</span>Sair
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main-content" style="min-height:100vh;display:flex;flex-direction:column;">
+
+  <!-- HEADER -->
+  <header style="position:sticky;top:0;z-index:40;background:rgba(11,14,20,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(71,69,84,.15);">
+    <div style="height:3.5rem;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;">
+      <div style="display:flex;align-items:center;gap:.625rem;">
+        <button id="btnHamburger" onclick="toggleSidebar()" style="padding:.5rem;border-radius:.5rem;background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">menu</span></button>
+        <span class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;">neurology</span>
+        <h2 style="font-size:1rem;font-weight:800;"><span style="color:#e1e2eb;">Pedago</span><span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:.625rem;">
+        <button onclick="abrirModal()" style="display:flex;align-items:center;gap:.375rem;padding:.4rem .875rem;background:rgba(108,92,231,.12);border:1px solid rgba(108,92,231,.25);border-radius:.75rem;color:#c6bfff;font-size:.75rem;font-weight:600;cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:.9rem;">lightbulb</span>FAQ & Sugestões
+        </button>
+        <button onclick="irModoAluno()" style="display:flex;align-items:center;gap:.375rem;padding:.4rem .875rem;background:rgba(71,69,84,.15);border:1px solid rgba(71,69,84,.3);border-radius:.75rem;color:#928ea0;font-size:.75rem;font-weight:600;cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:.9rem;">open_in_new</span>Ver como aluno
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO -->
+  <div style="flex:1;padding:1.25rem;max-width:1200px;margin:0 auto;width:100%;box-sizing:border-box;">
+
+    <!-- Banner -->
+    <div style="background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(69,237,238,.08));border:1px solid rgba(69,237,238,.2);border-radius:1.25rem;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <span class="material-symbols-outlined" style="font-size:2.25rem;color:#45edee;font-variation-settings:'FILL' 1;flex-shrink:0;">neurology</span>
+      <div>
+        <p style="font-weight:800;font-size:1rem;margin-bottom:.2rem;">
+          <span style="color:#e1e2eb;">Pedago</span><span style="color:#45edee;font-weight:900;font-style:italic;">IA</span>
+          <span style="color:#928ea0;font-weight:400;font-size:.85rem;margin-left:.375rem;">— sua central pedagógica com IA</span>
+        </p>
+        <p style="font-size:.82rem;color:#928ea0;line-height:1.5;">Olá, <span id="nomeProfBanner" style="color:#e1e2eb;font-weight:700;">Professor</span>! Gere materiais alinhados à BNCC, analise sua turma e identifique pontos de melhoria — tudo em segundos.</p>
+      </div>
+    </div>
+
+    <!-- Configuração -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
+      <div>
+        <label style="font-size:.72rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.5rem;">Tema da Redação / Aula</label>
+        <input type="text" id="inputTema" placeholder="Ex: Violência contra a mulher no Brasil..." style="width:100%;background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.875rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.875rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(71,69,84,.3)'"/>
+      </div>
+      <div>
+        <label style="font-size:.72rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.5rem;">Turma / Ano Escolar</label>
+        <select id="selectTurma" style="width:100%;background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.875rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.875rem;outline:none;cursor:pointer;">
+          <option value="3EM">3º Ano — Ensino Médio</option>
+          <option value="2EM">2º Ano — Ensino Médio</option>
+          <option value="1EM">1º Ano — Ensino Médio</option>
+          <option value="cursinho">Cursinho Pré-Vestibular</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Nível -->
+    <div style="margin-bottom:1.25rem;">
+      <label style="font-size:.72rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.625rem;">Nível da Turma</label>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <button class="nivel-btn ativo" id="nivel-basico" onclick="selecionarNivel('basico')">🌱 Básico</button>
+        <button class="nivel-btn" id="nivel-intermediario" onclick="selecionarNivel('intermediario')">📈 Intermediário</button>
+        <button class="nivel-btn" id="nivel-avancado" onclick="selecionarNivel('avancado')">🏆 Avançado</button>
+      </div>
+    </div>
+
+    <!-- Tipos de material -->
+    <div style="margin-bottom:1.25rem;">
+      <label style="font-size:.72rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.75rem;">Tipo de Material</label>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.75rem;">
+
+        <div class="tipo-card selecionado" id="card-plano" onclick="selecionarTipo('plano')">
+          <span class="material-symbols-outlined" style="font-size:1.875rem;color:#c6bfff;display:block;margin-bottom:.375rem;font-variation-settings:'FILL' 1;">menu_book</span>
+          <p style="font-size:.78rem;font-weight:700;color:#e1e2eb;">Plano de Aula</p>
+          <span class="bncc-tag">EF69LP44 · EM13LP01</span>
+        </div>
+
+        <div class="tipo-card" id="card-exercicios" onclick="selecionarTipo('exercicios')">
+          <span class="material-symbols-outlined" style="font-size:1.875rem;color:#45edee;display:block;margin-bottom:.375rem;font-variation-settings:'FILL' 1;">edit_note</span>
+          <p style="font-size:.78rem;font-weight:700;color:#e1e2eb;">Lista de Exercícios</p>
+          <span class="bncc-tag">EM13LP02 · EM13LP03</span>
+        </div>
+
+        <div class="tipo-card" id="card-sequencia" onclick="selecionarTipo('sequencia')">
+          <span class="material-symbols-outlined" style="font-size:1.875rem;color:#4ade80;display:block;margin-bottom:.375rem;font-variation-settings:'FILL' 1;">account_tree</span>
+          <p style="font-size:.78rem;font-weight:700;color:#e1e2eb;">Sequência Didática</p>
+          <span class="bncc-tag">EM13LP01 · EM13LP04</span>
+        </div>
+
+        <div class="tipo-card" id="card-flashcards" onclick="selecionarTipo('flashcards')">
+          <span class="material-symbols-outlined" style="font-size:1.875rem;color:#fabd00;display:block;margin-bottom:.375rem;font-variation-settings:'FILL' 1;">style</span>
+          <p style="font-size:.78rem;font-weight:700;color:#e1e2eb;">Flashcards</p>
+          <span class="bncc-tag">EM13LP05 · EM13LP06</span>
+        </div>
+
+        <div class="tipo-card" id="card-slides" onclick="selecionarTipo('slides')">
+          <span class="material-symbols-outlined" style="font-size:1.875rem;color:#ff8b8b;display:block;margin-bottom:.375rem;font-variation-settings:'FILL' 1;">slideshow</span>
+          <p style="font-size:.78rem;font-weight:700;color:#e1e2eb;">Roteiro de Slides</p>
+          <span class="bncc-tag">EM13LP07 · EM13LP08</span>
+        </div>
+
+        <div class="tipo-card" id="card-redacao" onclick="selecionarTipo('redacao')">
+          <span class="material-symbols-outlined" style="font-size:1.875rem;color:#c6bfff;display:block;margin-bottom:.375rem;font-variation-settings:'FILL' 1;">auto_fix_high</span>
+          <p style="font-size:.78rem;font-weight:700;color:#e1e2eb;">Redação Modelo</p>
+          <span class="bncc-tag">EM13LP09 · EM13LP10</span>
+        </div>
+
+        <div class="tipo-card" id="card-rubrica" onclick="selecionarTipo('rubrica')">
+          <span class="material-symbols-outlined" style="font-size:1.875rem;color:#45edee;display:block;margin-bottom:.375rem;font-variation-settings:'FILL' 1;">fact_check</span>
+          <p style="font-size:.78rem;font-weight:700;color:#e1e2eb;">Rubrica C1–C5</p>
+          <span class="bncc-tag">EM13LP11 · EM13LP12</span>
+        </div>
+
+        <div class="tipo-card" id="card-repertorio" onclick="selecionarTipo('repertorio')">
+          <span class="material-symbols-outlined" style="font-size:1.875rem;color:#4ade80;display:block;margin-bottom:.375rem;font-variation-settings:'FILL' 1;">library_books</span>
+          <p style="font-size:.78rem;font-weight:700;color:#e1e2eb;">Repertório Sociocultural</p>
+          <span class="bncc-tag">EM13LP13 · EM13LP14</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Instrução adicional -->
+    <div style="margin-bottom:1.25rem;">
+      <label style="font-size:.72rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.5rem;">
+        Instrução adicional <span style="color:#474554;font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span>
+      </label>
+      <textarea id="promptExtra" rows="2" placeholder="Ex: Foque em C4 — coesão. Inclua exemplos do cotidiano. Atividade para 30 min..." style="width:100%;background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.875rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.875rem;outline:none;resize:none;box-sizing:border-box;font-family:'Inter',sans-serif;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(71,69,84,.3)'"></textarea>
+    </div>
+
+    <!-- Botão gerar -->
+    <button onclick="gerarMaterial()" style="padding:.875rem 2rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;font-weight:900;border:none;border-radius:.875rem;font-size:.875rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;transition:transform .15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+      <span class="material-symbols-outlined" style="font-size:1.1rem;font-variation-settings:'FILL' 1;">bolt</span>
+      Gerar Material com IA
+    </button>
+
+    <!-- Resultado -->
+    <div id="resultado" style="display:none;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;overflow:hidden;margin-bottom:2rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid rgba(71,69,84,.12);flex-wrap:wrap;gap:.5rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+          <span class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;">neurology</span>
+          <span id="tituloResultado" style="font-weight:700;font-size:.95rem;"></span>
+          <span id="tagBncc" style="font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:9999px;background:rgba(108,92,231,.15);color:#c6bfff;"></span>
+          <span id="nivelResultado" style="font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:9999px;background:rgba(74,222,128,.1);color:#4ade80;"></span>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button onclick="salvarMaterial()" style="padding:.4rem .875rem;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:.625rem;color:#4ade80;font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;">
+            <span class="material-symbols-outlined" style="font-size:.9rem;">bookmark</span>Salvar
+          </button>
+          <button onclick="copiarResultado()" style="padding:.4rem .875rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);border-radius:.625rem;color:#c8c4d7;font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;">
+            <span class="material-symbols-outlined" style="font-size:.9rem;">content_copy</span>Copiar
+          </button>
+          <button onclick="compartilharWhatsApp()" style="padding:.4rem .875rem;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.2);border-radius:.625rem;color:#25d366;font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;">
+            <span class="material-symbols-outlined" style="font-size:.9rem;">share</span>WhatsApp
+          </button>
+        </div>
+      </div>
+      <div id="conteudoResultado" class="scroll-y" style="padding:1.5rem;font-size:.875rem;line-height:1.8;color:#c8c4d7;max-height:560px;"></div>
+    </div>
+
+    <!-- Banco de materiais salvos -->
+    <div id="secaoBanco" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <span class="material-symbols-outlined" style="color:#4ade80;font-size:1.1rem;font-variation-settings:'FILL' 1;">bookmark</span>
+          <h3 style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#928ea0;">Materiais Salvos</h3>
+          <span id="contSalvos" style="font-size:.72rem;color:#474554;"></span>
+        </div>
+      </div>
+      <div id="gridBanco" style="display:flex;flex-direction:column;gap:.625rem;"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  authGuard('professor');
+
+// ── SIDEBAR / ALUNO ──────────────────────────
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function irModoAluno(){if(confirm('Abrir o RedaON como aluno em uma nova aba?')){localStorage.setItem('modo_professor_ativo','1');window.open('inicio.html','_blank');}}
+
+// ── NOME ─────────────────────────────────────
+var NOME = authGetNome();
+document.getElementById('nomeProf').textContent = NOME;
+document.getElementById('nomeProfBanner').textContent = NOME.split(' ')[0];
+
+// ── MODAL ─────────────────────────────────────
+function abrirModal(){ document.getElementById('modalSugestao').classList.add('aberto'); }
+function fecharModal(){ document.getElementById('modalSugestao').classList.remove('aberto'); }
+document.getElementById('modalSugestao').addEventListener('click', function(e){ if(e.target===this) fecharModal(); });
+
+function enviarSugestao(){
+  var txt = document.getElementById('txtSugestao').value.trim();
+  if(!txt){ toast('Digite sua sugestão!'); return; }
+  var sugestoes = JSON.parse(localStorage.getItem('redaon_sugestoes_prof') || '[]');
+  sugestoes.push({texto:txt, data:new Date().toLocaleDateString('pt-BR')});
+  localStorage.setItem('redaon_sugestoes_prof', JSON.stringify(sugestoes));
+  document.getElementById('txtSugestao').value = '';
+  fecharModal();
+  toast('✅ Sugestão enviada! Obrigado, Professor.');
+}
+
+// ── TIPO / NÍVEL ──────────────────────────────
+var tipoSelecionado = 'plano';
+var nivelSelecionado = 'basico';
+
+function selecionarTipo(id){
+  tipoSelecionado = id;
+  document.querySelectorAll('.tipo-card').forEach(function(c){ c.classList.remove('selecionado'); });
+  document.getElementById('card-'+id).classList.add('selecionado');
+}
+
+function selecionarNivel(n){
+  nivelSelecionado = n;
+  ['basico','intermediario','avancado'].forEach(function(x){
+    document.getElementById('nivel-'+x).classList.toggle('ativo', x===n);
+  });
+}
+
+// ── DADOS DOS TIPOS ───────────────────────────
+var TIPOS = {
+  plano:      {label:'Plano de Aula',          bncc:'EM13LP01 · EM13LP44'},
+  exercicios: {label:'Lista de Exercícios',     bncc:'EM13LP02 · EM13LP03'},
+  sequencia:  {label:'Sequência Didática',      bncc:'EM13LP01 · EM13LP04'},
+  flashcards: {label:'Flashcards',              bncc:'EM13LP05 · EM13LP06'},
+  slides:     {label:'Roteiro de Slides',       bncc:'EM13LP07 · EM13LP08'},
+  redacao:    {label:'Redação Modelo',          bncc:'EM13LP09 · EM13LP10'},
+  rubrica:    {label:'Rubrica C1–C5',           bncc:'EM13LP11 · EM13LP12'},
+  repertorio: {label:'Repertório Sociocultural',bncc:'EM13LP13 · EM13LP14'},
+};
+var NIVEL_LABEL = {basico:'🌱 Básico', intermediario:'📈 Intermediário', avancado:'🏆 Avançado'};
+
+// ── PROMPTS ───────────────────────────────────
+function buildPrompt(tipo, tema, turma, nivel, extra){
+  var base = {
+    plano:      'Crie um PLANO DE AULA completo alinhado à BNCC ('+TIPOS.plano.bncc+') para trabalhar redação ENEM com o tema "'+tema+'". Turma: '+turma+'. Nível: '+nivel+'. Inclua: habilidades BNCC, objetivos de aprendizagem, duração (2 aulas de 50 min), materiais, desenvolvimento passo a passo, atividade de verificação e avaliação. Português brasileiro.',
+    exercicios: 'Crie uma LISTA DE EXERCÍCIOS alinhada à BNCC ('+TIPOS.exercicios.bncc+') sobre "'+tema+'" para redação ENEM. Turma: '+turma+'. Nível: '+nivel+'. Inclua: 3 questões dissertativas (C1-C5) e 4 questões objetivas estilo ENEM com gabarito comentado. Português brasileiro.',
+    sequencia:  'Crie uma SEQUÊNCIA DIDÁTICA alinhada à BNCC ('+TIPOS.sequencia.bncc+') com 4 aulas de 50 min sobre "'+tema+'" para redação ENEM. Turma: '+turma+'. Nível: '+nivel+'. Para cada aula: objetivo, atividade principal, recursos e avaliação. Português brasileiro.',
+    flashcards: 'Crie 12 FLASHCARDS alinhados à BNCC ('+TIPOS.flashcards.bncc+') sobre "'+tema+'" para alunos de '+turma+'. Nível: '+nivel+'. Formato: FRENTE: [conceito/pergunta] | VERSO: [resposta/explicação com exemplo de uso na redação]. Português brasileiro.',
+    slides:     'Crie um ROTEIRO DE SLIDES alinhado à BNCC ('+TIPOS.slides.bncc+') com 10 slides sobre "'+tema+'" para aula de redação ENEM. Turma: '+turma+'. Nível: '+nivel+'. Para cada slide: título, tópicos principais, dado ou exemplo, sugestão visual. Português brasileiro.',
+    redacao:    'Escreva uma REDAÇÃO DISSERTATIVO-ARGUMENTATIVA NOTA 1000 sobre "'+tema+'" alinhada à BNCC ('+TIPOS.redacao.bncc+'). Para uso como modelo em turma de '+turma+'. Nível: '+nivel+'. Inclua: introdução com repertório sociocultural, 2 parágrafos de desenvolvimento com argumentos sólidos e proposta de intervenção completa (agente, ação, meio, finalidade, detalhamento). 30 linhas. Português brasileiro.',
+    rubrica:    'Crie uma RUBRICA DE CORREÇÃO baseada nos critérios C1-C5 do ENEM, alinhada à BNCC ('+TIPOS.rubrica.bncc+'), adaptada para o tema "'+tema+'" e turma de '+turma+'. Nível: '+nivel+'. Para cada competência: descrição clara, descritores por nível de desempenho (0, 40, 80, 120, 160, 200 pontos) e exemplos práticos. Português brasileiro.',
+    repertorio: 'Crie um REPERTÓRIO SOCIOCULTURAL alinhado à BNCC ('+TIPOS.repertorio.bncc+') sobre "'+tema+'" para redação ENEM. Turma: '+turma+'. Nível: '+nivel+'. Inclua: 3 filósofos/sociólogos com frases-chave, 3 artigos de lei relevantes, 4 dados estatísticos recentes, 2 marcos históricos e 3 exemplos práticos para usar nos argumentos. Português brasileiro.',
+  }[tipo];
+  if(extra) base += '\nInstrução adicional: '+extra;
+  return base;
+}
+
+// ── API GEMINI (fetch direto) ─────────────────
+var API_KEY = 'AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU';
+async function gemini(prompt){
+  var resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+API_KEY,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+  });
+  var data = await resp.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
+// ── GERAR MATERIAL ────────────────────────────
+var conteudoAtual = '';
+var materiaisSalvos = JSON.parse(localStorage.getItem('redaon_materiais_prof') || '[]');
+
+async function gerarMaterial(){
+  var tema = document.getElementById('inputTema').value.trim();
+  if(!tema){ toast('⚠️ Digite o tema da aula!'); return; }
+  var turma = document.getElementById('selectTurma').options[document.getElementById('selectTurma').selectedIndex].text;
+  var extra = document.getElementById('promptExtra').value.trim();
+  var res  = document.getElementById('resultado');
+  var cont = document.getElementById('conteudoResultado');
+  res.style.display = 'block';
+  document.getElementById('tituloResultado').textContent = TIPOS[tipoSelecionado].label;
+  document.getElementById('tagBncc').textContent = 'BNCC: '+TIPOS[tipoSelecionado].bncc;
+  document.getElementById('nivelResultado').textContent = NIVEL_LABEL[nivelSelecionado];
+  cont.innerHTML = '<div style="display:flex;gap:4px;align-items:center;padding:.5rem 0;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;margin-left:.5rem;font-size:.85rem;">PROfa preparando seu material...</span></div>';
+  res.scrollIntoView({behavior:'smooth',block:'start'});
+  try{
+    conteudoAtual = await gemini(buildPrompt(tipoSelecionado,tema,turma,NIVEL_LABEL[nivelSelecionado],extra));
+    cont.innerHTML = formatarMd(conteudoAtual);
+  }catch(e){
+    cont.innerHTML = '<p style="color:#ffb4ab;">Erro ao gerar. Verifique sua conexão e tente novamente.</p>';
+  }
+}
+
+// ── AÇÕES DO RESULTADO ────────────────────────
+function copiarResultado(){ navigator.clipboard.writeText(conteudoAtual).then(function(){ toast('✓ Conteúdo copiado!'); }); }
+
+function compartilharWhatsApp(){
+  var turma = document.getElementById('selectTurma').options[document.getElementById('selectTurma').selectedIndex].text;
+  var tema  = document.getElementById('inputTema').value.trim();
+  var tipo  = TIPOS[tipoSelecionado].label;
+  var msg = encodeURIComponent('📚 *RedaON — PedagoIA*\n\n*'+tipo+'*\nTema: '+tema+'\nTurma: '+turma+'\nBNCC: '+TIPOS[tipoSelecionado].bncc+'\n\n'+conteudoAtual.substring(0,600)+'...\n\n_Gerado pela PedagoIA — RedaON_');
+  window.open('https://wa.me/?text='+msg,'_blank');
+}
+
+function salvarMaterial(){
+  if(!conteudoAtual){ toast('Gere um material primeiro!'); return; }
+  var tema = document.getElementById('inputTema').value.trim();
+  var turma = document.getElementById('selectTurma').options[document.getElementById('selectTurma').selectedIndex].text;
+  var item = {
+    id:Date.now(),
+    tipo:TIPOS[tipoSelecionado].label,
+    bncc:TIPOS[tipoSelecionado].bncc,
+    nivel:NIVEL_LABEL[nivelSelecionado],
+    tema:tema, turma:turma,
+    conteudo:conteudoAtual,
+    data:new Date().toLocaleDateString('pt-BR')
+  };
+  materiaisSalvos.unshift(item);
+  if(materiaisSalvos.length>30) materiaisSalvos.pop();
+  localStorage.setItem('redaon_materiais_prof', JSON.stringify(materiaisSalvos));
+  renderBanco();
+  toast('✅ Material salvo!');
+}
+
+function renderBanco(){
+  var secao = document.getElementById('secaoBanco');
+  var grid  = document.getElementById('gridBanco');
+  var cont  = document.getElementById('contSalvos');
+  if(!materiaisSalvos.length){ secao.style.display='none'; return; }
+  secao.style.display='block';
+  cont.textContent = materiaisSalvos.length+' salvo(s)';
+  grid.innerHTML = materiaisSalvos.map(function(m){
+    return '<div class="salvo-card">'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.2rem;">'
+      +'<span style="font-size:.8rem;font-weight:700;color:#e1e2eb;">'+m.tipo+'</span>'
+      +'<span style="font-size:.65rem;color:#c6bfff;background:rgba(108,92,231,.12);padding:.1rem .4rem;border-radius:9999px;">'+m.nivel+'</span>'
+      +'<span style="font-size:.6rem;color:#6c5ce7;background:rgba(108,92,231,.08);padding:.1rem .4rem;border-radius:9999px;">BNCC</span>'
+      +'</div>'
+      +'<p style="font-size:.78rem;color:#928ea0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+m.tema+' · '+m.turma+' · '+m.data+'</p>'
+      +'</div>'
+      +'<div style="display:flex;gap:.375rem;flex-shrink:0;">'
+      +'<button onclick="carregarSalvo('+m.id+')" style="padding:.35rem .75rem;background:rgba(69,237,238,.08);border:1px solid rgba(69,237,238,.2);border-radius:.625rem;color:#45edee;font-size:.72rem;cursor:pointer;">Ver</button>'
+      +'<button onclick="excluirSalvo('+m.id+')" style="padding:.35rem .625rem;background:rgba(255,180,171,.06);border:1px solid rgba(255,180,171,.15);border-radius:.625rem;color:#ffb4ab;font-size:.72rem;cursor:pointer;">✕</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function carregarSalvo(id){
+  var m = materiaisSalvos.find(function(x){ return x.id===id; });
+  if(!m) return;
+  conteudoAtual = m.conteudo;
+  document.getElementById('tituloResultado').textContent = m.tipo;
+  document.getElementById('tagBncc').textContent = 'BNCC: '+m.bncc;
+  document.getElementById('nivelResultado').textContent = m.nivel;
+  document.getElementById('conteudoResultado').innerHTML = formatarMd(m.conteudo);
+  document.getElementById('resultado').style.display = 'block';
+  document.getElementById('resultado').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function excluirSalvo(id){
+  materiaisSalvos = materiaisSalvos.filter(function(x){ return x.id!==id; });
+  localStorage.setItem('redaon_materiais_prof', JSON.stringify(materiaisSalvos));
+  renderBanco(); toast('Material removido.');
+}
+
+renderBanco();
+
+// ── MARKDOWN ──────────────────────────────────
+function formatarMd(t){
+  return t
+    .replace(/\*\*(.*?)\*\*/g,'<strong style="color:#e1e2eb;">$1</strong>')
+    .replace(/^### (.*)/gm,'<p style="font-size:.875rem;font-weight:700;color:#45edee;margin:.75rem 0 .2rem;">$1</p>')
+    .replace(/^## (.*)/gm,'<p style="font-size:1rem;font-weight:700;color:#e1e2eb;margin:.875rem 0 .3rem;">$1</p>')
+    .replace(/^# (.*)/gm,'<p style="font-size:1.05rem;font-weight:800;color:#45edee;margin:1rem 0 .4rem;">$1</p>')
+    .replace(/^[-•] (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0;color:#c8c4d7;">• $1</p>')
+    .replace(/^(\d+)\. (.*)/gm,'<p style="padding-left:1rem;margin:.3rem 0;"><strong style="color:#45edee;">$1.</strong> $2</p>')
+    .replace(/\n\n/g,'<br/>').replace(/\n/g,'<br/>');
+}
+
+// ── TOAST ─────────────────────────────────────
+function toast(msg,dur=3000){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},dur);}
+
+// ── EVOLUÇÃO & PONTOS DE MELHORIA ────────────
+var dadosTurmas = {
+  '3A':{notas:{C1:160,C2:140,C3:120,C4:150,C5:100},alunos:38},
+  '3B':{notas:{C1:140,C2:130,C3:150,C4:120,C5:90}, alunos:40},
+  '2A':{notas:{C1:120,C2:100,C3:110,C4:130,C5:80}, alunos:37},
+  '3N':{notas:{C1:100,C2:140,C3:130,C4:110,C5:120},alunos:32},
+};
+var nomeCompetencias = {
+  C1:'Domínio da Norma Culta',
+  C2:'Compreensão do Tema',
+  C3:'Seleção e Organização de Argumentos',
+  C4:'Coesão e Coerência',
+  C5:'Proposta de Intervenção'
+};
+var coresComp = {C1:'#c6bfff',C2:'#45edee',C3:'#4ade80',C4:'#fabd00',C5:'#ff8b8b'};
+var reforcoAtual = '';
+
+function carregarEvolucao(){
+  var sel = document.getElementById('selectTurmaEvolucao').value;
+  var vazio = document.getElementById('evolucaoVazio');
+  var cards = document.getElementById('cardsEvolucao');
+  if(!sel){ vazio.style.display='block'; cards.style.display='none'; return; }
+  vazio.style.display='none'; cards.style.display='block';
+
+  var d = dadosTurmas[sel];
+  var grid = document.getElementById('gridCompetencias');
+
+  // Encontra competência mais fraca
+  var minComp = Object.keys(d.notas).reduce(function(a,b){ return d.notas[a]<d.notas[b]?a:b; });
+  var minNota = d.notas[minComp];
+
+  // Renderiza cards C1-C5
+  grid.innerHTML = Object.keys(d.notas).map(function(comp){
+    var nota = d.notas[comp];
+    var pct = Math.round((nota/200)*100);
+    var cor = coresComp[comp];
+    var isFraca = comp === minComp;
+    return '<div style="background:#1d2026;border:1px solid '+(isFraca?'rgba(255,180,171,.3)':'rgba(71,69,84,.2)')+';border-radius:.875rem;padding:1rem;">'
+      +(isFraca?'<div style="font-size:.6rem;font-weight:800;color:#ffb4ab;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.375rem;">⚠ Ponto de melhoria</div>':'')
+      +'<p style="font-size:.7rem;font-weight:700;color:'+cor+';margin-bottom:.25rem;">'+comp+'</p>'
+      +'<p style="font-size:.72rem;color:#928ea0;line-height:1.3;margin-bottom:.625rem;">'+nomeCompetencias[comp]+'</p>'
+      +'<p style="font-size:1.75rem;font-weight:900;color:'+cor+';">'+nota+'<span style="font-size:.75rem;color:#474554;">/200</span></p>'
+      +'<div style="height:4px;background:rgba(71,69,84,.3);border-radius:9999px;margin-top:.5rem;overflow:hidden;">'
+      +'<div style="height:100%;width:'+pct+'%;background:'+cor+';border-radius:9999px;transition:width .6s;"></div>'
+      +'</div></div>';
+  }).join('');
+
+  // Ponto de melhoria
+  document.getElementById('tituloMelhoria').textContent = comp+' — '+nomeCompetencias[minComp];
+  document.getElementById('tituloMelhoria').textContent = minComp+' — '+nomeCompetencias[minComp];
+  document.getElementById('descMelhoria').textContent = 'Média de '+minNota+'/200 — a competência mais fraca da turma. A PedagoIA recomenda exercícios focados neste ponto para as próximas aulas.';
+
+  // Diagnóstico automático
+  var nomeTurma = document.getElementById('selectTurmaEvolucao').selectedOptions[0].text;
+  var media = Math.round(Object.values(d.notas).reduce(function(a,b){return a+b;},0)/5);
+  document.getElementById('textoDiagnostico').innerHTML =
+    '<p style="margin-bottom:.5rem;">A turma <strong style="color:#e1e2eb;">'+nomeTurma+'</strong> apresenta média geral de <strong style="color:#45edee;">'+(media*5)+'/1000</strong> pontos.</p>'
+    +'<p style="margin-bottom:.5rem;">O ponto crítico é <strong style="color:#ffb4ab;">'+minComp+' — '+nomeCompetencias[minComp]+'</strong> com '+minNota+'/200. Recomenda-se priorizar exercícios de reforço nesta competência nas próximas 2 semanas.</p>'
+    +'<p>As demais competências estão dentro da faixa esperada para o período letivo. Continue o bom trabalho! 💪</p>';
+
+  // Reseta reforço anterior
+  document.getElementById('resultadoReforco').style.display = 'none';
+}
+
+async function gerarReforco(){
+  var sel = document.getElementById('selectTurmaEvolucao').value;
+  if(!sel){ toast('Selecione uma turma primeiro!'); return; }
+  var d = dadosTurmas[sel];
+  var nomeTurma = document.getElementById('selectTurmaEvolucao').selectedOptions[0].text;
+  var minComp = Object.keys(d.notas).reduce(function(a,b){ return d.notas[a]<d.notas[b]?a:b; });
+
+  var res = document.getElementById('resultadoReforco');
+  var cont = document.getElementById('conteudoReforco');
+  res.style.display = 'block';
+  document.getElementById('tituloReforco').textContent = 'Exercícios de Reforço — '+minComp+' ('+nomeCompetencias[minComp]+')';
+  cont.innerHTML = '<div style="display:flex;gap:4px;align-items:center;padding:.5rem 0;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;margin-left:.5rem;font-size:.85rem;">PedagoIA gerando exercícios de reforço...</span></div>';
+  res.scrollIntoView({behavior:'smooth',block:'start'});
+
+  try{
+    var prompt = 'Você é a PedagoIA da RedaON. A turma '+nomeTurma+' está com dificuldade em '+minComp+' — '+nomeCompetencias[minComp]+' (média '+d.notas[minComp]+'/200). Crie 5 exercícios práticos de reforço específicos para esta competência, alinhados ao ENEM. Para cada exercício: contextualize a dificuldade, proponha a atividade, dê o gabarito comentado e explique como o exercício desenvolve '+minComp+'. Tom encorajador. Português brasileiro.';
+    reforcoAtual = await gemini(prompt);
+    cont.innerHTML = formatarMd(reforcoAtual);
+  }catch(e){
+    cont.innerHTML = '<p style="color:#ffb4ab;">Erro ao gerar. Verifique sua conexão.</p>';
+  }
+}
+
+function copiarReforco(){ navigator.clipboard.writeText(reforcoAtual).then(function(){ toast('✓ Exercícios copiados!'); }); }
+
+function salvarReforco(){
+  if(!reforcoAtual) return;
+  var conteudoAntes = conteudoAtual;
+  conteudoAtual = reforcoAtual;
+  var sel = document.getElementById('selectTurmaEvolucao').value;
+  var turma = document.getElementById('selectTurmaEvolucao').selectedOptions[0].text;
+  var minComp = Object.keys(dadosTurmas[sel].notas).reduce(function(a,b){ return dadosTurmas[sel].notas[a]<dadosTurmas[sel].notas[b]?a:b; });
+  var item = {
+    id:Date.now(),
+    tipo:'Exercícios de Reforço — '+minComp,
+    bncc:'Reforço ENEM',
+    nivel:'Reforço',
+    tema:nomeCompetencias[minComp],
+    turma:turma,
+    conteudo:reforcoAtual,
+    data:new Date().toLocaleDateString('pt-BR')
+  };
+  materiaisSalvos.unshift(item);
+  localStorage.setItem('redaon_materiais_prof', JSON.stringify(materiaisSalvos));
+  renderBanco();
+  conteudoAtual = conteudoAntes;
+  toast('✅ Exercícios salvos no banco!');
+}
+</script>
+
+<!-- SEÇÃO EVOLUÇÃO — HTML -->
+<script>
+// Injeta HTML da seção evolução após o banco
+document.addEventListener('DOMContentLoaded', function(){
+  var mainDiv = document.querySelector('#main-content > div');
+  var secao = document.createElement('div');
+  secao.innerHTML = `
+    <div style="margin-top:2.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem;">
+        <div style="display:flex;align-items:center;gap:.625rem;">
+          <span class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;">trending_up</span>
+          <h3 style="font-size:.875rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;">Evolução & Pontos de Melhoria</h3>
+        </div>
+        <select id="selectTurmaEvolucao" onchange="carregarEvolucao()" style="background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.45rem .875rem;color:#e1e2eb;font-size:.8rem;outline:none;cursor:pointer;">
+          <option value="">Selecione a turma...</option>
+          <option value="3A">3º Ano A — Manhã</option>
+          <option value="3B">3º Ano B — Manhã</option>
+          <option value="2A">2º Ano A — Tarde</option>
+          <option value="3N">3º Ano A — Noite</option>
+        </select>
+      </div>
+      <div id="cardsEvolucao" style="display:none;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.875rem;margin-bottom:1.5rem;" id="gridCompetencias"></div>
+        <div id="cardMelhoria" style="background:linear-gradient(135deg,rgba(255,180,171,.08),rgba(250,189,0,.05));border:1px solid rgba(255,180,171,.2);border-radius:1rem;padding:1.25rem;margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.875rem;">
+            <span class="material-symbols-outlined" style="color:#ffb4ab;font-variation-settings:'FILL' 1;">warning</span>
+            <p style="font-size:.8rem;font-weight:800;color:#ffb4ab;text-transform:uppercase;letter-spacing:.06em;">Ponto de Melhoria Prioritário</p>
+          </div>
+          <p style="font-size:1rem;font-weight:800;color:#e1e2eb;margin-bottom:.375rem;" id="tituloMelhoria">—</p>
+          <p style="font-size:.82rem;color:#928ea0;line-height:1.5;margin-bottom:1rem;" id="descMelhoria">—</p>
+          <button onclick="gerarReforco()" style="display:flex;align-items:center;gap:.5rem;padding:.625rem 1.25rem;background:linear-gradient(135deg,#ffb4ab,#ff8b8b);color:#1a0000;font-weight:800;border:none;border-radius:.75rem;font-size:.82rem;cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1;">bolt</span>Gerar Exercícios de Reforço com IA
+          </button>
+        </div>
+        <div id="resultadoReforco" style="display:none;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;overflow:hidden;margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.25rem;border-bottom:1px solid rgba(71,69,84,.12);flex-wrap:wrap;gap:.5rem;">
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <span class="material-symbols-outlined" style="color:#ffb4ab;font-variation-settings:'FILL' 1;">edit_note</span>
+              <span style="font-weight:700;font-size:.9rem;" id="tituloReforco">Exercícios de Reforço</span>
+            </div>
+            <div style="display:flex;gap:.5rem;">
+              <button onclick="copiarReforco()" style="padding:.35rem .75rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);border-radius:.625rem;color:#c8c4d7;font-size:.72rem;cursor:pointer;display:flex;align-items:center;gap:.25rem;"><span class="material-symbols-outlined" style="font-size:.85rem;">content_copy</span>Copiar</button>
+              <button onclick="salvarReforco()" style="padding:.35rem .75rem;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:.625rem;color:#4ade80;font-size:.72rem;cursor:pointer;display:flex;align-items:center;gap:.25rem;"><span class="material-symbols-outlined" style="font-size:.85rem;">bookmark</span>Salvar</button>
+            </div>
+          </div>
+          <div id="conteudoReforco" class="scroll-y" style="padding:1.25rem;font-size:.875rem;line-height:1.8;color:#c8c4d7;max-height:400px;"></div>
+        </div>
+        <div style="background:#1d2026;border:1px solid rgba(69,237,238,.15);border-radius:1rem;padding:1.25rem;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.875rem;">
+            <span class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;">neurology</span>
+            <p style="font-size:.8rem;font-weight:800;color:#45edee;letter-spacing:.04em;">Diagnóstico da Pedago<em style="color:#45edee;font-weight:900;font-style:italic;">IA</em></p>
+          </div>
+          <div id="textoDiagnostico" style="font-size:.85rem;color:#c8c4d7;line-height:1.7;"></div>
+        </div>
+      </div>
+      <div id="evolucaoVazio" style="text-align:center;padding:2.5rem 1rem;background:#1d2026;border:1px dashed rgba(71,69,84,.3);border-radius:1rem;">
+        <span class="material-symbols-outlined" style="font-size:2.5rem;color:#474554;display:block;margin-bottom:.75rem;">analytics</span>
+        <p style="font-size:.875rem;color:#928ea0;">Selecione uma turma para ver a evolução e os pontos de melhoria</p>
+      </div>
+    </div>`;
+  mainDiv.appendChild(secao);
+});
+</script>
+</body>
+</html>

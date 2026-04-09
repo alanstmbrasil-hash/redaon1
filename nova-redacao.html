@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html class="dark" lang="pt-BR">
 <head>
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "ced19395-bdaf-47e0-90d4-eb39698dbdad",
-    });
-  });
-</script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Nova Redação</title>
@@ -23,23 +14,14 @@
     theme: {
       extend: {
         colors: {
-          "inverse-on-surface": "#2e3037", "surface-container-high": "#272a31",
-          "surface": "#10131a", "inverse-primary": "#5847d2", "on-secondary": "#003737",
-          "surface-dim": "#10131a", "on-primary": "#2900a0", "on-secondary-fixed-variant": "#004f50",
-          "on-secondary-fixed": "#002020", "primary": "#c6bfff", "primary-container": "#6c5ce7",
-          "on-primary-fixed-variant": "#4029ba", "on-primary-container": "#faf6ff",
-          "surface-bright": "#363940", "inverse-surface": "#e1e2eb", "on-error-container": "#ffdad6",
-          "on-tertiary": "#3f2e00", "outline-variant": "#474554", "tertiary-container": "#906c00",
-          "surface-container": "#1d2026", "on-surface": "#e1e2eb", "secondary": "#45edee",
-          "error-container": "#93000a", "tertiary": "#fabd00", "on-primary-fixed": "#160066",
-          "tertiary-fixed-dim": "#fabd00", "secondary-fixed": "#56f9f9", "on-background": "#e1e2eb",
-          "on-surface-variant": "#c8c4d7", "on-error": "#690005", "surface-variant": "#32353c",
-          "secondary-fixed-dim": "#26dcdd", "primary-fixed": "#e4dfff", "primary-fixed-dim": "#c6bfff",
-          "surface-container-lowest": "#0b0e14", "error": "#ffb4ab", "on-secondary-container": "#005455",
-          "tertiary-fixed": "#ffdf9e", "outline": "#928ea0", "surface-container-low": "#191c22",
-          "on-tertiary-fixed": "#261a00", "on-tertiary-fixed-variant": "#5b4300", "background": "#10131a",
-          "on-tertiary-container": "#fff6ec", "surface-tint": "#c6bfff", "secondary-container": "#00d0d1",
-          "surface-container-highest": "#32353c"
+          "surface-container-high": "#272a31", "surface": "#10131a",
+          "primary": "#c6bfff", "primary-container": "#6c5ce7",
+          "on-primary-container": "#faf6ff", "outline-variant": "#474554",
+          "surface-container": "#1d2026", "on-surface": "#e1e2eb",
+          "secondary": "#45edee", "tertiary": "#fabd00",
+          "on-surface-variant": "#c8c4d7", "error": "#ffb4ab",
+          "surface-container-lowest": "#0b0e14", "background": "#10131a",
+          "surface-container-low": "#191c22",
         },
         fontFamily: {
           "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"],
@@ -54,6 +36,49 @@
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
   body { background-color: #0B0E14; color: #E1E2EB; font-family: 'Inter', sans-serif; }
 
+  /* ── Sidebar hambúrguer ── */
+  #sidebar {
+    position: fixed; left: 0; top: 0; height: 100%; width: 256px;
+    transform: translateX(-256px); transition: transform .3s ease; z-index: 50;
+  }
+  #sidebar.open { transform: translateX(0); }
+  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:45; }
+  #overlay.open { display:block; }
+
+  /* Header FIXO — nunca sai da tela mesmo com teclado aberto */
+  #mainHeader {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 40;
+    background: rgba(11,14,20,.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  /* Compensa o header fixo no conteúdo */
+  #main-content { padding-top: 4rem; }
+
+  @media (min-width: 1024px) {
+    #sidebar { transform: translateX(0) !important; }
+    #overlay { display: none !important; }
+    #main-content { margin-left: 256px; }
+    #btnHamburger { display: none !important; }
+    #mainHeader { left: 256px; }
+  }
+  @media (max-width: 1023px) {
+    #main-content { margin-left: 0 !important; }
+    #mainHeader { left: 0; }
+  }
+
+  /* Barra de palavras — feedback pedagógico */
+  #barraEnem { height:4px; border-radius:9999px; transition:width .5s, background .5s; }
+
+  /* Metros de palavras */
+  #feedbackPalavras {
+    font-size:.72rem; font-weight:700;
+    padding:.2rem .625rem; border-radius:9999px;
+    transition: all .3s;
+  }
+
   /* ── Folha de Redação ── */
   .redacao-sheet {
     background-color: #fdfdfb;
@@ -64,8 +89,7 @@
   }
   .redacao-sheet::before {
     content: "REDAÇÃO OFICIAL";
-    position: absolute;
-    top: 50%; left: 50%;
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(-45deg);
     font-size: 5rem; font-weight: 900;
     color: rgba(0,0,0,0.03);
@@ -74,63 +98,274 @@
   .line-numbers { border-right: 1px solid #d1d5db; user-select: none; }
   .writing-area { line-height: 2.25rem; background: transparent; z-index: 1; }
 
+  /* ── Campo de título da redação ── */
+  .titulo-sheet {
+    background: #fdfdfb;
+    border-bottom: 2px solid #e5e7eb;
+    width: 100%;
+    padding: .75rem 1rem .75rem 3.5rem;
+    font-family: 'EB Garamond', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: #1f2937;
+    outline: none;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .titulo-sheet::placeholder { color: #9ca3af; font-style: italic; text-transform: none; letter-spacing: 0; }
+
   /* ── Método de Envio ── */
+  .metodo-btn { transition: all .2s; }
   .metodo-btn.ativo { background: #6c5ce7 !important; border-color: #6c5ce7 !important; }
-  .metodo-btn.ativo span { color: white !important; }
+  .metodo-btn.ativo .metodo-icon { color: white !important; }
+  .metodo-btn.ativo .metodo-label { color: white !important; }
 
   /* ── Tempo ── */
   .tempo-card.ativo { border-color: #6c5ce7 !important; box-shadow: 0 0 0 1px #6c5ce7; }
   #display-tempo { font-variant-numeric: tabular-nums; }
   .tempo-vermelho { color: #ffb4ab !important; }
 
-  /* ── Voz ── */
-  @keyframes pulse-mic { 0%,100%{box-shadow:0 0 0 0 rgba(108,92,231,0.5)} 50%{box-shadow:0 0 0 10px rgba(108,92,231,0)} }
-  .gravando { animation: pulse-mic 1s infinite; }
+  /* ── Toast ── */
+  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; white-space:nowrap; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
 
-  /* ── Painel Blanche ── */
+  /* ── Status voz ── */
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .blink { animation: blink 1s infinite; }
+
+  /* ── Painel Análise ── */
   #painel-blanche { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.75); align-items:center; justify-content:center; padding:1rem; }
   #painel-blanche.aberto { display:flex; }
-  .painel-interno { background:#1d2026; border:1px solid rgba(255,255,255,0.08); border-radius:1.25rem; width:100%; max-width:720px; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,0.6); }
-  .painel-header { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0; }
+  .painel-interno { background:#1d2026; border:1px solid rgba(255,255,255,0.08); border-radius:1.25rem; width:100%; max-width:720px; max-height:88vh; display:flex; flex-direction:column; }
+  .painel-header { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid rgba(255,255,255,0.06); }
   .painel-body { overflow-y:auto; padding:1.5rem; flex:1; }
-  .painel-body::-webkit-scrollbar { width:6px; }
-  .painel-body::-webkit-scrollbar-thumb { background:#32353c; border-radius:10px; }
   .nota-numero { font-size:3rem; font-weight:800; line-height:1; background:linear-gradient(135deg,#6c5ce7,#45edee); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
   .comp-card { background:#10131a; border:1px solid rgba(255,255,255,0.06); border-radius:.75rem; padding:1rem; margin-bottom:.75rem; }
   .barra-bg { background:#32353c; border-radius:99px; height:6px; }
   .barra-fill { height:6px; border-radius:99px; background:linear-gradient(90deg,#6c5ce7,#45edee); transition:width .8s ease; }
-  .secao-tit { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#928ea0; margin:1.25rem 0 .5rem; }
-  .lista-it { display:flex; gap:.5rem; font-size:.8rem; color:#c8c4d7; margin-bottom:.4rem; line-height:1.5; }
-  .coment-geral { background:rgba(108,92,231,.1); border:1px solid rgba(108,92,231,.25); border-radius:.75rem; padding:1rem; font-size:.82rem; color:#c8c4d7; line-height:1.6; margin-top:1rem; font-style:italic; }
-  .loading-b { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem; gap:1rem; }
-  .spinner { width:40px; height:40px; border:3px solid rgba(108,92,231,.2); border-top-color:#6c5ce7; border-radius:50%; animation:spin .8s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
-
-  /* ── Toast ── */
-  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; box-shadow:0 8px 32px rgba(0,0,0,.4); z-index:300; transition:transform .3s ease; pointer-events:none; white-space:nowrap; }
-  #toast.show { transform:translateX(-50%) translateY(0); }
+  .spinner { width:40px; height:40px; border:3px solid rgba(108,92,231,.2); border-top-color:#6c5ce7; border-radius:50%; animation:spin .8s linear infinite; }
 
   /* ── Arquivo preview ── */
   #area-arquivo { display:none; margin:.5rem 1rem; background:rgba(108,92,231,.08); border:1px dashed rgba(108,92,231,.3); border-radius:.75rem; padding:.6rem 1rem; font-size:.8rem; color:#c8c4d7; align-items:center; gap:.75rem; }
   #area-arquivo.visivel { display:flex; }
   #inputPDF, #inputImagem { display:none; }
 
-  /* Status voz */
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-  .blink { animation: blink 1s infinite; }
-</style>
-</head>
-<body class="flex min-h-screen">
+  /* Mobile layout */
+  @media(max-width:1023px){
+    .grid-redacao { display:flex; flex-direction:column; }
+    .col-apoio { order: -1; }
+  }
 
-<!-- PAINEL BLANCHE -->
+  /* ══════════════════════════════════════
+     MODO ELITE DA PROFA
+  ══════════════════════════════════════ */
+
+  /* Variáveis douradas */
+  :root {
+    --elite-gold: #C9A227;
+    --elite-gold-light: #E8BC3A;
+    --elite-gold-dark: #A07A10;
+    --elite-glow: rgba(201,162,39,.25);
+    --elite-glow-soft: rgba(201,162,39,.08);
+  }
+
+  /* Transição suave ao entrar/sair do modo Elite */
+  #main-content, header, .redacao-sheet { transition: all .5s ease; }
+
+  /* Glow ambiente na tela — anel dourado no body */
+  body.modo-elite {
+    background: radial-gradient(ellipse at top, rgba(201,162,39,.07) 0%, #0B0E14 55%);
+  }
+
+  /* Header Elite */
+  body.modo-elite header {
+    background: linear-gradient(135deg, rgba(201,162,39,.12), rgba(11,14,20,.95)) !important;
+    border-bottom: 1px solid rgba(201,162,39,.3) !important;
+    box-shadow: 0 2px 24px rgba(201,162,39,.12);
+  }
+
+  /* Topbar — estrelas e avatar pulsando quando há dica */
+  @keyframes eliteGlow {
+    0%,100% { filter: drop-shadow(0 0 4px var(--elite-gold)); opacity:1; }
+    50%      { filter: drop-shadow(0 0 12px var(--elite-gold-light)); opacity:.8; }
+  }
+  @keyframes elitePulse {
+    0%,100% { box-shadow: 0 0 0 0 var(--elite-glow); }
+    50%      { box-shadow: 0 0 0 8px rgba(201,162,39,0); }
+  }
+  .elite-star { color: var(--elite-gold); animation: eliteGlow 2s ease-in-out infinite; }
+  .elite-avatar-ring {
+    border: 2.5px solid var(--elite-gold);
+    box-shadow: 0 0 0 2px var(--elite-glow);
+    animation: elitePulse 2.5s ease-in-out infinite;
+  }
+  /* Pulso intenso quando há dica acumulada */
+  .elite-dica-pendente .elite-star { animation: eliteGlow .8s ease-in-out infinite; }
+  .elite-dica-pendente .elite-avatar-ring { animation: elitePulse .8s ease-in-out infinite; }
+
+  /* Botão Elite — único, responsivo */
+  #btnAtivarElite {
+    background: linear-gradient(135deg, var(--elite-gold), #8B6914);
+    color: #1a0e00;
+    font-weight: 800;
+    border: none;
+    border-radius: .875rem;
+    padding: .45rem .875rem;
+    font-size: .75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    transition: all .2s;
+    box-shadow: 0 2px 12px rgba(201,162,39,.3);
+    white-space: nowrap;
+  }
+  #btnAtivarElite:hover { transform: scale(1.04); box-shadow: 0 4px 20px rgba(201,162,39,.45); }
+  body.modo-elite #btnAtivarElite {
+    background: rgba(201,162,39,.15);
+    color: var(--elite-gold);
+    border: 1px solid rgba(201,162,39,.35);
+    box-shadow: none;
+  }
+  /* Label longo só no desktop */
+  #labelBtnEliteDesktop { display:none; }
+  @media(min-width:640px) { #labelBtnEliteDesktop { display:inline; } }
+
+  /* Contador de dicas — no header só desktop */
+  #eliteContadorDicas {
+    display: none;
+    font-size: .72rem;
+    font-weight: 800;
+    color: var(--elite-gold);
+    background: rgba(201,162,39,.12);
+    border: 1px solid rgba(201,162,39,.3);
+    border-radius: 9999px;
+    padding: .25rem .625rem;
+    white-space: nowrap;
+    cursor: pointer;
+    align-items: center;
+    gap: .25rem;
+  }
+  /* Desktop: aparece no header */
+  @media(min-width:640px) {
+    body.modo-elite #eliteContadorDicas { display: inline-flex; }
+  }
+  /* Mobile: contador some do header — vira FAB */
+  @media(max-width:639px) {
+    #eliteContadorDicas { display: none !important; }
+  }
+
+  /* FAB flutuante — contador de dicas mobile */
+  #eliteFab {
+    display: none;
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.25rem;
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    gap: .25rem;
+    cursor: pointer;
+    filter: drop-shadow(0 4px 16px rgba(201,162,39,.4));
+  }
+  body.modo-elite #eliteFab { display: flex; }
+  @media(min-width:640px) { #eliteFab { display: none !important; } }
+
+  .elite-fab-btn {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--elite-gold), #8B6914);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: transform .2s;
+    box-shadow: 0 4px 20px rgba(201,162,39,.5);
+  }
+  .elite-fab-btn:active { transform: scale(.92); }
+
+  @keyframes fabPulse {
+    0%,100% { box-shadow: 0 4px 20px rgba(201,162,39,.5), 0 0 0 0 rgba(201,162,39,.4); }
+    50%      { box-shadow: 0 4px 20px rgba(201,162,39,.5), 0 0 0 10px rgba(201,162,39,0); }
+  }
+  .elite-fab-pendente .elite-fab-btn { animation: fabPulse .9s ease-in-out infinite; }
+
+  .elite-fab-label {
+    font-size: .65rem;
+    font-weight: 800;
+    color: var(--elite-gold);
+    background: rgba(11,14,20,.9);
+    border: 1px solid rgba(201,162,39,.3);
+    border-radius: 9999px;
+    padding: .15rem .5rem;
+    white-space: nowrap;
+  }
+
+  /* ── Drawer de dicas — desce abaixo do header fixo ── */
+  #eliteDrawer {
+    position: fixed;
+    top: 4rem; /* altura do header */
+    left: 0; right: 0;
+    z-index: 39; /* abaixo do header (40) */
+    transform: translateY(-110%);
+    transition: transform .4s cubic-bezier(.4,0,.2,1);
+    padding: 0 1rem;
+    pointer-events: none;
+  }
+  @media(min-width:1024px) { #eliteDrawer { left: 256px; } }
+  #eliteDrawer.aberto {
+    transform: translateY(0);
+    pointer-events: all;
+  }
+  .elite-drawer-inner {
+    margin: 0 auto;
+    max-width: 720px;
+    background: linear-gradient(135deg, #1a1506, #1d1a0a);
+    border: 1px solid rgba(201,162,39,.4);
+    border-top: none;
+    border-radius: 0 0 1.25rem 1.25rem;
+    box-shadow: 0 12px 40px rgba(201,162,39,.2), 0 4px 16px rgba(0,0,0,.5);
+    padding: 1rem 1.25rem 1.25rem;
+  }
+
+  /* Highlight âmbar no texto */
+  .elite-highlight {
+    background: rgba(201,162,39,.25);
+    border-bottom: 2px solid var(--elite-gold);
+    border-radius: 2px;
+    color: inherit;
+  }
+
+  /* Folha com borda dourada no modo Elite */
+  body.modo-elite .redacao-sheet {
+    box-shadow: inset 0 0 0 2px rgba(201,162,39,.2);
+  }
+
+  /* Botões dourados no modo Elite */
+  body.modo-elite #btnEnviar {
+    background: linear-gradient(135deg, var(--elite-gold), #8B6914) !important;
+    color: #1a0e00 !important;
+    box-shadow: 0 4px 16px rgba(201,162,39,.35);
+  }
+
+</style>
+<script src="supabase-auth.js"></script>
+</head>
+<body class="min-h-screen">
+
+<!-- PAINEL ANÁLISE -->
 <div id="painel-blanche">
   <div class="painel-interno">
     <div class="painel-header">
       <div style="display:flex;align-items:center;gap:.6rem;">
         <span class="material-symbols-outlined" style="color:#6c5ce7;font-size:1.3rem;">psychology</span>
-        <span style="font-weight:700;font-size:1rem;color:#e1e2eb;">Análise da Profa. Blanche</span>
+        <span style="font-weight:700;font-size:1rem;color:#e1e2eb;">Análise da PROfa</span>
       </div>
-      <button onclick="fecharPainel()" style="background:none;border:none;color:#928ea0;cursor:pointer;display:flex;padding:.25rem;border-radius:.5rem;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'">
+      <button onclick="fecharPainel()" style="background:none;border:none;color:#928ea0;cursor:pointer;">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
@@ -140,115 +375,184 @@
 
 <!-- TOAST -->
 <div id="toast"></div>
-
-<!-- INPUTS OCULTOS -->
 <input type="file" id="inputPDF" accept=".pdf"/>
 <input type="file" id="inputImagem" accept="image/*"/>
 
-<!-- SIDEBAR -->
-<aside class="h-screen w-64 fixed left-0 top-0 z-40 bg-[#0B0E14] flex flex-col p-4 gap-y-4 border-r border-[#C8C4D7]/10">
-  <div class="mb-8 px-2 flex items-center gap-3">
-    <span class="text-lg font-bold tracking-tight text-white">Reda<i class="font-black italic text-[#45EDEE]">ON</i></span>
+<!-- OVERLAY -->
+<div id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR — padrão igual às demais telas -->
+<aside id="sidebar" class="bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 shadow-xl">
+  <div class="flex items-center px-2 mb-10">
+    <div class="flex items-baseline italic">
+      <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
+      <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
+    </div>
   </div>
-  <nav class="flex-1 space-y-1">
-    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="inicio.html">
-      <span class="material-symbols-outlined">home</span><span>Início</span>
+  <nav class="flex-1 space-y-2 overflow-y-auto">
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="inicio.html">
+      <span class="material-symbols-outlined">home</span><span class="font-medium text-sm">Início</span>
     </a>
-    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium bg-[#1d2026] text-[#45EDEE] rounded-lg border-l-4 border-[#6C5CE7]" href="nova-redacao.html">
-      <span class="material-symbols-outlined">edit_note</span><span>Nova Redação</span>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE]" href="nova-redacao.html">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">add_circle</span><span class="font-medium text-sm">Nova Redação</span>
     </a>
-    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="temas.html">
-      <span class="material-symbols-outlined">library_books</span><span>Temas</span>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="temas.html">
+      <span class="material-symbols-outlined">description</span><span class="font-medium text-sm">Temas</span>
     </a>
-    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="minhas-redacoes.html">
-      <span class="material-symbols-outlined">history_edu</span><span>Minhas Redações</span>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="minhas-redacoes.html">
+      <span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Minhas Redações</span>
     </a>
-    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="evolucao.html">
-      <span class="material-symbols-outlined">trending_up</span><span>Evolução</span>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="evolucao.html">
+      <span class="material-symbols-outlined">trending_up</span><span class="font-medium text-sm">Evolução</span>
     </a>
-    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="plano.html">
-      <span class="material-symbols-outlined">calendar_today</span><span>Plano de Estudo</span>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="plano.html">
+      <span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span>
     </a>
-    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="ranking.html">
-      <span class="material-symbols-outlined">leaderboard</span><span>Ranking</span>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="estudio-profa.html">
+      <span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Estúdio PRO</span>
     </a>
-    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-[#E1E2EB] rounded-lg transition-all hover:translate-x-1" href="configuracoes.html">
-      <span class="material-symbols-outlined">settings</span><span>Configurações</span>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="ranking.html">
+      <span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="configuracoes.html">
+      <span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span>
     </a>
   </nav>
-  <div class="mt-auto pt-4 border-t border-outline-variant/20 space-y-1">
-    <div class="flex items-center gap-3 px-3 py-4 mb-2">
-      <div class="w-10 h-10 rounded-full border-2 border-primary/30 overflow-hidden shrink-0">
-        <img alt="Perfil" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDz3KCoSN2SuKE7VDpxtTtkQNaLLXiJEt7Yb-533rnAn_Dzod38lUgJ2sih3BAI2iktNZa2NPYyh8BTIVh7REUNJHHGF-_It0Zd58qo2IppgioO9lwyJHiKMX3XuVeLyj_eTV_iNFrsgNKKABTQhy66qcLjutbsT71u1fmShDkYNcDZva5stmLqRdrG0NWKSpdWCR3DKaAmmkqIdItYwq5na4irIOGPOUzmQZUjSx2wPs_1hBnONn6BX3rtudxwzjfYdWCnWNX4tne"/>
-      </div>
-      <div class="flex flex-col min-w-0">
-        <span class="text-sm font-semibold text-[#E1E2EB] truncate">Eduardo Silva</span>
-        <span class="text-[10px] font-bold text-primary uppercase tracking-wider">Nível 12</span>
+  <div class="mt-auto pt-6 border-t border-outline-variant/10">
+    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container cursor-pointer">
+      <img alt="Usuário" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDz3KCoSN2SuKE7VDpxtTtkQNaLLXiJEt7Yb-533rnAn_Dzod38lUgJ2sih3BAI2iktNZa2NPYyh8BTIVh7REUNJHHGF-_It0Zd58qo2IppgioO9lwyJHiKMX3XuVeLyj_eTV_iNFrsgNKKABTQhy66qcLjutbsT71u1fmShDkYNcDZva5stmLqRdrG0NWKSpdWCR3DKaAmmkqIdItYwq5na4irIOGPOUzmQZUjSx2wPs_1hBnONn6BX3rtudxwzjfYdWCnWNX4tne"/>
+      <div class="flex flex-col">
+        <span id="nomeUsuarioSidebar" class="text-sm font-semibold text-on-surface">Estudante</span>
+        <span class="text-xs text-on-surface-variant">Estudante Premium</span>
       </div>
     </div>
-    <a onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C8C4D7] hover:bg-[#191c22] hover:text-red-400 rounded-lg transition-all cursor-pointer">
-      <span class="material-symbols-outlined">logout</span><span>Sair</span>
+    <a onclick="authLogout()" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
+      <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
     </a>
   </div>
 </aside>
 
 <!-- MAIN -->
-<main class="flex-1 ml-64 min-h-screen flex flex-col relative">
+<div id="main-content" class="flex flex-col min-h-screen">
 
-  <!-- TOP BAR -->
-  <header class="sticky top-0 z-50 bg-[#10131a]/80 backdrop-blur-xl border-b border-[#C8C4D7]/20 flex justify-between items-center w-full px-8 py-3">
-    <div class="flex items-center gap-6">
-      <button class="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors mr-2">
-        <span class="material-symbols-outlined text-[#C8C4D7]">menu</span>
-      </button>
-      <div class="flex items-center gap-3 text-[#45EDEE]">
-        <span class="material-symbols-outlined text-2xl">edit_note</span>
-        <span class="font-semibold tracking-tight text-xl">Nova Redação</span>
+  <!-- TOP BAR FIXA — único botão Elite, sem duplicação -->
+  <header id="mainHeader">
+    <div style="height:4rem;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;gap:.5rem;">
+
+      <!-- ESQUERDA: hambúrguer + título -->
+      <div style="display:flex;align-items:center;gap:.5rem;min-width:0;flex:1;">
+        <button id="btnHamburger" onclick="toggleSidebar()" style="padding:.5rem;border-radius:.5rem;background:none;border:none;color:#928ea0;cursor:pointer;flex-shrink:0;">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+
+        <!-- Modo Normal -->
+        <div id="headerNormal" style="display:flex;align-items:center;gap:.375rem;min-width:0;">
+          <span class="material-symbols-outlined" style="color:#45edee;flex-shrink:0;font-variation-settings:'FILL' 1;">add_circle</span>
+          <h2 style="font-size:.95rem;font-weight:800;color:#e1e2eb;white-space:nowrap;">Nova Redação</h2>
+        </div>
+
+        <!-- Modo Elite -->
+        <div id="headerElite" style="display:none;align-items:center;gap:.375rem;min-width:0;flex:1;">
+          <span class="elite-star material-symbols-outlined" style="font-size:.9rem;font-variation-settings:'FILL' 1;flex-shrink:0;">star</span>
+          <span class="elite-star material-symbols-outlined" style="font-size:.75rem;font-variation-settings:'FILL' 1;opacity:.7;flex-shrink:0;">star</span>
+          <h2 style="font-size:.9rem;font-weight:800;color:var(--elite-gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Elite da PROfa</h2>
+          <span class="elite-star material-symbols-outlined" style="font-size:.75rem;font-variation-settings:'FILL' 1;opacity:.7;flex-shrink:0;">star</span>
+          <span class="elite-star material-symbols-outlined" style="font-size:.9rem;font-variation-settings:'FILL' 1;flex-shrink:0;">star</span>
+          <div class="elite-avatar-ring" style="width:1.875rem;height:1.875rem;border-radius:50%;overflow:hidden;flex-shrink:0;margin-left:.25rem;">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAzbjLUeSynIahzqHhjuL6QtKvLVlZpX3W1gxGRp60MaqJ-uW5TRqxEntmJYZdO17VE0ZWThnoFQQj9Aqq2RQvDsUjyXNrz8RRoEAoAPWp7VxNwRaKrgdkf-zhhwMCYMNvlbaam2Vol0qJQL1gKAlA0LA-WRuacFFZvXGaJRmZVRVZ9kggpUyPqwY1ckzypA6aEcsLybPJvNsqI7dXM99kQfk9UF7dQt_0vdiqQ35L823HrdbZODZ2b78kk13BhlWvjoz3a3Oe1okQ" alt="PROfa" style="width:100%;height:100%;object-fit:cover;"/>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="flex items-center gap-4">
-      <button class="p-2 rounded-full hover:bg-white/5 transition-colors relative">
-        <span class="material-symbols-outlined text-[#C8C4D7]">notifications</span>
-        <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-[#10131a]"></span>
-      </button>
+
+      <!-- DIREITA: contador dicas + botão Elite + sino -->
+      <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
+        <!-- Contador dicas (só Elite ativo) -->
+        <div id="eliteContadorDicas" onclick="abrirDrawerDica()">
+          <span class="material-symbols-outlined" style="font-size:.8rem;font-variation-settings:'FILL' 1;">lightbulb</span>
+          <span id="textoContador">Dica 1/20</span>
+        </div>
+
+        <!-- Botão Elite ÚNICO -->
+        <button id="btnAtivarElite" onclick="toggleModoElite()">
+          <span class="material-symbols-outlined" style="font-size:.9rem;font-variation-settings:'FILL' 1;">neurology</span>
+          <span id="labelBtnEliteDesktop">Modo Elite</span>
+        </button>
+
+        <!-- Sino -->
+        <button style="width:2.25rem;height:2.25rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#928ea0;cursor:pointer;position:relative;flex-shrink:0;">
+          <span class="material-symbols-outlined" style="font-size:1.2rem;">notifications</span>
+          <span style="position:absolute;top:.3rem;right:.3rem;width:.45rem;height:.45rem;background:#45edee;border-radius:50%;"></span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <div class="p-8 grid grid-cols-12 gap-8">
+  <!-- CONTEÚDO -->
+  <!-- ══ DRAWER ELITE — dicas da PROfa ══ -->
+  <div id="eliteDrawer">
+    <div class="elite-drawer-inner" id="eliteDrawerInner">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:.625rem;">
+          <span class="elite-star material-symbols-outlined" style="font-size:1.1rem;font-variation-settings:'FILL' 1;">psychology</span>
+          <span style="font-size:.8rem;font-weight:800;color:var(--elite-gold);">PROfa — Orientação em Tempo Real</span>
+          <span id="drawerNumDica" style="font-size:.7rem;font-weight:700;color:#928ea0;background:rgba(255,255,255,.06);padding:.15rem .5rem;border-radius:9999px;">Dica 1/20</span>
+        </div>
+        <button onclick="fecharDrawer()" style="background:none;border:none;color:#928ea0;cursor:pointer;font-size:1.25rem;line-height:1;">×</button>
+      </div>
+      <!-- Conteúdo da dica atual -->
+      <div id="eliteDicaConteudo" style="font-size:.9rem;color:#e8d9a0;line-height:1.7;margin-bottom:1rem;"></div>
+      <!-- Trecho destacado -->
+      <div id="eliteTrechoBox" style="display:none;background:rgba(201,162,39,.08);border-left:3px solid var(--elite-gold);border-radius:.5rem;padding:.625rem .875rem;margin-bottom:1rem;">
+        <p style="font-size:.68rem;font-weight:700;color:var(--elite-gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">Trecho em foco</p>
+        <p id="eliteTrechoTexto" style="font-size:.82rem;color:#c8c4d7;font-style:italic;"></p>
+      </div>
+      <!-- Ações -->
+      <div style="display:flex;gap:.625rem;flex-wrap:wrap;">
+        <button onclick="proximaDica()" style="padding:.5rem 1.125rem;border-radius:.75rem;font-size:.78rem;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--elite-gold),#8B6914);color:#1a0e00;border:none;">
+          Próxima dica →
+        </button>
+        <button onclick="fecharDrawer()" style="padding:.5rem 1rem;border-radius:.75rem;font-size:.78rem;font-weight:600;cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#928ea0;">
+          Continuar escrevendo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 grid-redacao">
 
     <!-- COLUNA ESQUERDA -->
-    <div class="col-span-8 space-y-8">
+    <div class="lg:col-span-8 space-y-6">
 
-      <div class="grid grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
         <!-- GESTÃO DE TEMPO -->
-        <section>
-          <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Gestão de Tempo</h2>
-          <div class="flex items-center gap-3 mb-3">
+        <section class="bg-surface-container rounded-2xl p-5 border border-outline-variant/10">
+          <h2 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Gestão de Tempo</h2>
+          <div class="flex items-center gap-3 mb-4">
             <span id="display-tempo" class="text-2xl font-bold text-primary">00:00:00</span>
             <button onclick="toggleTempo()" id="btnToggleTempo" class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center hover:opacity-80 transition-all">
               <span id="iconeTempo" class="material-symbols-outlined text-white text-base" style="font-variation-settings:'FILL' 1;">play_arrow</span>
             </button>
-            <button onclick="resetarTempo()" class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center hover:opacity-80 transition-all">
+            <button onclick="resetarTempo()" class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center hover:opacity-80 transition-all">
               <span class="material-symbols-outlined text-on-surface-variant text-base">restart_alt</span>
             </button>
           </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div id="cardLivre" onclick="selecionarModo('livre')" class="tempo-card ativo bg-surface-container rounded-xl p-4 border border-outline-variant/10 cursor-pointer">
-              <div class="flex items-center justify-between mb-2">
-                <span class="material-symbols-outlined text-secondary">schedule</span>
-                <span class="text-[10px] font-bold text-secondary uppercase tracking-tighter">Cronômetro</span>
+          <div class="grid grid-cols-2 gap-3">
+            <div id="cardLivre" onclick="selecionarModo('livre')" class="tempo-card ativo bg-surface-container-low rounded-xl p-3 border border-outline-variant/10 cursor-pointer">
+              <div class="flex items-center justify-between mb-1">
+                <span class="material-symbols-outlined text-secondary text-lg">schedule</span>
+                <span class="text-[9px] font-bold text-secondary uppercase">Cronômetro</span>
               </div>
               <h3 class="text-on-surface font-semibold text-sm">Modo Livre</h3>
-              <p class="text-on-surface-variant text-xs mt-1">Tempo progressivo</p>
+              <p class="text-on-surface-variant text-xs mt-0.5">Tempo progressivo</p>
             </div>
-            <div id="cardSimulado" onclick="selecionarModo('simulado')" class="tempo-card bg-surface-container rounded-xl p-4 border border-outline-variant/10 cursor-pointer">
-              <div class="flex items-center justify-between mb-2">
-                <span class="material-symbols-outlined text-tertiary">hourglass_empty</span>
-                <span class="text-[10px] font-bold text-tertiary uppercase tracking-tighter">Temporizador</span>
+            <div id="cardSimulado" onclick="selecionarModo('simulado')" class="tempo-card bg-surface-container-low rounded-xl p-3 border border-outline-variant/10 cursor-pointer">
+              <div class="flex items-center justify-between mb-1">
+                <span class="material-symbols-outlined text-tertiary text-lg">hourglass_empty</span>
+                <span class="text-[9px] font-bold text-tertiary uppercase">Temporizador</span>
               </div>
               <h3 class="text-on-surface font-semibold text-sm">Modo Simulado</h3>
-              <select id="selectTempo" onclick="event.stopPropagation()" onchange="atualizarTemporizador()" class="mt-2 w-full bg-surface-container-lowest border-none text-[10px] rounded-lg py-1 text-on-surface-variant focus:ring-1 focus:ring-primary/40">
+              <select id="selectTempo" onclick="event.stopPropagation()" onchange="atualizarTemporizador()" class="mt-1 w-full bg-surface-container-lowest border-none text-[10px] rounded-lg py-1 text-on-surface-variant focus:ring-1 focus:ring-primary/40">
                 <option value="3600">60 minutos</option>
                 <option value="5400">90 minutos</option>
                 <option value="7200">120 minutos</option>
@@ -258,36 +562,37 @@
         </section>
 
         <!-- MÉTODO DE ENVIO -->
-        <section>
-          <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4">Método de Envio</h2>
+        <section class="bg-surface-container rounded-2xl p-5 border border-outline-variant/10">
+          <h2 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Método de Envio</h2>
           <div id="status-voz" class="hidden mb-3 flex items-center gap-2 text-xs text-secondary">
             <span class="material-symbols-outlined text-sm blink" style="font-variation-settings:'FILL' 1;">fiber_manual_record</span>
             <span>Gravando... clique em Voz para parar</span>
           </div>
           <div class="grid grid-cols-4 gap-2">
-            <button id="btnTexto" onclick="selecionarMetodo('texto')" class="metodo-btn ativo flex flex-col items-center justify-center p-3 rounded-xl bg-primary-container border border-outline-variant/10 transition-all group">
-              <span class="material-symbols-outlined text-white mb-1">text_fields</span>
-              <span class="text-[10px] font-bold text-white">Texto</span>
+            <button id="btnTexto" onclick="selecionarMetodo('texto')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container-low border border-outline-variant/10 hover:bg-primary-container transition-all">
+              <span class="material-symbols-outlined metodo-icon text-primary mb-1">text_fields</span>
+              <span class="text-[10px] font-bold text-on-surface-variant metodo-label">Texto</span>
             </button>
-            <button id="btnVoz" onclick="selecionarMetodo('voz')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container border border-outline-variant/10 hover:bg-primary-container transition-all group">
-              <span class="material-symbols-outlined text-primary mb-1 group-hover:text-white">mic</span>
-              <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-white">Voz</span>
+            <button id="btnVoz" onclick="selecionarMetodo('voz')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container-low border border-outline-variant/10 hover:bg-primary-container transition-all">
+              <span class="material-symbols-outlined metodo-icon text-primary mb-1">mic</span>
+              <span class="text-[10px] font-bold text-on-surface-variant metodo-label">Voz</span>
             </button>
-            <button id="btnPdf" onclick="selecionarMetodo('pdf')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container border border-outline-variant/10 hover:bg-primary-container transition-all group">
-              <span class="material-symbols-outlined text-primary mb-1 group-hover:text-white">description</span>
-              <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-white">PDF</span>
+            <button id="btnPdf" onclick="selecionarMetodo('pdf')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container-low border border-outline-variant/10 hover:bg-primary-container transition-all">
+              <span class="material-symbols-outlined metodo-icon text-primary mb-1">description</span>
+              <span class="text-[10px] font-bold text-on-surface-variant metodo-label">PDF</span>
             </button>
-            <button id="btnImagem" onclick="selecionarMetodo('imagem')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container border border-outline-variant/10 hover:bg-primary-container transition-all group">
-              <span class="material-symbols-outlined text-primary mb-1 group-hover:text-white">image</span>
-              <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-white">Imagem</span>
+            <button id="btnImagem" onclick="selecionarMetodo('imagem')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container-low border border-outline-variant/10 hover:bg-primary-container transition-all">
+              <span class="material-symbols-outlined metodo-icon text-primary mb-1">image</span>
+              <span class="text-[10px] font-bold text-on-surface-variant metodo-label">Imagem</span>
             </button>
           </div>
         </section>
       </div>
 
       <!-- EDITOR OFICIAL -->
-      <section class="flex flex-col flex-1 bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden shadow-2xl">
-        <div class="bg-surface-container px-6 py-3 border-b border-outline-variant/5 flex items-center justify-between">
+      <section class="bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden shadow-2xl">
+        <!-- Toolbar -->
+        <div class="bg-surface-container px-5 py-3 border-b border-outline-variant/5 flex items-center justify-between">
           <div class="flex gap-4">
             <span onclick="formatarTexto('bold')" class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary select-none">format_bold</span>
             <span onclick="formatarTexto('italic')" class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary select-none">format_italic</span>
@@ -308,171 +613,346 @@
           </button>
         </div>
 
-        <!-- Folha com linhas numeradas -->
-        <div class="redacao-sheet flex min-h-[680px]">
-          <div class="line-numbers w-12 flex flex-col items-center pt-2 text-[10px] font-bold text-gray-400">
-            <span style="height:2.25rem;display:flex;align-items:center;">01</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">02</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">03</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">04</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">05</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">06</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">07</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">08</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">09</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">10</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">11</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">12</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">13</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">14</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">15</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">16</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">17</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">18</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">19</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">20</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">21</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">22</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">23</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">24</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">25</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">26</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">27</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">28</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">29</span>
-            <span style="height:2.25rem;display:flex;align-items:center;">30</span>
+        <!-- Folha com campo de título + linhas numeradas -->
+        <div class="redacao-sheet">
+          <!-- Campo Título — separado visualmente, estilo folha oficial -->
+          <div class="flex items-center border-b-2 border-dashed border-gray-300 bg-gray-50 relative">
+            <div class="w-12 flex items-center justify-center text-[10px] font-bold text-gray-400 border-r border-gray-200 self-stretch">
+              <span style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:.6rem;letter-spacing:.1em;color:#9ca3af;">TÍTULO</span>
+            </div>
+            <input
+              id="tituloRedacao"
+              type="text"
+              class="titulo-sheet flex-1"
+              placeholder="Digite o título da sua redação aqui"
+              maxlength="120"
+            />
           </div>
-          <textarea id="textoRedacao" class="writing-area flex-1 w-full bg-transparent p-0 px-4 pt-0 text-gray-800 leading-[2.25rem] resize-none focus:ring-0 border-none placeholder:text-gray-300 text-xl font-handwriting italic" placeholder="Comece a escrever sua redação oficial..."></textarea>
+          <!-- Linhas numeradas -->
+          <div class="flex min-h-[680px]">
+            <div class="line-numbers w-12 flex flex-col items-center pt-2 text-[10px] font-bold text-gray-400">
+              <span style="height:2.25rem;display:flex;align-items:center;">01</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">02</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">03</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">04</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">05</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">06</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">07</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">08</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">09</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">10</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">11</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">12</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">13</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">14</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">15</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">16</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">17</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">18</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">19</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">20</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">21</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">22</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">23</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">24</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">25</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">26</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">27</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">28</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">29</span>
+              <span style="height:2.25rem;display:flex;align-items:center;">30</span>
+            </div>
+            <textarea id="textoRedacao" class="writing-area flex-1 w-full bg-transparent p-0 px-4 pt-0 text-gray-800 leading-[2.25rem] resize-none focus:ring-0 border-none placeholder:text-gray-300 text-xl font-handwriting italic" placeholder="Comece a escrever sua redação aqui..."></textarea>
+          </div>
         </div>
 
-        <!-- Rodapé -->
-        <div class="bg-surface-container-lowest px-6 py-4 flex items-center justify-between border-t border-outline-variant/5">
-          <div class="flex gap-6">
-            <div class="flex flex-col">
-              <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Contagem</span>
-              <span id="contPalavras" class="text-sm font-bold text-primary">0 PALAVRAS</span>
+        <!-- Rodapé com barra pedagógica ENEM -->
+        <div class="bg-surface-container-lowest px-4 py-3 border-t border-outline-variant/5">
+          <!-- Barra de progresso ENEM -->
+          <div style="margin-bottom:.625rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.375rem;">
+              <span style="font-size:.68rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.06em;">Padrão ENEM</span>
+              <span id="feedbackPalavras" style="font-size:.7rem;font-weight:700;padding:.15rem .5rem;border-radius:9999px;background:rgba(71,69,84,.3);color:#928ea0;">0 palavras</span>
             </div>
-            <div class="flex flex-col">
-              <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Extensão</span>
-              <span id="contChars" class="text-sm font-bold text-secondary">0 CARACTERES</span>
+            <div style="height:5px;background:rgba(71,69,84,.3);border-radius:9999px;overflow:hidden;">
+              <div id="barraEnem" style="height:100%;border-radius:9999px;width:0%;transition:width .4s,background .4s;background:#474554;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:.25rem;">
+              <span style="font-size:.6rem;color:#474554;">0</span>
+              <span style="font-size:.6rem;color:#ffb4ab;font-weight:700;">280 mín.</span>
+              <span style="font-size:.6rem;color:#4ade80;font-weight:700;">350–500 ✓</span>
+              <span style="font-size:.6rem;color:#c6bfff;">500+</span>
             </div>
           </div>
-          <div class="flex gap-4">
-            <button id="btnRevisar" class="px-6 py-2.5 rounded-xl border border-outline-variant/20 text-secondary font-semibold text-sm hover:bg-secondary/5 transition-all">
-              Revisão de texto
-            </button>
-            <button id="btnEnviar" class="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary-container to-primary-container/80 text-white font-bold text-sm shadow-lg hover:scale-[1.02] transition-all active:scale-95">
-              Enviar para correção
-            </button>
+          <!-- Contadores + botões -->
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex gap-4">
+              <div class="flex flex-col">
+                <span style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;">Palavras</span>
+                <span id="contPalavras" class="text-sm font-bold text-primary">0</span>
+              </div>
+              <div class="flex flex-col">
+                <span style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;">Caracteres</span>
+                <span id="contChars" class="text-sm font-bold text-secondary">0</span>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button id="btnRevisar" class="px-4 py-2 rounded-xl border border-outline-variant/20 text-secondary font-semibold text-sm hover:bg-secondary/5 transition-all">
+                Revisão
+              </button>
+              <button id="btnEnviar" class="px-5 py-2 rounded-xl bg-primary-container text-white font-bold text-sm shadow-lg hover:scale-[1.02] transition-all active:scale-95">
+                Enviar para correção
+              </button>
+            </div>
           </div>
         </div>
       </section>
     </div>
 
-    <!-- COLUNA DIREITA -->
-    <div class="col-span-4 space-y-6">
+    <!-- COLUNA DIREITA — Material de Apoio -->
+    <div class="lg:col-span-4 space-y-5 col-apoio">
       <section>
-        <h2 class="text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-4 flex items-center gap-2">
+        <h2 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1 flex items-center gap-2">
           <span class="material-symbols-outlined text-primary text-lg">auto_stories</span>
           Material de Apoio
         </h2>
-        <div class="space-y-4">
-          <div class="bg-surface-container rounded-xl p-4 border-l-4 border-primary hover:bg-surface-container-high transition-all cursor-pointer">
-            <div class="flex items-start gap-4">
-              <div class="bg-primary/10 p-2 rounded-lg"><span class="material-symbols-outlined text-primary">balance</span></div>
-              <div><h4 class="text-sm font-bold text-on-surface">Legislação</h4><p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Artigos da Constituição Federal e leis específicas para embasamento.</p></div>
+        <p class="text-[10px] text-on-surface-variant mb-3">Gerado pela PROfa com base no título da sua redação. Toque para expandir.</p>
+        <div class="space-y-2" id="materialApoioLista">
+
+          <!-- Card Legislação -->
+          <div class="material-card rounded-xl border-l-4 border-primary overflow-hidden" style="background:#1d2026;border-color:#c6bfff;" id="card-legislacao">
+            <button class="w-full p-3 flex items-center gap-3 text-left" onclick="toggleMaterial('legislacao')">
+              <div class="bg-primary/10 p-1.5 rounded-lg shrink-0"><span class="material-symbols-outlined text-primary" style="font-size:1.1rem;">balance</span></div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-on-surface">Legislação</h4>
+                <p class="text-[10px] text-on-surface-variant">Artigos e leis para embasamento</p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="status-legislacao" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(198,191,255,.1);color:#c6bfff;display:none;">✓ Gerado</span>
+                <span class="material-symbols-outlined text-on-surface-variant" id="chevron-legislacao" style="font-size:1rem;transition:transform .3s;">expand_more</span>
+              </div>
+            </button>
+            <div class="material-body" id="body-legislacao" style="max-height:0;overflow:hidden;transition:max-height .4s ease;">
+              <div class="px-4 pb-4 pt-1 border-t border-outline-variant/10" id="conteudo-legislacao">
+                <div class="flex items-center gap-2 py-3 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-sm">pending</span>Toque para gerar com base no seu tema</div>
+              </div>
             </div>
           </div>
-          <div class="bg-surface-container rounded-xl p-4 border-l-4 border-secondary hover:bg-surface-container-high transition-all cursor-pointer">
-            <div class="flex items-start gap-4">
-              <div class="bg-secondary/10 p-2 rounded-lg"><span class="material-symbols-outlined text-secondary">history</span></div>
-              <div><h4 class="text-sm font-bold text-on-surface">História</h4><p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Contexto histórico, revoluções e marcos temporais relevantes.</p></div>
+
+          <!-- Card História -->
+          <div class="material-card rounded-xl overflow-hidden" style="background:#1d2026;border-left:4px solid #45edee;" id="card-historia">
+            <button class="w-full p-3 flex items-center gap-3 text-left" onclick="toggleMaterial('historia')">
+              <div class="p-1.5 rounded-lg shrink-0" style="background:rgba(69,237,238,.1);"><span class="material-symbols-outlined" style="color:#45edee;font-size:1.1rem;">history</span></div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-on-surface">História</h4>
+                <p class="text-[10px] text-on-surface-variant">Contexto e marcos temporais</p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="status-historia" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(69,237,238,.1);color:#45edee;display:none;">✓ Gerado</span>
+                <span class="material-symbols-outlined text-on-surface-variant" id="chevron-historia" style="font-size:1rem;transition:transform .3s;">expand_more</span>
+              </div>
+            </button>
+            <div class="material-body" id="body-historia" style="max-height:0;overflow:hidden;transition:max-height .4s ease;">
+              <div class="px-4 pb-4 pt-1 border-t border-outline-variant/10" id="conteudo-historia">
+                <div class="flex items-center gap-2 py-3 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-sm">pending</span>Toque para gerar com base no seu tema</div>
+              </div>
             </div>
           </div>
-          <div class="bg-surface-container rounded-xl p-4 border-l-4 border-tertiary hover:bg-surface-container-high transition-all cursor-pointer">
-            <div class="flex items-start gap-4">
-              <div class="bg-tertiary/10 p-2 rounded-lg"><span class="material-symbols-outlined text-tertiary">psychology</span></div>
-              <div><h4 class="text-sm font-bold text-on-surface">Especialistas</h4><p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Conceitos, estudos e análises de especialistas de renome.</p></div>
+
+          <!-- Card Especialistas -->
+          <div class="material-card rounded-xl overflow-hidden" style="background:#1d2026;border-left:4px solid #fabd00;" id="card-especialistas">
+            <button class="w-full p-3 flex items-center gap-3 text-left" onclick="toggleMaterial('especialistas')">
+              <div class="p-1.5 rounded-lg shrink-0" style="background:rgba(250,189,0,.1);"><span class="material-symbols-outlined" style="color:#fabd00;font-size:1.1rem;">network_intel_node</span></div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-on-surface">Especialistas</h4>
+                <p class="text-[10px] text-on-surface-variant">Filósofos, sociólogos e autores</p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="status-especialistas" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(250,189,0,.1);color:#fabd00;display:none;">✓ Gerado</span>
+                <span class="material-symbols-outlined text-on-surface-variant" id="chevron-especialistas" style="font-size:1rem;transition:transform .3s;">expand_more</span>
+              </div>
+            </button>
+            <div class="material-body" id="body-especialistas" style="max-height:0;overflow:hidden;transition:max-height .4s ease;">
+              <div class="px-4 pb-4 pt-1 border-t border-outline-variant/10" id="conteudo-especialistas">
+                <div class="flex items-center gap-2 py-3 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-sm">pending</span>Toque para gerar com base no seu tema</div>
+              </div>
             </div>
           </div>
-          <div class="bg-surface-container rounded-xl p-4 border-l-4 border-green-400 hover:bg-surface-container-high transition-all cursor-pointer">
-            <div class="flex items-start gap-4">
-              <div class="bg-green-400/10 p-2 rounded-lg"><span class="material-symbols-outlined text-green-400">public</span></div>
-              <div><h4 class="text-sm font-bold text-on-surface">Atualidades</h4><p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Notícias recentes sobre o tema e estatísticas atualizadas.</p></div>
+
+          <!-- Card Atualidades -->
+          <div class="material-card rounded-xl overflow-hidden" style="background:#1d2026;border-left:4px solid #4ade80;" id="card-atualidades">
+            <button class="w-full p-3 flex items-center gap-3 text-left" onclick="toggleMaterial('atualidades')">
+              <div class="p-1.5 rounded-lg shrink-0" style="background:rgba(74,222,128,.1);"><span class="material-symbols-outlined" style="color:#4ade80;font-size:1.1rem;">public</span></div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-on-surface">Atualidades</h4>
+                <p class="text-[10px] text-on-surface-variant">Dados recentes e estatísticas</p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="status-atualidades" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(74,222,128,.1);color:#4ade80;display:none;">✓ Gerado</span>
+                <span class="material-symbols-outlined text-on-surface-variant" id="chevron-atualidades" style="font-size:1rem;transition:transform .3s;">expand_more</span>
+              </div>
+            </button>
+            <div class="material-body" id="body-atualidades" style="max-height:0;overflow:hidden;transition:max-height .4s ease;">
+              <div class="px-4 pb-4 pt-1 border-t border-outline-variant/10" id="conteudo-atualidades">
+                <div class="flex items-center gap-2 py-3 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-sm">pending</span>Toque para gerar com base no seu tema</div>
+              </div>
             </div>
           </div>
+
         </div>
       </section>
 
-      <div class="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-primary-container to-primary text-white">
+      <!-- Dica da PROfa — dinâmica no modo Elite, estática no normal -->
+      <div id="cardDicaProfa" class="relative overflow-hidden rounded-2xl p-5 text-white" style="background:linear-gradient(135deg,#6c5ce7,#45edee);">
         <div class="relative z-10">
-          <span class="material-symbols-outlined text-3xl mb-4 block" style="font-variation-settings:'FILL' 1;">lightbulb</span>
-          <h3 class="font-bold text-lg mb-2">Dica do Mestre</h3>
-          <p class="text-sm opacity-90 leading-relaxed">Tente iniciar seu texto com uma citação direta da Constituição. Isso demonstra repertório sociocultural sólido desde a introdução.</p>
-        </div>
-        <div class="absolute -right-10 -bottom-10 opacity-20">
-          <span class="material-symbols-outlined text-[150px]">edit_square</span>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-xl" style="font-variation-settings:'FILL' 1;">lightbulb</span>
+            <h3 class="font-bold text-base" id="tituloDicaCard">Dica da PROfa</h3>
+          </div>
+          <p class="text-sm opacity-90 leading-relaxed" id="textoDicaCard">Inicie com uma citação da Constituição. Isso demonstra repertório sociocultural sólido desde a introdução.</p>
+          <!-- Indicador modo Elite ativo -->
+          <div id="dicaCardEliteIndicator" class="hidden mt-3 pt-3 border-t border-white/20">
+            <p class="text-[10px] font-bold uppercase tracking-widest opacity-70">Toque no contador acima para ver a dica completa</p>
+          </div>
         </div>
       </div>
 
-      <!-- CARD ELITE DA PROfa BLANCHE -->
-      <div class="relative overflow-hidden rounded-2xl border border-[#45edee]/20 bg-[#0b0e14]">
+      <!-- Card Status Elite (substitui o antigo "Ir para a Elite da PROfa") -->
+      <!-- Modo inativo: convite para ativar -->
+      <div id="cardEliteInativo" class="relative overflow-hidden rounded-2xl border border-[#45edee]/20 bg-[#0b0e14]">
         <div class="absolute inset-0 bg-gradient-to-br from-[#6c5ce7]/10 to-[#45edee]/5 pointer-events-none"></div>
         <div class="relative z-10 p-5">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full border-2 border-[#45edee] p-0.5 shrink-0" style="box-shadow:0 0 12px rgba(69,237,238,0.4)">
-              <img alt="Profa. Blanche" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAzbjLUeSynIahzqHhjuL6QtKvLVlZpX3W1gxGRp60MaqJ-uW5TRqxEntmJYZdO17VE0ZWThnoFQQj9Aqq2RQvDsUjyXNrz8RRoEAoAPWp7VxNwRaKrgdkf-zhhwMCYMNvlbaam2Vol0qJQL1gKAlA0LA-WRuacFFZvXGaJRmZVRVZ9kggpUyPqwY1ckzypA6aEcsLybPJvNsqI7dXM99kQfk9UF7dQt_0vdiqQ35L823HrdbZODZ2b78kk13BhlWvjoz3a3Oe1okQ"/>
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full border-2 border-[#45edee] p-0.5 shrink-0">
+              <img alt="PROfa" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAzbjLUeSynIahzqHhjuL6QtKvLVlZpX3W1gxGRp60MaqJ-uW5TRqxEntmJYZdO17VE0ZWThnoFQQj9Aqq2RQvDsUjyXNrz8RRoEAoAPWp7VxNwRaKrgdkf-zhhwMCYMNvlbaam2Vol0qJQL1gKAlA0LA-WRuacFFZvXGaJRmZVRVZ9kggpUyPqwY1ckzypA6aEcsLybPJvNsqI7dXM99kQfk9UF7dQt_0vdiqQ35L823HrdbZODZ2b78kk13BhlWvjoz3a3Oe1okQ"/>
             </div>
             <div>
               <p class="text-[10px] font-black text-[#45edee] uppercase tracking-widest">⭐ Plano Elite</p>
-              <h3 class="font-black text-white text-sm leading-tight">Mentor IA PROfa Blanche</h3>
+              <h3 class="font-black text-white text-sm">Elite da PROfa</h3>
             </div>
           </div>
-          <p class="text-xs text-on-surface-variant leading-relaxed mb-4">
-            A Blanche analisa <span class="text-[#45edee] font-bold">cada linha</span> em tempo real, destaca lacunas argumentativas e reescreve seus parágrafos enquanto você escreve.
-          </p>
-          <div class="space-y-1.5 mb-5">
-            <div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="text-[#45edee]">✓</span> Nota estimada ao vivo (C1 a C5)</div>
-            <div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="text-[#45edee]">✓</span> Destaques automáticos no texto</div>
-            <div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="text-[#45edee]">✓</span> Reescrita de argumentos com 1 clique</div>
+          <div class="space-y-1 mb-4">
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="text-[#45edee]">✓</span> 20 dicas em tempo real</div>
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="text-[#45edee]">✓</span> Orientação por etapa da redação</div>
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant"><span class="text-[#45edee]">✓</span> Destaques e trechos em foco</div>
           </div>
-          <button onclick="window.location.href='elite-profa.html'" class="w-full py-3 rounded-xl font-black text-sm uppercase tracking-widest text-[#002020] transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2" style="background:linear-gradient(135deg,#45edee,#6c5ce7);box-shadow:0 0 20px rgba(69,237,238,0.3)">
-            <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1;">psychology</span>
-            Ir para a Elite da PROfa
+          <button onclick="toggleModoElite()" class="w-full py-2.5 rounded-xl font-black text-sm uppercase tracking-widest text-[#1a0e00] transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2" style="background:linear-gradient(135deg,var(--elite-gold),#8B6914);">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1;">neurology</span>
+            Ativar Modo Elite
           </button>
         </div>
       </div>
 
+      <!-- Modo ativo: status da sessão -->
+      <div id="cardEliteAtivo" class="hidden relative overflow-hidden rounded-2xl" style="background:linear-gradient(135deg,#1a1506,#1d1a0a);border:1px solid rgba(201,162,39,.35);">
+        <div class="relative z-10 p-5">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="elite-avatar-ring rounded-full overflow-hidden shrink-0" style="width:2.5rem;height:2.5rem;">
+              <img alt="PROfa" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAzbjLUeSynIahzqHhjuL6QtKvLVlZpX3W1gxGRp60MaqJ-uW5TRqxEntmJYZdO17VE0ZWThnoFQQj9Aqq2RQvDsUjyXNrz8RRoEAoAPWp7VxNwRaKrgdkf-zhhwMCYMNvlbaam2Vol0qJQL1gKAlA0LA-WRuacFFZvXGaJRmZVRVZ9kggpUyPqwY1ckzypA6aEcsLybPJvNsqI7dXM99kQfk9UF7dQt_0vdiqQ35L823HrdbZODZ2b78kk13BhlWvjoz3a3Oe1okQ"/>
+            </div>
+            <div>
+              <p style="font-size:.68rem;font-weight:800;color:var(--elite-gold);text-transform:uppercase;letter-spacing:.1em;">⭐ Modo Elite Ativo</p>
+              <h3 style="font-weight:900;color:white;font-size:.9rem;">PROfa acompanhando</h3>
+            </div>
+          </div>
+          <div class="space-y-2 mb-4">
+            <div class="flex items-center justify-between">
+              <span style="font-size:.75rem;color:#928ea0;">Dica atual</span>
+              <span id="cardEliteDicaAtual" style="font-size:.8rem;font-weight:700;color:var(--elite-gold);">1 / 20</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span style="font-size:.75rem;color:#928ea0;">Etapa</span>
+              <span id="cardEliteEtapa" style="font-size:.8rem;font-weight:700;color:#e1e2eb;">Introdução</span>
+            </div>
+            <div style="height:4px;background:rgba(255,255,255,.08);border-radius:9999px;overflow:hidden;">
+              <div id="cardEliteProgressBar" style="height:100%;background:linear-gradient(90deg,var(--elite-gold),#8B6914);border-radius:9999px;width:5%;transition:width .5s;"></div>
+            </div>
+          </div>
+          <button onclick="abrirDrawerDica()" style="width:100%;padding:.625rem;border-radius:.75rem;font-size:.8rem;font-weight:700;cursor:pointer;background:rgba(201,162,39,.15);border:1px solid rgba(201,162,39,.35);color:var(--elite-gold);display:flex;align-items:center;justify-content:center;gap:.375rem;">
+            <span class="material-symbols-outlined" style="font-size:.9rem;font-variation-settings:'FILL' 1;">lightbulb</span>
+            Ver dica atual
+          </button>
+        </div>
+      </div>
     </div>
   </div>
-</main>
-
-<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-[-1] overflow-hidden">
-  <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]"></div>
-  <div class="absolute bottom-0 left-64 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px]"></div>
 </div>
+
+<script>
+// Variáveis globais compartilhadas entre módulos
+var modoEliteAtivo = false;
+var dicaAtual = 0;
+var totalDicas = 20;
+var dicasPendentes = 0;
+var intervaloDicas = null;
+</script>
 
 <script type="module">
   import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
   const API_KEY = "AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU";
   const genAI = new GoogleGenerativeAI(API_KEY);
 
+  // ── NOME USUÁRIO ───────────────────────────────────
+  const NOME_USUARIO = authGetNome();
+  document.getElementById('nomeUsuarioSidebar').textContent = NOME_USUARIO;
+
   // ── TOAST ──────────────────────────────────────────
   function toast(msg, dur = 3000) {
     const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
+    el.textContent = msg; el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), dur);
   }
 
-  // ── CONTADOR ───────────────────────────────────────
+  // ── CONTADOR + BARRA ENEM ──────────────────────────
   const textarea = document.getElementById('textoRedacao');
   textarea.addEventListener('input', atualizarContador);
   function atualizarContador() {
     const t = textarea.value;
     const p = t.trim() ? t.trim().split(/\s+/).length : 0;
-    document.getElementById('contPalavras').textContent = p + ' PALAVRAS';
-    document.getElementById('contChars').textContent = t.length + ' CARACTERES';
+    document.getElementById('contPalavras').textContent = p;
+    document.getElementById('contChars').textContent = t.length;
+    atualizarBarraEnem(p);
+  }
+
+  function atualizarBarraEnem(palavras) {
+    const barra    = document.getElementById('barraEnem');
+    const feedback = document.getElementById('feedbackPalavras');
+    // Máximo da barra = 550 palavras
+    const pct = Math.min((palavras / 550) * 100, 100);
+    barra.style.width = pct + '%';
+
+    if (palavras === 0) {
+      barra.style.background = '#474554';
+      feedback.style.background = 'rgba(71,69,84,.3)';
+      feedback.style.color = '#928ea0';
+      feedback.textContent = '0 palavras';
+    } else if (palavras < 280) {
+      barra.style.background = '#ffb4ab';
+      feedback.style.background = 'rgba(255,180,171,.15)';
+      feedback.style.color = '#ffb4ab';
+      feedback.textContent = `${palavras} palavras — curta para o ENEM`;
+    } else if (palavras < 350) {
+      barra.style.background = '#fabd00';
+      feedback.style.background = 'rgba(250,189,0,.15)';
+      feedback.style.color = '#fabd00';
+      feedback.textContent = `${palavras} palavras — quase lá!`;
+    } else if (palavras <= 500) {
+      barra.style.background = '#4ade80';
+      feedback.style.background = 'rgba(74,222,128,.15)';
+      feedback.style.color = '#4ade80';
+      feedback.textContent = `${palavras} palavras ✓ Padrão ENEM`;
+    } else {
+      barra.style.background = '#c6bfff';
+      feedback.style.background = 'rgba(198,191,255,.15)';
+      feedback.style.color = '#c6bfff';
+      feedback.textContent = `${palavras} palavras — revise o tamanho`;
+    }
+
+    // Dica PROfa Elite quando palavras fora do padrão
+    if (modoEliteAtivo && palavras > 0 && palavras < 280) {
+      const textoDica = document.getElementById('textoDicaCard');
+      if (textoDica) textoDica.textContent = `Atenção: você está com ${palavras} palavras. O ENEM exige no mínimo 280. Desenvolva mais seus argumentos!`;
+    }
   }
 
   // ── GESTÃO DE TEMPO ────────────────────────────────
@@ -485,14 +965,11 @@
     document.getElementById('cardSimulado').classList.toggle('ativo', modo === 'simulado');
     if (modo === 'simulado') atualizarTemporizador();
   };
-
   window.atualizarTemporizador = () => {
     tempoLimite = parseInt(document.getElementById('selectTempo').value);
     tempoSeg = tempoLimite; renderTempo();
   };
-
   window.toggleTempo = () => { timerAtivo ? pararTempo() : iniciarTempo(); };
-
   function iniciarTempo() {
     timerAtivo = true;
     document.getElementById('iconeTempo').textContent = 'pause';
@@ -500,24 +977,20 @@
     intervalId = setInterval(() => {
       modoTempo === 'livre' ? tempoSeg++ : tempoSeg--;
       if (modoTempo === 'simulado' && tempoSeg <= 0) {
-        tempoSeg = 0; pararTempo();
-        toast('⏰ Tempo esgotado! Envie sua redação agora.');
+        tempoSeg = 0; pararTempo(); toast('⏰ Tempo esgotado!');
       }
       renderTempo();
     }, 1000);
   }
-
   function pararTempo() {
     timerAtivo = false; clearInterval(intervalId);
     document.getElementById('iconeTempo').textContent = 'play_arrow';
   }
-
   window.resetarTempo = () => {
     pararTempo();
     tempoSeg = modoTempo === 'simulado' ? tempoLimite : 0;
     renderTempo();
   };
-
   function renderTempo() {
     const h = Math.floor(tempoSeg / 3600);
     const m = Math.floor((tempoSeg % 3600) / 60);
@@ -527,16 +1000,19 @@
     el.classList.toggle('tempo-vermelho', modoTempo === 'simulado' && tempoSeg <= 300 && timerAtivo);
   }
 
-  // ── MÉTODO DE ENVIO ────────────────────────────────
-  let metodoAtivo = 'texto', gravando = false, reconhecimento = null;
+  // ── MÉTODO DE ENVIO — sem ativo por padrão ─────────
+  let metodoAtivo = null, gravando = false, reconhecimento = null;
   let arquivoBase64 = null, arquivoMime = null;
 
   window.selecionarMetodo = (metodo) => {
     if (gravando && metodo !== 'voz') pararVoz();
+    // Remove ativo de todos
     ['Texto','Voz','Pdf','Imagem'].forEach(m =>
       document.getElementById('btn'+m).classList.remove('ativo'));
+    // Adiciona ativo no selecionado
+    const id = 'btn' + metodo.charAt(0).toUpperCase() + metodo.slice(1);
+    document.getElementById(id).classList.add('ativo');
     metodoAtivo = metodo;
-    document.getElementById('btn'+metodo.charAt(0).toUpperCase()+metodo.slice(1)).classList.add('ativo');
     if (metodo === 'voz') toggleVoz();
     else if (metodo === 'pdf') document.getElementById('inputPDF').click();
     else if (metodo === 'imagem') document.getElementById('inputImagem').click();
@@ -544,36 +1020,27 @@
   };
 
   function toggleVoz() { gravando ? pararVoz() : iniciarVoz(); }
-
   function iniciarVoz() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { toast('Use Chrome para reconhecimento de voz.'); return; }
     reconhecimento = new SR();
-    reconhecimento.lang = 'pt-BR';
-    reconhecimento.continuous = true;
-    reconhecimento.interimResults = true;
+    reconhecimento.lang = 'pt-BR'; reconhecimento.continuous = true; reconhecimento.interimResults = true;
     let textoFinal = textarea.value;
     reconhecimento.onresult = (e) => {
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         e.results[i].isFinal ? textoFinal += e.results[i][0].transcript + ' ' : interim = e.results[i][0].transcript;
       }
-      textarea.value = textoFinal + interim;
-      atualizarContador();
+      textarea.value = textoFinal + interim; atualizarContador();
     };
-    reconhecimento.onerror = (e) => { toast('Erro no microfone: ' + e.error); pararVoz(); };
-    reconhecimento.start();
-    gravando = true;
+    reconhecimento.onerror = () => pararVoz();
+    reconhecimento.start(); gravando = true;
     document.getElementById('status-voz').classList.remove('hidden');
-    document.getElementById('btnVoz').classList.add('gravando');
-    toast('🎙️ Gravando... fale sua redação!');
+    toast('🎙️ Gravando...');
   }
-
   function pararVoz() {
-    if (reconhecimento) reconhecimento.stop();
-    gravando = false;
+    if (reconhecimento) reconhecimento.stop(); gravando = false;
     document.getElementById('status-voz').classList.add('hidden');
-    document.getElementById('btnVoz').classList.remove('gravando');
     toast('Gravação encerrada.');
   }
 
@@ -582,34 +1049,26 @@
     const reader = new FileReader();
     reader.onload = (ev) => {
       arquivoBase64 = ev.target.result.split(',')[1]; arquivoMime = 'application/pdf';
-      mostrarArquivo(file.name);
-      textarea.value = ''; textarea.placeholder = 'PDF carregado: ' + file.name + '\n\nA Blanche irá analisar ao enviar.';
-      atualizarContador(); toast('PDF carregado!');
+      mostrarArquivo(file.name); atualizarContador(); toast('PDF carregado!');
     };
     reader.readAsDataURL(file); e.target.value = '';
   });
-
   document.getElementById('inputImagem').addEventListener('change', (e) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       arquivoBase64 = ev.target.result.split(',')[1]; arquivoMime = file.type;
-      mostrarArquivo(file.name);
-      textarea.value = ''; textarea.placeholder = 'Imagem carregada: ' + file.name + '\n\nA Blanche irá ler o texto ao enviar.';
-      atualizarContador(); toast('Imagem carregada!');
+      mostrarArquivo(file.name); atualizarContador(); toast('Imagem carregada!');
     };
     reader.readAsDataURL(file); e.target.value = '';
   });
-
   function mostrarArquivo(nome) {
     document.getElementById('nome-arquivo').textContent = nome;
     document.getElementById('area-arquivo').classList.add('visivel');
   }
-
   window.removerArquivo = () => {
     arquivoBase64 = null; arquivoMime = null;
     document.getElementById('area-arquivo').classList.remove('visivel');
-    textarea.placeholder = 'Comece a escrever sua redação oficial...';
     textarea.value = ''; atualizarContador();
   };
 
@@ -623,63 +1082,87 @@
     atualizarContador();
   };
 
-  // ── PAINEL BLANCHE ─────────────────────────────────
+  // ── PAINEL ANÁLISE ─────────────────────────────────
   window.fecharPainel = () => document.getElementById('painel-blanche').classList.remove('aberto');
 
   function abrirLoading() {
-    document.getElementById('painel-conteudo').innerHTML = `<div class="loading-b"><div class="spinner"></div><p style="color:#c8c4d7;font-size:.9rem;">Blanche está analisando sua redação...</p></div>`;
+    document.getElementById('painel-conteudo').innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:1rem;"><div class="spinner"></div><p style="color:#c8c4d7;">PROfa analisando sua redação...</p></div>`;
     document.getElementById('painel-blanche').classList.add('aberto');
   }
 
   function renderResultado(d) {
-    const nomes = ["Domínio da língua escrita","Compreensão do tema","Seleção e organização das informações","Conhecimento dos mecanismos linguísticos","Proposta de intervenção"];
+    const nomes = ["Domínio da língua","Compreensão do tema","Seleção e organização","Mecanismos linguísticos","Proposta de intervenção"];
     const comps = (d.competencias||[]).map((c,i) => {
       const pct = Math.round((c.nota/200)*100);
-      return `<div class="comp-card"><div style="display:flex;justify-content:space-between;margin-bottom:.5rem;"><span style="font-size:.8rem;font-weight:600;color:#c8c4d7;">C${i+1} — ${nomes[i]}</span><span style="font-size:.8rem;font-weight:700;color:#45edee;">${c.nota}/200</span></div><div class="barra-bg"><div class="barra-fill" style="width:${pct}%"></div></div>${c.comentario?`<p style="font-size:.75rem;color:#928ea0;margin-top:.5rem;line-height:1.5;">${c.comentario}</p>`:''}</div>`;
+      return `<div class="comp-card"><div style="display:flex;justify-content:space-between;margin-bottom:.5rem;"><span style="font-size:.8rem;font-weight:600;color:#c8c4d7;">C${i+1} — ${nomes[i]}</span><span style="font-size:.8rem;font-weight:700;color:#45edee;">${c.nota}/200</span></div><div class="barra-bg"><div class="barra-fill" style="width:${pct}%"></div></div></div>`;
     }).join('');
-    const pts = (d.pontos_fortes||[]).map(p=>`<div class="lista-it"><span style="color:#4ade80;">✓</span><span>${p}</span></div>`).join('');
-    const mel = (d.melhorias||[]).map(m=>`<div class="lista-it"><span style="color:#fabd00;">→</span><span>${m}</span></div>`).join('');
     document.getElementById('painel-conteudo').innerHTML = `
       <div style="text-align:center;margin-bottom:1.5rem;">
-        <div style="font-size:.75rem;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;">Nota Total</div>
+        <div style="font-size:.75rem;color:#928ea0;text-transform:uppercase;">Nota Total</div>
         <div class="nota-numero">${d.nota_total||'—'}</div>
         <div style="font-size:.75rem;color:#928ea0;">/1000 pontos</div>
       </div>${comps}
-      ${pts?`<div class="secao-tit">Pontos fortes</div>${pts}`:''}
-      ${mel?`<div class="secao-tit">O que melhorar</div>${mel}`:''}
-      ${d.comentario_geral?`<div class="coment-geral">"${d.comentario_geral}"</div>`:''}`;
-  }
-
-  function renderErro(msg) {
-    document.getElementById('painel-conteudo').innerHTML = `<div style="text-align:center;padding:2rem;color:#928ea0;"><span class="material-symbols-outlined" style="font-size:2.5rem;color:#ff6b6b;display:block;margin-bottom:1rem;">error</span><p>${msg}</p></div>`;
+      ${d.comentario_geral?`<div style="background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.25);border-radius:.75rem;padding:1rem;font-size:.82rem;color:#c8c4d7;line-height:1.6;margin-top:1rem;font-style:italic;">"${d.comentario_geral}"</div>`:''}`;
   }
 
   // ── ENVIO ──────────────────────────────────────────
   async function enviar() {
     const texto = textarea.value.trim();
-    const temArquivo = !!arquivoBase64;
-    if (!texto && !temArquivo) { toast('Escreva sua redação ou envie um arquivo!'); return; }
-    if (!temArquivo && texto.split(/\s+/).length < 50) { toast('Mínimo de 50 palavras para enviar.'); return; }
-    setBotoes(true); abrirLoading();
+    if (!texto && !arquivoBase64) { toast('Escreva sua redação ou envie um arquivo!'); return; }
+    if (!arquivoBase64 && texto.split(/\s+/).length < 50) { toast('Mínimo de 50 palavras para enviar.'); return; }
+    document.getElementById('btnEnviar').textContent = 'Analisando...';
+    document.getElementById('btnEnviar').disabled = true;
+    abrirLoading();
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      const instrucao = `Você é a Profa. Blanche da RedaON, mentora especialista em redação ENEM. Avalie pelas 5 competências do ENEM (0 a 200 cada). Responda APENAS com JSON válido, sem markdown: {"nota_total":<soma>,"competencias":[{"nota":<0-200>,"comentario":"<breve>"},{"nota":<0-200>,"comentario":"<breve>"},{"nota":<0-200>,"comentario":"<breve>"},{"nota":<0-200>,"comentario":"<breve>"},{"nota":<0-200>,"comentario":"<breve>"}],"pontos_fortes":["<p1>","<p2>","<p3>"],"melhorias":["<m1>","<m2>","<m3>"],"comentario_geral":"<mensagem motivacional>"}`;
-      let result;
-      if (temArquivo) {
-        result = await model.generateContent([instrucao + "\n\nAnalise o texto da redação neste arquivo:", { inlineData: { data: arquivoBase64, mimeType: arquivoMime } }]);
-      } else {
-        result = await model.generateContent(instrucao + "\n\nRedação:\n" + texto);
-      }
+      const instrucao = `Você é a PROfa da RedaON. Avalie pelas 5 competências do ENEM (0 a 200 cada). Responda APENAS com JSON válido, sem texto extra: {"nota_total":<soma>,"competencias":[{"nota":<0-200>,"feedback":"<texto>"},{"nota":<0-200>,"feedback":"<texto>"},{"nota":<0-200>,"feedback":"<texto>"},{"nota":<0-200>,"feedback":"<texto>"},{"nota":<0-200>,"feedback":"<texto>"}],"comentario_geral":"<mensagem>","pontos_fortes":"<texto>","pontos_melhorar":"<texto>"}`;
+      const result = arquivoBase64
+        ? await model.generateContent([instrucao, { inlineData: { data: arquivoBase64, mimeType: arquivoMime } }])
+        : await model.generateContent(instrucao + "\n\nRedação:\n" + texto);
       const json = result.response.text().trim().replace(/```json|```/g,'').trim();
-      renderResultado(JSON.parse(json));
-    } catch(err) {
-      console.error(err); renderErro("Erro na conexão com a Mestra Blanche. Tente novamente.");
-    } finally { setBotoes(false); }
-  }
+      const dados = JSON.parse(json);
+      renderResultado(dados);
 
-  function setBotoes(loading) {
-    document.getElementById('btnEnviar').textContent = loading ? 'Analisando...' : 'Enviar para correção';
-    document.getElementById('btnEnviar').disabled = loading;
+      // ── SALVAR NO SUPABASE ──────────────────────────
+      try {
+        // 1. Salvar a redação
+        const redacao = await dbSalvarRedacao({
+          texto: texto || '[Arquivo enviado]',
+          tema_livre: window._temaAtual || null
+        });
+
+        // 2. Salvar a correção da IA
+        if (redacao && redacao.id) {
+          const comps = dados.competencias || [];
+          await dbSalvarCorrecaoIA({
+            redacao_id: redacao.id,
+            c1: comps[0]?.nota || 0,
+            c2: comps[1]?.nota || 0,
+            c3: comps[2]?.nota || 0,
+            c4: comps[3]?.nota || 0,
+            c5: comps[4]?.nota || 0,
+            feedback_geral: dados.comentario_geral || '',
+            feedback_c1: comps[0]?.feedback || '',
+            feedback_c2: comps[1]?.feedback || '',
+            feedback_c3: comps[2]?.feedback || '',
+            feedback_c4: comps[3]?.feedback || '',
+            feedback_c5: comps[4]?.feedback || '',
+            pontos_fortes: dados.pontos_fortes || '',
+            pontos_melhorar: dados.pontos_melhorar || ''
+          });
+          toast('✅ Redação salva no seu histórico!', 4000);
+        }
+      } catch(errSave) {
+        console.warn('Erro ao salvar no banco:', errSave);
+        // Não bloqueia o usuário — a correção já foi exibida
+      }
+
+    } catch(err) {
+      document.getElementById('painel-conteudo').innerHTML = `<div style="text-align:center;padding:2rem;color:#928ea0;">Erro na análise. Tente novamente.</div>`;
+    } finally {
+      document.getElementById('btnEnviar').textContent = 'Enviar para correção';
+      document.getElementById('btnEnviar').disabled = false;
+    }
   }
 
   document.getElementById('btnEnviar').addEventListener('click', enviar);
@@ -687,6 +1170,298 @@
     if (!textarea.value.trim()) { toast('Escreva algo antes de revisar!'); return; }
     toast('Função de revisão em breve! 🚀');
   });
+</script>
+
+<!-- FAB ELITE — contador de dicas flutuante (só mobile < 640px) -->
+<div id="eliteFab" onclick="abrirDrawerDica()">
+  <div class="elite-fab-btn">
+    <span class="material-symbols-outlined" style="color:#1a0e00;font-size:1.4rem;font-variation-settings:'FILL' 1;">lightbulb</span>
+  </div>
+  <span class="elite-fab-label" id="eliteFabLabel">Dica 1/20</span>
+</div>
+
+<script>
+  authGuard('aluno');
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+</script>
+
+<script type="module">
+import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
+const API_KEY = "AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU";
+const genAI = new GoogleGenerativeAI(API_KEY);
+
+// ══════════════════════════════════════
+// MODO ELITE DA PROFA (vars globais declaradas acima)
+// ══════════════════════════════════════
+
+// Banco de dicas progressivas por etapa
+const DICAS = [
+  // Introdução (linhas 1–7)
+  { etapa:'Introdução', texto:'Sua introdução deve apresentar o tema de forma clara e já revelar seu posicionamento. Evite começar com "Nos dias de hoje" ou "Desde os tempos remotos" — são frases desgastadas que C2 penaliza.', trecho:'Comece com um dado, uma citação ou um paradoxo que provoque reflexão.' },
+  { etapa:'Introdução', texto:'Verifique se sua tese (posicionamento) está explícita no final da introdução. O corretor deve saber, ao terminar o primeiro parágrafo, qual é a sua defesa central.', trecho:'A tese deve ser sua última frase da introdução.' },
+  { etapa:'Introdução', texto:'C1 em ação: revise a norma culta na introdução. Verifique concordância verbal e nominal, pontuação e regência verbal antes de continuar.', trecho:null },
+
+  // Desenvolvimento 1 (linhas 8–14)
+  { etapa:'Desenvolvimento 1', texto:'Seu primeiro argumento deve ser o mais forte. Apresente dados, fatos ou autores para embasá-lo. Lembre: argumento sem repertório vale menos em C3.', trecho:'Use "Segundo [especialista/instituição]..." para ancorar seu argumento.' },
+  { etapa:'Desenvolvimento 1', texto:'C4 — Coesão: use conectivos de causa/consequência para ligar suas ideias. Exemplos: "visto que", "haja vista", "em decorrência disso", "consequentemente".', trecho:null },
+  { etapa:'Desenvolvimento 1', texto:'Verifique se há repetição de palavras no parágrafo. Substitua por sinônimos ou pronomes para manter a fluidez textual — C4 observa isso.', trecho:null },
+  { etapa:'Desenvolvimento 1', texto:'Seu argumento precisa de uma conclusão parcial. A última frase do parágrafo deve retomar a tese de forma implícita, mostrando que o argumento sustenta sua posição.', trecho:null },
+
+  // Desenvolvimento 2 (linhas 15–21)
+  { etapa:'Desenvolvimento 2', texto:'O segundo argumento deve ser complementar ao primeiro — não repetitivo. Explore um ângulo diferente: se o primeiro foi social, explore o econômico, cultural ou histórico.', trecho:null },
+  { etapa:'Desenvolvimento 2', texto:'C3 — Selecione e organize informações. Certifique-se de que cada argumento tem início, meio e fim dentro do parágrafo: contexto, desenvolvimento e conclusão parcial.', trecho:null },
+  { etapa:'Desenvolvimento 2', texto:'Use conectivos de contraste ou adição para ligar os dois parágrafos de desenvolvimento: "entretanto", "além disso", "por outro lado", "ademais", "outrossim".', trecho:'O início do Dev 2 deve fazer referência ao Dev 1.' },
+  { etapa:'Desenvolvimento 2', texto:'Verifique se seu texto tem pelo menos 1 dado estatístico ou referência a uma lei/pesquisa/autor. Isso é fundamental para C3 e diferencia redações nota 800 das nota 1000.', trecho:null },
+  { etapa:'Desenvolvimento 2', texto:'C1 — Revise os sinais de pontuação: vírgulas antes de conectivos como "porém", "contudo", "entretanto" são obrigatórias. Falta de vírgula é erro de C1.', trecho:null },
+
+  // Conclusão (linhas 22–30)
+  { etapa:'Conclusão', texto:'Você chegou à conclusão! C5 é onde muitos alunos perdem pontos. Sua proposta de intervenção PRECISA ter: Agente + Ação + Meio/Modo + Finalidade + Detalhamento.', trecho:'Ex: "O governo federal [agente] deve criar [ação] políticas públicas de incentivo [meio]..."' },
+  { etapa:'Conclusão', texto:'Agente da proposta: não use apenas "o governo" — seja específico: "O Ministério da Educação", "A Câmara dos Deputados", "As universidades públicas".', trecho:null },
+  { etapa:'Conclusão', texto:'Finalidade da proposta: use "a fim de", "para que", "com o intuito de" — esses conectivos mostram ao corretor que você sabe articular propósito em C5.', trecho:null },
+  { etapa:'Conclusão', texto:'Detalhamento: sua proposta precisa de um elemento que a torne específica. Evite proposta genérica como "conscientizar a população". Como? Por quê? Quando?', trecho:null },
+  { etapa:'Conclusão', texto:'Retome a tese na conclusão — mas com outras palavras. Isso fecha o círculo argumentativo e demonstra domínio da coesão global do texto (C4).', trecho:null },
+
+  // Revisão final
+  { etapa:'Revisão Final', texto:'Contagem de palavras: sua redação deve ter entre 400 e 500 palavras. Abaixo de 300, o texto é zerado em C5. Verifique o contador abaixo.', trecho:null },
+  { etapa:'Revisão Final', texto:'Releia o título. Ele deve ser curto, impactante e diretamente relacionado ao tema. Evite títulos genéricos — um bom título já demonstra domínio do tema.', trecho:null },
+  { etapa:'Revisão Final', texto:'🎯 Última dica: você chegou ao final! Releia toda a redação antes de enviar. Verifique erros de digitação, concordância e se a proposta de C5 está completa. Boa sorte!', trecho:null },
+];
+
+// Mapeamento de etapas por linha
+function etapaPorLinhas(texto) {
+  const linhas = texto.split('\n').length;
+  if (linhas <= 7)  return 0;   // Introdução → dicas 0-2
+  if (linhas <= 14) return 3;   // Dev 1 → dicas 3-6
+  if (linhas <= 21) return 7;   // Dev 2 → dicas 7-11
+  return 12;                    // Conclusão → dicas 12-18
+}
+
+window.toggleModoElite = function() {
+  modoEliteAtivo = !modoEliteAtivo;
+  const body          = document.body;
+  const headerNormal  = document.getElementById('headerNormal');
+  const headerElite   = document.getElementById('headerElite');
+  const labelBtn      = document.getElementById('labelBtnEliteDesktop');
+  const cardInativo   = document.getElementById('cardEliteInativo');
+  const cardAtivo     = document.getElementById('cardEliteAtivo');
+  const dicaIndicator = document.getElementById('dicaCardEliteIndicator');
+  const tituloDica    = document.getElementById('tituloDicaCard');
+
+  if (modoEliteAtivo) {
+    body.classList.add('modo-elite');
+    headerNormal.style.display = 'none';
+    headerElite.style.display  = 'flex';
+    if (labelBtn) labelBtn.textContent = 'Sair do Elite';
+    cardInativo?.classList.add('hidden');
+    cardAtivo?.classList.remove('hidden');
+    dicaIndicator?.classList.remove('hidden');
+    if (tituloDica) tituloDica.textContent = '⭐ Dica da PROfa';
+    dicaAtual = 0;
+    atualizarContadorDicas();
+    atualizarCardStatus();
+    iniciarMonitoramento();
+    toast('⭐ Modo Elite da PROfa ativado!');
+  } else {
+    body.classList.remove('modo-elite');
+    headerNormal.style.display = 'flex';
+    headerElite.style.display  = 'none';
+    if (labelBtn) labelBtn.textContent = 'Modo Elite';
+    cardInativo?.classList.remove('hidden');
+    cardAtivo?.classList.add('hidden');
+    dicaIndicator?.classList.add('hidden');
+    if (tituloDica) tituloDica.textContent = 'Dica da PROfa';
+    pararMonitoramento();
+    fecharDrawer();
+    toast('Modo Elite desativado.');
+  }
+};
+
+function iniciarMonitoramento() {
+  const textarea = document.getElementById('textoRedacao');
+  let ultimoTexto = '';
+  let ultimaEtapa = -1;
+
+  intervaloDicas = setInterval(() => {
+    if (!modoEliteAtivo) return;
+    const texto = textarea.value;
+    if (texto === ultimoTexto) return;
+    ultimoTexto = texto;
+
+    const etapaIdx = etapaPorLinhas(texto);
+    if (etapaIdx !== ultimaEtapa) {
+      ultimaEtapa = etapaIdx;
+      // Nova etapa — agenda dica após 3 segundos de pausa
+      setTimeout(() => {
+        if (modoEliteAtivo && dicaAtual < etapaIdx + 3) {
+          dicaAtual = etapaIdx;
+          dicasPendentes++;
+          document.getElementById('mainHeader').classList.add('elite-dica-pendente');
+          // FAB pulsa no mobile
+          const fab = document.getElementById('eliteFab');
+          if (fab) fab.classList.add('elite-fab-pendente');
+          atualizarContadorDicas();
+        }
+      }, 3000);
+    }
+  }, 1500);
+}
+
+function pararMonitoramento() {
+  clearInterval(intervaloDicas);
+  intervaloDicas = null;
+}
+
+window.abrirDrawerDica = function() {
+  if (!modoEliteAtivo || dicaAtual >= DICAS.length) return;
+  const dica = DICAS[dicaAtual];
+  document.getElementById('drawerNumDica').textContent = `Dica ${dicaAtual + 1}/${totalDicas}`;
+  document.getElementById('eliteDicaConteudo').textContent = dica.texto;
+
+  const trechoBox  = document.getElementById('eliteTrechoBox');
+  const trechoText = document.getElementById('eliteTrechoTexto');
+  if (dica.trecho) {
+    trechoBox.style.display = 'block';
+    trechoText.textContent  = dica.trecho;
+  } else {
+    trechoBox.style.display = 'none';
+  }
+
+  document.getElementById('eliteDrawer').classList.add('aberto');
+  // Remove pulso ao abrir
+  dicasPendentes = 0;
+  document.getElementById('mainHeader').classList.remove('elite-dica-pendente');
+  const fab = document.getElementById('eliteFab');
+  if (fab) fab.classList.remove('elite-fab-pendente');
+  atualizarContadorDicas();
+};
+
+window.fecharDrawer = function() {
+  document.getElementById('eliteDrawer').classList.remove('aberto');
+};
+
+window.proximaDica = function() {
+  if (dicaAtual < DICAS.length - 1) {
+    dicaAtual++;
+    atualizarContadorDicas();
+    window.abrirDrawerDica();
+  } else {
+    fecharDrawer();
+    toast('🎯 Você usou todas as 20 dicas da PROfa! Hora de revisar e enviar.');
+  }
+};
+
+function atualizarContadorDicas() {
+  const num = Math.min(dicaAtual + 1, totalDicas);
+  const txt = `Dica ${num}/${totalDicas}`;
+  const el    = document.getElementById('textoContador');
+  const fabLbl= document.getElementById('eliteFabLabel');
+  if (el)     el.textContent  = txt;
+  if (fabLbl) fabLbl.textContent = txt;
+  atualizarCardStatus();
+}
+
+// ══════════════════════════════════════
+// MATERIAL DE APOIO COM IA REAL
+// ══════════════════════════════════════
+const materialGerado = { legislacao:false, historia:false, especialistas:false, atualidades:false };
+
+const PROMPTS_MATERIAL = {
+  legislacao:   (t) => `Liste os 5 principais artigos da Constituição Federal e leis específicas relevantes para o tema: "${t}". Para cada: número, nome e como usar como argumento na redação. Markdown leve, português.`,
+  historia:     (t) => `Explique o contexto histórico de "${t}" com 4 marcos temporais. Para cada: data/período, fato e como usar como repertório no ENEM. Numerados, português.`,
+  especialistas:(t) => `Liste 4 especialistas (filósofos/sociólogos) cujas ideias se aplicam a "${t}". Para cada: nome, área, obra/conceito e frase-chave para a redação. Marcadores, português.`,
+  atualidades:  (t) => `Liste 4 dados estatísticos recentes (IBGE, ONU, OMS) sobre "${t}". Para cada: fonte, dado numérico e como usar como evidência na redação ENEM. Marcadores, português.`,
+};
+
+function mdSimples(t) {
+  return t
+    .replace(/\*\*(.*?)\*\*/g,'<strong style="color:#e1e2eb">$1</strong>')
+    .replace(/^## (.*)/gm,'<p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin:.5rem 0 .2rem">$1</p>')
+    .replace(/^[-•] (.*)/gm,'<p style="padding-left:.75rem;margin:.2rem 0;font-size:.78rem;color:#c8c4d7;line-height:1.5">• $1</p>')
+    .replace(/^(\d+)\. (.*)/gm,'<p style="padding-left:.75rem;margin:.25rem 0;font-size:.78rem;color:#c8c4d7;line-height:1.5"><strong style="color:#45edee">$1.</strong> $2</p>')
+    .replace(/\n\n/g,'<br/>').replace(/\n/g,'<br/>');
+}
+
+window.toggleMaterial = async function(tipo) {
+  const body    = document.getElementById('body-' + tipo);
+  const chevron = document.getElementById('chevron-' + tipo);
+  const aberto  = body.style.maxHeight && body.style.maxHeight !== '0px';
+
+  // Fecha os outros
+  ['legislacao','historia','especialistas','atualidades'].forEach(t => {
+    if (t !== tipo) {
+      document.getElementById('body-' + t).style.maxHeight = '0';
+      document.getElementById('chevron-' + t).style.transform = '';
+    }
+  });
+
+  if (aberto) { body.style.maxHeight = '0'; chevron.style.transform = ''; return; }
+
+  body.style.maxHeight = '800px';
+  chevron.style.transform = 'rotate(180deg)';
+  if (materialGerado[tipo]) return;
+
+  const titulo = document.getElementById('tituloRedacao')?.value.trim();
+  const temaSession = sessionStorage.getItem('tema_selecionado');
+  const tema = titulo || (temaSession ? JSON.parse(temaSession).titulo : '');
+  const conteudo = document.getElementById('conteudo-' + tipo);
+
+  if (!tema) {
+    conteudo.innerHTML = `<div style="padding:.625rem;background:rgba(250,189,0,.08);border:1px solid rgba(250,189,0,.2);border-radius:.625rem;margin:.5rem 0;">
+      <p style="font-size:.75rem;color:#fabd00;font-weight:700;">⚠️ Digite o título da redação primeiro!</p>
+      <p style="font-size:.7rem;color:#928ea0;margin-top:.2rem;">A PROfa precisa do tema para gerar conteúdo personalizado.</p>
+    </div>`;
+    return;
+  }
+
+  conteudo.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;padding:.75rem 0;color:#928ea0;font-size:.78rem;">
+    <span style="width:1rem;height:1rem;border:2px solid rgba(69,237,238,.3);border-top-color:#45edee;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;flex-shrink:0;"></span>
+    PROfa gerando...
+  </div>`;
+
+  try {
+    const model = genAI.getGenerativeModel({ model:'gemini-2.0-flash' });
+    const result = await model.generateContent(PROMPTS_MATERIAL[tipo](tema));
+    conteudo.innerHTML = `<div style="padding-top:.5rem;">${mdSimples(result.response.text())}</div>
+      <button onclick="copiarMaterial('${tipo}')" style="margin-top:.75rem;display:flex;align-items:center;gap:.375rem;padding:.375rem .75rem;border-radius:.625rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.3);color:#928ea0;font-size:.72rem;font-weight:600;cursor:pointer;">
+        <span class="material-symbols-outlined" style="font-size:.85rem;">content_copy</span>Copiar
+      </button>`;
+    materialGerado[tipo] = true;
+    const badge = document.getElementById('status-' + tipo);
+    if (badge) badge.style.display = 'inline-block';
+    body.style.maxHeight = (body.scrollHeight + 100) + 'px';
+  } catch(e) {
+    conteudo.innerHTML = `<p style="font-size:.75rem;color:#ffb4ab;padding:.5rem 0;">Erro ao gerar. Tente novamente.</p>`;
+  }
+};
+
+window.copiarMaterial = function(tipo) {
+  const el = document.getElementById('conteudo-' + tipo);
+  navigator.clipboard.writeText(el.innerText).then(()=>toast('✓ Conteúdo copiado!'));
+};
+
+function atualizarCardStatus() {
+  const etapas = ['Introdução','Desenvolvimento 1','Desenvolvimento 2','Conclusão','Revisão Final'];
+  const dica = DICAS[Math.min(dicaAtual, DICAS.length - 1)];
+  const etapaIdx = ['Introdução','Desenvolvimento 1','Desenvolvimento 2','Conclusão','Revisão Final'].indexOf(dica.etapa);
+  const progresso = Math.round(((dicaAtual + 1) / totalDicas) * 100);
+
+  const elDica  = document.getElementById('cardEliteDicaAtual');
+  const elEtapa = document.getElementById('cardEliteEtapa');
+  const elBar   = document.getElementById('cardEliteProgressBar');
+  if (elDica)  elDica.textContent  = `${dicaAtual + 1} / ${totalDicas}`;
+  if (elEtapa) elEtapa.textContent = dica.etapa;
+  if (elBar)   elBar.style.width   = progresso + '%';
+
+  // Atualiza dica card (modo normal: dica 0 estática, modo Elite: dica atual resumida)
+  if (modoEliteAtivo) {
+    const textoCard = document.getElementById('textoDicaCard');
+    if (textoCard) textoCard.textContent = dica.texto.length > 120 ? dica.texto.substring(0, 120) + '…' : dica.texto;
+  }
+}
 </script>
 </body>
 </html>

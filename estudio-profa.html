@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Estúdio PRO</title>
+<script>tailwind = { config: {} };</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+body{font-family:'Inter',sans-serif;background:#0b0e14;color:#e1e2eb;overflow-x:hidden;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+.scrollbar::-webkit-scrollbar{width:5px;height:5px;}
+.scrollbar::-webkit-scrollbar-thumb{background:#32353c;border-radius:10px;}
+.drop-zone{border:2px dashed rgba(71,69,84,0.4);border-radius:.875rem;transition:all .2s;cursor:pointer;}
+.drop-zone:hover,.drop-zone.over{border-color:#6c5ce7;background:rgba(108,92,231,0.05);}
+.fonte-card{background:#1d2026;border:1px solid rgba(71,69,84,0.3);border-radius:.875rem;transition:all .2s;}
+.saida-card{background:#191c22;border:2px solid rgba(71,69,84,0.25);border-radius:1rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;padding:1rem;}
+.saida-card:hover{border-color:rgba(108,92,231,0.5);background:#1d2026;transform:translateY(-2px);}
+.saida-card.selecionado{border-color:#6c5ce7;background:rgba(108,92,231,0.1);}
+.saida-card.selecionado::after{content:'✓';position:absolute;top:.5rem;right:.5rem;width:1.25rem;height:1.25rem;background:#6c5ce7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:white;}
+.saida-card.bloqueado{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.saida-card.gerado{border-color:#4ade80;}
+.chat-bubble-user{background:rgba(108,92,231,0.2);border:1px solid rgba(108,92,231,0.3);border-radius:1rem 1rem 0 1rem;margin-left:auto;}
+.chat-bubble-profa{background:#1d2026;border:1px solid rgba(71,69,84,0.3);border-radius:1rem 1rem 1rem 0;}
+#modalResultado{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.85);align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
+#modalResultado.aberto{display:flex;}
+@keyframes typing{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
+.dot{width:6px;height:6px;background:#45edee;border-radius:50%;animation:typing 1.2s infinite;display:inline-block;margin:0 2px;}
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+#toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(5rem);background:#272a31;border:1px solid rgba(255,255,255,.1);color:#e1e2eb;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:300;transition:transform .3s;pointer-events:none;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+.flashcard{perspective:800px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:140px;transform-style:preserve-3d;transition:transform .5s;}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashcard-front,.flashcard-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:.875rem;display:flex;align-items:center;justify-content:center;padding:1rem;text-align:center;}
+.flashcard-front{background:#1d2026;border:1px solid rgba(69,237,238,0.2);}
+.flashcard-back{background:rgba(108,92,231,0.15);border:1px solid rgba(108,92,231,0.3);transform:rotateY(180deg);}
+/* Sidebar */
+#sidebar{position:fixed;left:0;top:0;height:100%;width:256px;transform:translateX(-256px);transition:transform .3s;z-index:50;background:#10131a;border-right:1px solid rgba(71,69,84,.1);display:flex;flex-direction:column;padding:1.5rem 1rem;overflow-y:auto;}
+#sidebar.open{transform:translateX(0);}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:44;}
+#overlay.open{display:block;}
+@media(min-width:1024px){
+  #sidebar{transform:translateX(0)!important;}
+  #overlay{display:none!important;}
+  #mainContent{margin-left:256px;}
+  #btnHamburger{display:none!important;}
+  #btnToggleFontes{display:none!important;}
+}
+/* Landscape mobile: sidebar compacto com scroll */
+@media(max-height:500px) and (max-width:1023px){
+  #sidebar{padding:.5rem .75rem;}
+  #sidebar .logo-redaon{padding-bottom:.75rem!important;}
+}
+@media(max-width:767px){
+  #gridSaidas{grid-template-columns:repeat(2,1fr)!important;}
+}
+@media(min-width:768px) and (max-width:1023px){
+  #gridSaidas{grid-template-columns:repeat(2,1fr)!important;}
+}
+/* Barra de seleção de formatos */
+.barra-selecao{background:#1d2026;border:1px solid rgba(69,237,238,.3);border-radius:1rem;padding:1rem;margin-bottom:1.25rem;}
+/* Quiz bloqueado */
+.quiz-lock{background:rgba(108,92,231,.08);border:2px dashed rgba(108,92,231,.3);border-radius:1rem;padding:1.5rem;text-align:center;margin-top:1rem;}
+</style>
+<script src="supabase-auth.js"></script>
+</head>
+<body>
+
+<!-- BG -->
+<div style="position:fixed;inset:0;pointer-events:none;z-index:-1;">
+  <div style="position:absolute;top:-10%;right:-10%;width:50%;height:50%;background:rgba(108,92,231,.06);border-radius:50%;filter:blur(140px);"></div>
+  <div style="position:absolute;bottom:-10%;left:10%;width:40%;height:40%;background:rgba(69,237,238,.05);border-radius:50%;filter:blur(120px);"></div>
+</div>
+
+<div id="toast"></div>
+
+<!-- MODAL RESULTADO -->
+<div id="modalResultado">
+  <div style="background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:1.25rem;width:100%;max-width:760px;max-height:85vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid rgba(71,69,84,.25);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <span id="modalIcon" class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;font-size:1.4rem;"></span>
+        <div>
+          <p id="modalTipo" style="font-weight:700;font-size:.95rem;color:#e1e2eb;"></p>
+          <p style="font-size:.7rem;color:#928ea0;">Gerado pela PROfa · Gemini 2.0 Flash</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button onclick="copiarResultado()" style="background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);border-radius:.625rem;padding:.5rem .875rem;color:#c8c4d7;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.375rem;">
+          <span class="material-symbols-outlined" style="font-size:1rem;">content_copy</span>Copiar
+        </button>
+        <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;padding:.25rem;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+    <div id="modalConteudo" class="scrollbar" style="flex:1;overflow-y:auto;padding:1.5rem;font-size:.9rem;line-height:1.8;color:#c8c4d7;"></div>
+    <div style="padding:1rem 1.5rem;border-top:1px solid rgba(71,69,84,.25);display:flex;gap:.75rem;flex-shrink:0;">
+      <button onclick="salvarNoCaderno()" style="flex:1;padding:.75rem;background:#6c5ce7;color:white;border:none;border-radius:.75rem;font-weight:700;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="font-size:1rem;">menu_book</span>Salvar no Caderno Elite
+      </button>
+      <button onclick="fecharModal()" style="padding:.75rem 1.5rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.85rem;cursor:pointer;">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="logo-redaon" style="display:flex;align-items:baseline;font-style:italic;padding:.5rem .5rem 2rem;">
+    <span style="font-size:1.75rem;font-weight:900;color:white;letter-spacing:-.05em;">Reda</span>
+    <span style="font-size:1.75rem;font-weight:900;color:#45edee;letter-spacing:-.05em;">ON</span>
+  </div>
+  <nav style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.2rem;">
+    <a href="inicio.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">home</span>Início</a>
+    <a href="nova-redacao.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">add_circle</span>Nova Redação</a>
+    <a href="temas.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">description</span>Temas</a>
+    <a href="minhas-redacoes.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">edit_note</span>Minhas Redações</a>
+    <a href="evolucao.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">trending_up</span>Evolução</a>
+    <a href="plano.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">menu_book</span>Plano de Estudo</a>
+    <a href="estudio-profa.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:700;color:#45edee;text-decoration:none;background:#1d2026;border-right:3px solid #45edee;"><span class="material-symbols-outlined">neurology</span>Estúdio PRO</a>
+    <a href="ranking.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">leaderboard</span>Ranking</a>
+    <a href="configuracoes.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">settings</span>Configurações</a>
+  </nav>
+  <div style="border-top:1px solid rgba(71,69,84,.2);padding-top:1rem;margin-top:1rem;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;margin-bottom:.5rem;">
+      <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(108,92,231,.2);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="color:#c6bfff;">person</span></div>
+      <div><p style="font-size:.85rem;font-weight:700;">{{USUARIO}}</p><p style="font-size:.7rem;color:#45edee;font-weight:700;">⭐ Elite</p></div>
+    </div>
+    <a onclick="if(confirm('Sair?'))window.location.href='login.html'" style="display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.75rem;color:#ff8b8b;font-size:.85rem;cursor:pointer;" onmouseover="this.style.background='rgba(255,100,100,.1)'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1.1rem;">logout</span>Sair
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="mainContent" style="min-height:100vh;display:flex;flex-direction:column;">
+
+  <!-- HEADER -->
+  <header style="position:sticky;top:0;z-index:40;background:rgba(11,14,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(71,69,84,.15);">
+    <div style="height:3.5rem;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;">
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <button id="btnHamburger" onclick="toggleSidebar()" style="padding:.5rem;border-radius:.5rem;background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">menu</span></button>
+        <span class="material-symbols-outlined" style="color:#45edee;">neurology</span>
+        <h2 style="font-size:1rem;font-weight:800;">Estúdio PRO</h2>
+        <span style="padding:.15rem .5rem;background:rgba(69,237,238,.1);color:#45edee;font-size:.65rem;font-weight:700;border-radius:9999px;border:1px solid rgba(69,237,238,.2);">ELITE</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <!-- Sino de notificações -->
+        <button onclick="toast('Você não tem notificações no momento.')" style="position:relative;width:2.25rem;height:2.25rem;border-radius:.625rem;background:rgba(255,255,255,.04);border:1px solid rgba(71,69,84,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:1.2rem;color:#928ea0;">notifications</span>
+          <span style="position:absolute;top:.3rem;right:.3rem;width:.45rem;height:.45rem;background:#6c5ce7;border-radius:50%;"></span>
+        </button>
+      </div>
+    </div>
+    <!-- Tabs: grid 2x2 em smartphone/tablet (portrait E landscape), linha no desktop -->
+    <style>
+      #barraTabsMobile{display:none;}
+      #barraTabsDesktop{display:flex;}
+      @media(max-width:1023px){
+        #barraTabsMobile{display:grid!important;grid-template-columns:1fr 1fr;gap:.375rem;padding:.375rem .875rem .5rem;}
+        #barraTabsDesktop{display:none!important;}
+      }
+    </style>
+
+    <!-- TABS MOBILE/TABLET: grid 2x2 — ordem: Fontes | Estúdio | Caderno Elite | Chat -->
+    <div id="barraTabsMobile">
+      <button onclick="setTab('fontes')" id="tab-m-fontes" style="display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem .5rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;border:none;white-space:nowrap;background:rgba(255,255,255,.05);color:#928ea0;">
+        <span class="material-symbols-outlined" style="font-size:.9rem;">folder_open</span>Fontes
+      </button>
+      <button onclick="setTab('estudio')" id="tab-m-estudio" style="display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem .5rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;border:none;white-space:nowrap;background:#6c5ce7;color:white;">
+        <span class="material-symbols-outlined" style="font-size:.9rem;font-variation-settings:'FILL' 1;">auto_awesome</span>Estúdio
+      </button>
+      <button onclick="setTab('caderno')" id="tab-m-caderno" style="display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem .5rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;border:none;white-space:nowrap;background:rgba(255,255,255,.05);color:#928ea0;">
+        <span class="material-symbols-outlined" style="font-size:.9rem;">menu_book</span>Caderno Elite
+      </button>
+      <button onclick="setTab('chat')" id="tab-m-chat" style="display:flex;align-items:center;justify-content:center;gap:.375rem;padding:.5rem .5rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;border:none;white-space:nowrap;background:rgba(255,255,255,.05);color:#928ea0;">
+        <span class="material-symbols-outlined" style="font-size:.9rem;">chat</span>Chat
+      </button>
+    </div>
+
+    <!-- TABS DESKTOP: linha única — ordem: Fontes | Estúdio | Caderno Elite | Chat -->
+    <div id="barraTabsDesktop" style="gap:.5rem;padding:.5rem 1rem .625rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0;">
+      <button onclick="setTab('fontes')" id="tab-fontes" style="flex-shrink:0;display:flex;align-items:center;gap:.375rem;padding:.5rem 1rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;border:none;white-space:nowrap;background:rgba(255,255,255,.05);color:#928ea0;">
+        <span class="material-symbols-outlined" style="font-size:.9rem;">folder_open</span>Fontes
+      </button>
+      <button onclick="setTab('estudio')" id="tab-estudio" style="flex-shrink:0;display:flex;align-items:center;gap:.375rem;padding:.5rem 1rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;border:none;white-space:nowrap;background:#6c5ce7;color:white;">
+        <span class="material-symbols-outlined" style="font-size:.9rem;font-variation-settings:'FILL' 1;">auto_awesome</span>Estúdio
+      </button>
+      <button onclick="setTab('caderno')" id="tab-caderno" style="flex-shrink:0;display:flex;align-items:center;gap:.375rem;padding:.5rem 1rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;border:none;white-space:nowrap;background:rgba(255,255,255,.05);color:#928ea0;">
+        <span class="material-symbols-outlined" style="font-size:.9rem;">menu_book</span>Caderno Elite
+      </button>
+      <button onclick="setTab('chat')" id="tab-chat" style="flex-shrink:0;display:flex;align-items:center;gap:.375rem;padding:.5rem 1rem;border-radius:.75rem;font-size:.75rem;font-weight:700;cursor:pointer;border:none;white-space:nowrap;background:rgba(255,255,255,.05);color:#928ea0;">
+        <span class="material-symbols-outlined" style="font-size:.9rem;">chat</span>Chat com a PROfa
+      </button>
+    </div>
+  </header>
+
+  <!-- LAYOUT PRINCIPAL -->
+  <div style="flex:1;display:flex;overflow:hidden;height:calc(100vh - 6.5rem);max-width:100vw;">
+
+    <!-- COLUNA FONTES — oculta por padrão, não usada mais como gaveta -->
+    <div id="colunaFontes" style="display:none;width:300px;flex-shrink:0;border-right:1px solid rgba(71,69,84,.15);flex-direction:column;background:#0b0e14;overflow:hidden;">
+      <div style="padding:1rem;border-bottom:1px solid rgba(71,69,84,.1);overflow-y:auto;flex-shrink:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;">
+          <h3 style="font-size:.8rem;font-weight:700;">Minhas Fontes</h3>
+          <span id="contadorFontes" style="font-size:.65rem;color:#928ea0;background:#1d2026;padding:.2rem .5rem;border-radius:9999px;">0 fontes</span>
+        </div>
+
+        <!-- Busca: width 100% e box-sizing para não estourar -->
+        <div style="display:flex;align-items:center;gap:.5rem;background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.5rem .75rem;margin-bottom:.75rem;box-sizing:border-box;width:100%;">
+          <span class="material-symbols-outlined" style="font-size:1.1rem;color:#928ea0;flex-shrink:0;">search</span>
+          <input id="inputBusca" type="text" placeholder="Pesquise fontes na web..." onkeydown="if(event.key==='Enter')buscarFonte()" style="background:transparent;border:none;outline:none;font-size:.8rem;color:#e1e2eb;width:100%;min-width:0;"/>
+        </div>
+
+        <div style="display:flex;gap:.5rem;margin-bottom:.75rem;">
+          <button onclick="buscarFonte()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem;border-radius:.5rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);font-size:.7rem;font-weight:700;color:#928ea0;cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:.9rem;">language</span>Web
+          </button>
+          <button onclick="toast('Google Drive — em breve!')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem;border-radius:.5rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);font-size:.7rem;font-weight:700;color:#928ea0;cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:.9rem;">add_to_drive</span>Drive
+          </button>
+          <button onclick="document.getElementById('inputTexto').focus()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem;border-radius:.5rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);font-size:.7rem;font-weight:700;color:#928ea0;cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:.9rem;">content_paste</span>Texto
+          </button>
+        </div>
+
+        <!-- Drop zone: accept=*/* para funcionar em todos os dispositivos -->
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('inputPDF').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="handleDrop(event)" style="padding:.875rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;margin-bottom:.75rem;">
+          <span class="material-symbols-outlined" style="font-size:1.75rem;color:rgba(108,92,231,.6);font-variation-settings:'FILL' 1;">upload_file</span>
+          <p style="font-size:.75rem;color:#928ea0;text-align:center;">Solte seus arquivos aqui<br/><span style="font-size:.65rem;color:#474554;">PDF, imagens, documentos, áudio</span></p>
+        </div>
+        <!-- accept=*/* para abrir explorador completo no Android/iOS -->
+        <input type="file" id="inputPDF" style="display:none;" multiple accept="*/*" onchange="adicionarArquivos(this.files)"/>
+
+        <!-- Título do material -->
+        <div style="margin-bottom:.75rem;">
+          <label style="font-size:.7rem;font-weight:700;color:#928ea0;display:block;margin-bottom:.35rem;">Nome do Material <span style="color:#ffb4ab;">*</span></label>
+          <input id="tituloMaterial" type="text" placeholder="Ex: Conectivos e Coesão Textual" style="width:100%;background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.6rem .75rem;font-size:.8rem;color:#e1e2eb;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(71,69,84,.3)'"/>
+        </div>
+
+        <!-- Texto colado -->
+        <div style="position:relative;">
+          <textarea id="inputTexto" rows="3" placeholder="Cole um texto aqui..." style="width:100%;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:.75rem;padding:.75rem;font-size:.8rem;color:#e1e2eb;outline:none;resize:none;box-sizing:border-box;" onfocus="this.style.borderColor='rgba(69,237,238,.5)'" onblur="this.style.borderColor='rgba(71,69,84,.2)'"></textarea>
+          <button onclick="adicionarTexto()" style="position:absolute;bottom:.625rem;right:.625rem;padding:.3rem .75rem;background:#6c5ce7;color:white;border:none;border-radius:.5rem;font-size:.7rem;font-weight:700;cursor:pointer;">Adicionar</button>
+        </div>
+      </div>
+
+      <!-- Lista fontes -->
+      <div id="listaFontes" class="scrollbar" style="flex:1;overflow-y:auto;padding:.875rem;display:flex;flex-direction:column;gap:.5rem;">
+        <!-- Fontes pré-carregadas do professor -->
+        <div class="fonte-card" style="padding:.75rem;display:flex;align-items:flex-start;gap:.75rem;">
+          <div style="width:2rem;height:2rem;border-radius:.5rem;background:rgba(250,189,0,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:.9rem;color:#fabd00;font-variation-settings:'FILL' 1;">picture_as_pdf</span></div>
+          <div style="flex:1;min-width:0;"><p style="font-size:.75rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Guia de Competências ENEM 2024</p><p style="font-size:.65rem;color:#928ea0;">Da PROfa. Carla · PDF · 2.4MB</p></div>
+          <button onclick="this.closest('.fonte-card').remove();atualizarContador()" style="background:none;border:none;color:#474554;cursor:pointer;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:1rem;">close</span></button>
+        </div>
+        <div class="fonte-card" style="padding:.75rem;display:flex;align-items:flex-start;gap:.75rem;">
+          <div style="width:2rem;height:2rem;border-radius:.5rem;background:rgba(108,92,231,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:.9rem;color:#c6bfff;font-variation-settings:'FILL' 1;">picture_as_pdf</span></div>
+          <div style="flex:1;min-width:0;"><p style="font-size:.75rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Conectivos e Operadores Argumentativos</p><p style="font-size:.65rem;color:#928ea0;">Da PROfa. Carla · PDF · 560KB</p></div>
+          <button onclick="this.closest('.fonte-card').remove();atualizarContador()" style="background:none;border:none;color:#474554;cursor:pointer;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:1rem;">close</span></button>
+        </div>
+      </div>
+
+      <!-- Pontos de Melhoria -->
+      <div style="border-top:1px solid rgba(71,69,84,.15);padding:.875rem;flex-shrink:0;">
+        <p style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Pontos de Melhoria</p>
+        <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem;">
+          <span style="background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.2);color:#ffb4ab;border-radius:9999px;padding:.2rem .625rem;font-size:.7rem;font-weight:700;">C4 — Coesão</span>
+          <span style="background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.2);color:#ffb4ab;border-radius:9999px;padding:.2rem .625rem;font-size:.7rem;font-weight:700;">Conectivos</span>
+          <span style="background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.2);color:#ffb4ab;border-radius:9999px;padding:.2rem .625rem;font-size:.7rem;font-weight:700;">Proposta C5</span>
+        </div>
+        <p style="font-size:.68rem;color:#474554;">A PROfa irá priorizar esses temas no material gerado.</p>
+      </div>
+    </div>
+
+    <!-- COLUNA CENTRAL -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;max-width:100%;">
+
+      <!-- PAINEL ESTÚDIO -->
+      <div id="painel-estudio" style="flex:1;overflow-y:auto;padding:1.25rem;-webkit-overflow-scrolling:touch;" class="scrollbar">
+        <div style="max-width:700px;margin:0 auto;">
+
+          <!-- Barra: escolha 4 formatos -->
+          <div class="barra-selecao">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">
+              <div>
+                <p style="font-size:.8rem;font-weight:700;color:#e1e2eb;">Escolha 4 formatos de estudo</p>
+                <p style="font-size:.7rem;color:#928ea0;">Selecione abaixo os formatos que deseja gerar</p>
+              </div>
+              <div style="display:flex;align-items:center;gap:.5rem;">
+                <!-- Limite diário discreto, ao lado do contador -->
+                <div id="contadorUso" style="display:flex;align-items:center;gap:.3rem;padding:.2rem .6rem;background:rgba(250,189,0,.06);border:1px solid rgba(250,189,0,.15);border-radius:9999px;">
+                  <span class="material-symbols-outlined" style="font-size:.8rem;color:#fabd00;font-variation-settings:'FILL' 1;">workspace_premium</span>
+                  <span id="labelUso" style="font-size:.7rem;font-weight:700;color:#fabd00;">1/dia</span>
+                </div>
+                <span id="contadorFormatos" style="font-size:.8rem;font-weight:900;color:#45edee;">0/4</span>
+                <button id="btnGerar" onclick="iniciarGeracao()" disabled style="padding:.5rem 1.25rem;background:#45edee;color:#002020;font-weight:900;border:none;border-radius:.75rem;font-size:.8rem;cursor:not-allowed;opacity:.4;">Gerar Material</button>
+              </div>
+            </div>
+            <!-- Verifica uso diário -->
+            <div id="avisoUsoDiario" style="display:none;padding:.625rem 1rem;background:rgba(250,189,0,.08);border:1px solid rgba(250,189,0,.2);border-radius:.75rem;font-size:.8rem;color:#fabd00;text-align:center;">
+              ⏰ Você já gerou seu material de hoje. Próxima liberação: <span id="tempoRestante" style="font-weight:900;"></span>
+            </div>
+          </div>
+
+          <!-- Grid de cards de formatos -->
+          <div id="gridSaidas" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.875rem;margin-bottom:1.25rem;">
+
+            <div class="saida-card" data-tipo="resumo_texto" data-icone="article" data-titulo="Resumo em Texto" onclick="toggleFormato(this)">
+              <span class="material-symbols-outlined" style="font-size:1.5rem;color:#c6bfff;font-variation-settings:'FILL' 1;display:block;margin-bottom:.625rem;">article</span>
+              <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.2rem;">Resumo em Texto</p>
+              <p style="font-size:.68rem;color:#928ea0;">Síntese focada no ENEM</p>
+            </div>
+
+            <div class="saida-card" data-tipo="audio" data-icone="spatial_audio" data-titulo="Resumo em Áudio" onclick="toggleFormato(this)">
+              <span class="material-symbols-outlined" style="font-size:1.5rem;color:#45edee;font-variation-settings:'FILL' 1;display:block;margin-bottom:.625rem;">spatial_audio</span>
+              <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.2rem;">Resumo em Áudio</p>
+              <p style="font-size:.68rem;color:#928ea0;">Roteiro para ouvir</p>
+            </div>
+
+            <div class="saida-card" data-tipo="video" data-icone="smart_display" data-titulo="Roteiro de Vídeo" onclick="toggleFormato(this)">
+              <span class="material-symbols-outlined" style="font-size:1.5rem;color:#ffb4ab;font-variation-settings:'FILL' 1;display:block;margin-bottom:.625rem;">smart_display</span>
+              <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.2rem;">Roteiro de Vídeo</p>
+              <p style="font-size:.68rem;color:#928ea0;">Script formato aula</p>
+            </div>
+
+            <div class="saida-card" data-tipo="mapa_mental" data-icone="account_tree" data-titulo="Mapa Mental" onclick="toggleFormato(this)">
+              <span class="material-symbols-outlined" style="font-size:1.5rem;color:#fabd00;font-variation-settings:'FILL' 1;display:block;margin-bottom:.625rem;">account_tree</span>
+              <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.2rem;">Mapa Mental</p>
+              <p style="font-size:.68rem;color:#928ea0;">Estrutura visual</p>
+            </div>
+
+            <div class="saida-card" data-tipo="flashcards" data-icone="style" data-titulo="Cartões de Memória" onclick="toggleFormato(this)">
+              <span class="material-symbols-outlined" style="font-size:1.5rem;color:#4ade80;font-variation-settings:'FILL' 1;display:block;margin-bottom:.625rem;">style</span>
+              <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.2rem;">Cartões de Memória</p>
+              <p style="font-size:.68rem;color:#928ea0;">Flashcards de revisão</p>
+            </div>
+
+            <div class="saida-card" data-tipo="infografico" data-icone="bar_chart" data-titulo="Infográfico" onclick="toggleFormato(this)">
+              <span class="material-symbols-outlined" style="font-size:1.5rem;color:#c6bfff;font-variation-settings:'FILL' 1;display:block;margin-bottom:.625rem;">bar_chart</span>
+              <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.2rem;">Infográfico</p>
+              <p style="font-size:.68rem;color:#928ea0;">Dados e estruturas</p>
+            </div>
+
+            <div class="saida-card" data-tipo="relatorio" data-icone="assessment" data-titulo="Relatório" onclick="toggleFormato(this)">
+              <span class="material-symbols-outlined" style="font-size:1.5rem;color:#45edee;font-variation-settings:'FILL' 1;display:block;margin-bottom:.625rem;">assessment</span>
+              <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.2rem;">Relatório</p>
+              <p style="font-size:.68rem;color:#928ea0;">Análise aprofundada</p>
+            </div>
+
+            <div class="saida-card" data-tipo="caderno_pessoal" data-icone="auto_fix_high" data-titulo="Caderno Pessoal" onclick="toggleFormato(this)">
+              <span class="material-symbols-outlined" style="font-size:1.5rem;color:#6c5ce7;font-variation-settings:'FILL' 1;display:block;margin-bottom:.625rem;">auto_fix_high</span>
+              <p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin-bottom:.2rem;">Caderno Pessoal</p>
+              <p style="font-size:.68rem;color:#928ea0;">Baseado nas suas fraquezas</p>
+            </div>
+
+          </div>
+
+          <!-- Quiz — 5º formato, liberado após gerar os 4 -->
+          <div id="areaQuizLock" class="quiz-lock">
+            <span class="material-symbols-outlined" style="font-size:2rem;color:#6c5ce7;display:block;margin-bottom:.5rem;font-variation-settings:'FILL' 1;">lock</span>
+            <p style="font-size:.875rem;font-weight:700;color:#c6bfff;margin-bottom:.25rem;">Quiz — Teste seu Conhecimento</p>
+            <p style="font-size:.75rem;color:#928ea0;">Libera automaticamente após você gerar os 4 formatos escolhidos</p>
+          </div>
+
+          <div id="areaQuiz" style="display:none;margin-top:1.25rem;background:#191c22;border:1px solid rgba(69,237,238,.2);border-radius:1rem;padding:1.25rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+              <p style="font-size:.875rem;font-weight:700;display:flex;align-items:center;gap:.5rem;">
+                <span class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;">quiz</span>Quiz — Teste seu Conhecimento
+              </p>
+              <button onclick="gerarQuiz()" style="padding:.5rem 1rem;background:#45edee;color:#002020;font-size:.75rem;font-weight:900;border:none;border-radius:.625rem;cursor:pointer;">Iniciar Quiz</button>
+            </div>
+            <div id="containerQuiz" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+          </div>
+
+          <!-- Flashcards inline -->
+          <div id="areaFlashcards" style="display:none;margin-top:1.25rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+              <p style="font-size:.875rem;font-weight:700;display:flex;align-items:center;gap:.5rem;">
+                <span class="material-symbols-outlined" style="color:#4ade80;font-variation-settings:'FILL' 1;">style</span>Cartões de Memória
+              </p>
+              <span id="labelFlashcard" style="font-size:.75rem;color:#928ea0;"></span>
+            </div>
+            <div id="gridFlashcards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PAINEL CHAT -->
+      <div id="painel-chat" style="display:none;flex:1;flex-direction:column;height:100%;">
+        <!-- Contador chat -->
+        <div style="padding:.5rem 1rem;background:rgba(108,92,231,.08);border-bottom:1px solid rgba(71,69,84,.15);display:flex;align-items:center;justify-content:space-between;">
+          <p style="font-size:.75rem;color:#c6bfff;">A PROfa responde com base nas fontes carregadas</p>
+          <span id="contadorChat" style="font-size:.75rem;font-weight:700;color:#45edee;">20 mensagens restantes</span>
+        </div>
+        <div id="chatMensagens" class="scrollbar" style="flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:1rem;">
+          <div style="display:flex;align-items:flex-start;gap:.75rem;max-width:32rem;">
+            <div style="width:2.25rem;height:2.25rem;border-radius:50%;background:rgba(69,237,238,.15);border:2px solid rgba(69,237,238,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;color:#45edee;font-variation-settings:'FILL' 1;">neurology</span>
+            </div>
+            <div class="chat-bubble-profa" style="padding:1rem;max-width:26rem;">
+              <p style="font-size:.85rem;line-height:1.6;">Olá! 👋 Sou a PROfa do Estúdio PRO. Posso tirar suas dúvidas sobre os materiais carregados. Você tem 2 fontes da PROfa. Carla. O que quer explorar?</p>
+              <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;">
+                <button onclick="perguntarRapido('Quais são os principais erros de coesão?')" style="font-size:.7rem;padding:.3rem .75rem;border-radius:9999px;border:1px solid rgba(69,237,238,.3);color:#45edee;background:rgba(69,237,238,.05);cursor:pointer;">Erros de coesão</button>
+                <button onclick="perguntarRapido('Como melhorar minha proposta de intervenção C5?')" style="font-size:.7rem;padding:.3rem .75rem;border-radius:9999px;border:1px solid rgba(69,237,238,.3);color:#45edee;background:rgba(69,237,238,.05);cursor:pointer;">Proposta C5</button>
+                <button onclick="perguntarRapido('Explique as 5 competências do ENEM')" style="font-size:.7rem;padding:.3rem .75rem;border-radius:9999px;border:1px solid rgba(69,237,238,.3);color:#45edee;background:rgba(69,237,238,.05);cursor:pointer;">5 competências</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:.875rem 1rem;border-top:1px solid rgba(71,69,84,.15);background:rgba(11,14,20,.6);">
+          <div style="display:flex;align-items:flex-end;gap:.75rem;">
+            <div style="flex:1;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;padding:.75rem 1rem;">
+              <textarea id="chatInput" rows="2" placeholder="Pergunte sobre o material..." style="width:100%;background:transparent;border:none;outline:none;font-size:.85rem;color:#e1e2eb;resize:none;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarChat();}"></textarea>
+            </div>
+            <button onclick="enviarChat()" style="width:2.75rem;height:2.75rem;border-radius:1rem;background:#45edee;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+              <span class="material-symbols-outlined" style="color:#002020;font-variation-settings:'FILL' 1;">send</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAINEL CADERNO -->
+      <div id="painel-caderno" style="display:none;flex:1;overflow-y:auto;padding:1.25rem;" class="scrollbar">
+        <div style="max-width:700px;margin:0 auto;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
+            <div>
+              <p style="font-size:.7rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;">Caderno Elite Personalizado</p>
+              <p style="font-size:.85rem;color:#c8c4d7;">Gerado com base no seu histórico e fraquezas identificadas pela PROfa</p>
+            </div>
+            <button onclick="gerarCadernoPessoal()" style="padding:.625rem 1.25rem;background:#6c5ce7;color:white;border:none;border-radius:.75rem;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.4rem;">
+              <span class="material-symbols-outlined" style="font-size:1rem;">refresh</span>Atualizar
+            </button>
+          </div>
+          <div style="background:#191c22;border:1px solid rgba(255,180,171,.2);border-radius:1rem;padding:1.25rem;margin-bottom:1rem;">
+            <p style="font-size:.7rem;font-weight:700;color:#ffb4ab;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem;">
+              <span class="material-symbols-outlined" style="font-size:.9rem;font-variation-settings:'FILL' 1;">priority_high</span>Foco Prioritário — Sua Fraqueza Principal
+            </p>
+            <h3 style="font-size:.95rem;font-weight:700;color:white;margin-bottom:.5rem;">Competência 4 — Coesão Textual</h3>
+            <p style="font-size:.82rem;color:#928ea0;line-height:1.6;">Suas últimas 3 redações mostram dificuldade em encadear parágrafos com fluidez. O uso de conectivos está abaixo da média esperada para o 3º ano.</p>
+          </div>
+          <div style="background:#191c22;border:1px solid rgba(108,92,231,.2);border-radius:1rem;padding:1.25rem;margin-bottom:1rem;">
+            <p style="font-size:.7rem;font-weight:700;color:#c6bfff;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;">📚 Material Recomendado pela PROfa</p>
+            <div style="display:flex;flex-direction:column;gap:.5rem;">
+              <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;background:#10131a;border-radius:.75rem;">
+                <span class="material-symbols-outlined" style="color:#fabd00;font-size:1.1rem;font-variation-settings:'FILL' 1;">picture_as_pdf</span>
+                <div style="flex:1;min-width:0;"><p style="font-size:.8rem;font-weight:700;">Conectivos e Operadores Argumentativos</p><p style="font-size:.68rem;color:#928ea0;">PROfa. Carla · Relevante para C4</p></div>
+                <button onclick="toast('Abrindo material...')" style="font-size:.75rem;color:#45edee;font-weight:700;background:none;border:none;cursor:pointer;">Abrir</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;background:#10131a;border-radius:.75rem;">
+                <span class="material-symbols-outlined" style="color:#c6bfff;font-size:1.1rem;font-variation-settings:'FILL' 1;">picture_as_pdf</span>
+                <div style="flex:1;min-width:0;"><p style="font-size:.8rem;font-weight:700;">Guia de Competências ENEM 2024</p><p style="font-size:.68rem;color:#928ea0;">PROfa. Carla · Visão geral C1-C5</p></div>
+                <button onclick="toast('Abrindo material...')" style="font-size:.75rem;color:#45edee;font-weight:700;background:none;border:none;cursor:pointer;">Abrir</button>
+              </div>
+            </div>
+          </div>
+          <div id="cadernGerado" style="display:none;background:#191c22;border:1px solid rgba(69,237,238,.15);border-radius:1rem;padding:1.25rem;">
+            <p style="font-size:.7rem;font-weight:700;color:#45edee;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem;">
+              <span class="material-symbols-outlined" style="font-size:.9rem;font-variation-settings:'FILL' 1;">auto_fix_high</span>Caderno Gerado pela PROfa
+            </p>
+            <div id="cadernTexto" style="font-size:.85rem;color:#c8c4d7;line-height:1.8;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAINEL FONTES (mobile — aba normal) -->
+      <div id="painel-fontes" style="display:none;flex:1;overflow-y:auto;padding:1.25rem;" class="scrollbar">
+        <div style="max-width:600px;margin:0 auto;">
+
+          <!-- Cabeçalho -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <span class="material-symbols-outlined" style="color:#45edee;font-size:1.1rem;">folder_open</span>
+              <h3 style="font-size:.9rem;font-weight:700;">Minhas Fontes</h3>
+            </div>
+            <span id="contadorFontesPainel" style="font-size:.65rem;color:#928ea0;background:#1d2026;padding:.2rem .5rem;border-radius:9999px;">2 fontes</span>
+          </div>
+
+          <!-- Busca -->
+          <div style="display:flex;align-items:center;gap:.5rem;background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.5rem .75rem;margin-bottom:.75rem;box-sizing:border-box;">
+            <span class="material-symbols-outlined" style="font-size:1.1rem;color:#928ea0;flex-shrink:0;">search</span>
+            <input type="text" placeholder="Pesquise fontes na web..." style="background:transparent;border:none;outline:none;font-size:.8rem;color:#e1e2eb;width:100%;min-width:0;" onkeydown="if(event.key==='Enter')buscarFonte()"/>
+          </div>
+
+          <!-- Botões tipo -->
+          <div style="display:flex;gap:.5rem;margin-bottom:.75rem;">
+            <button onclick="buscarFonte()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem;border-radius:.5rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);font-size:.75rem;font-weight:700;color:#928ea0;cursor:pointer;">
+              <span class="material-symbols-outlined" style="font-size:.9rem;">language</span>Web
+            </button>
+            <button onclick="toast('Google Drive — em breve!')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem;border-radius:.5rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);font-size:.75rem;font-weight:700;color:#928ea0;cursor:pointer;">
+              <span class="material-symbols-outlined" style="font-size:.9rem;">add_to_drive</span>Drive
+            </button>
+            <button onclick="document.getElementById('inputTextoPainel').focus()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.3rem;padding:.5rem;border-radius:.5rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);font-size:.75rem;font-weight:700;color:#928ea0;cursor:pointer;">
+              <span class="material-symbols-outlined" style="font-size:.9rem;">content_paste</span>Texto
+            </button>
+          </div>
+
+          <!-- Drop zone -->
+          <div class="drop-zone" onclick="document.getElementById('inputPDF').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="handleDrop(event)" style="padding:1.25rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;margin-bottom:.75rem;">
+            <span class="material-symbols-outlined" style="font-size:2rem;color:rgba(108,92,231,.6);font-variation-settings:'FILL' 1;">upload_file</span>
+            <p style="font-size:.8rem;color:#928ea0;text-align:center;">Toque para adicionar arquivo<br/><span style="font-size:.65rem;color:#474554;">PDF, imagens, documentos, áudio</span></p>
+          </div>
+
+          <!-- Nome do material -->
+          <div style="margin-bottom:.75rem;">
+            <label style="font-size:.75rem;font-weight:700;color:#928ea0;display:block;margin-bottom:.35rem;">Nome do Material <span style="color:#ffb4ab;">*</span></label>
+            <input id="tituloMaterialPainel" type="text" placeholder="Ex: Conectivos e Coesão Textual" style="width:100%;background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.65rem .875rem;font-size:.85rem;color:#e1e2eb;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(71,69,84,.3)'"/>
+          </div>
+
+          <!-- Texto colado -->
+          <div style="position:relative;margin-bottom:1.25rem;">
+            <textarea id="inputTextoPainel" rows="3" placeholder="Cole um texto aqui..." style="width:100%;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:.75rem;padding:.75rem;font-size:.85rem;color:#e1e2eb;outline:none;resize:none;box-sizing:border-box;" onfocus="this.style.borderColor='rgba(69,237,238,.5)'" onblur="this.style.borderColor='rgba(71,69,84,.2)'"></textarea>
+            <button onclick="adicionarTexto()" style="position:absolute;bottom:.625rem;right:.625rem;padding:.35rem .875rem;background:#6c5ce7;color:white;border:none;border-radius:.5rem;font-size:.75rem;font-weight:700;cursor:pointer;">Adicionar</button>
+          </div>
+
+          <!-- Divisor -->
+          <p style="font-size:.7rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;">Fontes adicionadas</p>
+
+          <!-- Lista de fontes (espelho) -->
+          <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;">
+            <div class="fonte-card" style="padding:.875rem;display:flex;align-items:center;gap:.75rem;">
+              <div style="width:2.25rem;height:2.25rem;border-radius:.5rem;background:rgba(250,189,0,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:1rem;color:#fabd00;font-variation-settings:'FILL' 1;">picture_as_pdf</span></div>
+              <div style="flex:1;min-width:0;"><p style="font-size:.8rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Guia de Competências ENEM 2024</p><p style="font-size:.7rem;color:#928ea0;">Da PROfa. Carla · PDF · 2.4MB</p></div>
+            </div>
+            <div class="fonte-card" style="padding:.875rem;display:flex;align-items:center;gap:.75rem;">
+              <div style="width:2.25rem;height:2.25rem;border-radius:.5rem;background:rgba(108,92,231,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:1rem;color:#c6bfff;font-variation-settings:'FILL' 1;">picture_as_pdf</span></div>
+              <div style="flex:1;min-width:0;"><p style="font-size:.8rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Conectivos e Operadores Argumentativos</p><p style="font-size:.7rem;color:#928ea0;">Da PROfa. Carla · PDF · 560KB</p></div>
+            </div>
+          </div>
+
+          <!-- Pontos de Melhoria -->
+          <div style="background:#1d2026;border:1px solid rgba(255,180,171,.15);border-radius:1rem;padding:1rem;">
+            <div style="display:flex;align-items:center;gap:.375rem;margin-bottom:.625rem;">
+              <span class="material-symbols-outlined" style="font-size:.9rem;color:#ffb4ab;font-variation-settings:'FILL' 1;">priority_high</span>
+              <p style="font-size:.72rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.06em;">Pontos de Melhoria</p>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem;">
+              <span style="background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.2);color:#ffb4ab;border-radius:9999px;padding:.25rem .75rem;font-size:.75rem;font-weight:700;">C4 — Coesão</span>
+              <span style="background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.2);color:#ffb4ab;border-radius:9999px;padding:.25rem .75rem;font-size:.75rem;font-weight:700;">Conectivos</span>
+              <span style="background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.2);color:#ffb4ab;border-radius:9999px;padding:.25rem .75rem;font-size:.75rem;font-weight:700;">Proposta C5</span>
+            </div>
+            <p style="font-size:.7rem;color:#474554;">A PROfa irá priorizar esses temas no material gerado.</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
+const genAI = new GoogleGenerativeAI("AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU");
+
+// ── ESTADO ────────────────────────────────────
+let fontes = [
+  {id:1,titulo:'Guia de Competências ENEM 2024',conteudo:'Competência 1: Domínio da Norma Culta. C2: Compreensão da proposta. C3: Seleção de argumentos. C4: Coesão textual — uso de conectivos. C5: Proposta de intervenção com agentes e ações detalhadas.',tipo:'pdf'},
+  {id:2,titulo:'Conectivos e Operadores Argumentativos',conteudo:'Conectivos de adição: ademais, outrossim, além disso. Causa: porque, visto que, haja vista. Contraste: entretanto, todavia, contudo. Conclusão: portanto, logo, assim sendo.',tipo:'pdf'},
+];
+let fonteCount = fontes.length;
+let resultadoAtual = '';
+let quizRespostas = {};
+let formatosSelecionados = [];
+let formatosGerados = 0;
+let chatMensagens = 0;
+const MAX_CHAT = 20;
+const CHAVE_USO = 'estudio_pro_uso';
+
+// ── USO DIÁRIO ────────────────────────────────
+function verificarUsoDiario() {
+  const hoje = new Date().toDateString();
+  const uso = JSON.parse(localStorage.getItem(CHAVE_USO) || '{}');
+  if (uso.data === hoje && uso.gerou) {
+    document.getElementById('avisoUsoDiario').style.display = 'block';
+    document.getElementById('btnGerar').style.display = 'none';
+    atualizarContadorRegressivo();
+    // Bloquear todos os cards
+    document.querySelectorAll('.saida-card').forEach(c => {
+      c.classList.add('bloqueado');
+      c.onclick = null;
+    });
+    return false;
+  }
+  return true;
+}
+
+function registrarUso() {
+  const hoje = new Date().toDateString();
+  localStorage.setItem(CHAVE_USO, JSON.stringify({data: hoje, gerou: true}));
+}
+
+function atualizarContadorRegressivo() {
+  function tick() {
+    const agora = new Date();
+    const meianoite = new Date();
+    meianoite.setHours(24,0,0,0);
+    const diff = meianoite - agora;
+    const h = Math.floor(diff/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    const s = Math.floor((diff%60000)/1000);
+    const el = document.getElementById('tempoRestante');
+    if (el) el.textContent = h+'h '+m+'m '+s+'s';
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ── SIDEBAR / TABS / FONTES ───────────────────
+window.toggleSidebar = function() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+};
+
+window.toggleFontes = function() {
+  document.getElementById('colunaFontes').classList.toggle('aberta');
+};
+
+window.setTab = function(tab) {
+  const abas = ['estudio','chat','caderno','fontes'];
+  abas.forEach(t => {
+    const panel = document.getElementById('painel-' + t);
+    const btnD = document.getElementById('tab-' + t);       // desktop
+    const btnM = document.getElementById('tab-m-' + t);     // mobile
+    const ativo = t === tab;
+    if (panel) {
+      panel.style.display = ativo ? (t === 'chat' ? 'flex' : 'block') : 'none';
+      if (ativo) panel.style.flex = '1';
+    }
+    [btnD, btnM].forEach(btn => {
+      if (!btn) return;
+      btn.style.background = ativo ? '#6c5ce7' : 'rgba(255,255,255,.05)';
+      btn.style.color = ativo ? 'white' : '#928ea0';
+    });
+  });
+};
+
+// ── FORMATOS: SELEÇÃO ─────────────────────────
+window.toggleFormato = function(card) {
+  if (!verificarUsoDiario()) return;
+  const tipo = card.dataset.tipo;
+  if (card.classList.contains('selecionado')) {
+    card.classList.remove('selecionado');
+    formatosSelecionados = formatosSelecionados.filter(t => t !== tipo);
+  } else {
+    if (formatosSelecionados.length >= 4) { toast('Máximo de 4 formatos! Desmarque um para trocar.'); return; }
+    card.classList.add('selecionado');
+    formatosSelecionados.push(tipo);
+  }
+  const count = formatosSelecionados.length;
+  document.getElementById('contadorFormatos').textContent = count + '/4';
+  const btn = document.getElementById('btnGerar');
+  btn.disabled = count < 4;
+  btn.style.opacity = count < 4 ? '.4' : '1';
+  btn.style.cursor = count < 4 ? 'not-allowed' : 'pointer';
+};
+
+// ── INICIAR GERAÇÃO ───────────────────────────
+window.iniciarGeracao = async function() {
+  const titulo = document.getElementById('tituloMaterial').value.trim();
+  if (!titulo) { toast('⚠️ Digite o nome do material antes de gerar!'); document.getElementById('tituloMaterial').focus(); return; }
+  if (fontes.length === 0) { toast('Adicione ao menos uma fonte!'); return; }
+  if (formatosSelecionados.length < 4) { toast('Selecione exatamente 4 formatos!'); return; }
+
+  // Bloquear botão e cards não selecionados
+  document.getElementById('btnGerar').disabled = true;
+  document.getElementById('btnGerar').textContent = 'Gerando...';
+  document.querySelectorAll('.saida-card:not(.selecionado)').forEach(c => c.classList.add('bloqueado'));
+
+  formatosGerados = 0;
+  registrarUso();
+
+  for (const tipo of formatosSelecionados) {
+    const card = document.querySelector(`.saida-card[data-tipo="${tipo}"]`);
+    const tituloFormato = card?.dataset.titulo || tipo;
+    const icone = card?.dataset.icone || 'article';
+    await gerarConteudoFormato(tipo, icone, tituloFormato, titulo);
+    if (card) card.classList.add('gerado');
+    formatosGerados++;
+  }
+
+  // Liberar Quiz após os 4
+  document.getElementById('areaQuizLock').style.display = 'none';
+  document.getElementById('areaQuiz').style.display = 'block';
+  toast('✅ Os 4 formatos foram gerados! Quiz liberado 🎉', 4000);
+};
+
+// ── GERAR CONTEÚDO ────────────────────────────
+async function gerarConteudoFormato(tipo, icone, tituloFormato, tituloMaterial) {
+  document.getElementById('modalResultado').classList.add('aberto');
+  document.getElementById('modalTipo').textContent = tituloFormato + ' — ' + tituloMaterial;
+  document.getElementById('modalIcon').textContent = icone;
+  document.getElementById('modalConteudo').innerHTML =
+    '<div style="display:flex;align-items:center;gap:.75rem;padding:1.5rem 0;">' +
+    '<span class="dot"></span><span class="dot"></span><span class="dot"></span>' +
+    '<span style="font-size:.85rem;color:#928ea0;">A PROfa está gerando ' + tituloFormato.toLowerCase() + '...</span></div>';
+
+  const prompts = {
+    resumo_texto:`Crie um RESUMO EM TEXTO completo e detalhado do conteúdo das fontes abaixo, focando nos pontos mais relevantes para a redação do ENEM. Estruture com título, tópicos principais e conclusão.`,
+    audio:`Crie um ROTEIRO DE ÁUDIO conversacional (como um podcast de estudo) baseado nas fontes. Use linguagem natural. Ideal para ouvir enquanto se desloca.`,
+    video:`Crie um ROTEIRO DE VÍDEO AULA com narração, exemplos visuais e divisão em cenas. Adequado para uma aula de redação ENEM de 10 minutos.`,
+    mapa_mental:`Crie um MAPA MENTAL textual estruturado em formato hierárquico (use recuo e símbolos →). O tema central deve ser o assunto principal. Inclua subtópicos, conceitos e exemplos.`,
+    infografico:`Crie um INFOGRÁFICO em formato textual estruturado. Use seções, dados, comparações e listas visuais. Formato para um infográfico sobre redação ENEM.`,
+    relatorio:`Crie um RELATÓRIO DETALHADO baseado nas fontes. Inclua: Introdução, Desenvolvimento, Análise Crítica, Aplicação Prática para o ENEM e Conclusão.`,
+    flashcards:`Crie 6 FLASHCARDS de estudo. Responda APENAS com JSON sem markdown: [{"frente":"pergunta","verso":"resposta"}]`,
+    caderno_pessoal:`O aluno tem dificuldade em C4 (Coesão) e C5 (Proposta de Intervenção). Crie um PLANO DE MELHORIA personalizado com: diagnóstico, lista de conectivos essenciais, 5 exercícios práticos e checklist de revisão.`,
+  };
+
+  const prompt = (prompts[tipo] || 'Analise as fontes e gere conteúdo relevante para o ENEM.') +
+    '\n\nFONTES:\n' + getFontesTexto() +
+    '\n\nResponda em português brasileiro, formatado com markdown simples. Seja detalhado e didático.';
+
+  try {
+    if (tipo === 'flashcards') {
+      const model = genAI.getGenerativeModel({model:'gemini-2.0-flash'});
+      const result = await model.generateContent(prompt);
+      const json = result.response.text().trim().replace(/```json|```/g,'').trim();
+      const cards = JSON.parse(json);
+      resultadoAtual = cards.map(c => c.frente + ': ' + c.verso).join('\n');
+      document.getElementById('modalConteudo').innerHTML = '<p style="color:#45edee;font-size:.85rem;margin-bottom:1rem;">✓ ' + cards.length + ' cartões gerados! Feche para ver abaixo.</p>';
+      renderFlashcards(cards);
+    } else {
+      const model = genAI.getGenerativeModel({model:'gemini-2.0-flash'});
+      const result = await model.generateContent(prompt);
+      const texto = result.response.text();
+      resultadoAtual = texto;
+      document.getElementById('modalConteudo').innerHTML = formatarMarkdown(texto);
+    }
+  } catch(err) {
+    document.getElementById('modalConteudo').innerHTML = '<p style="color:#ffb4ab">Erro ao gerar. Verifique sua conexão.</p>';
+  }
+}
+
+window.gerarConteudo = gerarConteudoFormato;
+
+function renderFlashcards(cards) {
+  document.getElementById('areaFlashcards').style.display = 'block';
+  document.getElementById('labelFlashcard').textContent = cards.length + ' cartões · clique para virar';
+  const grid = document.getElementById('gridFlashcards');
+  grid.innerHTML = '';
+  cards.forEach(card => {
+    const div = document.createElement('div');
+    div.className = 'flashcard';
+    div.onclick = () => div.classList.toggle('flipped');
+    div.innerHTML =
+      '<div class="flashcard-inner">' +
+        '<div class="flashcard-front"><div><p style="font-size:.65rem;color:#45edee;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Frente</p><p style="font-size:.82rem;font-weight:700;color:#e1e2eb;">' + card.frente + '</p></div></div>' +
+        '<div class="flashcard-back"><div><p style="font-size:.65rem;color:#c6bfff;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Verso</p><p style="font-size:.75rem;color:#e1e2eb;line-height:1.5;">' + card.verso + '</p></div></div>' +
+      '</div>';
+    grid.appendChild(div);
+  });
+}
+
+// ── QUIZ ──────────────────────────────────────
+window.gerarQuiz = async function() {
+  if (fontes.length === 0) { toast('Adicione fontes primeiro!'); return; }
+  toast('🧪 Gerando quiz...');
+  const prompt = 'Crie 5 QUESTÕES DE MÚLTIPLA ESCOLHA baseadas nas fontes. Responda APENAS com JSON sem markdown:\n[{"pergunta":"...","alternativas":["A)...","B)...","C)...","D)..."],"correta":0,"explicacao":"..."}]\nFoque em ENEM/redação.\n\nFONTES:\n' + getFontesTexto();
+  try {
+    const model = genAI.getGenerativeModel({model:'gemini-2.0-flash'});
+    const result = await model.generateContent(prompt);
+    const json = result.response.text().trim().replace(/```json|```/g,'').trim();
+    const questoes = JSON.parse(json);
+    quizRespostas = {};
+    const container = document.getElementById('containerQuiz');
+    container.innerHTML = '';
+    questoes.forEach((q, qi) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'background:#10131a;border:1px solid rgba(71,69,84,.25);border-radius:.875rem;padding:1rem;';
+      div.innerHTML =
+        '<p style="font-size:.7rem;font-weight:700;color:#928ea0;margin-bottom:.5rem;">Questão ' + (qi+1) + ' de ' + questoes.length + '</p>' +
+        '<p style="font-size:.85rem;font-weight:700;color:#e1e2eb;margin-bottom:.75rem;">' + q.pergunta + '</p>' +
+        '<div id="alt-' + qi + '" style="display:flex;flex-direction:column;gap:.4rem;">' +
+        q.alternativas.map((alt, ai) =>
+          '<button onclick="responderQuiz(' + qi + ',' + ai + ',' + q.correta + ',\'' + q.explicacao.replace(/'/g,"\\'") + '\',this)" style="text-align:left;padding:.75rem 1rem;border-radius:.75rem;border:1px solid rgba(71,69,84,.3);background:#0b0e14;color:#c8c4d7;font-size:.82rem;cursor:pointer;transition:all .2s;">' + alt + '</button>'
+        ).join('') +
+        '</div><div id="exp-' + qi + '" style="display:none;margin-top:.625rem;padding:.625rem .875rem;border-radius:.75rem;font-size:.78rem;"></div>';
+      container.appendChild(div);
+    });
+    toast('✓ Quiz com ' + questoes.length + ' questões!');
+  } catch(err) { toast('Erro ao gerar quiz.'); }
+};
+
+window.responderQuiz = function(qi, ai, correta, explicacao, btn) {
+  if (quizRespostas[qi] !== undefined) return;
+  quizRespostas[qi] = ai;
+  const btns = document.getElementById('alt-'+qi).querySelectorAll('button');
+  btns.forEach((b,i) => {
+    if (i === correta) { b.style.borderColor='#4ade80'; b.style.color='#4ade80'; b.style.background='rgba(74,222,128,.08)'; }
+    else if (i === ai && ai !== correta) { b.style.borderColor='#ffb4ab'; b.style.color='#ffb4ab'; b.style.background='rgba(255,180,171,.08)'; }
+  });
+  const exp = document.getElementById('exp-'+qi);
+  exp.style.display = 'block';
+  exp.textContent = (ai === correta ? '✓ Correto! ' : '✗ Errado. ') + explicacao;
+  exp.style.background = ai === correta ? 'rgba(74,222,128,.08)' : 'rgba(255,180,171,.08)';
+  exp.style.border = '1px solid ' + (ai === correta ? 'rgba(74,222,128,.2)' : 'rgba(255,180,171,.2)');
+  exp.style.color = ai === correta ? '#4ade80' : '#ffb4ab';
+};
+
+// ── CADERNO PESSOAL ───────────────────────────
+window.gerarCadernoPessoal = async function() {
+  toast('📓 A PROfa está gerando seu caderno...');
+  const prompt = 'Você é a PROfa do Estúdio PRO da RedaON. Crie um CADERNO DE ESTUDO PERSONALIZADO para o aluno que tem dificuldade em C4 (Coesão) e C5 (Proposta de Intervenção). Fontes:\n' + getFontesTexto() + '\nInclua: diagnóstico, plano semanal (3 dias), 10 conectivos com exemplos, modelo de proposta de intervenção e checklist de revisão. Use markdown.';
+  try {
+    const model = genAI.getGenerativeModel({model:'gemini-2.0-flash'});
+    const result = await model.generateContent(prompt);
+    const texto = result.response.text();
+    document.getElementById('cadernGerado').style.display = 'block';
+    document.getElementById('cadernTexto').innerHTML = formatarMarkdown(texto);
+    toast('✓ Caderno gerado!');
+  } catch(err) { toast('Erro ao gerar caderno.'); }
+};
+
+// ── CHAT ──────────────────────────────────────
+const historico = [];
+window.perguntarRapido = function(texto) {
+  document.getElementById('chatInput').value = texto;
+  window.enviarChat();
+};
+
+window.enviarChat = async function() {
+  if (chatMensagens >= MAX_CHAT) { toast('Limite de 20 mensagens atingido para este material.'); return; }
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  chatMensagens++;
+  document.getElementById('contadorChat').textContent = (MAX_CHAT - chatMensagens) + ' mensagens restantes';
+
+  const chatEl = document.getElementById('chatMensagens');
+  chatEl.innerHTML += '<div style="display:flex;justify-content:flex-end;"><div class="chat-bubble-user" style="padding:.75rem 1rem;max-width:20rem;"><p style="font-size:.85rem;color:#e1e2eb;">' + msg + '</p></div></div>';
+
+  const typingDiv = document.createElement('div');
+  typingDiv.style.cssText = 'display:flex;align-items:center;gap:4px;padding:.5rem;';
+  typingDiv.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  chatEl.appendChild(typingDiv);
+  chatEl.scrollTop = chatEl.scrollHeight;
+
+  historico.push({role:'user',content:msg});
+
+  try {
+    const model = genAI.getGenerativeModel({model:'gemini-2.0-flash'});
+    const prompt = 'Você é a PROfa do Estúdio PRO da RedaON, especialista em redação ENEM. Responda de forma direta e didática.\n\nFontes:\n' + getFontesTexto() + '\n\nHistórico:\n' + historico.slice(-6).map(h=>(h.role==='user'?'Aluno':'PROfa')+': '+h.content).join('\n') + '\n\nPergunta: ' + msg;
+    const result = await model.generateContent(prompt);
+    const resposta = result.response.text();
+    historico.push({role:'assistant',content:resposta});
+    typingDiv.remove();
+    chatEl.innerHTML += '<div style="display:flex;align-items:flex-start;gap:.75rem;max-width:32rem;"><div style="width:2rem;height:2rem;border-radius:50%;background:rgba(69,237,238,.15);border:2px solid rgba(69,237,238,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:1rem;color:#45edee;font-variation-settings:\'FILL\' 1;">neurology</span></div><div class="chat-bubble-profa" style="padding:1rem;"><p style="font-size:.85rem;color:#e1e2eb;line-height:1.6;">' + formatarMarkdown(resposta) + '</p></div></div>';
+  } catch(err) {
+    typingDiv.remove();
+    toast('Erro ao conectar com a PROfa.');
+  }
+  chatEl.scrollTop = chatEl.scrollHeight;
+};
+
+// ── FONTES ────────────────────────────────────
+window.adicionarArquivos = function(files) {
+  Array.from(files).forEach(file => {
+    // Validar se é um tipo aceito
+    const ext = file.name.split('.').pop().toLowerCase();
+    const aceitos = ['pdf','jpg','jpeg','png','mp3','txt','doc','docx','mp4','xlsx','pptx'];
+    if (!aceitos.includes(ext)) { toast('⚠️ Formato não suportado: ' + ext); return; }
+    fonteCount++;
+    fontes.push({id:fonteCount,titulo:file.name,conteudo:'Arquivo: '+file.name,tipo:'upload'});
+    const div = document.createElement('div');
+    div.className = 'fonte-card';
+    div.style.cssText = 'padding:.75rem;display:flex;align-items:flex-start;gap:.75rem;';
+    div.innerHTML =
+      '<div style="width:2rem;height:2rem;border-radius:.5rem;background:rgba(108,92,231,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:.9rem;color:#c6bfff;font-variation-settings:\'FILL\' 1;">upload_file</span></div>' +
+      '<div style="flex:1;min-width:0;"><p style="font-size:.75rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + file.name + '</p><p style="font-size:.65rem;color:#928ea0;">' + (file.size/1024).toFixed(0) + ' KB</p></div>' +
+      '<button onclick="this.closest(\'.fonte-card\').remove();fontes=fontes.filter(f=>f.titulo!==\'' + file.name + '\');atualizarContador()" style="background:none;border:none;color:#474554;cursor:pointer;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:1rem;">close</span></button>';
+    document.getElementById('listaFontes').appendChild(div);
+    atualizarContador();
+    toast('✓ ' + file.name + ' adicionado!');
+  });
+};
+
+window.handleDrop = function(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('over');
+  if (e.dataTransfer.files.length) window.adicionarArquivos(e.dataTransfer.files);
+};
+
+window.adicionarTexto = function() {
+  const texto = document.getElementById('inputTexto').value.trim();
+  if (!texto) return;
+  fonteCount++;
+  fontes.push({id:fonteCount,titulo:'Texto #'+fonteCount,conteudo:texto,tipo:'texto'});
+  const div = document.createElement('div');
+  div.className = 'fonte-card';
+  div.style.cssText = 'padding:.75rem;display:flex;align-items:flex-start;gap:.75rem;';
+  div.innerHTML = '<div style="width:2rem;height:2rem;border-radius:.5rem;background:rgba(69,237,238,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:.9rem;color:#45edee;font-variation-settings:\'FILL\' 1;">content_paste</span></div><div style="flex:1;min-width:0;"><p style="font-size:.75rem;font-weight:700;">Texto #'+fonteCount+'</p><p style="font-size:.65rem;color:#928ea0;">'+texto.length+' caracteres</p></div><button onclick="this.closest(\'.fonte-card\').remove();atualizarContador()" style="background:none;border:none;color:#474554;cursor:pointer;flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:1rem;">close</span></button>';
+  document.getElementById('listaFontes').appendChild(div);
+  document.getElementById('inputTexto').value = '';
+  atualizarContador();
+  toast('✓ Texto adicionado!');
+};
+
+window.buscarFonte = function() {
+  const busca = document.getElementById('inputBusca').value.trim();
+  if (!busca) return;
+  toast('🔍 Busca na web — disponível em produção!');
+  document.getElementById('inputBusca').value = '';
+};
+
+window.atualizarContador = function() {
+  const total = document.getElementById('listaFontes').querySelectorAll('.fonte-card').length;
+  document.getElementById('contadorFontes').textContent = total + ' fonte' + (total !== 1 ? 's' : '');
+};
+
+// ── MODAL ─────────────────────────────────────
+window.fecharModal = function() {
+  document.getElementById('modalResultado').classList.remove('aberto');
+};
+document.getElementById('modalResultado').addEventListener('click', function(e) {
+  if (e.target === this) window.fecharModal();
+});
+
+window.copiarResultado = function() {
+  navigator.clipboard.writeText(resultadoAtual).then(() => toast('✓ Copiado!'));
+};
+
+window.salvarNoCaderno = function() {
+  const tipo = document.getElementById('modalTipo').textContent;
+  document.getElementById('cadernGerado').style.display = 'block';
+  const cadernTexto = document.getElementById('cadernTexto');
+  cadernTexto.innerHTML += (cadernTexto.innerHTML ? '<hr style="margin:1rem 0;border-color:rgba(71,69,84,.3)"/>' : '') + '<p><strong style="color:#45edee;">' + tipo + '</strong></p>' + formatarMarkdown(resultadoAtual);
+  window.fecharModal();
+  setTab('caderno');
+  toast('✓ Salvo no Caderno Elite! Acesse a aba Caderno Elite.');
+};
+
+// ── UTILITÁRIOS ───────────────────────────────
+function getFontesTexto() {
+  return fontes.map(f => '[' + f.titulo + ']: ' + f.conteudo).join('\n\n');
+}
+
+function formatarMarkdown(texto) {
+  return texto
+    .replace(/\*\*(.*?)\*\*/g,'<strong style="color:#e1e2eb">$1</strong>')
+    .replace(/^## (.*)/gm,'<p style="font-size:1rem;font-weight:700;color:#e1e2eb;margin:.875rem 0 .4rem">$1</p>')
+    .replace(/^# (.*)/gm,'<p style="font-size:1.1rem;font-weight:800;color:#45edee;margin:1rem 0 .5rem">$1</p>')
+    .replace(/^- (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0">• $1</p>')
+    .replace(/^(\d+)\. (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0"><strong style="color:#45edee">$1.</strong> $2</p>')
+    .replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');
+}
+
+window.toast = function(msg, dur=3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+};
+
+// Init
+verificarUsoDiario();
+</script>
+</body>
+</html>

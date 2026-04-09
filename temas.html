@@ -45,7 +45,9 @@
   #sidebar-toggle:checked ~ aside { transform: translateX(0); }
   #sidebar-toggle:checked ~ .content-overlay { display: block; }
 
-  .tab-btn.ativo { background: #6c5ce7; color: white; }
+  .tab-btn { background: #1d2026; color: #c8c4d7; border: 1px solid rgba(255,255,255,0.05); transition: all .2s; }
+  .tab-btn.ativo { background: #6c5ce7 !important; color: #fff !important; border-color: #6c5ce7 !important; }
+  .tab-btn:hover:not(.ativo) { background: #272a31; color: #e1e2eb; }
   @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(0.7)} }
   .card-compartilhado { border: 1px solid rgba(69,237,238,0.15); }
   .card-compartilhado:hover { border-color: rgba(69,237,238,0.4) !important; }
@@ -72,7 +74,30 @@
   /* Instituição dropdown */
   #painelInstituicoes { display:none; }
   #painelInstituicoes.aberto { display:block; }
+
+  /* ── Hamburger sidebar ─────────────────────────────── */
+  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
+  #sidebar.open { transform: translateX(0); }
+  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:44; }
+  #overlay.open { display:block; }
+  @media(min-width:1024px){
+    #sidebar { transform: translateX(0) !important; }
+    #overlay { display:none !important; }
+    .main-with-sidebar { margin-left:256px; }
+  }
+  @media(max-width:1023px){
+    .main-with-sidebar { margin-left:0 !important; }
+  }
+
+  /* ── Scrollbar sidebar invisível no desktop ── */
+  #sidebar nav::-webkit-scrollbar { width: 4px; }
+  #sidebar nav::-webkit-scrollbar-track { background: transparent; }
+  #sidebar nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 10px; }
+  #sidebar nav:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+  #sidebar nav { scrollbar-width: none; }
+  #sidebar nav:hover { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
 </style>
+<script src="supabase-auth.js"></script>
 </head>
 <body class="bg-background text-on-surface antialiased overflow-x-hidden">
 
@@ -121,12 +146,13 @@
 </div>
 
 <input class="hidden peer" id="sidebar-toggle" type="checkbox"/>
-<label class="content-overlay fixed inset-0 bg-black/60 z-[45] hidden transition-opacity lg:hidden" for="sidebar-toggle"></label>
+<button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden mr-2"><span class="material-symbols-outlined">menu</span></button>
 
 <div class="flex h-screen overflow-hidden relative z-10">
 
   <!-- SIDEBAR -->
-  <aside class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50 transition-transform duration-300 -translate-x-full lg:translate-x-0 shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)]">
+  <div id="overlay" onclick="toggleSidebar()"></div>
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50 transition-transform duration-300 -translate-x-full lg:translate-x-0 shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)]">
     <div class="flex items-center px-2 mb-10">
       <div class="flex items-baseline italic">
         <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
@@ -140,29 +166,29 @@
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Minhas Redações</span></a>
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span><span class="font-medium text-sm">Evolução</span></a>
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html"><span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span></a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Estúdio <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
     </nav>
     <div class="mt-auto pt-6 border-t border-outline-variant/10">
       <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
-        <img alt="Alan Alves" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
-        <div class="flex flex-col"><span class="text-sm font-semibold text-on-surface">Alan Alves</span><span class="text-xs text-on-surface-variant">Estudante Premium</span></div>
+        <img alt="{{USUARIO}}" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
+        <div class="flex flex-col"><span class="text-sm font-semibold text-on-surface">{{USUARIO}}</span><span class="text-xs text-on-surface-variant">Estudante Premium</span></div>
       </div>
-      <a onclick="if(confirm('Deseja sair?'))window.location.href='login.html'" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
+      <a onclick="authLogout()" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
         <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
       </a>
     </div>
   </aside>
 
   <!-- MAIN -->
-  <main class="flex-1 flex flex-col h-full relative bg-surface-container-lowest lg:ml-64 w-full">
+  <main class="flex-1 flex flex-col h-full relative bg-surface-container-lowest lg:ml-64 main-with-sidebar main-with-sidebar w-full">
 
     <!-- TOP BAR -->
     <header class="h-20 flex items-center justify-between px-6 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5 w-full">
       <div class="flex items-center gap-4">
-        <label class="cursor-pointer p-2 rounded-full text-[#E1E2EB] hover:bg-white/10 transition-all lg:hidden" for="sidebar-toggle">
-          <span class="material-symbols-outlined">menu</span>
-        </label>
+        
+          
         <div class="flex items-center gap-3">
           <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">library_books</span>
           <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Temas</h2>
@@ -195,7 +221,7 @@
         <!-- ABAS -->
         <section class="flex flex-col gap-6">
           <div class="flex gap-3 overflow-x-auto pb-2 no-scrollbar flex-wrap">
-            <button onclick="mudarAba('atualidades')" id="tab-atualidades" class="tab-btn ativo px-5 py-2 text-white text-sm font-bold rounded-lg whitespace-nowrap">Atualidades</button>
+            <button onclick="mudarAba('atualidades')" id="tab-atualidades" class="tab-btn ativo px-5 py-2 bg-[#1d2026] text-white text-sm font-bold rounded-lg border border-white/5 whitespace-nowrap">Atualidades</button>
             <button onclick="mudarAba('enem')" id="tab-enem" class="tab-btn px-5 py-2 bg-[#1d2026] text-[#c8c4d7] hover:bg-[#272a31] text-sm rounded-lg border border-white/5 whitespace-nowrap">ENEM (2020-2024)</button>
             <button onclick="mudarAba('top10')" id="tab-top10" class="tab-btn px-5 py-2 bg-[#1d2026] text-[#c8c4d7] hover:bg-[#272a31] text-sm rounded-lg border border-white/5 whitespace-nowrap">Top 10 Universidades</button>
             <button onclick="mudarAba('regioes')" id="tab-regioes" class="tab-btn px-5 py-2 bg-[#1d2026] text-[#c8c4d7] hover:bg-[#272a31] text-sm rounded-lg border border-white/5 whitespace-nowrap">Melhores por Região</button>
@@ -244,6 +270,8 @@
 </div>
 
 <script>
+  authGuard('aluno');
+
 // ═══════════════════════════════════════════════════════
 // BANCO DE DADOS DE TEMAS
 // ═══════════════════════════════════════════════════════
@@ -502,8 +530,8 @@ function renderTemas() {
     card.innerHTML = `
       <div class="h-44 bg-gradient-to-br ${t.cor} to-black relative">
         <span class="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] uppercase font-bold border" style="background:${t.eixoCor}20;color:${t.eixoCor};border-color:${t.eixoCor}40">${t.eixo}</span>
-        <button onclick="salvarTema(event,${t.id})" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-all" title="Salvar tema">
-          <span class="material-symbols-outlined text-sm text-white">bookmark</span>
+        <button onclick="salvarTema(event,${t.id})" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-all" title="Salvar tema" id="btn-salvar-${t.id}">
+          <span class="material-symbols-outlined text-sm text-white" id="ico-salvar-${t.id}">bookmark</span>
         </button>
       </div>
       <div class="p-6">
@@ -513,7 +541,7 @@ function renderTemas() {
         </div>
         <h3 class="text-base font-bold text-white leading-tight mb-6 group-hover:text-[#45edee] transition-colors">${t.titulo}</h3>
         <div class="flex items-center justify-between">
-          <span class="nivel-${t.nivel} text-xs font-bold uppercase">${t.nivel.charAt(0).toUpperCase()+t.nivel.slice(1)}</span>
+          <span class="nivel-${t.nivel} text-xs font-bold uppercase">${t.nivel==='avancado'?'AVANÇADO':t.nivel==='intermediario'?'INTERMEDIÁRIO':'BÁSICO'}</span>
           <button onclick="escreverTema(${t.id})" class="bg-[#6c5ce7] text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:scale-105 transition-all">
             Escrever <span class="material-symbols-outlined text-xs">arrow_forward</span>
           </button>
@@ -657,7 +685,7 @@ function renderCompartilhados(grid) {
             <span class="text-[11px] text-on-surface-variant">${t.professora} · ${t.turma}</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="nivel-${t.nivel} text-xs font-bold uppercase">${t.nivel.charAt(0).toUpperCase()+t.nivel.slice(1)}</span>
+            <span class="nivel-${t.nivel} text-xs font-bold uppercase">${t.nivel==='avancado'?'AVANÇADO':t.nivel==='intermediario'?'INTERMEDIÁRIO':'BÁSICO'}</span>
           </div>
           <button onclick="escreverTema('${t.id}')"
             class="w-full py-2.5 rounded-xl text-xs font-black text-[#002020] flex items-center justify-center gap-1.5 mt-2 hover:scale-[1.02] active:scale-95 transition-all"
@@ -698,7 +726,7 @@ function renderCompartilhados(grid) {
                 <span class="material-symbols-outlined text-xs text-on-surface-variant/40 group-hover/mat:text-[#45edee] transition-colors">open_in_new</span>
               </button>`).join('')}
 
-            <!-- Botão Estúdio da Blanche -->
+            <!-- Botão Estúdio da PROfa -->
             <button onclick="abrirEstudioCompleto('${t.id}')"
               class="w-full flex items-center gap-2.5 p-2.5 rounded-xl transition-all mt-1 hover:scale-[1.01] active:scale-95"
               style="background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.2);">
@@ -706,7 +734,7 @@ function renderCompartilhados(grid) {
                 <span class="material-symbols-outlined text-sm text-[#c6bfff]" style="font-variation-settings:'FILL' 1;">psychology</span>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-bold text-[#c6bfff]">Abrir no Estúdio da Blanche</p>
+                <p class="text-xs font-bold text-[#c6bfff]">Abrir no Estúdio da PROfa</p>
                 <p class="text-[10px] text-on-surface-variant">Resumo, Quiz, Mapa Mental e mais</p>
               </div>
               <span class="material-symbols-outlined text-xs text-[#c6bfff]/40">arrow_forward</span>
@@ -721,13 +749,13 @@ function renderCompartilhados(grid) {
 
 window.abrirEstudio = function(nomeArquivo) {
   sessionStorage.setItem('estudio_arquivo', nomeArquivo);
-  toast('📚 Abrindo "' + nomeArquivo + '" no Estúdio da Blanche...');
-  setTimeout(() => window.location.href = 'estudio-blanche.html', 1200);
+  toast('📚 Abrindo "' + nomeArquivo + '" no Estúdio da PROfa...');
+  setTimeout(() => window.location.href = 'estudio-profa.html', 1200);
 };
 
 window.abrirEstudioCompleto = function(temaId) {
   sessionStorage.setItem('estudio_tema_id', temaId);
-  window.location.href = 'estudio-blanche.html';
+  window.location.href = 'estudio-profa.html';
 };
 
 function filtrarTemas() { renderTemas(); }
@@ -773,5 +801,13 @@ document.getElementById('modalSugestao').addEventListener('click', function(e) {
 // Init
 renderTemas();
 </script>
+
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+</script>
+
 </body>
 </html>
