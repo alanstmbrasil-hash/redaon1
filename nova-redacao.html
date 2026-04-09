@@ -879,6 +879,15 @@
 </div>
 
 <script>
+
+  // Logout universal
+  window.authLogout = window.authLogout || function() {
+    if (confirm('Deseja sair da sua conta?')) {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+  };
+  window.sair = window.authLogout;
 // Variáveis globais compartilhadas entre módulos
 var modoEliteAtivo = false;
 var dicaAtual = 0;

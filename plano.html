@@ -512,6 +512,15 @@
 </main>
 
 <script>
+
+  // Logout universal
+  window.authLogout = window.authLogout || function() {
+    if (confirm('Deseja sair da sua conta?')) {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+  };
+  window.sair = window.authLogout;
   authGuard('aluno');
 
 // ═══════════════════════════════════════════════

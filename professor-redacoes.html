@@ -76,7 +76,7 @@
       <div style="width:2.5rem;height:2.5rem;border-radius:50%;background:rgba(108,92,231,.2);display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="color:#c6bfff;">person</span></div>
       <div><p id="nomeProf" style="font-size:.85rem;font-weight:700;color:#e1e2eb;">Professor</p><p style="font-size:.7rem;color:#6c5ce7;font-weight:700;">⭐ Portal Pro</p></div>
     </div>
-    <a onclick="if(confirm('Sair?'))window.location.href='login.html'" style="display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.75rem;color:#ff8b8b;font-size:.85rem;cursor:pointer;" onmouseover="this.style.background='rgba(255,100,100,.1)'" onmouseout="this.style.background='transparent'">
+    <a onclick="authLogout()" style="display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.75rem;color:#ff8b8b;font-size:.85rem;cursor:pointer;" onmouseover="this.style.background='rgba(255,100,100,.1)'" onmouseout="this.style.background='transparent'">
       <span class="material-symbols-outlined" style="font-size:1.1rem;">logout</span>Sair
     </a>
   </div>
@@ -367,6 +367,15 @@ function toast(msg,dur=3000){const el=document.getElementById('toast');el.textCo
 renderLista();
 </script>
 <script>
+
+  // Logout universal
+  window.authLogout = window.authLogout || function() {
+    if (confirm('Deseja sair da sua conta?')) {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+  };
+  window.sair = window.authLogout;
   authGuard('professor');
 
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
