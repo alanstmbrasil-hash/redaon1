@@ -896,10 +896,25 @@ var dicasPendentes = 0;
 var intervaloDicas = null;
 </script>
 
-<script type="module">
-  import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
-  const API_KEY = "AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU";
-  const genAI = new GoogleGenerativeAI(API_KEY);
+<script>
+  const GEMINI_API_KEY = "AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU";
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+  async function geminiGenerate(prompt, arquivoBase64 = null, arquivoMime = null) {
+    const parts = [];
+    if (arquivoBase64) {
+      parts.push({ inline_data: { mime_type: arquivoMime, data: arquivoBase64 } });
+    }
+    parts.push({ text: prompt });
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erro Gemini');
+    return data.candidates[0].content.parts[0].text;
+  }
 
   // ── NOME USUÁRIO ───────────────────────────────────
   const NOME_USUARIO = authGetNome();
@@ -1095,42 +1110,98 @@ var intervaloDicas = null;
   window.fecharPainel = () => document.getElementById('painel-blanche').classList.remove('aberto');
 
   function abrirLoading() {
-    document.getElementById('painel-conteudo').innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:1rem;"><div class="spinner"></div><p style="color:#c8c4d7;">PROfa analisando sua redação...</p></div>`;
+    const elite = modoEliteAtivo;
+    document.getElementById('painel-conteudo').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;gap:1rem;">
+        <div class="spinner" style="${elite ? 'border-color:rgba(201,162,39,.2);border-top-color:#C9A227;' : ''}"></div>
+        <p style="color:#c8c4d7;font-size:.9rem;">${elite ? '⭐ PROfa Elite analisando sua redação...' : 'PROfa analisando sua redação...'}</p>
+        ${elite ? '<p style="color:#928ea0;font-size:.75rem;">Análise profunda — pode levar alguns segundos a mais</p>' : ''}
+      </div>`;
     document.getElementById('painel-blanche').classList.add('aberto');
   }
 
-  function renderResultado(d) {
+  function renderResultado(d, elite = false) {
     const nomes = ["Domínio da língua","Compreensão do tema","Seleção e organização","Mecanismos linguísticos","Proposta de intervenção"];
+
     const comps = (d.competencias||[]).map((c,i) => {
       const pct = Math.round((c.nota/200)*100);
-      return `<div class="comp-card"><div style="display:flex;justify-content:space-between;margin-bottom:.5rem;"><span style="font-size:.8rem;font-weight:600;color:#c8c4d7;">C${i+1} — ${nomes[i]}</span><span style="font-size:.8rem;font-weight:700;color:#45edee;">${c.nota}/200</span></div><div class="barra-bg"><div class="barra-fill" style="width:${pct}%"></div></div></div>`;
+      const corNota = c.nota >= 160 ? '#4ade80' : c.nota >= 120 ? '#45edee' : c.nota >= 80 ? '#fabd00' : '#ffb4ab';
+
+      // Bloco de reescrita sugerida (só Elite)
+      const reescrita = elite && c.reescrita ? `
+        <div style="margin-top:.75rem;background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.2);border-radius:.625rem;padding:.75rem;">
+          <p style="font-size:.65rem;font-weight:700;color:#C9A227;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.375rem;">✏️ Sugestão de reescrita</p>
+          <p style="font-size:.78rem;color:#c8c4d7;line-height:1.6;font-style:italic;">"${c.reescrita}"</p>
+        </div>` : '';
+
+      // O que falta para 200 (só Elite)
+      const faltaPara200 = elite && c.para_200 ? `
+        <div style="margin-top:.5rem;">
+          <p style="font-size:.7rem;color:#928ea0;line-height:1.5;"><span style="color:#C9A227;font-weight:700;">Para 200:</span> ${c.para_200}</p>
+        </div>` : '';
+
+      return `
+        <div class="comp-card" style="${elite ? 'border-color:rgba(201,162,39,.15);' : ''}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+            <span style="font-size:.8rem;font-weight:600;color:#c8c4d7;">C${i+1} — ${nomes[i]}</span>
+            <span style="font-size:.85rem;font-weight:800;color:${corNota};">${c.nota}/200</span>
+          </div>
+          <div class="barra-bg"><div class="barra-fill" style="width:${pct}%;${elite ? 'background:linear-gradient(90deg,#A07A10,#C9A227);' : ''}"></div></div>
+          <p style="font-size:.78rem;color:#c8c4d7;line-height:1.6;margin-top:.625rem;">${c.feedback}</p>
+          ${reescrita}${faltaPara200}
+        </div>`;
     }).join('');
+
+    // Badge Elite no topo
+    const badgeElite = elite ? `
+      <div style="display:flex;align-items:center;justify-content:center;gap:.375rem;margin-bottom:1rem;">
+        <span style="font-size:.7rem;font-weight:800;color:#C9A227;background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.3);padding:.25rem .875rem;border-radius:9999px;letter-spacing:.06em;">⭐ ANÁLISE ELITE PRO</span>
+      </div>` : '';
+
+    // Plano de melhoria (só Elite)
+    const planoMelhoria = elite && d.plano_melhoria ? `
+      <div style="background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.2);border-radius:.75rem;padding:1rem;margin-top:1rem;">
+        <p style="font-size:.7rem;font-weight:700;color:#C9A227;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">🎯 Plano para sua próxima redação</p>
+        <p style="font-size:.82rem;color:#c8c4d7;line-height:1.7;">${d.plano_melhoria}</p>
+      </div>` : '';
+
+    // Comentário geral
+    const comentario = d.comentario_geral ? `
+      <div style="background:${elite ? 'rgba(201,162,39,.08)' : 'rgba(108,92,231,.1)'};border:1px solid ${elite ? 'rgba(201,162,39,.25)' : 'rgba(108,92,231,.25)'};border-radius:.75rem;padding:1rem;font-size:.82rem;color:#c8c4d7;line-height:1.6;margin-top:1rem;font-style:italic;">"${d.comentario_geral}"</div>` : '';
+
     document.getElementById('painel-conteudo').innerHTML = `
+      ${badgeElite}
       <div style="text-align:center;margin-bottom:1.5rem;">
         <div style="font-size:.75rem;color:#928ea0;text-transform:uppercase;">Nota Total</div>
-        <div class="nota-numero">${d.nota_total||'—'}</div>
+        <div class="nota-numero" style="${elite ? 'background:linear-gradient(135deg,#C9A227,#E8BC3A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;' : ''}">${d.nota_total||'—'}</div>
         <div style="font-size:.75rem;color:#928ea0;">/1000 pontos</div>
-      </div>${comps}
-      ${d.comentario_geral?`<div style="background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.25);border-radius:.75rem;padding:1rem;font-size:.82rem;color:#c8c4d7;line-height:1.6;margin-top:1rem;font-style:italic;">"${d.comentario_geral}"</div>`:''}`;
+      </div>
+      ${comps}${comentario}${planoMelhoria}`;
   }
+
+  // ── PROMPTS ────────────────────────────────────────
+  const PROMPT_NORMAL = `Você é a PROfa da RedaON. Avalie pelas 5 competências do ENEM (0 a 200 cada). Seja justa e pedagógica. Responda APENAS com JSON válido, sem texto extra:
+{"nota_total":<soma>,"competencias":[{"nota":<0-200>,"feedback":"<feedback direto de 1-2 frases>"},{"nota":<0-200>,"feedback":"<feedback>"},{"nota":<0-200>,"feedback":"<feedback>"},{"nota":<0-200>,"feedback":"<feedback>"},{"nota":<0-200>,"feedback":"<feedback>"}],"comentario_geral":"<mensagem encorajadora e direta>","pontos_fortes":"<texto>","pontos_melhorar":"<texto>"}`;
+
+  const PROMPT_ELITE = `Você é a PROfa Elite da RedaON — a mentora mais exigente e precisa do ENEM. Este aluno usou o Modo Elite durante a escrita e merece uma análise de alto nível. Avalie pelas 5 competências (0 a 200 cada) com profundidade real. Para cada competência: aponte erros específicos com localização no texto, explique o impacto na nota, sugira uma reescrita de trecho e diga exatamente o que falta para atingir 200. Seja rigorosa — notas altas só para redações que realmente merecem. Responda APENAS com JSON válido, sem texto extra:
+{"nota_total":<soma>,"competencias":[{"nota":<0-200>,"feedback":"<análise detalhada de 3-4 frases apontando erros específicos e impacto na nota>","reescrita":"<sugestão de reescrita de um trecho real do texto>","para_200":"<o que falta especificamente para tirar 200 nesta competência>"},{"nota":<0-200>,"feedback":"<análise>","reescrita":"<reescrita>","para_200":"<o que falta>"},{"nota":<0-200>,"feedback":"<análise>","reescrita":"<reescrita>","para_200":"<o que falta>"},{"nota":<0-200>,"feedback":"<análise>","reescrita":"<reescrita>","para_200":"<o que falta>"},{"nota":<0-200>,"feedback":"<análise>","reescrita":"<reescrita>","para_200":"<o que falta>"}],"comentario_geral":"<avaliação honesta e motivadora do desempenho geral>","pontos_fortes":"<o que o aluno fez bem de verdade>","pontos_melhorar":"<os 3 principais pontos críticos para a próxima redação>","plano_melhoria":"<plano de ação concreto com 3 passos para a próxima redação chegar mais perto de 1000>"}`;
 
   // ── ENVIO ──────────────────────────────────────────
   async function enviar() {
     const texto = textarea.value.trim();
     if (!texto && !arquivoBase64) { toast('Escreva sua redação ou envie um arquivo!'); return; }
     if (!arquivoBase64 && texto.split(/\s+/).length < 50) { toast('Mínimo de 50 palavras para enviar.'); return; }
-    document.getElementById('btnEnviar').textContent = 'Analisando...';
+    const elite = modoEliteAtivo;
+    document.getElementById('btnEnviar').textContent = elite ? '⭐ Analisando no Elite...' : 'Analisando...';
     document.getElementById('btnEnviar').disabled = true;
     abrirLoading();
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      const instrucao = `Você é a PROfa da RedaON. Avalie pelas 5 competências do ENEM (0 a 200 cada). Responda APENAS com JSON válido, sem texto extra: {"nota_total":<soma>,"competencias":[{"nota":<0-200>,"feedback":"<texto>"},{"nota":<0-200>,"feedback":"<texto>"},{"nota":<0-200>,"feedback":"<texto>"},{"nota":<0-200>,"feedback":"<texto>"},{"nota":<0-200>,"feedback":"<texto>"}],"comentario_geral":"<mensagem>","pontos_fortes":"<texto>","pontos_melhorar":"<texto>"}`;
-      const result = arquivoBase64
-        ? await model.generateContent([instrucao, { inlineData: { data: arquivoBase64, mimeType: arquivoMime } }])
-        : await model.generateContent(instrucao + "\n\nRedação:\n" + texto);
-      const json = result.response.text().trim().replace(/```json|```/g,'').trim();
+      const instrucao = elite ? PROMPT_ELITE : PROMPT_NORMAL;
+      const prompt = arquivoBase64 ? instrucao : instrucao + "\n\nRedação:\n" + texto;
+      const raw = await geminiGenerate(prompt, arquivoBase64 || null, arquivoMime || null);
+      const json = raw.trim().replace(/```json|```/g,'').trim();
       const dados = JSON.parse(json);
-      renderResultado(dados);
+      renderResultado(dados, elite);
 
       // ── SALVAR NO SUPABASE ──────────────────────────
       try {
@@ -1159,7 +1230,7 @@ var intervaloDicas = null;
             pontos_fortes: dados.pontos_fortes || '',
             pontos_melhorar: dados.pontos_melhorar || ''
           });
-          toast('✅ Redação salva no seu histórico!', 4000);
+          toast(elite ? '⭐ Análise Elite salva no seu histórico!' : '✅ Redação salva no seu histórico!', 4000);
         }
       } catch(errSave) {
         console.warn('Erro ao salvar no banco:', errSave);
@@ -1169,7 +1240,7 @@ var intervaloDicas = null;
     } catch(err) {
       document.getElementById('painel-conteudo').innerHTML = `<div style="text-align:center;padding:2rem;color:#928ea0;">Erro na análise. Tente novamente.</div>`;
     } finally {
-      document.getElementById('btnEnviar').textContent = 'Enviar para correção';
+      document.getElementById('btnEnviar').textContent = elite ? '⭐ Enviar para análise Elite' : 'Enviar para correção';
       document.getElementById('btnEnviar').disabled = false;
     }
   }
@@ -1198,11 +1269,7 @@ var intervaloDicas = null;
   }
 </script>
 
-<script type="module">
-import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
-const API_KEY = "AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU";
-const genAI = new GoogleGenerativeAI(API_KEY);
-
+<script>
 // ══════════════════════════════════════
 // MODO ELITE DA PROFA (vars globais declaradas acima)
 // ══════════════════════════════════════
@@ -1432,9 +1499,8 @@ window.toggleMaterial = async function(tipo) {
   </div>`;
 
   try {
-    const model = genAI.getGenerativeModel({ model:'gemini-2.0-flash' });
-    const result = await model.generateContent(PROMPTS_MATERIAL[tipo](tema));
-    conteudo.innerHTML = `<div style="padding-top:.5rem;">${mdSimples(result.response.text())}</div>
+    const texto = await geminiGenerate(PROMPTS_MATERIAL[tipo](tema));
+    conteudo.innerHTML = `<div style="padding-top:.5rem;">${mdSimples(texto)}</div>
       <button onclick="copiarMaterial('${tipo}')" style="margin-top:.75rem;display:flex;align-items:center;gap:.375rem;padding:.375rem .75rem;border-radius:.625rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.3);color:#928ea0;font-size:.72rem;font-weight:600;cursor:pointer;">
         <span class="material-symbols-outlined" style="font-size:.85rem;">content_copy</span>Copiar
       </button>`;
