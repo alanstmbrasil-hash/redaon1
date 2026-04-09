@@ -298,6 +298,14 @@
 <script>
   authGuard('professor');
 
+  // Logout local — garante funcionamento mesmo se supabase-auth.js falhar
+  window.authLogout = window.authLogout || function() {
+    if (confirm('Deseja sair da sua conta?')) {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+  };
+
   // Nome e saudação
   const NOME_PROF = authGetNome();
   document.getElementById('nomeProf').textContent = NOME_PROF;
