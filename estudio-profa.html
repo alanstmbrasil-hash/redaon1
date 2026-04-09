@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Estúdio PRO</title>
+<title>RedaON | Elite PRO</title>
 <script>tailwind = { config: {} };</script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
@@ -123,7 +123,7 @@ body{font-family:'Inter',sans-serif;background:#0b0e14;color:#e1e2eb;overflow-x:
     <a href="minhas-redacoes.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">edit_note</span>Minhas Redações</a>
     <a href="evolucao.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">trending_up</span>Evolução</a>
     <a href="plano.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">menu_book</span>Plano de Estudo</a>
-    <a href="estudio-profa.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:700;color:#45edee;text-decoration:none;background:#1d2026;border-right:3px solid #45edee;"><span class="material-symbols-outlined">neurology</span>Estúdio PRO</a>
+    <a href="estudio-profa.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:700;color:#45edee;text-decoration:none;background:#1d2026;border-right:3px solid #45edee;"><span class="material-symbols-outlined">neurology</span>Elite PRO</a>
     <a href="ranking.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">leaderboard</span>Ranking</a>
     <a href="configuracoes.html" style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.75rem;font-size:.875rem;font-weight:500;color:#c8c4d7;text-decoration:none;" onmouseover="this.style.background='#1d2026'" onmouseout="this.style.background='transparent'"><span class="material-symbols-outlined">settings</span>Configurações</a>
   </nav>
@@ -147,7 +147,7 @@ body{font-family:'Inter',sans-serif;background:#0b0e14;color:#e1e2eb;overflow-x:
       <div style="display:flex;align-items:center;gap:.5rem;">
         <button id="btnHamburger" onclick="toggleSidebar()" style="padding:.5rem;border-radius:.5rem;background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">menu</span></button>
         <span class="material-symbols-outlined" style="color:#45edee;">neurology</span>
-        <h2 style="font-size:1rem;font-weight:800;">Estúdio PRO</h2>
+        <h2 style="font-size:1rem;font-weight:800;">Elite PRO</h2>
         <span style="padding:.15rem .5rem;background:rgba(69,237,238,.1);color:#45edee;font-size:.65rem;font-weight:700;border-radius:9999px;border:1px solid rgba(69,237,238,.2);">ELITE</span>
       </div>
       <div style="display:flex;align-items:center;gap:.5rem;">
@@ -405,7 +405,7 @@ body{font-family:'Inter',sans-serif;background:#0b0e14;color:#e1e2eb;overflow-x:
               <span class="material-symbols-outlined" style="font-size:1.1rem;color:#45edee;font-variation-settings:'FILL' 1;">neurology</span>
             </div>
             <div class="chat-bubble-profa" style="padding:1rem;max-width:26rem;">
-              <p style="font-size:.85rem;line-height:1.6;">Olá! 👋 Sou a PROfa do Estúdio PRO. Posso tirar suas dúvidas sobre os materiais carregados. Você tem 2 fontes da PROfa. Carla. O que quer explorar?</p>
+              <p style="font-size:.85rem;line-height:1.6;">Olá! 👋 Sou a PROfa do Elite PRO. Posso tirar suas dúvidas sobre os materiais carregados. Você tem 2 fontes da PROfa. Carla. O que quer explorar?</p>
               <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;">
                 <button onclick="perguntarRapido('Quais são os principais erros de coesão?')" style="font-size:.7rem;padding:.3rem .75rem;border-radius:9999px;border:1px solid rgba(69,237,238,.3);color:#45edee;background:rgba(69,237,238,.05);cursor:pointer;">Erros de coesão</button>
                 <button onclick="perguntarRapido('Como melhorar minha proposta de intervenção C5?')" style="font-size:.7rem;padding:.3rem .75rem;border-radius:9999px;border:1px solid rgba(69,237,238,.3);color:#45edee;background:rgba(69,237,238,.05);cursor:pointer;">Proposta C5</button>
@@ -806,7 +806,7 @@ window.responderQuiz = function(qi, ai, correta, explicacao, btn) {
 // ── CADERNO PESSOAL ───────────────────────────
 window.gerarCadernoPessoal = async function() {
   toast('📓 A PROfa está gerando seu caderno...');
-  const prompt = 'Você é a PROfa do Estúdio PRO da RedaON. Crie um CADERNO DE ESTUDO PERSONALIZADO para o aluno que tem dificuldade em C4 (Coesão) e C5 (Proposta de Intervenção). Fontes:\n' + getFontesTexto() + '\nInclua: diagnóstico, plano semanal (3 dias), 10 conectivos com exemplos, modelo de proposta de intervenção e checklist de revisão. Use markdown.';
+  const prompt = 'Você é a PROfa do Elite PRO da RedaON. Crie um CADERNO DE ESTUDO PERSONALIZADO para o aluno que tem dificuldade em C4 (Coesão) e C5 (Proposta de Intervenção). Fontes:\n' + getFontesTexto() + '\nInclua: diagnóstico, plano semanal (3 dias), 10 conectivos com exemplos, modelo de proposta de intervenção e checklist de revisão. Use markdown.';
   try {
     const model = genAI.getGenerativeModel({model:'gemini-2.0-flash'});
     const result = await model.generateContent(prompt);
@@ -846,7 +846,7 @@ window.enviarChat = async function() {
 
   try {
     const model = genAI.getGenerativeModel({model:'gemini-2.0-flash'});
-    const prompt = 'Você é a PROfa do Estúdio PRO da RedaON, especialista em redação ENEM. Responda de forma direta e didática.\n\nFontes:\n' + getFontesTexto() + '\n\nHistórico:\n' + historico.slice(-6).map(h=>(h.role==='user'?'Aluno':'PROfa')+': '+h.content).join('\n') + '\n\nPergunta: ' + msg;
+    const prompt = 'Você é a PROfa do Elite PRO da RedaON, especialista em redação ENEM. Responda de forma direta e didática.\n\nFontes:\n' + getFontesTexto() + '\n\nHistórico:\n' + historico.slice(-6).map(h=>(h.role==='user'?'Aluno':'PROfa')+': '+h.content).join('\n') + '\n\nPergunta: ' + msg;
     const result = await model.generateContent(prompt);
     const resposta = result.response.text();
     historico.push({role:'assistant',content:resposta});
