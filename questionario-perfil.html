@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RedaON | Seu Perfil de Aprendizado</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --cyan: #45edee;
+    --purple: #6c5ce7;
+    --gold: #C9A227;
+    --surface: #1d2026;
+    --surface-low: #191c22;
+    --border: rgba(71,69,84,.25);
+    --text: #e1e2eb;
+    --muted: #928ea0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    overflow-x: hidden;
+  }
+
+  /* Background atmosphere */
+  .bg-glow {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  }
+  .bg-glow::before {
+    content: '';
+    position: absolute;
+    top: -20%; right: -10%;
+    width: 60%; height: 60%;
+    background: radial-gradient(ellipse, rgba(108,92,231,.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .bg-glow::after {
+    content: '';
+    position: absolute;
+    bottom: -10%; left: -10%;
+    width: 50%; height: 50%;
+    background: radial-gradient(ellipse, rgba(69,237,238,.07) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  /* Container principal */
+  .container {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 580px;
+  }
+
+  /* Logo */
+  .logo {
+    display: flex; align-items: baseline;
+    font-style: italic; font-weight: 900;
+    font-size: 1.5rem; letter-spacing: -.05em;
+    margin-bottom: 2rem;
+    justify-content: center;
+  }
+  .logo span:first-child { color: white; }
+  .logo span:last-child { color: var(--cyan); }
+
+  /* Card principal */
+  .card {
+    background: rgba(29,32,38,.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 1.5rem;
+    padding: 2rem 1.75rem;
+    box-shadow: 0 32px 64px rgba(0,0,0,.4);
+  }
+
+  /* Header do card */
+  .card-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .card-header .badge {
+    display: inline-flex; align-items: center; gap: .375rem;
+    font-size: .7rem; font-weight: 700;
+    color: var(--cyan);
+    background: rgba(69,237,238,.08);
+    border: 1px solid rgba(69,237,238,.2);
+    border-radius: 9999px;
+    padding: .3rem .875rem;
+    text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: 1rem;
+  }
+  .card-header h1 {
+    font-size: 1.35rem; font-weight: 800;
+    color: var(--text); line-height: 1.3;
+    margin-bottom: .5rem;
+  }
+  .card-header p {
+    font-size: .85rem; color: var(--muted); line-height: 1.6;
+  }
+
+  /* Barra de progresso */
+  .progress-wrap {
+    margin-bottom: 1.75rem;
+  }
+  .progress-info {
+    display: flex; justify-content: space-between;
+    font-size: .72rem; font-weight: 700;
+    color: var(--muted);
+    margin-bottom: .5rem;
+  }
+  .progress-info span:last-child { color: var(--cyan); }
+  .progress-bar-bg {
+    height: 4px; background: rgba(71,69,84,.3);
+    border-radius: 9999px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), var(--cyan));
+    border-radius: 9999px;
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* Pergunta */
+  .pergunta-wrap { animation: slideIn .35s ease forwards; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .pergunta-num {
+    font-size: .65rem; font-weight: 800;
+    color: var(--purple); text-transform: uppercase;
+    letter-spacing: .1em; margin-bottom: .5rem;
+  }
+  .pergunta-texto {
+    font-size: 1rem; font-weight: 700;
+    color: var(--text); line-height: 1.5;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Opções */
+  .opcoes { display: flex; flex-direction: column; gap: .625rem; }
+
+  .opcao {
+    display: flex; align-items: center; gap: .875rem;
+    padding: .875rem 1rem;
+    background: rgba(25,28,34,.8);
+    border: 1px solid var(--border);
+    border-radius: .875rem;
+    cursor: pointer;
+    transition: all .2s;
+    text-align: left;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .opcao::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(108,92,231,.08), rgba(69,237,238,.04));
+    opacity: 0; transition: opacity .2s;
+  }
+  .opcao:hover { border-color: rgba(108,92,231,.4); transform: translateY(-1px); }
+  .opcao:hover::before { opacity: 1; }
+  .opcao.selecionada {
+    border-color: var(--cyan);
+    background: rgba(69,237,238,.06);
+    box-shadow: 0 0 0 1px rgba(69,237,238,.2), 0 4px 20px rgba(69,237,238,.08);
+  }
+  .opcao.selecionada::before { opacity: 1; }
+
+  .opcao-emoji {
+    font-size: 1.3rem; flex-shrink: 0;
+    width: 2.25rem; height: 2.25rem;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.04);
+    border-radius: .625rem;
+  }
+  .opcao-texto {
+    font-size: .875rem; font-weight: 500;
+    color: var(--text); line-height: 1.4;
+    flex: 1;
+  }
+  .opcao.selecionada .opcao-texto { color: white; font-weight: 600; }
+
+  .check-icon {
+    width: 1.25rem; height: 1.25rem;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+    font-size: .7rem; color: transparent;
+  }
+  .opcao.selecionada .check-icon {
+    background: var(--cyan);
+    border-color: var(--cyan);
+    color: #0b0e14;
+  }
+
+  /* Botão avançar */
+  .btn-avancar {
+    width: 100%; margin-top: 1.5rem;
+    padding: .875rem;
+    background: linear-gradient(135deg, var(--purple), #5a4fd6);
+    border: none; border-radius: .875rem;
+    color: white; font-size: .95rem; font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+    transition: all .2s;
+    opacity: .4; pointer-events: none;
+  }
+  .btn-avancar.ativo {
+    opacity: 1; pointer-events: all;
+    box-shadow: 0 4px 20px rgba(108,92,231,.35);
+  }
+  .btn-avancar.ativo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(108,92,231,.45);
+  }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+  /* ── TELA DE LOADING / TRANSIÇÃO ── */
+  #tela-loading {
+    display: none;
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--bg);
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1.5rem;
+    padding: 2rem;
+  }
+  #tela-loading.ativo { display: flex; animation: fadeIn .5s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .avatares {
+    display: flex; align-items: flex-end; gap: 1.5rem;
+    margin-bottom: .5rem;
+  }
+  .avatar-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: .5rem;
+  }
+  .avatar-circulo {
+    width: 5rem; height: 5rem;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem;
+    position: relative;
+  }
+  .avatar-profa .avatar-circulo {
+    background: linear-gradient(135deg, rgba(108,92,231,.3), rgba(69,237,238,.2));
+    border: 2px solid rgba(69,237,238,.4);
+    animation: pulse-cyan 2s ease-in-out infinite;
+  }
+  .avatar-mentor .avatar-circulo {
+    background: linear-gradient(135deg, rgba(201,162,39,.2), rgba(108,92,231,.2));
+    border: 2px solid rgba(201,162,39,.4);
+    animation: pulse-gold 2s ease-in-out infinite .5s;
+  }
+  @keyframes pulse-cyan {
+    0%,100% { box-shadow: 0 0 0 0 rgba(69,237,238,.3); }
+    50%      { box-shadow: 0 0 0 12px rgba(69,237,238,0); }
+  }
+  @keyframes pulse-gold {
+    0%,100% { box-shadow: 0 0 0 0 rgba(201,162,39,.3); }
+    50%      { box-shadow: 0 0 0 12px rgba(201,162,39,0); }
+  }
+  .avatar-nome {
+    font-size: .7rem; font-weight: 700;
+    color: var(--muted); text-align: center;
+  }
+
+  .loading-titulo {
+    font-size: 1.2rem; font-weight: 800;
+    text-align: center; color: var(--text);
+  }
+  .loading-sub {
+    font-size: .85rem; color: var(--muted);
+    text-align: center; line-height: 1.6; max-width: 300px;
+  }
+
+  /* Dots animados */
+  .dots { display: flex; gap: .5rem; margin-top: .5rem; }
+  .dot {
+    width: .5rem; height: .5rem;
+    border-radius: 50%;
+    background: var(--cyan);
+    animation: bounce .9s ease-in-out infinite;
+  }
+  .dot:nth-child(2) { animation-delay: .2s; background: var(--purple); }
+  .dot:nth-child(3) { animation-delay: .4s; background: var(--gold); }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); opacity: .4; }
+    50%      { transform: translateY(-8px); opacity: 1; }
+  }
+
+  /* ── TELA FINAL ── */
+  #tela-final {
+    display: none;
+    text-align: center;
+    animation: slideIn .4s ease;
+  }
+  #tela-final.ativo { display: block; }
+
+  .perfil-badge {
+    display: inline-flex; flex-direction: column; align-items: center;
+    gap: .75rem; margin-bottom: 1.5rem;
+  }
+  .perfil-icone {
+    width: 5rem; height: 5rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.25rem;
+    background: linear-gradient(135deg, var(--purple), var(--cyan));
+    box-shadow: 0 8px 32px rgba(108,92,231,.4);
+  }
+  .perfil-nome {
+    font-size: 1.5rem; font-weight: 900;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .perfil-desc {
+    font-size: .875rem; color: var(--muted);
+    line-height: 1.7; max-width: 400px; margin: 0 auto 1.5rem;
+  }
+  .btn-comecar {
+    width: 100%; padding: .875rem;
+    background: linear-gradient(135deg, var(--cyan), #38c8c9);
+    border: none; border-radius: .875rem;
+    color: #0b0e14; font-size: .95rem; font-weight: 800;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 4px 20px rgba(69,237,238,.3);
+  }
+  .btn-comecar:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(69,237,238,.4); }
+
+  /* word-break padrão RedaON */
+  h1,h2,h3,p,span,a,button,div { word-break: normal !important; overflow-wrap: break-word; hyphens: none !important; }
+  /* Scrollbar fina */
+  * { scrollbar-width: thin; scrollbar-color: #32353c transparent; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
+</style>
+<script src="supabase-auth.js"></script>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<!-- TELA LOADING / TRANSIÇÃO -->
+<div id="tela-loading">
+  <div class="avatares">
+    <div class="avatar-wrap avatar-profa">
+      <div class="avatar-circulo">🧑‍🏫</div>
+      <span class="avatar-nome">PROfa</span>
+    </div>
+    <div class="avatar-wrap avatar-mentor">
+      <div class="avatar-circulo">🧑‍💻</div>
+      <span class="avatar-nome">Mentor</span>
+    </div>
+  </div>
+  <p class="loading-titulo">Conhecendo seu perfil...</p>
+  <p class="loading-sub">A PROfa e o Mentor estão analisando suas respostas para personalizar toda a sua experiência.</p>
+  <div class="dots">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+</div>
+
+<!-- CONTAINER PRINCIPAL -->
+<div class="container" id="container-quiz">
+
+  <div class="logo"><span>Reda</span><span>ON</span></div>
+
+  <div class="card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="badge">
+        <span class="material-symbols-outlined" style="font-size:.85rem;">psychology</span>
+        Personalização
+      </div>
+      <h1>Como você aprende melhor?</h1>
+      <p>São só 5 perguntas rápidas para a PROfa entender seu estilo e te orientar do jeito certo.</p>
+    </div>
+
+    <!-- Barra de progresso -->
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="progresso-texto">Pergunta 1 de 5</span>
+        <span id="progresso-pct">20%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="barra-fill" style="width:20%"></div>
+      </div>
+    </div>
+
+    <!-- Área da pergunta -->
+    <div id="area-pergunta"></div>
+
+    <!-- Botão avançar -->
+    <button class="btn-avancar" id="btn-avancar" onclick="avancar()">
+      Próxima <span class="material-symbols-outlined" style="font-size:1.1rem;">arrow_forward</span>
+    </button>
+
+    <!-- Tela final (dentro do card) -->
+    <div id="tela-final"></div>
+
+  </div>
+</div>
+
+<script>
+// ── DADOS DO QUIZ ──────────────────────────────────────────
+const PERGUNTAS = [
+  {
+    texto: 'Quando você decide estudar para o ENEM, o que mais te move?',
+    opcoes: [
+      { emoji: '🏆', texto: 'Quero a melhor nota possível e não aceito menos que isso', disc: 'D' },
+      { emoji: '🌟', texto: 'Quero mostrar que sou capaz e inspirar quem está ao meu redor', disc: 'I' },
+      { emoji: '🛡️', texto: 'Quero me sentir seguro e bem preparado no dia da prova', disc: 'S' },
+      { emoji: '📊', texto: 'Quero entender cada detalhe e ter certeza que não errei nada', disc: 'C' },
+    ]
+  },
+  {
+    texto: 'Quando você trava na redação, o que prefere fazer?',
+    opcoes: [
+      { emoji: '⚡', texto: 'Continuo escrevendo mesmo sem ter certeza — depois ajusto', disc: 'D' },
+      { emoji: '💬', texto: 'Converso com alguém ou busco inspiração em outros textos', disc: 'I' },
+      { emoji: '🔄', texto: 'Releio o que escrevi e retomo com calma, passo a passo', disc: 'S' },
+      { emoji: '🔍', texto: 'Paro, pesquiso e só continuo quando entendo o problema', disc: 'C' },
+    ]
+  },
+  {
+    texto: 'Quando alguém corrige sua redação, o que você mais valoriza?',
+    opcoes: [
+      { emoji: '🎯', texto: 'Que vá direto ao ponto — o que está errado e como corrigir', disc: 'D' },
+      { emoji: '💡', texto: 'Que reconheça o que foi bem antes de apontar o que melhorar', disc: 'I' },
+      { emoji: '🤝', texto: 'Que seja gentil e me dê tempo para absorver as críticas', disc: 'S' },
+      { emoji: '📋', texto: 'Que explique tecnicamente o porquê de cada erro', disc: 'C' },
+    ]
+  },
+  {
+    texto: 'Como você prefere organizar seus estudos?',
+    opcoes: [
+      { emoji: '🚀', texto: 'Estudo muito quando tenho vontade, sem seguir um roteiro fixo', disc: 'D' },
+      { emoji: '🎲', texto: 'Vario bastante — gosto de coisas novas para não enjoar', disc: 'I' },
+      { emoji: '📅', texto: 'Sigo uma rotina definida, dia a dia, sem pular etapas', disc: 'S' },
+      { emoji: '📝', texto: 'Planejo tudo com antecedência e sigo o plano à risca', disc: 'C' },
+    ]
+  },
+  {
+    texto: 'Ao terminar uma redação, o que você sente primeiro?',
+    opcoes: [
+      { emoji: '💪', texto: 'Satisfação de ter concluído — quero logo saber a nota', disc: 'D' },
+      { emoji: '😊', texto: 'Orgulho — gosto de compartilhar e ouvir o que acharam', disc: 'I' },
+      { emoji: '😌', texto: 'Alívio — fico feliz quando sei que segui a estrutura certa', disc: 'S' },
+      { emoji: '🧐', texto: 'Aquela vontade de reler tudo mais uma vez antes de enviar', disc: 'C' },
+    ]
+  }
+];
+
+// Perfis combinados — primário/secundário
+const PERFIS = {
+  'D/I': { nome: 'Executor Inspirador',    emoji: '🚀', desc: 'Você age rápido e arrasta pessoas com sua energia. Na redação, seu desafio é desacelerar e aprofundar os argumentos — mas sua força já está na convicção.' },
+  'D/S': { nome: 'Executor Consistente',   emoji: '⚡', desc: 'Você combina determinação com paciência. Quando foca em algo, termina. Na redação, aproveite isso para estruturar bem cada parágrafo.' },
+  'D/C': { nome: 'Executor Analítico',     emoji: '🎯', desc: 'Você quer resultado e busca embasamento. É o perfil ideal para redações de alto nível — direto, preciso e bem fundamentado.' },
+  'I/D': { nome: 'Influente com Foco',     emoji: '🌟', desc: 'Você tem carisma e iniciativa. Na redação, sua escrita é envolvente — o trabalho é canalizar essa energia para a estrutura do ENEM.' },
+  'I/S': { nome: 'Influente Acolhedor',    emoji: '💛', desc: 'Você conecta e inspira. Sua redação tende a ser empática e humana. Foque em fortalecer os argumentos com dados concretos.' },
+  'I/C': { nome: 'Influente Criterioso',   emoji: '💡', desc: 'Você é criativo e cuidadoso. Combina ideias originais com análise — um perfil raro que, bem direcionado, produz redações memoráveis.' },
+  'S/D': { nome: 'Estável com Força',      emoji: '🛡️', desc: 'Você é constante e determinado quando necessário. Na redação, sua organização é um ponto forte — trabalhe a assertividade na proposta de intervenção.' },
+  'S/I': { nome: 'Estável e Colaborativo', emoji: '🤝', desc: 'Você é empático e parceiro. Sua redação tende a ser bem articulada. O desafio é ser mais direto na tese e na conclusão.' },
+  'S/C': { nome: 'Estável e Criterioso',   emoji: '📅', desc: 'Você é organizado, metódico e preciso. Provavelmente segue a estrutura à risca. Seu desafio é tornar o texto mais vivo e original.' },
+  'C/D': { nome: 'Analítico Decisivo',     emoji: '📊', desc: 'Você analisa e age. Suas redações tendem a ser bem fundamentadas. O desafio é não engesar o texto com excesso de dados — equilibre emoção e razão.' },
+  'C/I': { nome: 'Analítico Criativo',     emoji: '🔍', desc: 'Você une precisão e criatividade. É um perfil forte para redações — consegue argumentar com dados e ainda tornar o texto interessante.' },
+  'C/S': { nome: 'Analítico Paciente',     emoji: '📝', desc: 'Você é detalhista e constante. Planeja tudo antes de escrever. Seu ponto de atenção é o tempo — no ENEM, a execução precisa ser ágil.' },
+};
+
+// ── ESTADO ─────────────────────────────────────────────────
+let perguntaAtual = 0;
+let respostas = []; // disc selecionado por pergunta
+let opcaoSelecionada = null;
+
+// ── RENDER PERGUNTA ────────────────────────────────────────
+function renderPergunta() {
+  const p = PERGUNTAS[perguntaAtual];
+  const area = document.getElementById('area-pergunta');
+  opcaoSelecionada = null;
+  document.getElementById('btn-avancar').classList.remove('ativo');
+
+  area.innerHTML = `
+    <div class="pergunta-wrap">
+      <p class="pergunta-num">Pergunta ${perguntaAtual + 1} de ${PERGUNTAS.length}</p>
+      <p class="pergunta-texto">${p.texto}</p>
+      <div class="opcoes">
+        ${p.opcoes.map((op, i) => `
+          <button class="opcao" onclick="selecionarOpcao(${i}, '${op.disc}')" id="opcao-${i}">
+            <span class="opcao-emoji">${op.emoji}</span>
+            <span class="opcao-texto">${op.texto}</span>
+            <span class="check-icon">✓</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>`;
+
+  // Atualizar progresso
+  const pct = Math.round(((perguntaAtual + 1) / PERGUNTAS.length) * 100);
+  document.getElementById('barra-fill').style.width = pct + '%';
+  document.getElementById('progresso-texto').textContent = `Pergunta ${perguntaAtual + 1} de ${PERGUNTAS.length}`;
+  document.getElementById('progresso-pct').textContent = pct + '%';
+
+  // Última pergunta muda o botão
+  const btn = document.getElementById('btn-avancar');
+  if (perguntaAtual === PERGUNTAS.length - 1) {
+    btn.innerHTML = 'Ver meu perfil <span class="material-symbols-outlined" style="font-size:1.1rem;">auto_awesome</span>';
+  } else {
+    btn.innerHTML = 'Próxima <span class="material-symbols-outlined" style="font-size:1.1rem;">arrow_forward</span>';
+  }
+}
+
+function selecionarOpcao(idx, disc) {
+  // Remove seleção anterior
+  document.querySelectorAll('.opcao').forEach(el => el.classList.remove('selecionada'));
+  // Seleciona nova
+  document.getElementById('opcao-' + idx).classList.add('selecionada');
+  opcaoSelecionada = disc;
+  document.getElementById('btn-avancar').classList.add('ativo');
+}
+
+function avancar() {
+  if (!opcaoSelecionada) return;
+  respostas.push(opcaoSelecionada);
+
+  if (perguntaAtual < PERGUNTAS.length - 1) {
+    perguntaAtual++;
+    renderPergunta();
+  } else {
+    mostrarLoading();
+  }
+}
+
+// ── CALCULAR PERFIL DISC ───────────────────────────────────
+function calcularPerfil() {
+  const contagem = { D: 0, I: 0, S: 0, C: 0 };
+  respostas.forEach(r => contagem[r] += 2);
+
+  // Ordenar por pontuação
+  const ordenado = Object.entries(contagem).sort((a,b) => b[1] - a[1]);
+  const primario   = ordenado[0][0];
+  const secundario = ordenado[1][0];
+  const chave = `${primario}/${secundario}`;
+
+  return { primario, secundario, chave, contagem };
+}
+
+// ── LOADING ────────────────────────────────────────────────
+function mostrarLoading() {
+  document.getElementById('container-quiz').style.display = 'none';
+  document.getElementById('tela-loading').classList.add('ativo');
+
+  // Simula processamento (2.5s) e mostra resultado
+  setTimeout(() => {
+    document.getElementById('tela-loading').classList.remove('ativo');
+    document.getElementById('container-quiz').style.display = 'flex';
+    mostrarResultado();
+  }, 2800);
+}
+
+// ── RESULTADO ─────────────────────────────────────────────
+function mostrarResultado() {
+  const { chave, primario, secundario, contagem } = calcularPerfil();
+  const perfil = PERFIS[chave] || {
+    nome: `Perfil ${chave}`,
+    emoji: '⭐',
+    desc: 'Seu perfil é único! A PROfa vai se adaptar para te orientar da melhor forma.'
+  };
+
+  // Esconde quiz, mostra final dentro do card
+  document.getElementById('area-pergunta').style.display = 'none';
+  document.getElementById('btn-avancar').style.display = 'none';
+  document.querySelector('.card-header').style.display = 'none';
+  document.querySelector('.progress-wrap').style.display = 'none';
+
+  const telaFinal = document.getElementById('tela-final');
+  telaFinal.classList.add('ativo');
+  telaFinal.innerHTML = `
+    <div class="perfil-badge">
+      <div class="perfil-icone">${perfil.emoji}</div>
+      <p style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;">Seu perfil de aprendizado</p>
+      <p class="perfil-nome">${perfil.nome}</p>
+    </div>
+    <p class="perfil-desc">${perfil.desc}</p>
+    <div style="display:flex;gap:.5rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap;">
+      ${Object.entries(contagem).map(([k,v]) => `
+        <div style="padding:.375rem .75rem;border-radius:.625rem;background:rgba(255,255,255,.04);border:1px solid var(--border);font-size:.72rem;font-weight:700;color:${v===Math.max(...Object.values(contagem))?'var(--cyan)':'var(--muted)'};">
+          ${k} · ${v} pts
+        </div>`).join('')}
+    </div>
+    <button class="btn-comecar" onclick="salvarESeguir('${chave}', '${primario}', '${secundario}')">
+      Começar minha jornada 🚀
+    </button>
+    <p style="font-size:.7rem;color:var(--muted);margin-top:1rem;">A PROfa já sabe como te orientar. Vamos nessa!</p>
+  `;
+}
+
+// ── SALVAR NO SUPABASE E REDIRECIONAR ─────────────────────
+async function salvarESeguir(chave, primario, secundario) {
+  try {
+    await dbUpdatePerfil({
+      perfil_disc: chave,
+      disc_primario: primario,
+      disc_secundario: secundario
+    });
+  } catch(e) {
+    console.warn('Erro ao salvar perfil DISC:', e);
+    // Não bloqueia — segue mesmo assim
+  }
+  window.location.href = 'inicio.html';
+}
+
+// ── INIT ──────────────────────────────────────────────────
+authGuard('aluno');
+renderPergunta();
+</script>
+</body>
+</html>
