@@ -165,7 +165,7 @@
     <div class="flex items-center gap-4 lg:gap-6">
       <div class="hidden sm:flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
         <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
-        <span class="text-xs font-bold text-on-surface">940 pts</span>
+        <span class="text-xs font-bold text-on-surface" id="headerPontos">— pts</span>
       </div>
       <button onclick="toggleNotificacoes()" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
         <span class="material-symbols-outlined">notifications</span>
@@ -177,28 +177,20 @@
   <!-- CONTEÚDO -->
   <div class="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar space-y-12">
 
-    <!-- BANNER -->
-    <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#6c5ce7] to-[#45edee] p-8 lg:p-12 flex flex-col xl:flex-row justify-between items-center gap-8 shadow-2xl">
-      <div class="relative z-10 text-center xl:text-left">
-        <h1 id="saudacao" class="text-4xl lg:text-5xl xl:text-6xl font-black italic text-white mb-6 tracking-tight drop-shadow-lg leading-tight">
-          Bom dia,<br/><span id="nomeUsuarioBanner">Estudante</span>,
-        </h1>
-        <p class="text-white/90 text-base lg:text-lg max-w-md font-medium mx-auto xl:mx-0">
-          Explore seu potencial máximo!
-        </p>
-      </div>
-      <div class="flex flex-wrap justify-center gap-4 relative z-10 w-full xl:w-auto">
-        <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
-          <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Média</span>
-          <span class="text-white text-3xl font-black count-anim">760</span>
+    <!-- BANNER COM CARROSSEL DINÂMICO -->
+    <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#6c5ce7] to-[#45edee] p-8 lg:p-12 shadow-2xl">
+      <div class="flex flex-col xl:flex-row justify-between items-center gap-8">
+        <div class="relative z-10 text-center xl:text-left">
+          <h1 id="saudacao" class="text-4xl lg:text-5xl xl:text-6xl font-black italic text-white mb-3 tracking-tight drop-shadow-lg leading-tight">
+            Bom dia,<br/><span id="nomeUsuarioBanner">Estudante</span>,
+          </h1>
+          <p id="subtituloBanner" class="text-white/90 text-base lg:text-lg max-w-md font-medium mx-auto xl:mx-0">
+            Explore seu potencial máximo!
+          </p>
         </div>
-        <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
-          <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Ranking</span>
-          <span class="text-white text-3xl font-black count-anim">#42</span>
-        </div>
-        <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
-          <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">Evolução</span>
-          <span class="text-white text-3xl font-black count-anim">+40</span>
+        <div class="relative z-10 w-full xl:w-auto">
+          <div id="carrossel-slides" class="relative overflow-hidden rounded-2xl" style="min-height:120px;"></div>
+          <div id="carrossel-dots" class="flex justify-center gap-2 mt-4"></div>
         </div>
       </div>
       <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
@@ -334,40 +326,35 @@
 
 <script>
 
-  // Logout universal
-  window.authLogout = window.authLogout || function() {
-    if (confirm('Deseja sair da sua conta?')) {
-      localStorage.clear();
-      window.location.href = 'login.html';
-    }
-  };
-  window.sair = window.authLogout;
+  // ── GUARD + DISC ────────────────────────────────────
   authGuard('aluno');
 
-  // ── NOME DO USUÁRIO ─────────────────────────────────
+  // Verificar perfil DISC — se não tem, redirecionar para questionário
+  if (typeof authTemDiscPerfil === 'function' && !authTemDiscPerfil()) {
+    window.location.href = 'questionario-perfil.html';
+  }
+
+  // ── NOME + SAUDAÇÃO ─────────────────────────────────
   const NOME_USUARIO = authGetNome();
   document.getElementById('nomeUsuarioSidebar').textContent = NOME_USUARIO;
-  document.getElementById('nomeUsuarioBanner').textContent = NOME_USUARIO;
-
-  // ── SAUDAÇÃO DINÂMICA ──────────────────────────────
   const h = new Date().getHours();
   const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   document.getElementById('saudacao').innerHTML = `${saudacao},<br/><span id="nomeUsuarioBanner">${NOME_USUARIO}</span>,`;
 
-  // ── SIDEBAR HAMBÚRGUER ─────────────────────────────
+  // ── SIDEBAR ─────────────────────────────────────────
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('open');
   }
 
-  // ── NOTIFICAÇÕES ───────────────────────────────────
+  // ── NOTIFICAÇÕES ────────────────────────────────────
   let notifLidas = false;
   window.toggleNotificacoes = function() {
     notifLidas = !notifLidas;
     document.getElementById('badgeNotif').style.display = notifLidas ? 'none' : 'block';
   };
 
-  // ── AULAS ──────────────────────────────────────────
+  // ── AULAS ───────────────────────────────────────────
   window.acessarAula = function(nome) {
     const toast = document.createElement('div');
     toast.textContent = `Acessando: ${nome} 📚`;
@@ -376,7 +363,7 @@
     setTimeout(() => toast.remove(), 2500);
   };
 
-  // ── VÍDEOS ─────────────────────────────────────────
+  // ── VÍDEOS ──────────────────────────────────────────
   window.assistirVideo = function(titulo) {
     const toast = document.createElement('div');
     toast.textContent = `▶ ${titulo}`;
@@ -385,12 +372,195 @@
     setTimeout(() => toast.remove(), 2500);
   };
 
-  // ── SAIR ───────────────────────────────────────────
+  // ── SAIR ────────────────────────────────────────────
   window.sair = function() {
-    if (confirm('Deseja sair da sua conta?')) {
-      authLogout();
-    }
+    if (confirm('Deseja sair da sua conta?')) { authLogout(); }
   };
+
+  // ── CARROSSEL DINÂMICO ──────────────────────────────
+  let slideAtual = 0;
+  let intervalCarrossel = null;
+  let slides = [];
+
+  function criarSlide(label, valor, icone, cor = 'white') {
+    return `
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;">
+        <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
+          <span style="font-size:1.5rem;margin-bottom:4px;">${icone}</span>
+          <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">${label}</span>
+          <span class="text-white text-3xl font-black count-anim" style="color:${cor}">${valor}</span>
+        </div>
+      </div>`;
+  }
+
+  function criarSlideMultiplo(cards) {
+    const cardsHtml = cards.map(c => `
+      <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
+        <span style="font-size:1.2rem;margin-bottom:4px;">${c.icone}</span>
+        <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">${c.label}</span>
+        <span class="text-white text-2xl font-black count-anim">${c.valor}</span>
+      </div>`).join('');
+    return `<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;">${cardsHtml}</div>`;
+  }
+
+  function renderSlide(idx) {
+    const container = document.getElementById('carrossel-slides');
+    if (!container || !slides[idx]) return;
+    container.innerHTML = `<div style="animation:fadeSlide .4s ease">${slides[idx]}</div>`;
+    // Atualizar dots
+    const dots = document.getElementById('carrossel-dots');
+    if (dots) {
+      dots.querySelectorAll('span').forEach((d, i) => {
+        d.style.background = i === idx ? 'white' : 'rgba(255,255,255,0.4)';
+        d.style.transform = i === idx ? 'scale(1.3)' : 'scale(1)';
+      });
+    }
+  }
+
+  function iniciarCarrossel() {
+    const dots = document.getElementById('carrossel-dots');
+    if (dots) {
+      dots.innerHTML = slides.map((_, i) =>
+        `<span onclick="irSlide(${i})" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${i===0?'white':'rgba(255,255,255,0.4)'};cursor:pointer;transition:all .3s;${i===0?'transform:scale(1.3)':''}"></span>`
+      ).join('');
+    }
+    renderSlide(0);
+    intervalCarrossel = setInterval(() => {
+      slideAtual = (slideAtual + 1) % slides.length;
+      renderSlide(slideAtual);
+    }, 4000);
+
+    // Pausar no hover
+    const section = document.querySelector('#carrossel-slides');
+    if (section) {
+      section.addEventListener('mouseenter', () => clearInterval(intervalCarrossel));
+      section.addEventListener('mouseleave', () => {
+        intervalCarrossel = setInterval(() => {
+          slideAtual = (slideAtual + 1) % slides.length;
+          renderSlide(slideAtual);
+        }, 4000);
+      });
+    }
+  }
+
+  window.irSlide = function(idx) {
+    clearInterval(intervalCarrossel);
+    slideAtual = idx;
+    renderSlide(idx);
+    intervalCarrossel = setInterval(() => {
+      slideAtual = (slideAtual + 1) % slides.length;
+      renderSlide(slideAtual);
+    }, 4000);
+  };
+
+  async function carregarDadosBanner() {
+    try {
+      const historico = await dbGetHistoricoRedacoes(5);
+
+      if (!historico || historico.length === 0) {
+        // Aluno novo — sem redações
+        slides = [
+          criarSlide('Redações', '0', '📝'),
+          criarSlide('Média', '—', '📊'),
+          criarSlideMultiplo([
+            { label: 'Escreva', valor: 'sua 1ª', icone: '✍️' },
+            { label: 'Redação', valor: 'agora!', icone: '🚀' }
+          ])
+        ];
+        document.getElementById('subtituloBanner').textContent = 'Envie sua primeira redação e veja seus dados aqui!';
+        iniciarCarrossel();
+        return;
+      }
+
+      // Calcular dados reais
+      const notas = historico.map(r => r.total);
+      const media = Math.round(notas.reduce((a,b) => a+b, 0) / notas.length);
+      const ultima = notas[0];
+      const penultima = notas[1] || ultima;
+      const evolucao = ultima - penultima;
+      const evolStr = evolucao >= 0 ? `+${evolucao}` : `${evolucao}`;
+      const totalRedacoes = historico.length;
+
+      // Benchmark
+      const benchmark = await dbGetBenchmarkPessoal();
+      const melhorNota = Math.max(benchmark.c1, benchmark.c2, benchmark.c3, benchmark.c4, benchmark.c5);
+
+      // Competências consolidadas
+      const consolidadas = await dbGetCompetenciasConsolidadas();
+
+      // Pareto
+      const pareto = await dbGetCompetenciaPareto();
+
+      // Ranking
+      let posicaoRanking = '—';
+      try {
+        const ranking = await dbGetRanking();
+        if (Array.isArray(ranking)) {
+          const userId = authGetUserId();
+          const pos = ranking.findIndex(r => r.aluno_id === userId);
+          if (pos >= 0) posicaoRanking = `#${pos + 1}`;
+        }
+      } catch(e) {}
+
+      // Montar slides
+      slides = [];
+
+      // Slide 1 — Stats principais
+      slides.push(criarSlideMultiplo([
+        { label: 'Média', valor: media, icone: '📊' },
+        { label: 'Ranking', valor: posicaoRanking, icone: '🏆' },
+        { label: 'Evolução', valor: evolStr, icone: evolucao >= 0 ? '📈' : '📉' }
+      ]));
+
+      // Slide 2 — Última redação
+      slides.push(criarSlideMultiplo([
+        { label: 'Última nota', valor: ultima, icone: '✍️' },
+        { label: 'Redações', valor: totalRedacoes, icone: '📝' },
+        { label: 'Melhor nota', valor: Math.max(...notas), icone: '⭐' }
+      ]));
+
+      // Slide 3 — PDCA — próximo desafio
+      if (pareto) {
+        slides.push(criarSlide('Foco agora', pareto, '🎯', '#fabd00'));
+      }
+
+      // Slide 4 — Competências conquistadas
+      if (consolidadas.length > 0) {
+        slides.push(criarSlide('Conquistas', consolidadas.join(' · '), '✅'));
+      } else {
+        slides.push(criarSlide('Continue!', `${totalRedacoes} redaç.`, '💪'));
+      }
+
+      // Atualizar header pontos
+      const el = document.getElementById('headerPontos');
+      if (el) el.textContent = `${media} pts`;
+
+      // Subtítulo motivador
+      const subtitulos = [
+        'Você está evoluindo a cada redação!',
+        `Sua melhor nota é ${Math.max(...notas)} — vamos superar!`,
+        pareto ? `Foco em ${pareto} para subir sua média!` : 'Continue escrevendo!'
+      ];
+      document.getElementById('subtituloBanner').textContent =
+        subtitulos[Math.floor(Math.random() * subtitulos.length)];
+
+      iniciarCarrossel();
+
+    } catch(e) {
+      console.warn('Erro ao carregar dados do banner:', e);
+      slides = [criarSlide('Olá!', '😊', '👋')];
+      iniciarCarrossel();
+    }
+  }
+
+  // Adicionar keyframe fadeSlide ao head
+  const styleEl = document.createElement('style');
+  styleEl.textContent = '@keyframes fadeSlide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}';
+  document.head.appendChild(styleEl);
+
+  // Carregar dados ao iniciar
+  carregarDadosBanner();
+
 </script>
 </body>
 </html>

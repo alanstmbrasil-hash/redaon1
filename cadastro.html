@@ -231,7 +231,10 @@
       if (perfilSelecionado === 'professor') {
         document.getElementById('sucesso-professor').style.display = 'block';
       } else {
-        document.getElementById('sucesso-aluno').style.display = 'block';
+        // Aluno — redireciona para questionario DISC
+        document.querySelector('#loading-cadastro p').textContent = 'Quase la! Vamos personalizar sua experiencia...';
+        document.getElementById('loading-cadastro').style.display = 'block';
+        setTimeout(() => { window.location.href = 'questionario-perfil.html'; }, 1500);
       }
     } catch (err) {
       document.getElementById('loading-cadastro').style.display = 'none';

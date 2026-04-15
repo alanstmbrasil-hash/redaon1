@@ -799,6 +799,106 @@
             </div>
           </div>
 
+          <!-- Card Literatura -->
+          <div class="material-card rounded-xl overflow-hidden" style="background:#1d2026;border-left:4px solid #f472b6;" id="card-literatura">
+            <button class="w-full p-3 flex items-center gap-3 text-left" onclick="toggleMaterial('literatura')">
+              <div class="p-1.5 rounded-lg shrink-0" style="background:rgba(244,114,182,.1);"><span class="material-symbols-outlined" style="color:#f472b6;font-size:1.1rem;">menu_book</span></div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-on-surface">Literatura</h4>
+                <p class="text-[10px] text-on-surface-variant">Obras e argumentos literários</p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="status-literatura" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(244,114,182,.1);color:#f472b6;display:none;">✓ Gerado</span>
+                <span class="material-symbols-outlined text-on-surface-variant" id="chevron-literatura" style="font-size:1rem;transition:transform .3s;">expand_more</span>
+              </div>
+            </button>
+            <div class="material-body" id="body-literatura" style="max-height:0;overflow:hidden;transition:max-height .4s ease;">
+              <div class="px-4 pb-4 pt-1 border-t border-outline-variant/10" id="conteudo-literatura">
+                <div class="flex items-center gap-2 py-3 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-sm">pending</span>Toque para gerar com base no seu tema</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Filosofia -->
+          <div class="material-card rounded-xl overflow-hidden" style="background:#1d2026;border-left:4px solid #a78bfa;" id="card-filosofia">
+            <button class="w-full p-3 flex items-center gap-3 text-left" onclick="toggleMaterial('filosofia')">
+              <div class="p-1.5 rounded-lg shrink-0" style="background:rgba(167,139,250,.1);"><span class="material-symbols-outlined" style="color:#a78bfa;font-size:1.1rem;">psychology</span></div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-on-surface">Filosofia</h4>
+                <p class="text-[10px] text-on-surface-variant">Filósofos e conceitos-chave</p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="status-filosofia" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(167,139,250,.1);color:#a78bfa;display:none;">✓ Gerado</span>
+                <span class="material-symbols-outlined text-on-surface-variant" id="chevron-filosofia" style="font-size:1rem;transition:transform .3s;">expand_more</span>
+              </div>
+            </button>
+            <div class="material-body" id="body-filosofia" style="max-height:0;overflow:hidden;transition:max-height .4s ease;">
+              <div class="px-4 pb-4 pt-1 border-t border-outline-variant/10" id="conteudo-filosofia">
+                <div class="flex items-center gap-2 py-3 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-sm">pending</span>Toque para gerar com base no seu tema</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Cinema e Arte -->
+          <div class="material-card rounded-xl overflow-hidden" style="background:#1d2026;border-left:4px solid #fb923c;" id="card-cinema">
+            <button class="w-full p-3 flex items-center gap-3 text-left" onclick="toggleMaterial('cinema')">
+              <div class="p-1.5 rounded-lg shrink-0" style="background:rgba(251,146,60,.1);"><span class="material-symbols-outlined" style="color:#fb923c;font-size:1.1rem;">movie</span></div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-on-surface">Cinema e Arte</h4>
+                <p class="text-[10px] text-on-surface-variant">Filmes, músicas e obras culturais</p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="status-cinema" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(251,146,60,.1);color:#fb923c;display:none;">✓ Gerado</span>
+                <span class="material-symbols-outlined text-on-surface-variant" id="chevron-cinema" style="font-size:1rem;transition:transform .3s;">expand_more</span>
+              </div>
+            </button>
+            <div class="material-body" id="body-cinema" style="max-height:0;overflow:hidden;transition:max-height .4s ease;">
+              <div class="px-4 pb-4 pt-1 border-t border-outline-variant/10" id="conteudo-cinema">
+                <div class="flex items-center gap-2 py-3 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-sm">pending</span>Toque para gerar com base no seu tema</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Ciência e Dados -->
+          <div class="material-card rounded-xl overflow-hidden" style="background:#1d2026;border-left:4px solid #22d3ee;" id="card-ciencia">
+            <button class="w-full p-3 flex items-center gap-3 text-left" onclick="toggleMaterial('ciencia')">
+              <div class="p-1.5 rounded-lg shrink-0" style="background:rgba(34,211,238,.1);"><span class="material-symbols-outlined" style="color:#22d3ee;font-size:1.1rem;">science</span></div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-on-surface">Ciência e Dados</h4>
+                <p class="text-[10px] text-on-surface-variant">Pesquisas e evidências científicas</p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="status-ciencia" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(34,211,238,.1);color:#22d3ee;display:none;">✓ Gerado</span>
+                <span class="material-symbols-outlined text-on-surface-variant" id="chevron-ciencia" style="font-size:1rem;transition:transform .3s;">expand_more</span>
+              </div>
+            </button>
+            <div class="material-body" id="body-ciencia" style="max-height:0;overflow:hidden;transition:max-height .4s ease;">
+              <div class="px-4 pb-4 pt-1 border-t border-outline-variant/10" id="conteudo-ciencia">
+                <div class="flex items-center gap-2 py-3 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-sm">pending</span>Toque para gerar com base no seu tema</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Cultura Pop -->
+          <div class="material-card rounded-xl overflow-hidden" style="background:#1d2026;border-left:4px solid #e879f9;" id="card-culturapop">
+            <button class="w-full p-3 flex items-center gap-3 text-left" onclick="toggleMaterial('culturapop')">
+              <div class="p-1.5 rounded-lg shrink-0" style="background:rgba(232,121,249,.1);"><span class="material-symbols-outlined" style="color:#e879f9;font-size:1.1rem;">star</span></div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-on-surface">Cultura Pop</h4>
+                <p class="text-[10px] text-on-surface-variant">Séries, games e referências atuais</p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span id="status-culturapop" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style="background:rgba(232,121,249,.1);color:#e879f9;display:none;">✓ Gerado</span>
+                <span class="material-symbols-outlined text-on-surface-variant" id="chevron-culturapop" style="font-size:1rem;transition:transform .3s;">expand_more</span>
+              </div>
+            </button>
+            <div class="material-body" id="body-culturapop" style="max-height:0;overflow:hidden;transition:max-height .4s ease;">
+              <div class="px-4 pb-4 pt-1 border-t border-outline-variant/10" id="conteudo-culturapop">
+                <div class="flex items-center gap-2 py-3 text-xs text-on-surface-variant"><span class="material-symbols-outlined text-sm">pending</span>Toque para gerar com base no seu tema</div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -1443,13 +1543,73 @@ function atualizarContadorDicas() {
 // ══════════════════════════════════════
 // MATERIAL DE APOIO COM IA REAL
 // ══════════════════════════════════════
-const materialGerado = { legislacao:false, historia:false, especialistas:false, atualidades:false };
+const materialGerado = { legislacao:false, historia:false, especialistas:false, atualidades:false, literatura:false, filosofia:false, cinema:false, ciencia:false, culturapop:false };
+
+const TODAS_CATEGORIAS = ['legislacao','historia','especialistas','atualidades','literatura','filosofia','cinema','ciencia','culturapop'];
 
 const PROMPTS_MATERIAL = {
-  legislacao:   (t) => `Liste os 5 principais artigos da Constituição Federal e leis específicas relevantes para o tema: "${t}". Para cada: número, nome e como usar como argumento na redação. Markdown leve, português.`,
-  historia:     (t) => `Explique o contexto histórico de "${t}" com 4 marcos temporais. Para cada: data/período, fato e como usar como repertório no ENEM. Numerados, português.`,
-  especialistas:(t) => `Liste 4 especialistas (filósofos/sociólogos) cujas ideias se aplicam a "${t}". Para cada: nome, área, obra/conceito e frase-chave para a redação. Marcadores, português.`,
-  atualidades:  (t) => `Liste 4 dados estatísticos recentes (IBGE, ONU, OMS) sobre "${t}". Para cada: fonte, dado numérico e como usar como evidência na redação ENEM. Marcadores, português.`,
+  legislacao:   (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Legislação para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
+**ARGUMENTO [número]:**
+**USE AGORA:** [frase pronta para inserir na redação, conectada ao tema]
+**ENTENDA:** [3 linhas — qual lei/artigo, o que determina, contexto]
+**COMO CONECTAR:** [como ligar ao argumento da redação]
+Foque em: Constituição Federal, leis específicas, tratados internacionais. Português, direto ao ponto.`,
+
+  historia:     (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de História para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
+**ARGUMENTO [número]:**
+**USE AGORA:** [frase pronta para inserir na redação, conectada ao tema]
+**ENTENDA:** [3 linhas — período, fato histórico, impacto]
+**COMO CONECTAR:** [como ligar ao argumento da redação]
+Foque em: marcos temporais, fatos históricos brasileiros e mundiais relevantes. Português, direto ao ponto.`,
+
+  especialistas:(t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Especialistas para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
+**ARGUMENTO [número]:**
+**USE AGORA:** [frase pronta para inserir na redação com o nome do especialista]
+**ENTENDA:** [3 linhas — quem é, qual obra/conceito, o que defende]
+**COMO CONECTAR:** [como ligar ao argumento da redação]
+Foque em: filósofos, sociólogos, antropólogos, pesquisadores. Inclua brasileiros sempre que possível. Português, direto ao ponto.`,
+
+  atualidades:  (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Atualidades para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
+**ARGUMENTO [número]:**
+**USE AGORA:** [frase pronta com dado numérico e fonte para inserir na redação]
+**ENTENDA:** [3 linhas — fonte, dado completo, contexto]
+**COMO CONECTAR:** [como usar como evidência na redação]
+Foque em: dados IBGE, ONU, OMS, Fórum Econômico Mundial, relatórios recentes. Português, direto ao ponto.`,
+
+  literatura:   (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Literatura para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
+**ARGUMENTO [número]:**
+**USE AGORA:** [frase pronta mencionando a obra e o argumento que ela sustenta]
+**ENTENDA:** [3 linhas — título, autor, o que a obra revela sobre o tema — o aluno não precisa ter lido]
+**COMO CONECTAR:** [como ligar ao argumento da redação]
+Foque em: obras brasileiras e internacionais relevantes para o ENEM. Inclua literatura africana e indígena quando pertinente. Português, direto ao ponto.`,
+
+  filosofia:    (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Filosofia para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
+**ARGUMENTO [número]:**
+**USE AGORA:** [frase pronta com o nome do filósofo e o conceito aplicado ao tema]
+**ENTENDA:** [3 linhas — quem é o filósofo, qual conceito-chave, como se aplica ao tema]
+**COMO CONECTAR:** [como ligar ao argumento da redação]
+Foque em: filósofos brasileiros (Ailton Krenak, Marilena Chaui, Milton Santos) e clássicos. Explique o conceito de forma simples. Português, direto ao ponto.`,
+
+  cinema:       (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Cinema e Arte para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
+**ARGUMENTO [número]:**
+**USE AGORA:** [frase pronta mencionando a obra cultural e o argumento que ela sustenta]
+**ENTENDA:** [3 linhas — título, criador/diretor, o que a obra aborda sobre o tema]
+**COMO CONECTAR:** [como usar como repertório aceito pelo ENEM]
+Foque em: filmes, séries, músicas, obras de arte, documentários. O aluno não precisa ter assistido — precisa entender o argumento. Português, direto ao ponto.`,
+
+  ciencia:      (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Ciência e Dados para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
+**ARGUMENTO [número]:**
+**USE AGORA:** [frase pronta com dado científico e fonte para inserir na redação]
+**ENTENDA:** [3 linhas — fonte, pesquisa ou estudo, dado completo e contexto]
+**COMO CONECTAR:** [como usar como evidência científica na redação]
+Foque em: pesquisas acadêmicas, relatórios científicos, índices de desenvolvimento. Inclua fontes brasileiras. Português, direto ao ponto.`,
+
+  culturapop:   (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Cultura Pop para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
+**ARGUMENTO [número]:**
+**USE AGORA:** [frase pronta mencionando a referência pop e o argumento que ela sustenta]
+**ENTENDA:** [3 linhas — qual referência, por que é relevante, como se relaciona ao tema]
+**COMO CONECTAR:** [como usar como repertório aceito pelo ENEM]
+Foque em: séries, games, eventos culturais, redes sociais, fenômenos contemporâneos aceitos pelo ENEM. Português, direto ao ponto.`,
 };
 
 function mdSimples(t) {
@@ -1467,7 +1627,7 @@ window.toggleMaterial = async function(tipo) {
   const aberto  = body.style.maxHeight && body.style.maxHeight !== '0px';
 
   // Fecha os outros
-  ['legislacao','historia','especialistas','atualidades'].forEach(t => {
+  TODAS_CATEGORIAS.forEach(t => {
     if (t !== tipo) {
       document.getElementById('body-' + t).style.maxHeight = '0';
       document.getElementById('chevron-' + t).style.transform = '';

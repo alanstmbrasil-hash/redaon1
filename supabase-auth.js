@@ -300,6 +300,206 @@ async function dbGetRedacoesDaTurma(turmaId) {
 }
 
 // ─────────────────────────────────────────────
+// DISC — Perfil comportamental
+// ─────────────────────────────────────────────
+
+async function dbSalvarPerfilDisc({ perfil_disc, disc_primario, disc_secundario }) {
+  const userId = authGetUserId();
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}`, {
+    method: 'PATCH',
+    headers: dbHeaders(),
+    body: JSON.stringify({ perfil_disc, disc_primario, disc_secundario })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  const perfil = authGetPerfil();
+  localStorage.setItem('redaon_perfil', JSON.stringify({
+    ...perfil, perfil_disc, disc_primario, disc_secundario
+  }));
+  return data[0];
+}
+
+function authGetDiscPerfil() {
+  const perfil = authGetPerfil();
+  return perfil?.perfil_disc || 'S/C';
+}
+
+function authTemDiscPerfil() {
+  const perfil = authGetPerfil();
+  return !!(perfil?.perfil_disc);
+}
+
+// ─────────────────────────────────────────────
+// PDCA — Histórico e análise
+// ─────────────────────────────────────────────
+
+async function dbGetHistoricoRedacoes(limite = 5) {
+  const userId = authGetUserId();
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/redacoes?aluno_id=eq.${userId}&status=eq.corrigida&order=created_at.desc&limit=${limite}&select=id,nota_final,tema_livre,created_at,correcoes(c1,c2,c3,c4,c5,feedback_geral,pdca_pareto,pdca_causa_raiz,pdca_tendencia)`,
+    { headers: dbHeaders() }
+  );
+  const data = await res.json();
+  if (!Array.isArray(data)) return [];
+  return data.map(r => {
+    const c = r.correcoes?.[0] || {};
+    return {
+      id: r.id,
+      total: r.nota_final || 0,
+      c1: c.c1 || 0, c2: c.c2 || 0, c3: c.c3 || 0, c4: c.c4 || 0, c5: c.c5 || 0,
+      tema: r.tema_livre || '',
+      data: r.created_at,
+      pdca_pareto: c.pdca_pareto || null,
+      pdca_causa_raiz: c.pdca_causa_raiz || null,
+      pdca_tendencia: c.pdca_tendencia || null
+    };
+  });
+}
+
+async function dbGetBenchmarkPessoal() {
+  const userId = authGetUserId();
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/correcoes?select=c1,c2,c3,c4,c5,redacoes!inner(aluno_id)&redacoes.aluno_id=eq.${userId}&order=created_at.desc`,
+    { headers: dbHeaders() }
+  );
+  const data = await res.json();
+  if (!Array.isArray(data) || data.length === 0) return { c1: 0, c2: 0, c3: 0, c4: 0, c5: 0 };
+  return {
+    c1: Math.max(...data.map(d => d.c1 || 0)),
+    c2: Math.max(...data.map(d => d.c2 || 0)),
+    c3: Math.max(...data.map(d => d.c3 || 0)),
+    c4: Math.max(...data.map(d => d.c4 || 0)),
+    c5: Math.max(...data.map(d => d.c5 || 0))
+  };
+}
+
+async function dbGetCompetenciasConsolidadas() {
+  const userId = authGetUserId();
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/correcoes?select=c1,c2,c3,c4,c5,redacoes!inner(aluno_id)&redacoes.aluno_id=eq.${userId}&order=created_at.desc&limit=3`,
+    { headers: dbHeaders() }
+  );
+  const data = await res.json();
+  if (!Array.isArray(data) || data.length < 3) return [];
+  const consolidadas = [];
+  ['c1','c2','c3','c4','c5'].forEach(comp => {
+    if (data.every(d => (d[comp] || 0) >= 160)) consolidadas.push(comp.toUpperCase());
+  });
+  return consolidadas;
+}
+
+async function dbGetCompetenciaPareto() {
+  const historico = await dbGetHistoricoRedacoes(5);
+  if (historico.length === 0) return null;
+  const medias = { C1: 0, C2: 0, C3: 0, C4: 0, C5: 0 };
+  historico.forEach(r => {
+    medias.C1 += r.c1; medias.C2 += r.c2; medias.C3 += r.c3;
+    medias.C4 += r.c4; medias.C5 += r.c5;
+  });
+  Object.keys(medias).forEach(k => medias[k] /= historico.length);
+  return Object.entries(medias).sort((a, b) => a[1] - b[1])[0][0];
+}
+
+async function dbGetContextoPDCA() {
+  try {
+    const [historico, benchmark, consolidadas, pareto] = await Promise.all([
+      dbGetHistoricoRedacoes(5),
+      dbGetBenchmarkPessoal(),
+      dbGetCompetenciasConsolidadas(),
+      dbGetCompetenciaPareto()
+    ]);
+    const historicoFormatado = historico.length > 0
+      ? historico.map((r, i) =>
+          `Redacao ${i + 1}: C1=${r.c1}, C2=${r.c2}, C3=${r.c3}, C4=${r.c4}, C5=${r.c5}, Total=${r.total}`
+        ).join('\n')
+      : 'Primeira redacao do aluno — sem historico anterior.';
+    const benchmarkFormatado = Object.entries(benchmark)
+      .map(([k, v]) => `${k.toUpperCase()}: ${v}`).join(', ');
+    return {
+      historico, historicoFormatado,
+      benchmark, benchmarkFormatado,
+      consolidadas, pareto,
+      totalRedacoes: historico.length
+    };
+  } catch(e) {
+    console.warn('Erro ao buscar contexto PDCA:', e);
+    return {
+      historico: [], historicoFormatado: 'Sem historico disponivel.',
+      benchmark: { c1: 0, c2: 0, c3: 0, c4: 0, c5: 0 },
+      benchmarkFormatado: 'Sem benchmark.',
+      consolidadas: [], pareto: null, totalRedacoes: 0
+    };
+  }
+}
+
+async function dbSalvarCorrecaoIACompleta({
+  redacao_id, c1, c2, c3, c4, c5,
+  feedback_geral, feedback_c1, feedback_c2, feedback_c3, feedback_c4, feedback_c5,
+  pontos_fortes, pontos_melhorar, modo = 'normal', pdca = null
+}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/correcoes`, {
+    method: 'POST',
+    headers: dbHeaders(),
+    body: JSON.stringify({
+      redacao_id, tipo: 'ia', modo,
+      c1, c2, c3, c4, c5,
+      feedback_geral, feedback_c1, feedback_c2, feedback_c3, feedback_c4, feedback_c5,
+      pontos_fortes, pontos_melhorar,
+      pdca_pareto:     pdca?.pareto_competencia || null,
+      pdca_recorrente: pdca?.pareto_recorrente || false,
+      pdca_causa_raiz: pdca?.causa_raiz || null,
+      pdca_tendencia:  pdca?.tendencia || null,
+      pdca_plano:      JSON.stringify(pdca?.plano_5w2h || {}),
+      pdca_r3g:        JSON.stringify(pdca?.r3g || {}),
+      consolidadas:    JSON.stringify(pdca?.competencias_consolidadas_atualizadas || [])
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  const nota = (c1||0)+(c2||0)+(c3||0)+(c4||0)+(c5||0);
+  await fetch(`${SUPABASE_URL}/rest/v1/redacoes?id=eq.${redacao_id}`, {
+    method: 'PATCH',
+    headers: dbHeaders(),
+    body: JSON.stringify({ status: 'corrigida', nota_final: nota })
+  });
+  return data[0];
+}
+
+async function dbGetRelatorioPDCAAluno(alunoId) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/correcoes?select=c1,c2,c3,c4,c5,pdca_pareto,pdca_causa_raiz,pdca_tendencia,pdca_r3g,pdca_plano,consolidadas,created_at,modo,redacoes!inner(aluno_id,tema_livre,nota_final)&redacoes.aluno_id=eq.${alunoId}&order=created_at.desc&limit=10`,
+    { headers: dbHeaders() }
+  );
+  const data = await res.json();
+  if (!Array.isArray(data)) return null;
+  const benchmark = {
+    c1: Math.max(...data.map(d => d.c1 || 0), 0),
+    c2: Math.max(...data.map(d => d.c2 || 0), 0),
+    c3: Math.max(...data.map(d => d.c3 || 0), 0),
+    c4: Math.max(...data.map(d => d.c4 || 0), 0),
+    c5: Math.max(...data.map(d => d.c5 || 0), 0)
+  };
+  const ultima = data[0] || {};
+  let consolidadas = [];
+  try { consolidadas = JSON.parse(ultima.consolidadas || '[]'); } catch {}
+  return {
+    historico: data,
+    benchmark,
+    pareto: ultima.pdca_pareto || null,
+    tendencia: ultima.pdca_tendencia || null,
+    consolidadas
+  };
+}
+
+async function dbGetRelatorioPeriodoTurma(turmaId) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/redacoes?turma_id=eq.${turmaId}&order=created_at.desc&select=aluno_id,nota_final,created_at,usuarios!inner(nome),correcoes(c1,c2,c3,c4,c5,pdca_pareto,pdca_tendencia)`,
+    { headers: dbHeaders() }
+  );
+  return await res.json();
+}
+
+// ─────────────────────────────────────────────
 // UTILITÁRIOS
 // ─────────────────────────────────────────────
 
