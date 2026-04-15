@@ -1297,6 +1297,7 @@ var intervaloDicas = null;
     abrirLoading();
     try {
       // ── 1. BUSCAR CONTEXTO PDCA + DISC ──────────────
+      // Valores padrão — usados se o Supabase falhar
       let ctxPDCA = {
         historicoFormatado: 'Primeira redação do aluno — sem histórico anterior.',
         benchmarkFormatado: 'Sem benchmark.',
@@ -1305,15 +1306,20 @@ var intervaloDicas = null;
         totalRedacoes: 0
       };
       let discPerfil = 'S/C';
+      // Buscar com timeout de 3s — se falhar, usa os valores padrão
       try {
-        if (typeof dbGetContextoPDCA === 'function') {
-          ctxPDCA = await dbGetContextoPDCA();
-        }
+        const pdcaPromise = typeof dbGetContextoPDCA === 'function'
+          ? dbGetContextoPDCA()
+          : Promise.resolve(ctxPDCA);
+        const timeout = new Promise(resolve => setTimeout(() => resolve(null), 3000));
+        const resultado = await Promise.race([pdcaPromise, timeout]);
+        if (resultado) ctxPDCA = resultado;
         if (typeof authGetDiscPerfil === 'function') {
-          discPerfil = authGetDiscPerfil();
+          discPerfil = authGetDiscPerfil() || 'S/C';
         }
       } catch(e) {
-        console.warn('Erro ao buscar contexto PDCA:', e);
+        console.warn('PDCA indisponível — usando padrão:', e.message);
+        // Continua normalmente sem PDCA
       }
 
       // ── 2. MONTAR PROMPT COM CONTEXTO ───────────────
