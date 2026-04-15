@@ -1296,45 +1296,114 @@ var intervaloDicas = null;
     document.getElementById('btnEnviar').disabled = true;
     abrirLoading();
     try {
-      const instrucao = elite ? PROMPT_ELITE : PROMPT_NORMAL;
+      // ── 1. BUSCAR CONTEXTO PDCA + DISC ──────────────
+      let ctxPDCA = {
+        historicoFormatado: 'Primeira redação do aluno — sem histórico anterior.',
+        benchmarkFormatado: 'Sem benchmark.',
+        consolidadas: [],
+        pareto: null,
+        totalRedacoes: 0
+      };
+      let discPerfil = 'S/C';
+      try {
+        if (typeof dbGetContextoPDCA === 'function') {
+          ctxPDCA = await dbGetContextoPDCA();
+        }
+        if (typeof authGetDiscPerfil === 'function') {
+          discPerfil = authGetDiscPerfil();
+        }
+      } catch(e) {
+        console.warn('Erro ao buscar contexto PDCA:', e);
+      }
+
+      // ── 2. MONTAR PROMPT COM CONTEXTO ───────────────
+      const DISC_TONS = {
+        'D/I':'Seja direto e objetivo. Elogie rapidamente e vá ao ponto. Fale em resultados.',
+        'D/S':'Seja direto mas reconheça o esforço antes de cobrar.',
+        'D/C':'Seja direto e técnico. Use dados e números.',
+        'I/D':'Seja entusiasmado mas objetivo. Elogie antes de apontar melhorias.',
+        'I/S':'Seja muito encorajador e acolhedor. Celebre cada avanço.',
+        'I/C':'Seja entusiasta e detalhado. Use analogias criativas.',
+        'S/D':'Seja acolhedor primeiro, depois apresente o desafio.',
+        'S/I':'Seja muito encorajador. Celebre o progresso.',
+        'S/C':'Seja acolhedor e detalhado. Explique passo a passo.',
+        'C/D':'Seja técnico e direto. Dados primeiro, conclusão rápida.',
+        'C/I':'Seja detalhado e entusiasta.',
+        'C/S':'Seja técnico e acolhedor. Muitos detalhes com paciência.'
+      };
+      const discTom = DISC_TONS[discPerfil] || DISC_TONS['S/C'];
+
+      const contexto = `\nPERFIL DISC DO ALUNO: ${discPerfil}\nTOM A USAR: ${discTom}\n\nHISTÓRICO DO ALUNO:\n${ctxPDCA.historicoFormatado}\nCompetências consolidadas: ${ctxPDCA.consolidadas.join(', ') || 'Nenhuma ainda'}\nCompetência Pareto atual (maior perda): ${ctxPDCA.pareto || 'A identificar'}\nBenchmark pessoal: ${ctxPDCA.benchmarkFormatado}\nTotal de redações: ${ctxPDCA.totalRedacoes}`;
+
+      const instrucao = (elite ? PROMPT_ELITE : PROMPT_NORMAL) + contexto;
       const prompt = arquivoBase64 ? instrucao : instrucao + "\n\nRedação:\n" + texto;
+
+      // ── 3. CHAMAR GEMINI ─────────────────────────────
       const raw = await geminiGenerate(prompt, arquivoBase64 || null, arquivoMime || null);
-      const json = raw.trim().replace(/```json|```/g,'').trim();
-      const dados = JSON.parse(json);
+      let dados;
+      try {
+        dados = JSON.parse(raw.trim().replace(/```json|```/g,'').trim());
+      } catch(e) {
+        const match = raw.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error('JSON não encontrado');
+        dados = JSON.parse(match[0]);
+      }
       renderResultado(dados, elite);
 
-      // ── SALVAR NO SUPABASE ──────────────────────────
+      // ── 4. SALVAR NO SUPABASE COM DADOS PDCA ────────
       try {
-        // 1. Salvar a redação
         const redacao = await dbSalvarRedacao({
           texto: texto || '[Arquivo enviado]',
           tema_livre: window._temaAtual || null
         });
 
-        // 2. Salvar a correção da IA
         if (redacao && redacao.id) {
           const comps = dados.competencias || [];
-          await dbSalvarCorrecaoIA({
-            redacao_id: redacao.id,
-            c1: comps[0]?.nota || 0,
-            c2: comps[1]?.nota || 0,
-            c3: comps[2]?.nota || 0,
-            c4: comps[3]?.nota || 0,
-            c5: comps[4]?.nota || 0,
-            feedback_geral: dados.comentario_geral || '',
-            feedback_c1: comps[0]?.feedback || '',
-            feedback_c2: comps[1]?.feedback || '',
-            feedback_c3: comps[2]?.feedback || '',
-            feedback_c4: comps[3]?.feedback || '',
-            feedback_c5: comps[4]?.feedback || '',
-            pontos_fortes: dados.pontos_fortes || '',
-            pontos_melhorar: dados.pontos_melhorar || ''
-          });
+          const pdcaProf = dados.pdca_professor || null;
+
+          // Usar dbSalvarCorrecaoIACompleta se disponível (com PDCA)
+          // Senão fallback para dbSalvarCorrecaoIA
+          if (typeof dbSalvarCorrecaoIACompleta === 'function') {
+            await dbSalvarCorrecaoIACompleta({
+              redacao_id: redacao.id,
+              c1: comps[0]?.nota || 0,
+              c2: comps[1]?.nota || 0,
+              c3: comps[2]?.nota || 0,
+              c4: comps[3]?.nota || 0,
+              c5: comps[4]?.nota || 0,
+              feedback_geral: dados.feedback_aluno?.mensagem_profa || dados.comentario_geral || '',
+              feedback_c1: comps[0]?.feedback || '',
+              feedback_c2: comps[1]?.feedback || '',
+              feedback_c3: comps[2]?.feedback || '',
+              feedback_c4: comps[3]?.feedback || '',
+              feedback_c5: comps[4]?.feedback || '',
+              pontos_fortes: dados.pontos_fortes || '',
+              pontos_melhorar: dados.pontos_melhorar || '',
+              modo: elite ? 'elite' : 'normal',
+              pdca: pdcaProf
+            });
+          } else {
+            await dbSalvarCorrecaoIA({
+              redacao_id: redacao.id,
+              c1: comps[0]?.nota || 0,
+              c2: comps[1]?.nota || 0,
+              c3: comps[2]?.nota || 0,
+              c4: comps[3]?.nota || 0,
+              c5: comps[4]?.nota || 0,
+              feedback_geral: dados.comentario_geral || '',
+              feedback_c1: comps[0]?.feedback || '',
+              feedback_c2: comps[1]?.feedback || '',
+              feedback_c3: comps[2]?.feedback || '',
+              feedback_c4: comps[3]?.feedback || '',
+              feedback_c5: comps[4]?.feedback || '',
+              pontos_fortes: dados.pontos_fortes || '',
+              pontos_melhorar: dados.pontos_melhorar || ''
+            });
+          }
           toast(elite ? '⭐ Análise Elite salva no seu histórico!' : '✅ Redação salva no seu histórico!', 4000);
         }
       } catch(errSave) {
         console.warn('Erro ao salvar no banco:', errSave);
-        // Não bloqueia o usuário — a correção já foi exibida
       }
 
     } catch(err) {
