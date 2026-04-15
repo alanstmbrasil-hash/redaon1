@@ -620,8 +620,14 @@ async function salvarESeguir(chave, primario, secundario) {
     });
   } catch(e) {
     console.warn('Erro ao salvar perfil DISC:', e);
-    // Não bloqueia — segue mesmo assim
   }
+  // Atualizar cache local ANTES de redirecionar
+  // Isso evita o loop com inicio.html
+  const perfilAtual = authGetPerfil() || {};
+  perfilAtual.perfil_disc = chave;
+  perfilAtual.disc_primario = primario;
+  perfilAtual.disc_secundario = secundario;
+  localStorage.setItem('redaon_perfil', JSON.stringify(perfilAtual));
   window.location.href = 'inicio.html';
 }
 
