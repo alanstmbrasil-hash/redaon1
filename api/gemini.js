@@ -1,21 +1,14 @@
 // api/gemini.js – Função serverless do Vercel
-// Compatível com keys AQ. (Vertex AI) e AIzaSy (Generative Language)
+// Usa Service Account JWT para autenticar no Gemini via Vertex AI
 
 export default async function handler(req, res) {
-  // Apenas POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
-  // CORS – permitir chamadas do próprio domínio
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  const API_KEY = process.env.GEMINI_API_KEY;
-  if (!API_KEY) {
-    return res.status(500).json({ error: 'API key não configurada no servidor' });
-  }
 
   try {
     const { contents } = req.body;
@@ -23,26 +16,17 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Campo contents obrigatório' });
     }
 
-    const isOAuth = API_KEY.startsWith('AQ.');
+    // Gerar JWT para autenticação
+    const accessToken = await getAccessToken();
 
-    let url, headers;
-
-    if (isOAuth) {
-      // Vertex AI endpoint – aceita Bearer token
-      url = 'https://us-central1-aiplatform.googleapis.com/v1/projects/45751368191/locations/us-central1/publishers/google/models/gemini-2.0-flash:generateContent';
-      headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
-      };
-    } else {
-      // Generative Language endpoint – aceita API key
-      url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
-      headers = { 'Content-Type': 'application/json' };
-    }
+    const url = 'https://us-central1-aiplatform.googleapis.com/v1/projects/gen-lang-client-0066912662/locations/us-central1/publishers/google/models/gemini-2.0-flash:generateContent';
 
     const geminiRes = await fetch(url, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
       body: JSON.stringify({ contents }),
     });
 
@@ -57,4 +41,63 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(500).json({ error: 'Erro interno: ' + err.message });
   }
+}
+
+async function getAccessToken() {
+  const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+  
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: credentials.client_email,
+    scope: 'https://www.googleapis.com/auth/cloud-platform',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  };
+
+  const jwt = await createJWT(payload, credentials.private_key);
+
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+  });
+
+  const tokenData = await tokenRes.json();
+  if (!tokenData.access_token) {
+    throw new Error('Falha ao obter access token: ' + JSON.stringify(tokenData));
+  }
+  return tokenData.access_token;
+}
+
+async function createJWT(payload, privateKeyPem) {
+  const header = { alg: 'RS256', typ: 'JWT' };
+  
+  const encode = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
+  const signingInput = `${encode(header)}.${encode(payload)}`;
+
+  // Importar chave privada
+  const pemContents = privateKeyPem
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '')
+    .replace(/\n/g, '');
+  
+  const binaryKey = Buffer.from(pemContents, 'base64');
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    binaryKey,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    cryptoKey,
+    Buffer.from(signingInput)
+  );
+
+  const signatureBase64 = Buffer.from(signature).toString('base64url');
+  return `${signingInput}.${signatureBase64}`;
 }
