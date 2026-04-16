@@ -1,7 +1,7 @@
-// api/gemini.js – Função serverless do Vercel
+// api/gemini.js – Função serverless do Vercel (CommonJS)
 // Usa Service Account JWT para autenticar no Gemini via Vertex AI
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
   }
@@ -16,7 +16,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Campo contents obrigatório' });
     }
 
-    // Gerar JWT para autenticação
     const accessToken = await getAccessToken();
 
     const url = 'https://us-central1-aiplatform.googleapis.com/v1/projects/45751368191/locations/us-central1/publishers/google/models/gemini-2.0-flash-001:generateContent';
@@ -76,7 +75,6 @@ async function createJWT(payload, privateKeyPem) {
   const encode = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
   const signingInput = `${encode(header)}.${encode(payload)}`;
 
-  // Importar chave privada
   const pemContents = privateKeyPem
     .replace('-----BEGIN PRIVATE KEY-----', '')
     .replace('-----END PRIVATE KEY-----', '')
