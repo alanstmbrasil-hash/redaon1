@@ -1,37 +1,32 @@
-// api/gemini.js – Função serverless do Vercel
-// Usa GEMINI_API_KEY via variável de ambiente
+// api/gemini.js
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
 
   try {
-    const { contents } = req.body;
-    if (!contents) return res.status(400).json({ error: 'Campo contents obrigatório' });
+    // Usando a chave AQ que você salvou na Vercel
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_APPLICATION_CREDENTIALS_KEY);
+    
+    // Configuração do modelo (Gemini 1.5 Flash é ideal para o RedaON)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada' });
+    const { prompt } = req.body;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const systemInstruction = "Você é a Profa. Blanche, mentora de redação do projeto RedaON...";
+    
+    const result = await model.generateContent([systemInstruction, prompt]);
+    const response = await result.response;
+    const text = response.text();
 
-    const geminiRes = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents }),
+    return res.status(200).json({ text });
+  } catch (error) {
+    console.error("Erro na API Gemini:", error);
+    return res.status(500).json({ 
+      error: "Falha na comunicação com a Profa. Blanche.",
+      details: error.message 
     });
-
-    const data = await geminiRes.json();
-
-    if (!geminiRes.ok) {
-      return res.status(geminiRes.status).json({ error: data.error?.message || 'Erro do Gemini' });
-    }
-
-    return res.status(200).json(data);
-
-  } catch (err) {
-    return res.status(500).json({ error: 'Erro interno: ' + err.message });
   }
 }
