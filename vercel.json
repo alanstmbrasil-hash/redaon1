@@ -1,5 +1,10 @@
 {
   "rewrites": [
     { "source": "/", "destination": "/login.html" }
-  ]
+  ],
+  "functions": {
+    "api/gemini.js": {
+      "runtime": "nodejs20.x"
+    }
+  }
 }
