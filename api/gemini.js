@@ -1,6 +1,4 @@
 // api/gemini.js – Função serverless do Vercel
-// Compatível com chaves AQ (Google AI Studio novo formato)
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -15,8 +13,7 @@ module.exports = async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada' });
 
-    // Endpoint compatível com chaves AQ
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
 
     const geminiRes = await fetch(url, {
       method: 'POST',
