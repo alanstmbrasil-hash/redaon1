@@ -1,0 +1,20 @@
+{
+  "name": "redaon",
+  "version": "1.0.0",
+  "description": "Plataforma RedaON - Profa. Blanche",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "next dev",
+    "build": "next build"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.11.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
