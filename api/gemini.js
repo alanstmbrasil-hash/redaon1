@@ -1,5 +1,5 @@
 // api/gemini.js – Função serverless do Vercel
-// A key do Gemini fica aqui no servidor, nunca exposta no navegador
+// Compatível com keys AQ. (Vertex AI) e AIzaSy (Generative Language)
 
 export default async function handler(req, res) {
   // Apenas POST
@@ -23,15 +23,22 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Campo contents obrigatório' });
     }
 
-    // Detecta formato da key: AIzaSy = query param, AQ. = Bearer header
     const isOAuth = API_KEY.startsWith('AQ.');
 
-    const url = isOAuth
-      ? 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
-      : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+    let url, headers;
 
-    const headers = { 'Content-Type': 'application/json' };
-    if (isOAuth) headers['Authorization'] = `Bearer ${API_KEY}`;
+    if (isOAuth) {
+      // Vertex AI endpoint – aceita Bearer token
+      url = 'https://us-central1-aiplatform.googleapis.com/v1/projects/45751368191/locations/us-central1/publishers/google/models/gemini-2.0-flash:generateContent';
+      headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+      };
+    } else {
+      // Generative Language endpoint – aceita API key
+      url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+      headers = { 'Content-Type': 'application/json' };
+    }
 
     const geminiRes = await fetch(url, {
       method: 'POST',
