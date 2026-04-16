@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     // Gerar JWT para autenticação
     const accessToken = await getAccessToken();
 
-    const url = 'https://us-central1-aiplatform.googleapis.com/v1/projects/45751368191/locations/us-central1/publishers/google/models/gemini-2.0-flash:generateContent';
+    const url = 'https://us-central1-aiplatform.googleapis.com/v1/projects/45751368191/locations/us-central1/publishers/google/models/gemini-2.0-flash-001:generateContent';
 
     const geminiRes = await fetch(url, {
       method: 'POST',
