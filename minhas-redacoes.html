@@ -358,9 +358,17 @@
 </div>
 
 <script type="module">
-  import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
-  const API_KEY = "AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU";
-  const genAI = new GoogleGenerativeAI(API_KEY);
+  // Chama Gemini via rota serverless do Vercel (chave protegida no servidor)
+  async function geminiGenerate(prompt) {
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erro Gemini');
+    return data.candidates[0].content.parts[0].text;
+  }
 
   // ── NOME USUÁRIO ───────────────────────────────────
   const NOME_USUARIO = authGetNome();
@@ -466,7 +474,6 @@
     mudarAba('original');
 
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       const prompt = `Você é a PROfa da RedaON, especialista em redação ENEM.
 Analise a redação e retorne APENAS um objeto JSON válido, sem texto antes ou depois, sem markdown, sem explicações:
 {"competencias":[0,0,0,0,0],"erros":[{"original":"palavra errada","correto":"palavra correta","tipo":"ortografia"}],"versao_elite":"redação reescrita nota 1000 aqui em 3 parágrafos completos","por_que_elite":"explicação breve","analise_completa":"análise detalhada aqui"}
@@ -476,11 +483,10 @@ ${redacao.texto}
 
 IMPORTANTE: Retorne APENAS o JSON, começando com { e terminando com }`;
 
-      const result = await model.generateContent(prompt);
-      let rawText = result.response.text().trim();
+      let rawText = await geminiGenerate(prompt);
       rawText = rawText.replace(/```json/g,'').replace(/```/g,'').trim();
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('JSON não encontrado na resposta');
+      if (!jsonMatch) throw new Error('JSON não encontrado');
       dadosAtuais = JSON.parse(jsonMatch[0]);
       renderAnalise(redacao, dadosAtuais);
 
@@ -492,6 +498,79 @@ IMPORTANTE: Retorne APENAS o JSON, começando com { e terminando com }`;
       document.getElementById('painelAnalise').classList.remove('hidden');
     }
   };
+
+  // ── RENDER ANÁLISE ─────────────────────────────────
+  function renderAnalise(redacao, dados) {
+    const nomes = ['C1','C2','C3','C4','C5'];
+    const cores = ['#45edee','#6c5ce7','#6c5ce7','#fabd00','#fabd00'];
+    document.getElementById('barrasComp').innerHTML = (dados.competencias||[]).map((v,i) => `
+      <div class="flex flex-col gap-1">
+        <div class="flex justify-between text-[9px] font-bold gap-2">
+          <span class="text-on-surface-variant">${nomes[i]}</span>
+          <span style="color:${cores[i]}">${v}/200</span>
+        </div>
+        <div class="comp-barra-bg w-16">
+          <div class="comp-barra-fill" style="width:${Math.round(v/200*100)}%;background:${cores[i]}"></div>
+        </div>
+      </div>`).join('');
+
+    document.getElementById('colOriginal').innerHTML =
+      `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
+
+    let textoCorrigido = escHtml(redacao.texto);
+    let qtd = 0;
+    if (dados.erros?.length) {
+      qtd = dados.erros.length;
+      dados.erros.forEach(e => {
+        if (!e.original) return;
+        const esc = escHtml(e.original);
+        textoCorrigido = textoCorrigido.replace(
+          new RegExp(esc.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'g'),
+          `<span class="erro-orto" title="Sugestão: ${escHtml(e.correto)}">${esc}</span>`
+        );
+      });
+    }
+    document.getElementById('colCorrecoes').innerHTML =
+      `<p style="white-space:pre-line;text-align:justify;">${textoCorrigido}</p>`;
+    document.getElementById('badgeErros').textContent = `${qtd} marcação${qtd!==1?'ões':''}`;
+
+    document.getElementById('colElite').innerHTML =
+      `<p style="white-space:pre-line;text-align:justify;color:#1a1a2e;">${escHtml(dados.versao_elite||'')}</p>`;
+
+    window._analiseCompleta = dados.analise_completa || '';
+    window._porQueElite = dados.por_que_elite || '';
+  }
+
+  function renderFallback(redacao) {
+    document.getElementById('barrasComp').innerHTML = '<p class="text-xs text-on-surface-variant">Análise indisponível.</p>';
+    document.getElementById('colOriginal').innerHTML = `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
+    document.getElementById('colCorrecoes').innerHTML = '<p style="text-align:center;padding:2rem;color:#928ea0;font-size:.9rem;">Não foi possível gerar a análise.</p>';
+    document.getElementById('colElite').innerHTML = '<p style="text-align:center;padding:2rem;color:#928ea0;font-size:.9rem;">Não foi possível gerar a análise.</p>';
+    document.getElementById('badgeErros').textContent = '—';
+    window.toast('Erro ao gerar análise. Tente novamente.');
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  window.verAnaliseCompleta = function() {
+    document.getElementById('modalAnaliseTitle').textContent = 'Análise Completa';
+    document.getElementById('modalAnaliseTexto').innerHTML = `<p style="white-space:pre-line;">${escHtml(window._analiseCompleta||'Não disponível.')}</p>`;
+    document.getElementById('modalAnalise').classList.remove('hidden');
+  };
+  window.verPorQueElite = function() {
+    document.getElementById('modalAnaliseTitle').textContent = 'Por que Nota 1000?';
+    document.getElementById('modalAnaliseTexto').innerHTML = `<p style="white-space:pre-line;">${escHtml(window._porQueElite||'Não disponível.')}</p>`;
+    document.getElementById('modalAnalise').classList.remove('hidden');
+  };
+  window.fecharModal = function() {
+    document.getElementById('modalAnalise').classList.add('hidden');
+  };
+  document.getElementById('modalAnalise').addEventListener('click', function(e) {
+    if (e.target === this) window.fecharModal();
+  });
 </script>
 
 <script>
