@@ -375,75 +375,54 @@
     document.getElementById('modalLgpd').classList.remove('aberto');
   };
 
-  // ── TOAST ──────────────────────────────────────────
-  function toast(msg, dur = 3000) {
+  // ── TOAST (exposto globalmente para uso fora do module) ────────────
+  window.toast = function(msg, dur = 3000) {
     const el = document.getElementById('toast');
     el.textContent = msg; el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), dur);
-  }
+  };
+  function toast(msg, dur) { window.toast(msg, dur); }
 
-  // ── SUPABASE CONFIG (usa variáveis globais de supabase-auth.js) ────
-  // SUPABASE_URL e SUPABASE_KEY já estão definidos pelo supabase-auth.js carregado no <head>
-  let REDACOES = [];
+  // ── SUPABASE: funções expostas globalmente (window) para escapar do module ──
+  window.REDACOES = [];
 
-  // ── CARREGAR DO SUPABASE ───────────────────────────
-  async function carregarRedacoesDoSupabase() {
+  window.carregarRedacoesDoSupabase = async function() {
     const lista = document.getElementById('listaRedacoes');
-    lista.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:2rem;color:#928ea0;font-size:.75rem;"><div class="spinner" style="width:18px;height:18px;border-width:2px;"></div><span>Carregando...</span></div>`;
-
+    lista.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:2rem;color:#928ea0;font-size:.75rem;"><div class="spinner" style="width:18px;height:18px;border-width:2px;"></div><span>Carregando...</span></div>';
     try {
       const userId = (typeof authGetUserId === 'function') ? authGetUserId() : null;
-      if (!userId) {
-        lista.innerHTML = '<p style="font-size:.75rem;color:#928ea0;text-align:center;padding:1.5rem;">Sessao invalida. Faca login novamente.</p>';
-        return;
-      }
-
+      if (!userId) { lista.innerHTML = '<p style="font-size:.75rem;color:#928ea0;text-align:center;padding:1.5rem;">Sessao invalida.</p>'; return; }
       const res = await fetch(
         SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + userId + '&order=created_at.desc&select=id,texto,tema_livre,status,created_at,correcoes(nota_final)',
         { headers: dbHeaders() }
       );
-
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const rows = await res.json();
-
-      REDACOES = rows.map(r => {
+      window.REDACOES = rows.map(r => {
         const correcaoArr = Array.isArray(r.correcoes) ? r.correcoes : [];
         const nota = correcaoArr.length > 0 ? correcaoArr[0].nota_final : null;
-        const primeiraLinha = r.texto ? r.texto.trim().split(/\n/)[0] : '';
-        const tituloExtraido = (r.tema_livre && r.tema_livre.trim())
-          ? r.tema_livre
+        const primeiraLinha = r.texto ? r.texto.trim().split('\n')[0] : '';
+        const titulo = (r.tema_livre && r.tema_livre.trim()) ? r.tema_livre
           : (primeiraLinha ? primeiraLinha.substring(0, 80) + (primeiraLinha.length > 80 ? '\u2026' : '') : 'Redacao sem titulo');
-        const dataFormatada = new Date(r.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
-        return {
-          id: r.id,
-          titulo: tituloExtraido,
-          data: dataFormatada,
-          fonte: 'ENEM',
-          nota: nota,
-          status: r.status || 'enviada',
-          texto: r.texto || ''
-        };
+        const data = new Date(r.created_at).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
+        return { id: r.id, titulo, data, fonte: 'ENEM', nota, status: r.status || 'enviada', texto: r.texto || '' };
       });
-
-      renderLista();
-
+      window.renderLista();
     } catch(err) {
-      console.error('Erro ao carregar redacoes:', err);
-      lista.innerHTML = '<div style="padding:1rem;text-align:center;"><p style="font-size:.75rem;color:#ffb4ab;margin-bottom:.5rem;">Erro ao carregar redacoes.</p><button onclick="carregarRedacoesDoSupabase()" style="font-size:.72rem;color:#45edee;background:none;border:none;cursor:pointer;text-decoration:underline;">Tentar novamente</button></div>';
+      console.error('Erro:', err);
+      lista.innerHTML = '<div style="padding:1rem;text-align:center;"><p style="font-size:.75rem;color:#ffb4ab;margin-bottom:.5rem;">Erro ao carregar.</p><button onclick="carregarRedacoesDoSupabase()" style="font-size:.72rem;color:#45edee;background:none;border:none;cursor:pointer;text-decoration:underline;">Tentar novamente</button></div>';
     }
-  }
+  };
 
-  // ── RENDERIZAR LISTA ───────────────────────────────
-  function renderLista() {
+  window.renderLista = function() {
     const lista = document.getElementById('listaRedacoes');
     lista.innerHTML = '';
-
-    if (REDACOES.length === 0) {
-      lista.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem 1rem;gap:.75rem;text-align:center;"><span class="material-symbols-outlined" style="font-size:2.5rem;color:rgba(200,196,215,.2);">edit_note</span><p style="font-size:.75rem;color:#928ea0;">Nenhuma redacao enviada ainda.</p><button onclick="window.location.href=\'nova-redacao.html\';" style="font-size:.72rem;color:#45edee;background:none;border:none;cursor:pointer;text-decoration:underline;">Escrever agora →</button></div>';
+    const RD = window.REDACOES;
+    if (RD.length === 0) {
+      lista.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:2.5rem 1rem;gap:.75rem;text-align:center;"><span class="material-symbols-outlined" style="font-size:2.5rem;color:rgba(200,196,215,.2);">edit_note</span><p style="font-size:.75rem;color:#928ea0;">Nenhuma redacao enviada ainda.</p><button onclick="location.href=\'nova-redacao.html\';" style="font-size:.72rem;color:#45edee;background:none;border:none;cursor:pointer;text-decoration:underline;">Escrever agora</button></div>';
       return;
     }
-
-    REDACOES.forEach(r => {
+    RD.forEach(r => {
       const corrigida = r.status === 'corrigida';
       const card = document.createElement('div');
       card.className = 'card-redacao p-4 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-white/5 transition-all cursor-pointer';
@@ -452,12 +431,12 @@
       const statusLabel = corrigida ? 'Corrigida' : (r.status === 'enviada' ? 'Enviada' : 'Pendente');
       const statusClass = corrigida ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20';
       card.innerHTML = '<div class="flex justify-between items-start mb-2"><span class="px-2 py-0.5 ' + statusClass + ' text-[9px] font-bold rounded-full uppercase">' + statusLabel + '</span>' + notaHtml + '</div><h4 class="text-on-surface font-semibold text-sm leading-snug mb-3">' + r.titulo + '</h4><div class="flex items-center justify-between"><span class="text-[10px] text-on-surface-variant">' + r.data + ' &middot; ' + r.fonte + '</span><button onclick="selecionarRedacao(\'' + r.id + '\')" class="px-3 py-1 bg-surface-container-highest text-white text-[10px] font-bold rounded-lg hover:bg-primary-container transition-colors">Ver</button></div>';
-      card.addEventListener('click', () => selecionarRedacao(r.id));
+      card.addEventListener('click', () => window.selecionarRedacao(r.id));
       lista.appendChild(card);
     });
-  }
+  };
 
-  carregarRedacoesDoSupabase();
+  window.carregarRedacoesDoSupabase();
 </script>
 
 <script>
