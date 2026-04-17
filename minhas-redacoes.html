@@ -436,6 +436,54 @@
   };
 
   window.carregarRedacoesDoSupabase();
+
+  // ── SELECIONAR REDAÇÃO ─────────────────────────────
+  let dadosAtuais = null;
+
+  window.selecionarRedacao = async function(id) {
+    const redacao = window.REDACOES.find(r => r.id === id);
+    if (!redacao || !redacao.texto) { window.toast('Redação sem conteúdo disponível.'); return; }
+
+    document.querySelectorAll('.card-redacao').forEach(c => c.classList.remove('selecionado'));
+    document.getElementById('card-' + id)?.classList.add('selecionado');
+
+    document.getElementById('estadoVazio').classList.add('hidden');
+    document.getElementById('painelAnalise').classList.add('hidden');
+    document.getElementById('estadoCarregando').classList.remove('hidden');
+
+    document.getElementById('tituloEspelho').textContent = redacao.titulo;
+    document.getElementById('metaEspelho').textContent = `Enviada em ${redacao.data} · ${redacao.fonte}`;
+    document.getElementById('notaEspelho').textContent = redacao.nota || '—';
+
+    mudarAba('original');
+
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const prompt = `Você é a PROfa da RedaON, especialista em redação ENEM.
+Analise a redação e retorne APENAS um objeto JSON válido, sem texto antes ou depois, sem markdown, sem explicações:
+{"competencias":[0,0,0,0,0],"erros":[{"original":"palavra errada","correto":"palavra correta","tipo":"ortografia"}],"versao_elite":"redação reescrita nota 1000 aqui em 3 parágrafos completos","por_que_elite":"explicação breve","analise_completa":"análise detalhada aqui"}
+
+Substitua os valores pelos reais. Redação para analisar:
+${redacao.texto}
+
+IMPORTANTE: Retorne APENAS o JSON, começando com { e terminando com }`;
+
+      const result = await model.generateContent(prompt);
+      let rawText = result.response.text().trim();
+      rawText = rawText.replace(/```json/g,'').replace(/```/g,'').trim();
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('JSON não encontrado na resposta');
+      dadosAtuais = JSON.parse(jsonMatch[0]);
+      renderAnalise(redacao, dadosAtuais);
+
+    } catch(err) {
+      console.error('Erro na análise:', err);
+      renderFallback(redacao);
+    } finally {
+      document.getElementById('estadoCarregando').classList.add('hidden');
+      document.getElementById('painelAnalise').classList.remove('hidden');
+    }
+  };
 </script>
 
 <script>
