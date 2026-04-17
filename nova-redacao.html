@@ -1346,9 +1346,14 @@ var intervaloDicas = null;
 
       // ── 4. SALVAR NO SUPABASE COM DADOS PDCA ────────
       try {
+        // Capturar tema_livre do input ou sessionStorage
+        const _tituloInput = document.getElementById('tituloRedacao')?.value?.trim() || null;
+        const _temaSession = (() => { try { const s = sessionStorage.getItem('tema_selecionado'); return s ? JSON.parse(s).titulo : null; } catch(e) { return null; } })();
+        const _temaFinal = _tituloInput || _temaSession || window._temaAtual || null;
+
         const redacao = await dbSalvarRedacao({
           texto: texto || '[Arquivo enviado]',
-          tema_livre: window._temaAtual || null
+          tema_livre: _temaFinal
         });
 
         if (redacao && redacao.id) {

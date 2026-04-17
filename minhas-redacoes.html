@@ -382,217 +382,82 @@
     setTimeout(() => el.classList.remove('show'), dur);
   }
 
-  // ── DADOS DAS REDAÇÕES ─────────────────────────────
-  const REDACOES = [
-    {
-      id: 1,
-      titulo: 'Os desafios da mobilidade urbana no Brasil do século XXI',
-      data: '12 Out 2023', fonte: 'ENEM', nota: 960, status: 'corrigida',
-      texto: `A mobilidade urbana no Brasil do século XXI representa um dos maiores desafios para a gestão das cidades. Com o crescimento desordenado das metrópoles, o transporte público tornou-se precário, forçando a população a depender de veículos particulares. Essa situação gera congestionamentos, poluição atmosférica e exclusão social das camadas mais vulneráveis.
+  // ── SUPABASE CONFIG (usa variáveis globais de supabase-auth.js) ────
+  // SUPABASE_URL e SUPABASE_KEY já estão definidos pelo supabase-auth.js carregado no <head>
+  let REDACOES = [];
 
-Nesse contexto, é fundamental que o poder público invista em transporte coletivo eficiente e acessível. Políticas como a expansão do metrô, a criação de corredores de ônibus e a implantação de ciclovias são essenciais para transformar a realidade urbana. Alem disso, a educação para o transito consciente deve ser incentivada desde a escola.
+  // ── CARREGAR DO SUPABASE ───────────────────────────
+  async function carregarRedacoesDoSupabase() {
+    const lista = document.getElementById('listaRedacoes');
+    lista.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:2rem;color:#928ea0;font-size:.75rem;"><div class="spinner" style="width:18px;height:18px;border-width:2px;"></div><span>Carregando...</span></div>`;
 
-Portanto, enfrentar os desafios da mobilidade urbana exige um esforço conjunto do Estado, da sociedade e do setor privado, com planejamento integrado e investimentos sustentáveis que garantam o direito de ir e vir a todos os cidadãos brasileiros.`
-    },
-    {
-      id: 2,
-      titulo: 'A manipulação do comportamento do usuário pelo controle de dados',
-      data: '05 Out 2023', fonte: 'ENEM', nota: 920, status: 'corrigida',
-      texto: `Na era digital, as grandes empresas de tecnologia acumularam um poder sem precedentes: o controle sobre os dados pessoais de bilhões de usuários. Através de algorítmos sofisticados, essas corporações são capazes de prever, influenciar e até manipular o comportamento humano, transformando pessoas em produtos rentáveis.
+    try {
+      const userId = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+      if (!userId) {
+        lista.innerHTML = '<p style="font-size:.75rem;color:#928ea0;text-align:center;padding:1.5rem;">Sessao invalida. Faca login novamente.</p>';
+        return;
+      }
 
-Essa realidade levanta questões eticas fundamentais sobre privacidade e autonomia individual. Quando um usuário consente com os termos de uso de uma plataforma, raramente compreende a extensão com que seus dados serão explorados. A falta de literacia digital agrava esse problema, tornando a população vulneravel a manipulações politicas e comerciais.
+      const res = await fetch(
+        SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + userId + '&order=created_at.desc&select=id,texto,tema_livre,status,created_at,correcoes(nota_final)',
+        { headers: dbHeaders() }
+      );
 
-Assim, torna-se urgente a regulamentação rigorosa do uso de dados pessoais no Brasil, à semelhança da GDPR europeia, garantindo transparência, consentimento informado e o direito ao esquecimento digital, pilares de uma sociedade democrática e justa.`
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const rows = await res.json();
+
+      REDACOES = rows.map(r => {
+        const correcaoArr = Array.isArray(r.correcoes) ? r.correcoes : [];
+        const nota = correcaoArr.length > 0 ? correcaoArr[0].nota_final : null;
+        const primeiraLinha = r.texto ? r.texto.trim().split(/\n/)[0] : '';
+        const tituloExtraido = (r.tema_livre && r.tema_livre.trim())
+          ? r.tema_livre
+          : (primeiraLinha ? primeiraLinha.substring(0, 80) + (primeiraLinha.length > 80 ? '\u2026' : '') : 'Redacao sem titulo');
+        const dataFormatada = new Date(r.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+        return {
+          id: r.id,
+          titulo: tituloExtraido,
+          data: dataFormatada,
+          fonte: 'ENEM',
+          nota: nota,
+          status: r.status || 'enviada',
+          texto: r.texto || ''
+        };
+      });
+
+      renderLista();
+
+    } catch(err) {
+      console.error('Erro ao carregar redacoes:', err);
+      lista.innerHTML = '<div style="padding:1rem;text-align:center;"><p style="font-size:.75rem;color:#ffb4ab;margin-bottom:.5rem;">Erro ao carregar redacoes.</p><button onclick="carregarRedacoesDoSupabase()" style="font-size:.72rem;color:#45edee;background:none;border:none;cursor:pointer;text-decoration:underline;">Tentar novamente</button></div>';
     }
-  ];
-
-  // Redação recém-salva
-  const redacaoSalva = sessionStorage.getItem('redacao_titulo');
-  if (redacaoSalva) {
-    REDACOES.unshift({
-      id: 0, titulo: redacaoSalva,
-      data: new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'numeric'}),
-      fonte: 'ENEM',
-      nota: parseInt(sessionStorage.getItem('redacao_nota') || '0') || null,
-      status: sessionStorage.getItem('redacao_nota') ? 'corrigida' : 'pendente',
-      texto: sessionStorage.getItem('redacao_texto') || ''
-    });
   }
 
   // ── RENDERIZAR LISTA ───────────────────────────────
   function renderLista() {
     const lista = document.getElementById('listaRedacoes');
     lista.innerHTML = '';
+
+    if (REDACOES.length === 0) {
+      lista.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem 1rem;gap:.75rem;text-align:center;"><span class="material-symbols-outlined" style="font-size:2.5rem;color:rgba(200,196,215,.2);">edit_note</span><p style="font-size:.75rem;color:#928ea0;">Nenhuma redacao enviada ainda.</p><button onclick="window.location.href=\'nova-redacao.html\';" style="font-size:.72rem;color:#45edee;background:none;border:none;cursor:pointer;text-decoration:underline;">Escrever agora →</button></div>';
+      return;
+    }
+
     REDACOES.forEach(r => {
+      const corrigida = r.status === 'corrigida';
       const card = document.createElement('div');
       card.className = 'card-redacao p-4 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-white/5 transition-all cursor-pointer';
       card.id = 'card-' + r.id;
-      card.innerHTML = `
-        <div class="flex justify-between items-start mb-2">
-          <span class="px-2 py-0.5 ${r.status === 'corrigida' ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'} text-[9px] font-bold rounded-full uppercase">
-            ${r.status === 'corrigida' ? 'Corrigida' : 'Pendente'}
-          </span>
-          ${r.nota ? `<div class="text-right"><span class="text-xl font-black text-secondary">${r.nota}</span><span class="text-[9px] block text-on-surface-variant uppercase font-bold">Nota</span></div>` : ''}
-        </div>
-        <h4 class="text-on-surface font-semibold text-sm leading-snug mb-3">${r.titulo}</h4>
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] text-on-surface-variant">${r.data} · ${r.fonte}</span>
-          <button onclick="selecionarRedacao(${r.id})" class="px-3 py-1 bg-surface-container-highest text-white text-[10px] font-bold rounded-lg hover:bg-primary-container transition-colors">
-            Ver
-          </button>
-        </div>`;
+      const notaHtml = r.nota ? '<div class="text-right"><span class="text-xl font-black text-secondary">' + r.nota + '</span><span class="text-[9px] block text-on-surface-variant uppercase font-bold">Nota</span></div>' : '';
+      const statusLabel = corrigida ? 'Corrigida' : (r.status === 'enviada' ? 'Enviada' : 'Pendente');
+      const statusClass = corrigida ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20';
+      card.innerHTML = '<div class="flex justify-between items-start mb-2"><span class="px-2 py-0.5 ' + statusClass + ' text-[9px] font-bold rounded-full uppercase">' + statusLabel + '</span>' + notaHtml + '</div><h4 class="text-on-surface font-semibold text-sm leading-snug mb-3">' + r.titulo + '</h4><div class="flex items-center justify-between"><span class="text-[10px] text-on-surface-variant">' + r.data + ' &middot; ' + r.fonte + '</span><button onclick="selecionarRedacao(\'' + r.id + '\')" class="px-3 py-1 bg-surface-container-highest text-white text-[10px] font-bold rounded-lg hover:bg-primary-container transition-colors">Ver</button></div>';
       card.addEventListener('click', () => selecionarRedacao(r.id));
       lista.appendChild(card);
     });
   }
 
-  // ── ABAS ──────────────────────────────────────────
-  window.mudarAba = function(aba) {
-    ['original','melhoria','elite'].forEach(a => {
-      document.getElementById('painel-' + a).classList.toggle('hidden', a !== aba);
-      document.getElementById('aba-' + a).classList.toggle('ativa', a === aba);
-    });
-  };
-
-  // ── SELECIONAR REDAÇÃO ─────────────────────────────
-  let dadosAtuais = null;
-
-  window.selecionarRedacao = async function(id) {
-    const redacao = REDACOES.find(r => r.id === id);
-    if (!redacao || !redacao.texto) { toast('Redação sem conteúdo disponível.'); return; }
-
-    document.querySelectorAll('.card-redacao').forEach(c => c.classList.remove('selecionado'));
-    document.getElementById('card-' + id)?.classList.add('selecionado');
-
-    document.getElementById('estadoVazio').classList.add('hidden');
-    document.getElementById('painelAnalise').classList.add('hidden');
-    document.getElementById('estadoCarregando').classList.remove('hidden');
-
-    document.getElementById('tituloEspelho').textContent = redacao.titulo;
-    document.getElementById('metaEspelho').textContent = `Enviada em ${redacao.data} · ${redacao.fonte}`;
-    document.getElementById('notaEspelho').textContent = redacao.nota || '—';
-
-    // Volta para aba original
-    mudarAba('original');
-
-    try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      const prompt = `Você é a PROfa da RedaON, especialista em redação ENEM.
-Analise a redação e retorne APENAS um objeto JSON válido, sem texto antes ou depois, sem markdown, sem explicações:
-{"competencias":[0,0,0,0,0],"erros":[{"original":"palavra errada","correto":"palavra correta","tipo":"ortografia"}],"versao_elite":"redação reescrita nota 1000 aqui em 3 parágrafos completos","por_que_elite":"explicação breve","analise_completa":"análise detalhada aqui"}
-
-Substitua os valores pelos reais. Redação para analisar:
-${redacao.texto}
-
-IMPORTANTE: Retorne APENAS o JSON, começando com { e terminando com }`;
-
-      const result = await model.generateContent(prompt);
-      let rawText = result.response.text().trim();
-      // Limpar markdown e extrair JSON
-      rawText = rawText.replace(/```json/g,'').replace(/```/g,'').trim();
-      // Tentar encontrar o JSON dentro do texto
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('JSON não encontrado na resposta');
-      dadosAtuais = JSON.parse(jsonMatch[0]);
-      renderAnalise(redacao, dadosAtuais);
-
-    } catch(err) {
-      console.error('Erro na análise:', err);
-      renderFallback(redacao);
-    } finally {
-      document.getElementById('estadoCarregando').classList.add('hidden');
-      document.getElementById('painelAnalise').classList.remove('hidden');
-    }
-  };
-
-  function renderAnalise(redacao, dados) {
-    // Barras de competência
-    const nomes = ['C1','C2','C3','C4','C5'];
-    const cores = ['#45edee','#6c5ce7','#6c5ce7','#fabd00','#fabd00'];
-    document.getElementById('barrasComp').innerHTML = (dados.competencias||[]).map((v,i) => `
-      <div class="flex flex-col gap-1">
-        <div class="flex justify-between text-[9px] font-bold gap-2">
-          <span class="text-on-surface-variant">${nomes[i]}</span>
-          <span style="color:${cores[i]}">${v}/200</span>
-        </div>
-        <div class="comp-barra-bg w-16">
-          <div class="comp-barra-fill" style="width:${Math.round(v/200*100)}%;background:${cores[i]}"></div>
-        </div>
-      </div>`).join('');
-
-    // Aba 1: Texto Original
-    document.getElementById('colOriginal').innerHTML =
-      `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
-
-    // Aba 2: Pontos de Melhoria
-    let textoCorrigido = escHtml(redacao.texto);
-    let qtd = 0;
-    if (dados.erros?.length) {
-      qtd = dados.erros.length;
-      dados.erros.forEach(e => {
-        if (!e.original) return;
-        const esc = escHtml(e.original);
-        textoCorrigido = textoCorrigido.replace(
-          new RegExp(esc.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'g'),
-          `<span class="erro-orto" title="Sugestão: ${escHtml(e.correto)}">${esc}</span>`
-        );
-      });
-    }
-    document.getElementById('colCorrecoes').innerHTML =
-      `<p style="white-space:pre-line;text-align:justify;">${textoCorrigido}</p>`;
-    document.getElementById('badgeErros').textContent = `${qtd} marcação${qtd !== 1 ? 'ões' : ''} identificada${qtd !== 1 ? 's' : ''}`;
-
-    // Aba 3: Elite da PROfa
-    document.getElementById('colElite').innerHTML =
-      `<p style="white-space:pre-line;text-align:justify;color:#1a1a2e;">${escHtml(dados.versao_elite||'')}</p>`;
-
-    window._analiseCompleta = dados.analise_completa || '';
-    window._porQueElite = dados.por_que_elite || '';
-  }
-
-  function renderFallback(redacao) {
-    document.getElementById('barrasComp').innerHTML = '<p class="text-xs text-on-surface-variant">Análise indisponível.</p>';
-    document.getElementById('colOriginal').innerHTML = `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
-    
-    const btnTentar = `<div style="text-align:center;padding:2rem;">
-      <p style="color:#928ea0;font-style:italic;font-size:.9rem;margin-bottom:1rem;">Não foi possível gerar a análise. Isso pode acontecer por instabilidade da IA.</p>
-      <button onclick="selecionarRedacao(${redacao.id})" style="padding:.75rem 1.5rem;background:#6c5ce7;color:white;border:none;border-radius:.75rem;font-weight:700;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;">
-        <span style="font-family:'Material Symbols Outlined';font-size:1.1rem;">refresh</span>
-        Tentar novamente
-      </button>
-    </div>`;
-    
-    document.getElementById('colCorrecoes').innerHTML = btnTentar;
-    document.getElementById('colElite').innerHTML = btnTentar;
-    document.getElementById('badgeErros').textContent = '—';
-    toast('Erro ao gerar análise. Tente novamente.');
-  }
-
-  // ── MODAIS ─────────────────────────────────────────
-  window.verAnaliseCompleta = function() {
-    document.getElementById('modalAnaliseTitle').textContent = 'Análise Completa — Pontos de Melhoria';
-    document.getElementById('modalAnaliseTexto').innerHTML = `<p style="white-space:pre-line;">${escHtml(window._analiseCompleta||'Análise não disponível.')}</p>`;
-    document.getElementById('modalAnalise').classList.remove('hidden');
-  };
-  window.verPorQueElite = function() {
-    document.getElementById('modalAnaliseTitle').textContent = 'Por que esta versão é Nota 1000?';
-    document.getElementById('modalAnaliseTexto').innerHTML = `<p style="white-space:pre-line;">${escHtml(window._porQueElite||'Explicação não disponível.')}</p>`;
-    document.getElementById('modalAnalise').classList.remove('hidden');
-  };
-  window.fecharModal = function() {
-    document.getElementById('modalAnalise').classList.add('hidden');
-  };
-  document.getElementById('modalAnalise').addEventListener('click', function(e) {
-    if (e.target === this) window.fecharModal();
-  });
-
-  // ── UTILS ──────────────────────────────────────────
-  function escHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  renderLista();
+  carregarRedacoesDoSupabase();
 </script>
 
 <script>
