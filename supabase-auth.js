@@ -9,7 +9,7 @@
 // CONFIGURAÇÃO
 // ─────────────────────────────────────────────
 const SUPABASE_URL = 'https://fejlkxmjucnhdvgwtilo.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_M43NSb-WXlxgo6m-P1_oKg_YLf0wjOY';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlamxreG1qdWNuaGR2Z3d0aWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NDc2MjMsImV4cCI6MjA5MDUyMzYyM30.autXhnCTjmz4w41fuBT-leZgnegzDe7RTQZ37PmNazY';
 
 // ─────────────────────────────────────────────
 // AUTH — Login / Logout / Cadastro
