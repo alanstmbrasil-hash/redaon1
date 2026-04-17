@@ -535,34 +535,13 @@ CRITÉRIOS DE AVALIAÇÃO — USE PARA PONTUAR
     5. DETALHAMENTO: exemplificação ou complemento de qualquer elemento acima
   Viola direitos humanos (= nota 0 automática): tortura, execução sumária, "justiça com as próprias mãos", incitação à violência por raça/etnia/gênero/religião, discurso de ódio.
 
-════════════════════════════════════════════════
-RETORNE APENAS O JSON ABAIXO — sem texto antes ou depois, sem markdown
-════════════════════════════════════════════════
+RETORNE APENAS UM OBJETO JSON VÁLIDO. Sem texto antes ou depois. Sem markdown. Comece com { e termine com }.
+Strings longas (analise_completa, versao_elite, por_que_elite) NÃO podem ter quebras de linha — use \\n para indicar parágrafo dentro das strings.
+Use null (sem aspas) para campos ausentes.
 
-{
-  "competencias": [<C1 0-200>, <C2 0-200>, <C3 0-200>, <C4 0-200>, <C5 0-200>],
-  "nota_total": <soma das 5 competências>,
-  "c2_repertorio_tipo": "<produtivo|bolso|ausente>",
-  "c2_repertorio_referencia": "<nome da referência usada ou null>",
-  "c2_repertorio_avaliacao": "<por que é produtivo ou de bolso — 1-2 frases>",
-  "c2_repertorio_sugestao": "<como tornar produtivo se for bolso, ou null>",
-  "c2_tangenciamento": <true|false>,
-  "c2_tangenciamento_detalhe": "<o que faltou abordar do tema, ou null>",
-  "c3_projeto_texto": "<avaliação da progressão argumentativa em 2-3 frases>",
-  "c4_problemas": ["<problema coesivo 1>", "<problema coesivo 2>"],
-  "c5_acao": "<ação identificada ou null>",
-  "c5_agente": "<agente identificado ou null>",
-  "c5_meio": "<meio identificado ou null>",
-  "c5_finalidade": "<finalidade identificada ou null>",
-  "c5_detalhamento": "<detalhamento identificado ou null>",
-  "c5_elementos_faltantes": ["<elemento que faltou>"],
-  "c5_direitos_humanos": <true = respeita | false = viola>,
-  "erros": [{"original": "<trecho exato com erro, máx 10 palavras>", "correto": "<como deveria estar>", "tipo": "ortografia|gramatical|registro|coesao"}],
-  "analise_completa": "<análise parágrafo a parágrafo: o que cada parágrafo faz, pontos positivos e de melhoria, competências afetadas>",
-  "feedback_geral": "<feedback direto de 3-4 frases: o que está bem, o maior ponto de melhoria, encorajamento>",
-  "versao_elite": "<redação completamente reescrita atingindo nota 1000: mesma tese, linguagem formal impecável, repertório produtivo contextualizado, proposta com todos os 5 elementos, coesão rica — mínimo 25 linhas>",
-  "por_que_elite": "<3-4 frases comparando a versão original com a elite: o que mudou e por quê eleva a nota>"
-}
+{"competencias":[160,120,140,120,80],"nota_total":620,"c2_repertorio_tipo":"bolso","c2_repertorio_referencia":"Thomas More","c2_repertorio_avaliacao":"Citação genérica sem conexão ao tema.","c2_repertorio_sugestao":"Contextualizar a obra e ligá-la ao argumento central.","c2_tangenciamento":false,"c2_tangenciamento_detalhe":null,"c3_projeto_texto":"Introdução apresenta tese clara. Parágrafos progridem bem.","c4_problemas":["uso incorreto de onde","conectivos repetidos"],"c5_acao":"criar programa de saneamento","c5_agente":"Ministério da Saúde","c5_meio":"lei federal","c5_finalidade":"reduzir desigualdade hídrica","c5_detalhamento":null,"c5_elementos_faltantes":["detalhamento"],"c5_direitos_humanos":true,"erros":[{"original":"fazem parte do problema","correto":"constituem o problema","tipo":"vocabulario"}],"analise_completa":"Parágrafo 1: apresenta o tema com clareza.\\nParágrafo 2: desenvolve argumento histórico, mas repertório é superficial.\\nParágrafo 3: boa progressão. Parágrafo 4: proposta incompleta.","feedback_geral":"Sua redação apresenta boa estrutura e tese clara. O principal ponto de melhoria é aprofundar o repertório e completar a proposta de intervenção com o meio de execução. Continue praticando!","versao_elite":"Redação nota 1000 reescrita aqui em prosa contínua sem quebras literais de linha.","por_que_elite":"A versão elite aprimora o repertório tornando-o produtivo e completa a proposta com todos os 5 elementos exigidos pelo INEP."}
+
+Substitua TODOS os valores acima pelos valores reais da redação analisada.
 
 Redação para corrigir:
 ${redacao.texto}`;
@@ -571,7 +550,12 @@ ${redacao.texto}`;
       rawText = rawText.replace(/```json/g,'').replace(/```/g,'').trim();
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('JSON não encontrado');
-      dadosAtuais = JSON.parse(jsonMatch[0]);
+      let jsonStr = jsonMatch[0];
+      // Remove quebras de linha literais dentro de strings JSON
+      jsonStr = jsonStr.replace(/("(?:[^"\\]|\\.)*")|(\n)/g, (m, str, nl) => str ? str : ' ');
+      // Remove vírgulas duplas e trailing commas
+      jsonStr = jsonStr.replace(/,\s*,/g, ',').replace(/,\s*([}\]])/g, '$1');
+      dadosAtuais = JSON.parse(jsonStr);
       renderAnalise(redacao, dadosAtuais);
 
     } catch(err) {
