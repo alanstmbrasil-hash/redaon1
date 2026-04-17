@@ -79,7 +79,9 @@
     width: 1px; background: rgba(239,68,68,0.2);
   }
   .folha-elite {
-    background: linear-gradient(135deg, rgba(108,92,231,0.03) 0%, rgba(69,237,238,0.02) 100%);
+    background: #fdfdfb;
+    background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 100% 2rem;
     border-left: 3px solid rgba(108,92,231,0.3);
   }
 
@@ -535,7 +537,7 @@ IMPORTANTE: Retorne APENAS o JSON, começando com { e terminando com }`;
     document.getElementById('badgeErros').textContent = `${qtd} marcação${qtd!==1?'ões':''}`;
 
     document.getElementById('colElite').innerHTML =
-      `<p style="white-space:pre-line;text-align:justify;color:#1a1a2e;">${escHtml(dados.versao_elite||'')}</p>`;
+      `<p style="white-space:pre-line;text-align:justify;color:#1f2937;">${escHtml(dados.versao_elite||'')}</p>`;
 
     window._analiseCompleta = dados.analise_completa || '';
     window._porQueElite = dados.por_que_elite || '';
