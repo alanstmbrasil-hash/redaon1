@@ -393,14 +393,13 @@
       const userId = (typeof authGetUserId === 'function') ? authGetUserId() : null;
       if (!userId) { lista.innerHTML = '<p style="font-size:.75rem;color:#928ea0;text-align:center;padding:1.5rem;">Sessao invalida.</p>'; return; }
       const res = await fetch(
-        SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + userId + '&order=created_at.desc&select=id,texto,tema_livre,status,created_at,correcoes(nota_final)',
+        SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + userId + '&order=created_at.desc&select=id,texto,tema_livre,status,nota_final,created_at',
         { headers: dbHeaders() }
       );
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const rows = await res.json();
       window.REDACOES = rows.map(r => {
-        const correcaoArr = Array.isArray(r.correcoes) ? r.correcoes : [];
-        const nota = correcaoArr.length > 0 ? correcaoArr[0].nota_final : null;
+        const nota = r.nota_final || null;
         const primeiraLinha = r.texto ? r.texto.trim().split('\n')[0] : '';
         const titulo = (r.tema_livre && r.tema_livre.trim()) ? r.tema_livre
           : (primeiraLinha ? primeiraLinha.substring(0, 80) + (primeiraLinha.length > 80 ? '\u2026' : '') : 'Redacao sem titulo');
