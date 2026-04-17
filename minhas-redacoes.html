@@ -609,23 +609,23 @@ ${redacao.texto}`;
     // ── Alertas C2: repertório de bolso e tangenciamento
     let alertasC2 = '';
     if (dados.c2_tangenciamento) {
-      alertasC2 += `<div style="margin-bottom:10px;padding:10px 12px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.25);border-radius:8px;">
-        <p style="color:#ff6b6b;font-size:11px;font-weight:700;">⚠ Tangenciamento detectado</p>
-        <p style="color:#c8c4d7;font-size:12px;margin-top:3px;">${escHtml(dados.c2_tangenciamento_detalhe || 'O tema não foi desenvolvido em sua totalidade.')}</p>
-        <p style="color:#928ea0;font-size:10px;margin-top:4px;">C2, C3 e C5 limitadas a 40 pontos cada.</p>
+      alertasC2 += `<div style="margin-bottom:10px;padding:12px 14px;background:#1a1010;border:1px solid #7f2020;border-radius:8px;">
+        <p style="color:#ff6b6b;font-size:12px;font-weight:700;margin-bottom:4px;">⚠ Tangenciamento detectado</p>
+        <p style="color:#e1e2eb;font-size:13px;line-height:1.5;">${escHtml(dados.c2_tangenciamento_detalhe || 'O tema não foi desenvolvido em sua totalidade.')}</p>
+        <p style="color:#928ea0;font-size:11px;margin-top:6px;">Efeito: C2, C3 e C5 limitadas a 40 pontos cada.</p>
       </div>`;
     }
     if (dados.c2_repertorio_tipo === 'bolso') {
-      alertasC2 += `<div style="margin-bottom:10px;padding:10px 12px;background:rgba(250,189,0,.08);border:1px solid rgba(250,189,0,.2);border-radius:8px;">
-        <p style="color:#fabd00;font-size:11px;font-weight:700;">⚠ Repertório de bolso detectado</p>
-        ${dados.c2_repertorio_referencia ? `<p style="color:#928ea0;font-size:11px;margin-top:2px;">Referência: <strong style="color:#e1e2eb;">${escHtml(dados.c2_repertorio_referencia)}</strong></p>` : ''}
-        <p style="color:#c8c4d7;font-size:12px;margin-top:4px;">${escHtml(dados.c2_repertorio_avaliacao || '')}</p>
-        ${dados.c2_repertorio_sugestao ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(250,189,0,.15);"><p style="color:#928ea0;font-size:10px;">Como tornar produtivo:</p><p style="color:#e1e2eb;font-size:12px;margin-top:2px;">${escHtml(dados.c2_repertorio_sugestao)}</p></div>` : ''}
+      alertasC2 += `<div style="margin-bottom:10px;padding:12px 14px;background:#1a1600;border:1px solid #7a5e00;border-radius:8px;">
+        <p style="color:#fabd00;font-size:12px;font-weight:700;margin-bottom:4px;">⚠ Repertório de bolso detectado</p>
+        ${dados.c2_repertorio_referencia ? `<p style="color:#928ea0;font-size:11px;margin-bottom:4px;">Referência: <strong style="color:#fabd00;">${escHtml(dados.c2_repertorio_referencia)}</strong></p>` : ''}
+        <p style="color:#e1e2eb;font-size:13px;line-height:1.5;">${escHtml(dados.c2_repertorio_avaliacao || '')}</p>
+        ${dados.c2_repertorio_sugestao ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #7a5e00;"><p style="color:#928ea0;font-size:11px;margin-bottom:4px;">Como tornar produtivo:</p><p style="color:#e1e2eb;font-size:13px;line-height:1.5;">${escHtml(dados.c2_repertorio_sugestao)}</p></div>` : ''}
       </div>`;
     } else if (dados.c2_repertorio_tipo === 'produtivo') {
-      alertasC2 += `<div style="margin-bottom:10px;padding:10px 12px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.15);border-radius:8px;">
-        <p style="color:#4ade80;font-size:11px;font-weight:700;">✓ Repertório produtivo</p>
-        <p style="color:#c8c4d7;font-size:12px;margin-top:3px;">${escHtml(dados.c2_repertorio_avaliacao || '')}</p>
+      alertasC2 += `<div style="margin-bottom:10px;padding:12px 14px;background:#0a1a10;border:1px solid #1a5c30;border-radius:8px;">
+        <p style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">✓ Repertório produtivo</p>
+        <p style="color:#e1e2eb;font-size:13px;line-height:1.5;">${escHtml(dados.c2_repertorio_avaliacao || '')}</p>
       </div>`;
     }
 
@@ -639,16 +639,18 @@ ${redacao.texto}`;
     ];
     const checklistC5 = c5itens.map(item => {
       const ok = !!item.valor;
-      return `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);">
-        <span style="color:${ok?'#4ade80':'#ff6b6b'};font-weight:700;min-width:14px;font-size:12px;">${ok?'✓':'✗'}</span>
-        <div><span style="font-size:10px;color:#928ea0;display:block;">${item.label}</span>
-        <span style="font-size:12px;color:${ok?'#e1e2eb':'#ff6b6b'};">${ok ? escHtml(item.valor) : 'Não identificado'}</span></div>
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+        <span style="color:${ok?'#4ade80':'#ff6b6b'};font-weight:900;min-width:16px;font-size:14px;line-height:1.4;">${ok?'✓':'✗'}</span>
+        <div style="flex:1;">
+          <span style="font-size:11px;color:#928ea0;font-weight:600;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px;">${item.label}</span>
+          <span style="font-size:13px;color:${ok?'#e1e2eb':'#ff6b6b'};line-height:1.5;">${ok ? escHtml(item.valor) : 'Não identificado — inclua na conclusão'}</span>
+        </div>
       </div>`;
     }).join('');
     const c5dh = dados.c5_direitos_humanos === false
-      ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);border-radius:6px;color:#ff6b6b;font-size:11px;">⚠ Proposta viola direitos humanos → C5 = 0</div>` : '';
+      ? `<div style="margin-top:10px;padding:10px 12px;background:#1a0000;border:1px solid #7f0000;border-radius:6px;color:#ff6b6b;font-size:12px;font-weight:600;">⚠ Proposta viola direitos humanos → C5 = 0</div>` : '';
     const c5faltantes = (dados.c5_elementos_faltantes||[]).length > 0
-      ? `<p style="color:#fabd00;font-size:11px;margin-top:6px;">Faltam: ${dados.c5_elementos_faltantes.join(', ')}</p>` : '';
+      ? `<p style="color:#fabd00;font-size:12px;font-weight:600;margin-top:8px;">Faltam: ${dados.c5_elementos_faltantes.join(', ')}</p>` : `<p style="color:#4ade80;font-size:12px;font-weight:600;margin-top:8px;">✓ Proposta completa</p>`;
 
     // ── Painel de melhoria: alertas C2 + checklist C5 + erros
     let textoCorrigido = escHtml(redacao.texto);
@@ -670,8 +672,8 @@ ${redacao.texto}`;
 
     document.getElementById('colCorrecoes').innerHTML =
       alertasC2 +
-      `<div style="margin-bottom:12px;padding:10px 12px;background:rgba(250,107,107,.05);border:1px solid rgba(255,255,255,.06);border-radius:8px;">
-        <p style="font-size:11px;font-weight:700;color:#fa6e6e;margin-bottom:6px;">Proposta de intervenção — C5</p>
+      `<div style="margin-bottom:16px;padding:12px 14px;background:#12101a;border:1px solid #3a2060;border-radius:8px;">
+        <p style="font-size:12px;font-weight:700;color:#c6bfff;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">Proposta de intervenção — C5</p>
         ${checklistC5}${c5faltantes}${c5dh}
       </div>` +
       `<p style="white-space:pre-line;text-align:justify;margin-top:8px;">${textoCorrigido}</p>`;
