@@ -437,6 +437,14 @@
 
   window.carregarRedacoesDoSupabase();
 
+  // ── ABAS ──────────────────────────────────────────
+  window.mudarAba = function(aba) {
+    ['original','melhoria','elite'].forEach(a => {
+      document.getElementById('painel-' + a).classList.toggle('hidden', a !== aba);
+      document.getElementById('aba-' + a).classList.toggle('ativa', a === aba);
+    });
+  };
+
   // ── SELECIONAR REDAÇÃO ─────────────────────────────
   let dadosAtuais = null;
 
