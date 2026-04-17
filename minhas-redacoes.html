@@ -477,13 +477,95 @@
 
     try {
       const prompt = `Você é a PROfa da RedaON, especialista em redação ENEM.
-Analise a redação e retorne APENAS um objeto JSON válido, sem texto antes ou depois, sem markdown, sem explicações:
-{"competencias":[0,0,0,0,0],"erros":[{"original":"palavra errada","correto":"palavra correta","tipo":"ortografia"}],"versao_elite":"redação reescrita nota 1000 aqui em 3 parágrafos completos","por_que_elite":"explicação breve","analise_completa":"análise detalhada aqui"}
+Sua missão é corrigir redações com os critérios OFICIAIS do INEP (Cartilha 2025).
 
-Substitua os valores pelos reais. Redação para analisar:
-${redacao.texto}
+════════════════════════════════════════════════
+CRITÉRIOS DE AVALIAÇÃO — USE PARA PONTUAR
+════════════════════════════════════════════════
 
-IMPORTANTE: Retorne APENAS o JSON, começando com { e terminando com }`;
+▸ COMPETÊNCIA 1 — Domínio da língua formal (0-200)
+  200: excelente domínio; desvios apenas excepcionais; períodos complexos com subordinação e intercalação
+  160: bom domínio; poucos desvios gramaticais ou de convenções
+  120: domínio mediano; alguns desvios gramaticais e de convenções
+   80: domínio insuficiente; muitos desvios gramaticais, de registro e de convenções
+   40: domínio precário; desvios sistemáticos, frequentes e diversificados
+    0: desconhecimento da modalidade escrita formal
+  Avalie: ortografia, acentuação, crase, regência verbal e nominal, concordância verbal e nominal, pontuação, paralelismo, pronomes, registro informal, vocabulário impreciso, truncamentos e justaposição de orações.
+
+▸ COMPETÊNCIA 2 — Compreensão do tema e repertório (0-200)
+  200: tema completamente desenvolvido + repertório sociocultural produtivo + excelente domínio dissertativo-argumentativo
+  160: tema completo + argumentação consistente + bom domínio
+  120: tema completo + argumentação previsível + domínio mediano
+   80: recorre a cópia de textos motivadores OU estrutura sem proposição/argumentação/conclusão
+   40: tangenciamento (aborda parcialmente o tema) OU traços constantes de outros tipos textuais
+    0: fuga total ao tema OU não atende ao tipo dissertativo-argumentativo
+  ATENÇÃO — TANGENCIAMENTO: limita C2, C3 e C5 a no máximo 40 pontos cada.
+  REPERTÓRIO DE BOLSO — penalize quando a referência for genérica, sem contextualização ao tema e sem retomada nos parágrafos seguintes. Exemplos frequentes de repertório de bolso: Thomas More (Utopia), Bauman (instituições zumbis), Platão (Alegoria da Caverna), Einstein (definição de loucura), Nelson Mandela (educação muda o mundo sem contexto geográfico). Repertório produtivo: específico, contextualizado, articulado ao argumento, retomado ao longo do texto.
+
+▸ COMPETÊNCIA 3 — Organização e defesa do ponto de vista (0-200)
+  200: informações consistentes e organizadas, autoria clara, ponto de vista bem defendido
+  160: informações organizadas, indícios de autoria, ponto de vista presente
+  120: informações limitadas aos textos motivadores, pouco organizadas
+   80: informações desorganizadas ou contraditórias
+   40: informações pouco relacionadas ao tema ou incoerentes, sem ponto de vista
+    0: informações não relacionadas ao tema, sem ponto de vista
+  Avalie: tese clara na introdução, progressão parágrafo a parágrafo sem saltos ou repetições, argumentos com exemplos/dados/analogias, coerência entre introdução e conclusão.
+
+▸ COMPETÊNCIA 4 — Coesão (0-200)
+  200: articulação excelente entre todas as partes; repertório coesivo diversificado
+  160: boa articulação; poucas inadequações; repertório diversificado
+  120: articulação mediana; inadequações presentes; repertório pouco diversificado
+   80: articulação insuficiente; muitas inadequações; repertório limitado
+   40: articulação precária
+    0: não articula as informações
+  Avalie: operadores argumentativos (porém, entretanto, ademais, portanto, dessa forma, nesse sentido), referenciação (pronomes, sinônimos), articulação inter e intraparágrafo. Penalize: ausência de paragrafação, conectivos artificiais ou excessivos, pronome relativo "onde" para pessoas ou ideias, repetição excessiva sem recurso coesivo.
+
+▸ COMPETÊNCIA 5 — Proposta de intervenção (0-200)
+  200: proposta detalhada, com TODOS os 5 elementos, articulada à discussão do texto
+  160: proposta completa, articulada ao texto
+  120: proposta mediana, articulada ao texto
+   80: proposta insuficiente OU desarticulada do texto
+   40: proposta vaga, precária ou relacionada apenas ao assunto geral
+    0: proposta ausente OU viola direitos humanos OU não relacionada ao tema
+  OS 5 ELEMENTOS OBRIGATÓRIOS:
+    1. AÇÃO: o que deve ser feito concretamente (≠ "faltam investimentos" = vago, máximo 40)
+    2. AGENTE: quem executa (Ministério da Educação, escolas, mídia, empresas, famílias...)
+    3. MEIO: como será feito (lei, campanha, projeto, disciplina curricular, programa...)
+    4. FINALIDADE/EFEITO: para quê / qual o resultado esperado
+    5. DETALHAMENTO: exemplificação ou complemento de qualquer elemento acima
+  Viola direitos humanos (= nota 0 automática): tortura, execução sumária, "justiça com as próprias mãos", incitação à violência por raça/etnia/gênero/religião, discurso de ódio.
+
+════════════════════════════════════════════════
+RETORNE APENAS O JSON ABAIXO — sem texto antes ou depois, sem markdown
+════════════════════════════════════════════════
+
+{
+  "competencias": [<C1 0-200>, <C2 0-200>, <C3 0-200>, <C4 0-200>, <C5 0-200>],
+  "nota_total": <soma das 5 competências>,
+  "c2_repertorio_tipo": "<produtivo|bolso|ausente>",
+  "c2_repertorio_referencia": "<nome da referência usada ou null>",
+  "c2_repertorio_avaliacao": "<por que é produtivo ou de bolso — 1-2 frases>",
+  "c2_repertorio_sugestao": "<como tornar produtivo se for bolso, ou null>",
+  "c2_tangenciamento": <true|false>,
+  "c2_tangenciamento_detalhe": "<o que faltou abordar do tema, ou null>",
+  "c3_projeto_texto": "<avaliação da progressão argumentativa em 2-3 frases>",
+  "c4_problemas": ["<problema coesivo 1>", "<problema coesivo 2>"],
+  "c5_acao": "<ação identificada ou null>",
+  "c5_agente": "<agente identificado ou null>",
+  "c5_meio": "<meio identificado ou null>",
+  "c5_finalidade": "<finalidade identificada ou null>",
+  "c5_detalhamento": "<detalhamento identificado ou null>",
+  "c5_elementos_faltantes": ["<elemento que faltou>"],
+  "c5_direitos_humanos": <true = respeita | false = viola>,
+  "erros": [{"original": "<trecho exato com erro, máx 10 palavras>", "correto": "<como deveria estar>", "tipo": "ortografia|gramatical|registro|coesao"}],
+  "analise_completa": "<análise parágrafo a parágrafo: o que cada parágrafo faz, pontos positivos e de melhoria, competências afetadas>",
+  "feedback_geral": "<feedback direto de 3-4 frases: o que está bem, o maior ponto de melhoria, encorajamento>",
+  "versao_elite": "<redação completamente reescrita atingindo nota 1000: mesma tese, linguagem formal impecável, repertório produtivo contextualizado, proposta com todos os 5 elementos, coesão rica — mínimo 25 linhas>",
+  "por_que_elite": "<3-4 frases comparando a versão original com a elite: o que mudou e por quê eleva a nota>"
+}
+
+Redação para corrigir:
+${redacao.texto}`;
 
       let rawText = await geminiGenerate(prompt);
       rawText = rawText.replace(/```json/g,'').replace(/```/g,'').trim();
@@ -504,8 +586,12 @@ IMPORTANTE: Retorne APENAS o JSON, começando com { e terminando com }`;
   // ── RENDER ANÁLISE ─────────────────────────────────
   function renderAnalise(redacao, dados) {
     const nomes = ['C1','C2','C3','C4','C5'];
-    const cores = ['#45edee','#6c5ce7','#6c5ce7','#fabd00','#fabd00'];
-    document.getElementById('barrasComp').innerHTML = (dados.competencias||[]).map((v,i) => `
+    const cores = ['#45edee','#6c5ce7','#6c5ce7','#fabd00','#fa6e6e'];
+    const comp = dados.competencias || [0,0,0,0,0];
+    const notaTotal = dados.nota_total || comp.reduce((a,b)=>a+b,0);
+
+    // ── Barras de competência
+    document.getElementById('barrasComp').innerHTML = comp.map((v,i) => `
       <div class="flex flex-col gap-1">
         <div class="flex justify-between text-[9px] font-bold gap-2">
           <span class="text-on-surface-variant">${nomes[i]}</span>
@@ -514,11 +600,57 @@ IMPORTANTE: Retorne APENAS o JSON, começando com { e terminando com }`;
         <div class="comp-barra-bg w-16">
           <div class="comp-barra-fill" style="width:${Math.round(v/200*100)}%;background:${cores[i]}"></div>
         </div>
-      </div>`).join('');
+      </div>`).join('') +
+      `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:9px;color:#928ea0;font-weight:700;text-transform:uppercase;">Total</span>
+        <span style="font-size:15px;font-weight:800;color:#e1e2eb;">${notaTotal}<span style="font-size:9px;color:#928ea0;">/1000</span></span>
+      </div>`;
 
-    document.getElementById('colOriginal').innerHTML =
-      `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
+    // ── Alertas C2: repertório de bolso e tangenciamento
+    let alertasC2 = '';
+    if (dados.c2_tangenciamento) {
+      alertasC2 += `<div style="margin-bottom:10px;padding:10px 12px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.25);border-radius:8px;">
+        <p style="color:#ff6b6b;font-size:11px;font-weight:700;">⚠ Tangenciamento detectado</p>
+        <p style="color:#c8c4d7;font-size:12px;margin-top:3px;">${escHtml(dados.c2_tangenciamento_detalhe || 'O tema não foi desenvolvido em sua totalidade.')}</p>
+        <p style="color:#928ea0;font-size:10px;margin-top:4px;">C2, C3 e C5 limitadas a 40 pontos cada.</p>
+      </div>`;
+    }
+    if (dados.c2_repertorio_tipo === 'bolso') {
+      alertasC2 += `<div style="margin-bottom:10px;padding:10px 12px;background:rgba(250,189,0,.08);border:1px solid rgba(250,189,0,.2);border-radius:8px;">
+        <p style="color:#fabd00;font-size:11px;font-weight:700;">⚠ Repertório de bolso detectado</p>
+        ${dados.c2_repertorio_referencia ? `<p style="color:#928ea0;font-size:11px;margin-top:2px;">Referência: <strong style="color:#e1e2eb;">${escHtml(dados.c2_repertorio_referencia)}</strong></p>` : ''}
+        <p style="color:#c8c4d7;font-size:12px;margin-top:4px;">${escHtml(dados.c2_repertorio_avaliacao || '')}</p>
+        ${dados.c2_repertorio_sugestao ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(250,189,0,.15);"><p style="color:#928ea0;font-size:10px;">Como tornar produtivo:</p><p style="color:#e1e2eb;font-size:12px;margin-top:2px;">${escHtml(dados.c2_repertorio_sugestao)}</p></div>` : ''}
+      </div>`;
+    } else if (dados.c2_repertorio_tipo === 'produtivo') {
+      alertasC2 += `<div style="margin-bottom:10px;padding:10px 12px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.15);border-radius:8px;">
+        <p style="color:#4ade80;font-size:11px;font-weight:700;">✓ Repertório produtivo</p>
+        <p style="color:#c8c4d7;font-size:12px;margin-top:3px;">${escHtml(dados.c2_repertorio_avaliacao || '')}</p>
+      </div>`;
+    }
 
+    // ── Checklist C5
+    const c5itens = [
+      { label: 'Ação',         valor: dados.c5_acao },
+      { label: 'Agente',       valor: dados.c5_agente },
+      { label: 'Meio',         valor: dados.c5_meio },
+      { label: 'Finalidade',   valor: dados.c5_finalidade },
+      { label: 'Detalhamento', valor: dados.c5_detalhamento }
+    ];
+    const checklistC5 = c5itens.map(item => {
+      const ok = !!item.valor;
+      return `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+        <span style="color:${ok?'#4ade80':'#ff6b6b'};font-weight:700;min-width:14px;font-size:12px;">${ok?'✓':'✗'}</span>
+        <div><span style="font-size:10px;color:#928ea0;display:block;">${item.label}</span>
+        <span style="font-size:12px;color:${ok?'#e1e2eb':'#ff6b6b'};">${ok ? escHtml(item.valor) : 'Não identificado'}</span></div>
+      </div>`;
+    }).join('');
+    const c5dh = dados.c5_direitos_humanos === false
+      ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);border-radius:6px;color:#ff6b6b;font-size:11px;">⚠ Proposta viola direitos humanos → C5 = 0</div>` : '';
+    const c5faltantes = (dados.c5_elementos_faltantes||[]).length > 0
+      ? `<p style="color:#fabd00;font-size:11px;margin-top:6px;">Faltam: ${dados.c5_elementos_faltantes.join(', ')}</p>` : '';
+
+    // ── Painel de melhoria: alertas C2 + checklist C5 + erros
     let textoCorrigido = escHtml(redacao.texto);
     let qtd = 0;
     if (dados.erros?.length) {
@@ -532,14 +664,27 @@ IMPORTANTE: Retorne APENAS o JSON, começando com { e terminando com }`;
         );
       });
     }
+
+    document.getElementById('colOriginal').innerHTML =
+      `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
+
     document.getElementById('colCorrecoes').innerHTML =
-      `<p style="white-space:pre-line;text-align:justify;">${textoCorrigido}</p>`;
+      alertasC2 +
+      `<div style="margin-bottom:12px;padding:10px 12px;background:rgba(250,107,107,.05);border:1px solid rgba(255,255,255,.06);border-radius:8px;">
+        <p style="font-size:11px;font-weight:700;color:#fa6e6e;margin-bottom:6px;">Proposta de intervenção — C5</p>
+        ${checklistC5}${c5faltantes}${c5dh}
+      </div>` +
+      `<p style="white-space:pre-line;text-align:justify;margin-top:8px;">${textoCorrigido}</p>`;
+
     document.getElementById('badgeErros').textContent = `${qtd} marcação${qtd!==1?'ões':''}`;
 
     document.getElementById('colElite').innerHTML =
       `<p style="white-space:pre-line;text-align:justify;color:#1f2937;">${escHtml(dados.versao_elite||'')}</p>`;
 
-    window._analiseCompleta = dados.analise_completa || '';
+    window._analiseCompleta = (dados.c3_projeto_texto ? '— Projeto de texto —\n' + dados.c3_projeto_texto + '\n\n' : '') +
+      (dados.c4_problemas?.length ? '— Coesão —\n' + dados.c4_problemas.join('\n') + '\n\n' : '') +
+      (dados.feedback_geral ? '— Feedback geral —\n' + dados.feedback_geral + '\n\n' : '') +
+      (dados.analise_completa || '');
     window._porQueElite = dados.por_que_elite || '';
   }
 
