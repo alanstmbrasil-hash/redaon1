@@ -167,8 +167,34 @@ function dbHeaders(token = null) {
   };
 }
 
+/**
+ * Versão segura do fetch para o Supabase.
+ * Se receber 401 (JWT expirado), renova o token automaticamente e tenta de novo.
+ */
+async function dbFetch(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    headers: { ...dbHeaders(), ...(options.headers || {}) }
+  });
+
+  if (res.status !== 401) return res;
+
+  // Token expirado — tenta renovar
+  const novoToken = await authRefreshToken();
+  if (!novoToken) {
+    window.location.href = 'login.html';
+    return res;
+  }
+
+  // Segunda tentativa com token novo
+  return fetch(url, {
+    ...options,
+    headers: { ...dbHeaders(novoToken), ...(options.headers || {}) }
+  });
+}
+
 async function dbGetPerfil(userId, token = null) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}&select=*`, {
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}&select=*`, {
     headers: dbHeaders(token)
   });
   const data = await res.json();
@@ -177,10 +203,8 @@ async function dbGetPerfil(userId, token = null) {
 
 async function dbUpdatePerfil(campos) {
   const userId = authGetUserId();
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}`, {
-    method: 'PATCH',
-    headers: dbHeaders(),
-    body: JSON.stringify(campos)
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}`, {
+    method: 'PATCH',body: JSON.stringify(campos)
   });
   const data = await res.json();
   if (!res.ok) throw new Error(JSON.stringify(data));
@@ -198,16 +222,14 @@ async function dbGetRedacoes(filtros = {}) {
   if (filtros.status) url += `&status=eq.${filtros.status}`;
   if (filtros.limit) url += `&limit=${filtros.limit}`;
   
-  const res = await fetch(url, { headers: dbHeaders() });
+  const res = await dbFetch(url, {});
   return await res.json();
 }
 
 async function dbSalvarRedacao({ texto, tema_id = null, tema_livre = null, turma_id = null }) {
   const userId = authGetUserId();
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/redacoes`, {
-    method: 'POST',
-    headers: dbHeaders(),
-    body: JSON.stringify({
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/redacoes`, {
+    method: 'POST',body: JSON.stringify({
       aluno_id: userId,
       texto,
       tema_id,
@@ -231,17 +253,13 @@ async function dbGetTemas(filtros = {}) {
 }
 
 async function dbGetCorrecoes(redacaoId) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/correcoes?redacao_id=eq.${redacaoId}&order=created_at.desc`, {
-    headers: dbHeaders()
-  });
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/correcoes?redacao_id=eq.${redacaoId}&order=created_at.desc`, {});
   return await res.json();
 }
 
 async function dbSalvarCorrecaoIA({ redacao_id, c1, c2, c3, c4, c5, feedback_geral, feedback_c1, feedback_c2, feedback_c3, feedback_c4, feedback_c5, pontos_fortes, pontos_melhorar }) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/correcoes`, {
-    method: 'POST',
-    headers: dbHeaders(),
-    body: JSON.stringify({
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/correcoes`, {
+    method: 'POST',body: JSON.stringify({
       redacao_id,
       tipo: 'ia',
       c1, c2, c3, c4, c5,
@@ -253,10 +271,8 @@ async function dbSalvarCorrecaoIA({ redacao_id, c1, c2, c3, c4, c5, feedback_ger
   
   // Atualizar nota na redação
   const nota = (c1||0)+(c2||0)+(c3||0)+(c4||0)+(c5||0);
-  await fetch(`${SUPABASE_URL}/rest/v1/redacoes?id=eq.${redacao_id}`, {
-    method: 'PATCH',
-    headers: dbHeaders(),
-    body: JSON.stringify({ status: 'corrigida', nota_final: nota })
+  await dbFetch(`${SUPABASE_URL}/rest/v1/redacoes?id=eq.${redacao_id}`, {
+    method: 'PATCH',body: JSON.stringify({ status: 'corrigida', nota_final: nota })
   });
   
   return data[0];
@@ -265,7 +281,7 @@ async function dbSalvarCorrecaoIA({ redacao_id, c1, c2, c3, c4, c5, feedback_ger
 async function dbGetRanking(turmaId = null) {
   let url = `${SUPABASE_URL}/rest/v1/ranking?order=media_notas.desc&limit=50`;
   if (turmaId) url += `&turma_id=eq.${turmaId}`;
-  const res = await fetch(url, { headers: dbHeaders() });
+  const res = await dbFetch(url, {});
   return await res.json();
 }
 
@@ -305,10 +321,8 @@ async function dbGetRedacoesDaTurma(turmaId) {
 
 async function dbSalvarPerfilDisc({ perfil_disc, disc_primario, disc_secundario }) {
   const userId = authGetUserId();
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}`, {
-    method: 'PATCH',
-    headers: dbHeaders(),
-    body: JSON.stringify({ perfil_disc, disc_primario, disc_secundario })
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}`, {
+    method: 'PATCH',body: JSON.stringify({ perfil_disc, disc_primario, disc_secundario })
   });
   const data = await res.json();
   if (!res.ok) throw new Error(JSON.stringify(data));
@@ -437,10 +451,8 @@ async function dbSalvarCorrecaoIACompleta({
   feedback_geral, feedback_c1, feedback_c2, feedback_c3, feedback_c4, feedback_c5,
   pontos_fortes, pontos_melhorar, modo = 'normal', pdca = null
 }) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/correcoes`, {
-    method: 'POST',
-    headers: dbHeaders(),
-    body: JSON.stringify({
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/correcoes`, {
+    method: 'POST',body: JSON.stringify({
       redacao_id, tipo: 'ia', modo,
       c1, c2, c3, c4, c5,
       feedback_geral, feedback_c1, feedback_c2, feedback_c3, feedback_c4, feedback_c5,
@@ -457,10 +469,8 @@ async function dbSalvarCorrecaoIACompleta({
   const data = await res.json();
   if (!res.ok) throw new Error(JSON.stringify(data));
   const nota = (c1||0)+(c2||0)+(c3||0)+(c4||0)+(c5||0);
-  await fetch(`${SUPABASE_URL}/rest/v1/redacoes?id=eq.${redacao_id}`, {
-    method: 'PATCH',
-    headers: dbHeaders(),
-    body: JSON.stringify({ status: 'corrigida', nota_final: nota })
+  await dbFetch(`${SUPABASE_URL}/rest/v1/redacoes?id=eq.${redacao_id}`, {
+    method: 'PATCH',body: JSON.stringify({ status: 'corrigida', nota_final: nota })
   });
   return data[0];
 }
