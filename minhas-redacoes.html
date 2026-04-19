@@ -551,11 +551,61 @@ ${redacao.texto}`;
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('JSON não encontrado');
       let jsonStr = jsonMatch[0];
-      // Remove quebras de linha literais dentro de strings JSON
-      jsonStr = jsonStr.replace(/("(?:[^"\\]|\\.)*")|(\n)/g, (m, str, nl) => str ? str : ' ');
-      // Remove vírgulas duplas e trailing commas
+
+      // Parser robusto: limpar problemas comuns do Gemini
+      // 1. Remover quebras de linha FORA de strings (dentro de strings são válidas se escapadas)
+      jsonStr = jsonStr.replace(/("(?:[^"\\]|\\.)*")|([\n\r])/g, (m, str) => str !== undefined ? str : ' ');
+      // 2. Remover vírgulas duplas e trailing commas
       jsonStr = jsonStr.replace(/,\s*,/g, ',').replace(/,\s*([}\]])/g, '$1');
-      dadosAtuais = JSON.parse(jsonStr);
+      // 3. Tentar parse direto; se falhar, tentar limpeza mais agressiva
+      let dadosParsed;
+      try {
+        dadosParsed = JSON.parse(jsonStr);
+      } catch(e1) {
+        try {
+          // Limpeza agressiva: remover todos os \n e \r dentro do JSON
+          const jsonLimpo = jsonStr.replace(/\n/g,' ').replace(/\r/g,' ').replace(/\t/g,' ');
+          dadosParsed = JSON.parse(jsonLimpo);
+        } catch(e2) {
+          // Último recurso: extrair apenas os campos essenciais via regex
+          console.warn('JSON inválido, extraindo campos essenciais:', e2.message);
+          const extrair = (chave) => {
+            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*"([^"]*)"'));
+            return m ? m[1] : null;
+          };
+          const extrairNum = (chave) => {
+            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*(\\d+)'));
+            return m ? parseInt(m[1]) : 0;
+          };
+          const extrairArr = (chave) => {
+            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*\\[([^\\]]+)\\]'));
+            if (!m) return [0,0,0,0,0];
+            return m[1].split(',').map(v => parseInt(v.trim()) || 0);
+          };
+          dadosParsed = {
+            competencias: extrairArr('competencias'),
+            nota_total: extrairNum('nota_total'),
+            c2_repertorio_tipo: extrair('c2_repertorio_tipo'),
+            c2_repertorio_referencia: extrair('c2_repertorio_referencia'),
+            c2_repertorio_avaliacao: extrair('c2_repertorio_avaliacao'),
+            c2_repertorio_sugestao: extrair('c2_repertorio_sugestao'),
+            c2_tangenciamento: jsonStr.includes('"c2_tangenciamento":true'),
+            c5_acao: extrair('c5_acao'),
+            c5_agente: extrair('c5_agente'),
+            c5_meio: extrair('c5_meio'),
+            c5_finalidade: extrair('c5_finalidade'),
+            c5_detalhamento: extrair('c5_detalhamento'),
+            c5_direitos_humanos: !jsonStr.includes('"c5_direitos_humanos":false'),
+            feedback_geral: extrair('feedback_geral'),
+            analise_completa: extrair('analise_completa'),
+            versao_elite_intro: extrair('versao_elite_intro'),
+            versao_elite_dev1: extrair('versao_elite_dev1'),
+            versao_elite_dev2: extrair('versao_elite_dev2'),
+            versao_elite_conclusao: extrair('versao_elite_conclusao'),
+          };
+        }
+      }
+      dadosAtuais = dadosParsed;
       renderAnalise(redacao, dadosAtuais);
 
     } catch(err) {
