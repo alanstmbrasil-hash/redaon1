@@ -449,7 +449,8 @@ async function dbGetContextoPDCA() {
 async function dbSalvarCorrecaoIACompleta({
   redacao_id, c1, c2, c3, c4, c5,
   feedback_geral, feedback_c1, feedback_c2, feedback_c3, feedback_c4, feedback_c5,
-  pontos_fortes, pontos_melhorar, modo = 'normal', pdca = null
+  pontos_fortes, pontos_melhorar, modo = 'normal', pdca = null,
+  correcao_json = null
 }) {
   const res = await dbFetch(`${SUPABASE_URL}/rest/v1/correcoes`, {
     method: 'POST',body: JSON.stringify({
@@ -463,7 +464,8 @@ async function dbSalvarCorrecaoIACompleta({
       pdca_tendencia:  pdca?.tendencia || null,
       pdca_plano:      JSON.stringify(pdca?.plano_5w2h || {}),
       pdca_r3g:        JSON.stringify(pdca?.r3g || {}),
-      consolidadas:    JSON.stringify(pdca?.competencias_consolidadas_atualizadas || [])
+      consolidadas:    JSON.stringify(pdca?.competencias_consolidadas_atualizadas || []),
+      correcao_json:   correcao_json || null
     })
   });
   const data = await res.json();
