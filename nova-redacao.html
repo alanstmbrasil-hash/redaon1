@@ -1342,6 +1342,20 @@ var intervaloDicas = null;
         if (!match) throw new Error('JSON não encontrado');
         dados = JSON.parse(match[0]);
       }
+
+      // ── FIX DE INTEGRIDADE DE NOTAS ──────────────────
+      // A Gemini retorna "nota_total" e "competencias[].nota" separadamente,
+      // e às vezes eles divergem (LLMs são ruins em aritmética confiável).
+      // Recalculamos nota_total a partir da soma real das competências para
+      // garantir consistência entre tela de correção, banco e minhas-redacoes.
+      if (Array.isArray(dados.competencias) && dados.competencias.length > 0) {
+        const somaReal = dados.competencias.reduce((s, c) => s + (Number(c?.nota) || 0), 0);
+        if (dados.nota_total !== somaReal) {
+          console.info(`[RedaON] nota_total ajustada: Gemini retornou ${dados.nota_total}, soma real é ${somaReal}`);
+          dados.nota_total = somaReal;
+        }
+      }
+
       renderResultado(dados, elite);
 
       // ── 4. SALVAR NO SUPABASE COM DADOS PDCA ────────
