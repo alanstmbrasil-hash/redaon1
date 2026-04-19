@@ -569,9 +569,10 @@ ${redacao.texto}`;
         } catch(e2) {
           // Último recurso: extrair apenas os campos essenciais via regex
           console.warn('JSON inválido, extraindo campos essenciais:', e2.message);
+          // Regex que captura strings com \n e \\ escapados dentro delas
           const extrair = (chave) => {
-            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*"([^"]*)"'));
-            return m ? m[1] : null;
+            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"'));
+            return m ? m[1].replace(/\\n/g, '\n') : null;
           };
           const extrairNum = (chave) => {
             const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*(\\d+)'));
@@ -582,6 +583,11 @@ ${redacao.texto}`;
             if (!m) return [0,0,0,0,0];
             return m[1].split(',').map(v => parseInt(v.trim()) || 0);
           };
+          const extrairArrStr = (chave) => {
+            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*\\[([^\\]]*)\\]'));
+            if (!m) return [];
+            return (m[1].match(/"((?:[^"\\\\]|\\\\.)*)"/g) || []).map(s => s.slice(1,-1));
+          };
           dadosParsed = {
             competencias: extrairArr('competencias'),
             nota_total: extrairNum('nota_total'),
@@ -590,18 +596,28 @@ ${redacao.texto}`;
             c2_repertorio_avaliacao: extrair('c2_repertorio_avaliacao'),
             c2_repertorio_sugestao: extrair('c2_repertorio_sugestao'),
             c2_tangenciamento: jsonStr.includes('"c2_tangenciamento":true'),
+            c2_tangenciamento_detalhe: extrair('c2_tangenciamento_detalhe'),
+            c3_projeto_texto: extrair('c3_projeto_texto'),
+            c4_problemas: extrairArrStr('c4_problemas'),
             c5_acao: extrair('c5_acao'),
             c5_agente: extrair('c5_agente'),
             c5_meio: extrair('c5_meio'),
             c5_finalidade: extrair('c5_finalidade'),
             c5_detalhamento: extrair('c5_detalhamento'),
-            c5_direitos_humanos: !jsonStr.includes('"c5_direitos_humanos":false'),
+            c5_elementos_faltantes: extrairArrStr('c5_elementos_faltantes'),
+            c5_direitos_humanos: jsonStr.includes('"c5_direitos_humanos":true'),
+            erros: [],
             feedback_geral: extrair('feedback_geral'),
             analise_completa: extrair('analise_completa'),
             versao_elite_intro: extrair('versao_elite_intro'),
             versao_elite_dev1: extrair('versao_elite_dev1'),
             versao_elite_dev2: extrair('versao_elite_dev2'),
             versao_elite_conclusao: extrair('versao_elite_conclusao'),
+            por_que_elite_c1: extrair('por_que_elite_c1'),
+            por_que_elite_c2: extrair('por_que_elite_c2'),
+            por_que_elite_c3: extrair('por_que_elite_c3'),
+            por_que_elite_c4: extrair('por_que_elite_c4'),
+            por_que_elite_c5: extrair('por_que_elite_c5'),
           };
         }
       }
@@ -622,8 +638,12 @@ ${redacao.texto}`;
     const nomes = ['C1','C2','C3','C4','C5'];
     const cores = ['#45edee','#6c5ce7','#6c5ce7','#fabd00','#fa6e6e'];
     const comp = dados.competencias || [0,0,0,0,0];
-    // Prioriza nota salva no banco (pelo nova-redacao) sobre o recálculo local
-    const notaTotal = redacao.nota || dados.nota_total || comp.reduce((a,b)=>a+b,0);
+    // Soma real das competências (para as barras e total interno)
+    const somaComp = comp.reduce((a,b)=>a+b,0);
+    // Nota exibida no cabeçalho: prioriza banco, senão JSON, senão soma
+    const notaCabecalho = redacao.nota || dados.nota_total || somaComp;
+    // Sincroniza o cabeçalho com a nota correta
+    document.getElementById('notaEspelho').textContent = notaCabecalho || '—';
 
     // ── Barras de competência
     document.getElementById('barrasComp').innerHTML = comp.map((v,i) => `
@@ -638,7 +658,7 @@ ${redacao.texto}`;
       </div>`).join('') +
       `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:9px;color:#928ea0;font-weight:700;text-transform:uppercase;">Total</span>
-        <span style="font-size:15px;font-weight:800;color:#e1e2eb;">${notaTotal}<span style="font-size:9px;color:#928ea0;">/1000</span></span>
+        <span style="font-size:15px;font-weight:800;color:#e1e2eb;">${somaComp}<span style="font-size:9px;color:#928ea0;">/1000</span></span>
       </div>`;
 
     // ── Alertas C2: repertório de bolso e tangenciamento
@@ -682,10 +702,13 @@ ${redacao.texto}`;
         </div>
       </div>`;
     }).join('');
-    // Só mostra alerta de direitos humanos se o Gemini retornar explicitamente false (boolean)
-    const violaDH = dados.c5_direitos_humanos === false && typeof dados.c5_direitos_humanos === 'boolean';
+    // Só mostra alerta de direitos humanos se o Gemini retornar explicitamente true (boolean)
+    const violaDH = dados.c5_direitos_humanos === true;
     const c5dh = violaDH
-      ? `<div style="margin-top:10px;padding:10px 12px;background:#1a0000;border:1px solid #7f0000;border-radius:6px;color:#ff6b6b;font-size:12px;font-weight:600;">⚠ Proposta viola direitos humanos → C5 = 0</div>` : '';
+      ? `<div style="margin-top:10px;padding:10px 12px;background:#1a0000;border:1px solid #7f0000;border-radius:6px;">
+          <p style="color:#ff6b6b;font-size:12px;font-weight:700;margin-bottom:4px;">⚠ Proposta viola direitos humanos → C5 = 0</p>
+          <p style="color:#e1e2eb;font-size:12px;line-height:1.6;">No ENEM, viola direitos humanos qualquer proposta que sugira: tortura, execução sem julgamento, "justiça com as próprias mãos", punições degradantes, incitação ao ódio por raça, gênero ou religião. Reescreva sua conclusão propondo uma ação legal e respeitosa à dignidade humana.</p>
+        </div>` : '';
     const c5faltantes = (dados.c5_elementos_faltantes||[]).length > 0
       ? `<p style="color:#fabd00;font-size:12px;font-weight:600;margin-top:8px;">Faltam: ${dados.c5_elementos_faltantes.join(', ')}</p>` : `<p style="color:#4ade80;font-size:12px;font-weight:600;margin-top:8px;">✓ Proposta completa</p>`;
 
@@ -792,7 +815,7 @@ ${redacao.texto}`;
       (dados.c4_problemas?.length ? '— Coesão —\n' + dados.c4_problemas.join('\n') + '\n\n' : '') +
       (dados.feedback_geral ? '— Feedback geral —\n' + dados.feedback_geral + '\n\n' : '') +
       (dados.analise_completa || '');
-    window._porQueElite = dados.por_que_elite || '';
+    // _porQueElite já foi definido acima (por competência ou fallback) — não sobrescrever aqui
   }
 
   function renderFallback(redacao) {
