@@ -1393,7 +1393,8 @@ var intervaloDicas = null;
               pontos_fortes: dados.pontos_fortes || '',
               pontos_melhorar: dados.pontos_melhorar || '',
               modo: elite ? 'elite' : 'normal',
-              pdca: pdcaProf
+              pdca: pdcaProf,
+              correcao_json: dados
             });
           } else {
             await dbSalvarCorrecaoIA({
