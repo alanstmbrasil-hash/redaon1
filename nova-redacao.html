@@ -1340,14 +1340,14 @@ CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
     5. DETALHAMENTO: exemplificação ou complemento
   VIOLAÇÃO DH (nota 0 automática): tortura, execução sumária, "justiça com as próprias mãos", discurso de ódio.`;
 
-  const FORMATO_JSON_NORMAL = `{
+  const FORMATO_JSON_CORRECAO = `{
   "nota_total": <soma das 5 competências>,
   "competencias": [
-    {"nota": <0-200>, "feedback": "<1-2 frases diretas sobre C1>"},
-    {"nota": <0-200>, "feedback": "<1-2 frases diretas sobre C2>"},
-    {"nota": <0-200>, "feedback": "<1-2 frases diretas sobre C3>"},
-    {"nota": <0-200>, "feedback": "<1-2 frases diretas sobre C4>"},
-    {"nota": <0-200>, "feedback": "<1-2 frases diretas sobre C5>"}
+    {"nota": <0-200>, "feedback": "<1-2 frases diretas sobre C1>", "reescrita": "<reescrita de um trecho real do texto que exemplifica melhoria de C1>", "para_200": "<o que falta especificamente para 200 em C1>"},
+    {"nota": <0-200>, "feedback": "<1-2 frases sobre C2>", "reescrita": "<reescrita de trecho para C2>", "para_200": "<o que falta para 200 em C2>"},
+    {"nota": <0-200>, "feedback": "<1-2 frases sobre C3>", "reescrita": "<reescrita de trecho para C3>", "para_200": "<o que falta para 200 em C3>"},
+    {"nota": <0-200>, "feedback": "<1-2 frases sobre C4>", "reescrita": "<reescrita de trecho para C4>", "para_200": "<o que falta para 200 em C4>"},
+    {"nota": <0-200>, "feedback": "<1-2 frases sobre C5>", "reescrita": "<reescrita de trecho para C5>", "para_200": "<o que falta para 200 em C5>"}
   ],
   "c2_repertorio_tipo": "<'produtivo', 'bolso', 'inexistente' ou null>",
   "c2_repertorio_referencia": "<nome da referência usada ou null>",
@@ -1368,41 +1368,7 @@ CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
     {"original": "<trecho exato do texto com erro>", "correto": "<como deveria ser>", "tipo": "<'gramatica'|'vocabulario'|'pontuacao'|'coesao'|'concordancia'>", "competencia": <1-5>}
   ],
   "analise_completa": "<análise parágrafo a parágrafo, separada por \\\\n. Ex: Parágrafo 1: apresenta tese clara...\\\\nParágrafo 2: desenvolve argumento...>",
-  "feedback_geral": "<avaliação geral da redação em 2-3 frases>",
-  "comentario_geral": "<mensagem encorajadora e direta pro aluno, usando o tom DISC informado no contexto>",
-  "pontos_fortes": "<o que o aluno fez bem>",
-  "pontos_melhorar": "<os 3 principais pontos críticos>"
-}`;
-
-  const FORMATO_JSON_ELITE = `{
-  "nota_total": <soma das 5 competências>,
-  "competencias": [
-    {"nota": <0-200>, "feedback": "<análise detalhada de 3-4 frases sobre C1 com impacto na nota>", "reescrita": "<reescrita de um trecho real>", "para_200": "<o que falta especificamente para 200 em C1>"},
-    {"nota": <0-200>, "feedback": "<análise detalhada C2>", "reescrita": "<reescrita>", "para_200": "<o que falta para 200 em C2>"},
-    {"nota": <0-200>, "feedback": "<análise detalhada C3>", "reescrita": "<reescrita>", "para_200": "<o que falta para 200 em C3>"},
-    {"nota": <0-200>, "feedback": "<análise detalhada C4>", "reescrita": "<reescrita>", "para_200": "<o que falta para 200 em C4>"},
-    {"nota": <0-200>, "feedback": "<análise detalhada C5>", "reescrita": "<reescrita>", "para_200": "<o que falta para 200 em C5>"}
-  ],
-  "c2_repertorio_tipo": "<'produtivo', 'bolso', 'inexistente' ou null>",
-  "c2_repertorio_referencia": "<nome da referência ou null>",
-  "c2_repertorio_avaliacao": "<avaliação em 1 frase>",
-  "c2_repertorio_sugestao": "<sugestão em 1 frase>",
-  "c2_tangenciamento": <true/false>,
-  "c2_tangenciamento_detalhe": "<explicação ou null>",
-  "c3_projeto_texto": "<análise do projeto de texto em 2-3 frases>",
-  "c4_problemas": ["<problema 1>", "<problema 2>"],
-  "c5_acao": "<a ação ou null>",
-  "c5_agente": "<o agente ou null>",
-  "c5_meio": "<o meio ou null>",
-  "c5_finalidade": "<a finalidade ou null>",
-  "c5_detalhamento": "<o detalhamento ou null>",
-  "c5_elementos_faltantes": ["<elementos ausentes>"],
-  "c5_direitos_humanos": <true/false>,
-  "erros": [
-    {"original": "<trecho exato>", "correto": "<correção>", "tipo": "<categoria>", "competencia": <1-5>}
-  ],
-  "analise_completa": "<análise parágrafo a parágrafo, separada por \\\\n>",
-  "versao_elite_intro": "<parágrafo de introdução reescrito nível nota 1000>",
+  "versao_elite_intro": "<parágrafo de introdução reescrito nível nota 1000, mantendo tema e ponto de vista do aluno>",
   "versao_elite_dev1": "<1º parágrafo de desenvolvimento reescrito nível nota 1000>",
   "versao_elite_dev2": "<2º parágrafo de desenvolvimento reescrito nível nota 1000>",
   "versao_elite_conclusao": "<parágrafo de conclusão reescrito com proposta COMPLETA (5 elementos)>",
@@ -1411,31 +1377,20 @@ CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
   "por_que_elite_c3": "<explique o que foi melhorado em C3>",
   "por_que_elite_c4": "<explique o que foi melhorado em C4>",
   "por_que_elite_c5": "<explique o que foi melhorado em C5>",
-  "feedback_geral": "<avaliação geral em 2-3 frases>",
-  "comentario_geral": "<avaliação honesta e motivadora, usando o tom DISC informado no contexto>",
-  "pontos_fortes": "<o que o aluno fez bem de verdade>",
-  "pontos_melhorar": "<os 3 principais pontos críticos>",
-  "plano_melhoria": "<plano concreto com 3 passos para a próxima redação>"
+  "feedback_geral": "<avaliação geral da redação em 2-3 frases>",
+  "comentario_geral": "<mensagem encorajadora e direta pro aluno, usando o tom DISC informado no contexto>",
+  "pontos_fortes": "<o que o aluno fez bem>",
+  "pontos_melhorar": "<os 3 principais pontos críticos para a próxima redação>",
+  "plano_melhoria": "<plano concreto com 3 passos para a próxima redação chegar mais perto de 1000>"
 }`;
 
-  const PROMPT_NORMAL = `Você é a PROfa da RedaON — especialista em redação ENEM baseada na Cartilha INEP 2025.
-Sua missão: corrigir com rigor técnico e tom pedagógico, identificar pontos de melhoria e gerar dados estruturados para mentoria contínua via PDCA.
-${RUBRICA_INEP}
-
-REGRAS CRÍTICAS DE SAÍDA:
-1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
-2. Comece com { e termine com }.
-3. Dentro de strings, use \\n (escapado) para quebras de linha. Nunca quebre linha literal dentro de string.
-4. Use null (sem aspas) para campos ausentes.
-5. CALCULE os valores baseados na redação real. NÃO copie números ou textos de nenhum exemplo.
-6. nota_total DEVE ser a soma exata das 5 competências.
-
-Formato EXATO da resposta:
-${FORMATO_JSON_NORMAL}`;
-
-  const PROMPT_ELITE = `Você é a PROfa Elite da RedaON — a mentora mais exigente e precisa do ENEM, baseada na Cartilha INEP 2025.
-Este aluno está no plano Elite e merece análise de alto nível: aponte erros específicos com localização no texto, reescreva trechos, e gere uma versão Elite completa (nota 1000) da redação.
-Seja rigorosa — notas altas só para redações que realmente merecem.
+  // Prompt único de correção — mesma correção completa para todos os alunos,
+  // independente de terem usado Modo Normal ou Modo Elite durante a escrita.
+  // O Modo Elite (plano pago) diferencia-se APENAS pela mentoria em tempo real
+  // durante a escrita (até 20 chamadas IA), não pela correção final.
+  const PROMPT_CORRECAO = `Você é a PROfa da RedaON — especialista em redação ENEM baseada na Cartilha INEP 2025.
+Sua missão: corrigir com rigor técnico e tom pedagógico, apontar erros específicos, sugerir reescritas, gerar uma versão Elite (nota 1000) da redação, e produzir dados estruturados para mentoria contínua via PDCA.
+Seja rigorosa — notas altas só para redações que realmente merecem —, mas sempre pedagógica e encorajadora no tom.
 ${RUBRICA_INEP}
 
 REGRAS CRÍTICAS DE SAÍDA:
@@ -1446,9 +1401,15 @@ REGRAS CRÍTICAS DE SAÍDA:
 5. CALCULE os valores baseados na redação real. NÃO copie números ou textos de nenhum exemplo.
 6. nota_total DEVE ser a soma exata das 5 competências.
 7. A versão Elite (versao_elite_*) deve ser uma REESCRITA REAL da redação original, mantendo o tema e o ponto de vista do aluno, mas elevada ao nível de nota 1000.
+8. O campo "erros" deve conter marcações com o trecho EXATO do texto original (character-perfect), para que a UI possa destacá-lo.
 
 Formato EXATO da resposta:
-${FORMATO_JSON_ELITE}`;
+${FORMATO_JSON_CORRECAO}`;
+
+  // Aliases para compatibilidade retroativa (caso algum lugar do código
+  // ainda referencie os nomes antigos). Ambos apontam para o mesmo prompt.
+  const PROMPT_NORMAL = PROMPT_CORRECAO;
+  const PROMPT_ELITE = PROMPT_CORRECAO;
 
   // ── ENVIO ──────────────────────────────────────────
   async function enviar() {
