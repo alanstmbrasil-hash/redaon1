@@ -385,13 +385,48 @@
   // Parse seguro do JSON retornado pela Gemini (idempotente com o de nova-redacao.html).
   function parseRespostaGemini(raw) {
     const limpo = raw.trim().replace(/```json|```/g, '').trim();
+
+    // Estratégia 1: parse direto (caso mais comum, JSON bem formado)
     try {
       return JSON.parse(limpo);
-    } catch (e) {
-      const m = limpo.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error('JSON não encontrado na resposta da Gemini');
-      return JSON.parse(m[0]);
+    } catch (_) { /* cai pra estratégia 2 */ }
+
+    // Estratégia 2: extrai APENAS o primeiro bloco JSON completo, balanceando chaves.
+    // Evita capturar lixo depois do JSON válido (ex: Gemini às vezes inclui texto
+    // extra após o objeto principal, causando "Unexpected non-whitespace character
+    // after JSON at position X").
+    const inicio = limpo.indexOf('{');
+    if (inicio >= 0) {
+      let profundidade = 0;
+      let dentroDeString = false;
+      let charAnterior = '';
+      for (let i = inicio; i < limpo.length; i++) {
+        const c = limpo[i];
+        if (dentroDeString) {
+          if (c === '"' && charAnterior !== '\\') dentroDeString = false;
+        } else {
+          if (c === '"') dentroDeString = true;
+          else if (c === '{') profundidade++;
+          else if (c === '}') {
+            profundidade--;
+            if (profundidade === 0) {
+              // Achou o fim do primeiro JSON balanceado
+              const candidato = limpo.slice(inicio, i + 1);
+              try { return JSON.parse(candidato); }
+              catch (_) { /* cai pra estratégia 3 */ break; }
+            }
+          }
+        }
+        charAnterior = c;
+      }
     }
+
+    // Estratégia 3: fallback greedy (comportamento antigo) — pega tudo entre o
+    // primeiro { e o último }. Pior caso, mas às vezes funciona se o problema
+    // estiver só no final do texto.
+    const m = limpo.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('JSON não encontrado na resposta da Gemini');
+    return JSON.parse(m[0]);
   }
 
   // Rubrica INEP compacta — usada como contexto nas chamadas 3 e 4.
@@ -490,9 +525,11 @@ Formato EXATO da resposta:
     try {
       const userId = (typeof authGetUserId === 'function') ? authGetUserId() : null;
       if (!userId) { lista.innerHTML = '<p style="font-size:.75rem;color:#928ea0;text-align:center;padding:1.5rem;">Sessao invalida.</p>'; return; }
-      const res = await fetch(
-        SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + userId + '&order=created_at.desc&select=id,texto,tema_livre,status,nota_final,created_at',
-        { headers: dbHeaders() }
+      // dbFetch renova o token automaticamente se retornar 401 (JWT expirado) e
+      // repete a chamada uma vez. Evita o bug do 401 recorrente que obrigava o
+      // usuário a fazer logout/login manualmente após algumas horas de inatividade.
+      const res = await dbFetch(
+        SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + userId + '&order=created_at.desc&select=id,texto,tema_livre,status,nota_final,created_at'
       );
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const rows = await res.json();
