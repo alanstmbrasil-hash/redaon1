@@ -360,17 +360,9 @@
 </div>
 
 <script type="module">
-  // Chama Gemini via rota serverless do Vercel (chave protegida no servidor)
-  async function geminiGenerate(prompt) {
-    const res = await fetch('/api/gemini', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Erro Gemini');
-    return data.candidates[0].content.parts[0].text;
-  }
+  // Cenário B — Commit 3: esta tela não faz mais chamadas à Gemini.
+  // Os dados de correção são lidos do banco (correcao_json) via dbBuscarCorrecao.
+  // Chamadas sob demanda (Redação Nota 1000, Melhorias) entram no Commit 4.
 
   // ── NOME USUÁRIO ───────────────────────────────────
   const NOME_USUARIO = authGetNome();
@@ -458,6 +450,9 @@
   // ── SELECIONAR REDAÇÃO ─────────────────────────────
   let dadosAtuais = null;
 
+  // Cenário B — lê dados do banco (correcao_json) em vez de chamar Gemini.
+  // A correção já foi salva em nova-redacao.html via dbSalvarCorrecaoIACompleta,
+  // e a Chamada 2 (analise_completa) é adicionada em background.
   window.selecionarRedacao = async function(id) {
     const redacao = window.REDACOES.find(r => r.id === id);
     if (!redacao || !redacao.texto) { window.toast('Redação sem conteúdo disponível.'); return; }
@@ -476,156 +471,32 @@
     mudarAba('original');
 
     try {
-      const prompt = `Você é a PROfa da RedaON, especialista em redação ENEM.
-Sua missão é corrigir redações com os critérios OFICIAIS do INEP (Cartilha 2025).
-
-════════════════════════════════════════════════
-CRITÉRIOS DE AVALIAÇÃO — USE PARA PONTUAR
-════════════════════════════════════════════════
-
-▸ COMPETÊNCIA 1 — Domínio da língua formal (0-200)
-  200: excelente domínio; desvios apenas excepcionais; períodos complexos com subordinação e intercalação
-  160: bom domínio; poucos desvios gramaticais ou de convenções
-  120: domínio mediano; alguns desvios gramaticais e de convenções
-   80: domínio insuficiente; muitos desvios gramaticais, de registro e de convenções
-   40: domínio precário; desvios sistemáticos, frequentes e diversificados
-    0: desconhecimento da modalidade escrita formal
-  Avalie: ortografia, acentuação, crase, regência verbal e nominal, concordância verbal e nominal, pontuação, paralelismo, pronomes, registro informal, vocabulário impreciso, truncamentos e justaposição de orações.
-
-▸ COMPETÊNCIA 2 — Compreensão do tema e repertório (0-200)
-  200: tema completamente desenvolvido + repertório sociocultural produtivo + excelente domínio dissertativo-argumentativo
-  160: tema completo + argumentação consistente + bom domínio
-  120: tema completo + argumentação previsível + domínio mediano
-   80: recorre a cópia de textos motivadores OU estrutura sem proposição/argumentação/conclusão
-   40: tangenciamento (aborda parcialmente o tema) OU traços constantes de outros tipos textuais
-    0: fuga total ao tema OU não atende ao tipo dissertativo-argumentativo
-  ATENÇÃO — TANGENCIAMENTO: limita C2, C3 e C5 a no máximo 40 pontos cada.
-  REPERTÓRIO DE BOLSO — penalize quando a referência for genérica, sem contextualização ao tema e sem retomada nos parágrafos seguintes. Exemplos frequentes de repertório de bolso: Thomas More (Utopia), Bauman (instituições zumbis), Platão (Alegoria da Caverna), Einstein (definição de loucura), Nelson Mandela (educação muda o mundo sem contexto geográfico). Repertório produtivo: específico, contextualizado, articulado ao argumento, retomado ao longo do texto.
-
-▸ COMPETÊNCIA 3 — Organização e defesa do ponto de vista (0-200)
-  200: informações consistentes e organizadas, autoria clara, ponto de vista bem defendido
-  160: informações organizadas, indícios de autoria, ponto de vista presente
-  120: informações limitadas aos textos motivadores, pouco organizadas
-   80: informações desorganizadas ou contraditórias
-   40: informações pouco relacionadas ao tema ou incoerentes, sem ponto de vista
-    0: informações não relacionadas ao tema, sem ponto de vista
-  Avalie: tese clara na introdução, progressão parágrafo a parágrafo sem saltos ou repetições, argumentos com exemplos/dados/analogias, coerência entre introdução e conclusão.
-
-▸ COMPETÊNCIA 4 — Coesão (0-200)
-  200: articulação excelente entre todas as partes; repertório coesivo diversificado
-  160: boa articulação; poucas inadequações; repertório diversificado
-  120: articulação mediana; inadequações presentes; repertório pouco diversificado
-   80: articulação insuficiente; muitas inadequações; repertório limitado
-   40: articulação precária
-    0: não articula as informações
-  Avalie: operadores argumentativos (porém, entretanto, ademais, portanto, dessa forma, nesse sentido), referenciação (pronomes, sinônimos), articulação inter e intraparágrafo. Penalize: ausência de paragrafação, conectivos artificiais ou excessivos, pronome relativo "onde" para pessoas ou ideias, repetição excessiva sem recurso coesivo.
-
-▸ COMPETÊNCIA 5 — Proposta de intervenção (0-200)
-  200: proposta detalhada, com TODOS os 5 elementos, articulada à discussão do texto
-  160: proposta completa, articulada ao texto
-  120: proposta mediana, articulada ao texto
-   80: proposta insuficiente OU desarticulada do texto
-   40: proposta vaga, precária ou relacionada apenas ao assunto geral
-    0: proposta ausente OU viola direitos humanos OU não relacionada ao tema
-  OS 5 ELEMENTOS OBRIGATÓRIOS:
-    1. AÇÃO: o que deve ser feito concretamente (≠ "faltam investimentos" = vago, máximo 40)
-    2. AGENTE: quem executa (Ministério da Educação, escolas, mídia, empresas, famílias...)
-    3. MEIO: como será feito (lei, campanha, projeto, disciplina curricular, programa...)
-    4. FINALIDADE/EFEITO: para quê / qual o resultado esperado
-    5. DETALHAMENTO: exemplificação ou complemento de qualquer elemento acima
-  Viola direitos humanos (= nota 0 automática): tortura, execução sumária, "justiça com as próprias mãos", incitação à violência por raça/etnia/gênero/religião, discurso de ódio.
-
-RETORNE APENAS UM OBJETO JSON VÁLIDO. Sem texto antes ou depois. Sem markdown. Comece com { e termine com }.
-Strings longas (analise_completa, versao_elite, por_que_elite) NÃO podem ter quebras de linha — use \\n para indicar parágrafo dentro das strings.
-Use null (sem aspas) para campos ausentes.
-
-{"competencias":[160,120,140,120,80],"nota_total":620,"c2_repertorio_tipo":"bolso","c2_repertorio_referencia":"Thomas More","c2_repertorio_avaliacao":"Citação genérica sem conexão ao tema.","c2_repertorio_sugestao":"Contextualizar a obra e ligá-la ao argumento central.","c2_tangenciamento":false,"c2_tangenciamento_detalhe":null,"c3_projeto_texto":"Introdução apresenta tese clara. Parágrafos progridem bem.","c4_problemas":["uso incorreto de onde","conectivos repetidos"],"c5_acao":"criar programa de saneamento","c5_agente":"Ministério da Saúde","c5_meio":"lei federal","c5_finalidade":"reduzir desigualdade hídrica","c5_detalhamento":null,"c5_elementos_faltantes":["detalhamento"],"c5_direitos_humanos":true,"erros":[{"original":"fazem parte do problema","correto":"constituem o problema","tipo":"vocabulario"}],"analise_completa":"Parágrafo 1: apresenta o tema com clareza.\\nParágrafo 2: desenvolve argumento histórico, mas repertório é superficial.\\nParágrafo 3: boa progressão. Parágrafo 4: proposta incompleta.","feedback_geral":"Sua redação apresenta boa estrutura e tese clara. O principal ponto de melhoria é aprofundar o repertório e completar a proposta de intervenção com o meio de execução. Continue praticando!","versao_elite_intro":"Parágrafo de introdução reescrito com tese clara e repertório produtivo contextualizado.","versao_elite_dev1":"Primeiro parágrafo de desenvolvimento com argumento aprofundado, dados e conexão ao tema.","versao_elite_dev2":"Segundo parágrafo de desenvolvimento com argumento complementar e coesão rica.","versao_elite_conclusao":"Parágrafo de conclusão com proposta completa: agente + ação + meio + finalidade + detalhamento.","por_que_elite_c1":"C1 — explique o que foi corrigido na língua formal e por que eleva a nota.","por_que_elite_c2":"C2 — explique como o repertório foi tornado produtivo e contextualizado.","por_que_elite_c3":"C3 — explique como a argumentação foi aprofundada e organizada.","por_que_elite_c4":"C4 — explique quais recursos coesivos foram adicionados ou corrigidos.","por_que_elite_c5":"C5 — explique como a proposta de intervenção foi completada com os 5 elementos."}
-
-Substitua TODOS os valores acima pelos valores reais da redação analisada.
-
-Redação para corrigir:
-${redacao.texto}`;
-
-      let rawText = await geminiGenerate(prompt);
-      rawText = rawText.replace(/```json/g,'').replace(/```/g,'').trim();
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('JSON não encontrado');
-      let jsonStr = jsonMatch[0];
-
-      // Parser robusto: limpar problemas comuns do Gemini
-      // 1. Remover quebras de linha FORA de strings (dentro de strings são válidas se escapadas)
-      jsonStr = jsonStr.replace(/("(?:[^"\\]|\\.)*")|([\n\r])/g, (m, str) => str !== undefined ? str : ' ');
-      // 2. Remover vírgulas duplas e trailing commas
-      jsonStr = jsonStr.replace(/,\s*,/g, ',').replace(/,\s*([}\]])/g, '$1');
-      // 3. Tentar parse direto; se falhar, tentar limpeza mais agressiva
-      let dadosParsed;
-      try {
-        dadosParsed = JSON.parse(jsonStr);
-      } catch(e1) {
-        try {
-          // Limpeza agressiva: remover todos os \n e \r dentro do JSON
-          const jsonLimpo = jsonStr.replace(/\n/g,' ').replace(/\r/g,' ').replace(/\t/g,' ');
-          dadosParsed = JSON.parse(jsonLimpo);
-        } catch(e2) {
-          // Último recurso: extrair apenas os campos essenciais via regex
-          console.warn('JSON inválido, extraindo campos essenciais:', e2.message);
-          // Regex que captura strings com \n e \\ escapados dentro delas
-          const extrair = (chave) => {
-            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"'));
-            return m ? m[1].replace(/\\n/g, '\n') : null;
-          };
-          const extrairNum = (chave) => {
-            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*(\\d+)'));
-            return m ? parseInt(m[1]) : 0;
-          };
-          const extrairArr = (chave) => {
-            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*\\[([^\\]]+)\\]'));
-            if (!m) return [0,0,0,0,0];
-            return m[1].split(',').map(v => parseInt(v.trim()) || 0);
-          };
-          const extrairArrStr = (chave) => {
-            const m = jsonStr.match(new RegExp('"' + chave + '"\\s*:\\s*\\[([^\\]]*)\\]'));
-            if (!m) return [];
-            return (m[1].match(/"((?:[^"\\\\]|\\\\.)*)"/g) || []).map(s => s.slice(1,-1));
-          };
-          dadosParsed = {
-            competencias: extrairArr('competencias'),
-            nota_total: extrairNum('nota_total'),
-            c2_repertorio_tipo: extrair('c2_repertorio_tipo'),
-            c2_repertorio_referencia: extrair('c2_repertorio_referencia'),
-            c2_repertorio_avaliacao: extrair('c2_repertorio_avaliacao'),
-            c2_repertorio_sugestao: extrair('c2_repertorio_sugestao'),
-            c2_tangenciamento: jsonStr.includes('"c2_tangenciamento":true'),
-            c2_tangenciamento_detalhe: extrair('c2_tangenciamento_detalhe'),
-            c3_projeto_texto: extrair('c3_projeto_texto'),
-            c4_problemas: extrairArrStr('c4_problemas'),
-            c5_acao: extrair('c5_acao'),
-            c5_agente: extrair('c5_agente'),
-            c5_meio: extrair('c5_meio'),
-            c5_finalidade: extrair('c5_finalidade'),
-            c5_detalhamento: extrair('c5_detalhamento'),
-            c5_elementos_faltantes: extrairArrStr('c5_elementos_faltantes'),
-            c5_direitos_humanos: jsonStr.includes('"c5_direitos_humanos":true'),
-            erros: [],
-            feedback_geral: extrair('feedback_geral'),
-            analise_completa: extrair('analise_completa'),
-            versao_elite_intro: extrair('versao_elite_intro'),
-            versao_elite_dev1: extrair('versao_elite_dev1'),
-            versao_elite_dev2: extrair('versao_elite_dev2'),
-            versao_elite_conclusao: extrair('versao_elite_conclusao'),
-            por_que_elite_c1: extrair('por_que_elite_c1'),
-            por_que_elite_c2: extrair('por_que_elite_c2'),
-            por_que_elite_c3: extrair('por_que_elite_c3'),
-            por_que_elite_c4: extrair('por_que_elite_c4'),
-            por_que_elite_c5: extrair('por_que_elite_c5'),
-          };
-        }
+      // 1. Busca correção completa no banco
+      if (typeof dbBuscarCorrecao !== 'function') {
+        throw new Error('dbBuscarCorrecao indisponível — atualize supabase-auth.js');
       }
-      dadosAtuais = dadosParsed;
-      renderAnalise(redacao, dadosAtuais);
+      const correcao = await dbBuscarCorrecao(id);
+      if (!correcao || !correcao.correcao_json) {
+        throw new Error('Correção ainda não disponível — envie a redação novamente');
+      }
+
+      const dados = correcao.correcao_json;
+
+      // 2. Normaliza formato de competências (banco pode ter objetos com {nota, feedback, ...}
+      //    ou array de números puros em registros legados).
+      if (Array.isArray(dados.competencias) && dados.competencias.length > 0 && typeof dados.competencias[0] === 'object') {
+        // Extrai só as notas pra compatibilidade com código antigo de barras.
+        // Mantém o array original em outra variável para os feedbacks ricos.
+        dados._competencias_objetos = dados.competencias;
+        dados.competencias = dados.competencias.map(c => c?.nota || 0);
+      }
+
+      // 3. Renderiza
+      dadosAtuais = dados;
+      renderAnalise(redacao, dados);
 
     } catch(err) {
-      console.error('Erro na análise:', err);
+      console.error('[Minhas Redações] Erro ao carregar correção:', err);
       renderFallback(redacao);
     } finally {
       document.getElementById('estadoCarregando').classList.add('hidden');
@@ -743,18 +614,23 @@ ${redacao.texto}`;
     document.getElementById('badgeErros').textContent = `${qtd} marcação${qtd!==1?'ões':''}`;
 
     // ── Versão Elite: parágrafos identificados por competência
+    //     Compatível com nomes novos (redacao_nota_1000_*) e antigos (versao_elite_*).
     const secoesList = [
-      { key: 'versao_elite_intro',     label: 'Introdução',        cor: '#45edee', comp: 'C1 + C2' },
-      { key: 'versao_elite_dev1',      label: 'Desenvolvimento 1', cor: '#6c5ce7', comp: 'C2 + C3' },
-      { key: 'versao_elite_dev2',      label: 'Desenvolvimento 2', cor: '#6c5ce7', comp: 'C3 + C4' },
-      { key: 'versao_elite_conclusao', label: 'Conclusão — C5',    cor: '#fabd00', comp: 'C5' }
+      { keys: ['redacao_nota_1000_intro',     'versao_elite_intro'],     label: 'Introdução',        cor: '#45edee', comp: 'C1 + C2' },
+      { keys: ['redacao_nota_1000_dev1',      'versao_elite_dev1'],      label: 'Desenvolvimento 1', cor: '#6c5ce7', comp: 'C2 + C3' },
+      { keys: ['redacao_nota_1000_dev2',      'versao_elite_dev2'],      label: 'Desenvolvimento 2', cor: '#6c5ce7', comp: 'C3 + C4' },
+      { keys: ['redacao_nota_1000_conclusao', 'versao_elite_conclusao'], label: 'Conclusão — C5',    cor: '#fabd00', comp: 'C5' }
     ];
+    const leCampo = (keys) => {
+      for (const k of keys) { if (dados[k]) return dados[k]; }
+      return null;
+    };
     // Fallback: se vier versao_elite como string única, dividir em parágrafos
     let eliteHtml = '';
-    const temSecoes = secoesList.some(s => dados[s.key]);
+    const temSecoes = secoesList.some(s => leCampo(s.keys));
     if (temSecoes) {
       eliteHtml = secoesList.map(s => {
-        const texto = dados[s.key];
+        const texto = leCampo(s.keys);
         if (!texto) return '';
         return '<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,.08);">'
           + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;">'
@@ -765,7 +641,7 @@ ${redacao.texto}`;
           + '</div>';
       }).join('');
     } else {
-      // Fallback: versao_elite como texto único dividido por \n
+      // Fallback: versao_elite como texto único dividido por \n (registros muito antigos)
       const textoElite = dados.versao_elite || '';
       const paragrafosElite = textoElite.split(/\\n|\n/).map(p => p.trim()).filter(p => p.length > 0);
       const rotulosFallback = [
@@ -785,20 +661,31 @@ ${redacao.texto}`;
           + '</div>';
       }).join('');
     }
-    document.getElementById('colElite').innerHTML = eliteHtml || '<p style="color:#928ea0;text-align:center;padding:2rem;">Versão elite não disponível.</p>';
+    // Estado vazio amigável: a reescrita nota 1000 é gerada sob demanda (Commit 4).
+    // Enquanto essa feature não estiver ativa, informa que ainda não foi gerada.
+    if (!eliteHtml) {
+      const status = (dados.chamadas && dados.chamadas.redacao_nota_1000) || 'pendente';
+      eliteHtml = '<p style="color:#928ea0;text-align:center;padding:2rem;">'
+        + (status === 'pendente'
+            ? 'Versão nota 1000 será gerada sob demanda (em breve disponível).'
+            : 'Versão nota 1000 não disponível.')
+        + '</p>';
+    }
+    document.getElementById('colElite').innerHTML = eliteHtml;
 
     // ── Por que Nota 1000: análise por competência
+    //     Compatível com nomes novos (melhoria_c*) e antigos (por_que_elite_*).
     const porQueCompetencias = [
-      { key: 'por_que_elite_c1', label: 'C1 — Língua formal',     cor: '#45edee' },
-      { key: 'por_que_elite_c2', label: 'C2 — Tema e repertório', cor: '#6c5ce7' },
-      { key: 'por_que_elite_c3', label: 'C3 — Argumentação',      cor: '#6c5ce7' },
-      { key: 'por_que_elite_c4', label: 'C4 — Coesão',            cor: '#fabd00' },
-      { key: 'por_que_elite_c5', label: 'C5 — Intervenção',       cor: '#fa6e6e' }
+      { keys: ['melhoria_c1', 'por_que_elite_c1'], label: 'C1 — Língua formal',     cor: '#45edee' },
+      { keys: ['melhoria_c2', 'por_que_elite_c2'], label: 'C2 — Tema e repertório', cor: '#6c5ce7' },
+      { keys: ['melhoria_c3', 'por_que_elite_c3'], label: 'C3 — Argumentação',      cor: '#6c5ce7' },
+      { keys: ['melhoria_c4', 'por_que_elite_c4'], label: 'C4 — Coesão',            cor: '#fabd00' },
+      { keys: ['melhoria_c5', 'por_que_elite_c5'], label: 'C5 — Intervenção',       cor: '#fa6e6e' }
     ];
-    const temPorQueComp = porQueCompetencias.some(c => dados[c.key]);
+    const temPorQueComp = porQueCompetencias.some(c => leCampo(c.keys));
     if (temPorQueComp) {
       window._porQueElite = porQueCompetencias.map(c => {
-        const texto = dados[c.key];
+        const texto = leCampo(c.keys);
         if (!texto) return '';
         return '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid ' + c.cor + ';border-radius:0 8px 8px 0;">'
           + '<p style="font-size:11px;font-weight:700;color:' + c.cor + ';margin-bottom:5px;">' + c.label + '</p>'
@@ -806,25 +693,45 @@ ${redacao.texto}`;
           + '</div>';
       }).join('');
     } else {
-      window._porQueElite = dados.por_que_elite
-        ? '<p style="font-size:13px;color:#e1e2eb;line-height:1.7;white-space:pre-line;">' + escHtml(dados.por_que_elite) + '</p>'
-        : '<p style="color:#928ea0;">Não disponível.</p>';
+      // Estado vazio amigável — texto único antigo (fallback histórico) ou placeholder.
+      if (dados.por_que_elite) {
+        window._porQueElite = '<p style="font-size:13px;color:#e1e2eb;line-height:1.7;white-space:pre-line;">' + escHtml(dados.por_que_elite) + '</p>';
+      } else {
+        const status = (dados.chamadas && dados.chamadas.melhorias_por_competencia) || 'pendente';
+        window._porQueElite = '<p style="color:#928ea0;text-align:center;padding:2rem;">'
+          + (status === 'pendente'
+              ? 'Análise por competência será gerada sob demanda (em breve disponível).'
+              : 'Análise por competência não disponível.')
+          + '</p>';
+      }
     }
 
-    window._analiseCompleta = (dados.c3_projeto_texto ? '— Projeto de texto —\n' + dados.c3_projeto_texto + '\n\n' : '') +
-      (dados.c4_problemas?.length ? '— Coesão —\n' + dados.c4_problemas.join('\n') + '\n\n' : '') +
-      (dados.feedback_geral ? '— Feedback geral —\n' + dados.feedback_geral + '\n\n' : '') +
-      (dados.analise_completa || '');
+    // ── Análise completa: agora lê diretamente do campo correcao_json.analise_completa,
+    //     que é preenchido pela Chamada 2 em background após o envio da redação.
+    //     Complementa com dados do Commit 1 que também fazem parte da análise (projeto C3, problemas C4, feedback geral).
+    const partesAnalise = [];
+    if (dados.analise_completa) {
+      partesAnalise.push(dados.analise_completa);
+    } else {
+      const status = (dados.chamadas && dados.chamadas.analise_completa) || 'pendente';
+      partesAnalise.push(status === 'pendente'
+        ? '(Análise completa ainda sendo processada — volte em alguns instantes.)'
+        : '');
+    }
+    if (dados.c3_projeto_texto)  partesAnalise.push('— Projeto de texto —\n' + dados.c3_projeto_texto);
+    if (dados.c4_problemas?.length) partesAnalise.push('— Coesão —\n' + dados.c4_problemas.join('\n'));
+    if (dados.feedback_geral)    partesAnalise.push('— Feedback geral —\n' + dados.feedback_geral);
+    window._analiseCompleta = partesAnalise.filter(p => p && p.trim()).join('\n\n');
     // _porQueElite já foi definido acima (por competência ou fallback) — não sobrescrever aqui
   }
 
   function renderFallback(redacao) {
     document.getElementById('barrasComp').innerHTML = '<p class="text-xs text-on-surface-variant">Análise indisponível.</p>';
     document.getElementById('colOriginal').innerHTML = `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
-    document.getElementById('colCorrecoes').innerHTML = '<p style="text-align:center;padding:2rem;color:#928ea0;font-size:.9rem;">Não foi possível gerar a análise.</p>';
-    document.getElementById('colElite').innerHTML = '<p style="text-align:center;padding:2rem;color:#928ea0;font-size:.9rem;">Não foi possível gerar a análise.</p>';
+    document.getElementById('colCorrecoes').innerHTML = '<p style="text-align:center;padding:2rem;color:#928ea0;font-size:.9rem;">Correção não disponível. Isso pode acontecer se a redação ainda está sendo processada ou se foi enviada antes da atualização do sistema. Envie a redação novamente.</p>';
+    document.getElementById('colElite').innerHTML = '<p style="text-align:center;padding:2rem;color:#928ea0;font-size:.9rem;">Correção não disponível.</p>';
     document.getElementById('badgeErros').textContent = '—';
-    window.toast('Erro ao gerar análise. Tente novamente.');
+    window.toast('Correção não encontrada no banco.');
   }
 
   function escHtml(str) {
