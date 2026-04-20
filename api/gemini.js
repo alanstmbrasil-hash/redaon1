@@ -17,17 +17,15 @@ module.exports = async function handler(req, res) {
     // Modelo gemini-2.5-flash-lite mantido para custo baixo
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent`;
 
-    // Configuração padrão para correção ENEM completa:
-    // - maxOutputTokens 16000: cabe 5 competências + pontos de melhoria +
-    //   análise completa + versão Elite reescrita + explicação nota 1000.
-    //   O valor anterior (1500) era o que cortava a resposta no meio e
-    //   causava "Versão elite não disponível", "Por que nota 1000: não
-    //   disponível" e Análise Completa truncada.
+    // Configuração padrão para correção ENEM:
+    // - maxOutputTokens 32000: folga durante transição para Cenário B (chamadas
+    //   fracionadas). No estado final cada chamada pedirá 1500-3000 tokens,
+    //   mas agora ainda existem chamadas maiores que precisam caber inteiras.
     // - temperature 0.3: correção consistente, não criativa
     // - responseMimeType application/json: força JSON válido e parseável,
     //   elimina os erros "Expected ',' or ']' at position X" no console
     const defaultConfig = {
-      maxOutputTokens: 16000,
+      maxOutputTokens: 32000,
       temperature: 0.3,
       responseMimeType: 'application/json'
     };

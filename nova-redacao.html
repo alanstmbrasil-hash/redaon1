@@ -1256,11 +1256,14 @@ var intervaloDicas = null;
         <span style="font-size:.7rem;font-weight:800;color:#C9A227;background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.3);padding:.25rem .875rem;border-radius:9999px;letter-spacing:.06em;">⭐ ANÁLISE ELITE PRO</span>
       </div>` : '';
 
-    // Plano de melhoria (só Elite)
-    const planoMelhoria = elite && d.plano_melhoria ? `
+    // Plano de melhoria (só Elite) — aceita array ou string
+    const _planoTexto = Array.isArray(d.plano_melhoria)
+      ? d.plano_melhoria.map((p, i) => `${i + 1}. ${p}`).join('<br>')
+      : (d.plano_melhoria || '');
+    const planoMelhoria = elite && _planoTexto ? `
       <div style="background:rgba(201,162,39,.06);border:1px solid rgba(201,162,39,.2);border-radius:.75rem;padding:1rem;margin-top:1rem;">
         <p style="font-size:.7rem;font-weight:700;color:#C9A227;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">🎯 Plano para sua próxima redação</p>
-        <p style="font-size:.82rem;color:#c8c4d7;line-height:1.7;">${d.plano_melhoria}</p>
+        <p style="font-size:.82rem;color:#c8c4d7;line-height:1.7;">${_planoTexto}</p>
       </div>` : '';
 
     // Comentário geral
@@ -1340,7 +1343,19 @@ CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
     5. DETALHAMENTO: exemplificação ou complemento
   VIOLAÇÃO DH (nota 0 automática): tortura, execução sumária, "justiça com as próprias mãos", discurso de ódio.`;
 
-  const FORMATO_JSON_CORRECAO = `{
+  // ── PROMPTS FRACIONADOS (Cenário B) ────────────────
+  // Correção em 4 chamadas Gemini independentes para UX mais rápida e melhor
+  // distribuição do consumo de tokens.
+  //
+  // Chamada 1 (PROMPT_NOTA_DIAGNOSTICO): rápida, bloqueia UI — nota + diagnóstico
+  // Chamada 2 (PROMPT_ANALISE_COMPLETA): preload em background — análise parágrafo a parágrafo
+  // Chamada 3 (PROMPT_REDACAO_NOTA_1000): sob demanda — redação reescrita nota 1000
+  // Chamada 4 (PROMPT_MELHORIAS): sob demanda — explicação do que foi melhorado em cada C
+  //
+  // Neste Commit 1, apenas Chamada 1 está sendo executada. As outras serão
+  // orquestradas nos Commits 2-4.
+
+  const FORMATO_JSON_NOTA_DIAGNOSTICO = `{
   "nota_total": <soma das 5 competências>,
   "competencias": [
     {"nota": <0-200>, "feedback": "<1-2 frases diretas sobre C1>", "reescrita": "<reescrita de um trecho real do texto que exemplifica melhoria de C1>", "para_200": "<o que falta especificamente para 200 em C1>"},
@@ -1367,29 +1382,18 @@ CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
   "erros": [
     {"original": "<trecho exato do texto com erro>", "correto": "<como deveria ser>", "tipo": "<'gramatica'|'vocabulario'|'pontuacao'|'coesao'|'concordancia'>", "competencia": <1-5>}
   ],
-  "analise_completa": "<análise parágrafo a parágrafo, separada por \\\\n. Ex: Parágrafo 1: apresenta tese clara...\\\\nParágrafo 2: desenvolve argumento...>",
-  "redacao_nota_1000_intro": "<parágrafo de introdução reescrito nível nota 1000, mantendo tema e ponto de vista do aluno>",
-  "redacao_nota_1000_dev1": "<1º parágrafo de desenvolvimento reescrito nível nota 1000>",
-  "redacao_nota_1000_dev2": "<2º parágrafo de desenvolvimento reescrito nível nota 1000>",
-  "redacao_nota_1000_conclusao": "<parágrafo de conclusão reescrito com proposta COMPLETA (5 elementos)>",
-  "melhoria_c1": "<explique o que foi melhorado em C1 na redação nota 1000 e por que eleva para 200>",
-  "melhoria_c2": "<explique o que foi melhorado em C2>",
-  "melhoria_c3": "<explique o que foi melhorado em C3>",
-  "melhoria_c4": "<explique o que foi melhorado em C4>",
-  "melhoria_c5": "<explique o que foi melhorado em C5>",
   "feedback_geral": "<avaliação geral da redação em 2-3 frases>",
   "comentario_geral": "<mensagem encorajadora e direta pro aluno, usando o tom DISC informado no contexto>",
-  "pontos_fortes": "<o que o aluno fez bem>",
-  "pontos_melhorar": "<os 3 principais pontos críticos para a próxima redação>",
-  "plano_melhoria": "<plano concreto com 3 passos para a próxima redação chegar mais perto de 1000>"
+  "pontos_fortes": ["<ponto 1>", "<ponto 2>", "<ponto 3>"],
+  "pontos_melhorar": ["<ponto 1>", "<ponto 2>", "<ponto 3>"],
+  "plano_melhoria": ["<passo 1>", "<passo 2>", "<passo 3>"]
 }`;
 
-  // Prompt único de correção — mesma correção completa para todos os alunos,
-  // independente de terem usado Modo Normal ou Modo Elite durante a escrita.
-  // O Modo Elite (plano pago) diferencia-se APENAS pela mentoria em tempo real
-  // durante a escrita (até 20 chamadas IA), não pela correção final.
-  const PROMPT_CORRECAO = `Você é a PROfa da RedaON — especialista em redação ENEM baseada na Cartilha INEP 2025.
-Sua missão: corrigir com rigor técnico e tom pedagógico, apontar erros específicos, sugerir reescritas, gerar uma versão Elite (nota 1000) da redação, e produzir dados estruturados para mentoria contínua via PDCA.
+  // CHAMADA 1 — Nota + Diagnóstico completo
+  // Rápida, bloqueia UI. Retorna tudo necessário para tela de correção aparecer
+  // e para "Pontos de Melhoria" em Minhas Redações funcionar.
+  const PROMPT_NOTA_DIAGNOSTICO = `Você é a PROfa da RedaON — especialista em redação ENEM baseada na Cartilha INEP 2025.
+Sua missão nesta análise: atribuir notas justas por competência, identificar pontos fortes e pontos críticos, marcar erros específicos no texto, e gerar os dados que alimentam a tela "Pontos de Melhoria" e os indicadores PDCA.
 Seja rigorosa — notas altas só para redações que realmente merecem —, mas sempre pedagógica e encorajadora no tom.
 ${RUBRICA_INEP}
 
@@ -1400,16 +1404,79 @@ REGRAS CRÍTICAS DE SAÍDA:
 4. Use null (sem aspas) para campos ausentes.
 5. CALCULE os valores baseados na redação real. NÃO copie números ou textos de nenhum exemplo.
 6. nota_total DEVE ser a soma exata das 5 competências.
-7. Os campos redacao_nota_1000_* devem conter uma REESCRITA REAL da redação original, mantendo o tema e o ponto de vista do aluno, mas elevada ao nível de nota 1000.
-8. O campo "erros" deve conter marcações com o trecho EXATO do texto original (character-perfect), para que a UI possa destacá-lo.
+7. O campo "erros" deve conter marcações com o trecho EXATO do texto original (character-perfect), para que a UI possa destacá-lo.
+8. pontos_fortes, pontos_melhorar e plano_melhoria são arrays de strings (3 itens cada), não um texto corrido.
 
 Formato EXATO da resposta:
-${FORMATO_JSON_CORRECAO}`;
+${FORMATO_JSON_NOTA_DIAGNOSTICO}`;
 
-  // Aliases para compatibilidade retroativa (caso algum lugar do código
-  // ainda referencie os nomes antigos). Ambos apontam para o mesmo prompt.
-  const PROMPT_NORMAL = PROMPT_CORRECAO;
-  const PROMPT_ELITE = PROMPT_CORRECAO;
+  // CHAMADA 2 — Análise Completa (preload em background — Commit 2)
+  // Recebe como contexto as notas da Chamada 1 para manter consistência.
+  const FORMATO_JSON_ANALISE_COMPLETA = `{
+  "analise_completa": "<análise aprofundada parágrafo a parágrafo da redação. Separe os parágrafos com \\\\n. Para cada parágrafo do texto original, comente: função (introdução, desenvolvimento, conclusão), tese ou argumento central, qualidade da construção, relação com a tese, pontos fortes e pontos a melhorar. Mínimo 4 parágrafos de análise (um por parágrafo do texto). Mantenha coerência com as notas já atribuídas.>"
+}`;
+
+  const PROMPT_ANALISE_COMPLETA = `Você é a PROfa da RedaON — especialista em redação ENEM.
+Sua missão agora é produzir uma ANÁLISE COMPLETA e aprofundada da redação, parágrafo a parágrafo. Esta análise complementa as notas e feedbacks já atribuídos, aprofundando o raciocínio pedagógico.
+${RUBRICA_INEP}
+
+REGRAS CRÍTICAS DE SAÍDA:
+1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
+2. Dentro de strings, use \\n (escapado) para quebras de linha.
+3. Mantenha COERÊNCIA com as notas e feedbacks que foram atribuídos na análise anterior (fornecidos no contexto).
+
+Formato EXATO da resposta:
+${FORMATO_JSON_ANALISE_COMPLETA}`;
+
+  // CHAMADA 3 — Redação Nota 1000 (sob demanda — Commit 4)
+  const FORMATO_JSON_REDACAO_NOTA_1000 = `{
+  "redacao_nota_1000_intro": "<parágrafo de introdução reescrito nível nota 1000, mantendo tema e ponto de vista do aluno>",
+  "redacao_nota_1000_dev1": "<1º parágrafo de desenvolvimento reescrito nível nota 1000>",
+  "redacao_nota_1000_dev2": "<2º parágrafo de desenvolvimento reescrito nível nota 1000>",
+  "redacao_nota_1000_conclusao": "<parágrafo de conclusão reescrito com proposta COMPLETA (5 elementos)>"
+}`;
+
+  const PROMPT_REDACAO_NOTA_1000 = `Você é a PROfa da RedaON — especialista em redação ENEM.
+Sua missão agora é REESCREVER a redação do aluno em nível nota 1000, mantendo o tema e o ponto de vista original, mas elevando linguagem, argumentação, coesão e proposta de intervenção ao nível máximo.
+${RUBRICA_INEP}
+
+REGRAS CRÍTICAS DE SAÍDA:
+1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
+2. Dentro de strings, use \\n (escapado) para quebras de linha.
+3. MANTENHA o tema, o ponto de vista e a tese do aluno. A reescrita deve ser reconhecível como "a redação dele melhorada", não uma redação completamente diferente.
+4. A conclusão DEVE incluir os 5 elementos obrigatórios da proposta de intervenção: AÇÃO + AGENTE + MEIO + FINALIDADE + DETALHAMENTO.
+
+Formato EXATO da resposta:
+${FORMATO_JSON_REDACAO_NOTA_1000}`;
+
+  // CHAMADA 4 — Melhorias por Competência (sob demanda — Commit 4)
+  // Recebe como contexto a redação original + redação nota 1000 (Chamada 3).
+  const FORMATO_JSON_MELHORIAS = `{
+  "melhoria_c1": "<explique o que foi melhorado em C1 na redação nota 1000 comparada à original, e por que eleva para 200>",
+  "melhoria_c2": "<explique o que foi melhorado em C2>",
+  "melhoria_c3": "<explique o que foi melhorado em C3>",
+  "melhoria_c4": "<explique o que foi melhorado em C4>",
+  "melhoria_c5": "<explique o que foi melhorado em C5>"
+}`;
+
+  const PROMPT_MELHORIAS = `Você é a PROfa da RedaON — especialista em redação ENEM.
+Sua missão agora é comparar a REDAÇÃO ORIGINAL do aluno com a REDAÇÃO NOTA 1000 reescrita (ambas fornecidas no contexto) e explicar, competência por competência, o que foi melhorado e por que a mudança eleva a nota para 200.
+${RUBRICA_INEP}
+
+REGRAS CRÍTICAS DE SAÍDA:
+1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
+2. Seja concreta: cite trechos específicos da reescrita e compare com os originais quando útil.
+3. Cada campo melhoria_cN deve ter entre 3 e 5 frases.
+
+Formato EXATO da resposta:
+${FORMATO_JSON_MELHORIAS}`;
+
+  // Aliases para compatibilidade retroativa — todos apontam para Chamada 1.
+  // No Cenário B, a "correção principal" é apenas a Chamada 1; as demais
+  // chamadas são complementares e executadas em outros momentos.
+  const PROMPT_CORRECAO = PROMPT_NOTA_DIAGNOSTICO;
+  const PROMPT_NORMAL = PROMPT_NOTA_DIAGNOSTICO;
+  const PROMPT_ELITE = PROMPT_NOTA_DIAGNOSTICO;
 
   // ── ENVIO ──────────────────────────────────────────
   async function enviar() {
@@ -1483,6 +1550,16 @@ ${FORMATO_JSON_CORRECAO}`;
         }
       }
 
+      // ── STATUS DAS CHAMADAS (Cenário B) ──────────────
+      // Marca quais chamadas Gemini foram executadas. minhas-redacoes.html
+      // usa isso para saber o que já tem no banco e o que precisa buscar sob demanda.
+      dados.chamadas = {
+        nota_e_diagnostico: 'completa',
+        analise_completa: 'pendente',
+        redacao_nota_1000: 'pendente',
+        melhorias_por_competencia: 'pendente'
+      };
+
       renderResultado(dados, elite);
 
       // ── 4. SALVAR NO SUPABASE COM DADOS PDCA ────────
@@ -1503,6 +1580,10 @@ ${FORMATO_JSON_CORRECAO}`;
 
           // Usar dbSalvarCorrecaoIACompleta se disponível (com PDCA)
           // Senão fallback para dbSalvarCorrecaoIA
+          // Nota: pontos_fortes/pontos_melhorar agora vêm como arrays do Prompt
+          // NOTA_DIAGNOSTICO, mas as colunas text do banco guardam string.
+          // Convertemos aqui, preservando o formato array no correcao_json (jsonb).
+          const _arrToString = (v) => Array.isArray(v) ? v.map(x => `• ${x}`).join('\n') : (v || '');
           if (typeof dbSalvarCorrecaoIACompleta === 'function') {
             await dbSalvarCorrecaoIACompleta({
               redacao_id: redacao.id,
@@ -1517,8 +1598,8 @@ ${FORMATO_JSON_CORRECAO}`;
               feedback_c3: comps[2]?.feedback || '',
               feedback_c4: comps[3]?.feedback || '',
               feedback_c5: comps[4]?.feedback || '',
-              pontos_fortes: dados.pontos_fortes || '',
-              pontos_melhorar: dados.pontos_melhorar || '',
+              pontos_fortes: _arrToString(dados.pontos_fortes),
+              pontos_melhorar: _arrToString(dados.pontos_melhorar),
               modo: elite ? 'elite' : 'normal',
               pdca: pdcaProf,
               correcao_json: dados
@@ -1537,8 +1618,8 @@ ${FORMATO_JSON_CORRECAO}`;
               feedback_c3: comps[2]?.feedback || '',
               feedback_c4: comps[3]?.feedback || '',
               feedback_c5: comps[4]?.feedback || '',
-              pontos_fortes: dados.pontos_fortes || '',
-              pontos_melhorar: dados.pontos_melhorar || ''
+              pontos_fortes: _arrToString(dados.pontos_fortes),
+              pontos_melhorar: _arrToString(dados.pontos_melhorar)
             });
           }
           toast(elite ? '⭐ Análise Elite salva no seu histórico!' : '✅ Redação salva no seu histórico!', 4000);
