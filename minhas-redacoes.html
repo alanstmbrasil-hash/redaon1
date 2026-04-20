@@ -439,21 +439,38 @@ CRITÉRIOS INEP (Cartilha 2025) — resumo:
 - C5 Proposta de intervenção (0-200): 5 elementos (AÇÃO, AGENTE, MEIO, FINALIDADE, DETALHAMENTO) + articulação ao texto. Viola DH = nota 0.`;
 
   // CHAMADA 2 — Análise Completa (preload em background no envio, sob demanda aqui).
-  // Mesmo prompt que nova-redacao.html usa para preload. Aqui é disparado apenas
-  // se o campo analise_completa ainda não existe no banco (ex: redação antiga
-  // anterior ao fix da RLS, ou Chamada 2 em background falhou silenciosamente).
-  const PROMPT_ANALISE_COMPLETA = `Você é a PROfa da RedaON — especialista em redação ENEM.
-Sua missão agora é produzir uma ANÁLISE COMPLETA e aprofundada da redação, parágrafo a parágrafo. Esta análise complementa as notas e feedbacks já atribuídos, aprofundando o raciocínio pedagógico.
+  //
+  // Prompt reescrito: antes usava um template rígido (5 tópicos por parágrafo)
+  // que gerava texto mecânico e repetitivo. Agora pede análise narrativa e
+  // estratégica, focada em padrões e no próximo passo de aprendizado.
+  const PROMPT_ANALISE_COMPLETA = `Você é a PROfa da RedaON — especialista em redação ENEM, com postura de mentora pedagógica contínua.
+Sua missão é produzir uma ANÁLISE ESTRATÉGICA da redação em 3 seções bem enxutas, focando no que realmente importa para o desenvolvimento deste aluno.
 ${RUBRICA_INEP_COMPACTA}
+
+CONTEXTO IMPORTANTE:
+- Este aluno já recebeu feedbacks específicos por competência (Chamada 1).
+- Sua função aqui NÃO é repetir essas observações.
+- Seu papel é DAR SENTIDO ao conjunto — identificar padrões, hierarquizar problemas, e apontar um caminho.
+
+DIRETRIZES DE ESCRITA:
+- Fale DIRETAMENTE com o aluno (usando "você"), como uma mentora conversando.
+- NUNCA use fórmulas mecânicas como "Parágrafo 1 apresenta...", "Este parágrafo tem como função...", "Observa-se que...".
+- NUNCA liste os 5 tópicos padrão para cada parágrafo.
+- Seja concreta e específica: cite trechos reais da redação quando útil.
+- Evite repetir o mesmo tipo de análise em seções diferentes.
+- Tom: mentora competente, acolhedora e direta. Nem burocrática, nem puxa-saco.
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
 2. Dentro de strings, use \\n (escapado) para quebras de linha.
-3. Mantenha COERÊNCIA com as notas e feedbacks que foram atribuídos na análise anterior (fornecidos no contexto).
+3. NÃO inclua aspas duplas não-escapadas dentro dos valores de string.
+4. Mantenha COERÊNCIA com as notas já atribuídas.
 
 Formato EXATO da resposta:
 {
-  "analise_completa": "<análise aprofundada parágrafo a parágrafo da redação. Separe os parágrafos com \\\\n. Para cada parágrafo do texto original, comente: função (introdução, desenvolvimento, conclusão), tese ou argumento central, qualidade da construção, relação com a tese, pontos fortes e pontos a melhorar. Mínimo 4 parágrafos de análise (um por parágrafo do texto). Mantenha coerência com as notas já atribuídas.>"
+  "analise_projeto_texto": "<1 a 2 parágrafos. Avalie o PROJETO DE TEXTO: tese clara? A progressão dos parágrafos constrói um caminho lógico ou a redação salta entre ideias? O aluno controla o texto ou o texto controla o aluno? Foque no ARCO argumentativo, não em comentar cada parágrafo.>",
+  "analise_padrao_dominante": "<1 parágrafo. Qual é o PADRÃO dominante que mais limita a nota desta redação? Ex: 'repertório genérico retomado de forma superficial'; 'argumentos que anunciam mas não desenvolvem'; 'coesão por repetição em vez de operadores argumentativos'. Identifique UM padrão-chave, não vários problemas soltos.>",
+  "analise_proximo_passo": "<1 parágrafo. Qual é o PRÓXIMO PASSO concreto no percurso deste aluno? Uma recomendação específica e acionável para a próxima redação, não um checklist genérico. Ex: 'Antes de escrever a próxima redação, escolha 2 referências específicas sobre o tema e anote como cada uma se conecta à sua tese — esse exercício resolve o repertório de bolso.'>"
 }`;
 
   // CHAMADA 3 — Gera a redação nota 1000 reescrita.
@@ -670,29 +687,37 @@ Formato EXATO da resposta:
       </div>`;
 
     // ── Alertas C2: repertório de bolso e tangenciamento
+    //     Padrão visual unificado com "Por que Nota 1000?":
+    //     background #1d2026 + border-left 3px colorido + border-radius 0 8px 8px 0
+    //     Tipografia consistente: título 11px/700, corpo 13px/1.6.
     let alertasC2 = '';
     if (dados.c2_tangenciamento) {
-      alertasC2 += `<div style="margin-bottom:10px;padding:12px 14px;background:#1a1010;border:1px solid #7f2020;border-radius:8px;">
-        <p style="color:#ff6b6b;font-size:12px;font-weight:700;margin-bottom:4px;">⚠ Tangenciamento detectado</p>
-        <p style="color:#e1e2eb;font-size:13px;line-height:1.5;">${escHtml(dados.c2_tangenciamento_detalhe || 'O tema não foi desenvolvido em sua totalidade.')}</p>
-        <p style="color:#928ea0;font-size:11px;margin-top:6px;">Efeito: C2, C3 e C5 limitadas a 40 pontos cada.</p>
-      </div>`;
+      alertasC2 += '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid #fa6e6e;border-radius:0 8px 8px 0;">'
+        + '<p style="font-size:11px;font-weight:700;color:#fa6e6e;margin-bottom:5px;">⚠ Tangenciamento detectado (C2)</p>'
+        + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;margin-bottom:6px;">' + escHtml(dados.c2_tangenciamento_detalhe || 'O tema não foi desenvolvido em sua totalidade.') + '</p>'
+        + '<p style="font-size:11px;color:#928ea0;line-height:1.5;">Efeito: C2, C3 e C5 ficam limitadas a 40 pontos cada.</p>'
+        + '</div>';
     }
     if (dados.c2_repertorio_tipo === 'bolso') {
-      alertasC2 += `<div style="margin-bottom:10px;padding:12px 14px;background:#1a1600;border:1px solid #7a5e00;border-radius:8px;">
-        <p style="color:#fabd00;font-size:12px;font-weight:700;margin-bottom:4px;">⚠ Repertório de bolso detectado</p>
-        ${dados.c2_repertorio_referencia ? `<p style="color:#928ea0;font-size:11px;margin-bottom:4px;">Referência: <strong style="color:#fabd00;">${escHtml(dados.c2_repertorio_referencia)}</strong></p>` : ''}
-        <p style="color:#e1e2eb;font-size:13px;line-height:1.5;">${escHtml(dados.c2_repertorio_avaliacao || '')}</p>
-        ${dados.c2_repertorio_sugestao ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #7a5e00;"><p style="color:#928ea0;font-size:11px;margin-bottom:4px;">Como tornar produtivo:</p><p style="color:#e1e2eb;font-size:13px;line-height:1.5;">${escHtml(dados.c2_repertorio_sugestao)}</p></div>` : ''}
-      </div>`;
+      alertasC2 += '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid #6c5ce7;border-radius:0 8px 8px 0;">'
+        + '<p style="font-size:11px;font-weight:700;color:#6c5ce7;margin-bottom:5px;">C2 — Repertório de bolso detectado</p>'
+        + (dados.c2_repertorio_referencia
+            ? '<p style="font-size:11px;color:#928ea0;margin-bottom:6px;">Referência: <strong style="color:#c6bfff;">' + escHtml(dados.c2_repertorio_referencia) + '</strong></p>'
+            : '')
+        + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;">' + escHtml(dados.c2_repertorio_avaliacao || '') + '</p>'
+        + (dados.c2_repertorio_sugestao
+            ? '<p style="font-size:11px;color:#928ea0;margin-top:8px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;">Como tornar produtivo</p>'
+              + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;">' + escHtml(dados.c2_repertorio_sugestao) + '</p>'
+            : '')
+        + '</div>';
     } else if (dados.c2_repertorio_tipo === 'produtivo') {
-      alertasC2 += `<div style="margin-bottom:10px;padding:12px 14px;background:#0a1a10;border:1px solid #1a5c30;border-radius:8px;">
-        <p style="color:#4ade80;font-size:12px;font-weight:700;margin-bottom:4px;">✓ Repertório produtivo</p>
-        <p style="color:#e1e2eb;font-size:13px;line-height:1.5;">${escHtml(dados.c2_repertorio_avaliacao || '')}</p>
-      </div>`;
+      alertasC2 += '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid #4ade80;border-radius:0 8px 8px 0;">'
+        + '<p style="font-size:11px;font-weight:700;color:#4ade80;margin-bottom:5px;">✓ C2 — Repertório produtivo</p>'
+        + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;">' + escHtml(dados.c2_repertorio_avaliacao || '') + '</p>'
+        + '</div>';
     }
 
-    // ── Checklist C5
+    // ── Checklist C5 — agora em formato card vermelho (consistente com paleta C5)
     const c5itens = [
       { label: 'Ação',         valor: dados.c5_acao },
       { label: 'Agente',       valor: dados.c5_agente },
@@ -702,23 +727,33 @@ Formato EXATO da resposta:
     ];
     const checklistC5 = c5itens.map(item => {
       const ok = !!item.valor;
-      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);">
-        <span style="color:${ok?'#4ade80':'#ff6b6b'};font-weight:900;min-width:16px;font-size:14px;line-height:1.4;">${ok?'✓':'✗'}</span>
-        <div style="flex:1;">
-          <span style="font-size:11px;color:#928ea0;font-weight:600;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px;">${item.label}</span>
-          <span style="font-size:13px;color:${ok?'#e1e2eb':'#ff6b6b'};line-height:1.5;">${ok ? escHtml(item.valor) : 'Não identificado — inclua na conclusão'}</span>
-        </div>
-      </div>`;
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:6px 0;">'
+        + '<span style="color:' + (ok ? '#4ade80' : '#fa6e6e') + ';font-weight:900;min-width:16px;font-size:14px;line-height:1.4;">' + (ok ? '✓' : '✗') + '</span>'
+        + '<div style="flex:1;">'
+        +   '<span style="font-size:11px;color:#928ea0;font-weight:600;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px;">' + item.label + '</span>'
+        +   '<span style="font-size:13px;color:' + (ok ? '#e1e2eb' : '#fa6e6e') + ';line-height:1.6;">' + (ok ? escHtml(item.valor) : 'Não identificado — inclua na conclusão') + '</span>'
+        + '</div>'
+        + '</div>';
     }).join('');
-    // Só mostra alerta de direitos humanos se o Gemini retornar explicitamente true (boolean)
+
     const violaDH = dados.c5_direitos_humanos === true;
     const c5dh = violaDH
-      ? `<div style="margin-top:10px;padding:10px 12px;background:#1a0000;border:1px solid #7f0000;border-radius:6px;">
-          <p style="color:#ff6b6b;font-size:12px;font-weight:700;margin-bottom:4px;">⚠ Proposta viola direitos humanos → C5 = 0</p>
-          <p style="color:#e1e2eb;font-size:12px;line-height:1.6;">No ENEM, viola direitos humanos qualquer proposta que sugira: tortura, execução sem julgamento, "justiça com as próprias mãos", punições degradantes, incitação ao ódio por raça, gênero ou religião. Reescreva sua conclusão propondo uma ação legal e respeitosa à dignidade humana.</p>
-        </div>` : '';
-    const c5faltantes = (dados.c5_elementos_faltantes||[]).length > 0
-      ? `<p style="color:#fabd00;font-size:12px;font-weight:600;margin-top:8px;">Faltam: ${dados.c5_elementos_faltantes.join(', ')}</p>` : `<p style="color:#4ade80;font-size:12px;font-weight:600;margin-top:8px;">✓ Proposta completa</p>`;
+      ? '<div style="margin-top:10px;padding:10px 12px;background:rgba(250,110,110,.08);border-radius:6px;">'
+        + '<p style="font-size:11px;font-weight:700;color:#fa6e6e;margin-bottom:5px;">⚠ Proposta viola direitos humanos → C5 = 0</p>'
+        + '<p style="font-size:12px;color:#e1e2eb;line-height:1.6;">No ENEM, viola direitos humanos qualquer proposta que sugira tortura, execução sem julgamento, "justiça com as próprias mãos", punições degradantes ou incitação ao ódio por raça, gênero ou religião. Reescreva sua conclusão propondo uma ação legal e respeitosa à dignidade humana.</p>'
+        + '</div>'
+      : '';
+    const c5faltantes = (dados.c5_elementos_faltantes || []).length > 0
+      ? '<p style="font-size:11px;color:#fabd00;font-weight:600;margin-top:8px;">Faltam: ' + dados.c5_elementos_faltantes.join(', ') + '</p>'
+      : '<p style="font-size:11px;color:#4ade80;font-weight:600;margin-top:8px;">✓ Proposta completa</p>';
+
+    // Card C5 completo no padrão novo
+    const cardC5 = '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid #fa6e6e;border-radius:0 8px 8px 0;">'
+      + '<p style="font-size:11px;font-weight:700;color:#fa6e6e;margin-bottom:8px;">C5 — Proposta de intervenção</p>'
+      + checklistC5
+      + c5faltantes
+      + c5dh
+      + '</div>';
 
     // ── Painel de melhoria: alertas C2 + checklist C5 + erros
     let textoCorrigido = escHtml(redacao.texto);
@@ -742,11 +777,8 @@ Formato EXATO da resposta:
 
     document.getElementById('colCorrecoes').innerHTML =
       alertasC2 +
-      `<div style="margin-bottom:16px;padding:12px 14px;background:#12101a;border:1px solid #3a2060;border-radius:8px;">
-        <p style="font-size:12px;font-weight:700;color:#c6bfff;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">Proposta de intervenção — C5</p>
-        ${checklistC5}${c5faltantes}${c5dh}
-      </div>` +
-      `<p style="white-space:pre-line;text-align:justify;margin-top:8px;">${textoCorrigido}</p>`;
+      cardC5 +
+      '<p style="white-space:pre-line;text-align:justify;margin-top:16px;color:#c8c4d7;font-size:13px;line-height:1.7;">' + textoCorrigido + '</p>';
 
     document.getElementById('badgeErros').textContent = `${qtd} marcação${qtd!==1?'ões':''}`;
 
@@ -851,23 +883,64 @@ Formato EXATO da resposta:
       }
     }
 
-    // ── Análise completa: agora lê diretamente do campo correcao_json.analise_completa,
-    //     que é preenchido pela Chamada 2 em background após o envio da redação.
-    //     Complementa com dados do Commit 1 que também fazem parte da análise (projeto C3, problemas C4, feedback geral).
-    //     Se analise_completa ainda não existe, window.verAnaliseCompleta dispara a
-    //     Chamada 2 sob demanda com loading próprio — sem placeholder aqui.
-    const partesAnalise = [];
-    if (dados.analise_completa) partesAnalise.push(dados.analise_completa);
-    if (dados.c3_projeto_texto)  partesAnalise.push('— Projeto de texto —\n' + dados.c3_projeto_texto);
-    if (dados.c4_problemas?.length) partesAnalise.push('— Coesão —\n' + dados.c4_problemas.join('\n'));
-    if (dados.feedback_geral)    partesAnalise.push('— Feedback geral —\n' + dados.feedback_geral);
-    window._analiseCompleta = partesAnalise.filter(p => p && p.trim()).join('\n\n');
-    // Observação: _analiseCompleta pode ficar com apenas c3/c4/feedback_geral se
-    // analise_completa não existir. Como essas 3 partes são complementares e não
-    // substituem a análise parágrafo-a-parágrafo, verAnaliseCompleta verifica se
-    // dados.analise_completa existe especificamente antes de decidir se mostra
-    // o conteúdo ou dispara a geração sob demanda.
-    window._temAnaliseCompleta = !!dados.analise_completa;
+    // ── Análise completa (cards coloridos por seção, padrão Por que Nota 1000):
+    //     Prompt novo retorna 3 campos (projeto_texto, padrao_dominante, proximo_passo).
+    //     Prompt antigo retornava 1 campo (analise_completa) — mantido como fallback.
+    //     Campos complementares (c3_projeto_texto, c4_problemas, feedback_geral) vêm
+    //     da Chamada 1 e entram como cards adicionais.
+    const cardAnalise = (cor, label, texto) => {
+      if (!texto || !texto.trim()) return '';
+      return '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid ' + cor + ';border-radius:0 8px 8px 0;">'
+        + '<p style="font-size:11px;font-weight:700;color:' + cor + ';margin-bottom:5px;">' + label + '</p>'
+        + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;white-space:pre-line;">' + escHtml(texto) + '</p>'
+        + '</div>';
+    };
+
+    const cardsAnalise = [];
+    // Seção 1 — Projeto de texto (formato novo: seção dedicada; antigo: vem do c3_projeto_texto)
+    if (dados.analise_projeto_texto) {
+      cardsAnalise.push(cardAnalise('#4ade80', '🏗️ Projeto de texto (C3)', dados.analise_projeto_texto));
+    } else if (dados.c3_projeto_texto) {
+      cardsAnalise.push(cardAnalise('#4ade80', '🏗️ Projeto de texto (C3)', dados.c3_projeto_texto));
+    }
+
+    // Seção 2 — Padrão dominante (só formato novo)
+    if (dados.analise_padrao_dominante) {
+      cardsAnalise.push(cardAnalise('#fa6e6e', '⚡ Padrão dominante', dados.analise_padrao_dominante));
+    }
+
+    // Seção 3 — Problemas de coesão (Chamada 1)
+    if (dados.c4_problemas?.length) {
+      cardsAnalise.push(cardAnalise('#fabd00', '🔗 Coesão (C4)', dados.c4_problemas.map(p => '• ' + p).join('\n')));
+    }
+
+    // Seção 4 — Próximo passo (só formato novo)
+    if (dados.analise_proximo_passo) {
+      cardsAnalise.push(cardAnalise('#6c5ce7', '🎯 Próximo passo', dados.analise_proximo_passo));
+    }
+
+    // Seção 5 — Feedback geral da PROfa (Chamada 1)
+    if (dados.feedback_geral) {
+      cardsAnalise.push(cardAnalise('#45edee', '💬 Feedback geral', dados.feedback_geral));
+    }
+
+    // Seção 6 — Fallback: análise_completa em formato antigo (texto único)
+    // Só entra se o formato novo não existir, pra evitar duplicação.
+    if (!dados.analise_projeto_texto && !dados.analise_padrao_dominante && !dados.analise_proximo_passo && dados.analise_completa) {
+      cardsAnalise.unshift(cardAnalise('#45edee', '📖 Análise parágrafo a parágrafo', dados.analise_completa));
+    }
+
+    window._analiseCompletaHtml = cardsAnalise.filter(c => c).join('');
+    // Flag: a análise é considerada "presente" se tem formato novo OU formato antigo.
+    // Cards puramente complementares (c3/c4/feedback_geral, todos da Chamada 1) não
+    // contam como "análise completa" — se só eles existirem, a Chamada 2 ainda
+    // precisa ser disparada sob demanda.
+    window._temAnaliseCompleta = !!(
+      dados.analise_projeto_texto ||
+      dados.analise_padrao_dominante ||
+      dados.analise_proximo_passo ||
+      dados.analise_completa
+    );
     // _porQueElite já foi definido acima (por competência ou fallback) — não sobrescrever aqui
   }
 
@@ -912,18 +985,25 @@ Formato EXATO da resposta:
       const raw = await geminiGenerate(PROMPT_ANALISE_COMPLETA + contexto);
       const dados2 = parseRespostaGemini(raw);
 
-      if (!dados2.analise_completa) {
-        throw new Error('Resposta da Gemini não contém analise_completa.');
+      // Prompt novo retorna 3 campos (projeto_texto, padrao_dominante, proximo_passo)
+      // Fallback: se vier no formato antigo (analise_completa único), aceita também
+      const temFormatoNovo = dados2.analise_projeto_texto || dados2.analise_padrao_dominante || dados2.analise_proximo_passo;
+      const temFormatoAntigo = dados2.analise_completa;
+      if (!temFormatoNovo && !temFormatoAntigo) {
+        throw new Error('Resposta da Gemini não contém análise esperada.');
       }
+
+      const camposParaSalvar = { chamadas: { analise_completa: 'completa' } };
+      if (dados2.analise_projeto_texto)    camposParaSalvar.analise_projeto_texto    = dados2.analise_projeto_texto;
+      if (dados2.analise_padrao_dominante) camposParaSalvar.analise_padrao_dominante = dados2.analise_padrao_dominante;
+      if (dados2.analise_proximo_passo)    camposParaSalvar.analise_proximo_passo    = dados2.analise_proximo_passo;
+      if (dados2.analise_completa)         camposParaSalvar.analise_completa         = dados2.analise_completa;
 
       if (typeof dbAtualizarCorrecaoJson === 'function') {
-        await dbAtualizarCorrecaoJson(redacao.id, {
-          analise_completa: dados2.analise_completa,
-          chamadas: { analise_completa: 'completa' }
-        });
+        await dbAtualizarCorrecaoJson(redacao.id, camposParaSalvar);
       }
 
-      dadosAtuais.analise_completa = dados2.analise_completa;
+      Object.assign(dadosAtuais, camposParaSalvar);
       dadosAtuais.chamadas = dadosAtuais.chamadas || {};
       dadosAtuais.chamadas.analise_completa = 'completa';
 
@@ -944,7 +1024,7 @@ Formato EXATO da resposta:
     // Se já temos análise completa (flag setada em renderAnalise), exibe direto.
     if (window._temAnaliseCompleta) {
       document.getElementById('modalAnaliseTexto').innerHTML =
-        `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(window._analiseCompleta)}</p>`;
+        window._analiseCompletaHtml || '<p style="color:#928ea0;">Não disponível.</p>';
       return;
     }
 
@@ -959,7 +1039,7 @@ Formato EXATO da resposta:
     const ok = await window.gerarAnaliseCompleta();
     if (ok) {
       document.getElementById('modalAnaliseTexto').innerHTML =
-        `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(window._analiseCompleta || 'Não disponível.')}</p>`;
+        window._analiseCompletaHtml || '<p style="color:#928ea0;">Não disponível.</p>';
     } else {
       document.getElementById('modalAnaliseTexto').innerHTML =
         '<div style="text-align:center;padding:2rem;">'

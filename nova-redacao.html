@@ -1412,18 +1412,36 @@ ${FORMATO_JSON_NOTA_DIAGNOSTICO}`;
 
   // CHAMADA 2 — Análise Completa (preload em background — Commit 2)
   // Recebe como contexto as notas da Chamada 1 para manter consistência.
+  // CHAMADA 2 (preload em background) — Análise Completa em 3 seções.
+  // Prompt reescrito para sair do template mecânico ("Parágrafo 1 apresenta...")
+  // e gerar análise narrativa e estratégica: projeto de texto + padrão dominante
+  // de problema + próximo passo concreto. Cards renderizados em minhas-redacoes.html.
   const FORMATO_JSON_ANALISE_COMPLETA = `{
-  "analise_completa": "<análise aprofundada parágrafo a parágrafo da redação. Separe os parágrafos com \\\\n. Para cada parágrafo do texto original, comente: função (introdução, desenvolvimento, conclusão), tese ou argumento central, qualidade da construção, relação com a tese, pontos fortes e pontos a melhorar. Mínimo 4 parágrafos de análise (um por parágrafo do texto). Mantenha coerência com as notas já atribuídas.>"
+  "analise_projeto_texto": "<1 a 2 parágrafos avaliando o ARCO argumentativo da redação: tese clara? Progressão lógica ou saltos? Quem controla quem — o aluno o texto ou vice-versa? Não comente parágrafo a parágrafo.>",
+  "analise_padrao_dominante": "<1 parágrafo identificando o PADRÃO dominante que mais limita a nota (ex: repertório genérico retomado superficialmente, argumentos que anunciam mas não desenvolvem, coesão por repetição). UM padrão-chave, não vários problemas soltos.>",
+  "analise_proximo_passo": "<1 parágrafo com recomendação concreta e acionável para a PRÓXIMA redação deste aluno. Não checklist genérico — um exercício específico que resolveria o padrão dominante.>"
 }`;
 
-  const PROMPT_ANALISE_COMPLETA = `Você é a PROfa da RedaON — especialista em redação ENEM.
-Sua missão agora é produzir uma ANÁLISE COMPLETA e aprofundada da redação, parágrafo a parágrafo. Esta análise complementa as notas e feedbacks já atribuídos, aprofundando o raciocínio pedagógico.
+  const PROMPT_ANALISE_COMPLETA = `Você é a PROfa da RedaON — especialista em redação ENEM, com postura de mentora pedagógica contínua.
+Sua missão é produzir uma ANÁLISE ESTRATÉGICA da redação em 3 seções bem enxutas, focando no que realmente importa para o desenvolvimento deste aluno.
 ${RUBRICA_INEP}
+
+CONTEXTO IMPORTANTE:
+- Este aluno já recebeu feedbacks específicos por competência (Chamada 1).
+- Sua função aqui NÃO é repetir essas observações.
+- Seu papel é DAR SENTIDO ao conjunto — identificar padrões, hierarquizar problemas, e apontar um caminho.
+
+DIRETRIZES DE ESCRITA:
+- Fale DIRETAMENTE com o aluno (usando "você"), como uma mentora conversando.
+- NUNCA use fórmulas mecânicas como "Parágrafo 1 apresenta...", "Este parágrafo tem como função...", "Observa-se que...".
+- Seja concreta: cite trechos reais da redação quando útil.
+- Evite repetir o mesmo tipo de análise em seções diferentes.
+- Tom: mentora competente, acolhedora e direta.
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
 2. Dentro de strings, use \\n (escapado) para quebras de linha.
-3. Mantenha COERÊNCIA com as notas e feedbacks que foram atribuídos na análise anterior (fornecidos no contexto).
+3. Mantenha COERÊNCIA com as notas e feedbacks já atribuídos.
 
 Formato EXATO da resposta:
 ${FORMATO_JSON_ANALISE_COMPLETA}`;
@@ -1650,11 +1668,21 @@ ${FORMATO_JSON_MELHORIAS}`;
                 dados2 = JSON.parse(m[0]);
               }
 
-              if (dados2 && dados2.analise_completa && typeof dbAtualizarCorrecaoJson === 'function') {
-                await dbAtualizarCorrecaoJson(redacao.id, {
-                  analise_completa: dados2.analise_completa,
-                  chamadas: { analise_completa: 'completa' }
-                });
+              // Prompt novo retorna 3 campos; antigo retornava 1.
+              // Salva o que vier preenchido (formato novo tem prioridade).
+              const temAlgumCampo = dados2 && (
+                dados2.analise_projeto_texto ||
+                dados2.analise_padrao_dominante ||
+                dados2.analise_proximo_passo ||
+                dados2.analise_completa
+              );
+              if (temAlgumCampo && typeof dbAtualizarCorrecaoJson === 'function') {
+                const camposChamada2 = { chamadas: { analise_completa: 'completa' } };
+                if (dados2.analise_projeto_texto)    camposChamada2.analise_projeto_texto    = dados2.analise_projeto_texto;
+                if (dados2.analise_padrao_dominante) camposChamada2.analise_padrao_dominante = dados2.analise_padrao_dominante;
+                if (dados2.analise_proximo_passo)    camposChamada2.analise_proximo_passo    = dados2.analise_proximo_passo;
+                if (dados2.analise_completa)         camposChamada2.analise_completa         = dados2.analise_completa;
+                await dbAtualizarCorrecaoJson(redacao.id, camposChamada2);
                 console.info('[RedaON] Chamada 2 (Análise Completa) salva no banco.');
               }
             } catch (err2) {
