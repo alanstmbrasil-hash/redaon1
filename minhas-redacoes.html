@@ -360,9 +360,86 @@
 </div>
 
 <script type="module">
-  // Cenário B — Commit 3: esta tela não faz mais chamadas à Gemini.
-  // Os dados de correção são lidos do banco (correcao_json) via dbBuscarCorrecao.
-  // Chamadas sob demanda (Redação Nota 1000, Melhorias) entram no Commit 4.
+  // Cenário B — Commit 3: esta tela não faz mais correção inicial via Gemini.
+  // Os dados da Chamada 1 (nota + diagnóstico) são lidos do banco via dbBuscarCorrecao.
+  //
+  // Cenário B — Commit 4: chamadas sob demanda à Gemini:
+  //   - Chamada 3 (PROMPT_REDACAO_NOTA_1000) — disparada no botão "Gerar agora"
+  //     da aba Elite da PROfa, quando redacao_nota_1000_* não está no banco.
+  //   - Chamada 4 (PROMPT_MELHORIAS)         — disparada ao clicar em "Por que
+  //     Nota 1000?", quando melhoria_c* não está no banco.
+  //     Depende da Chamada 3; se ausente, dispara ambas em sequência.
+
+  async function geminiGenerate(prompt) {
+    const res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erro Gemini');
+    return data.candidates[0].content.parts[0].text;
+  }
+
+  // Parse seguro do JSON retornado pela Gemini (idempotente com o de nova-redacao.html).
+  function parseRespostaGemini(raw) {
+    const limpo = raw.trim().replace(/```json|```/g, '').trim();
+    try {
+      return JSON.parse(limpo);
+    } catch (e) {
+      const m = limpo.match(/\{[\s\S]*\}/);
+      if (!m) throw new Error('JSON não encontrado na resposta da Gemini');
+      return JSON.parse(m[0]);
+    }
+  }
+
+  // Rubrica INEP compacta — usada como contexto nas chamadas 3 e 4.
+  const RUBRICA_INEP_COMPACTA = `
+CRITÉRIOS INEP (Cartilha 2025) — resumo:
+- C1 Domínio da língua formal (0-200): ortografia, acentuação, concordância, regência, pontuação.
+- C2 Compreensão do tema e repertório (0-200): repertório produtivo (contextualizado, retomado) vs. bolso (genérico). Tangenciamento limita C2/C3/C5 a 40.
+- C3 Organização e defesa do ponto de vista (0-200): tese clara, progressão sem saltos, argumentos com exemplos/dados.
+- C4 Coesão (0-200): operadores argumentativos diversificados, referenciação, articulação inter e intraparágrafo.
+- C5 Proposta de intervenção (0-200): 5 elementos (AÇÃO, AGENTE, MEIO, FINALIDADE, DETALHAMENTO) + articulação ao texto. Viola DH = nota 0.`;
+
+  // CHAMADA 3 — Gera a redação nota 1000 reescrita.
+  const PROMPT_REDACAO_NOTA_1000 = `Você é a PROfa da RedaON — especialista em redação ENEM.
+Sua missão agora é REESCREVER a redação do aluno em nível nota 1000, mantendo o tema e o ponto de vista original, mas elevando linguagem, argumentação, coesão e proposta de intervenção ao nível máximo.
+${RUBRICA_INEP_COMPACTA}
+
+REGRAS CRÍTICAS DE SAÍDA:
+1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
+2. Dentro de strings, use \\n (escapado) para quebras de linha.
+3. MANTENHA o tema, o ponto de vista e a tese do aluno. A reescrita deve ser reconhecível como "a redação dele melhorada", não uma redação completamente diferente.
+4. A conclusão DEVE incluir os 5 elementos obrigatórios da proposta de intervenção: AÇÃO + AGENTE + MEIO + FINALIDADE + DETALHAMENTO.
+
+Formato EXATO da resposta:
+{
+  "redacao_nota_1000_intro": "<parágrafo de introdução reescrito nível nota 1000, mantendo tema e ponto de vista do aluno>",
+  "redacao_nota_1000_dev1": "<1º parágrafo de desenvolvimento reescrito nível nota 1000>",
+  "redacao_nota_1000_dev2": "<2º parágrafo de desenvolvimento reescrito nível nota 1000>",
+  "redacao_nota_1000_conclusao": "<parágrafo de conclusão reescrito com proposta COMPLETA (5 elementos)>"
+}`;
+
+  // CHAMADA 4 — Explica o que foi melhorado em cada competência.
+  // Depende dos dados da Chamada 3 (redação reescrita) passados como contexto.
+  const PROMPT_MELHORIAS = `Você é a PROfa da RedaON — especialista em redação ENEM.
+Sua missão agora é comparar a REDAÇÃO ORIGINAL do aluno com a REDAÇÃO NOTA 1000 reescrita (ambas fornecidas no contexto) e explicar, competência por competência, o que foi melhorado e por que a mudança eleva a nota para 200.
+${RUBRICA_INEP_COMPACTA}
+
+REGRAS CRÍTICAS DE SAÍDA:
+1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
+2. Seja concreta: cite trechos específicos da reescrita e compare com os originais quando útil.
+3. Cada campo melhoria_cN deve ter entre 3 e 5 frases.
+
+Formato EXATO da resposta:
+{
+  "melhoria_c1": "<explique o que foi melhorado em C1 na redação nota 1000 comparada à original, e por que eleva para 200>",
+  "melhoria_c2": "<explique o que foi melhorado em C2>",
+  "melhoria_c3": "<explique o que foi melhorado em C3>",
+  "melhoria_c4": "<explique o que foi melhorado em C4>",
+  "melhoria_c5": "<explique o que foi melhorado em C5>"
+}`;
 
   // ── NOME USUÁRIO ───────────────────────────────────
   const NOME_USUARIO = authGetNome();
@@ -493,6 +570,8 @@
 
       // 3. Renderiza
       dadosAtuais = dados;
+      window._redacaoAtual = redacao;
+      window._correcaoAtualId = correcao.id;
       renderAnalise(redacao, dados);
 
     } catch(err) {
@@ -661,15 +740,23 @@
           + '</div>';
       }).join('');
     }
-    // Estado vazio amigável: a reescrita nota 1000 é gerada sob demanda (Commit 4).
-    // Enquanto essa feature não estiver ativa, informa que ainda não foi gerada.
+    // Estado vazio amigável: a reescrita nota 1000 é gerada sob demanda (Chamada 3).
+    // Mostra botão "Gerar agora" que dispara a chamada Gemini e salva no banco.
     if (!eliteHtml) {
       const status = (dados.chamadas && dados.chamadas.redacao_nota_1000) || 'pendente';
-      eliteHtml = '<p style="color:#928ea0;text-align:center;padding:2rem;">'
-        + (status === 'pendente'
-            ? 'Versão nota 1000 será gerada sob demanda (em breve disponível).'
-            : 'Versão nota 1000 não disponível.')
-        + '</p>';
+      if (status === 'pendente' || status === 'erro') {
+        eliteHtml = ''
+          + '<div style="text-align:center;padding:2.5rem 1.5rem;">'
+          +   '<div style="font-size:2.5rem;margin-bottom:.75rem;">✨</div>'
+          +   '<h3 style="color:#e1e2eb;font-weight:800;font-size:1rem;margin-bottom:.5rem;">Veja sua redação nota 1000</h3>'
+          +   '<p style="color:#928ea0;font-size:.85rem;line-height:1.6;max-width:420px;margin:0 auto 1.25rem;">A PROfa vai reescrever a sua redação mantendo seu tema e ponto de vista, mas elevando tudo ao nível da nota máxima. Leva cerca de 15 segundos.</p>'
+          +   '<button onclick="window.gerarRedacaoNota1000()" style="background:linear-gradient(135deg,#6c5ce7,#45edee);color:#002020;border:none;padding:.75rem 1.5rem;border-radius:.75rem;font-weight:800;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;">'
+          +     '<span>✨ Gerar agora</span>'
+          +   '</button>'
+          + '</div>';
+      } else {
+        eliteHtml = '<p style="color:#928ea0;text-align:center;padding:2rem;">Versão nota 1000 não disponível.</p>';
+      }
     }
     document.getElementById('colElite').innerHTML = eliteHtml;
 
@@ -744,15 +831,166 @@
     document.getElementById('modalAnaliseTexto').innerHTML = `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(window._analiseCompleta||'Não disponível.')}</p>`;
     document.getElementById('modalAnalise').classList.remove('hidden');
   };
-  window.verPorQueElite = function() {
+
+  // ── CHAMADA 3 (sob demanda) ─────────────────────────
+  // Gera a redação nota 1000 via Gemini e salva no banco. Atualiza a UI.
+  window.gerarRedacaoNota1000 = async function() {
+    const redacao = window._redacaoAtual;
+    if (!redacao || !dadosAtuais) {
+      window.toast('Selecione uma redação primeiro.');
+      return;
+    }
+    const colElite = document.getElementById('colElite');
+    colElite.innerHTML =
+      '<div style="text-align:center;padding:2.5rem 1.5rem;">'
+      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
+      + '<p style="color:#c8c4d7;font-size:.9rem;font-weight:600;margin-bottom:.375rem;">Gerando versão nota 1000...</p>'
+      + '<p style="color:#928ea0;font-size:.75rem;">A PROfa está reescrevendo sua redação com rigor ENEM. Aguarde cerca de 15 segundos.</p>'
+      + '</div>';
+
+    try {
+      // Monta prompt com contexto da redação original + notas já atribuídas
+      const contexto = '\n\nCONTEXTO — Notas já atribuídas:\n'
+        + (dadosAtuais.nota_total ? 'Nota total: ' + dadosAtuais.nota_total + '/1000\n' : '')
+        + (Array.isArray(dadosAtuais.competencias)
+            ? 'Notas por competência: ' + dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + v).join(', ') + '\n'
+            : '')
+        + '\nRedação original:\n' + redacao.texto;
+
+      const raw = await geminiGenerate(PROMPT_REDACAO_NOTA_1000 + contexto);
+      const dados3 = parseRespostaGemini(raw);
+
+      if (!dados3.redacao_nota_1000_intro && !dados3.redacao_nota_1000_dev1) {
+        throw new Error('Resposta da Gemini não contém os campos esperados.');
+      }
+
+      // Merge no banco
+      if (typeof dbAtualizarCorrecaoJson === 'function') {
+        await dbAtualizarCorrecaoJson(redacao.id, {
+          redacao_nota_1000_intro:     dados3.redacao_nota_1000_intro,
+          redacao_nota_1000_dev1:      dados3.redacao_nota_1000_dev1,
+          redacao_nota_1000_dev2:      dados3.redacao_nota_1000_dev2,
+          redacao_nota_1000_conclusao: dados3.redacao_nota_1000_conclusao,
+          chamadas: { redacao_nota_1000: 'completa' }
+        });
+      }
+
+      // Atualiza dadosAtuais localmente para re-render imediato
+      Object.assign(dadosAtuais, dados3);
+      dadosAtuais.chamadas = dadosAtuais.chamadas || {};
+      dadosAtuais.chamadas.redacao_nota_1000 = 'completa';
+
+      // Re-renderiza painel inteiro para refletir o novo estado
+      renderAnalise(redacao, dadosAtuais);
+      // Garante que a aba Elite da PROfa continue aberta
+      window.mudarAba('elite');
+      window.toast('✨ Versão nota 1000 gerada!');
+
+    } catch (err) {
+      console.error('[Minhas Redações] Falha ao gerar redação nota 1000:', err);
+      colElite.innerHTML =
+        '<div style="text-align:center;padding:2rem;">'
+        + '<p style="color:#ffb4ab;font-size:.85rem;margin-bottom:1rem;">Não foi possível gerar a versão nota 1000.</p>'
+        + '<button onclick="window.gerarRedacaoNota1000()" style="background:rgba(108,92,231,.15);color:#c6bfff;border:1px solid rgba(108,92,231,.3);padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.8rem;cursor:pointer;">Tentar novamente</button>'
+        + '</div>';
+    }
+  };
+
+  // ── CHAMADA 4 (sob demanda) ─────────────────────────
+  // Gera as melhorias por competência. Depende da redação nota 1000 existir
+  // (Chamada 3); se não existir, dispara as duas em sequência.
+  window.gerarMelhorias = async function() {
+    const redacao = window._redacaoAtual;
+    if (!redacao || !dadosAtuais) return;
+
+    // Se redação nota 1000 ainda não existe, precisa gerá-la primeiro
+    const temReescrita = dadosAtuais.redacao_nota_1000_intro || dadosAtuais.redacao_nota_1000_dev1;
+    if (!temReescrita) {
+      await window.gerarRedacaoNota1000();
+      // Se falhou lá em cima, aborta
+      if (!dadosAtuais.redacao_nota_1000_intro) return;
+    }
+
+    try {
+      const contexto = '\n\nCONTEXTO:\n'
+        + 'REDAÇÃO ORIGINAL:\n' + redacao.texto
+        + '\n\nREDAÇÃO NOTA 1000 REESCRITA:\n'
+        + 'Introdução: '        + (dadosAtuais.redacao_nota_1000_intro     || '') + '\n'
+        + 'Desenvolvimento 1: ' + (dadosAtuais.redacao_nota_1000_dev1      || '') + '\n'
+        + 'Desenvolvimento 2: ' + (dadosAtuais.redacao_nota_1000_dev2      || '') + '\n'
+        + 'Conclusão: '         + (dadosAtuais.redacao_nota_1000_conclusao || '');
+
+      const raw = await geminiGenerate(PROMPT_MELHORIAS + contexto);
+      const dados4 = parseRespostaGemini(raw);
+
+      if (!dados4.melhoria_c1 && !dados4.melhoria_c2) {
+        throw new Error('Resposta da Gemini não contém as melhorias por competência.');
+      }
+
+      if (typeof dbAtualizarCorrecaoJson === 'function') {
+        await dbAtualizarCorrecaoJson(redacao.id, {
+          melhoria_c1: dados4.melhoria_c1,
+          melhoria_c2: dados4.melhoria_c2,
+          melhoria_c3: dados4.melhoria_c3,
+          melhoria_c4: dados4.melhoria_c4,
+          melhoria_c5: dados4.melhoria_c5,
+          chamadas: { melhorias_por_competencia: 'completa' }
+        });
+      }
+
+      Object.assign(dadosAtuais, dados4);
+      dadosAtuais.chamadas = dadosAtuais.chamadas || {};
+      dadosAtuais.chamadas.melhorias_por_competencia = 'completa';
+
+      // Re-renderiza pra atualizar _porQueElite com o conteúdo novo
+      renderAnalise(redacao, dadosAtuais);
+
+      return true;
+    } catch (err) {
+      console.error('[Minhas Redações] Falha ao gerar melhorias:', err);
+      return false;
+    }
+  };
+
+  window.verPorQueElite = async function() {
     document.getElementById('modalAnaliseTitle').textContent = 'Por que Nota 1000?';
-    // _porQueElite agora pode ser HTML (análise por competência) ou texto puro
-    const conteudo = window._porQueElite || '<p style="color:#928ea0;">Não disponível.</p>';
-    const ehHtml = conteudo.trim().startsWith('<');
-    document.getElementById('modalAnaliseTexto').innerHTML = ehHtml
-      ? conteudo
-      : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
     document.getElementById('modalAnalise').classList.remove('hidden');
+
+    // Se já temos melhorias no banco, exibe direto
+    const jaTem = window._porQueElite && !window._porQueElite.includes('em breve disponível')
+                                      && !window._porQueElite.includes('não disponível');
+    if (jaTem) {
+      const conteudo = window._porQueElite;
+      const ehHtml = conteudo.trim().startsWith('<');
+      document.getElementById('modalAnaliseTexto').innerHTML = ehHtml
+        ? conteudo
+        : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
+      return;
+    }
+
+    // Caso contrário, dispara Chamada 4 (e, se necessário, Chamada 3 antes)
+    document.getElementById('modalAnaliseTexto').innerHTML =
+      '<div style="text-align:center;padding:2.5rem 1.5rem;">'
+      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
+      + '<p style="color:#c8c4d7;font-size:.9rem;font-weight:600;margin-bottom:.375rem;">Analisando o que foi melhorado...</p>'
+      + '<p style="color:#928ea0;font-size:.75rem;">A PROfa está comparando sua redação com a versão nota 1000 competência por competência.</p>'
+      + '</div>';
+
+    const ok = await window.gerarMelhorias();
+    if (ok) {
+      // gerarMelhorias já re-renderizou — agora lê _porQueElite atualizado
+      const conteudo = window._porQueElite || '<p style="color:#928ea0;">Não disponível.</p>';
+      const ehHtml = conteudo.trim().startsWith('<');
+      document.getElementById('modalAnaliseTexto').innerHTML = ehHtml
+        ? conteudo
+        : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
+    } else {
+      document.getElementById('modalAnaliseTexto').innerHTML =
+        '<div style="text-align:center;padding:2rem;">'
+        + '<p style="color:#ffb4ab;font-size:.85rem;margin-bottom:1rem;">Não foi possível gerar a análise por competência.</p>'
+        + '<button onclick="window.verPorQueElite()" style="background:rgba(108,92,231,.15);color:#c6bfff;border:1px solid rgba(108,92,231,.3);padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.8rem;cursor:pointer;">Tentar novamente</button>'
+        + '</div>';
+    }
   };
   window.fecharModal = function() {
     document.getElementById('modalAnalise').classList.add('hidden');
