@@ -477,6 +477,61 @@ async function dbSalvarCorrecaoIACompleta({
   return data[0];
 }
 
+// Busca a correção IA mais recente de uma redação, incluindo o correcao_json
+// completo (usado pelo Cenário B para merges subsequentes e leitura em
+// minhas-redacoes.html).
+async function dbBuscarCorrecao(redacao_id) {
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/correcoes?redacao_id=eq.${redacao_id}&tipo=eq.ia&order=created_at.desc&limit=1&select=id,correcao_json`,
+    {}
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return Array.isArray(data) && data.length > 0 ? data[0] : null;
+}
+
+// Atualiza o correcao_json de uma correção fazendo MERGE com campos novos,
+// preservando o que já existe. Usado pelo Cenário B para adicionar:
+//   - analise_completa (Chamada 2, preload em background)
+//   - redacao_nota_1000_* (Chamada 3, sob demanda)
+//   - melhoria_c* (Chamada 4, sob demanda)
+//   - chamadas.<nome>: "completa" (marca status de cada chamada)
+//
+// PostgreSQL jsonb não tem operador nativo de deep-merge via REST, então
+// lemos o objeto atual, mesclamos em JS, e escrevemos de volta. Race
+// conditions são minimizadas porque cada chamada atualiza campos diferentes
+// (última escrita ganha só em caso de atualização do mesmo campo).
+async function dbAtualizarCorrecaoJson(redacao_id, camposNovos) {
+  // 1. Busca correção atual
+  const correcao = await dbBuscarCorrecao(redacao_id);
+  if (!correcao || !correcao.id) {
+    throw new Error('Correção não encontrada para redacao_id=' + redacao_id);
+  }
+
+  // 2. Merge: começa com o correcao_json atual, aplica campos novos por cima
+  const atual = correcao.correcao_json || {};
+  const merged = { ...atual, ...camposNovos };
+
+  // 3. Se camposNovos tem .chamadas, faz merge aninhado também
+  if (camposNovos.chamadas || atual.chamadas) {
+    merged.chamadas = { ...(atual.chamadas || {}), ...(camposNovos.chamadas || {}) };
+  }
+
+  // 4. Escreve de volta
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/correcoes?id=eq.${correcao.id}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ correcao_json: merged })
+    }
+  );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('Falha ao atualizar correcao_json: ' + err);
+  }
+  return merged;
+}
+
 async function dbGetRelatorioPDCAAluno(alunoId) {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/correcoes?select=c1,c2,c3,c4,c5,pdca_pareto,pdca_causa_raiz,pdca_tendencia,pdca_r3g,pdca_plano,consolidadas,created_at,modo,redacoes!inner(aluno_id,tema_livre,nota_final)&redacoes.aluno_id=eq.${alunoId}&order=created_at.desc&limit=10`,

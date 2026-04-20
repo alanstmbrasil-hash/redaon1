@@ -1623,6 +1623,44 @@ ${FORMATO_JSON_MELHORIAS}`;
             });
           }
           toast(elite ? '⭐ Análise Elite salva no seu histórico!' : '✅ Redação salva no seu histórico!', 4000);
+
+          // ── CENÁRIO B — CHAMADA 2 (Análise Completa) em background ────
+          // Não bloqueia UI nem toast. Roda sem await e, quando termina,
+          // faz merge no correcao_json marcando analise_completa: "completa".
+          // Se falhar (ex: timeout, rate limit), o aluno continua normal;
+          // apenas a análise completa ficará "pendente" até ser regenerada
+          // sob demanda em minhas-redacoes.html (Commit 3/4).
+          (async () => {
+            try {
+              const prompt2 = PROMPT_ANALISE_COMPLETA
+                + '\n\nCONTEXTO — Análise já atribuída a esta redação:\n'
+                + 'Nota total: ' + dados.nota_total + '/1000\n'
+                + 'Notas por competência: '
+                + dados.competencias.map((c,i) => `C${i+1}=${c.nota}`).join(', ') + '\n'
+                + 'Feedbacks: ' + dados.competencias.map((c,i) => `C${i+1}: ${c.feedback}`).join(' | ')
+                + '\n\nRedação:\n' + (texto || '[Arquivo enviado]');
+
+              const raw2 = await geminiGenerate(prompt2);
+              let dados2;
+              try {
+                dados2 = JSON.parse(raw2.trim().replace(/```json|```/g, '').trim());
+              } catch (e) {
+                const m = raw2.match(/\{[\s\S]*\}/);
+                if (!m) throw new Error('JSON da Chamada 2 não encontrado');
+                dados2 = JSON.parse(m[0]);
+              }
+
+              if (dados2 && dados2.analise_completa && typeof dbAtualizarCorrecaoJson === 'function') {
+                await dbAtualizarCorrecaoJson(redacao.id, {
+                  analise_completa: dados2.analise_completa,
+                  chamadas: { analise_completa: 'completa' }
+                });
+                console.info('[RedaON] Chamada 2 (Análise Completa) salva no banco.');
+              }
+            } catch (err2) {
+              console.warn('[RedaON] Chamada 2 falhou (não crítico):', err2.message);
+            }
+          })();
         }
       } catch(errSave) {
         console.warn('Erro ao salvar no banco:', errSave);
