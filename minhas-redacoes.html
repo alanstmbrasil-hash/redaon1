@@ -97,6 +97,7 @@
   }
   .aba-btn.ativa { color: #45edee; border-bottom-color: #45edee; }
   .aba-btn:hover:not(.ativa) { color: #c8c4d7; }
+  .aba-btn.aba-melhoria.ativa { color: #fa6e6e; border-bottom-color: #fa6e6e; }
   .aba-btn.aba-elite.ativa { color: #6c5ce7; border-bottom-color: #6c5ce7; }
 
   /* ── Card redação ── */
@@ -299,7 +300,7 @@
             <span class="material-symbols-outlined text-sm">article</span>
             Texto Original
           </button>
-          <button class="aba-btn" id="aba-melhoria" onclick="mudarAba('melhoria')">
+          <button class="aba-btn aba-melhoria" id="aba-melhoria" onclick="mudarAba('melhoria')">
             <span class="material-symbols-outlined text-sm">error</span>
             Pontos de Melhoria
           </button>
@@ -401,6 +402,24 @@ CRITÉRIOS INEP (Cartilha 2025) — resumo:
 - C3 Organização e defesa do ponto de vista (0-200): tese clara, progressão sem saltos, argumentos com exemplos/dados.
 - C4 Coesão (0-200): operadores argumentativos diversificados, referenciação, articulação inter e intraparágrafo.
 - C5 Proposta de intervenção (0-200): 5 elementos (AÇÃO, AGENTE, MEIO, FINALIDADE, DETALHAMENTO) + articulação ao texto. Viola DH = nota 0.`;
+
+  // CHAMADA 2 — Análise Completa (preload em background no envio, sob demanda aqui).
+  // Mesmo prompt que nova-redacao.html usa para preload. Aqui é disparado apenas
+  // se o campo analise_completa ainda não existe no banco (ex: redação antiga
+  // anterior ao fix da RLS, ou Chamada 2 em background falhou silenciosamente).
+  const PROMPT_ANALISE_COMPLETA = `Você é a PROfa da RedaON — especialista em redação ENEM.
+Sua missão agora é produzir uma ANÁLISE COMPLETA e aprofundada da redação, parágrafo a parágrafo. Esta análise complementa as notas e feedbacks já atribuídos, aprofundando o raciocínio pedagógico.
+${RUBRICA_INEP_COMPACTA}
+
+REGRAS CRÍTICAS DE SAÍDA:
+1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
+2. Dentro de strings, use \\n (escapado) para quebras de linha.
+3. Mantenha COERÊNCIA com as notas e feedbacks que foram atribuídos na análise anterior (fornecidos no contexto).
+
+Formato EXATO da resposta:
+{
+  "analise_completa": "<análise aprofundada parágrafo a parágrafo da redação. Separe os parágrafos com \\\\n. Para cada parágrafo do texto original, comente: função (introdução, desenvolvimento, conclusão), tese ou argumento central, qualidade da construção, relação com a tese, pontos fortes e pontos a melhorar. Mínimo 4 parágrafos de análise (um por parágrafo do texto). Mantenha coerência com as notas já atribuídas.>"
+}`;
 
   // CHAMADA 3 — Gera a redação nota 1000 reescrita.
   const PROMPT_REDACAO_NOTA_1000 = `Você é a PROfa da RedaON — especialista em redação ENEM.
@@ -586,7 +605,9 @@ Formato EXATO da resposta:
   // ── RENDER ANÁLISE ─────────────────────────────────
   function renderAnalise(redacao, dados) {
     const nomes = ['C1','C2','C3','C4','C5'];
-    const cores = ['#45edee','#6c5ce7','#6c5ce7','#fabd00','#fa6e6e'];
+    // Cores por competência — 5 cores distintas para evitar confusão visual.
+    // C2 roxo (tema), C3 verde (argumentação/solidez), C4 âmbar, C5 vermelho.
+    const cores = ['#45edee','#6c5ce7','#4ade80','#fabd00','#fa6e6e'];
     const comp = dados.competencias || [0,0,0,0,0];
     // Soma real das competências (para as barras e total interno)
     const somaComp = comp.reduce((a,b)=>a+b,0);
@@ -697,7 +718,7 @@ Formato EXATO da resposta:
     const secoesList = [
       { keys: ['redacao_nota_1000_intro',     'versao_elite_intro'],     label: 'Introdução',        cor: '#45edee', comp: 'C1 + C2' },
       { keys: ['redacao_nota_1000_dev1',      'versao_elite_dev1'],      label: 'Desenvolvimento 1', cor: '#6c5ce7', comp: 'C2 + C3' },
-      { keys: ['redacao_nota_1000_dev2',      'versao_elite_dev2'],      label: 'Desenvolvimento 2', cor: '#6c5ce7', comp: 'C3 + C4' },
+      { keys: ['redacao_nota_1000_dev2',      'versao_elite_dev2'],      label: 'Desenvolvimento 2', cor: '#4ade80', comp: 'C3 + C4' },
       { keys: ['redacao_nota_1000_conclusao', 'versao_elite_conclusao'], label: 'Conclusão — C5',    cor: '#fabd00', comp: 'C5' }
     ];
     const leCampo = (keys) => {
@@ -726,7 +747,7 @@ Formato EXATO da resposta:
       const rotulosFallback = [
         {label:'Introdução', cor:'#45edee', comp:'C1 + C2'},
         {label:'Desenvolvimento 1', cor:'#6c5ce7', comp:'C2 + C3'},
-        {label:'Desenvolvimento 2', cor:'#6c5ce7', comp:'C3 + C4'},
+        {label:'Desenvolvimento 2', cor:'#4ade80', comp:'C3 + C4'},
         {label:'Conclusão — C5', cor:'#fabd00', comp:'C5'}
       ];
       eliteHtml = paragrafosElite.map((p, i) => {
@@ -765,7 +786,7 @@ Formato EXATO da resposta:
     const porQueCompetencias = [
       { keys: ['melhoria_c1', 'por_que_elite_c1'], label: 'C1 — Língua formal',     cor: '#45edee' },
       { keys: ['melhoria_c2', 'por_que_elite_c2'], label: 'C2 — Tema e repertório', cor: '#6c5ce7' },
-      { keys: ['melhoria_c3', 'por_que_elite_c3'], label: 'C3 — Argumentação',      cor: '#6c5ce7' },
+      { keys: ['melhoria_c3', 'por_que_elite_c3'], label: 'C3 — Argumentação',      cor: '#4ade80' },
       { keys: ['melhoria_c4', 'por_que_elite_c4'], label: 'C4 — Coesão',            cor: '#fabd00' },
       { keys: ['melhoria_c5', 'por_que_elite_c5'], label: 'C5 — Intervenção',       cor: '#fa6e6e' }
     ];
@@ -796,19 +817,20 @@ Formato EXATO da resposta:
     // ── Análise completa: agora lê diretamente do campo correcao_json.analise_completa,
     //     que é preenchido pela Chamada 2 em background após o envio da redação.
     //     Complementa com dados do Commit 1 que também fazem parte da análise (projeto C3, problemas C4, feedback geral).
+    //     Se analise_completa ainda não existe, window.verAnaliseCompleta dispara a
+    //     Chamada 2 sob demanda com loading próprio — sem placeholder aqui.
     const partesAnalise = [];
-    if (dados.analise_completa) {
-      partesAnalise.push(dados.analise_completa);
-    } else {
-      const status = (dados.chamadas && dados.chamadas.analise_completa) || 'pendente';
-      partesAnalise.push(status === 'pendente'
-        ? '(Análise completa ainda sendo processada — volte em alguns instantes.)'
-        : '');
-    }
+    if (dados.analise_completa) partesAnalise.push(dados.analise_completa);
     if (dados.c3_projeto_texto)  partesAnalise.push('— Projeto de texto —\n' + dados.c3_projeto_texto);
     if (dados.c4_problemas?.length) partesAnalise.push('— Coesão —\n' + dados.c4_problemas.join('\n'));
     if (dados.feedback_geral)    partesAnalise.push('— Feedback geral —\n' + dados.feedback_geral);
     window._analiseCompleta = partesAnalise.filter(p => p && p.trim()).join('\n\n');
+    // Observação: _analiseCompleta pode ficar com apenas c3/c4/feedback_geral se
+    // analise_completa não existir. Como essas 3 partes são complementares e não
+    // substituem a análise parágrafo-a-parágrafo, verAnaliseCompleta verifica se
+    // dados.analise_completa existe especificamente antes de decidir se mostra
+    // o conteúdo ou dispara a geração sob demanda.
+    window._temAnaliseCompleta = !!dados.analise_completa;
     // _porQueElite já foi definido acima (por competência ou fallback) — não sobrescrever aqui
   }
 
@@ -826,10 +848,88 @@ Formato EXATO da resposta:
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  window.verAnaliseCompleta = function() {
+  // ── CHAMADA 2 (sob demanda) ─────────────────────────
+  // Gera a análise completa via Gemini e salva no banco. Geralmente a análise
+  // já foi preloada em background durante o envio da redação em nova-redacao.html,
+  // mas para redações antigas (anteriores ao fix da RLS) ou casos em que o
+  // preload falhou, esta função dispara a Chamada 2 sob demanda.
+  window.gerarAnaliseCompleta = async function() {
+    const redacao = window._redacaoAtual;
+    if (!redacao || !dadosAtuais) return false;
+
+    try {
+      // Monta prompt com contexto das notas/feedbacks da Chamada 1 (pra consistência).
+      const comps = dadosAtuais._competencias_objetos || [];
+      const contexto = '\n\nCONTEXTO — Análise já atribuída a esta redação:\n'
+        + 'Nota total: ' + (dadosAtuais.nota_total || '—') + '/1000\n'
+        + 'Notas por competência: '
+        + (Array.isArray(dadosAtuais.competencias)
+            ? dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + v).join(', ')
+            : '—')
+        + '\n'
+        + (comps.length > 0
+            ? 'Feedbacks: ' + comps.map((c, i) => 'C' + (i+1) + ': ' + (c.feedback || '')).join(' | ')
+            : '')
+        + '\n\nRedação:\n' + redacao.texto;
+
+      const raw = await geminiGenerate(PROMPT_ANALISE_COMPLETA + contexto);
+      const dados2 = parseRespostaGemini(raw);
+
+      if (!dados2.analise_completa) {
+        throw new Error('Resposta da Gemini não contém analise_completa.');
+      }
+
+      if (typeof dbAtualizarCorrecaoJson === 'function') {
+        await dbAtualizarCorrecaoJson(redacao.id, {
+          analise_completa: dados2.analise_completa,
+          chamadas: { analise_completa: 'completa' }
+        });
+      }
+
+      dadosAtuais.analise_completa = dados2.analise_completa;
+      dadosAtuais.chamadas = dadosAtuais.chamadas || {};
+      dadosAtuais.chamadas.analise_completa = 'completa';
+
+      // Re-renderiza pra atualizar window._analiseCompleta
+      renderAnalise(redacao, dadosAtuais);
+
+      return true;
+    } catch (err) {
+      console.error('[Minhas Redações] Falha ao gerar análise completa:', err);
+      return false;
+    }
+  };
+
+  window.verAnaliseCompleta = async function() {
     document.getElementById('modalAnaliseTitle').textContent = 'Análise Completa';
-    document.getElementById('modalAnaliseTexto').innerHTML = `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(window._analiseCompleta||'Não disponível.')}</p>`;
     document.getElementById('modalAnalise').classList.remove('hidden');
+
+    // Se já temos análise completa (flag setada em renderAnalise), exibe direto.
+    if (window._temAnaliseCompleta) {
+      document.getElementById('modalAnaliseTexto').innerHTML =
+        `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(window._analiseCompleta)}</p>`;
+      return;
+    }
+
+    // Dispara Chamada 2 sob demanda
+    document.getElementById('modalAnaliseTexto').innerHTML =
+      '<div style="text-align:center;padding:2.5rem 1.5rem;">'
+      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
+      + '<p style="color:#c8c4d7;font-size:.9rem;font-weight:600;margin-bottom:.375rem;">Gerando análise completa...</p>'
+      + '<p style="color:#928ea0;font-size:.75rem;">A PROfa está analisando sua redação parágrafo a parágrafo. Aguarde cerca de 15 segundos.</p>'
+      + '</div>';
+
+    const ok = await window.gerarAnaliseCompleta();
+    if (ok) {
+      document.getElementById('modalAnaliseTexto').innerHTML =
+        `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(window._analiseCompleta || 'Não disponível.')}</p>`;
+    } else {
+      document.getElementById('modalAnaliseTexto').innerHTML =
+        '<div style="text-align:center;padding:2rem;">'
+        + '<p style="color:#ffb4ab;font-size:.85rem;margin-bottom:1rem;">Não foi possível gerar a análise completa.</p>'
+        + '<button onclick="window.verAnaliseCompleta()" style="background:rgba(108,92,231,.15);color:#c6bfff;border:1px solid rgba(108,92,231,.3);padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.8rem;cursor:pointer;">Tentar novamente</button>'
+        + '</div>';
+    }
   };
 
   // ── CHAMADA 3 (sob demanda) ─────────────────────────
