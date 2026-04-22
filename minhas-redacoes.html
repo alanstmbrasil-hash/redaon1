@@ -772,8 +772,11 @@ Formato EXATO da resposta:
       });
     }
 
+    // Aba "Texto Original" mostra a redação com marcações de erros inline.
+    // Se não há erros identificados, mostra o texto cru (sem nenhum span extra).
+    // Os spans .erro-orto têm tooltip com a sugestão de correção.
     document.getElementById('colOriginal').innerHTML =
-      `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
+      `<p style="white-space:pre-line;text-align:justify;">${textoCorrigido}</p>`;
 
     document.getElementById('badgeErros').textContent = `${qtd} marcação${qtd!==1?'ões':''}`;
 
@@ -936,17 +939,11 @@ Formato EXATO da resposta:
         + '</div>';
     }
 
-    // Divisor sutil entre análise estratégica e o texto original com erros marcados
-    const divisorTextoOriginal = textoCorrigido
-      ? '<div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(0,0,0,.08);">'
-          + '<p style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(0,0,0,.45);margin-bottom:.75rem;">📝 Texto original com marcações</p>'
-          + '<p style="white-space:pre-line;text-align:justify;color:#1f2937;line-height:2rem;">' + textoCorrigido + '</p>'
-        + '</div>'
-      : '';
-
-    // Montagem final de colCorrecoes: alertas C2 + card C5 + análise estratégica + texto original
+    // Montagem final de colCorrecoes: alertas C2 + card C5 + análise estratégica.
+    // O texto original com erros marcados não aparece mais aqui (Opção C):
+    // as marcações foram movidas para a aba "Texto Original" — acabou a redundância.
     document.getElementById('colCorrecoes').innerHTML =
-      alertasC2 + cardC5 + secaoAnalise + divisorTextoOriginal;
+      alertasC2 + cardC5 + secaoAnalise;
 
     // _porQueElite já foi definido acima (por competência ou fallback) — não sobrescrever aqui
   }
