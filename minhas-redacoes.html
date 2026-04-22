@@ -320,19 +320,16 @@
 
           <!-- Aba 2: Pontos de Melhoria -->
           <div id="painel-melhoria" class="hidden h-full">
-            <div class="p-4 bg-red-500/5 border-b border-red-500/10 flex items-center gap-2">
+            <div class="p-4 bg-red-500/5 border-b border-red-500/10 flex items-center gap-2" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(250,110,110,.08);">
               <span class="material-symbols-outlined text-error text-sm">info</span>
               <span id="badgeErros" class="text-xs text-error font-bold"></span>
-              <button onclick="verAnaliseCompleta()" class="ml-auto text-xs text-error font-bold border border-error/30 px-3 py-1 rounded-lg hover:bg-error/10 transition-all">
-                Ver Análise Completa
-              </button>
             </div>
             <div class="folha" id="colCorrecoes"></div>
           </div>
 
           <!-- Aba 3: Elite da PROfa -->
           <div id="painel-elite" class="hidden h-full">
-            <div class="p-4 bg-[#6c5ce7]/10 border-b border-[#6c5ce7]/20 flex items-center gap-2">
+            <div class="p-4 bg-[#6c5ce7]/10 border-b border-[#6c5ce7]/20 flex items-center gap-2" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(108,92,231,.12);">
               <span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings:'FILL' 1;">psychology</span>
               <span class="text-xs text-secondary font-bold">Versão reescrita pela PROfa com nota 1000</span>
               <button onclick="verPorQueElite()" class="ml-auto text-xs text-[#6c5ce7] font-bold border border-[#6c5ce7]/30 px-3 py-1 rounded-lg hover:bg-[#6c5ce7]/10 transition-all flex items-center gap-1">
@@ -687,37 +684,45 @@ Formato EXATO da resposta:
       </div>`;
 
     // ── Alertas C2: repertório de bolso e tangenciamento
-    //     Padrão visual unificado com "Por que Nota 1000?":
-    //     background #1d2026 + border-left 3px colorido + border-radius 0 8px 8px 0
-    //     Tipografia consistente: título 11px/700, corpo 13px/1.6.
+    //     Padrão "folha" — rótulo colorido pequeno + texto serifado sobre fundo bege,
+    //     consistente com Elite da PROfa. Sem cards escuros sobrepostos.
+    //     Função auxiliar que cria um bloco-folha (para reuso com Análise Completa abaixo):
+    const blocoFolha = (cor, rotulo, tagComp, conteudoHtml) => {
+      return '<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,.08);">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;">'
+        + '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:' + cor + ';">' + rotulo + '</span>'
+        + (tagComp ? '<span style="font-size:9px;color:rgba(0,0,0,.35);background:rgba(0,0,0,.06);padding:1px 6px;border-radius:3px;">' + tagComp + '</span>' : '')
+        + '</div>'
+        + conteudoHtml
+        + '</div>';
+    };
+    const paragrafoFolha = (texto) => {
+      return '<p style="text-align:justify;color:#1f2937;line-height:2rem;">' + escHtml(texto) + '</p>';
+    };
+
     let alertasC2 = '';
     if (dados.c2_tangenciamento) {
-      alertasC2 += '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid #fa6e6e;border-radius:0 8px 8px 0;">'
-        + '<p style="font-size:11px;font-weight:700;color:#fa6e6e;margin-bottom:5px;">⚠ Tangenciamento detectado (C2)</p>'
-        + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;margin-bottom:6px;">' + escHtml(dados.c2_tangenciamento_detalhe || 'O tema não foi desenvolvido em sua totalidade.') + '</p>'
-        + '<p style="font-size:11px;color:#928ea0;line-height:1.5;">Efeito: C2, C3 e C5 ficam limitadas a 40 pontos cada.</p>'
-        + '</div>';
+      const conteudo = paragrafoFolha(dados.c2_tangenciamento_detalhe || 'O tema não foi desenvolvido em sua totalidade.')
+        + '<p style="font-size:.85rem;color:rgba(0,0,0,.5);margin-top:.5rem;font-style:italic;">Efeito: C2, C3 e C5 ficam limitadas a 40 pontos cada.</p>';
+      alertasC2 += blocoFolha('#dc2626', '⚠ Tangenciamento detectado', 'C2', conteudo);
     }
     if (dados.c2_repertorio_tipo === 'bolso') {
-      alertasC2 += '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid #6c5ce7;border-radius:0 8px 8px 0;">'
-        + '<p style="font-size:11px;font-weight:700;color:#6c5ce7;margin-bottom:5px;">C2 — Repertório de bolso detectado</p>'
-        + (dados.c2_repertorio_referencia
-            ? '<p style="font-size:11px;color:#928ea0;margin-bottom:6px;">Referência: <strong style="color:#c6bfff;">' + escHtml(dados.c2_repertorio_referencia) + '</strong></p>'
-            : '')
-        + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;">' + escHtml(dados.c2_repertorio_avaliacao || '') + '</p>'
-        + (dados.c2_repertorio_sugestao
-            ? '<p style="font-size:11px;color:#928ea0;margin-top:8px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;">Como tornar produtivo</p>'
-              + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;">' + escHtml(dados.c2_repertorio_sugestao) + '</p>'
-            : '')
-        + '</div>';
+      let conteudo = '';
+      if (dados.c2_repertorio_referencia) {
+        conteudo += '<p style="color:rgba(0,0,0,.55);font-size:.95rem;margin-bottom:.5rem;">Referência citada: <strong style="color:#1f2937;">' + escHtml(dados.c2_repertorio_referencia) + '</strong></p>';
+      }
+      conteudo += paragrafoFolha(dados.c2_repertorio_avaliacao || '');
+      if (dados.c2_repertorio_sugestao) {
+        conteudo += '<p style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(0,0,0,.5);margin-top:1rem;margin-bottom:.25rem;">Como tornar produtivo</p>'
+          + paragrafoFolha(dados.c2_repertorio_sugestao);
+      }
+      alertasC2 += blocoFolha('#6c5ce7', 'Repertório de bolso', 'C2', conteudo);
     } else if (dados.c2_repertorio_tipo === 'produtivo') {
-      alertasC2 += '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid #4ade80;border-radius:0 8px 8px 0;">'
-        + '<p style="font-size:11px;font-weight:700;color:#4ade80;margin-bottom:5px;">✓ C2 — Repertório produtivo</p>'
-        + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;">' + escHtml(dados.c2_repertorio_avaliacao || '') + '</p>'
-        + '</div>';
+      alertasC2 += blocoFolha('#16a34a', '✓ Repertório produtivo', 'C2', paragrafoFolha(dados.c2_repertorio_avaliacao || ''));
     }
 
-    // ── Checklist C5 — agora em formato card vermelho (consistente com paleta C5)
+    // ── C5 — Proposta de intervenção (padrão folha)
+    //     Checklist dos 5 elementos + avisos sobre direitos humanos.
     const c5itens = [
       { label: 'Ação',         valor: dados.c5_acao },
       { label: 'Agente',       valor: dados.c5_agente },
@@ -727,33 +732,28 @@ Formato EXATO da resposta:
     ];
     const checklistC5 = c5itens.map(item => {
       const ok = !!item.valor;
-      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:6px 0;">'
-        + '<span style="color:' + (ok ? '#4ade80' : '#fa6e6e') + ';font-weight:900;min-width:16px;font-size:14px;line-height:1.4;">' + (ok ? '✓' : '✗') + '</span>'
+      return '<div style="display:flex;align-items:flex-start;gap:12px;padding:.5rem 0;">'
+        + '<span style="color:' + (ok ? '#16a34a' : '#dc2626') + ';font-weight:900;min-width:18px;font-size:1.1rem;line-height:2rem;">' + (ok ? '✓' : '✗') + '</span>'
         + '<div style="flex:1;">'
-        +   '<span style="font-size:11px;color:#928ea0;font-weight:600;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px;">' + item.label + '</span>'
-        +   '<span style="font-size:13px;color:' + (ok ? '#e1e2eb' : '#fa6e6e') + ';line-height:1.6;">' + (ok ? escHtml(item.valor) : 'Não identificado — inclua na conclusão') + '</span>'
+        +   '<span style="font-size:9px;color:rgba(0,0,0,.5);font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:block;line-height:1.3;">' + item.label + '</span>'
+        +   '<span style="font-size:1rem;color:' + (ok ? '#1f2937' : '#dc2626') + ';line-height:1.7;font-style:' + (ok ? 'normal' : 'italic') + ';">' + (ok ? escHtml(item.valor) : 'Não identificado — inclua na conclusão') + '</span>'
         + '</div>'
         + '</div>';
     }).join('');
 
     const violaDH = dados.c5_direitos_humanos === true;
     const c5dh = violaDH
-      ? '<div style="margin-top:10px;padding:10px 12px;background:rgba(250,110,110,.08);border-radius:6px;">'
-        + '<p style="font-size:11px;font-weight:700;color:#fa6e6e;margin-bottom:5px;">⚠ Proposta viola direitos humanos → C5 = 0</p>'
-        + '<p style="font-size:12px;color:#e1e2eb;line-height:1.6;">No ENEM, viola direitos humanos qualquer proposta que sugira tortura, execução sem julgamento, "justiça com as próprias mãos", punições degradantes ou incitação ao ódio por raça, gênero ou religião. Reescreva sua conclusão propondo uma ação legal e respeitosa à dignidade humana.</p>'
+      ? '<div style="margin-top:1rem;padding:.75rem 1rem;background:rgba(220,38,38,.08);border-left:3px solid #dc2626;border-radius:0 6px 6px 0;">'
+        + '<p style="font-size:9px;font-weight:800;color:#dc2626;margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.06em;">⚠ Proposta viola direitos humanos → C5 = 0</p>'
+        + '<p style="font-size:.95rem;color:#1f2937;line-height:1.6;">No ENEM, viola direitos humanos qualquer proposta que sugira tortura, execução sem julgamento, "justiça com as próprias mãos", punições degradantes ou incitação ao ódio por raça, gênero ou religião. Reescreva sua conclusão propondo uma ação legal e respeitosa à dignidade humana.</p>'
         + '</div>'
       : '';
-    const c5faltantes = (dados.c5_elementos_faltantes || []).length > 0
-      ? '<p style="font-size:11px;color:#fabd00;font-weight:600;margin-top:8px;">Faltam: ' + dados.c5_elementos_faltantes.join(', ') + '</p>'
-      : '<p style="font-size:11px;color:#4ade80;font-weight:600;margin-top:8px;">✓ Proposta completa</p>';
+    const c5faltantesHtml = (dados.c5_elementos_faltantes || []).length > 0
+      ? '<p style="font-size:.9rem;color:#b45309;font-weight:600;margin-top:.75rem;font-style:italic;">Faltam: ' + dados.c5_elementos_faltantes.join(', ') + '</p>'
+      : '<p style="font-size:.9rem;color:#16a34a;font-weight:600;margin-top:.75rem;">✓ Proposta completa</p>';
 
-    // Card C5 completo no padrão novo
-    const cardC5 = '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid #fa6e6e;border-radius:0 8px 8px 0;">'
-      + '<p style="font-size:11px;font-weight:700;color:#fa6e6e;margin-bottom:8px;">C5 — Proposta de intervenção</p>'
-      + checklistC5
-      + c5faltantes
-      + c5dh
-      + '</div>';
+    const cardC5 = blocoFolha('#dc2626', 'Proposta de intervenção', 'C5',
+      checklistC5 + c5faltantesHtml + c5dh);
 
     // ── Painel de melhoria: alertas C2 + checklist C5 + erros
     let textoCorrigido = escHtml(redacao.texto);
@@ -774,11 +774,6 @@ Formato EXATO da resposta:
 
     document.getElementById('colOriginal').innerHTML =
       `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
-
-    document.getElementById('colCorrecoes').innerHTML =
-      alertasC2 +
-      cardC5 +
-      '<p style="white-space:pre-line;text-align:justify;margin-top:16px;color:#c8c4d7;font-size:13px;line-height:1.7;">' + textoCorrigido + '</p>';
 
     document.getElementById('badgeErros').textContent = `${qtd} marcação${qtd!==1?'ões':''}`;
 
@@ -883,67 +878,78 @@ Formato EXATO da resposta:
       }
     }
 
-    // ── Análise completa (cards coloridos por seção, padrão Por que Nota 1000):
-    //     Prompt novo retorna 3 campos (projeto_texto, padrao_dominante, proximo_passo).
-    //     Prompt antigo retornava 1 campo (analise_completa) — mantido como fallback.
-    //     Campos complementares (c3_projeto_texto, c4_problemas, feedback_geral) vêm
-    //     da Chamada 1 e entram como cards adicionais.
-    const cardAnalise = (cor, label, texto) => {
-      if (!texto || !texto.trim()) return '';
-      return '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid ' + cor + ';border-radius:0 8px 8px 0;">'
-        + '<p style="font-size:11px;font-weight:700;color:' + cor + ';margin-bottom:5px;">' + label + '</p>'
-        + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;white-space:pre-line;">' + escHtml(texto) + '</p>'
-        + '</div>';
-    };
-
+    // ── Análise estratégica da PROfa — blocos-folha integrados com o fundo bege.
+    //     Padrão visual idêntico aos alertas C2/C5 (blocoFolha), para unificação total.
+    //     Conteúdo vem da Chamada 2 (prompt reescrito em 3 seções estratégicas).
+    //     Fallback: formato antigo (analise_completa único) é mostrado como bloco único.
     const cardsAnalise = [];
-    // Seção 1 — Projeto de texto (formato novo: seção dedicada; antigo: vem do c3_projeto_texto)
+
+    // Projeto de texto (C3) — formato novo tem seção dedicada; antigo usa c3_projeto_texto
     if (dados.analise_projeto_texto) {
-      cardsAnalise.push(cardAnalise('#4ade80', '🏗️ Projeto de texto (C3)', dados.analise_projeto_texto));
+      cardsAnalise.push(blocoFolha('#16a34a', '🏗️ Projeto de texto', 'C3', paragrafoFolha(dados.analise_projeto_texto)));
     } else if (dados.c3_projeto_texto) {
-      cardsAnalise.push(cardAnalise('#4ade80', '🏗️ Projeto de texto (C3)', dados.c3_projeto_texto));
+      cardsAnalise.push(blocoFolha('#16a34a', '🏗️ Projeto de texto', 'C3', paragrafoFolha(dados.c3_projeto_texto)));
     }
 
-    // Seção 2 — Padrão dominante (só formato novo)
+    // Padrão dominante (só formato novo)
     if (dados.analise_padrao_dominante) {
-      cardsAnalise.push(cardAnalise('#fa6e6e', '⚡ Padrão dominante', dados.analise_padrao_dominante));
+      cardsAnalise.push(blocoFolha('#dc2626', '⚡ Padrão dominante', '', paragrafoFolha(dados.analise_padrao_dominante)));
     }
 
-    // Seção 3 — Problemas de coesão (Chamada 1)
+    // Problemas de coesão (C4) — vem da Chamada 1, lista itens
     if (dados.c4_problemas?.length) {
-      cardsAnalise.push(cardAnalise('#fabd00', '🔗 Coesão (C4)', dados.c4_problemas.map(p => '• ' + p).join('\n')));
+      const itensC4 = dados.c4_problemas.map(p =>
+        '<li style="margin-bottom:.4rem;color:#1f2937;">' + escHtml(p) + '</li>'
+      ).join('');
+      const listaC4 = '<ul style="list-style:disc;padding-left:1.25rem;line-height:1.8;">' + itensC4 + '</ul>';
+      cardsAnalise.push(blocoFolha('#b45309', '🔗 Coesão', 'C4', listaC4));
     }
 
-    // Seção 4 — Próximo passo (só formato novo)
+    // Próximo passo (só formato novo)
     if (dados.analise_proximo_passo) {
-      cardsAnalise.push(cardAnalise('#6c5ce7', '🎯 Próximo passo', dados.analise_proximo_passo));
+      cardsAnalise.push(blocoFolha('#6c5ce7', '🎯 Próximo passo', '', paragrafoFolha(dados.analise_proximo_passo)));
     }
 
-    // Seção 5 — Feedback geral da PROfa (Chamada 1)
+    // Feedback geral (Chamada 1)
     if (dados.feedback_geral) {
-      cardsAnalise.push(cardAnalise('#45edee', '💬 Feedback geral', dados.feedback_geral));
+      cardsAnalise.push(blocoFolha('#0891b2', '💬 Feedback geral', '', paragrafoFolha(dados.feedback_geral)));
     }
 
-    // Seção 6 — Fallback: análise_completa em formato antigo (texto único)
-    // Só entra se o formato novo não existir, pra evitar duplicação.
+    // Fallback: analise_completa em formato antigo (prompt anterior)
     if (!dados.analise_projeto_texto && !dados.analise_padrao_dominante && !dados.analise_proximo_passo && dados.analise_completa) {
-      cardsAnalise.unshift(cardAnalise('#45edee', '📖 Análise parágrafo a parágrafo', dados.analise_completa));
+      cardsAnalise.unshift(blocoFolha('#0891b2', '📖 Análise parágrafo a parágrafo', '', paragrafoFolha(dados.analise_completa)));
     }
 
-    window._analiseCompletaHtml = cardsAnalise.filter(c => c).join('');
-    // Flag: a análise é considerada "presente" se tem formato novo OU formato antigo.
-    // Cards puramente complementares (c3/c4/feedback_geral, todos da Chamada 1) não
-    // contam como "análise completa" — se só eles existirem, a Chamada 2 ainda
-    // precisa ser disparada sob demanda.
-    window._temAnaliseCompleta = !!(
-      dados.analise_projeto_texto ||
-      dados.analise_padrao_dominante ||
-      dados.analise_proximo_passo ||
-      dados.analise_completa
-    );
+    // HTML final: alertas C2 + card C5 + blocos de análise + placeholder ou texto original com erros
+    const temAlgumaAnalise = cardsAnalise.length > 0;
+    const temFormatoNovo = !!(dados.analise_projeto_texto || dados.analise_padrao_dominante || dados.analise_proximo_passo);
+    window._temAnaliseCompleta = !!(temFormatoNovo || dados.analise_completa);
+
+    // Se falta a análise estratégica (Chamada 2), mostra placeholder com botão "Gerar"
+    let secaoAnalise = '';
+    if (temAlgumaAnalise) {
+      secaoAnalise = cardsAnalise.join('');
+    } else if (!window._temAnaliseCompleta) {
+      secaoAnalise = '<div style="text-align:center;padding:1.5rem 1rem;margin:1.5rem 0;background:rgba(108,92,231,.05);border:1px dashed rgba(108,92,231,.25);border-radius:8px;">'
+        + '<p style="font-size:.95rem;color:#4b5563;margin-bottom:.75rem;">📖 A análise estratégica da PROfa ainda não foi gerada.</p>'
+        + '<button onclick="window.gerarAnaliseCompleta && window.gerarAnaliseCompleta()" style="background:#6c5ce7;color:white;border:none;padding:.5rem 1.25rem;border-radius:.5rem;font-weight:700;font-size:.85rem;cursor:pointer;">Gerar análise estratégica</button>'
+        + '</div>';
+    }
+
+    // Divisor sutil entre análise estratégica e o texto original com erros marcados
+    const divisorTextoOriginal = textoCorrigido
+      ? '<div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(0,0,0,.08);">'
+          + '<p style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(0,0,0,.45);margin-bottom:.75rem;">📝 Texto original com marcações</p>'
+          + '<p style="white-space:pre-line;text-align:justify;color:#1f2937;line-height:2rem;">' + textoCorrigido + '</p>'
+        + '</div>'
+      : '';
+
+    // Montagem final de colCorrecoes: alertas C2 + card C5 + análise estratégica + texto original
+    document.getElementById('colCorrecoes').innerHTML =
+      alertasC2 + cardC5 + secaoAnalise + divisorTextoOriginal;
+
     // _porQueElite já foi definido acima (por competência ou fallback) — não sobrescrever aqui
   }
-
   function renderFallback(redacao) {
     document.getElementById('barrasComp').innerHTML = '<p class="text-xs text-on-surface-variant">Análise indisponível.</p>';
     document.getElementById('colOriginal').innerHTML = `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
@@ -966,6 +972,20 @@ Formato EXATO da resposta:
   window.gerarAnaliseCompleta = async function() {
     const redacao = window._redacaoAtual;
     if (!redacao || !dadosAtuais) return false;
+
+    // Loading inline: substitui o placeholder pela animação de geração na própria aba.
+    const colCorrecoes = document.getElementById('colCorrecoes');
+    const loadingHtml = '<div style="text-align:center;padding:2rem 1rem;margin:1.5rem 0;background:rgba(108,92,231,.05);border:1px dashed rgba(108,92,231,.25);border-radius:8px;">'
+      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
+      + '<p style="font-size:.95rem;color:#4b5563;font-weight:600;margin-bottom:.375rem;">Gerando análise estratégica...</p>'
+      + '<p style="font-size:.8rem;color:rgba(0,0,0,.5);">A PROfa está analisando sua redação. Leva cerca de 15 segundos.</p>'
+      + '</div>';
+    // Localiza se já existe um placeholder pra substituir; senão, adiciona ao fim.
+    if (colCorrecoes) {
+      const placeholder = colCorrecoes.querySelector('[style*="dashed"]');
+      if (placeholder) placeholder.outerHTML = loadingHtml;
+      else colCorrecoes.insertAdjacentHTML('beforeend', loadingHtml);
+    }
 
     try {
       // Monta prompt com contexto das notas/feedbacks da Chamada 1 (pra consistência).
@@ -1007,47 +1027,29 @@ Formato EXATO da resposta:
       dadosAtuais.chamadas = dadosAtuais.chamadas || {};
       dadosAtuais.chamadas.analise_completa = 'completa';
 
-      // Re-renderiza pra atualizar window._analiseCompleta
+      // Re-renderiza pra atualizar o painel completo com os novos cards
       renderAnalise(redacao, dadosAtuais);
 
       return true;
     } catch (err) {
       console.error('[Minhas Redações] Falha ao gerar análise completa:', err);
+      // Reexibe o placeholder com opção de tentar de novo
+      if (colCorrecoes) {
+        const loading = colCorrecoes.querySelector('.spinner');
+        if (loading) {
+          loading.closest('div[style*="dashed"], div[style*="#6c5ce7"]').outerHTML =
+            '<div style="text-align:center;padding:1.5rem 1rem;margin:1.5rem 0;background:rgba(220,38,38,.05);border:1px dashed rgba(220,38,38,.25);border-radius:8px;">'
+            + '<p style="font-size:.95rem;color:#7f1d1d;margin-bottom:.75rem;">Não foi possível gerar a análise estratégica.</p>'
+            + '<button onclick="window.gerarAnaliseCompleta()" style="background:#dc2626;color:white;border:none;padding:.5rem 1.25rem;border-radius:.5rem;font-weight:700;font-size:.85rem;cursor:pointer;">Tentar novamente</button>'
+            + '</div>';
+        }
+      }
       return false;
     }
   };
 
-  window.verAnaliseCompleta = async function() {
-    document.getElementById('modalAnaliseTitle').textContent = 'Análise Completa';
-    document.getElementById('modalAnalise').classList.remove('hidden');
-
-    // Se já temos análise completa (flag setada em renderAnalise), exibe direto.
-    if (window._temAnaliseCompleta) {
-      document.getElementById('modalAnaliseTexto').innerHTML =
-        window._analiseCompletaHtml || '<p style="color:#928ea0;">Não disponível.</p>';
-      return;
-    }
-
-    // Dispara Chamada 2 sob demanda
-    document.getElementById('modalAnaliseTexto').innerHTML =
-      '<div style="text-align:center;padding:2.5rem 1.5rem;">'
-      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
-      + '<p style="color:#c8c4d7;font-size:.9rem;font-weight:600;margin-bottom:.375rem;">Gerando análise completa...</p>'
-      + '<p style="color:#928ea0;font-size:.75rem;">A PROfa está analisando sua redação parágrafo a parágrafo. Aguarde cerca de 15 segundos.</p>'
-      + '</div>';
-
-    const ok = await window.gerarAnaliseCompleta();
-    if (ok) {
-      document.getElementById('modalAnaliseTexto').innerHTML =
-        window._analiseCompletaHtml || '<p style="color:#928ea0;">Não disponível.</p>';
-    } else {
-      document.getElementById('modalAnaliseTexto').innerHTML =
-        '<div style="text-align:center;padding:2rem;">'
-        + '<p style="color:#ffb4ab;font-size:.85rem;margin-bottom:1rem;">Não foi possível gerar a análise completa.</p>'
-        + '<button onclick="window.verAnaliseCompleta()" style="background:rgba(108,92,231,.15);color:#c6bfff;border:1px solid rgba(108,92,231,.3);padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.8rem;cursor:pointer;">Tentar novamente</button>'
-        + '</div>';
-    }
-  };
+  // window.verAnaliseCompleta foi removida nesta iteração — a análise agora
+  // é renderizada na própria aba "Pontos de Melhoria" via renderAnalise.
 
   // ── CHAMADA 3 (sob demanda) ─────────────────────────
   // Gera a redação nota 1000 via Gemini e salva no banco. Atualiza a UI.
