@@ -589,28 +589,50 @@ Formato EXATO da resposta:
   // ── HANDLER ?abrir=<id> ────────────────────────────
   // Quando o aluno vem de nova-redacao.html via botão "Ver análise completa →",
   // a URL chega como minhas-redacoes.html?abrir=<redacao_id>.
-  // Aguarda a lista de redações carregar (REDACOES é populado async) e então
-  // chama selecionarRedacao automaticamente.
+  // Recarrega a lista pra garantir que a redação nova aparece, depois abre.
   (function() {
     const params = new URLSearchParams(window.location.search);
     const abrirId = params.get('abrir');
     if (!abrirId) return;
 
-    // Tentativa em loop até REDACOES estar populado (máx ~5s)
-    let tentativas = 0;
-    const tentaAbrir = () => {
-      tentativas++;
-      if (window.REDACOES && window.REDACOES.find(r => r.id === abrirId)) {
-        window.selecionarRedacao(abrirId);
-        // Remove o parâmetro da URL sem recarregar a página (fica mais limpo)
-        const url = new URL(window.location.href);
-        url.searchParams.delete('abrir');
-        window.history.replaceState({}, '', url.toString());
-      } else if (tentativas < 25) {
-        setTimeout(tentaAbrir, 200);
-      }
+    // Remove o parâmetro da URL imediatamente (fica mais limpo)
+    const url = new URL(window.location.href);
+    url.searchParams.delete('abrir');
+    window.history.replaceState({}, '', url.toString());
+
+    // Aguarda carregarRedacoesDoSupabase terminar, depois tenta abrir.
+    // carregarRedacoesDoSupabase já foi chamado acima — mas a redação nova
+    // pode ter sido salva depois que essa página carregou (aluno veio de
+    // nova-redacao.html). Por segurança, recarrega a lista uma vez.
+    const abrirAposCarregar = () => {
+      // Espera até REDACOES ser populado (carregarRedacoesDoSupabase é async)
+      let tentativas = 0;
+      const tentaAbrir = () => {
+        tentativas++;
+        const encontrou = window.REDACOES && window.REDACOES.find(r => r.id === abrirId);
+        if (encontrou) {
+          window.selecionarRedacao(abrirId);
+        } else if (tentativas < 30) {
+          setTimeout(tentaAbrir, 200);
+        } else {
+          window.toast('Redação não encontrada. Verifique Minhas Redações.');
+        }
+      };
+      tentaAbrir();
     };
-    setTimeout(tentaAbrir, 300); // Pequeno delay inicial pra dar tempo do carregamento
+
+    // Recarrega a lista pra incluir a redação recém-salva, depois abre
+    if (typeof window.carregarRedacoesDoSupabase === 'function') {
+      const originalRender = window.renderLista;
+      window.renderLista = function() {
+        originalRender && originalRender.call(this);
+        window.renderLista = originalRender; // restaura depois da primeira chamada
+        abrirAposCarregar();
+      };
+    } else {
+      // Fallback: espera 1s e tenta diretamente
+      setTimeout(abrirAposCarregar, 1000);
+    }
   })();
   window.mudarAba = function(aba) {
     ['original','melhoria','elite'].forEach(a => {
