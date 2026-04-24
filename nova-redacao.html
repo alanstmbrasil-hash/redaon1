@@ -1609,17 +1609,13 @@ ${FORMATO_JSON_MELHORIAS}`;
         });
 
         if (redacao && redacao.id) {
-          // Guarda o ID pra o botão "Ver análise completa" acessar depois de renderResultado
+          // Array de competências do payload do prompt (necessário pra c1..c5 e feedbacks).
+          // Foi perdido em refactor anterior — restaurado aqui.
+          const comps = dados.competencias || [];
+          // Guarda o ID pra o botão "Ver análise completa" usar depois.
+          // A ativação do botão acontece APÓS o salvamento da correção completar
+          // (ver logo abaixo, depois de dbSalvarCorrecaoIACompleta).
           window._redacaoSalvaId = redacao.id;
-          // Ativa o botão agora que a correção está salva no banco
-          const btnAction = document.getElementById('btn-ver-analise-action');
-          const btnLabel = document.getElementById('btn-ver-analise-label');
-          if (btnAction) {
-            btnAction.disabled = false;
-            btnAction.style.cursor = 'pointer';
-            btnAction.style.opacity = '1';
-          }
-          if (btnLabel) btnLabel.textContent = 'Ver análise completa →';
           const pdcaProf = dados.pdca_professor || null;
 
           // Usar dbSalvarCorrecaoIACompleta se disponível (com PDCA)
@@ -1667,6 +1663,17 @@ ${FORMATO_JSON_MELHORIAS}`;
             });
           }
           toast(elite ? '⭐ Análise Elite salva no seu histórico!' : '✅ Redação salva no seu histórico!', 4000);
+
+          // Ativa o botão "Ver análise completa →" — agora temos certeza que a
+          // correção está salva no banco (correcoes.correcao_json + redacoes.status=corrigida).
+          const btnAction = document.getElementById('btn-ver-analise-action');
+          const btnLabel = document.getElementById('btn-ver-analise-label');
+          if (btnAction) {
+            btnAction.disabled = false;
+            btnAction.style.cursor = 'pointer';
+            btnAction.style.opacity = '1';
+          }
+          if (btnLabel) btnLabel.textContent = 'Ver análise completa →';
 
           // ── CENÁRIO B — CHAMADA 2 (Análise Completa) em background ────
           // Não bloqueia UI nem toast. Roda sem await e, quando termina,
