@@ -1270,17 +1270,19 @@ var intervaloDicas = null;
     const comentario = d.comentario_geral ? `
       <div style="background:${elite ? 'rgba(201,162,39,.08)' : 'rgba(108,92,231,.1)'};border:1px solid ${elite ? 'rgba(201,162,39,.25)' : 'rgba(108,92,231,.25)'};border-radius:.75rem;padding:1rem;font-size:.82rem;color:#c8c4d7;line-height:1.6;margin-top:1rem;font-style:italic;">"${d.comentario_geral}"</div>` : '';
 
-    // Botão "Ver análise completa →" — leva o aluno direto pra Minhas Redações
-    // com a redação já aberta. Aparece apenas depois do salvamento (quando
-    // window._redacaoSalvaId já existe). Fica oculto durante a geração inicial.
+    // Botão "Ver análise completa →" — aparece logo mas fica desabilitado até
+    // o salvamento no banco completar (window._redacaoSalvaId sendo setado).
+    // Assim o aluno vê o botão imediatamente mas não navega antes de estar salvo.
     const btnAnalise = `
       <div id="btn-ver-analise" style="margin-top:1.25rem;">
         <button
-          onclick="if(window._redacaoSalvaId){window.location.href='minhas-redacoes.html?abrir='+window._redacaoSalvaId;}else{window.toast('Aguarde o salvamento da redação...');}"
-          style="width:100%;padding:.85rem 1.5rem;background:linear-gradient(135deg,#6c5ce7,#8b7df0);color:#fff;border:none;border-radius:.75rem;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:opacity .2s;"
-          onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+          id="btn-ver-analise-action"
+          onclick="if(window._redacaoSalvaId){window.location.href='minhas-redacoes.html?abrir='+window._redacaoSalvaId;}else{window.toast('Aguarde o salvamento...');}"
+          disabled
+          style="width:100%;padding:.85rem 1.5rem;background:linear-gradient(135deg,#6c5ce7,#8b7df0);color:#fff;border:none;border-radius:.75rem;font-weight:700;font-size:.9rem;cursor:not-allowed;opacity:.45;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:opacity .3s,cursor .3s;"
+          onmouseover="if(!this.disabled)this.style.opacity='.88'" onmouseout="if(!this.disabled)this.style.opacity='1'">
           <span class="material-symbols-outlined" style="font-size:1rem;">analytics</span>
-          Ver análise completa →
+          <span id="btn-ver-analise-label">Salvando correção...</span>
         </button>
       </div>`;
 
@@ -1609,6 +1611,15 @@ ${FORMATO_JSON_MELHORIAS}`;
         if (redacao && redacao.id) {
           // Guarda o ID pra o botão "Ver análise completa" acessar depois de renderResultado
           window._redacaoSalvaId = redacao.id;
+          // Ativa o botão agora que a correção está salva no banco
+          const btnAction = document.getElementById('btn-ver-analise-action');
+          const btnLabel = document.getElementById('btn-ver-analise-label');
+          if (btnAction) {
+            btnAction.disabled = false;
+            btnAction.style.cursor = 'pointer';
+            btnAction.style.opacity = '1';
+          }
+          if (btnLabel) btnLabel.textContent = 'Ver análise completa →';
           const pdcaProf = dados.pdca_professor || null;
 
           // Usar dbSalvarCorrecaoIACompleta se disponível (com PDCA)
