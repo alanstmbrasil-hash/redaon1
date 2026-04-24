@@ -1270,6 +1270,20 @@ var intervaloDicas = null;
     const comentario = d.comentario_geral ? `
       <div style="background:${elite ? 'rgba(201,162,39,.08)' : 'rgba(108,92,231,.1)'};border:1px solid ${elite ? 'rgba(201,162,39,.25)' : 'rgba(108,92,231,.25)'};border-radius:.75rem;padding:1rem;font-size:.82rem;color:#c8c4d7;line-height:1.6;margin-top:1rem;font-style:italic;">"${d.comentario_geral}"</div>` : '';
 
+    // Botão "Ver análise completa →" — leva o aluno direto pra Minhas Redações
+    // com a redação já aberta. Aparece apenas depois do salvamento (quando
+    // window._redacaoSalvaId já existe). Fica oculto durante a geração inicial.
+    const btnAnalise = `
+      <div id="btn-ver-analise" style="margin-top:1.25rem;">
+        <button
+          onclick="if(window._redacaoSalvaId){window.location.href='minhas-redacoes.html?abrir='+window._redacaoSalvaId;}else{window.toast('Aguarde o salvamento da redação...');}"
+          style="width:100%;padding:.85rem 1.5rem;background:linear-gradient(135deg,#6c5ce7,#8b7df0);color:#fff;border:none;border-radius:.75rem;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:opacity .2s;"
+          onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+          <span class="material-symbols-outlined" style="font-size:1rem;">analytics</span>
+          Ver análise completa →
+        </button>
+      </div>`;
+
     document.getElementById('painel-conteudo').innerHTML = `
       ${badgeElite}
       <div style="text-align:center;margin-bottom:1.5rem;">
@@ -1277,7 +1291,7 @@ var intervaloDicas = null;
         <div class="nota-numero" style="${elite ? 'background:linear-gradient(135deg,#C9A227,#E8BC3A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;' : ''}">${d.nota_total||'—'}</div>
         <div style="font-size:.75rem;color:#928ea0;">/1000 pontos</div>
       </div>
-      ${comps}${comentario}${planoMelhoria}`;
+      ${comps}${comentario}${planoMelhoria}${btnAnalise}`;
   }
 
   // ── PROMPTS UNIFICADOS ─────────────────────────────
@@ -1593,7 +1607,8 @@ ${FORMATO_JSON_MELHORIAS}`;
         });
 
         if (redacao && redacao.id) {
-          const comps = dados.competencias || [];
+          // Guarda o ID pra o botão "Ver análise completa" acessar depois de renderResultado
+          window._redacaoSalvaId = redacao.id;
           const pdcaProf = dados.pdca_professor || null;
 
           // Usar dbSalvarCorrecaoIACompleta se disponível (com PDCA)

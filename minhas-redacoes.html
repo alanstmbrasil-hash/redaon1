@@ -586,7 +586,32 @@ Formato EXATO da resposta:
 
   window.carregarRedacoesDoSupabase();
 
-  // ── ABAS ──────────────────────────────────────────
+  // ── HANDLER ?abrir=<id> ────────────────────────────
+  // Quando o aluno vem de nova-redacao.html via botão "Ver análise completa →",
+  // a URL chega como minhas-redacoes.html?abrir=<redacao_id>.
+  // Aguarda a lista de redações carregar (REDACOES é populado async) e então
+  // chama selecionarRedacao automaticamente.
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const abrirId = params.get('abrir');
+    if (!abrirId) return;
+
+    // Tentativa em loop até REDACOES estar populado (máx ~5s)
+    let tentativas = 0;
+    const tentaAbrir = () => {
+      tentativas++;
+      if (window.REDACOES && window.REDACOES.find(r => r.id === abrirId)) {
+        window.selecionarRedacao(abrirId);
+        // Remove o parâmetro da URL sem recarregar a página (fica mais limpo)
+        const url = new URL(window.location.href);
+        url.searchParams.delete('abrir');
+        window.history.replaceState({}, '', url.toString());
+      } else if (tentativas < 25) {
+        setTimeout(tentaAbrir, 200);
+      }
+    };
+    setTimeout(tentaAbrir, 300); // Pequeno delay inicial pra dar tempo do carregamento
+  })();
   window.mudarAba = function(aba) {
     ['original','melhoria','elite'].forEach(a => {
       document.getElementById('painel-' + a).classList.toggle('hidden', a !== aba);
