@@ -286,33 +286,284 @@ async function dbGetRanking(turmaId = null) {
 }
 
 // ─────────────────────────────────────────────
-// PROFESSOR — helpers específicos
+// PROFESSOR — helpers específicos (Caminho B)
+// Atualizado em 27/04/2026 — Etapa 2 do Painel Professor
+// Tabela oficial de vínculo aluno↔turma: alunos_turma
 // ─────────────────────────────────────────────
 
-async function dbGetAlunosDoProfessor() {
+// ---------- ESCOLAS ----------
+
+/**
+ * Cria uma escola vinculada ao professor logado.
+ * @param {object} dados - { nome, cidade, estado }
+ * @returns {Promise<object>} escola criada
+ */
+async function dbSalvarEscola({ nome, cidade = null, estado = null }) {
   const profId = authGetUserId();
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/turma_alunos?select=aluno_id,joined_at,turmas!inner(professor_id,nome),usuarios!inner(nome,email,plano)&turmas.professor_id=eq.${profId}`,
-    { headers: dbHeaders() }
-  );
-  return await res.json();
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/escolas`, {
+    method: 'POST',
+    body: JSON.stringify({
+      nome,
+      cidade,
+      estado,
+      criada_por: profId
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data[0];
 }
 
+/**
+ * Lista as escolas que o professor logado criou.
+ * @returns {Promise<Array>} lista de escolas
+ */
+async function dbGetEscolasDoProfessor() {
+  const profId = authGetUserId();
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/escolas?criada_por=eq.${profId}&order=nome`,
+    {}
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
+}
+
+// ---------- TURMAS ----------
+
+/**
+ * Cria uma turma. O código é gerado automaticamente pela função SQL
+ * gerar_codigo_turma() (trigger do banco).
+ * @param {object} dados - { escola_id, nome, serie, ano_letivo }
+ * @returns {Promise<object>} turma criada (já com código gerado)
+ */
+async function dbSalvarTurma({ escola_id, nome, serie = null, ano_letivo = null }) {
+  const profId = authGetUserId();
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/turmas`, {
+    method: 'POST',
+    body: JSON.stringify({
+      escola_id,
+      professor_id: profId,
+      nome,
+      serie,
+      ano_letivo: ano_letivo || new Date().getFullYear()
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data[0];
+}
+
+/**
+ * Lista todas as turmas do professor logado, com nome da escola via JOIN.
+ * REFATORADA — agora inclui dados da escola.
+ * @returns {Promise<Array>} lista de turmas com escola
+ */
 async function dbGetTurmasDoProfessor() {
   const profId = authGetUserId();
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/turmas?professor_id=eq.${profId}&order=nome`,
-    { headers: dbHeaders() }
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/turmas?professor_id=eq.${profId}&order=nome&select=*,escolas(id,nome,cidade,estado)`,
+    {}
   );
-  return await res.json();
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
 }
 
-async function dbGetRedacoesDaTurma(turmaId) {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/redacoes?turma_id=eq.${turmaId}&order=created_at.desc&select=*,usuarios!inner(nome)`,
-    { headers: dbHeaders() }
+// ---------- ALUNOS ----------
+
+/**
+ * Aluno entra numa turma usando o código (estilo Google Classroom).
+ * Idempotente — se o aluno já está na turma, retorna o vínculo existente.
+ *
+ * @param {string} codigo - código da turma (ex: "redaon-rapido-tigre-42")
+ * @returns {Promise<object>} { turma, vinculo, jaEstava }
+ */
+async function dbAlunoEntrarComCodigo(codigo) {
+  const userId = authGetUserId();
+  const codigoLimpo = (codigo || '').trim().toLowerCase();
+  if (!codigoLimpo) throw new Error('Código da turma vazio.');
+
+  // 1. Buscar turma pelo código
+  const resTurma = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/turmas?codigo=eq.${encodeURIComponent(codigoLimpo)}&select=*,escolas(nome)`,
+    {}
   );
-  return await res.json();
+  const turmas = await resTurma.json();
+  if (!resTurma.ok) throw new Error(JSON.stringify(turmas));
+  if (!Array.isArray(turmas) || turmas.length === 0) {
+    throw new Error('Código de turma inválido. Verifique com seu professor.');
+  }
+  const turma = turmas[0];
+
+  // 2. Verificar se o aluno já está vinculado
+  const resExiste = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/alunos_turma?turma_id=eq.${turma.id}&aluno_id=eq.${userId}`,
+    {}
+  );
+  const existentes = await resExiste.json();
+  if (Array.isArray(existentes) && existentes.length > 0) {
+    return { turma, vinculo: existentes[0], jaEstava: true };
+  }
+
+  // 3. Criar vínculo
+  const resVinculo = await dbFetch(`${SUPABASE_URL}/rest/v1/alunos_turma`, {
+    method: 'POST',
+    body: JSON.stringify({
+      turma_id: turma.id,
+      aluno_id: userId,
+      status: 'ativo'
+    })
+  });
+  const vinculo = await resVinculo.json();
+  if (!resVinculo.ok) throw new Error(JSON.stringify(vinculo));
+
+  return { turma, vinculo: vinculo[0], jaEstava: false };
+}
+
+/**
+ * Lista os alunos de uma turma específica.
+ * @param {string} turmaId - UUID da turma
+ * @returns {Promise<Array>} lista de alunos
+ */
+async function dbGetAlunosDaTurma(turmaId) {
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/alunos_turma?turma_id=eq.${turmaId}&select=*,usuarios!inner(id,nome,email,plano)&order=created_at.desc`,
+    {}
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
+}
+
+/**
+ * Lista TODOS os alunos do professor (de todas as suas turmas).
+ * REFATORADA — agora usa `alunos_turma` (antes era `turma_alunos`).
+ * @returns {Promise<Array>} lista de alunos com turma e usuário
+ */
+async function dbGetAlunosDoProfessor() {
+  const profId = authGetUserId();
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/alunos_turma?select=aluno_id,created_at,status,turmas!inner(id,nome,professor_id),usuarios!inner(nome,email,plano)&turmas.professor_id=eq.${profId}`,
+    {}
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
+}
+
+// ---------- REDAÇÕES ----------
+
+/**
+ * Lista as redações de uma turma específica.
+ * REFATORADA — agora retorna a correção da IA junto.
+ * @param {string} turmaId - UUID da turma
+ * @returns {Promise<Array>} lista de redações com aluno e correção
+ */
+async function dbGetRedacoesDaTurma(turmaId) {
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/redacoes?turma_id=eq.${turmaId}&order=created_at.desc&select=*,usuarios!inner(nome,email),correcoes(id,c1,c2,c3,c4,c5,feedback_geral,revisao_professor,created_at)`,
+    {}
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
+}
+
+/**
+ * Lista TODAS as redações de TODAS as turmas do professor logado.
+ * Permite filtro opcional por status da redação.
+ *
+ * @param {object} filtros - { status?: 'enviada'|'corrigida'|'revisada', limit?: number }
+ * @returns {Promise<Array>} lista de redações
+ */
+async function dbGetRedacoesDoProfessor(filtros = {}) {
+  const profId = authGetUserId();
+
+  let url = `${SUPABASE_URL}/rest/v1/redacoes`
+    + `?select=*,usuarios!inner(id,nome,email),turmas!inner(id,nome,professor_id),correcoes(id,c1,c2,c3,c4,c5,feedback_geral,revisao_professor,created_at)`
+    + `&turmas.professor_id=eq.${profId}`
+    + `&order=created_at.desc`;
+
+  if (filtros.status) url += `&status=eq.${encodeURIComponent(filtros.status)}`;
+  if (filtros.limit)  url += `&limit=${filtros.limit}`;
+
+  const res = await dbFetch(url, {});
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
+}
+
+// ---------- REVISÃO PEDAGÓGICA ----------
+
+/**
+ * Salva a revisão pedagógica do professor numa correção da IA.
+ * O professor edita as notas C1-C5 e adiciona comentários por competência
+ * + comentário geral. A correção da IA fica intocada — a revisão é overlay.
+ *
+ * Estrutura do jsonb gravado em correcoes.revisao_professor:
+ * {
+ *   professor_id, revisado_em,
+ *   competencias: { c1: {nota, comentario}, ..., c5: {nota, comentario} },
+ *   nota_total, comentario_geral, visivel_aluno
+ * }
+ *
+ * @param {string} correcaoId - UUID da correção da IA
+ * @param {object} revisao - { competencias, comentario_geral, visivel_aluno }
+ * @returns {Promise<object>} correção atualizada
+ */
+async function dbSalvarRevisaoProfessor(correcaoId, revisao) {
+  const profId = authGetUserId();
+
+  const comps = revisao.competencias || {};
+  ['c1', 'c2', 'c3', 'c4', 'c5'].forEach(c => {
+    if (!comps[c] || typeof comps[c].nota !== 'number') {
+      throw new Error(`Competência ${c.toUpperCase()} inválida ou sem nota.`);
+    }
+  });
+
+  const notaTotal = ['c1','c2','c3','c4','c5']
+    .reduce((soma, c) => soma + (comps[c].nota || 0), 0);
+
+  const payload = {
+    revisao_professor: {
+      professor_id: profId,
+      revisado_em: new Date().toISOString(),
+      competencias: comps,
+      nota_total: notaTotal,
+      comentario_geral: revisao.comentario_geral || '',
+      visivel_aluno: revisao.visivel_aluno !== false  // default true
+    }
+  };
+
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/correcoes?id=eq.${correcaoId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data[0];
+}
+
+/**
+ * Busca a revisão do professor de uma correção específica.
+ * Retorna null se ainda não foi revisada.
+ *
+ * @param {string} correcaoId - UUID da correção
+ * @returns {Promise<object|null>} objeto da revisão ou null
+ */
+async function dbGetRevisaoProfessor(correcaoId) {
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/correcoes?id=eq.${correcaoId}&select=id,revisao_professor`,
+    {}
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  if (!Array.isArray(data) || data.length === 0) return null;
+  return data[0].revisao_professor || null;
 }
 
 // ─────────────────────────────────────────────
