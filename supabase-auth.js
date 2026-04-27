@@ -306,7 +306,7 @@ async function dbSalvarEscola({ nome, cidade = null, estado = null }) {
       nome,
       cidade,
       estado,
-      criada_por: profId
+      professor_id: profId
     })
   });
   const data = await res.json();
@@ -321,7 +321,7 @@ async function dbSalvarEscola({ nome, cidade = null, estado = null }) {
 async function dbGetEscolasDoProfessor() {
   const profId = authGetUserId();
   const res = await dbFetch(
-    `${SUPABASE_URL}/rest/v1/escolas?criada_por=eq.${profId}&order=nome`,
+    `${SUPABASE_URL}/rest/v1/escolas?professor_id=eq.${profId}&order=nome`,
     {}
   );
   const data = await res.json();
