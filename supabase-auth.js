@@ -428,7 +428,7 @@ async function dbAlunoEntrarComCodigo(codigo) {
  */
 async function dbGetAlunosDaTurma(turmaId) {
   const res = await dbFetch(
-    `${SUPABASE_URL}/rest/v1/alunos_turma?turma_id=eq.${turmaId}&select=*,usuarios!inner(id,nome,email,plano)&order=created_at.desc`,
+    `${SUPABASE_URL}/rest/v1/alunos_turma?turma_id=eq.${turmaId}&select=*,usuarios!inner(id,nome,email,plano)&order=entrou_em.desc`,
     {}
   );
   const data = await res.json();
@@ -444,7 +444,7 @@ async function dbGetAlunosDaTurma(turmaId) {
 async function dbGetAlunosDoProfessor() {
   const profId = authGetUserId();
   const res = await dbFetch(
-    `${SUPABASE_URL}/rest/v1/alunos_turma?select=aluno_id,created_at,status,turmas!inner(id,nome,professor_id),usuarios!inner(nome,email,plano)&turmas.professor_id=eq.${profId}`,
+    `${SUPABASE_URL}/rest/v1/alunos_turma?select=aluno_id,entrou_em,status,turmas!inner(id,nome,professor_id),usuarios!inner(nome,email,plano)&turmas.professor_id=eq.${profId}`,
     {}
   );
   const data = await res.json();
