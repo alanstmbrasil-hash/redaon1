@@ -33,18 +33,22 @@
   .redacao-item.selecionada{border-color:#45edee;background:#1a2535;}
   .aba-btn{padding:.5rem 1rem;border-radius:.625rem;font-size:.8rem;font-weight:700;cursor:pointer;border:none;background:transparent;color:#928ea0;transition:all .2s;}
   .aba-btn.ativo{background:rgba(69,237,238,.1);color:#45edee;}
-  .competencia-row{display:flex;align-items:center;gap:.75rem;padding:.625rem 0;border-bottom:1px solid rgba(71,69,84,.1);}
+  .competencia-row{display:grid;grid-template-columns:1fr auto;gap:.75rem;align-items:center;padding:.875rem 0;border-bottom:1px solid rgba(71,69,84,.1);}
   .competencia-row:last-child{border-bottom:none;}
   .nota-input{width:4rem;background:#10131a;border:1px solid rgba(71,69,84,.3);border-radius:.5rem;padding:.35rem .5rem;color:#e1e2eb;font-size:.875rem;font-weight:700;text-align:center;outline:none;}
   .nota-input:focus{border-color:#45edee;}
+  .nota-ia-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .5rem;background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.25);border-radius:.5rem;color:#c6bfff;font-size:.7rem;font-weight:700;}
+  .comentario-comp{width:100%;background:#10131a;border:1px solid rgba(71,69,84,.3);border-radius:.5rem;padding:.5rem .65rem;color:#e1e2eb;font-size:.78rem;font-family:inherit;outline:none;resize:vertical;min-height:2.5rem;box-sizing:border-box;}
+  .comentario-comp:focus{border-color:#45edee;}
   #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(5rem);background:#272a31;border:1px solid rgba(255,255,255,.1);color:#e1e2eb;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:300;transition:transform .3s;pointer-events:none;}
   #toast.show{transform:translateX(-50%) translateY(0);}
-  @keyframes typing{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
-  .dot{width:6px;height:6px;background:#45edee;border-radius:50%;animation:typing 1.2s infinite;display:inline-block;margin:0 2px;}
-  .dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
   .status-badge{display:inline-flex;align-items:center;padding:.2rem .6rem;border-radius:9999px;font-size:.7rem;font-weight:700;}
-  .status-pendente{background:rgba(250,189,0,.1);color:#fabd00;border:1px solid rgba(250,189,0,.2);}
-  .status-corrigida{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
+  .status-enviada{background:rgba(250,189,0,.1);color:#fabd00;border:1px solid rgba(250,189,0,.2);}
+  .status-corrigida{background:rgba(69,237,238,.1);color:#45edee;border:1px solid rgba(69,237,238,.2);}
+  .status-revisada{background:rgba(108,92,231,.15);color:#c6bfff;border:1px solid rgba(108,92,231,.3);}
+  .skeleton{background:linear-gradient(90deg,#1d2026 0%,#272a31 50%,#1d2026 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.5rem;}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 <script src="supabase-auth.js"></script>
 </head>
@@ -56,7 +60,6 @@
   <div style="display:flex;align-items:baseline;padding:.5rem .5rem 2rem;font-style:italic;">
     <span style="font-size:1.75rem;font-weight:900;color:white;letter-spacing:-.05em;">Reda</span>
     <span style="font-size:1.75rem;font-weight:900;color:#45edee;letter-spacing:-.05em;">ON</span>
-    
   </div>
   <nav style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.25rem;">
     <div class="nav-section-label">Portal</div>
@@ -84,38 +87,33 @@
 
 <div id="main-content" style="min-height:100vh;display:flex;flex-direction:column;">
   <header style="position:sticky;top:0;z-index:40;background:rgba(11,14,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(71,69,84,.15);">
-    <!-- Linha 1: título -->
     <div style="height:3.5rem;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;">
       <div style="display:flex;align-items:center;gap:.75rem;">
         <button id="btnHamburger" onclick="toggleSidebar()" style="padding:.5rem;border-radius:.5rem;background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">menu</span></button>
         <span class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;">edit_note</span>
         <h2 style="font-size:1rem;font-weight:800;">Redações dos Alunos</h2>
       </div>
-<button onclick="irModoAluno()" style="display:flex;align-items:center;gap:.375rem;padding:.4rem .875rem;background:rgba(71,69,84,.15);border:1px solid rgba(71,69,84,.3);border-radius:.75rem;color:#928ea0;font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;" onmouseover="this.style.color='#e1e2eb';this.style.borderColor='rgba(71,69,84,.5)'" onmouseout="this.style.color='#928ea0';this.style.borderColor='rgba(71,69,84,.3)'">
+      <button onclick="irModoAluno()" style="display:flex;align-items:center;gap:.375rem;padding:.4rem .875rem;background:rgba(71,69,84,.15);border:1px solid rgba(71,69,84,.3);border-radius:.75rem;color:#928ea0;font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;" onmouseover="this.style.color='#e1e2eb';this.style.borderColor='rgba(71,69,84,.5)'" onmouseout="this.style.color='#928ea0';this.style.borderColor='rgba(71,69,84,.3)'">
         <span class="material-symbols-outlined" style="font-size:.9rem;">open_in_new</span>
         Ver como aluno
       </button>
     </div>
-    <!-- Linha 2: filtros com scroll horizontal -->
     <div style="display:flex;gap:.5rem;padding:.5rem 1rem .625rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
-      <select id="selEscola" class="filtro-select" style="flex-shrink:0;" onchange="onEscolaChange()">
-        <option value="">Todas as Escolas</option>
-      </select>
       <select id="selTurma" class="filtro-select" style="flex-shrink:0;" onchange="renderLista()">
         <option value="">Todas as Turmas</option>
       </select>
       <select id="selStatus" class="filtro-select" style="flex-shrink:0;" onchange="renderLista()">
         <option value="">Todos os Status</option>
-        <option value="pendente">Pendentes</option>
+        <option value="enviada">Pendentes</option>
         <option value="corrigida">Corrigidas</option>
+        <option value="revisada">Revisadas</option>
       </select>
     </div>
   </header>
 
-  <div id="gridPrincipal" style="flex:1;display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 6.5rem);">
-  <style>@media(max-width:768px){#gridPrincipal{grid-template-columns:1fr!important;}#painelDetalhe{display:none!important;}#painelDetalhe.mobile-open{display:flex!important;}}</style>
+  <div id="gridPrincipal" style="flex:1;display:grid;grid-template-columns:340px 1fr;height:calc(100vh - 6.5rem);">
+    <style>@media(max-width:768px){#gridPrincipal{grid-template-columns:1fr!important;}#painelDetalhe{display:none!important;}#painelDetalhe.mobile-open{display:flex!important;}}</style>
 
-    <!-- Lista -->
     <div style="border-right:1px solid rgba(71,69,84,.15);display:flex;flex-direction:column;overflow:hidden;">
       <div style="padding:.875rem;border-bottom:1px solid rgba(71,69,84,.15);">
         <input type="text" id="busca" placeholder="Buscar aluno ou tema..." oninput="renderLista()" style="width:100%;background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:.75rem;padding:.6rem .875rem;color:#e1e2eb;font-size:.8rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(71,69,84,.3)'"/>
@@ -123,7 +121,6 @@
       <div id="listaRedacoes" class="scroll-fino" style="overflow-y:auto;flex:1;padding:.75rem;display:flex;flex-direction:column;gap:.5rem;"></div>
     </div>
 
-    <!-- Detalhe -->
     <div id="painelDetalhe" class="scroll-fino" style="overflow-y:auto;padding:1.5rem;display:flex;align-items:center;justify-content:center;">
       <div style="text-align:center;color:#474554;">
         <span class="material-symbols-outlined" style="font-size:3.5rem;margin-bottom:.75rem;display:block;">edit_note</span>
@@ -134,241 +131,9 @@
   </div>
 </div>
 
-<script type="module">
-import { GoogleGenerativeAI } from "https://cdn.skypack.dev/@google/generative-ai";
-const genAI = new GoogleGenerativeAI("AIzaSyAj9B5qLu6r14dkZbrsNHWYNb9oUadamMU");
-
-document.getElementById('nomeProf').textContent = authGetNome();
-
-const DADOS = JSON.parse(localStorage.getItem('prof_dados') || '{"escolas":[{"id":1,"nome":"E.E. Rui Barbosa","turmas":[{"id":1,"nome":"3\u00ba A \u2014 Manh\u00e3","disciplina":"Reda\u00e7\u00e3o","alunos":38,"aulas_semana":2}]},{"id":2,"nome":"E.M. Jo\u00e3o Pessoa","turmas":[{"id":4,"nome":"3\u00ba A \u2014 Noite","disciplina":"Reda\u00e7\u00e3o","alunos":32,"aulas_semana":2}]}]}');
-
-// Redações simuladas
-const REDACOES = [
-  {id:1,aluno:'Ana Souza',escola:1,turma:1,tema:'Violência doméstica no Brasil',data:'28/03/2025',status:'pendente',texto:'A violência doméstica constitui um dos maiores problemas sociais da contemporaneidade brasileira. Dados do Instituto de Segurança Pública revelam que, apenas em 2023, mais de 230 mil casos foram registrados oficialmente no país, número que não reflete a realidade, dado o alto índice de subnotificação...\n\nEssa situação decorre, em primeira análise, da cultura patriarcal enraizada na sociedade. Conforme apontou a filósofa Simone de Beauvoir em "O Segundo Sexo", a mulher é historicamente construída como subalterna ao homem, o que legitima, no imaginário coletivo, práticas de controle e dominação...\n\nPortanto, para enfrentar esse problema, o Estado deve ampliar as delegacias especializadas, especialmente em municípios de pequeno porte, e investir em campanhas educativas nas escolas desde o ensino fundamental, formando cidadãos comprometidos com a igualdade de gênero.'},
-  {id:2,aluno:'Carlos Lima',escola:1,turma:1,tema:'Desigualdade racial no mercado de trabalho',data:'27/03/2025',status:'pendente',texto:'O Brasil, apesar de ser considerado um dos países mais diversos do mundo, ainda convive com profundas desigualdades raciais, sobretudo no mercado de trabalho. Segundo pesquisa do IBGE de 2022, trabalhadores negros recebem, em média, 40% a menos que trabalhadores brancos para a mesma função...\n\nEssa disparidade tem raízes históricas. A escravidão, abolida formalmente em 1888 pela Lei Áurea, não foi acompanhada de políticas de inserção social para os recém-libertos, gerando um ciclo de pobreza e exclusão que persiste até hoje...\n\nAssim, é fundamental que o poder público ampliem as políticas de cotas no setor privado e incentivem programas de mentoria para jovens negros, garantindo acesso igualitário às oportunidades de desenvolvimento profissional.'},
-  {id:3,aluno:'Beatriz Santos',escola:1,turma:2,tema:'Saúde mental na era digital',data:'26/03/2025',status:'corrigida',nota:880,texto:'A popularização das redes sociais transformou profundamente as relações humanas, trazendo, junto com seus benefícios, sérios riscos à saúde mental, especialmente entre jovens. Dados da OMS apontam que transtornos de ansiedade e depressão cresceram 25% nos últimos cinco anos...\n\nO filósofo Byung-Chul Han, em "Sociedade do Cansaço", analisa como a cultura do desempenho exacerbado e a exposição constante nas redes sociais geram um esgotamento psíquico sem precedentes. O indivíduo torna-se simultaneamente explorador e explorado, em uma dinâmica que alimenta a insatisfação crônica...\n\nDiante disso, cabe ao Ministério da Saúde, em parceria com o Ministério da Educação, incluir a educação digital e o letramento emocional nos currículos escolares, além de ampliar o acesso ao acompanhamento psicológico pelo SUS.'},
-  {id:4,aluno:'Fernanda Costa',escola:2,turma:4,tema:'Crise hídrica e sustentabilidade',data:'25/03/2025',status:'pendente',texto:'A crise hídrica que assola diversas regiões brasileiras evidencia a urgência de uma reflexão profunda sobre os modelos de consumo e gestão dos recursos naturais. Segundo a Agência Nacional de Águas, cerca de 30% dos municípios brasileiros enfrentam situação de escassez hídrica severa...\n\nEssa crise é, em grande medida, resultado da ação humana sobre o meio ambiente. O desmatamento acelerado, especialmente na Amazônia e no Cerrado, compromete o chamado "rio voador", ciclo de chuvas que abastece boa parte do território nacional, conforme estudos do pesquisador Antonio Nobre...\n\nPara reverter esse cenário, é necessário que o governo federal reforce a fiscalização ambiental e promova incentivos financeiros para agricultores que adotam práticas sustentáveis, garantindo a preservação das bacias hidrográficas.'},
-  {id:5,aluno:'Rafael Mendes',escola:1,turma:1,tema:'Educação a distância no Brasil',data:'24/03/2025',status:'corrigida',nota:720,texto:'A educação a distância cresceu exponencialmente no Brasil, acelerada pela pandemia de Covid-19. No entanto, apesar de democratizar o acesso ao ensino superior, ela ainda enfrenta desafios estruturais que comprometem sua qualidade...\n\nUm dos principais problemas é a exclusão digital: segundo o IBGE, 20% dos domicílios brasileiros não possuem acesso à internet, o que inviabiliza a participação de parcelas significativas da população nos cursos online...\n\nPortanto, o Estado deve investir em infraestrutura de conectividade nas regiões mais carentes e estabelecer padrões mínimos de qualidade para os cursos EAD, assegurando que a modalidade cumpra seu papel democratizador sem abrir mão da excelência pedagógica.'},
-];
-
-// Preencher escolas
-const selEscola = document.getElementById('selEscola');
-DADOS.escolas.forEach(e => {
-  const o = document.createElement('option');
-  o.value = e.id; o.textContent = e.nome;
-  selEscola.appendChild(o);
-});
-
-window.onEscolaChange = function() {
-  const selTurma = document.getElementById('selTurma');
-  selTurma.innerHTML = '<option value="">Todas as Turmas</option>';
-  const escolaId = parseInt(selEscola.value);
-  if (escolaId) {
-    const escola = DADOS.escolas.find(e => e.id === escolaId);
-    escola.turmas.forEach(t => {
-      const o = document.createElement('option');
-      o.value = t.id; o.textContent = t.nome + ' (' + t.disciplina + ')';
-      selTurma.appendChild(o);
-    });
-  }
-  renderLista();
-};
-
-let redacaoAtiva = null;
-
-window.renderLista = function() {
-  const busca = document.getElementById('busca').value.toLowerCase();
-  const escolaId = parseInt(selEscola.value) || null;
-  const turmaId = parseInt(document.getElementById('selTurma').value) || null;
-  const status = document.getElementById('selStatus').value;
-
-  const filtradas = REDACOES.filter(r =>
-    (!escolaId || r.escola === escolaId) &&
-    (!turmaId || r.turma === turmaId) &&
-    (!status || r.status === status) &&
-    (!busca || r.aluno.toLowerCase().includes(busca) || r.tema.toLowerCase().includes(busca))
-  );
-
-  const lista = document.getElementById('listaRedacoes');
-  if (!filtradas.length) {
-    lista.innerHTML = '<p style="color:#474554;font-size:.85rem;text-align:center;padding:2rem;">Nenhuma redação encontrada.</p>';
-    return;
-  }
-
-  lista.innerHTML = '';
-  filtradas.forEach(r => {
-    const escola = DADOS.escolas.find(e => e.id === r.escola);
-    const turma = escola?.turmas.find(t => t.id === r.turma);
-    const el = document.createElement('div');
-    el.className = 'redacao-item' + (redacaoAtiva?.id === r.id ? ' selecionada' : '');
-    el.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.4rem;">' +
-        '<p style="font-size:.85rem;font-weight:700;color:#e1e2eb;">' + r.aluno + '</p>' +
-        '<span class="status-badge status-' + r.status + '">' + (r.status === 'pendente' ? 'Pendente' : 'Corrigida') + '</span>' +
-      '</div>' +
-      '<p style="font-size:.75rem;color:#928ea0;margin-bottom:.35rem;">' + r.tema + '</p>' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-        '<p style="font-size:.7rem;color:#474554;">' + (turma?.nome || '') + '</p>' +
-        (r.nota ? '<span style="font-size:.875rem;font-weight:900;color:#4ade80;">' + r.nota + '</span>' : '') +
-      '</div>';
-    el.onclick = () => abrirRedacao(r);
-    lista.appendChild(el);
-  });
-};
-
-window.abrirRedacao = function(r) {
-  redacaoAtiva = r;
-  renderLista();
-  const escola = DADOS.escolas.find(e => e.id === r.escola);
-  const turma = escola?.turmas.find(t => t.id === r.turma);
-  const painel = document.getElementById('painelDetalhe');
-
-  painel.innerHTML =
-    '<div style="max-width:800px;width:100%;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem;">' +
-        '<div>' +
-          '<h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.25rem;">' + r.aluno + '</h2>' +
-          '<p style="font-size:.8rem;color:#928ea0;">' + escola?.nome + ' · ' + turma?.nome + ' · ' + r.data + '</p>' +
-          '<p style="font-size:.8rem;color:#c8c4d7;font-weight:600;margin-top:.25rem;">' + r.tema + '</p>' +
-        '</div>' +
-        '<span class="status-badge status-' + r.status + '" style="font-size:.8rem;padding:.3rem .75rem;">' + (r.status === 'pendente' ? '⏳ Pendente' : '✅ Corrigida') + '</span>' +
-      '</div>' +
-      '<div style="display:flex;gap:.5rem;margin-bottom:1rem;">' +
-        '<button class="aba-btn ativo" id="abaTexto" onclick="trocarAba(\'texto\')">Texto Original</button>' +
-        '<button class="aba-btn" id="abaIA" onclick="trocarAba(\'ia\')">Análise da IA</button>' +
-        '<button class="aba-btn" id="abaNota" onclick="trocarAba(\'nota\')">Dar Nota</button>' +
-      '</div>' +
-      '<div id="conteudoAba" style="background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;padding:1.25rem;min-height:400px;">' +
-        '<div id="abaTextoContent"><p style="font-size:.875rem;line-height:1.8;color:#c8c4d7;white-space:pre-line;">' + r.texto + '</p></div>' +
-        '<div id="abaIAContent" style="display:none;">' +
-          '<button onclick="gerarAnaliseIA()" style="padding:.7rem 1.5rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;font-weight:900;border:none;border-radius:.75rem;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;">' +
-            '<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:\'FILL\' 1;">bolt</span>Analisar com IA' +
-          '</button>' +
-          '<div id="analiseIAResultado"></div>' +
-        '</div>' +
-        '<div id="abaNota Content" style="display:none;" id="abaNotaContent">' +
-          renderFormNota(r) +
-        '</div>' +
-      '</div>' +
-    '</div>';
-};
-
-function renderFormNota(r) {
-  const comp = ['C1 — Domínio da língua','C2 — Compreensão da proposta','C3 — Argumentação','C4 — Coesão','C5 — Proposta de intervenção'];
-  const vals = r.notasComp || [0,0,0,0,0];
-  let html = '<div id="abaNotaContent2">';
-  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">';
-  html += '<h3 style="font-size:.9rem;font-weight:700;color:#e1e2eb;">Notas por Competência (0–200)</h3>';
-  html += '<button onclick="sugerirNotasIA()" style="padding:.5rem 1rem;background:rgba(108,92,231,.2);border:1px solid rgba(108,92,231,.4);border-radius:.625rem;color:#c6bfff;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.3rem;">';
-  html += '<span class="material-symbols-outlined" style="font-size:.9rem;font-variation-settings:\'FILL\' 1;">bolt</span>IA Sugerir Notas</button></div>';
-  comp.forEach((c,i) => {
-    html += '<div class="competencia-row"><div style="flex:1;font-size:.8rem;color:#c8c4d7;">' + c + '</div>';
-    html += '<input class="nota-input" id="nota_c' + (i+1) + '" type="number" min="0" max="200" step="40" value="' + vals[i] + '" oninput="calcularTotal()"/></div>';
-  });
-  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(71,69,84,.2);">';
-  html += '<span style="font-size:.9rem;font-weight:700;color:#e1e2eb;">Total ENEM</span>';
-  html += '<span id="totalNota" style="font-size:1.5rem;font-weight:900;color:#45edee;">' + (r.nota || '—') + '</span></div>';
-  html += '<div id="sugestaoIANotas" style="margin-top:.75rem;display:none;background:rgba(108,92,231,.08);border:1px solid rgba(108,92,231,.2);border-radius:.75rem;padding:.875rem;font-size:.8rem;color:#c8c4d7;"></div>';
-  html += '<div style="display:flex;gap:.75rem;margin-top:1rem;">';
-  html += '<button onclick="salvarNota()" style="flex:1;padding:.7rem;background:#45edee;color:#002020;font-weight:900;border:none;border-radius:.75rem;font-size:.85rem;cursor:pointer;">Salvar Nota</button>';
-  html += '<button onclick="enviarFeedback()" style="flex:1;padding:.7rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);border-radius:.75rem;color:#c8c4d7;font-size:.85rem;cursor:pointer;">Enviar Feedback ao Aluno</button>';
-  html += '</div></div>';
-  return html;
-}
-
-window.trocarAba = function(aba) {
-  ['texto','ia','nota'].forEach(a => {
-    const btn = document.getElementById('aba' + a.charAt(0).toUpperCase() + a.slice(1));
-    const content = document.getElementById('aba' + a.charAt(0).toUpperCase() + a.slice(1) + 'Content') || document.getElementById('abaNotaContent2');
-    if (btn) btn.classList.toggle('ativo', a === aba);
-    if (content) content.style.display = a === aba ? 'block' : 'none';
-  });
-  document.getElementById('abaTextoContent').style.display = aba === 'texto' ? 'block' : 'none';
-  document.getElementById('abaIAContent').style.display = aba === 'ia' ? 'block' : 'none';
-  const notaEl = document.getElementById('abaNotaContent2');
-  if (notaEl) notaEl.style.display = aba === 'nota' ? 'block' : 'none';
-};
-
-window.calcularTotal = function() {
-  let total = 0;
-  for (let i = 1; i <= 5; i++) {
-    const v = parseInt(document.getElementById('nota_c' + i)?.value) || 0;
-    total += v;
-  }
-  const el = document.getElementById('totalNota');
-  if (el) {
-    el.textContent = total;
-    el.style.color = total >= 800 ? '#4ade80' : total >= 600 ? '#fabd00' : '#ffb4ab';
-  }
-};
-
-window.sugerirNotasIA = async function() {
-  if (!redacaoAtiva) return;
-  const sugestaoDiv = document.getElementById('sugestaoIANotas');
-  sugestaoDiv.style.display = 'block';
-  sugestaoDiv.innerHTML = '<div style="display:flex;align-items:center;gap:.5rem;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;margin-left:.5rem;">IA analisando redação...</span></div>';
-
-  try {
-    const model = genAI.getGenerativeModel({model:'gemini-2.0-flash'});
-    const prompt = 'Você é um avaliador ENEM. Analise esta redação e sugira notas (0, 40, 80, 120, 160 ou 200) para cada competência. Responda APENAS em JSON: {"c1":X,"c2":X,"c3":X,"c4":X,"c5":X,"justificativa":"breve texto"}\n\nRedação:\n' + redacaoAtiva.texto;
-    const result = await model.generateContent(prompt);
-    let txt = result.response.text().replace(/```json|```/g,'').trim();
-    const json = JSON.parse(txt);
-    for (let i = 1; i <= 5; i++) {
-      const el = document.getElementById('nota_c' + i);
-      if (el) el.value = json['c' + i] || 0;
-    }
-    calcularTotal();
-    sugestaoDiv.innerHTML = '<strong style="color:#c6bfff;">💡 Sugestão da IA:</strong> ' + (json.justificativa || 'Notas sugeridas com base nos critérios ENEM.');
-    toast('✓ Notas sugeridas pela IA!');
-  } catch(e) {
-    sugestaoDiv.innerHTML = '<span style="color:#ffb4ab;">Erro ao conectar com a IA. Disponível apenas online.</span>';
-  }
-};
-
-window.gerarAnaliseIA = async function() {
-  if (!redacaoAtiva) return;
-  const div = document.getElementById('analiseIAResultado');
-  div.innerHTML = '<div style="display:flex;gap:4px;align-items:center;padding:1rem;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;margin-left:.5rem;">Analisando redação...</span></div>';
-  try {
-    const model = genAI.getGenerativeModel({model:'gemini-2.0-flash'});
-    const prompt = 'Analise esta redação no contexto do ENEM. Para cada uma das 5 competências, aponte os pontos positivos e o que pode melhorar. Use linguagem clara e didática. Redação:\n\n' + redacaoAtiva.texto;
-    const result = await model.generateContent(prompt);
-    div.innerHTML = result.response.text()
-      .replace(/\*\*(.*?)\*\*/g,'<strong style="color:#e1e2eb;">$1</strong>')
-      .replace(/^### (.*)/gm,'<p style="font-size:.875rem;font-weight:700;color:#45edee;margin:.75rem 0 .25rem;">$1</p>')
-      .replace(/^## (.*)/gm,'<p style="font-size:1rem;font-weight:700;color:#e1e2eb;margin:.875rem 0 .3rem;">$1</p>')
-      .replace(/^[-•] (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0;">• $1</p>')
-      .replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');
-  } catch(e) {
-    div.innerHTML = '<p style="color:#ffb4ab;">Erro ao analisar. Disponível apenas online.</p>';
-  }
-};
-
-window.salvarNota = function() {
-  if (!redacaoAtiva) return;
-  let total = 0;
-  for (let i = 1; i <= 5; i++) total += parseInt(document.getElementById('nota_c' + i)?.value) || 0;
-  redacaoAtiva.nota = total;
-  redacaoAtiva.status = 'corrigida';
-  const idx = REDACOES.findIndex(r => r.id === redacaoAtiva.id);
-  if (idx >= 0) { REDACOES[idx].nota = total; REDACOES[idx].status = 'corrigida'; }
-  renderLista();
-  toast('✓ Nota ' + total + ' salva!');
-};
-
-window.enviarFeedback = function() {
-  if (!redacaoAtiva) return;
-  toast('✓ Feedback enviado para ' + redacaoAtiva.aluno + '!');
-};
-
-function toast(msg,dur=3000){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),dur);}
-
-renderLista();
-</script>
 <script>
+  authGuard('professor');
 
-  // Logout universal
   window.authLogout = window.authLogout || function() {
     if (confirm('Deseja sair da sua conta?')) {
       localStorage.clear();
@@ -376,10 +141,461 @@ renderLista();
     }
   };
   window.sair = window.authLogout;
-  authGuard('professor');
 
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
-function irModoAluno(){if(confirm('Abrir o RedaON como aluno em uma nova aba?')){localStorage.setItem('modo_professor_ativo','1');window.open('inicio.html','_blank');}}
+  // ─── Estado em memória ───
+  let todasRedacoes = [];
+  let todasTurmas   = [];
+  let redacaoAtiva  = null;
+  let revisaoAtiva  = null;
+
+  // ─── Helpers ───
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function tempoRelativo(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const diff = Date.now() - d.getTime();
+    const min = Math.floor(diff / 60000);
+    if (min < 1)  return 'agora';
+    if (min < 60) return 'há ' + min + 'min';
+    const h = Math.floor(min / 60);
+    if (h < 24)   return 'há ' + h + 'h';
+    const dias = Math.floor(h / 24);
+    if (dias < 7) return 'há ' + dias + 'd';
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  function corDaNota(n) {
+    if (typeof n !== 'number') return '#928ea0';
+    if (n >= 800) return '#4ade80';
+    if (n >= 600) return '#fabd00';
+    if (n >= 400) return '#ff9d68';
+    return '#ffb4ab';
+  }
+
+  function labelStatus(s) {
+    if (s === 'enviada')   return 'Pendente';
+    if (s === 'corrigida') return 'Corrigida';
+    if (s === 'revisada')  return 'Revisada';
+    return s || '-';
+  }
+
+  function nomeAluno(r) {
+    return (r.usuarios && r.usuarios.nome) || 'Aluno';
+  }
+
+  function nomeTema(r) {
+    if (r.tema_livre) return r.tema_livre;
+    if (r.tema_id)    return 'Tema atribuído';
+    return 'Sem tema';
+  }
+
+  function turmaNomeFromId(turmaId) {
+    const t = todasTurmas.find(x => x.id === turmaId);
+    if (!t) return '';
+    const escola = t.escolas && t.escolas.nome;
+    return escola ? escola + ' · ' + t.nome : t.nome;
+  }
+
+  function toast(msg, dur) {
+    dur = dur || 3000;
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); }, dur);
+  }
+
+  // ─── Inicialização ───
+  document.getElementById('nomeProf').textContent = authGetNome();
+
+  async function inicializar() {
+    mostrarSkeletonsLista();
+    try {
+      const [redacoes, turmas] = await Promise.all([
+        dbGetRedacoesDoProfessor({ limit: 200 }),
+        dbGetTurmasDoProfessor()
+      ]);
+      todasRedacoes = Array.isArray(redacoes) ? redacoes : [];
+      todasTurmas   = Array.isArray(turmas)   ? turmas   : [];
+
+      popularSelectTurmas();
+      renderLista();
+
+      // Se a URL tem ?id=XXX, abre direto a redação
+      const params = new URLSearchParams(window.location.search);
+      const idAlvo = params.get('id');
+      if (idAlvo) {
+        const alvo = todasRedacoes.find(r => r.id === idAlvo);
+        if (alvo) abrirRedacao(alvo);
+      }
+    } catch (e) {
+      console.error('Erro ao carregar dados:', e);
+      toast('Não foi possível carregar as redações. Recarregue a página.', 5000);
+      document.getElementById('listaRedacoes').innerHTML =
+        '<div style="padding:1.5rem;text-align:center;color:#ffb4ab;font-size:.8rem;">' +
+        '<span class="material-symbols-outlined" style="font-size:1.5rem;display:block;margin-bottom:.4rem;">error</span>' +
+        'Erro ao carregar</div>';
+    }
+  }
+
+  function mostrarSkeletonsLista() {
+    const lista = document.getElementById('listaRedacoes');
+    let html = '';
+    for (let i = 0; i < 4; i++) {
+      html += '<div class="skeleton" style="height:5rem;"></div>';
+    }
+    lista.innerHTML = html;
+  }
+
+  function popularSelectTurmas() {
+    const sel = document.getElementById('selTurma');
+    const opcoes = todasTurmas.map(function(t) {
+      const escolaPrefix = (t.escolas && t.escolas.nome) ? (t.escolas.nome + ' · ') : '';
+      return '<option value="' + t.id + '">' + escapeHtml(escolaPrefix + t.nome) + '</option>';
+    }).join('');
+    sel.innerHTML = '<option value="">Todas as Turmas</option>' + opcoes;
+  }
+
+  // ─── Lista ───
+  window.renderLista = function() {
+    const busca   = document.getElementById('busca').value.toLowerCase().trim();
+    const turmaId = document.getElementById('selTurma').value;
+    const status  = document.getElementById('selStatus').value;
+
+    const filtradas = todasRedacoes.filter(function(r) {
+      if (turmaId && r.turma_id !== turmaId) return false;
+      if (status  && r.status   !== status)  return false;
+      if (busca) {
+        const aluno = nomeAluno(r).toLowerCase();
+        const tema  = nomeTema(r).toLowerCase();
+        if (aluno.indexOf(busca) === -1 && tema.indexOf(busca) === -1) return false;
+      }
+      return true;
+    });
+
+    const lista = document.getElementById('listaRedacoes');
+
+    if (filtradas.length === 0) {
+      lista.innerHTML =
+        '<div style="padding:2rem 1rem;text-align:center;color:#928ea0;font-size:.8rem;">' +
+        '<span class="material-symbols-outlined" style="font-size:2rem;color:#474554;display:block;margin-bottom:.5rem;">inbox</span>' +
+        'Nenhuma redação encontrada</div>';
+      return;
+    }
+
+    lista.innerHTML = filtradas.map(function(r) {
+      const selec = redacaoAtiva && redacaoAtiva.id === r.id ? ' selecionada' : '';
+      const stat  = r.status || 'enviada';
+      const nome  = nomeAluno(r);
+      const tema  = nomeTema(r);
+      const turma = turmaNomeFromId(r.turma_id);
+      const nota  = r.nota_final;
+      const exibeNota = (stat === 'corrigida' || stat === 'revisada') && typeof nota === 'number';
+
+      return (
+        '<div class="redacao-item' + selec + '" onclick="abrirRedacaoPorId(\'' + r.id + '\')">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.4rem;">' +
+            '<p style="font-size:.85rem;font-weight:700;color:#e1e2eb;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(nome) + '</p>' +
+            '<span class="status-badge status-' + stat + '">' + labelStatus(stat) + '</span>' +
+          '</div>' +
+          '<p style="font-size:.75rem;color:#928ea0;margin-bottom:.35rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(tema) + '</p>' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;">' +
+            '<p style="font-size:.7rem;color:#474554;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;">' + escapeHtml(turma) + ' · ' + tempoRelativo(r.created_at) + '</p>' +
+            (exibeNota ? '<span style="font-size:.875rem;font-weight:900;color:' + corDaNota(nota) + ';flex-shrink:0;">' + nota + '</span>' : '') +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  };
+
+  window.abrirRedacaoPorId = function(id) {
+    const r = todasRedacoes.find(function(x) { return x.id === id; });
+    if (r) abrirRedacao(r);
+  };
+
+  // ─── Painel direito ───
+  window.abrirRedacao = function(r) {
+    redacaoAtiva = r;
+    revisaoAtiva = null;
+    renderLista();
+
+    const correcao = (Array.isArray(r.correcoes) && r.correcoes.length > 0) ? r.correcoes[0] : null;
+    if (correcao && correcao.revisao_professor) {
+      revisaoAtiva = correcao.revisao_professor;
+    }
+
+    renderizarPainelDetalhe(r, correcao);
+  };
+
+  function renderizarPainelDetalhe(r, correcao) {
+    const painel = document.getElementById('painelDetalhe');
+    painel.style.alignItems = 'flex-start';
+    painel.style.justifyContent = 'flex-start';
+
+    const stat   = r.status || 'enviada';
+    const nome   = nomeAluno(r);
+    const tema   = nomeTema(r);
+    const turma  = turmaNomeFromId(r.turma_id);
+
+    const headerHtml =
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.25rem;">' + escapeHtml(nome) + '</h2>' +
+          '<p style="font-size:.8rem;color:#928ea0;">' + escapeHtml(turma) + ' · enviada ' + tempoRelativo(r.created_at) + '</p>' +
+          '<p style="font-size:.85rem;color:#c8c4d7;font-weight:600;margin-top:.4rem;">' + escapeHtml(tema) + '</p>' +
+        '</div>' +
+        '<span class="status-badge status-' + stat + '" style="font-size:.75rem;padding:.3rem .75rem;flex-shrink:0;">' + labelStatus(stat) + '</span>' +
+      '</div>';
+
+    const bannerRevisao = revisaoAtiva ? (
+      '<div style="background:rgba(108,92,231,.08);border:1px solid rgba(108,92,231,.25);border-radius:.75rem;padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;">' +
+        '<span class="material-symbols-outlined" style="color:#c6bfff;font-size:1rem;font-variation-settings:\'FILL\' 1;">verified</span>' +
+        '<p style="font-size:.78rem;color:#c6bfff;">' +
+          'Revisada por você ' + tempoRelativo(revisaoAtiva.revisado_em) +
+          (revisaoAtiva.visivel_aluno === false ? ' · <strong>oculta para o aluno</strong>' : '') +
+        '</p>' +
+      '</div>'
+    ) : '';
+
+    painel.innerHTML =
+      '<div style="max-width:850px;width:100%;">' +
+        headerHtml +
+        bannerRevisao +
+        '<div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;">' +
+          '<button class="aba-btn ativo" id="abaTexto" onclick="trocarAba(\'texto\')">Texto da Redação</button>' +
+          '<button class="aba-btn" id="abaIA" onclick="trocarAba(\'ia\')">Análise da IA</button>' +
+          '<button class="aba-btn" id="abaRevisao" onclick="trocarAba(\'revisao\')">Revisar Correção</button>' +
+        '</div>' +
+        '<div style="background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;padding:1.25rem;min-height:400px;">' +
+          '<div id="abaTextoConteudo">' +
+            (r.texto
+              ? '<p style="font-size:.875rem;line-height:1.8;color:#c8c4d7;white-space:pre-line;">' + escapeHtml(r.texto) + '</p>'
+              : '<p style="color:#474554;font-size:.85rem;text-align:center;padding:2rem;">Texto da redação não disponível.</p>') +
+          '</div>' +
+          '<div id="abaIAConteudo" style="display:none;">' + renderAnaliseIA(correcao) + '</div>' +
+          '<div id="abaRevisaoConteudo" style="display:none;">' + renderFormRevisao(correcao) + '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderAnaliseIA(correcao) {
+    if (!correcao) {
+      return '<p style="color:#474554;font-size:.85rem;text-align:center;padding:2rem;">A IA ainda não corrigiu esta redação.</p>';
+    }
+    const total = ['c1','c2','c3','c4','c5'].reduce(function(s,k) { return s + (correcao[k] || 0); }, 0);
+
+    const cardsComp = ['c1','c2','c3','c4','c5'].map(function(k) {
+      return (
+        '<div style="text-align:center;padding:.625rem .25rem;background:#10131a;border-radius:.5rem;border:1px solid rgba(71,69,84,.2);">' +
+          '<p style="font-size:.65rem;color:#928ea0;font-weight:700;text-transform:uppercase;margin-bottom:.2rem;">' + k.toUpperCase() + '</p>' +
+          '<p style="font-size:1rem;font-weight:900;color:#45edee;">' + (correcao[k] || 0) + '</p>' +
+        '</div>'
+      );
+    }).join('');
+
+    return (
+      '<div style="margin-bottom:1.25rem;padding:.875rem 1rem;background:#10131a;border-radius:.75rem;border:1px solid rgba(69,237,238,.15);">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          '<span style="font-size:.78rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.05em;">Nota total da IA</span>' +
+          '<span style="font-size:1.4rem;font-weight:900;color:' + corDaNota(total) + ';">' + total + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin-bottom:1.25rem;">' + cardsComp + '</div>' +
+      '<h3 style="font-size:.85rem;font-weight:700;color:#e1e2eb;margin-bottom:.5rem;">Feedback da IA</h3>' +
+      '<div style="font-size:.85rem;line-height:1.7;color:#c8c4d7;white-space:pre-line;">' +
+        escapeHtml(correcao.feedback_geral || 'Sem feedback geral disponível.') +
+      '</div>'
+    );
+  }
+
+  function renderFormRevisao(correcao) {
+    if (!correcao) {
+      return '<p style="color:#474554;font-size:.85rem;text-align:center;padding:2rem;">Aguardando a IA corrigir antes da revisão.</p>';
+    }
+
+    const labels = {
+      c1: 'C1 — Domínio da norma culta',
+      c2: 'C2 — Compreensão do tema',
+      c3: 'C3 — Argumentação',
+      c4: 'C4 — Coesão e coerência',
+      c5: 'C5 — Proposta de intervenção'
+    };
+
+    const compsRev = (revisaoAtiva && revisaoAtiva.competencias) || {};
+    const visivelAluno = revisaoAtiva ? (revisaoAtiva.visivel_aluno !== false) : true;
+    const comentarioGeral = (revisaoAtiva && revisaoAtiva.comentario_geral) || '';
+
+    const linhasComp = ['c1','c2','c3','c4','c5'].map(function(k) {
+      const notaIa = correcao[k] || 0;
+      const notaProf = (compsRev[k] && typeof compsRev[k].nota === 'number') ? compsRev[k].nota : notaIa;
+      const coment = (compsRev[k] && compsRev[k].comentario) || '';
+
+      return (
+        '<div style="padding:.875rem 0;border-bottom:1px solid rgba(71,69,84,.1);">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.5rem;">' +
+            '<div style="flex:1;min-width:0;">' +
+              '<p style="font-size:.82rem;color:#e1e2eb;font-weight:600;margin-bottom:.15rem;">' + labels[k] + '</p>' +
+              '<p style="font-size:.7rem;color:#928ea0;">IA sugeriu <strong style="color:#c6bfff;">' + notaIa + '</strong></p>' +
+            '</div>' +
+            '<div style="text-align:center;flex-shrink:0;">' +
+              '<p style="font-size:.6rem;color:#474554;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem;">Sua nota</p>' +
+              '<input class="nota-input" id="rev_' + k + '" type="number" min="0" max="200" step="40" value="' + notaProf + '" oninput="atualizarTotalRevisao()"/>' +
+            '</div>' +
+          '</div>' +
+          '<textarea class="comentario-comp" id="com_' + k + '" placeholder="Comentário sobre ' + k.toUpperCase() + ' (opcional)" rows="2">' + escapeHtml(coment) + '</textarea>' +
+        '</div>'
+      );
+    }).join('');
+
+    const totalProf = ['c1','c2','c3','c4','c5'].reduce(function(s,k) {
+      const v = (compsRev[k] && typeof compsRev[k].nota === 'number') ? compsRev[k].nota : (correcao[k] || 0);
+      return s + v;
+    }, 0);
+
+    return (
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:.875rem;border-bottom:1px solid rgba(71,69,84,.2);">' +
+        '<div>' +
+          '<h3 style="font-size:.95rem;font-weight:800;color:#e1e2eb;margin-bottom:.15rem;">Revisão Pedagógica</h3>' +
+          '<p style="font-size:.75rem;color:#928ea0;">Ajuste as notas e comentários por competência</p>' +
+        '</div>' +
+        '<span class="nota-ia-pill">' +
+          '<span class="material-symbols-outlined" style="font-size:.85rem;font-variation-settings:\'FILL\' 1;">smart_toy</span>' +
+          'IA já corrigiu' +
+        '</span>' +
+      '</div>' +
+      '<div style="margin-bottom:1.25rem;">' + linhasComp + '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:.875rem 1rem;background:#10131a;border-radius:.75rem;border:1px solid rgba(69,237,238,.2);margin-bottom:1.25rem;">' +
+        '<span style="font-size:.85rem;font-weight:700;color:#e1e2eb;">Total da sua revisão</span>' +
+        '<span id="totalRevisao" style="font-size:1.5rem;font-weight:900;color:' + corDaNota(totalProf) + ';">' + totalProf + '</span>' +
+      '</div>' +
+      '<div style="margin-bottom:1.25rem;">' +
+        '<label style="display:block;font-size:.78rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">Comentário Geral da Professora</label>' +
+        '<textarea id="comentarioGeralProf" class="comentario-comp" rows="4" placeholder="Mensagem para o aluno: pontos fortes, pontos a melhorar, próximos passos...">' + escapeHtml(comentarioGeral) + '</textarea>' +
+      '</div>' +
+      '<div style="display:flex;align-items:flex-start;gap:.6rem;margin-bottom:1.25rem;padding:.75rem;background:#10131a;border-radius:.625rem;border:1px solid rgba(71,69,84,.2);">' +
+        '<input type="checkbox" id="visivelAluno" ' + (visivelAluno ? 'checked' : '') + ' style="width:1rem;height:1rem;accent-color:#45edee;cursor:pointer;margin-top:.15rem;"/>' +
+        '<label for="visivelAluno" style="font-size:.82rem;color:#c8c4d7;cursor:pointer;flex:1;">' +
+          'Visível para o aluno' +
+          '<span style="display:block;font-size:.7rem;color:#474554;margin-top:.15rem;">Quando marcado, o aluno verá sua revisão em "Minhas Redações"</span>' +
+        '</label>' +
+      '</div>' +
+      '<button onclick="salvarRevisao()" id="btnSalvarRevisao" style="width:100%;padding:.75rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#0b0e14;font-weight:800;border:none;border-radius:.75rem;font-size:.875rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.transform=\'translateY(0)\'">' +
+        (revisaoAtiva ? 'Atualizar revisão' : 'Salvar revisão') +
+      '</button>'
+    );
+  }
+
+  // ─── Tabs ───
+  window.trocarAba = function(aba) {
+    ['Texto', 'IA', 'Revisao'].forEach(function(a) {
+      const btn = document.getElementById('aba' + a);
+      const conteudo = document.getElementById('aba' + a + 'Conteudo');
+      const ativa = a.toLowerCase() === aba;
+      if (btn) btn.classList.toggle('ativo', ativa);
+      if (conteudo) conteudo.style.display = ativa ? 'block' : 'none';
+    });
+  };
+
+  window.atualizarTotalRevisao = function() {
+    let total = 0;
+    ['c1','c2','c3','c4','c5'].forEach(function(k) {
+      const v = parseInt(document.getElementById('rev_' + k) ? document.getElementById('rev_' + k).value : 0) || 0;
+      total += v;
+    });
+    const el = document.getElementById('totalRevisao');
+    if (el) {
+      el.textContent = total;
+      el.style.color = corDaNota(total);
+    }
+  };
+
+  // ─── Salvar revisão ───
+  window.salvarRevisao = async function() {
+    if (!redacaoAtiva) return;
+    const correcao = (Array.isArray(redacaoAtiva.correcoes) && redacaoAtiva.correcoes.length > 0)
+      ? redacaoAtiva.correcoes[0] : null;
+    if (!correcao) {
+      toast('Esta redação ainda não tem correção da IA.');
+      return;
+    }
+
+    const competencias = {};
+    let invalidos = 0;
+    ['c1','c2','c3','c4','c5'].forEach(function(k) {
+      const inp = document.getElementById('rev_' + k);
+      const com = document.getElementById('com_' + k);
+      const nota = parseInt(inp ? inp.value : NaN);
+      if (isNaN(nota) || nota < 0 || nota > 200) {
+        invalidos++;
+      } else {
+        competencias[k] = { nota: nota, comentario: (com ? com.value.trim() : '') };
+      }
+    });
+
+    if (invalidos > 0) {
+      toast('Verifique as notas: devem ser números entre 0 e 200.');
+      return;
+    }
+
+    const elComGeral = document.getElementById('comentarioGeralProf');
+    const elVisivel  = document.getElementById('visivelAluno');
+    const comentarioGeral = elComGeral ? elComGeral.value.trim() : '';
+    const visivelAluno    = elVisivel ? elVisivel.checked : true;
+
+    const btn = document.getElementById('btnSalvarRevisao');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    try {
+      const correcaoAtualizada = await dbSalvarRevisaoProfessor(correcao.id, {
+        competencias: competencias,
+        comentario_geral: comentarioGeral,
+        visivel_aluno: visivelAluno
+      });
+
+      revisaoAtiva = correcaoAtualizada.revisao_professor;
+
+      // Atualiza cache
+      const idx = todasRedacoes.findIndex(function(x) { return x.id === redacaoAtiva.id; });
+      if (idx >= 0 && todasRedacoes[idx].correcoes && todasRedacoes[idx].correcoes[0]) {
+        todasRedacoes[idx].correcoes[0].revisao_professor = revisaoAtiva;
+        todasRedacoes[idx].status = 'revisada';
+        if (redacaoAtiva) redacaoAtiva.status = 'revisada';
+      }
+
+      toast('✓ Revisão salva com sucesso!');
+      renderLista();
+      renderizarPainelDetalhe(redacaoAtiva, correcao);
+      trocarAba('revisao');
+    } catch (e) {
+      console.error('Erro ao salvar revisão:', e);
+      toast('Não foi possível salvar a revisão. Tente de novo.', 5000);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = revisaoAtiva ? 'Atualizar revisão' : 'Salvar revisão';
+    }
+  };
+
+  // ─── Utilitários ───
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+
+  function irModoAluno() {
+    if (confirm('Abrir o RedaON como aluno em uma nova aba?')) {
+      localStorage.setItem('modo_professor_ativo','1');
+      window.open('inicio.html','_blank');
+    }
+  }
+
+  // ─── Boot ───
+  inicializar();
 </script>
 </body>
 </html>
