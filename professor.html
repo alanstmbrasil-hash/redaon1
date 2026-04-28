@@ -45,6 +45,22 @@
   /* Cards de stat */
   .stat-card { background:#1d2026; border:1px solid rgba(71,69,84,0.2); border-radius:1rem; padding:1.25rem 1.5rem; }
 
+  /* Tabs de filtro de status */
+  .tab-status {
+    padding:.4rem .8rem; background:transparent; border:1px solid rgba(71,69,84,.4);
+    border-radius:99px; color:#928ea0; font-size:.72rem; font-weight:600; font-family:inherit;
+    cursor:pointer; white-space:nowrap; transition:all .15s; flex-shrink:0;
+  }
+  .tab-status:hover { color:#e1e2eb; border-color:rgba(71,69,84,.7); }
+  .tab-status.tab-ativa {
+    background:linear-gradient(135deg,#45edee 0%,#6c5ce7 100%);
+    border-color:transparent; color:#0b0e14; font-weight:700;
+  }
+
+  /* Select customizado */
+  #filtroTurma:hover { border-color:rgba(69,237,238,.4); }
+  #filtroTurma:focus { outline:none; border-color:#45edee; box-shadow:0 0 0 3px rgba(69,237,238,.15); }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width:5px; }
   ::-webkit-scrollbar-thumb { background:#32353c; border-radius:10px; }
@@ -279,6 +295,20 @@
           <h3 style="font-size:.875rem;font-weight:700;color:#e1e2eb;text-transform:uppercase;letter-spacing:.08em;">Últimas Entregas</h3>
           <a href="professor-redacoes.html" style="font-size:.75rem;color:#45edee;font-weight:600;text-decoration:none;">Ver todas</a>
         </div>
+
+        <!-- Filtro: dropdown de turma -->
+        <select id="filtroTurma" onchange="aplicarFiltros()" style="width:100%;padding:.5rem .75rem;background:#10131a;border:1px solid rgba(71,69,84,.3);border-radius:.5rem;color:#e1e2eb;font-size:.8rem;font-family:inherit;margin-bottom:.75rem;cursor:pointer;">
+          <option value="">Todas as turmas</option>
+        </select>
+
+        <!-- Filtro: tabs de status -->
+        <div id="filtroStatusTabs" style="display:flex;gap:.4rem;margin-bottom:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:.25rem;">
+          <button data-status="" class="tab-status tab-ativa" onclick="setStatusFiltro(this,'')">Todas (0)</button>
+          <button data-status="enviada" class="tab-status" onclick="setStatusFiltro(this,'enviada')">Pendentes (0)</button>
+          <button data-status="corrigida" class="tab-status" onclick="setStatusFiltro(this,'corrigida')">Corrigidas (0)</button>
+          <button data-status="revisada" class="tab-status" onclick="setStatusFiltro(this,'revisada')">Revisadas (0)</button>
+        </div>
+
         <div style="display:flex;flex-direction:column;gap:.625rem;" id="gridEntregas"></div>
       </div>
     </div>
@@ -477,6 +507,12 @@
   let escolaCriada = null;   // guarda escola entre passo 1 e passo 2
   let turmasDoProfessor = [];
 
+  // Estado dos filtros (3.3)
+  let todasRedacoes = [];     // cache de redações carregadas
+  let todosAlunos   = [];     // cache de alunos carregados
+  let filtroTurmaId = '';     // '' = todas
+  let filtroStatus  = '';     // '' = todos
+
   // ════════════════════════════════════════════════════════════════
   // CARREGAMENTO INICIAL — decide entre empty state e dashboard
   // ════════════════════════════════════════════════════════════════
@@ -533,9 +569,18 @@
         dbGetAlunosDoProfessor()
       ]);
 
-      atualizarStatsAlunos(alunos);
-      atualizarStatsRedacoes(redacoes);
-      renderizarUltimasEntregas(redacoes);
+      // Guarda em cache pra os filtros usarem
+      todasRedacoes = Array.isArray(redacoes) ? redacoes : [];
+      todosAlunos   = Array.isArray(alunos)   ? alunos   : [];
+
+      // Popula dropdown de turmas com as turmas reais do professor
+      popularFiltroTurmas();
+
+      // Atualiza contagens das tabs (independente do filtro atual)
+      atualizarContagensTabs();
+
+      // Aplica os filtros atuais (estado inicial: todos)
+      aplicarFiltros();
     } catch (e) {
       console.error('Erro ao carregar dados do dashboard:', e);
       toast('Não foi possível carregar todos os dados. Recarregue para tentar de novo.', 5000);
@@ -544,6 +589,93 @@
           <span class="material-symbols-outlined" style="font-size:1.5rem;display:block;margin-bottom:.4rem;">error</span>
           Erro ao carregar entregas
         </div>`;
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // FILTROS — sub-etapa 3.3
+  // ════════════════════════════════════════════════════════════════
+
+  function popularFiltroTurmas() {
+    const sel = document.getElementById('filtroTurma');
+    if (!sel) return;
+    // Preserva a opção atualmente selecionada
+    const atual = sel.value;
+    sel.innerHTML = '<option value="">Todas as turmas</option>'
+      + turmasDoProfessor.map(t =>
+          `<option value="${t.id}">${escapeHtml(t.nome)}${t.serie ? ' · '+escapeHtml(t.serie) : ''}</option>`
+        ).join('');
+    // Se a turma anteriormente selecionada ainda existe, mantém
+    if (atual && turmasDoProfessor.some(t => t.id === atual)) {
+      sel.value = atual;
+    }
+  }
+
+  function atualizarContagensTabs() {
+    // As tabs mostram contagem GLOBAL (não filtrada por turma)
+    // pra a professora ver "tenho 3 pendentes em qualquer turma"
+    const r = todasRedacoes;
+    const total      = r.length;
+    const pendentes  = r.filter(x => x.status === 'enviada').length;
+    const corrigidas = r.filter(x => x.status === 'corrigida').length;
+    const revisadas  = r.filter(x => x.status === 'revisada').length;
+
+    const tabs = document.querySelectorAll('.tab-status');
+    tabs.forEach(t => {
+      const stat = t.dataset.status;
+      let label, count;
+      if (stat === '')              { label = 'Todas';      count = total; }
+      else if (stat === 'enviada')  { label = 'Pendentes';  count = pendentes; }
+      else if (stat === 'corrigida'){ label = 'Corrigidas'; count = corrigidas; }
+      else if (stat === 'revisada') { label = 'Revisadas';  count = revisadas; }
+      t.textContent = `${label} (${count})`;
+    });
+  }
+
+  function setStatusFiltro(btn, status) {
+    filtroStatus = status;
+    document.querySelectorAll('.tab-status').forEach(t => t.classList.remove('tab-ativa'));
+    btn.classList.add('tab-ativa');
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros() {
+    // Lê o estado atual do dropdown de turma
+    const sel = document.getElementById('filtroTurma');
+    if (sel) filtroTurmaId = sel.value || '';
+
+    // Filtra redações em memória
+    const redacoesFiltradas = todasRedacoes.filter(r => {
+      if (filtroTurmaId && r.turma_id !== filtroTurmaId) return false;
+      if (filtroStatus  && r.status   !== filtroStatus)  return false;
+      return true;
+    });
+
+    // Filtra alunos pela turma (se aplicável)
+    const alunosFiltrados = filtroTurmaId
+      ? todosAlunos.filter(a => a.turmas && a.turmas.id === filtroTurmaId)
+      : todosAlunos;
+
+    // Atualiza stats e grid com os dados filtrados
+    atualizarStatsAlunos(alunosFiltrados);
+    atualizarStatsRedacoes(redacoesFiltradas);
+    renderizarUltimasEntregas(redacoesFiltradas);
+
+    // Atualiza descrição do card "Turmas" se filtrar por uma turma específica
+    atualizarDescricaoTurmas();
+  }
+
+  function atualizarDescricaoTurmas() {
+    const desc = document.getElementById('statTurmasDesc');
+    if (!desc) return;
+    if (filtroTurmaId) {
+      const t = turmasDoProfessor.find(x => x.id === filtroTurmaId);
+      desc.textContent = t ? `Filtro: ${t.nome}` : 'Filtro ativo';
+      desc.style.color = '#45edee';
+    } else {
+      const n = turmasDoProfessor.length;
+      desc.textContent = n === 1 ? 'Você tem 1 turma cadastrada' : `Você tem ${n} turmas cadastradas`;
+      desc.style.color = '#928ea0';
     }
   }
 
@@ -606,10 +738,18 @@
     const grid = document.getElementById('gridEntregas');
 
     if (!redacoes || redacoes.length === 0) {
+      const filtroAtivo = filtroTurmaId || filtroStatus;
+      const mensagem = filtroAtivo
+        ? 'Nenhuma entrega para esses filtros'
+        : 'Nenhuma entrega ainda';
+      const sub = filtroAtivo
+        ? '<p style="font-size:.7rem;color:#474554;margin-top:.4rem;">Tente ajustar os filtros acima</p>'
+        : '';
       grid.innerHTML = `
         <div style="padding:2rem 1rem;text-align:center;color:#928ea0;font-size:.8rem;">
           <span class="material-symbols-outlined" style="font-size:2rem;color:#474554;display:block;margin-bottom:.5rem;">inbox</span>
-          Nenhuma entrega ainda
+          ${mensagem}
+          ${sub}
         </div>`;
       return;
     }
