@@ -175,7 +175,7 @@
 
 <!-- Modal Por que Nota 1000 -->
 <div id="modalAnalise" onclick="if(event.target===this)fecharModal()">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:1rem;width:100%;max-width:42rem;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.5);">
+  <div style="background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:1rem;width:100%;max-width:50rem;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.5);">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;border-bottom:1px solid rgba(255,255,255,.05);">
       <h3 id="modalAnaliseTitle" style="font-weight:800;color:#e1e2eb;font-size:.875rem;"></h3>
       <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;display:flex;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'">
@@ -622,15 +622,46 @@
       { keys: ['melhoria_c5', 'por_que_elite_c5'], label: 'C5 — Intervenção',       cor: '#fa6e6e' }
     ];
     const temPorQue = porQueCompetencias.some(function(c) { return leCampo(c.keys); });
+
     if (temPorQue) {
-      window._porQueElite = porQueCompetencias.map(function(c) {
+      // Pega a nota original da redação ativa
+      const notaAtual = (redacaoAtiva && typeof redacaoAtiva.nota_final === 'number') ? redacaoAtiva.nota_final : null;
+      const corNotaAtual = corDaNota(notaAtual);
+
+      // Barra de nota no topo
+      let barraNota = '';
+      if (notaAtual !== null) {
+        barraNota =
+          '<div style="display:flex;align-items:center;justify-content:center;gap:1.25rem;padding:1rem 1.25rem;margin-bottom:1.25rem;background:linear-gradient(135deg,rgba(69,237,238,.06) 0%,rgba(74,222,128,.06) 100%);border:1px solid rgba(74,222,128,.2);border-radius:.875rem;">' +
+            '<div style="text-align:center;">' +
+              '<p style="font-size:.65rem;color:#928ea0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">Esta redação</p>' +
+              '<p style="font-size:1.75rem;font-weight:900;color:' + corNotaAtual + ';line-height:1;">' + notaAtual + '</p>' +
+            '</div>' +
+            '<span class="material-symbols-outlined" style="color:#928ea0;font-size:1.5rem;">arrow_forward</span>' +
+            '<div style="text-align:center;">' +
+              '<p style="font-size:.65rem;color:#928ea0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">Versão nota 1000</p>' +
+              '<p style="font-size:1.75rem;font-weight:900;color:#4ade80;line-height:1;">1000</p>' +
+            '</div>' +
+          '</div>';
+      }
+
+      // Texto introdutório
+      const introTexto =
+        '<p style="font-family:\'EB Garamond\',serif;font-size:1.05rem;line-height:1.65;color:#c8c4d7;margin-bottom:1.5rem;text-align:center;font-style:italic;">' +
+          'Veja como esta redação chegaria à nota 1000 — competência por competência:' +
+        '</p>';
+
+      // Blocos C1-C5 com Garamond e espaçamento respirável
+      const blocos = porQueCompetencias.map(function(c) {
         const texto = leCampo(c.keys);
         if (!texto) return '';
-        return '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid ' + c.cor + ';border-radius:0 8px 8px 0;">' +
-          '<p style="font-size:11px;font-weight:700;color:' + c.cor + ';margin-bottom:5px;">' + c.label + '</p>' +
-          '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;">' + escapeHtml(texto) + '</p>' +
+        return '<div style="margin-bottom:1.25rem;padding:1rem 1.25rem;background:#10131a;border-left:4px solid ' + c.cor + ';border-radius:0 .75rem .75rem 0;">' +
+          '<p style="font-family:\'Inter\',sans-serif;font-size:.78rem;font-weight:800;color:' + c.cor + ';text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem;">' + c.label + '</p>' +
+          '<p style="font-family:\'EB Garamond\',serif;font-size:1.1rem;line-height:1.75;color:#e1e2eb;">' + escapeHtml(texto) + '</p>' +
           '</div>';
       }).join('');
+
+      window._porQueElite = barraNota + introTexto + blocos;
     } else {
       window._porQueElite = '<p style="color:#928ea0;text-align:center;padding:2rem;">Análise por competência não disponível para esta redação.</p>';
     }
