@@ -7,6 +7,7 @@
 <script>tailwind = { config: {} };</script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <style>
   body{font-family:'Inter',sans-serif;background:#0b0e14;color:#e1e2eb;}
@@ -49,6 +50,47 @@
   .skeleton{background:linear-gradient(90deg,#1d2026 0%,#272a31 50%,#1d2026 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.5rem;}
   @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
   @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ── Folha de redação (idêntica ao aluno) ── */
+  .folha {
+    background: #fdfdfb;
+    background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 100% 2rem;
+    font-family: 'EB Garamond', serif;
+    font-size: 1.05rem; line-height: 2rem; color: #1f2937;
+    padding: 2rem 2.5rem 2rem 4rem; min-height: 600px; position: relative;
+  }
+  .folha::before {
+    content: ''; position: absolute; left: 3rem; top: 0; bottom: 0;
+    width: 1px; background: rgba(239,68,68,0.2);
+  }
+  .folha-elite { border-left: 3px solid rgba(108,92,231,0.3); }
+
+  /* ── Erros sublinhados ── */
+  .erro-orto {
+    text-decoration: underline wavy #ef4444;
+    text-decoration-thickness: 2px;
+    cursor: help; background: rgba(239,68,68,0.08);
+    border-radius: 2px; padding: 0 1px;
+  }
+
+  /* ── Cards Validar Correção ── */
+  .card-comp { background:#1d2026; border:1px solid rgba(71,69,84,.2); border-radius:1rem; padding:1.25rem; margin-bottom:1rem; transition:all .2s; }
+  .card-comp.concorda { border-color: rgba(74,222,128,.4); }
+  .card-comp.discorda { border-color: rgba(250,110,110,.4); }
+  .btn-validacao {
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.5rem 1rem; border-radius:.625rem; cursor:pointer;
+    font-size:.8rem; font-weight:700; transition:all .2s;
+    border:1px solid rgba(71,69,84,.4); background:transparent; color:#928ea0;
+  }
+  .btn-validacao:hover { color:#e1e2eb; border-color:rgba(71,69,84,.7); }
+  .btn-validacao.btn-concordo.ativo { background:rgba(74,222,128,.15); color:#4ade80; border-color:rgba(74,222,128,.4); }
+  .btn-validacao.btn-discordo.ativo { background:rgba(250,110,110,.15); color:#fa6e6e; border-color:rgba(250,110,110,.4); }
+
+  /* ── Modal Por que Nota 1000 ── */
+  #modalAnalise { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.85); align-items:center; justify-content:center; padding:1rem; }
+  #modalAnalise.aberto { display:flex; }
 </style>
 <script src="supabase-auth.js"></script>
 </head>
@@ -128,6 +170,19 @@
         <p style="font-size:.8rem;margin-top:.35rem;">Clique em qualquer item da lista ao lado</p>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal Por que Nota 1000 -->
+<div id="modalAnalise" onclick="if(event.target===this)fecharModal()">
+  <div style="background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:1rem;width:100%;max-width:42rem;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;border-bottom:1px solid rgba(255,255,255,.05);">
+      <h3 id="modalAnaliseTitle" style="font-weight:800;color:#e1e2eb;font-size:.875rem;"></h3>
+      <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;display:flex;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div id="modalAnaliseTexto" style="flex:1;overflow-y:auto;padding:1.25rem;font-size:.875rem;color:#c8c4d7;line-height:1.7;"></div>
   </div>
 </div>
 
@@ -363,59 +418,230 @@
     ) : '';
 
     painel.innerHTML =
-      '<div style="max-width:850px;width:100%;">' +
+      '<div style="max-width:900px;width:100%;">' +
         headerHtml +
         bannerRevisao +
         '<div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;">' +
-          '<button class="aba-btn ativo" id="abaTexto" onclick="trocarAba(\'texto\')">Texto da Redação</button>' +
-          '<button class="aba-btn" id="abaIA" onclick="trocarAba(\'ia\')">Análise da IA</button>' +
-          '<button class="aba-btn" id="abaRevisao" onclick="trocarAba(\'revisao\')">Revisar Correção</button>' +
+          '<button class="aba-btn ativo" id="abaTexto" onclick="trocarAba(\'texto\')">Texto Original</button>' +
+          '<button class="aba-btn" id="abaMelhoria" onclick="trocarAba(\'melhoria\')">Pontos de Melhoria</button>' +
+          '<button class="aba-btn" id="abaElite" onclick="trocarAba(\'elite\')">Elite da PROfa</button>' +
+          '<button class="aba-btn" id="abaValidar" onclick="trocarAba(\'validar\')">Validar Correção</button>' +
         '</div>' +
-        '<div style="background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;padding:1.25rem;min-height:400px;">' +
-          '<div id="abaTextoConteudo">' +
-            (r.texto
-              ? '<p style="font-size:.875rem;line-height:1.8;color:#c8c4d7;white-space:pre-line;">' + escapeHtml(r.texto) + '</p>'
-              : '<p style="color:#474554;font-size:.85rem;text-align:center;padding:2rem;">Texto da redação não disponível.</p>') +
+        '<div id="conteudoAbas" style="background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;overflow:hidden;min-height:400px;">' +
+          '<div id="abaTextoConteudo"><div class="folha" id="colOriginal"></div></div>' +
+          '<div id="abaMelhoriaConteudo" style="display:none;">' +
+            '<div style="padding:.75rem 1rem;background:rgba(250,110,110,.08);border-bottom:1px solid rgba(250,110,110,.15);display:flex;align-items:center;gap:.5rem;">' +
+              '<span class="material-symbols-outlined" style="color:#fa6e6e;font-size:.9rem;">info</span>' +
+              '<span id="badgeErros" style="font-size:.7rem;color:#fa6e6e;font-weight:700;"></span>' +
+            '</div>' +
+            '<div class="folha" id="colCorrecoes"></div>' +
           '</div>' +
-          '<div id="abaIAConteudo" style="display:none;">' + renderAnaliseIA(correcao) + '</div>' +
-          '<div id="abaRevisaoConteudo" style="display:none;">' + renderFormRevisao(correcao) + '</div>' +
+          '<div id="abaEliteConteudo" style="display:none;">' +
+            '<div style="padding:.75rem 1rem;background:rgba(108,92,231,.12);border-bottom:1px solid rgba(108,92,231,.2);display:flex;align-items:center;gap:.5rem;">' +
+              '<span class="material-symbols-outlined" style="color:#c6bfff;font-size:.9rem;font-variation-settings:\'FILL\' 1;">psychology</span>' +
+              '<span style="font-size:.7rem;color:#c6bfff;font-weight:700;">Versão reescrita pela PROfa com nota 1000</span>' +
+              '<button onclick="verPorQueElite()" style="margin-left:auto;font-size:.7rem;color:#c6bfff;font-weight:700;border:1px solid rgba(108,92,231,.3);background:transparent;padding:.25rem .65rem;border-radius:.5rem;cursor:pointer;display:flex;align-items:center;gap:.25rem;">' +
+                '<span class="material-symbols-outlined" style="font-size:.8rem;">help</span>Por que Nota 1000?' +
+              '</button>' +
+            '</div>' +
+            '<div class="folha folha-elite" id="colElite"></div>' +
+          '</div>' +
+          '<div id="abaValidarConteudo" style="display:none;padding:1.25rem;">' + renderFormValidar(correcao) + '</div>' +
         '</div>' +
       '</div>';
+
+    // Preenche as abas pedagógicas (Texto / Melhoria / Elite) com correcao_json
+    if (correcao && correcao.correcao_json) {
+      preencherAbasPedagogicas(r, correcao.correcao_json);
+    } else {
+      // Fallback se não tiver correcao_json (correção antiga sem dados ricos)
+      const colO = document.getElementById('colOriginal');
+      if (colO) colO.innerHTML = r.texto
+        ? '<p style="white-space:pre-line;text-align:justify;">' + escapeHtml(r.texto) + '</p>'
+        : '<p style="color:rgba(0,0,0,.5);text-align:center;padding:2rem;">Texto não disponível.</p>';
+
+      const colC = document.getElementById('colCorrecoes');
+      if (colC) colC.innerHTML = '<p style="color:rgba(0,0,0,.5);text-align:center;padding:2rem;">Análise pedagógica detalhada não disponível para esta correção.</p>';
+
+      const colE = document.getElementById('colElite');
+      if (colE) colE.innerHTML = '<p style="color:rgba(0,0,0,.5);text-align:center;padding:2rem;">Versão nota 1000 não disponível para esta correção.</p>';
+    }
   }
 
-  function renderAnaliseIA(correcao) {
+  // ════════════════════════════════════════════════════════════════
+  // ABAS PEDAGÓGICAS — preenche Texto / Pontos de Melhoria / Elite
+  // a partir de correcao_json (mesmo formato que o aluno consome)
+  // ════════════════════════════════════════════════════════════════
+  function preencherAbasPedagogicas(redacao, dados) {
+    // ── 1) Texto Original com erros sublinhados
+    let textoCorrigido = escapeHtml(redacao.texto || '');
+    let qtdErros = 0;
+    if (dados.erros && Array.isArray(dados.erros)) {
+      const errosFiltrados = dados.erros.filter(function(e) {
+        return e.original && e.original.split(' ').length <= 6;
+      });
+      qtdErros = errosFiltrados.length;
+      errosFiltrados.forEach(function(e) {
+        const esc = escapeHtml(e.original);
+        const regex = new RegExp('(?<![\\w])' + esc.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '(?![\\w])', 'g');
+        textoCorrigido = textoCorrigido.replace(regex,
+          '<span class="erro-orto" title="Sugestão: ' + escapeHtml(e.correto) + '">' + esc + '</span>');
+      });
+    }
+    const colO = document.getElementById('colOriginal');
+    if (colO) colO.innerHTML = '<p style="white-space:pre-line;text-align:justify;">' + textoCorrigido + '</p>';
+
+    const badge = document.getElementById('badgeErros');
+    if (badge) badge.textContent = qtdErros + ' marcação' + (qtdErros !== 1 ? 'ões' : '');
+
+    // ── 2) Pontos de Melhoria
+    const blocoFolha = function(cor, rotulo, tagComp, conteudoHtml) {
+      return '<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,.08);">' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;">' +
+        '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:' + cor + ';">' + rotulo + '</span>' +
+        (tagComp ? '<span style="font-size:9px;color:rgba(0,0,0,.35);background:rgba(0,0,0,.06);padding:1px 6px;border-radius:3px;">' + tagComp + '</span>' : '') +
+        '</div>' + conteudoHtml + '</div>';
+    };
+    const paragrafoFolha = function(texto) {
+      return '<p style="text-align:justify;color:#1f2937;line-height:2rem;">' + escapeHtml(texto) + '</p>';
+    };
+
+    let alertasC2 = '';
+    if (dados.c2_tangenciamento) {
+      const conteudo = paragrafoFolha(dados.c2_tangenciamento_detalhe || 'O tema não foi desenvolvido em sua totalidade.') +
+        '<p style="font-size:.85rem;color:rgba(0,0,0,.5);margin-top:.5rem;font-style:italic;">Efeito: C2, C3 e C5 ficam limitadas a 40 pontos cada.</p>';
+      alertasC2 += blocoFolha('#dc2626', '⚠ Tangenciamento detectado', 'C2', conteudo);
+    }
+    if (dados.c2_repertorio_tipo === 'bolso') {
+      let conteudo = '';
+      if (dados.c2_repertorio_referencia) {
+        conteudo += '<p style="color:rgba(0,0,0,.55);font-size:.95rem;margin-bottom:.5rem;">Referência citada: <strong style="color:#1f2937;">' + escapeHtml(dados.c2_repertorio_referencia) + '</strong></p>';
+      }
+      conteudo += paragrafoFolha(dados.c2_repertorio_avaliacao || '');
+      if (dados.c2_repertorio_sugestao) {
+        conteudo += '<p style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(0,0,0,.5);margin-top:1rem;margin-bottom:.25rem;">Como tornar produtivo</p>' +
+          paragrafoFolha(dados.c2_repertorio_sugestao);
+      }
+      alertasC2 += blocoFolha('#6c5ce7', 'Repertório de bolso', 'C2', conteudo);
+    } else if (dados.c2_repertorio_tipo === 'produtivo') {
+      alertasC2 += blocoFolha('#16a34a', '✓ Repertório produtivo', 'C2', paragrafoFolha(dados.c2_repertorio_avaliacao || ''));
+    }
+
+    // C5 checklist
+    const c5itens = [
+      { label: 'Ação',         valor: dados.c5_acao },
+      { label: 'Agente',       valor: dados.c5_agente },
+      { label: 'Meio',         valor: dados.c5_meio },
+      { label: 'Finalidade',   valor: dados.c5_finalidade },
+      { label: 'Detalhamento', valor: dados.c5_detalhamento }
+    ];
+    const checklistC5 = c5itens.map(function(item) {
+      const ok = !!item.valor;
+      return '<div style="display:flex;align-items:flex-start;gap:12px;padding:.5rem 0;">' +
+        '<span style="color:' + (ok ? '#16a34a' : '#dc2626') + ';font-weight:900;min-width:18px;font-size:1.1rem;line-height:2rem;">' + (ok ? '✓' : '✗') + '</span>' +
+        '<div style="flex:1;">' +
+          '<span style="font-size:9px;color:rgba(0,0,0,.5);font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:block;line-height:1.3;">' + item.label + '</span>' +
+          '<span style="font-size:1rem;color:' + (ok ? '#1f2937' : '#dc2626') + ';line-height:1.7;font-style:' + (ok ? 'normal' : 'italic') + ';">' + (ok ? escapeHtml(item.valor) : 'Não identificado — inclua na conclusão') + '</span>' +
+        '</div></div>';
+    }).join('');
+    const c5faltantesHtml = (dados.c5_elementos_faltantes && dados.c5_elementos_faltantes.length > 0)
+      ? '<p style="font-size:.9rem;color:#b45309;font-weight:600;margin-top:.75rem;font-style:italic;">Faltam: ' + dados.c5_elementos_faltantes.join(', ') + '</p>'
+      : '<p style="font-size:.9rem;color:#16a34a;font-weight:600;margin-top:.75rem;">✓ Proposta completa</p>';
+    const c5dh = dados.c5_direitos_humanos === true
+      ? '<div style="margin-top:1rem;padding:.75rem 1rem;background:rgba(220,38,38,.08);border-left:3px solid #dc2626;border-radius:0 6px 6px 0;">' +
+          '<p style="font-size:9px;font-weight:800;color:#dc2626;margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.06em;">⚠ Proposta viola direitos humanos → C5 = 0</p>' +
+          '<p style="font-size:.95rem;color:#1f2937;line-height:1.6;">No ENEM, viola direitos humanos qualquer proposta que sugira tortura, execução sem julgamento, "justiça com as próprias mãos", punições degradantes ou incitação ao ódio por raça, gênero ou religião.</p>' +
+        '</div>'
+      : '';
+    const cardC5 = blocoFolha('#dc2626', 'Proposta de intervenção', 'C5', checklistC5 + c5faltantesHtml + c5dh);
+
+    // Análise estratégica
+    const cardsAnalise = [];
+    if (dados.analise_projeto_texto)     cardsAnalise.push(blocoFolha('#16a34a', '🏗️ Projeto de texto',  'C3', paragrafoFolha(dados.analise_projeto_texto)));
+    else if (dados.c3_projeto_texto)     cardsAnalise.push(blocoFolha('#16a34a', '🏗️ Projeto de texto',  'C3', paragrafoFolha(dados.c3_projeto_texto)));
+    if (dados.analise_padrao_dominante)  cardsAnalise.push(blocoFolha('#dc2626', '⚡ Padrão dominante',    '',   paragrafoFolha(dados.analise_padrao_dominante)));
+    if (dados.c4_problemas && dados.c4_problemas.length) {
+      const itensC4 = dados.c4_problemas.map(function(p) { return '<li style="margin-bottom:.4rem;color:#1f2937;">' + escapeHtml(p) + '</li>'; }).join('');
+      cardsAnalise.push(blocoFolha('#b45309', '🔗 Coesão', 'C4', '<ul style="list-style:disc;padding-left:1.25rem;line-height:1.8;">' + itensC4 + '</ul>'));
+    }
+    if (dados.analise_proximo_passo)     cardsAnalise.push(blocoFolha('#6c5ce7', '🎯 Próximo passo',       '',   paragrafoFolha(dados.analise_proximo_passo)));
+    if (dados.feedback_geral)            cardsAnalise.push(blocoFolha('#0891b2', '💬 Feedback geral',      '',   paragrafoFolha(dados.feedback_geral)));
+
+    let secaoAnalise = cardsAnalise.length > 0 ? cardsAnalise.join('') : '';
+    if (!secaoAnalise) {
+      secaoAnalise = '<div style="text-align:center;padding:1.5rem 1rem;margin:1.5rem 0;background:rgba(108,92,231,.05);border:1px dashed rgba(108,92,231,.25);border-radius:8px;">' +
+        '<p style="font-size:.95rem;color:#4b5563;">📖 A análise estratégica detalhada ainda não foi gerada para esta redação.</p>' +
+        '</div>';
+    }
+
+    const colC = document.getElementById('colCorrecoes');
+    if (colC) colC.innerHTML = alertasC2 + cardC5 + secaoAnalise;
+
+    // ── 3) Elite da PROfa
+    const secoesList = [
+      { keys: ['redacao_nota_1000_intro',     'versao_elite_intro'],     label: 'Introdução',        cor: '#45edee', comp: 'C1 + C2' },
+      { keys: ['redacao_nota_1000_dev1',      'versao_elite_dev1'],      label: 'Desenvolvimento 1', cor: '#6c5ce7', comp: 'C2 + C3' },
+      { keys: ['redacao_nota_1000_dev2',      'versao_elite_dev2'],      label: 'Desenvolvimento 2', cor: '#4ade80', comp: 'C3 + C4' },
+      { keys: ['redacao_nota_1000_conclusao', 'versao_elite_conclusao'], label: 'Conclusão — C5',    cor: '#fabd00', comp: 'C5' }
+    ];
+    const leCampo = function(keys) {
+      for (let i = 0; i < keys.length; i++) { if (dados[keys[i]]) return dados[keys[i]]; }
+      return null;
+    };
+    let eliteHtml = '';
+    const temSecoes = secoesList.some(function(s) { return leCampo(s.keys); });
+    if (temSecoes) {
+      eliteHtml = secoesList.map(function(s) {
+        const texto = leCampo(s.keys);
+        if (!texto) return '';
+        return '<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,.08);">' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;">' +
+          '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:' + s.cor + ';">' + s.label + '</span>' +
+          '<span style="font-size:9px;color:rgba(0,0,0,.35);background:rgba(0,0,0,.06);padding:1px 6px;border-radius:3px;">' + s.comp + '</span>' +
+          '</div>' +
+          '<p style="text-align:justify;color:#1f2937;line-height:2rem;">' + escapeHtml(texto) + '</p>' +
+          '</div>';
+      }).join('');
+    }
+    if (!eliteHtml) {
+      eliteHtml = '<div style="text-align:center;padding:2.5rem 1.5rem;color:rgba(0,0,0,.55);">' +
+        '<div style="font-size:2.5rem;margin-bottom:.75rem;">✨</div>' +
+        '<p style="font-size:.95rem;">Versão nota 1000 ainda não foi gerada para esta redação.</p>' +
+        '<p style="font-size:.85rem;margin-top:.5rem;color:rgba(0,0,0,.4);">O aluno pode gerá-la em "Minhas Redações".</p>' +
+        '</div>';
+    }
+    const colE = document.getElementById('colElite');
+    if (colE) colE.innerHTML = eliteHtml;
+
+    // ── 4) Por que Nota 1000 — armazena no escopo pra modal abrir depois
+    const porQueCompetencias = [
+      { keys: ['melhoria_c1', 'por_que_elite_c1'], label: 'C1 — Língua formal',     cor: '#45edee' },
+      { keys: ['melhoria_c2', 'por_que_elite_c2'], label: 'C2 — Tema e repertório', cor: '#6c5ce7' },
+      { keys: ['melhoria_c3', 'por_que_elite_c3'], label: 'C3 — Argumentação',      cor: '#4ade80' },
+      { keys: ['melhoria_c4', 'por_que_elite_c4'], label: 'C4 — Coesão',            cor: '#fabd00' },
+      { keys: ['melhoria_c5', 'por_que_elite_c5'], label: 'C5 — Intervenção',       cor: '#fa6e6e' }
+    ];
+    const temPorQue = porQueCompetencias.some(function(c) { return leCampo(c.keys); });
+    if (temPorQue) {
+      window._porQueElite = porQueCompetencias.map(function(c) {
+        const texto = leCampo(c.keys);
+        if (!texto) return '';
+        return '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid ' + c.cor + ';border-radius:0 8px 8px 0;">' +
+          '<p style="font-size:11px;font-weight:700;color:' + c.cor + ';margin-bottom:5px;">' + c.label + '</p>' +
+          '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;">' + escapeHtml(texto) + '</p>' +
+          '</div>';
+      }).join('');
+    } else {
+      window._porQueElite = '<p style="color:#928ea0;text-align:center;padding:2rem;">Análise por competência não disponível para esta redação.</p>';
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // ABA "VALIDAR CORREÇÃO" — Concordo / Discordo + comentário único
+  // ════════════════════════════════════════════════════════════════
+  function renderFormValidar(correcao) {
     if (!correcao) {
       return '<p style="color:#474554;font-size:.85rem;text-align:center;padding:2rem;">A IA ainda não corrigiu esta redação.</p>';
-    }
-    const total = ['c1','c2','c3','c4','c5'].reduce(function(s,k) { return s + (correcao[k] || 0); }, 0);
-
-    const cardsComp = ['c1','c2','c3','c4','c5'].map(function(k) {
-      return (
-        '<div style="text-align:center;padding:.625rem .25rem;background:#10131a;border-radius:.5rem;border:1px solid rgba(71,69,84,.2);">' +
-          '<p style="font-size:.65rem;color:#928ea0;font-weight:700;text-transform:uppercase;margin-bottom:.2rem;">' + k.toUpperCase() + '</p>' +
-          '<p style="font-size:1rem;font-weight:900;color:#45edee;">' + (correcao[k] || 0) + '</p>' +
-        '</div>'
-      );
-    }).join('');
-
-    return (
-      '<div style="margin-bottom:1.25rem;padding:.875rem 1rem;background:#10131a;border-radius:.75rem;border:1px solid rgba(69,237,238,.15);">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-          '<span style="font-size:.78rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.05em;">Nota total da IA</span>' +
-          '<span style="font-size:1.4rem;font-weight:900;color:' + corDaNota(total) + ';">' + total + '</span>' +
-        '</div>' +
-      '</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin-bottom:1.25rem;">' + cardsComp + '</div>' +
-      '<h3 style="font-size:.85rem;font-weight:700;color:#e1e2eb;margin-bottom:.5rem;">Feedback da IA</h3>' +
-      '<div style="font-size:.85rem;line-height:1.7;color:#c8c4d7;white-space:pre-line;">' +
-        escapeHtml(correcao.feedback_geral || 'Sem feedback geral disponível.') +
-      '</div>'
-    );
-  }
-
-  function renderFormRevisao(correcao) {
-    if (!correcao) {
-      return '<p style="color:#474554;font-size:.85rem;text-align:center;padding:2rem;">Aguardando a IA corrigir antes da revisão.</p>';
     }
 
     const labels = {
@@ -426,73 +652,116 @@
       c5: 'C5 — Proposta de intervenção'
     };
 
+    // Estado salvo (se já existe revisão)
     const compsRev = (revisaoAtiva && revisaoAtiva.competencias) || {};
     const visivelAluno = revisaoAtiva ? (revisaoAtiva.visivel_aluno !== false) : true;
     const comentarioGeral = (revisaoAtiva && revisaoAtiva.comentario_geral) || '';
+    const feedbackDiscord = (revisaoAtiva && revisaoAtiva.feedback_discordancia) || '';
 
-    const linhasComp = ['c1','c2','c3','c4','c5'].map(function(k) {
-      const notaIa = correcao[k] || 0;
-      const notaProf = (compsRev[k] && typeof compsRev[k].nota === 'number') ? compsRev[k].nota : notaIa;
-      const coment = (compsRev[k] && compsRev[k].comentario) || '';
+    // Cards de competência (Concordo / Discordo)
+    const cardsHtml = ['c1','c2','c3','c4','c5'].map(function(k) {
+      const nota = correcao[k] || 0;
+      const status = compsRev[k] && typeof compsRev[k].concorda === 'boolean'
+        ? (compsRev[k].concorda ? 'concorda' : 'discorda')
+        : '';
 
       return (
-        '<div style="padding:.875rem 0;border-bottom:1px solid rgba(71,69,84,.1);">' +
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.5rem;">' +
+        '<div class="card-comp ' + status + '" id="cardComp_' + k + '">' +
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.75rem;">' +
             '<div style="flex:1;min-width:0;">' +
-              '<p style="font-size:.82rem;color:#e1e2eb;font-weight:600;margin-bottom:.15rem;">' + labels[k] + '</p>' +
-              '<p style="font-size:.7rem;color:#928ea0;">IA sugeriu <strong style="color:#c6bfff;">' + notaIa + '</strong></p>' +
-            '</div>' +
-            '<div style="text-align:center;flex-shrink:0;">' +
-              '<p style="font-size:.6rem;color:#474554;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem;">Sua nota</p>' +
-              '<input class="nota-input" id="rev_' + k + '" type="number" min="0" max="200" step="40" value="' + notaProf + '" oninput="atualizarTotalRevisao()"/>' +
+              '<p style="font-size:.85rem;color:#e1e2eb;font-weight:700;margin-bottom:.15rem;">' + labels[k] + '</p>' +
+              '<p style="font-size:.7rem;color:#928ea0;">Nota da IA: <strong style="color:#c6bfff;font-size:.85rem;">' + nota + '</strong></p>' +
             '</div>' +
           '</div>' +
-          '<textarea class="comentario-comp" id="com_' + k + '" placeholder="Comentário sobre ' + k.toUpperCase() + ' (opcional)" rows="2">' + escapeHtml(coment) + '</textarea>' +
+          '<div style="display:flex;gap:.5rem;">' +
+            '<button class="btn-validacao btn-concordo' + (status === 'concorda' ? ' ativo' : '') + '" onclick="setValidacao(\'' + k + '\', true)">' +
+              '<span class="material-symbols-outlined" style="font-size:1rem;">check</span>Concordo' +
+            '</button>' +
+            '<button class="btn-validacao btn-discordo' + (status === 'discorda' ? ' ativo' : '') + '" onclick="setValidacao(\'' + k + '\', false)">' +
+              '<span class="material-symbols-outlined" style="font-size:1rem;">close</span>Discordo' +
+            '</button>' +
+          '</div>' +
         '</div>'
       );
     }).join('');
 
-    const totalProf = ['c1','c2','c3','c4','c5'].reduce(function(s,k) {
-      const v = (compsRev[k] && typeof compsRev[k].nota === 'number') ? compsRev[k].nota : (correcao[k] || 0);
-      return s + v;
-    }, 0);
-
     return (
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:.875rem;border-bottom:1px solid rgba(71,69,84,.2);">' +
+      // Cabeçalho
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:1rem;padding-bottom:.875rem;border-bottom:1px solid rgba(71,69,84,.2);">' +
         '<div>' +
-          '<h3 style="font-size:.95rem;font-weight:800;color:#e1e2eb;margin-bottom:.15rem;">Revisão Pedagógica</h3>' +
-          '<p style="font-size:.75rem;color:#928ea0;">Ajuste as notas e comentários por competência</p>' +
+          '<h3 style="font-size:.95rem;font-weight:800;color:#e1e2eb;margin-bottom:.15rem;">Validar Correção</h3>' +
+          '<p style="font-size:.75rem;color:#928ea0;">Você concorda com a correção da IA em cada competência?</p>' +
         '</div>' +
-        '<span class="nota-ia-pill">' +
-          '<span class="material-symbols-outlined" style="font-size:.85rem;font-variation-settings:\'FILL\' 1;">smart_toy</span>' +
-          'IA já corrigiu' +
-        '</span>' +
+        '<button onclick="concordarComTudo()" style="flex-shrink:0;padding:.5rem 1rem;background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.3);border-radius:.625rem;font-size:.75rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;" onmouseover="this.style.background=\'rgba(74,222,128,.2)\'" onmouseout="this.style.background=\'rgba(74,222,128,.1)\'">' +
+          '<span class="material-symbols-outlined" style="font-size:1rem;">done_all</span>Concordo com tudo' +
+        '</button>' +
       '</div>' +
-      '<div style="margin-bottom:1.25rem;">' + linhasComp + '</div>' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;padding:.875rem 1rem;background:#10131a;border-radius:.75rem;border:1px solid rgba(69,237,238,.2);margin-bottom:1.25rem;">' +
-        '<span style="font-size:.85rem;font-weight:700;color:#e1e2eb;">Total da sua revisão</span>' +
-        '<span id="totalRevisao" style="font-size:1.5rem;font-weight:900;color:' + corDaNota(totalProf) + ';">' + totalProf + '</span>' +
+      // Cards
+      '<div style="margin-bottom:1.25rem;">' + cardsHtml + '</div>' +
+      // Feedback de discordância (caixa única)
+      '<div id="boxFeedbackDiscord" style="margin-bottom:1.25rem;">' +
+        '<label style="display:block;font-size:.78rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">Por que você discordou? <span style="color:#474554;text-transform:none;letter-spacing:0;font-weight:500;">(opcional, mas valioso)</span></label>' +
+        '<textarea id="feedbackDiscordancia" class="comentario-comp" rows="3" placeholder="Ex: em C5, a IA não considerou que o aluno detalhou a finalidade. Em C2, repertório está produtivo, não de bolso..." style="font-size:.82rem;">' + escapeHtml(feedbackDiscord) + '</textarea>' +
+        '<p style="font-size:.7rem;color:#474554;margin-top:.4rem;line-height:1.5;">Seu feedback será analisado pela equipe RedaON pra calibrar a IA continuamente.</p>' +
       '</div>' +
+      // Comentário geral pro aluno
       '<div style="margin-bottom:1.25rem;">' +
-        '<label style="display:block;font-size:.78rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">Comentário Geral da Professora</label>' +
-        '<textarea id="comentarioGeralProf" class="comentario-comp" rows="4" placeholder="Mensagem para o aluno: pontos fortes, pontos a melhorar, próximos passos...">' + escapeHtml(comentarioGeral) + '</textarea>' +
+        '<label style="display:block;font-size:.78rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">Comentário Geral pro aluno <span style="color:#474554;text-transform:none;letter-spacing:0;font-weight:500;">(opcional)</span></label>' +
+        '<textarea id="comentarioGeralProf" class="comentario-comp" rows="3" placeholder="Mensagem direta pro aluno: o que destacar, próximos passos..." style="font-size:.82rem;">' + escapeHtml(comentarioGeral) + '</textarea>' +
       '</div>' +
+      // Toggle visível
       '<div style="display:flex;align-items:flex-start;gap:.6rem;margin-bottom:1.25rem;padding:.75rem;background:#10131a;border-radius:.625rem;border:1px solid rgba(71,69,84,.2);">' +
         '<input type="checkbox" id="visivelAluno" ' + (visivelAluno ? 'checked' : '') + ' style="width:1rem;height:1rem;accent-color:#45edee;cursor:pointer;margin-top:.15rem;"/>' +
-        '<label for="visivelAluno" style="font-size:.82rem;color:#c8c4d7;cursor:pointer;flex:1;">' +
-          'Visível para o aluno' +
+        '<label for="visivelAluno" style="font-size:.82rem;color:#c8c4d7;cursor:pointer;flex:1;">Visível para o aluno' +
           '<span style="display:block;font-size:.7rem;color:#474554;margin-top:.15rem;">Quando marcado, o aluno verá sua revisão em "Minhas Redações"</span>' +
         '</label>' +
       '</div>' +
+      // Botão concluir
       '<button onclick="salvarRevisao()" id="btnSalvarRevisao" style="width:100%;padding:.75rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#0b0e14;font-weight:800;border:none;border-radius:.75rem;font-size:.875rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.transform=\'translateY(0)\'">' +
-        (revisaoAtiva ? 'Atualizar revisão' : 'Salvar revisão') +
+        (revisaoAtiva ? 'Atualizar revisão' : 'Concluir revisão') +
       '</button>'
     );
   }
 
+  // Estado em memória das validações antes de salvar
+  let _validacoesPendentes = {};
+
+  window.setValidacao = function(comp, concorda) {
+    _validacoesPendentes[comp] = { concorda: concorda };
+    const card = document.getElementById('cardComp_' + comp);
+    if (card) {
+      card.classList.remove('concorda', 'discorda');
+      card.classList.add(concorda ? 'concorda' : 'discorda');
+    }
+    // Atualiza botões
+    const btnC = card && card.querySelector('.btn-concordo');
+    const btnD = card && card.querySelector('.btn-discordo');
+    if (btnC) btnC.classList.toggle('ativo', concorda);
+    if (btnD) btnD.classList.toggle('ativo', !concorda);
+  };
+
+  window.concordarComTudo = function() {
+    ['c1','c2','c3','c4','c5'].forEach(function(k) {
+      window.setValidacao(k, true);
+    });
+    toast('✓ Marcadas todas como concordadas');
+  };
+
+  // ─── Modal Por que Nota 1000 ───
+  window.verPorQueElite = function() {
+    document.getElementById('modalAnaliseTitle').textContent = 'Por que Nota 1000?';
+    document.getElementById('modalAnaliseTexto').innerHTML = window._porQueElite ||
+      '<p style="color:#928ea0;text-align:center;padding:2rem;">Análise não disponível.</p>';
+    document.getElementById('modalAnalise').classList.add('aberto');
+  };
+
+  window.fecharModal = function() {
+    document.getElementById('modalAnalise').classList.remove('aberto');
+  };
+
   // ─── Tabs ───
   window.trocarAba = function(aba) {
-    ['Texto', 'IA', 'Revisao'].forEach(function(a) {
+    ['Texto', 'Melhoria', 'Elite', 'Validar'].forEach(function(a) {
       const btn = document.getElementById('aba' + a);
       const conteudo = document.getElementById('aba' + a + 'Conteudo');
       const ativa = a.toLowerCase() === aba;
@@ -502,19 +771,10 @@
   };
 
   window.atualizarTotalRevisao = function() {
-    let total = 0;
-    ['c1','c2','c3','c4','c5'].forEach(function(k) {
-      const v = parseInt(document.getElementById('rev_' + k) ? document.getElementById('rev_' + k).value : 0) || 0;
-      total += v;
-    });
-    const el = document.getElementById('totalRevisao');
-    if (el) {
-      el.textContent = total;
-      el.style.color = corDaNota(total);
-    }
+    // legado — não usado mais no novo fluxo, mantido só pra não quebrar
   };
 
-  // ─── Salvar revisão ───
+  // ─── Salvar revisão (novo fluxo: validação por concorda/discorda) ───
   window.salvarRevisao = async function() {
     if (!redacaoAtiva) return;
     const correcao = (Array.isArray(redacaoAtiva.correcoes) && redacaoAtiva.correcoes.length > 0)
@@ -524,28 +784,36 @@
       return;
     }
 
+    // Monta competências combinando estado pendente + estado já salvo
+    const compsAntigas = (revisaoAtiva && revisaoAtiva.competencias) || {};
     const competencias = {};
-    let invalidos = 0;
+    let totalMarcadas = 0;
+
     ['c1','c2','c3','c4','c5'].forEach(function(k) {
-      const inp = document.getElementById('rev_' + k);
-      const com = document.getElementById('com_' + k);
-      const nota = parseInt(inp ? inp.value : NaN);
-      if (isNaN(nota) || nota < 0 || nota > 200) {
-        invalidos++;
-      } else {
-        competencias[k] = { nota: nota, comentario: (com ? com.value.trim() : '') };
+      const pendente = _validacoesPendentes[k];
+      const antiga   = compsAntigas[k];
+      let concorda;
+      if (pendente && typeof pendente.concorda === 'boolean') concorda = pendente.concorda;
+      else if (antiga && typeof antiga.concorda === 'boolean') concorda = antiga.concorda;
+      else concorda = null;
+
+      if (concorda !== null) {
+        competencias[k] = { concorda: concorda };
+        totalMarcadas++;
       }
     });
 
-    if (invalidos > 0) {
-      toast('Verifique as notas: devem ser números entre 0 e 200.');
+    if (totalMarcadas === 0) {
+      toast('Marque pelo menos uma competência (Concordo ou Discordo) ou use "Concordo com tudo".');
       return;
     }
 
     const elComGeral = document.getElementById('comentarioGeralProf');
     const elVisivel  = document.getElementById('visivelAluno');
-    const comentarioGeral = elComGeral ? elComGeral.value.trim() : '';
-    const visivelAluno    = elVisivel ? elVisivel.checked : true;
+    const elFeedDis  = document.getElementById('feedbackDiscordancia');
+    const comentarioGeral       = elComGeral ? elComGeral.value.trim() : '';
+    const visivelAluno          = elVisivel ? elVisivel.checked : true;
+    const feedbackDiscordancia  = elFeedDis ? elFeedDis.value.trim() : '';
 
     const btn = document.getElementById('btnSalvarRevisao');
     btn.disabled = true;
@@ -555,12 +823,14 @@
       const correcaoAtualizada = await dbSalvarRevisaoProfessor(correcao.id, {
         competencias: competencias,
         comentario_geral: comentarioGeral,
+        feedback_discordancia: feedbackDiscordancia,
         visivel_aluno: visivelAluno
       });
 
       revisaoAtiva = correcaoAtualizada.revisao_professor;
+      _validacoesPendentes = {};
 
-      // Atualiza cache
+      // Atualiza cache local
       const idx = todasRedacoes.findIndex(function(x) { return x.id === redacaoAtiva.id; });
       if (idx >= 0 && todasRedacoes[idx].correcoes && todasRedacoes[idx].correcoes[0]) {
         todasRedacoes[idx].correcoes[0].revisao_professor = revisaoAtiva;
@@ -568,16 +838,16 @@
         if (redacaoAtiva) redacaoAtiva.status = 'revisada';
       }
 
-      toast('✓ Revisão salva com sucesso!');
+      toast('✓ Revisão concluída!');
       renderLista();
       renderizarPainelDetalhe(redacaoAtiva, correcao);
-      trocarAba('revisao');
+      trocarAba('validar');
     } catch (e) {
       console.error('Erro ao salvar revisão:', e);
       toast('Não foi possível salvar a revisão. Tente de novo.', 5000);
     } finally {
       btn.disabled = false;
-      btn.textContent = revisaoAtiva ? 'Atualizar revisão' : 'Salvar revisão';
+      btn.textContent = revisaoAtiva ? 'Atualizar revisão' : 'Concluir revisão';
     }
   };
 

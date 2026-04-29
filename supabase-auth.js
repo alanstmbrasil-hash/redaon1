@@ -515,24 +515,33 @@ async function dbGetRedacoesDoProfessor(filtros = {}) {
 async function dbSalvarRevisaoProfessor(correcaoId, revisao) {
   const profId = authGetUserId();
 
+  // Aceita 2 formatos:
+  // (a) NOVO — comps[k] = { concorda: true|false }   (validação 3.5+)
+  // (b) ANTIGO — comps[k] = { nota: number, comentario: string }   (revisão de nota)
+  // O formato é detectado pela presença de 'concorda' OU 'nota'.
   const comps = revisao.competencias || {};
-  ['c1', 'c2', 'c3', 'c4', 'c5'].forEach(c => {
-    if (!comps[c] || typeof comps[c].nota !== 'number') {
-      throw new Error(`Competência ${c.toUpperCase()} inválida ou sem nota.`);
-    }
+  let formatoNovo = false;
+  Object.keys(comps).forEach(c => {
+    if (comps[c] && typeof comps[c].concorda === 'boolean') formatoNovo = true;
   });
 
-  const notaTotal = ['c1','c2','c3','c4','c5']
-    .reduce((soma, c) => soma + (comps[c].nota || 0), 0);
+  // Validação leve — pelo menos uma competência marcada
+  const algumaMarcada = ['c1','c2','c3','c4','c5'].some(c =>
+    comps[c] && (typeof comps[c].concorda === 'boolean' || typeof comps[c].nota === 'number')
+  );
+  if (!algumaMarcada) {
+    throw new Error('Marque pelo menos uma competência antes de salvar.');
+  }
 
   const payload = {
     revisao_professor: {
       professor_id: profId,
       revisado_em: new Date().toISOString(),
       competencias: comps,
-      nota_total: notaTotal,
       comentario_geral: revisao.comentario_geral || '',
-      visivel_aluno: revisao.visivel_aluno !== false  // default true
+      feedback_discordancia: revisao.feedback_discordancia || '',
+      visivel_aluno: revisao.visivel_aluno !== false,
+      formato: formatoNovo ? 'validacao' : 'revisao_nota'
     }
   };
 
