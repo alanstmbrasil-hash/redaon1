@@ -462,7 +462,7 @@ async function dbGetAlunosDoProfessor() {
  */
 async function dbGetRedacoesDaTurma(turmaId) {
   const res = await dbFetch(
-    `${SUPABASE_URL}/rest/v1/redacoes?turma_id=eq.${turmaId}&order=created_at.desc&select=*,usuarios!redacoes_aluno_id_fkey(nome,email),correcoes(id,c1,c2,c3,c4,c5,feedback_geral,revisao_professor,created_at)`,
+    `${SUPABASE_URL}/rest/v1/redacoes?turma_id=eq.${turmaId}&order=created_at.desc&select=*,usuarios!redacoes_aluno_id_fkey(nome,email),correcoes(id,c1,c2,c3,c4,c5,feedback_geral,correcao_json,revisao_professor,created_at)`,
     {}
   );
   const data = await res.json();
@@ -481,7 +481,7 @@ async function dbGetRedacoesDoProfessor(filtros = {}) {
   const profId = authGetUserId();
 
   let url = `${SUPABASE_URL}/rest/v1/redacoes`
-    + `?select=*,usuarios!redacoes_aluno_id_fkey(id,nome,email),turmas!inner(id,nome,professor_id),correcoes(id,c1,c2,c3,c4,c5,feedback_geral,revisao_professor,created_at)`
+    + `?select=*,usuarios!redacoes_aluno_id_fkey(id,nome,email),turmas!inner(id,nome,professor_id),correcoes(id,c1,c2,c3,c4,c5,feedback_geral,correcao_json,revisao_professor,created_at)`
     + `&turmas.professor_id=eq.${profId}`
     + `&order=created_at.desc`;
 
