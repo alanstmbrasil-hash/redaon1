@@ -422,6 +422,49 @@ async function dbAlunoEntrarComCodigo(codigo) {
 }
 
 /**
+ * Lista as turmas onde o aluno atual está vinculado (status 'ativo').
+ * Inclui dados da escola e do professor para exibição.
+ * @returns {Promise<Array>} Array de turmas com escola e professor inclusos.
+ */
+async function dbGetMinhasTurmas() {
+  const userId = authGetUserId();
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/alunos_turma?aluno_id=eq.${userId}&status=eq.ativo&select=entrou_em,turmas(id,nome,codigo,serie,ano_letivo,escolas(nome,cidade,estado),usuarios!turmas_professor_id_fkey(nome))&order=entrou_em.desc`,
+    {}
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  // Achata: retorna [{ id, nome, codigo, serie, ano_letivo, escolas, professor, entrou_em }, ...]
+  return (Array.isArray(data) ? data : []).map(v => ({
+    ...v.turmas,
+    professor: v.turmas && v.turmas.usuarios ? v.turmas.usuarios.nome : null,
+    entrou_em: v.entrou_em
+  })).filter(t => t.id);
+}
+
+/**
+ * Aluno sai de uma turma. Não deleta o vínculo (preserva histórico de
+ * redações antigas) — apenas marca status='inativo'.
+ * @param {string} turmaId UUID da turma
+ * @returns {Promise<object>} Vínculo atualizado.
+ */
+async function dbAlunoSairDaTurma(turmaId) {
+  const userId = authGetUserId();
+  if (!turmaId) throw new Error('ID da turma obrigatório.');
+
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/alunos_turma?turma_id=eq.${turmaId}&aluno_id=eq.${userId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'inativo' })
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data[0];
+}
+
+/**
  * Lista os alunos de uma turma específica.
  * @param {string} turmaId - UUID da turma
  * @returns {Promise<Array>} lista de alunos

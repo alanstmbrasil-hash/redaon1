@@ -76,6 +76,57 @@
     letter-spacing: .05em;
     margin-right: .4rem;
   }
+
+  /* ── Ticker horizontal CNN ── */
+  @keyframes tickerScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-track {
+    animation: tickerScroll 20s linear infinite;
+    width: max-content;
+  }
+  .ticker-track.paused { animation-play-state: paused; }
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #c8c4d7;
+    flex-shrink: 0;
+  }
+  .ticker-item strong { color: #e1e2eb; font-weight: 700; }
+  .ticker-divider {
+    width: 4px; height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Modal Entrar em Turma ── */
+  #modalEntrarTurma {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,.85);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  #modalEntrarTurma.aberto { display: flex; }
+  .input-codigo {
+    width: 100%;
+    background: #10131a;
+    border: 1px solid rgba(71,69,84,.4);
+    border-radius: .625rem;
+    padding: .75rem 1rem;
+    color: #e1e2eb;
+    font-size: .95rem;
+    font-family: 'Inter', monospace;
+    letter-spacing: .02em;
+    outline: none;
+  }
+  .input-codigo:focus { border-color: #45edee; box-shadow: 0 0 0 3px rgba(69,237,238,.15); }
 </style>
 <script src="supabase-auth.js"></script>
 </head>
@@ -177,23 +228,58 @@
   <!-- CONTEÚDO -->
   <div class="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar space-y-12">
 
-    <!-- BANNER COM CARROSSEL DINÂMICO -->
-    <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#6c5ce7] to-[#45edee] p-8 lg:p-12 shadow-2xl">
-      <div class="flex flex-col xl:flex-row justify-between items-center gap-8">
-        <div class="relative z-10 text-center xl:text-left">
-          <h1 id="saudacao" class="text-4xl lg:text-5xl xl:text-6xl font-black italic text-white mb-3 tracking-tight drop-shadow-lg leading-tight">
-            Bom dia,<br/><span id="nomeUsuarioBanner">Estudante</span>,
-          </h1>
-          <p id="subtituloBanner" class="text-white/90 text-base lg:text-lg max-w-md font-medium mx-auto xl:mx-0">
-            Explore seu potencial máximo!
-          </p>
-        </div>
-        <div class="relative z-10 w-full xl:w-auto">
-          <div id="carrossel-slides" class="relative overflow-hidden rounded-2xl" style="min-height:120px;"></div>
-          <div id="carrossel-dots" class="flex justify-center gap-2 mt-4"></div>
+    <!-- BANNER NOVO — saudação discreta + stats fixos + ticker horizontal -->
+    <section>
+      <!-- Linha de saudação + indicação de turma -->
+      <div class="flex items-center justify-between mb-3 px-1">
+        <p id="saudacaoLinha" class="text-sm text-outline font-medium">
+          Olá, <span id="nomeUsuarioBanner">Estudante</span> ✍️
+        </p>
+        <div id="indicadorTurmas" class="hidden text-xs text-outline">
+          <!-- Preenchido por JS quando aluno tem turma(s) -->
         </div>
       </div>
-      <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+
+      <!-- Painel principal: stats grandes + ticker -->
+      <div class="bg-surface-container border border-outline-variant/30 rounded-2xl p-5 lg:p-6">
+
+        <!-- 3 stats fixos -->
+        <div class="grid grid-cols-3 gap-4 mb-4">
+          <div>
+            <p class="text-[10px] text-outline font-bold uppercase tracking-wider mb-1">Média</p>
+            <p id="statMedia" class="text-2xl lg:text-3xl font-black text-tertiary leading-none">—</p>
+          </div>
+          <div>
+            <p class="text-[10px] text-outline font-bold uppercase tracking-wider mb-1">Ranking</p>
+            <p id="statRanking" class="text-2xl lg:text-3xl font-black text-secondary leading-none">—</p>
+          </div>
+          <div>
+            <p class="text-[10px] text-outline font-bold uppercase tracking-wider mb-1">Evolução</p>
+            <p id="statEvolucao" class="text-2xl lg:text-3xl font-black text-primary leading-none">—</p>
+          </div>
+        </div>
+
+        <!-- Ticker horizontal animado -->
+        <div id="tickerContainer" class="bg-surface-container-lowest border border-white/5 rounded-xl py-3 overflow-hidden relative">
+          <div id="tickerTrack" class="ticker-track flex gap-8 whitespace-nowrap">
+            <!-- preenchido por JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner "Entrar em uma turma" (só aparece se aluno NÃO está em nenhuma turma) -->
+      <div id="bannerEntrarTurma" class="hidden mt-3 bg-primary-container/10 border border-dashed border-primary-container/40 rounded-xl p-3 lg:p-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings:'FILL' 1;">school</span>
+          <div>
+            <p class="text-sm text-primary font-bold">Você ainda não entrou em uma turma</p>
+            <p class="text-xs text-outline mt-0.5">Use o código que sua professora passou</p>
+          </div>
+        </div>
+        <button onclick="abrirModalEntrarTurma()" class="bg-gradient-to-r from-secondary to-primary-container text-surface-container-lowest text-xs font-extrabold px-4 py-2 rounded-lg whitespace-nowrap hover:opacity-90 transition flex-shrink-0">
+          Entrar em turma
+        </button>
+      </div>
     </section>
 
     <!-- POTENCIALIZE SUA ESCRITA -->
@@ -377,119 +463,74 @@
     if (confirm('Deseja sair da sua conta?')) { authLogout(); }
   };
 
-  // ── CARROSSEL DINÂMICO ──────────────────────────────
-  let slideAtual = 0;
-  let intervalCarrossel = null;
-  let slides = [];
-
-  function criarSlide(label, valor, icone, cor = 'white') {
-    return `
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;">
-        <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
-          <span style="font-size:1.5rem;margin-bottom:4px;">${icone}</span>
-          <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">${label}</span>
-          <span class="text-white text-3xl font-black count-anim" style="color:${cor}">${valor}</span>
-        </div>
-      </div>`;
+  // ── BANNER NOVO: stats fixos + ticker horizontal ────────────
+  function fmtNum(n) {
+    if (n === null || n === undefined || isNaN(n)) return '—';
+    return n;
   }
 
-  function criarSlideMultiplo(cards) {
-    const cardsHtml = cards.map(c => `
-      <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col items-center min-w-[100px] flex-1 sm:flex-none">
-        <span style="font-size:1.2rem;margin-bottom:4px;">${c.icone}</span>
-        <span class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">${c.label}</span>
-        <span class="text-white text-2xl font-black count-anim">${c.valor}</span>
-      </div>`).join('');
-    return `<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;">${cardsHtml}</div>`;
+  function escapeHtmlBanner(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  function renderSlide(idx) {
-    const container = document.getElementById('carrossel-slides');
-    if (!container || !slides[idx]) return;
-    container.innerHTML = `<div style="animation:fadeSlide .4s ease">${slides[idx]}</div>`;
-    // Atualizar dots
-    const dots = document.getElementById('carrossel-dots');
-    if (dots) {
-      dots.querySelectorAll('span').forEach((d, i) => {
-        d.style.background = i === idx ? 'white' : 'rgba(255,255,255,0.4)';
-        d.style.transform = i === idx ? 'scale(1.3)' : 'scale(1)';
-      });
+  function montarTicker(itens) {
+    // itens = [{ icone: '🎯', html: 'texto com <strong>destaque</strong>' }, ...]
+    if (!itens || itens.length === 0) {
+      itens = [
+        { icone: '👋', html: 'Bem-vindo ao RedaON' },
+        { icone: '✍️', html: 'Envie sua primeira redação para começar' },
+        { icone: '🚀', html: 'Sua jornada para a nota 1000 começa agora' }
+      ];
+    }
+    const itemHtml = itens.map(function(it) {
+      return '<div class="ticker-item">' +
+        '<span style="font-size:14px;">' + it.icone + '</span>' +
+        '<span>' + it.html + '</span>' +
+        '<span class="ticker-divider"></span>' +
+      '</div>';
+    }).join('');
+
+    // Duplica pra criar loop infinito sem "salto"
+    const track = document.getElementById('tickerTrack');
+    if (track) {
+      track.innerHTML = itemHtml + itemHtml;
     }
   }
-
-  function iniciarCarrossel() {
-    const dots = document.getElementById('carrossel-dots');
-    if (dots) {
-      dots.innerHTML = slides.map((_, i) =>
-        `<span onclick="irSlide(${i})" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${i===0?'white':'rgba(255,255,255,0.4)'};cursor:pointer;transition:all .3s;${i===0?'transform:scale(1.3)':''}"></span>`
-      ).join('');
-    }
-    renderSlide(0);
-    intervalCarrossel = setInterval(() => {
-      slideAtual = (slideAtual + 1) % slides.length;
-      renderSlide(slideAtual);
-    }, 4000);
-
-    // Pausar no hover
-    const section = document.querySelector('#carrossel-slides');
-    if (section) {
-      section.addEventListener('mouseenter', () => clearInterval(intervalCarrossel));
-      section.addEventListener('mouseleave', () => {
-        intervalCarrossel = setInterval(() => {
-          slideAtual = (slideAtual + 1) % slides.length;
-          renderSlide(slideAtual);
-        }, 4000);
-      });
-    }
-  }
-
-  window.irSlide = function(idx) {
-    clearInterval(intervalCarrossel);
-    slideAtual = idx;
-    renderSlide(idx);
-    intervalCarrossel = setInterval(() => {
-      slideAtual = (slideAtual + 1) % slides.length;
-      renderSlide(slideAtual);
-    }, 4000);
-  };
 
   async function carregarDadosBanner() {
+    // Atualiza saudação com nome do usuário
+    const nome = (typeof authGetNome === 'function') ? authGetNome() : 'Estudante';
+    const elNome = document.getElementById('nomeUsuarioBanner');
+    if (elNome) elNome.textContent = nome.split(' ')[0];
+
     try {
       const historico = await dbGetHistoricoRedacoes(5);
 
+      // Sem redações ainda
       if (!historico || historico.length === 0) {
-        // Aluno novo — sem redações
-        slides = [
-          criarSlide('Redações', '0', '📝'),
-          criarSlide('Média', '—', '📊'),
-          criarSlideMultiplo([
-            { label: 'Escreva', valor: 'sua 1ª', icone: '✍️' },
-            { label: 'Redação', valor: 'agora!', icone: '🚀' }
-          ])
-        ];
-        document.getElementById('subtituloBanner').textContent = 'Envie sua primeira redação e veja seus dados aqui!';
-        iniciarCarrossel();
+        document.getElementById('statMedia').textContent = '—';
+        document.getElementById('statRanking').textContent = '—';
+        document.getElementById('statEvolucao').textContent = '—';
+        montarTicker([
+          { icone: '✍️', html: '<strong>Envie sua primeira redação</strong> para ver seus dados aqui' },
+          { icone: '🎯', html: 'O RedaON corrige em <strong>tempo real</strong> com IA' },
+          { icone: '🏆', html: 'Acompanhe sua evolução pelo <strong>ranking</strong>' },
+          { icone: '🚀', html: 'Cada redação é um passo rumo à <strong>nota 1000</strong>' }
+        ]);
         return;
       }
 
       // Calcular dados reais
-      const notas = historico.map(r => r.total);
-      const media = Math.round(notas.reduce((a,b) => a+b, 0) / notas.length);
+      const notas = historico.map(function(r) { return r.total; });
+      const media = Math.round(notas.reduce(function(a,b) { return a+b; }, 0) / notas.length);
       const ultima = notas[0];
       const penultima = notas[1] || ultima;
       const evolucao = ultima - penultima;
-      const evolStr = evolucao >= 0 ? `+${evolucao}` : `${evolucao}`;
+      const evolStr = evolucao >= 0 ? '+' + evolucao : '' + evolucao;
       const totalRedacoes = historico.length;
-
-      // Benchmark
-      const benchmark = await dbGetBenchmarkPessoal();
-      const melhorNota = Math.max(benchmark.c1, benchmark.c2, benchmark.c3, benchmark.c4, benchmark.c5);
-
-      // Competências consolidadas
-      const consolidadas = await dbGetCompetenciasConsolidadas();
-
-      // Pareto
-      const pareto = await dbGetCompetenciaPareto();
+      const melhorNota = Math.max.apply(null, notas);
 
       // Ranking
       let posicaoRanking = '—';
@@ -497,70 +538,209 @@
         const ranking = await dbGetRanking();
         if (Array.isArray(ranking)) {
           const userId = authGetUserId();
-          const pos = ranking.findIndex(r => r.aluno_id === userId);
-          if (pos >= 0) posicaoRanking = `#${pos + 1}`;
+          const pos = ranking.findIndex(function(r) { return r.aluno_id === userId; });
+          if (pos >= 0) posicaoRanking = '#' + (pos + 1);
         }
       } catch(e) {}
 
-      // Montar slides
-      slides = [];
+      // PDCA / Pareto
+      let pareto = null;
+      try { pareto = await dbGetCompetenciaPareto(); } catch(e) {}
 
-      // Slide 1 — Stats principais
-      slides.push(criarSlideMultiplo([
-        { label: 'Média', valor: media, icone: '📊' },
-        { label: 'Ranking', valor: posicaoRanking, icone: '🏆' },
-        { label: 'Evolução', valor: evolStr, icone: evolucao >= 0 ? '📈' : '📉' }
-      ]));
+      // Competências consolidadas
+      let consolidadas = [];
+      try { consolidadas = await dbGetCompetenciasConsolidadas(); } catch(e) {}
 
-      // Slide 2 — Última redação
-      slides.push(criarSlideMultiplo([
-        { label: 'Última nota', valor: ultima, icone: '✍️' },
-        { label: 'Redações', valor: totalRedacoes, icone: '📝' },
-        { label: 'Melhor nota', valor: Math.max(...notas), icone: '⭐' }
-      ]));
+      // Atualiza stats fixos
+      document.getElementById('statMedia').textContent = fmtNum(media);
+      document.getElementById('statRanking').textContent = posicaoRanking;
+      const elEvol = document.getElementById('statEvolucao');
+      elEvol.textContent = evolStr;
+      // Cor da evolução: verde se positiva, vermelha se negativa, cinza se 0
+      if (evolucao > 0)      elEvol.style.color = '#4ade80';
+      else if (evolucao < 0) elEvol.style.color = '#ffb4ab';
+      else                   elEvol.style.color = '#928ea0';
 
-      // Slide 3 — PDCA — próximo desafio
+      // Header pontos (se existir)
+      const elHP = document.getElementById('headerPontos');
+      if (elHP) elHP.textContent = media + ' pts';
+
+      // Monta ticker com info dinâmica
+      const itens = [];
+      itens.push({ icone: '✍️', html: '<strong>' + totalRedacoes + ' reda' + (totalRedacoes === 1 ? 'ção' : 'ções') + '</strong> escritas' });
+      itens.push({ icone: '🌟', html: 'Última nota: <strong>' + ultima + '</strong>' });
+      if (melhorNota > ultima) {
+        itens.push({ icone: '🏆', html: 'Sua melhor nota: <strong>' + melhorNota + '</strong>' });
+      }
       if (pareto) {
-        slides.push(criarSlide('Foco agora', pareto, '🎯', '#fabd00'));
+        itens.push({ icone: '🎯', html: '<strong>Foco agora:</strong> ' + escapeHtmlBanner(pareto) });
       }
-
-      // Slide 4 — Competências conquistadas
-      if (consolidadas.length > 0) {
-        slides.push(criarSlide('Conquistas', consolidadas.join(' · '), '✅'));
-      } else {
-        slides.push(criarSlide('Continue!', `${totalRedacoes} redaç.`, '💪'));
+      if (consolidadas && consolidadas.length > 0) {
+        itens.push({ icone: '✅', html: 'Conquistas: <strong>' + escapeHtmlBanner(consolidadas.join(' · ')) + '</strong>' });
       }
+      if (evolucao > 0) {
+        itens.push({ icone: '📈', html: 'Você subiu <strong>' + evolucao + ' pontos</strong> na última redação' });
+      } else if (evolucao < 0) {
+        itens.push({ icone: '💪', html: 'Próxima redação você sobe — bora!' });
+      }
+      itens.push({ icone: '🚀', html: 'Cada redação é um passo rumo à <strong>nota 1000</strong>' });
 
-      // Atualizar header pontos
-      const el = document.getElementById('headerPontos');
-      if (el) el.textContent = `${media} pts`;
-
-      // Subtítulo motivador
-      const subtitulos = [
-        'Você está evoluindo a cada redação!',
-        `Sua melhor nota é ${Math.max(...notas)} — vamos superar!`,
-        pareto ? `Foco em ${pareto} para subir sua média!` : 'Continue escrevendo!'
-      ];
-      document.getElementById('subtituloBanner').textContent =
-        subtitulos[Math.floor(Math.random() * subtitulos.length)];
-
-      iniciarCarrossel();
-
+      montarTicker(itens);
     } catch(e) {
       console.warn('Erro ao carregar dados do banner:', e);
-      slides = [criarSlide('Olá!', '😊', '👋')];
-      iniciarCarrossel();
+      montarTicker(null);
     }
   }
-
-  // Adicionar keyframe fadeSlide ao head
-  const styleEl = document.createElement('style');
-  styleEl.textContent = '@keyframes fadeSlide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}';
-  document.head.appendChild(styleEl);
 
   // Carregar dados ao iniciar
   carregarDadosBanner();
 
+</script>
+
+<!-- Modal Entrar em Turma -->
+<div id="modalEntrarTurma" onclick="if(event.target===this)fecharModalEntrarTurma()">
+  <div style="background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:1rem;width:100%;max-width:28rem;box-shadow:0 24px 64px rgba(0,0,0,.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;border-bottom:1px solid rgba(255,255,255,.05);">
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="color:#c6bfff;font-size:1.25rem;font-variation-settings:'FILL' 1;">school</span>
+        <h3 style="font-weight:800;color:#e1e2eb;font-size:.95rem;">Entrar em uma turma</h3>
+      </div>
+      <button onclick="fecharModalEntrarTurma()" style="background:none;border:none;color:#928ea0;cursor:pointer;display:flex;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div style="padding:1.25rem;">
+      <p style="font-size:.85rem;color:#c8c4d7;margin-bottom:1rem;line-height:1.5;">
+        Cole abaixo o <strong style="color:#e1e2eb;">código da turma</strong> que sua professora passou pra você.
+      </p>
+      <input type="text" id="codigoTurmaInput" class="input-codigo" placeholder="ex: redaon-bravo-jaguar-84" autocomplete="off" />
+      <div id="erroEntrarTurma" style="display:none;margin-top:.6rem;padding:.5rem .75rem;background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.3);border-radius:.5rem;color:#ffb4ab;font-size:.78rem;"></div>
+      <div id="sucessoEntrarTurma" style="display:none;margin-top:.6rem;padding:.5rem .75rem;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:.5rem;color:#4ade80;font-size:.78rem;"></div>
+      <button onclick="confirmarEntrarTurma()" id="btnEntrarTurma" style="width:100%;margin-top:1rem;padding:.75rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#0b0e14;font-weight:800;border:none;border-radius:.75rem;font-size:.875rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+        Entrar na turma
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Modal Entrar em Turma ──
+  window.abrirModalEntrarTurma = function() {
+    document.getElementById('codigoTurmaInput').value = '';
+    document.getElementById('erroEntrarTurma').style.display = 'none';
+    document.getElementById('sucessoEntrarTurma').style.display = 'none';
+    document.getElementById('modalEntrarTurma').classList.add('aberto');
+    setTimeout(function(){ document.getElementById('codigoTurmaInput').focus(); }, 150);
+  };
+  window.fecharModalEntrarTurma = function() {
+    document.getElementById('modalEntrarTurma').classList.remove('aberto');
+  };
+
+  // Enter no input dispara confirmação
+  document.getElementById('codigoTurmaInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') confirmarEntrarTurma();
+  });
+
+  window.confirmarEntrarTurma = async function() {
+    const codigo = document.getElementById('codigoTurmaInput').value.trim();
+    const elErro = document.getElementById('erroEntrarTurma');
+    const elSucesso = document.getElementById('sucessoEntrarTurma');
+    const btn = document.getElementById('btnEntrarTurma');
+
+    elErro.style.display = 'none';
+    elSucesso.style.display = 'none';
+
+    if (!codigo) {
+      elErro.textContent = 'Digite o código da turma.';
+      elErro.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+
+    try {
+      const r = await dbAlunoEntrarComCodigo(codigo);
+      const nomeTurma = r.turma.nome;
+      const nomeEscola = r.turma.escolas && r.turma.escolas.nome ? r.turma.escolas.nome : '';
+      const local = nomeEscola ? (nomeEscola + ' · ' + nomeTurma) : nomeTurma;
+
+      if (r.jaEstava) {
+        elSucesso.textContent = '✓ Você já está nessa turma: ' + local;
+      } else {
+        elSucesso.textContent = '✓ Bem-vindo(a) à turma ' + local + '!';
+      }
+      elSucesso.style.display = 'block';
+
+      // Fecha modal e recarrega indicação após 1.2s
+      setTimeout(function() {
+        fecharModalEntrarTurma();
+        carregarMinhasTurmas();
+      }, 1200);
+    } catch (e) {
+      console.error('Erro ao entrar em turma:', e);
+      elErro.textContent = e.message || 'Não foi possível entrar na turma. Verifique o código.';
+      elErro.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Entrar na turma';
+    }
+  };
+
+  // ── Carrega as turmas do aluno e atualiza a UI ──
+  async function carregarMinhasTurmas() {
+    try {
+      const turmas = await dbGetMinhasTurmas();
+      const indicador = document.getElementById('indicadorTurmas');
+      const banner = document.getElementById('bannerEntrarTurma');
+
+      if (!turmas || turmas.length === 0) {
+        // Sem turmas: esconde indicador, mostra banner pra entrar
+        indicador.classList.add('hidden');
+        banner.classList.remove('hidden');
+        banner.style.display = '';
+      } else {
+        // Com turmas: mostra indicação, esconde banner
+        const principais = turmas.slice(0, 2).map(function(t) {
+          const escola = t.escolas && t.escolas.nome ? t.escolas.nome : '';
+          const prof = t.professor ? ' · ' + t.professor : '';
+          return '<span style="color:#c8c4d7;font-weight:600;">' + escapeHtmlSimples(t.nome) + '</span>' + (escola ? ' (' + escapeHtmlSimples(escola) + ')' : '') + prof;
+        }).join(' &nbsp;·&nbsp; ');
+        const mais = turmas.length > 2 ? ' &nbsp;<span style="color:#928ea0;">+' + (turmas.length - 2) + '</span>' : '';
+        indicador.innerHTML = '🏫 ' + principais + mais;
+        indicador.classList.remove('hidden');
+        banner.classList.add('hidden');
+        banner.style.display = 'none';
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar turmas do aluno:', e);
+    }
+  }
+
+  function escapeHtmlSimples(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // Carrega ao entrar
+  carregarMinhasTurmas();
+
+  // ── Pausa do ticker (touch/hover) ──
+  (function() {
+    const cont = document.getElementById('tickerContainer');
+    if (!cont) return;
+    const track = document.getElementById('tickerTrack');
+    if (!track) return;
+
+    cont.addEventListener('mouseenter', function() { track.classList.add('paused'); });
+    cont.addEventListener('mouseleave', function() { track.classList.remove('paused'); });
+    cont.addEventListener('touchstart', function() { track.classList.add('paused'); }, { passive: true });
+    cont.addEventListener('touchend',   function() {
+      // Volta a animar 2s depois do toque (tempo pra ler com calma)
+      setTimeout(function(){ track.classList.remove('paused'); }, 2000);
+    }, { passive: true });
+  })();
 </script>
 </body>
 </html>
