@@ -129,6 +129,43 @@
   #sidebar nav { scrollbar-width: none; }
   #sidebar nav:hover { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
   @media(min-width:1024px){ #btnHamburger { display:none !important; } }
+
+  /* ── Minhas Turmas (3.4) ── */
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .turma-item {
+    display:flex; align-items:flex-start; gap:.75rem;
+    padding:1rem; background:#10131a;
+    border:1px solid rgba(71,69,84,.2);
+    border-radius:.75rem; margin-bottom:.625rem; transition:all .2s;
+  }
+  .turma-item:hover { border-color:rgba(108,92,231,.3); }
+  .turma-item:last-child { margin-bottom:0; }
+
+  .btn-sair-turma {
+    background:transparent; border:1px solid rgba(255,180,171,.3);
+    color:#ffb4ab; padding:.4rem .75rem; border-radius:.5rem;
+    font-size:.7rem; font-weight:700; cursor:pointer;
+    flex-shrink:0; transition:all .15s;
+    display:inline-flex; align-items:center; gap:.3rem;
+  }
+  .btn-sair-turma:hover {
+    background:rgba(255,180,171,.1); border-color:rgba(255,180,171,.5);
+  }
+
+  /* ── Modal Entrar em Turma (mesmo padrão do inicio.html) ── */
+  #modalEntrarTurmaConfig, #modalConfirmarSair {
+    display:none; position:fixed; inset:0; z-index:200;
+    background:rgba(0,0,0,.85);
+    align-items:center; justify-content:center; padding:1rem;
+  }
+  #modalEntrarTurmaConfig.aberto, #modalConfirmarSair.aberto { display:flex; }
+  .input-codigo-config {
+    width:100%; background:#10131a; border:1px solid rgba(71,69,84,.4);
+    border-radius:.625rem; padding:.75rem 1rem; color:#e1e2eb;
+    font-size:.95rem; font-family:'Inter',monospace; letter-spacing:.02em;
+    outline:none;
+  }
+  .input-codigo-config:focus { border-color:#45edee; box-shadow:0 0 0 3px rgba(69,237,238,.15); }
 </style>
 <script src="supabase-auth.js"></script>
 </head>
@@ -214,6 +251,58 @@
           <p>✓ Temas INEP exclusivos</p>
         </div>
         <button style="width:100%;padding:.625rem;background:#6c5ce7;border:none;border-radius:.75rem;color:white;font-size:.8rem;font-weight:700;cursor:default;opacity:.7;">Plano atual</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ENTRAR EM TURMA (config) -->
+<div id="modalEntrarTurmaConfig" onclick="if(event.target===this)fecharModalEntrarTurmaConfig()">
+  <div style="background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:1rem;width:100%;max-width:28rem;box-shadow:0 24px 64px rgba(0,0,0,.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;border-bottom:1px solid rgba(255,255,255,.05);">
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="color:#c6bfff;font-size:1.25rem;font-variation-settings:'FILL' 1;">school</span>
+        <h3 style="font-weight:800;color:#e1e2eb;font-size:.95rem;">Entrar em uma turma</h3>
+      </div>
+      <button onclick="fecharModalEntrarTurmaConfig()" style="background:none;border:none;color:#928ea0;cursor:pointer;display:flex;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div style="padding:1.25rem;">
+      <p style="font-size:.85rem;color:#c8c4d7;margin-bottom:1rem;line-height:1.5;">
+        Cole abaixo o <strong style="color:#e1e2eb;">código da turma</strong> que sua professora passou pra você.
+      </p>
+      <input type="text" id="codigoTurmaConfigInput" class="input-codigo-config" placeholder="ex: redaon-bravo-jaguar-84" autocomplete="off" />
+      <div id="erroEntrarTurmaConfig" style="display:none;margin-top:.6rem;padding:.5rem .75rem;background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.3);border-radius:.5rem;color:#ffb4ab;font-size:.78rem;"></div>
+      <div id="sucessoEntrarTurmaConfig" style="display:none;margin-top:.6rem;padding:.5rem .75rem;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:.5rem;color:#4ade80;font-size:.78rem;"></div>
+      <button onclick="confirmarEntrarTurmaConfig()" id="btnEntrarTurmaConfig" style="width:100%;margin-top:1rem;padding:.75rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#0b0e14;font-weight:800;border:none;border-radius:.75rem;font-size:.875rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+        Entrar na turma
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRMAR SAIR DA TURMA -->
+<div id="modalConfirmarSair" onclick="if(event.target===this)fecharModalConfirmarSair()">
+  <div style="background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:1rem;width:100%;max-width:28rem;box-shadow:0 24px 64px rgba(0,0,0,.5);">
+    <div style="padding:1.5rem;text-align:center;">
+      <div style="width:3.5rem;height:3.5rem;border-radius:50%;background:rgba(255,180,171,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <span class="material-symbols-outlined" style="color:#ffb4ab;font-size:1.75rem;">logout</span>
+      </div>
+      <h3 style="font-size:1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;">Sair da turma?</h3>
+      <p id="textoConfirmarSair" style="font-size:.85rem;color:#c8c4d7;line-height:1.55;margin-bottom:1rem;">
+        Tem certeza que deseja sair desta turma?
+      </p>
+      <p style="font-size:.78rem;color:#928ea0;line-height:1.5;margin-bottom:1.25rem;font-style:italic;">
+        Você não verá mais novas redações ou atividades, mas seu histórico anterior fica preservado.
+      </p>
+      <div style="display:flex;gap:.625rem;">
+        <button onclick="fecharModalConfirmarSair()" style="flex:1;padding:.75rem;background:rgba(71,69,84,.2);border:1px solid rgba(71,69,84,.4);border-radius:.625rem;color:#c8c4d7;font-size:.85rem;font-weight:700;cursor:pointer;">
+          Cancelar
+        </button>
+        <button onclick="confirmarSairTurma()" id="btnConfirmarSair" style="flex:1;padding:.75rem;background:rgba(255,180,171,.15);border:1px solid rgba(255,180,171,.4);border-radius:.625rem;color:#ffb4ab;font-size:.85rem;font-weight:700;cursor:pointer;">
+          Sim, sair
+        </button>
       </div>
     </div>
   </div>
@@ -385,6 +474,28 @@
                   <span id="toggleEmailDot" class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white/40 transition-transform toggle-dot"></span>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MINHAS TURMAS — vínculo do aluno com turmas -->
+        <div class="glass-card p-6 rounded-xl">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">school</span>
+              Minhas Turmas
+            </h3>
+            <button onclick="abrirModalEntrarTurmaConfig()" class="text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all" style="background:rgba(69,237,238,.1);color:#45edee;border:1px solid rgba(69,237,238,.3);">
+              <span class="material-symbols-outlined" style="font-size:1rem;">add</span>
+              Entrar em turma
+            </button>
+          </div>
+          <p class="text-xs text-on-surface-variant mb-4">Turmas onde você está vinculado(a). Você pode sair a qualquer momento sem perder seu histórico de redações.</p>
+          <div id="listaMinhasTurmas">
+            <!-- Loading inicial -->
+            <div style="text-align:center;padding:1.5rem;color:#928ea0;font-size:.85rem;">
+              <span class="material-symbols-outlined" style="animation:spin 1s linear infinite;color:#6c5ce7;">progress_activity</span>
+              <p style="margin-top:.4rem;">Carregando turmas...</p>
             </div>
           </div>
         </div>
@@ -702,5 +813,180 @@ atualizarPreview();
     this.classList.remove('open');
   });
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MINHAS TURMAS — Sub-etapa 3.4 parte 2
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+  // ── Estado ──
+  let _turmaParaSair = null;  // guarda turma selecionada pra sair (após confirmação)
+
+  // ── Helpers ──
+  function escTurma(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function fmtData(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  // ── Carregar e renderizar lista de turmas ──
+  async function carregarMinhasTurmasConfig() {
+    const lista = document.getElementById('listaMinhasTurmas');
+    if (!lista) return;
+    try {
+      const turmas = await dbGetMinhasTurmas();
+      if (!turmas || turmas.length === 0) {
+        lista.innerHTML =
+          '<div style="padding:2rem 1rem;text-align:center;color:#928ea0;background:#10131a;border:1px dashed rgba(71,69,84,.3);border-radius:.75rem;">' +
+            '<span class="material-symbols-outlined" style="font-size:2rem;color:#474554;display:block;margin-bottom:.5rem;">school</span>' +
+            '<p style="font-size:.85rem;font-weight:600;color:#c8c4d7;margin-bottom:.3rem;">Você ainda não está em nenhuma turma</p>' +
+            '<p style="font-size:.75rem;color:#928ea0;">Use o botão "Entrar em turma" acima para começar</p>' +
+          '</div>';
+        return;
+      }
+
+      lista.innerHTML = turmas.map(function(t) {
+        const escola = (t.escolas && t.escolas.nome) ? t.escolas.nome : 'Escola não informada';
+        const local = (t.escolas && t.escolas.cidade && t.escolas.estado)
+          ? t.escolas.cidade + '/' + t.escolas.estado : '';
+        const prof = t.professor || 'Professor(a)';
+        const serie = t.serie ? t.serie + (t.ano_letivo ? ' · ' + t.ano_letivo : '') : '';
+
+        return (
+          '<div class="turma-item">' +
+            '<div style="width:2.25rem;height:2.25rem;border-radius:.625rem;background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+              '<span class="material-symbols-outlined" style="color:#c6bfff;font-size:1.1rem;font-variation-settings:\'FILL\' 1;">school</span>' +
+            '</div>' +
+            '<div style="flex:1;min-width:0;">' +
+              '<p style="font-size:.9rem;font-weight:700;color:#e1e2eb;margin-bottom:.15rem;">' + escTurma(t.nome) + '</p>' +
+              '<p style="font-size:.75rem;color:#c8c4d7;margin-bottom:.15rem;">' + escTurma(escola) + (local ? ' · ' + escTurma(local) : '') + '</p>' +
+              '<p style="font-size:.7rem;color:#928ea0;">' +
+                'Profa(o). ' + escTurma(prof) +
+                (serie ? ' · ' + escTurma(serie) : '') +
+                (t.entrou_em ? ' · entrou em ' + fmtData(t.entrou_em) : '') +
+              '</p>' +
+            '</div>' +
+            '<button class="btn-sair-turma" onclick="abrirConfirmarSair(\'' + t.id + '\', \'' + escTurma(t.nome).replace(/'/g, '\\\'') + '\')">' +
+              '<span class="material-symbols-outlined" style="font-size:.9rem;">logout</span>Sair' +
+            '</button>' +
+          '</div>'
+        );
+      }).join('');
+    } catch (e) {
+      console.error('Erro ao carregar turmas:', e);
+      lista.innerHTML =
+        '<div style="padding:1.5rem;text-align:center;color:#ffb4ab;font-size:.8rem;">' +
+          '<span class="material-symbols-outlined" style="display:block;margin-bottom:.4rem;">error</span>' +
+          'Não foi possível carregar suas turmas. Recarregue a página.' +
+        '</div>';
+    }
+  }
+
+  // ── Modal Confirmar Sair ──
+  window.abrirConfirmarSair = function(turmaId, nomeTurma) {
+    _turmaParaSair = { id: turmaId, nome: nomeTurma };
+    const txt = document.getElementById('textoConfirmarSair');
+    if (txt) txt.innerHTML = 'Tem certeza que deseja sair de <strong style="color:#e1e2eb;">' + escTurma(nomeTurma) + '</strong>?';
+    document.getElementById('modalConfirmarSair').classList.add('aberto');
+  };
+  window.fecharModalConfirmarSair = function() {
+    document.getElementById('modalConfirmarSair').classList.remove('aberto');
+    _turmaParaSair = null;
+  };
+  window.confirmarSairTurma = async function() {
+    if (!_turmaParaSair) return;
+    const btn = document.getElementById('btnConfirmarSair');
+    btn.disabled = true;
+    btn.textContent = 'Saindo...';
+    try {
+      await dbAlunoSairDaTurma(_turmaParaSair.id);
+      toast('Você saiu de ' + _turmaParaSair.nome);
+      fecharModalConfirmarSair();
+      await carregarMinhasTurmasConfig();
+    } catch (e) {
+      console.error('Erro ao sair da turma:', e);
+      toast('Erro ao sair. Tente novamente.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sim, sair';
+    }
+  };
+
+  // ── Modal Entrar em Turma (mesmo do inicio.html, adaptado) ──
+  window.abrirModalEntrarTurmaConfig = function() {
+    document.getElementById('codigoTurmaConfigInput').value = '';
+    document.getElementById('erroEntrarTurmaConfig').style.display = 'none';
+    document.getElementById('sucessoEntrarTurmaConfig').style.display = 'none';
+    document.getElementById('modalEntrarTurmaConfig').classList.add('aberto');
+    setTimeout(function(){
+      const inp = document.getElementById('codigoTurmaConfigInput');
+      if (inp) inp.focus();
+    }, 150);
+  };
+  window.fecharModalEntrarTurmaConfig = function() {
+    document.getElementById('modalEntrarTurmaConfig').classList.remove('aberto');
+  };
+
+  // Enter no input dispara confirmação
+  const inpCfg = document.getElementById('codigoTurmaConfigInput');
+  if (inpCfg) {
+    inpCfg.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') confirmarEntrarTurmaConfig();
+    });
+  }
+
+  window.confirmarEntrarTurmaConfig = async function() {
+    const codigo = document.getElementById('codigoTurmaConfigInput').value.trim();
+    const elErro = document.getElementById('erroEntrarTurmaConfig');
+    const elSucesso = document.getElementById('sucessoEntrarTurmaConfig');
+    const btn = document.getElementById('btnEntrarTurmaConfig');
+
+    elErro.style.display = 'none';
+    elSucesso.style.display = 'none';
+
+    if (!codigo) {
+      elErro.textContent = 'Digite o código da turma.';
+      elErro.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+
+    try {
+      const r = await dbAlunoEntrarComCodigo(codigo);
+      const nomeTurma = r.turma.nome;
+      const nomeEscola = r.turma.escolas && r.turma.escolas.nome ? r.turma.escolas.nome : '';
+      const local = nomeEscola ? (nomeEscola + ' · ' + nomeTurma) : nomeTurma;
+
+      if (r.jaEstava) {
+        elSucesso.textContent = '✓ Você já está nessa turma: ' + local;
+      } else {
+        elSucesso.textContent = '✓ Bem-vindo(a) à turma ' + local + '!';
+      }
+      elSucesso.style.display = 'block';
+
+      setTimeout(function() {
+        fecharModalEntrarTurmaConfig();
+        carregarMinhasTurmasConfig();
+      }, 1200);
+    } catch (e) {
+      console.error('Erro ao entrar em turma:', e);
+      elErro.textContent = e.message || 'Não foi possível entrar na turma. Verifique o código.';
+      elErro.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Entrar na turma';
+    }
+  };
+
+  // ── Init ──
+  carregarMinhasTurmasConfig();
+</script>
+
 </body>
 </html>
