@@ -649,6 +649,10 @@ function authTemDiscPerfil() {
 /**
  * Atualiza dados básicos do perfil do usuário (nome, série).
  * Atualiza o banco E o localStorage pra refletir em todas as telas.
+ *
+ * Resiliente a colunas inexistentes: se PATCH com {nome, serie} falhar,
+ * tenta de novo só com {nome} (caso a coluna `serie` não exista).
+ *
  * @param {object} dados - { nome, serie } — pelo menos um obrigatório
  * @returns {Promise<object>} usuário atualizado
  */
@@ -656,23 +660,85 @@ async function dbAtualizarPerfilUsuario(dados) {
   const userId = authGetUserId();
   if (!userId) throw new Error('Usuário não autenticado.');
 
-  const payload = {};
-  if (typeof dados.nome === 'string'  && dados.nome.trim())  payload.nome  = dados.nome.trim();
-  if (typeof dados.serie === 'string' && dados.serie.trim()) payload.serie = dados.serie.trim();
-  if (Object.keys(payload).length === 0) throw new Error('Nada pra atualizar.');
+  const payloadCompleto = {};
+  if (typeof dados.nome === 'string'  && dados.nome.trim())  payloadCompleto.nome  = dados.nome.trim();
+  if (typeof dados.serie === 'string' && dados.serie.trim()) payloadCompleto.serie = dados.serie.trim();
+  if (Object.keys(payloadCompleto).length === 0) throw new Error('Nada pra atualizar.');
 
-  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}`, {
-    method: 'PATCH',
-    body: JSON.stringify(payload)
-  });
+  // Função interna que tenta o PATCH
+  async function tentarPatch(payload) {
+    const res = await dbFetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(function() { return null; });
+    if (!res.ok) {
+      const msg = data && (data.message || data.hint || JSON.stringify(data));
+      throw new Error(msg || 'PATCH falhou (HTTP ' + res.status + ')');
+    }
+    return data;
+  }
+
+  let data;
+  try {
+    data = await tentarPatch(payloadCompleto);
+  } catch (e) {
+    // Fallback: se erro mencionar coluna, tenta só com nome
+    const erroStr = String(e.message || '');
+    const colunaInexistente = /column .* does not exist|could not find.*column|PGRST20[0-9]/i.test(erroStr);
+    if (colunaInexistente && payloadCompleto.nome) {
+      console.warn('Coluna inexistente detectada, tentando salvar só o nome...', erroStr);
+      data = await tentarPatch({ nome: payloadCompleto.nome });
+    } else {
+      throw e;
+    }
+  }
+
+  // Atualiza localStorage pra refletir nas outras telas
+  const perfil = authGetPerfil() || {};
+  const novoPerfil = { ...perfil };
+  if (payloadCompleto.nome)  novoPerfil.nome  = payloadCompleto.nome;
+  if (payloadCompleto.serie) novoPerfil.serie = payloadCompleto.serie;
+  localStorage.setItem('redaon_perfil', JSON.stringify(novoPerfil));
+
+  // Atualiza redaon_nome (usado por authGetNome) pra refletir na sidebar
+  if (payloadCompleto.nome) {
+    localStorage.setItem('redaon_nome', payloadCompleto.nome);
+  }
+
+  return Array.isArray(data) ? data[0] : data;
+}
+
+/**
+ * Busca o usuário atual do banco e SINCRONIZA o localStorage com os
+ * dados reais. Útil pra corrigir desincronia entre login antigo e
+ * dados atuais (ex: nome ficou "alanalves" no localStorage mas o
+ * banco tem "Alan Alves").
+ *
+ * @returns {Promise<object>} dados atualizados do usuário
+ */
+async function dbSincronizarUsuarioAtual() {
+  const userId = authGetUserId();
+  if (!userId) throw new Error('Usuário não autenticado.');
+
+  const res = await dbFetch(
+    `${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}&select=*`,
+    {}
+  );
   const data = await res.json();
-  if (!res.ok) throw new Error(JSON.stringify(data));
+  if (!res.ok || !Array.isArray(data) || data.length === 0) {
+    throw new Error('Não foi possível buscar dados do usuário.');
+  }
 
-  // Atualiza localStorage pra refletir em outras telas sem F5
-  const perfil = authGetPerfil();
-  localStorage.setItem('redaon_perfil', JSON.stringify({ ...perfil, ...payload }));
+  const u = data[0];
+  // Sincroniza localStorage
+  if (u.nome)  localStorage.setItem('redaon_nome', u.nome);
+  if (u.tipo)  localStorage.setItem('redaon_tipo', u.tipo);
+  // Atualiza o objeto perfil completo
+  const perfilAtual = authGetPerfil() || {};
+  localStorage.setItem('redaon_perfil', JSON.stringify({ ...perfilAtual, ...u }));
 
-  return data[0];
+  return u;
 }
 
 // ─────────────────────────────────────────────
