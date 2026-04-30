@@ -575,7 +575,7 @@
 
       // Monta ticker com info dinâmica
       const itens = [];
-      itens.push({ icone: '✍️', html: '<strong>' + totalRedacoes + ' reda' + (totalRedacoes === 1 ? 'ção' : 'ções') + '</strong> escritas' });
+      itens.push({ icone: '✍️', html: '<strong>' + totalRedacoes + ' reda' + (totalRedacoes === 1 ? 'ção</strong> escrita' : 'ções</strong> escritas') });
       itens.push({ icone: '🌟', html: 'Última nota: <strong>' + ultima + '</strong>' });
       if (melhorNota > ultima) {
         itens.push({ icone: '🏆', html: 'Sua melhor nota: <strong>' + melhorNota + '</strong>' });
