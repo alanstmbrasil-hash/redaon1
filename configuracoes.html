@@ -686,15 +686,48 @@ window.toggleEmailSemanal = function() {
   toast(emailAtivo ? '📧 Resumo semanal ativado!' : '📧 Resumo semanal desativado.');
 };
 
+// ── CARREGAR PERFIL DO BANCO (na entrada) ──────
+async function carregarPerfilNaEntrada() {
+  try {
+    const nome = (typeof authGetNome === 'function') ? authGetNome() : '';
+    if (nome) {
+      const inpNome = document.getElementById('inputNome');
+      const sidebarNome = document.getElementById('sidebarNome');
+      const previewNome = document.getElementById('previewNomeTexto');
+      if (inpNome) inpNome.value = nome;
+      if (sidebarNome) sidebarNome.textContent = nome;
+      if (previewNome) previewNome.textContent = nome;
+    }
+    // E-mail (opcional, se houver authGetEmail)
+    if (typeof authGetEmail === 'function') {
+      const email = authGetEmail();
+      const inpEmail = document.getElementById('inputEmail');
+      if (inpEmail && email) inpEmail.value = email;
+    }
+    // Atualiza preview com os valores reais
+    if (typeof atualizarPreview === 'function') atualizarPreview();
+  } catch (e) {
+    console.warn('Erro ao carregar perfil:', e);
+  }
+}
+
 // ── SALVAR PERFIL ──────────────────────────────
-window.salvarPerfil = function() {
+window.salvarPerfil = async function() {
   const nome = document.getElementById('inputNome').value.trim();
   const email = document.getElementById('inputEmail').value.trim();
+  const serie = document.getElementById('inputSerie').value;
   if (!nome) { toast('⚠️ O nome não pode estar vazio!'); return; }
   if (!email.includes('@')) { toast('⚠️ E-mail inválido!'); return; }
-  document.getElementById('sidebarNome').textContent = nome;
-  atualizarPreview();
-  toast('✅ Perfil salvo com sucesso!');
+
+  try {
+    await dbAtualizarPerfilUsuario({ nome: nome, serie: serie });
+    document.getElementById('sidebarNome').textContent = nome;
+    atualizarPreview();
+    toast('✅ Perfil salvo com sucesso!');
+  } catch (e) {
+    console.error('Erro ao salvar perfil:', e);
+    toast('❌ Não foi possível salvar. Tente novamente.');
+  }
 };
 
 // ── PREVIEW EM TEMPO REAL ──────────────────────
@@ -800,6 +833,7 @@ window.alternarModoAcessoProf = function() {
 };
 
 // ── INIT ───────────────────────────────────────
+carregarPerfilNaEntrada();
 atualizarPreview();
 </script>
 <script>

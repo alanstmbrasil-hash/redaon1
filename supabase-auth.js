@@ -646,6 +646,35 @@ function authTemDiscPerfil() {
   return !!(perfil?.perfil_disc);
 }
 
+/**
+ * Atualiza dados básicos do perfil do usuário (nome, série).
+ * Atualiza o banco E o localStorage pra refletir em todas as telas.
+ * @param {object} dados - { nome, serie } — pelo menos um obrigatório
+ * @returns {Promise<object>} usuário atualizado
+ */
+async function dbAtualizarPerfilUsuario(dados) {
+  const userId = authGetUserId();
+  if (!userId) throw new Error('Usuário não autenticado.');
+
+  const payload = {};
+  if (typeof dados.nome === 'string'  && dados.nome.trim())  payload.nome  = dados.nome.trim();
+  if (typeof dados.serie === 'string' && dados.serie.trim()) payload.serie = dados.serie.trim();
+  if (Object.keys(payload).length === 0) throw new Error('Nada pra atualizar.');
+
+  const res = await dbFetch(`${SUPABASE_URL}/rest/v1/usuarios?id=eq.${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+
+  // Atualiza localStorage pra refletir em outras telas sem F5
+  const perfil = authGetPerfil();
+  localStorage.setItem('redaon_perfil', JSON.stringify({ ...perfil, ...payload }));
+
+  return data[0];
+}
+
 // ─────────────────────────────────────────────
 // PDCA — Histórico e análise
 // ─────────────────────────────────────────────
