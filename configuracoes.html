@@ -395,7 +395,7 @@
             </div>
             <div class="space-y-1.5">
               <label class="text-xs text-on-surface-variant font-medium ml-1">E-mail de Acesso</label>
-              <input id="inputEmail" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface focus:ring-1 focus:ring-primary/40 text-sm" type="email" value="alan.alves@email.com"/>
+              <input id="inputEmail" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface text-sm" style="opacity:.6;cursor:not-allowed;" type="email" value="" readonly title="Para alterar seu e-mail, entre em contato com o suporte."/>
             </div>
             <div class="space-y-1.5">
               <label class="text-xs text-on-surface-variant font-medium ml-1">Série / Ano</label>
@@ -688,36 +688,61 @@ window.toggleEmailSemanal = function() {
 
 // ── CARREGAR PERFIL DO BANCO (na entrada) ──────
 async function carregarPerfilNaEntrada() {
+  // Primeiro: aplica o que tem no localStorage (rápido)
   try {
-    const nome = (typeof authGetNome === 'function') ? authGetNome() : '';
-    if (nome) {
+    const nomeLS = (typeof authGetNome === 'function') ? authGetNome() : '';
+    if (nomeLS) {
       const inpNome = document.getElementById('inputNome');
       const sidebarNome = document.getElementById('sidebarNome');
       const previewNome = document.getElementById('previewNomeTexto');
-      if (inpNome) inpNome.value = nome;
-      if (sidebarNome) sidebarNome.textContent = nome;
-      if (previewNome) previewNome.textContent = nome;
+      if (inpNome) inpNome.value = nomeLS;
+      if (sidebarNome) sidebarNome.textContent = nomeLS;
+      if (previewNome) previewNome.textContent = nomeLS;
     }
-    // E-mail (opcional, se houver authGetEmail)
-    if (typeof authGetEmail === 'function') {
-      const email = authGetEmail();
-      const inpEmail = document.getElementById('inputEmail');
-      if (inpEmail && email) inpEmail.value = email;
-    }
-    // Atualiza preview com os valores reais
     if (typeof atualizarPreview === 'function') atualizarPreview();
   } catch (e) {
-    console.warn('Erro ao carregar perfil:', e);
+    console.warn('Erro inicial ao carregar perfil:', e);
+  }
+
+  // Em paralelo: busca dados reais do banco e ATUALIZA tudo
+  // Isso corrige desincronia entre localStorage antigo e banco atual
+  try {
+    if (typeof dbSincronizarUsuarioAtual === 'function') {
+      const u = await dbSincronizarUsuarioAtual();
+      if (u && u.nome) {
+        const inpNome = document.getElementById('inputNome');
+        const sidebarNome = document.getElementById('sidebarNome');
+        if (inpNome) inpNome.value = u.nome;
+        if (sidebarNome) sidebarNome.textContent = u.nome;
+      }
+      if (u && u.email) {
+        const inpEmail = document.getElementById('inputEmail');
+        if (inpEmail) inpEmail.value = u.email;
+      }
+      if (u && u.serie) {
+        const inpSerie = document.getElementById('inputSerie');
+        if (inpSerie) {
+          // Tenta encontrar a opção que corresponde
+          for (let i = 0; i < inpSerie.options.length; i++) {
+            if (inpSerie.options[i].text === u.serie || inpSerie.options[i].value === u.serie) {
+              inpSerie.selectedIndex = i;
+              break;
+            }
+          }
+        }
+      }
+      atualizarPreview();
+    }
+  } catch (e) {
+    console.warn('Erro ao sincronizar com banco:', e);
   }
 }
 
 // ── SALVAR PERFIL ──────────────────────────────
 window.salvarPerfil = async function() {
   const nome = document.getElementById('inputNome').value.trim();
-  const email = document.getElementById('inputEmail').value.trim();
   const serie = document.getElementById('inputSerie').value;
   if (!nome) { toast('⚠️ O nome não pode estar vazio!'); return; }
-  if (!email.includes('@')) { toast('⚠️ E-mail inválido!'); return; }
 
   try {
     await dbAtualizarPerfilUsuario({ nome: nome, serie: serie });
