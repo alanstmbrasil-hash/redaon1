@@ -420,12 +420,11 @@
     window.location.href = 'questionario-perfil.html';
   }
 
-  // ── NOME + SAUDAÇÃO ─────────────────────────────────
+  // ── NOME ─────────────────────────────────────────────
+  // (a saudação no banner agora é montada dentro de carregarDadosBanner)
   const NOME_USUARIO = authGetNome();
-  document.getElementById('nomeUsuarioSidebar').textContent = NOME_USUARIO;
-  const h = new Date().getHours();
-  const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-  document.getElementById('saudacao').innerHTML = `${saudacao},<br/><span id="nomeUsuarioBanner">${NOME_USUARIO}</span>,`;
+  const elNomeSidebar = document.getElementById('nomeUsuarioSidebar');
+  if (elNomeSidebar) elNomeSidebar.textContent = NOME_USUARIO;
 
   // ── SIDEBAR ─────────────────────────────────────────
   function toggleSidebar() {
@@ -500,10 +499,19 @@
   }
 
   async function carregarDadosBanner() {
-    // Atualiza saudação com nome do usuário
+    // Atualiza saudação com nome + período do dia
     const nome = (typeof authGetNome === 'function') ? authGetNome() : 'Estudante';
+    const primeiroNome = nome.split(' ')[0];
     const elNome = document.getElementById('nomeUsuarioBanner');
-    if (elNome) elNome.textContent = nome.split(' ')[0];
+    if (elNome) elNome.textContent = primeiroNome;
+
+    // Atualiza linha de saudação inteira pra incluir período (Bom dia/tarde/noite)
+    const h = new Date().getHours();
+    const periodo = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+    const elSauda = document.getElementById('saudacaoLinha');
+    if (elSauda) {
+      elSauda.innerHTML = periodo + ', <span id="nomeUsuarioBanner" style="color:#e1e2eb;font-weight:600;">' + escapeHtmlBanner(primeiroNome) + '</span> ✍️';
+    }
 
     try {
       const historico = await dbGetHistoricoRedacoes(5);
