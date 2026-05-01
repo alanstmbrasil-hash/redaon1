@@ -880,7 +880,7 @@ async function dbSalvarCorrecaoIACompleta({
 // minhas-redacoes.html).
 async function dbBuscarCorrecao(redacao_id) {
   const res = await dbFetch(
-    `${SUPABASE_URL}/rest/v1/correcoes?redacao_id=eq.${redacao_id}&tipo=eq.ia&order=created_at.desc&limit=1&select=id,correcao_json`,
+    `${SUPABASE_URL}/rest/v1/correcoes?redacao_id=eq.${redacao_id}&tipo=eq.ia&order=created_at.desc&limit=1&select=id,correcao_json,revisao_professor`,
     {}
   );
   const data = await res.json();
