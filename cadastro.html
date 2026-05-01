@@ -18,6 +18,7 @@
   }
   .input-field:focus{border-color:#45edee}
   .input-field::placeholder{color:#4a5568}
+  .input-field.codigo{font-family:'Courier New',monospace;letter-spacing:1px;text-align:center;font-weight:600}
 
   .btn-primary{
     background:linear-gradient(135deg,#45edee,#6c5ce7);color:#0b0e14;
@@ -42,9 +43,10 @@
 
   .error-msg{background:#e74c3c22;border:1px solid #e74c3c44;color:#f87171;border-radius:8px;padding:12px 14px;font-size:14px;display:none}
   .success-box{background:#45edee18;border:1px solid #45edee44;border-radius:12px;padding:24px;text-align:center;display:none}
+  .info-box{background:#6c5ce714;border:1px solid #6c5ce744;color:#a39afc;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
 
   @keyframes spin{to{transform:rotate(360deg)}}
-  .spinner{width:20px;height:20px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+  .spinner-sm{width:16px;height:16px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
 
   @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   .fade-in{animation:fadeIn .35s ease-out}
@@ -66,7 +68,7 @@
   <!-- Logo -->
   <div class="text-center mb-6">
     <div class="logo-text text-white">Reda<span class="logo-on">ON</span></div>
-    <p style="color:#6b7280;font-size:14px;margin-top:4px">Crie sua conta gratuita</p>
+    <p style="color:#6b7280;font-size:14px;margin-top:4px">Crie sua conta com seu código</p>
   </div>
 
   <!-- Step indicators -->
@@ -74,9 +76,10 @@
     <span id="dot-1" class="done"></span>
     <span id="dot-2"></span>
     <span id="dot-3"></span>
+    <span id="dot-4"></span>
   </div>
 
-  <!-- STEP 1: Escolher perfil -->
+  <!-- ========== STEP 1: Escolher perfil ========== -->
   <div class="card p-6 step active" id="step-1">
     <h2 style="color:#fff;font-size:18px;font-weight:700;margin-bottom:4px">Você é:</h2>
     <p style="color:#6b7280;font-size:14px;margin-bottom:20px">Escolha seu perfil para começar</p>
@@ -100,9 +103,39 @@
     </p>
   </div>
 
-  <!-- STEP 2: Dados pessoais -->
+  <!-- ========== STEP 2: Código de acesso ========== -->
   <div class="card p-6 step" id="step-2">
     <button onclick="irStep(1)" style="background:none;border:none;color:#6b7280;cursor:pointer;font-size:13px;margin-bottom:16px;padding:0">← Voltar</button>
+
+    <h2 style="color:#fff;font-size:18px;font-weight:700;margin-bottom:4px" id="step2-titulo">Código da turma</h2>
+    <p style="color:#6b7280;font-size:14px;margin-bottom:20px" id="step2-subtitulo">Cole o código que sua professora enviou</p>
+
+    <div class="info-box mb-4" id="info-aluno">
+      💡 O código de turma tem o formato <strong style="color:#fff">redaon-xxxx-xxxx-NN</strong> e foi compartilhado pela sua professora.
+    </div>
+    <div class="info-box mb-4" id="info-professor" style="display:none">
+      💡 O código de professor tem o formato <strong style="color:#fff">prof-XXXX-XXXX</strong> e foi enviado pela equipe RedaON.
+    </div>
+
+    <div class="mb-4">
+      <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Código de acesso *</label>
+      <input id="cad-codigo" type="text" class="input-field codigo" placeholder="cole seu código aqui" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+
+    <div class="error-msg mb-4" id="step2-error"></div>
+
+    <button class="btn-primary" id="btn-validar-codigo" onclick="validarCodigo()">Validar código</button>
+  </div>
+
+  <!-- ========== STEP 3: Dados pessoais ========== -->
+  <div class="card p-6 step" id="step-3">
+    <button onclick="irStep(2)" style="background:none;border:none;color:#6b7280;cursor:pointer;font-size:13px;margin-bottom:16px;padding:0">← Voltar</button>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 12px;background:#45edee14;border:1px solid #45edee44;border-radius:8px">
+      <span style="color:#45edee;font-size:18px">✓</span>
+      <span style="color:#45edee;font-size:13px;font-weight:600">Código validado</span>
+    </div>
+
     <h2 style="color:#fff;font-size:18px;font-weight:700;margin-bottom:4px">Seus dados</h2>
     <p style="color:#6b7280;font-size:14px;margin-bottom:20px">Preencha suas informações</p>
 
@@ -122,7 +155,7 @@
       </div>
     </div>
 
-    <!-- Campo extra: professor -->
+    <!-- Campos extras: professor -->
     <div id="campo-escola" style="display:none" class="mb-4">
       <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Escola onde leciona *</label>
       <input id="cad-escola" type="text" class="input-field" placeholder="Nome da escola">
@@ -132,123 +165,202 @@
       <input id="cad-cpf" type="text" class="input-field" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)">
     </div>
 
-    <div class="error-msg mb-4" id="step2-error"></div>
+    <div class="error-msg mb-4" id="step3-error"></div>
 
-    <button class="btn-primary" onclick="validarStep2()">Continuar →</button>
+    <button class="btn-primary" id="btn-criar-conta" onclick="fazerCadastro()">Criar conta</button>
   </div>
 
-  <!-- STEP 3: Confirmação / Sucesso -->
-  <div class="card p-6 step" id="step-3">
+  <!-- ========== STEP 4: Sucesso ========== -->
+  <div class="card p-6 step" id="step-4">
     <div id="loading-cadastro" style="text-align:center;padding:20px 0">
       <div style="width:48px;height:48px;border:3px solid #1e2330;border-top-color:#45edee;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>
-      <p style="color:#6b7280;font-size:15px">Criando sua conta...</p>
+      <p style="color:#6b7280;font-size:15px" id="loading-msg">Criando sua conta...</p>
     </div>
 
     <div id="sucesso-aluno" class="success-box">
       <div style="font-size:48px;margin-bottom:12px">🎉</div>
-      <h3 style="color:#45edee;font-size:20px;font-weight:700;margin-bottom:8px">Conta criada!</h3>
-      <p style="color:#9ca3af;font-size:14px;margin-bottom:20px">Verifique seu e-mail para confirmar a conta, depois faça login.</p>
+      <h3 style="color:#45edee;font-size:20px;font-weight:700;margin-bottom:8px">Bem-vindo à turma!</h3>
+      <p style="color:#9ca3af;font-size:14px;margin-bottom:20px">Sua conta foi criada e você já está vinculado à turma. Verifique seu e-mail para confirmar a conta, depois faça login.</p>
       <a href="login.html" class="btn-primary" style="display:block;text-decoration:none;text-align:center">Ir para o Login</a>
     </div>
 
     <div id="sucesso-professor" class="success-box">
-      <div style="font-size:48px;margin-bottom:12px">⏳</div>
-      <h3 style="color:#45edee;font-size:20px;font-weight:700;margin-bottom:8px">Solicitação enviada!</h3>
-      <p style="color:#9ca3af;font-size:14px;margin-bottom:8px">Seu cadastro está em análise.</p>
-      <p style="color:#6b7280;font-size:13px;margin-bottom:20px">Você receberá um e-mail com a resposta em até <strong style="color:#fff">48 horas</strong>.</p>
-      <a href="login.html" style="color:#45edee;font-size:14px;text-decoration:none">Voltar ao login</a>
+      <div style="font-size:48px;margin-bottom:12px">🎉</div>
+      <h3 style="color:#45edee;font-size:20px;font-weight:700;margin-bottom:8px">Conta de professor criada!</h3>
+      <p style="color:#9ca3af;font-size:14px;margin-bottom:20px">Verifique seu e-mail para confirmar a conta, depois faça login no portal do professor.</p>
+      <a href="login.html" class="btn-primary" style="display:block;text-decoration:none;text-align:center">Ir para o Login</a>
     </div>
 
-    <div id="erro-cadastro" class="error-msg"></div>
+    <div class="error-msg" id="erro-cadastro" style="margin-top:0"></div>
   </div>
 
 </div>
 
 <script>
   let perfilSelecionado = 'aluno';
+  let codigoValidado    = '';
 
-  // Redirecionar se logado
-  if (authEstaLogado()) {
+  // Redirecionar se já logado
+  if (typeof authEstaLogado === 'function' && authEstaLogado()) {
     const tipo = authGetTipo();
     window.location.href = tipo === 'professor' ? 'professor.html' : 'inicio.html';
   }
 
+  // ========================================================
+  // STEP 1 — Perfil
+  // ========================================================
   function selecionarPerfil(p) {
     perfilSelecionado = p;
-    document.getElementById('btn-perfil-aluno').className = 'perfil-btn ' + (p === 'aluno' ? 'active' : '');
+    document.getElementById('btn-perfil-aluno').className     = 'perfil-btn ' + (p === 'aluno' ? 'active' : '');
     document.getElementById('btn-perfil-professor').className = 'perfil-btn ' + (p === 'professor' ? 'active' : '');
+
+    // Ajusta texto do step 2 conforme perfil
+    if (p === 'aluno') {
+      document.getElementById('step2-titulo').textContent    = 'Código da turma';
+      document.getElementById('step2-subtitulo').textContent = 'Cole o código que sua professora enviou';
+      document.getElementById('info-aluno').style.display     = 'block';
+      document.getElementById('info-professor').style.display = 'none';
+      document.getElementById('cad-codigo').placeholder       = 'redaon-xxxx-xxxx-NN';
+    } else {
+      document.getElementById('step2-titulo').textContent    = 'Código de professor';
+      document.getElementById('step2-subtitulo').textContent = 'Cole o código que recebeu da equipe RedaON';
+      document.getElementById('info-aluno').style.display     = 'none';
+      document.getElementById('info-professor').style.display = 'block';
+      document.getElementById('cad-codigo').placeholder       = 'prof-XXXX-XXXX';
+    }
+
+    // Campos extras só pra professor
     document.getElementById('campo-escola').style.display = p === 'professor' ? 'block' : 'none';
-    document.getElementById('campo-cpf').style.display = p === 'professor' ? 'block' : 'none';
+    document.getElementById('campo-cpf').style.display    = p === 'professor' ? 'block' : 'none';
   }
 
+  // ========================================================
+  // Navegação entre steps
+  // ========================================================
   function irStep(n) {
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     document.getElementById('step-' + n).classList.add('active');
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 4; i++) {
       document.getElementById('dot-' + i).className = i <= n ? 'done' : '';
     }
   }
 
-  function validarStep2() {
-    const nome = document.getElementById('cad-nome').value.trim();
-    const email = document.getElementById('cad-email').value.trim();
-    const senha = document.getElementById('cad-senha').value;
-    const escola = document.getElementById('cad-escola').value.trim();
-    const err = document.getElementById('step2-error');
+  // ========================================================
+  // STEP 2 — Validar código
+  // ========================================================
+  async function validarCodigo() {
+    const codigo = document.getElementById('cad-codigo').value.trim();
+    const err    = document.getElementById('step2-error');
+    const btn    = document.getElementById('btn-validar-codigo');
     err.style.display = 'none';
 
-    if (!nome) { mostrarErroStep2('Informe seu nome completo.'); return; }
-    if (!email || !email.includes('@')) { mostrarErroStep2('Informe um e-mail válido.'); return; }
-    if (!senha || senha.length < 6) { mostrarErroStep2('Senha deve ter pelo menos 6 caracteres.'); return; }
-    if (perfilSelecionado === 'professor' && !escola) { mostrarErroStep2('Informe a escola onde leciona.'); return; }
+    if (!codigo) {
+      mostrarErro('step2-error', 'Informe o código de acesso.');
+      return;
+    }
 
-    fazerCadastro();
-  }
-
-  function mostrarErroStep2(msg) {
-    const el = document.getElementById('step2-error');
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
-
-  async function fazerCadastro() {
-    irStep(3);
-    document.getElementById('loading-cadastro').style.display = 'block';
-    document.getElementById('sucesso-aluno').style.display = 'none';
-    document.getElementById('sucesso-professor').style.display = 'none';
-    document.getElementById('erro-cadastro').style.display = 'none';
-
-    const nome = document.getElementById('cad-nome').value.trim();
-    const email = document.getElementById('cad-email').value.trim();
-    const senha = document.getElementById('cad-senha').value;
-    const escola = document.getElementById('cad-escola').value.trim();
-    const cpf = document.getElementById('cad-cpf').value.trim();
+    // Lock botão
+    btn.disabled    = true;
+    btn.innerHTML   = '<span class="spinner-sm"></span>Validando...';
 
     try {
-      await authCadastro({ nome, email, senha, perfil: perfilSelecionado, escola, cpf });
+      const valido = perfilSelecionado === 'aluno'
+        ? await dbValidarCodigoTurma(codigo)
+        : await dbValidarCodigoProfessor(codigo);
+
+      if (!valido) {
+        mostrarErro('step2-error', 'Código inválido.');
+        return;
+      }
+
+      codigoValidado = codigo;
+      irStep(3);
+    } catch (e) {
+      console.error(e);
+      mostrarErro('step2-error', 'Não foi possível validar agora. Tente novamente.');
+    } finally {
+      btn.disabled  = false;
+      btn.innerHTML = 'Validar código';
+    }
+  }
+
+  // ========================================================
+  // STEP 3 — Validar dados e cadastrar
+  // ========================================================
+  async function fazerCadastro() {
+    const nome   = document.getElementById('cad-nome').value.trim();
+    const email  = document.getElementById('cad-email').value.trim();
+    const senha  = document.getElementById('cad-senha').value;
+    const escola = document.getElementById('cad-escola').value.trim();
+    const cpf    = document.getElementById('cad-cpf').value.trim();
+    const btn    = document.getElementById('btn-criar-conta');
+
+    const errEl  = document.getElementById('step3-error');
+    errEl.style.display = 'none';
+
+    if (!nome) { mostrarErro('step3-error', 'Informe seu nome completo.'); return; }
+    if (!email || !email.includes('@')) { mostrarErro('step3-error', 'Informe um e-mail válido.'); return; }
+    if (!senha || senha.length < 6) { mostrarErro('step3-error', 'Senha deve ter pelo menos 6 caracteres.'); return; }
+    if (perfilSelecionado === 'professor' && !escola) { mostrarErro('step3-error', 'Informe a escola onde leciona.'); return; }
+
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner-sm"></span>Criando conta...';
+
+    irStep(4);
+    document.getElementById('loading-cadastro').style.display = 'block';
+    document.getElementById('sucesso-aluno').style.display     = 'none';
+    document.getElementById('sucesso-professor').style.display = 'none';
+    document.getElementById('erro-cadastro').style.display     = 'none';
+
+    try {
+      await authCadastroFechado({
+        nome, email, senha,
+        perfil: perfilSelecionado,
+        codigo: codigoValidado,
+        escola, cpf
+      });
+
       document.getElementById('loading-cadastro').style.display = 'none';
 
       if (perfilSelecionado === 'professor') {
         document.getElementById('sucesso-professor').style.display = 'block';
       } else {
-        // Aluno — redireciona para questionario DISC
-        document.querySelector('#loading-cadastro p').textContent = 'Quase la! Vamos personalizar sua experiencia...';
+        document.getElementById('loading-msg').textContent = 'Personalizando sua experiência...';
         document.getElementById('loading-cadastro').style.display = 'block';
         setTimeout(() => { window.location.href = 'questionario-perfil.html'; }, 1500);
       }
     } catch (err) {
       document.getElementById('loading-cadastro').style.display = 'none';
-      const el = document.getElementById('erro-cadastro');
-      el.textContent = traduzirErroAuth(err.message);
-      el.style.display = 'block';
-      setTimeout(() => irStep(2), 100);
+
+      if (err.message === 'CODIGO_INVALIDO') {
+        // Código foi consumido entre validação e cadastro (raro mas possível)
+        mostrarErro('erro-cadastro', 'Código inválido. Volte e use outro código.');
+      } else {
+        const el = document.getElementById('erro-cadastro');
+        el.textContent     = traduzirErroAuth(err.message);
+        el.style.display   = 'block';
+      }
+
+      btn.disabled  = false;
+      btn.innerHTML = 'Criar conta';
+      // Volta pra step 3 depois de 2s pra usuário poder corrigir
+      setTimeout(() => irStep(3), 2500);
     }
+  }
+
+  // ========================================================
+  // Helpers
+  // ========================================================
+  function mostrarErro(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent   = msg;
+    el.style.display = 'block';
   }
 
   function toggleSenha(id, btn) {
     const input = document.getElementById(id);
-    if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
-    else { input.type = 'password'; btn.textContent = '👁'; }
+    if (input.type === 'password') { input.type = 'text';     btn.textContent = '🙈'; }
+    else                            { input.type = 'password'; btn.textContent = '👁'; }
   }
 
   function maskCPF(input) {
@@ -263,10 +375,18 @@
   function traduzirErroAuth(msg) {
     if (!msg) return 'Erro desconhecido. Tente novamente.';
     if (msg.includes('User already registered')) return '📧 E-mail já cadastrado. Faça login.';
-    if (msg.includes('Password should be')) return '🔒 Senha deve ter pelo menos 6 caracteres.';
-    if (msg.includes('Invalid email')) return '📧 E-mail inválido.';
+    if (msg.includes('Password should be'))      return '🔒 Senha deve ter pelo menos 6 caracteres.';
+    if (msg.includes('Invalid email'))           return '📧 E-mail inválido.';
     return msg;
   }
+
+  // Permitir Enter pra avançar
+  document.getElementById('cad-codigo').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); validarCodigo(); }
+  });
+  document.getElementById('cad-senha').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); fazerCadastro(); }
+  });
 </script>
 </body>
 </html>

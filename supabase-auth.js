@@ -999,3 +999,226 @@ if (document.readyState === 'loading') {
 } else {
   preencherNomeUsuario();
 }
+
+// ─────────────────────────────────────────────
+// CADASTRO FECHADO POR CÓDIGO (01/05/2026)
+// Todas as funções abaixo usam fetch direto pra
+// /rest/v1/rpc/<funcao> seguindo o padrão do arquivo.
+// ─────────────────────────────────────────────
+
+/**
+ * Helper interno: chama RPC do Supabase via REST.
+ * Funciona com ou sem token (anon = sem token).
+ */
+async function _rpcCall(nomeFuncao, params = {}, requerAuth = false) {
+  const url = `${SUPABASE_URL}/rest/v1/rpc/${nomeFuncao}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY
+  };
+  if (requerAuth) {
+    const token = authGetToken();
+    if (!token) throw new Error('Não autenticado');
+    headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    // anon: usa a anon key como bearer
+    headers['Authorization'] = `Bearer ${SUPABASE_KEY}`;
+  }
+
+  const fetchFn = requerAuth ? dbFetch : fetch;
+  const res = await fetchFn(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(params)
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    const msg = (data && (data.message || data.hint || data.error_description)) || 'Erro RPC';
+    throw new Error(msg);
+  }
+  return data;
+}
+
+// ─────────────────────────────────────────────
+// VALIDAÇÃO DE CÓDIGO (anon, ANTES do signUp)
+// ─────────────────────────────────────────────
+
+/**
+ * Valida código de turma (aluno).
+ * @param {string} codigo - Ex: "redaon-pleno-pantera-35"
+ * @returns {Promise<boolean>}
+ */
+async function dbValidarCodigoTurma(codigo) {
+  if (!codigo) return false;
+  try {
+    const data = await _rpcCall('validar_codigo_turma', { p_codigo: codigo.trim() }, false);
+    return data === true;
+  } catch (err) {
+    console.error('[dbValidarCodigoTurma] erro:', err);
+    return false;
+  }
+}
+
+/**
+ * Valida código de professor (one-time-use).
+ * @param {string} codigo - Ex: "prof-A1B2-C3D4"
+ * @returns {Promise<boolean>}
+ */
+async function dbValidarCodigoProfessor(codigo) {
+  if (!codigo) return false;
+  try {
+    const data = await _rpcCall('validar_codigo_professor', { p_codigo: codigo.trim() }, false);
+    return data === true;
+  } catch (err) {
+    console.error('[dbValidarCodigoProfessor] erro:', err);
+    return false;
+  }
+}
+
+// ─────────────────────────────────────────────
+// CONSUMO DE CÓDIGO (autenticado, DEPOIS do signUp+login)
+// ─────────────────────────────────────────────
+
+/**
+ * Marca código de professor como usado e vincula ao usuário logado.
+ * @param {string} codigo
+ * @returns {Promise<boolean>}
+ */
+async function dbConsumirCodigoProfessor(codigo) {
+  try {
+    const data = await _rpcCall('consumir_codigo_professor', { p_codigo: codigo.trim() }, true);
+    return data === true;
+  } catch (err) {
+    console.error('[dbConsumirCodigoProfessor] erro:', err);
+    return false;
+  }
+}
+
+/**
+ * Vincula aluno recém-cadastrado à turma via código.
+ * @param {string} codigoTurma
+ * @returns {Promise<boolean>}
+ */
+async function dbVincularAlunoTurmaPosCadastro(codigoTurma) {
+  try {
+    const data = await _rpcCall('vincular_aluno_turma_pos_cadastro', { p_codigo_turma: codigoTurma.trim() }, true);
+    return data === true;
+  } catch (err) {
+    console.error('[dbVincularAlunoTurmaPosCadastro] erro:', err);
+    return false;
+  }
+}
+
+// ─────────────────────────────────────────────
+// ADMIN — geração e listagem de códigos de professor
+// Só funciona pra usuários com is_admin = true
+// ─────────────────────────────────────────────
+
+/**
+ * Gera novo código de professor.
+ * @param {string|null} observacao - Texto livre (ex: "Profa. Maria - Escola X")
+ * @returns {Promise<string>} código gerado
+ */
+async function dbAdminCriarCodigoProfessor(observacao = null) {
+  const data = await _rpcCall('admin_criar_codigo_professor', { p_observacao: observacao }, true);
+  return data;
+}
+
+/**
+ * Lista todos os códigos de professor (admin).
+ * @returns {Promise<Array>}
+ */
+async function dbAdminListarCodigosProfessor() {
+  const data = await _rpcCall('admin_listar_codigos_professor', {}, true);
+  return Array.isArray(data) ? data : [];
+}
+
+// ─────────────────────────────────────────────
+// CADASTRO FECHADO — wrapper principal
+// Faz: valida código → cria conta → faz login → consome código / vincula turma
+// ─────────────────────────────────────────────
+
+/**
+ * Cadastro fechado por código.
+ * Valida o código (já fez no front, mas valida de novo aqui),
+ * cria a conta, faz login automático pra ter token,
+ * e consome o código (professor) ou vincula à turma (aluno).
+ *
+ * @param {Object} dados
+ * @param {string} dados.nome
+ * @param {string} dados.email
+ * @param {string} dados.senha
+ * @param {'aluno'|'professor'} dados.perfil
+ * @param {string} dados.codigo - código de turma OU código de professor
+ * @param {string} [dados.escola] - só pra professor
+ * @param {string} [dados.cpf]    - só pra professor
+ */
+async function authCadastroFechado({ nome, email, senha, perfil, codigo, escola = null, cpf = null }) {
+  // 1. Re-valida código (defesa em profundidade)
+  const codigoValido = perfil === 'aluno'
+    ? await dbValidarCodigoTurma(codigo)
+    : await dbValidarCodigoProfessor(codigo);
+
+  if (!codigoValido) {
+    throw new Error('CODIGO_INVALIDO');
+  }
+
+  // 2. Cria conta (reusa authCadastro existente)
+  await authCadastro({ nome, email, senha, perfil, escola, cpf });
+
+  // 3. Pra consumir código / vincular turma precisamos de token.
+  //    Tenta login automático. Se o Supabase exigir confirmação de e-mail,
+  //    o login pode falhar — nesse caso o vínculo será feito no primeiro login.
+  let logado = false;
+  try {
+    await authLogin(email, senha);
+    logado = true;
+  } catch (e) {
+    console.warn('[authCadastroFechado] Login pós-cadastro falhou (provavelmente requer confirmação de e-mail):', e.message);
+  }
+
+  // 4. Pequeno delay defensivo pra trigger on_auth_user_created criar registro em public.usuarios
+  await new Promise(r => setTimeout(r, 700));
+
+  // 5. Pós-cadastro
+  if (logado) {
+    if (perfil === 'professor') {
+      const ok = await dbConsumirCodigoProfessor(codigo);
+      if (!ok) {
+        console.warn('[authCadastroFechado] Falha ao consumir código de professor — admin pode marcar manualmente');
+      }
+    } else {
+      const ok = await dbVincularAlunoTurmaPosCadastro(codigo);
+      if (!ok) {
+        console.warn('[authCadastroFechado] Falha ao vincular aluno à turma — pode entrar manualmente em configurações');
+      }
+    }
+  } else {
+    // Não conseguiu logar — guarda código pra usar no primeiro login
+    localStorage.setItem('redaon_codigo_pendente', JSON.stringify({ codigo, perfil }));
+  }
+
+  return { logado };
+}
+
+/**
+ * Verifica se há código pendente após cadastro com confirmação de e-mail.
+ * Chamar após login bem-sucedido (em login.html ou no carregamento das telas pós-login).
+ */
+async function processarCodigoPendente() {
+  const raw = localStorage.getItem('redaon_codigo_pendente');
+  if (!raw) return;
+
+  try {
+    const { codigo, perfil } = JSON.parse(raw);
+    if (perfil === 'professor') {
+      await dbConsumirCodigoProfessor(codigo);
+    } else {
+      await dbVincularAlunoTurmaPosCadastro(codigo);
+    }
+  } catch (e) {
+    console.error('[processarCodigoPendente] erro:', e);
+  } finally {
+    localStorage.removeItem('redaon_codigo_pendente');
+  }
+}
