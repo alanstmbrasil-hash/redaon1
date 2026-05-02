@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RedaON — Códigos de Professor (Admin)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="supabase-auth.js"></script>
+<style>
+  *{word-break:normal!important;overflow-wrap:break-word}
+  body{background:#0b0e14;font-family:'Segoe UI',sans-serif;color:#e5e7eb;margin:0}
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#0b0e14}::-webkit-scrollbar-thumb{background:#45edee44;border-radius:3px}
+
+  /* Layout */
+  .container{max-width:1100px;margin:0 auto;padding:24px}
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap}
+  .logo-text{font-style:italic;font-weight:800;font-size:1.5rem;letter-spacing:-1px;color:#fff}
+  .logo-on{color:#45edee}
+  .badge-admin{background:linear-gradient(135deg,#6c5ce7,#45edee);color:#0b0e14;font-weight:700;font-size:11px;padding:4px 10px;border-radius:999px;letter-spacing:.5px}
+  .back-link{color:#6b7280;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .back-link:hover{color:#45edee}
+
+  /* Cards */
+  .card{background:#13161f;border:1px solid #1e2330;border-radius:14px;padding:20px}
+
+  /* Stats */
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+  .stat-card{background:#13161f;border:1px solid #1e2330;border-radius:12px;padding:16px}
+  .stat-label{color:#6b7280;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .stat-value{font-size:28px;font-weight:800;line-height:1}
+  .stat-disponivel .stat-value{color:#45edee}
+  .stat-usado    .stat-value{color:#a39afc}
+  .stat-total    .stat-value{color:#fff}
+  @media(max-width:640px){.stats-grid{grid-template-columns:1fr}}
+
+  /* Botões */
+  .btn-primary{background:linear-gradient(135deg,#45edee,#6c5ce7);color:#0b0e14;font-weight:700;border-radius:10px;padding:12px 18px;font-size:14px;border:none;cursor:pointer;transition:opacity .2s,transform .1s;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary:hover{opacity:.9}
+  .btn-primary:active{transform:scale(.98)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+  .btn-ghost{background:transparent;color:#9ca3af;font-weight:600;border:1.5px solid #1e2330;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;transition:all .2s}
+  .btn-ghost:hover{border-color:#45edee;color:#45edee}
+  .btn-ghost.active{border-color:#45edee;color:#45edee;background:#45edee14}
+
+  /* Filtros */
+  .filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+  .filtros-label{color:#6b7280;font-size:13px;margin-right:4px}
+
+  /* Tabela */
+  .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid #1e2330}
+  table{width:100%;border-collapse:collapse;background:#13161f}
+  th{background:#0b0e14;color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:left;padding:12px 14px;border-bottom:1px solid #1e2330;white-space:nowrap}
+  td{padding:14px;border-bottom:1px solid #1a1d28;font-size:14px;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#15191f}
+
+  .codigo-cell{font-family:'Courier New',monospace;font-weight:700;color:#45edee;letter-spacing:1px;font-size:13px}
+  .codigo-cell.usado{color:#6b7280;text-decoration:line-through}
+  .obs-cell{color:#9ca3af;font-size:13px;max-width:240px}
+  .data-cell{color:#6b7280;font-size:12px;white-space:nowrap}
+  .email-cell{color:#a39afc;font-size:13px;font-weight:500}
+
+  .status-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+  .status-disponivel{background:#45edee18;color:#45edee;border:1px solid #45edee44}
+  .status-usado     {background:#6c5ce714;color:#a39afc;border:1px solid #6c5ce744}
+
+  .copy-btn{background:none;border:1px solid #1e2330;color:#9ca3af;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;transition:all .15s}
+  .copy-btn:hover{border-color:#45edee;color:#45edee}
+  .copy-btn.copiado{border-color:#45edee;color:#45edee;background:#45edee14}
+
+  /* Empty / Loading */
+  .empty{text-align:center;padding:48px 16px;color:#6b7280;font-size:14px}
+  .empty-icon{font-size:42px;margin-bottom:10px;opacity:.5}
+
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{width:32px;height:32px;border:3px solid #1e2330;border-top-color:#45edee;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+  .spinner-sm{width:14px;height:14px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle}
+
+  /* Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+  .modal-overlay.show{display:flex}
+  .modal{background:#13161f;border:1px solid #1e2330;border-radius:16px;padding:24px;max-width:440px;width:100%;animation:modalIn .25s ease-out}
+  @keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+  .modal h3{color:#fff;font-size:18px;font-weight:700;margin:0 0 6px 0}
+  .modal p.sub{color:#6b7280;font-size:14px;margin:0 0 18px 0}
+
+  .input-field{background:#0b0e14;border:1.5px solid #1e2330;color:#fff;border-radius:10px;padding:12px 14px;width:100%;font-size:14px;outline:none;transition:border-color .2s;box-sizing:border-box}
+  .input-field:focus{border-color:#45edee}
+  .input-field::placeholder{color:#4a5568}
+
+  .codigo-display{background:#0b0e14;border:1.5px dashed #45edee44;border-radius:10px;padding:18px;text-align:center;font-family:'Courier New',monospace;font-size:22px;font-weight:700;color:#45edee;letter-spacing:2px;margin:14px 0}
+
+  /* Toast */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:#13161f;border:1px solid #45edee44;color:#45edee;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:transform .3s ease;z-index:60;display:flex;align-items:center;gap:8px}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.erro{border-color:#e74c3c44;color:#f87171}
+
+  /* Block when not admin */
+  .block-screen{display:none;text-align:center;padding:60px 20px}
+  .block-screen.show{display:block}
+  .block-screen .icon{font-size:56px;margin-bottom:16px}
+  .block-screen h2{color:#fff;font-size:20px;font-weight:700;margin:0 0 8px 0}
+  .block-screen p{color:#9ca3af;font-size:14px;margin:0 0 20px 0}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="inicio.html" class="back-link">← Voltar</a>
+      <span style="color:#1e2330">|</span>
+      <div class="logo-text">Reda<span class="logo-on">ON</span></div>
+      <span class="badge-admin">ADMIN</span>
+    </div>
+    <button class="btn-primary" id="btn-novo-codigo" onclick="abrirModalNovo()">
+      <span style="font-size:18px">＋</span>
+      Gerar novo código
+    </button>
+  </div>
+
+  <h1 style="color:#fff;font-size:24px;font-weight:800;margin:0 0 4px 0">Códigos de Professor</h1>
+  <p style="color:#6b7280;font-size:14px;margin:0 0 20px 0">Gere e acompanhe os códigos one-time-use enviados aos professores.</p>
+
+  <!-- Bloqueio se não for admin -->
+  <div class="block-screen" id="block-screen">
+    <div class="icon">🔒</div>
+    <h2>Acesso restrito</h2>
+    <p>Esta área é exclusiva para administradores RedaON.</p>
+    <a href="inicio.html" class="btn-primary" style="text-decoration:none">Voltar</a>
+  </div>
+
+  <!-- Conteúdo principal -->
+  <div id="content" style="display:none">
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card stat-disponivel">
+        <div class="stat-label">Disponíveis</div>
+        <div class="stat-value" id="stat-disponivel">—</div>
+      </div>
+      <div class="stat-card stat-usado">
+        <div class="stat-label">Usados</div>
+        <div class="stat-value" id="stat-usado">—</div>
+      </div>
+      <div class="stat-card stat-total">
+        <div class="stat-label">Total gerados</div>
+        <div class="stat-value" id="stat-total">—</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros">
+      <span class="filtros-label">Mostrar:</span>
+      <button class="btn-ghost active" data-filtro="disponiveis" onclick="aplicarFiltro('disponiveis')">Disponíveis</button>
+      <button class="btn-ghost"        data-filtro="usados"      onclick="aplicarFiltro('usados')">Usados</button>
+      <button class="btn-ghost"        data-filtro="todos"       onclick="aplicarFiltro('todos')">Todos</button>
+      <span style="flex:1"></span>
+      <button class="btn-ghost" onclick="carregarCodigos()" title="Atualizar">🔄</button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Observação</th>
+            <th>Status</th>
+            <th>Usado por</th>
+            <th>Quando</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tabela-body">
+          <tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Novo Código -->
+<div class="modal-overlay" id="modal-novo">
+  <div class="modal">
+
+    <!-- Estado: form -->
+    <div id="modal-form-step">
+      <h3>Gerar novo código</h3>
+      <p class="sub">Adicione uma observação pra lembrar quem vai usar este código (opcional, mas ajuda).</p>
+
+      <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Observação</label>
+      <input id="input-observacao" type="text" class="input-field" placeholder="Ex: Profa. Maria — Escola Estadual ABC" maxlength="200">
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px">
+        <button class="btn-ghost" onclick="fecharModalNovo()">Cancelar</button>
+        <button class="btn-primary" id="btn-gerar" onclick="gerarCodigo()">Gerar código</button>
+      </div>
+    </div>
+
+    <!-- Estado: gerado -->
+    <div id="modal-gerado-step" style="display:none">
+      <h3>✅ Código gerado!</h3>
+      <p class="sub">Copie o código abaixo e envie ao professor por WhatsApp ou e-mail.</p>
+
+      <div class="codigo-display" id="codigo-gerado">—</div>
+
+      <p style="color:#6b7280;font-size:12px;text-align:center;margin:0 0 16px 0">Este código só funciona uma vez. Após o cadastro, ele será marcado como usado.</p>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-ghost" onclick="fecharModalNovo()">Fechar</button>
+        <button class="btn-primary" id="btn-copiar-modal" onclick="copiarCodigoModal()">📋 Copiar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toast-texto"></span></div>
+
+<script>
+  // ============================================================
+  // Estado global
+  // ============================================================
+  let TODOS_CODIGOS  = [];
+  let FILTRO_ATUAL   = 'disponiveis';
+  let CODIGO_GERADO  = '';
+
+  // ============================================================
+  // Inicialização
+  // ============================================================
+  (async function init() {
+    if (!authEstaLogado()) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // Verifica se é admin
+    const isAdmin = await verificarSeAdmin();
+    if (!isAdmin) {
+      document.getElementById('block-screen').classList.add('show');
+      document.getElementById('content').style.display = 'none';
+      document.getElementById('btn-novo-codigo').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('content').style.display = 'block';
+    await carregarCodigos();
+  })();
+
+  async function verificarSeAdmin() {
+    // A RPC admin_listar_codigos_professor já bloqueia não-admins.
+    // Tenta listar; se der erro de "Acesso negado", não é admin.
+    try {
+      await dbAdminListarCodigosProfessor();
+      return true;
+    } catch (err) {
+      console.warn('[verificarSeAdmin] não é admin:', err.message);
+      return false;
+    }
+  }
+
+  // ============================================================
+  // Carregar códigos
+  // ============================================================
+  async function carregarCodigos() {
+    try {
+      document.getElementById('tabela-body').innerHTML = '<tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>';
+      TODOS_CODIGOS = await dbAdminListarCodigosProfessor();
+      atualizarStats();
+      renderizarTabela();
+    } catch (err) {
+      console.error(err);
+      mostrarToast('Erro ao carregar códigos: ' + (err.message || ''), true);
+      document.getElementById('tabela-body').innerHTML = '<tr><td colspan="6" class="empty"><div class="empty-icon">⚠️</div>Erro ao carregar.</td></tr>';
+    }
+  }
+
+  function atualizarStats() {
+    const total       = TODOS_CODIGOS.length;
+    const usados      = TODOS_CODIGOS.filter(c => c.usado_em).length;
+    const disponiveis = total - usados;
+    document.getElementById('stat-disponivel').textContent = disponiveis;
+    document.getElementById('stat-usado').textContent      = usados;
+    document.getElementById('stat-total').textContent      = total;
+  }
+
+  function renderizarTabela() {
+    const tbody = document.getElementById('tabela-body');
+
+    let lista = TODOS_CODIGOS;
+    if (FILTRO_ATUAL === 'disponiveis') lista = lista.filter(c => !c.usado_em);
+    else if (FILTRO_ATUAL === 'usados') lista = lista.filter(c =>  c.usado_em);
+
+    if (lista.length === 0) {
+      let msg, icon;
+      if (FILTRO_ATUAL === 'disponiveis') { msg = 'Nenhum código disponível. Gere um novo!'; icon = '🎟️'; }
+      else if (FILTRO_ATUAL === 'usados') { msg = 'Nenhum código foi usado ainda.'; icon = '⏳'; }
+      else                                 { msg = 'Nenhum código gerado ainda.'; icon = '🎟️'; }
+      tbody.innerHTML = `<tr><td colspan="6" class="empty"><div class="empty-icon">${icon}</div>${msg}</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = lista.map(c => {
+      const usado = !!c.usado_em;
+      return `
+        <tr>
+          <td><span class="codigo-cell ${usado ? 'usado' : ''}">${escapeHtml(c.codigo)}</span></td>
+          <td><span class="obs-cell">${c.observacao ? escapeHtml(c.observacao) : '<em style="color:#4a5568">—</em>'}</span></td>
+          <td><span class="status-pill ${usado ? 'status-usado' : 'status-disponivel'}">${usado ? 'Usado' : 'Disponível'}</span></td>
+          <td>${usado
+            ? `<div class="email-cell">${escapeHtml(c.usado_por_email || '')}</div>${c.usado_por_nome ? `<div style="color:#6b7280;font-size:12px;margin-top:2px">${escapeHtml(c.usado_por_nome)}</div>` : ''}`
+            : `<span style="color:#4a5568">—</span>`
+          }</td>
+          <td><span class="data-cell">${usado ? formatarData(c.usado_em) : 'Criado: ' + formatarData(c.criado_em)}</span></td>
+          <td>${!usado
+            ? `<button class="copy-btn" onclick="copiarCodigo('${escapeHtml(c.codigo)}', this)">📋 Copiar</button>`
+            : ''
+          }</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // ============================================================
+  // Filtros
+  // ============================================================
+  function aplicarFiltro(novoFiltro) {
+    FILTRO_ATUAL = novoFiltro;
+    document.querySelectorAll('[data-filtro]').forEach(b => {
+      b.classList.toggle('active', b.dataset.filtro === novoFiltro);
+    });
+    renderizarTabela();
+  }
+
+  // ============================================================
+  // Modal: gerar novo código
+  // ============================================================
+  function abrirModalNovo() {
+    document.getElementById('input-observacao').value = '';
+    document.getElementById('modal-form-step').style.display    = 'block';
+    document.getElementById('modal-gerado-step').style.display  = 'none';
+    document.getElementById('modal-novo').classList.add('show');
+    setTimeout(() => document.getElementById('input-observacao').focus(), 100);
+  }
+
+  function fecharModalNovo() {
+    document.getElementById('modal-novo').classList.remove('show');
+    if (CODIGO_GERADO) {
+      // Recarrega lista pra mostrar o código novo
+      carregarCodigos();
+      CODIGO_GERADO = '';
+    }
+  }
+
+  async function gerarCodigo() {
+    const obs = document.getElementById('input-observacao').value.trim() || null;
+    const btn = document.getElementById('btn-gerar');
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner-sm"></span>&nbsp;Gerando...';
+
+    try {
+      const codigo = await dbAdminCriarCodigoProfessor(obs);
+      CODIGO_GERADO = codigo;
+      document.getElementById('codigo-gerado').textContent       = codigo;
+      document.getElementById('modal-form-step').style.display   = 'none';
+      document.getElementById('modal-gerado-step').style.display = 'block';
+    } catch (err) {
+      console.error(err);
+      mostrarToast('Erro: ' + (err.message || 'falha ao gerar'), true);
+    } finally {
+      btn.disabled  = false;
+      btn.innerHTML = 'Gerar código';
+    }
+  }
+
+  async function copiarCodigoModal() {
+    if (!CODIGO_GERADO) return;
+    await copiarParaClipboard(CODIGO_GERADO);
+    const btn = document.getElementById('btn-copiar-modal');
+    btn.innerHTML = '✓ Copiado!';
+    setTimeout(() => btn.innerHTML = '📋 Copiar', 1800);
+  }
+
+  async function copiarCodigo(codigo, btn) {
+    await copiarParaClipboard(codigo);
+    btn.classList.add('copiado');
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => {
+      btn.classList.remove('copiado');
+      btn.textContent = '📋 Copiar';
+    }, 1800);
+  }
+
+  async function copiarParaClipboard(texto) {
+    try {
+      await navigator.clipboard.writeText(texto);
+      mostrarToast('Código copiado!');
+    } catch {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = texto;
+      ta.style.position = 'fixed';
+      ta.style.opacity  = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); mostrarToast('Código copiado!'); }
+      catch { mostrarToast('Não foi possível copiar', true); }
+      ta.remove();
+    }
+  }
+
+  // ============================================================
+  // Helpers
+  // ============================================================
+  function formatarData(iso) {
+    if (!iso) return '—';
+    try {
+      const d = new Date(iso);
+      const dia  = String(d.getDate()).padStart(2,'0');
+      const mes  = String(d.getMonth()+1).padStart(2,'0');
+      const ano  = d.getFullYear();
+      const hora = String(d.getHours()).padStart(2,'0');
+      const min  = String(d.getMinutes()).padStart(2,'0');
+      return `${dia}/${mes}/${ano} ${hora}:${min}`;
+    } catch { return iso; }
+  }
+
+  function escapeHtml(s) {
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#039;');
+  }
+
+  let toastTimer;
+  function mostrarToast(msg, erro = false) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-texto').textContent = msg;
+    t.classList.toggle('erro', erro);
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  // Permitir Enter pra gerar código
+  document.getElementById('input-observacao').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); gerarCodigo(); }
+  });
+
+  // Fechar modal com Esc ou clique fora
+  document.getElementById('modal-novo').addEventListener('click', e => {
+    if (e.target.id === 'modal-novo') fecharModalNovo();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('modal-novo').classList.contains('show')) {
+      fecharModalNovo();
+    }
+  });
+</script>
+</body>
+</html>
