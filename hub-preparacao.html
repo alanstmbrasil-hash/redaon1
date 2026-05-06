@@ -418,7 +418,7 @@ async function _hubBuscarMaterial(eixo){
   if(!TEMA_ID_HUB)return null;
   try{
     const url=`${SUPABASE_URL}/rest/v1/rpc/buscar_material_apoio`;
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${authGetToken()}`},body:JSON.stringify({p_tema_id:TEMA_ID_HUB,p_eixo:eixo})});
+    const res=await dbFetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID_HUB,p_eixo:eixo})});
     if(!res.ok)return null;
     const data=await res.json();
     return (typeof data==='string'&&data.length>30)?data:null;
@@ -428,7 +428,7 @@ async function _hubSalvarMaterial(eixo,conteudo){
   if(!TEMA_ID_HUB||!conteudo)return;
   try{
     const url=`${SUPABASE_URL}/rest/v1/rpc/salvar_material_apoio`;
-    await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${authGetToken()}`},body:JSON.stringify({p_tema_id:TEMA_ID_HUB,p_eixo:eixo,p_conteudo:conteudo})});
+    await dbFetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID_HUB,p_eixo:eixo,p_conteudo:conteudo})});
   }catch(e){console.warn('[hub salvar]',e);}
 }
 

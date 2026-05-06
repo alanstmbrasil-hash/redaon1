@@ -319,11 +319,7 @@
   // ============================================================
   async function carregarTemas() {
     const url = `${SUPABASE_URL}/rest/v1/temas?select=id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,ativo&ativo=eq.true&order=ano_enem.desc.nullsfirst&order=aplicacao.asc`;
-    const headers = {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${authGetToken()}`,
-    };
-    const res = await fetch(url, { headers });
+    const res = await dbFetch(url, {});
     if (!res.ok) throw new Error('Erro ao buscar temas: ' + res.status);
     TEMAS = await res.json();
     console.log(`[carregarTemas] ${TEMAS.length} temas carregados do banco.`);

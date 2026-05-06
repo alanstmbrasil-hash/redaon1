@@ -2071,13 +2071,9 @@ async function _buscarMaterialNoBanco(temaId, eixo) {
   if (!temaId) return null;
   try {
     const url = `${SUPABASE_URL}/rest/v1/rpc/buscar_material_apoio`;
-    const res = await fetch(url, {
+    const res = await dbFetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${authGetToken()}`
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ p_tema_id: temaId, p_eixo: eixo })
     });
     if (!res.ok) return null;
@@ -2093,13 +2089,9 @@ async function _salvarMaterialNoBanco(temaId, eixo, conteudo) {
   if (!temaId || !conteudo) return;
   try {
     const url = `${SUPABASE_URL}/rest/v1/rpc/salvar_material_apoio`;
-    await fetch(url, {
+    await dbFetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${authGetToken()}`
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ p_tema_id: temaId, p_eixo: eixo, p_conteudo: conteudo })
     });
   } catch (e) {
