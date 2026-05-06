@@ -261,6 +261,46 @@ function toggleSidebar(){
           </button>
           <div class="rep-body px-5 pb-5" id="body-atualidades"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-atualidades"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando atualidades...</span></div></div></div>
         </div>
+        <div class="rep-card" id="card-literatura">
+          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('literatura')">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(244,114,182,.1);"><span class="material-symbols-outlined" style="color:#f472b6;font-variation-settings:'FILL' 1;">menu_book</span></div>
+            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Literatura</p><p class="text-[10px] text-on-surface-variant">Obras literárias e autores</p></div>
+            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-literatura">expand_more</span>
+          </button>
+          <div class="rep-body px-5 pb-5" id="body-literatura"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-literatura"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando obras literárias...</span></div></div></div>
+        </div>
+        <div class="rep-card" id="card-filosofia">
+          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('filosofia')">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(167,139,250,.1);"><span class="material-symbols-outlined" style="color:#a78bfa;font-variation-settings:'FILL' 1;">psychology</span></div>
+            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Filosofia</p><p class="text-[10px] text-on-surface-variant">Pensadores e correntes filosóficas</p></div>
+            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-filosofia">expand_more</span>
+          </button>
+          <div class="rep-body px-5 pb-5" id="body-filosofia"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-filosofia"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando filósofos...</span></div></div></div>
+        </div>
+        <div class="rep-card" id="card-cinema">
+          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('cinema')">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(251,146,60,.1);"><span class="material-symbols-outlined" style="color:#fb923c;font-variation-settings:'FILL' 1;">movie</span></div>
+            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Cinema</p><p class="text-[10px] text-on-surface-variant">Filmes, séries e documentários</p></div>
+            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-cinema">expand_more</span>
+          </button>
+          <div class="rep-body px-5 pb-5" id="body-cinema"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-cinema"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando obras audiovisuais...</span></div></div></div>
+        </div>
+        <div class="rep-card" id="card-ciencia">
+          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('ciencia')">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(34,211,238,.1);"><span class="material-symbols-outlined" style="color:#22d3ee;font-variation-settings:'FILL' 1;">science</span></div>
+            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Ciência</p><p class="text-[10px] text-on-surface-variant">Pesquisas, descobertas e cientistas</p></div>
+            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-ciencia">expand_more</span>
+          </button>
+          <div class="rep-body px-5 pb-5" id="body-ciencia"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-ciencia"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando pesquisas científicas...</span></div></div></div>
+        </div>
+        <div class="rep-card" id="card-culturapop">
+          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('culturapop')">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(232,121,249,.1);"><span class="material-symbols-outlined" style="color:#e879f9;font-variation-settings:'FILL' 1;">music_note</span></div>
+            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Cultura Pop</p><p class="text-[10px] text-on-surface-variant">Música, séries e fenômenos culturais</p></div>
+            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-culturapop">expand_more</span>
+          </button>
+          <div class="rep-body px-5 pb-5" id="body-culturapop"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-culturapop"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando referências culturais...</span></div></div></div>
+        </div>
       </div>
     </section>
 
@@ -332,10 +372,65 @@ const nivel=tema.nivel||'avancado';
 document.getElementById('tagsTema').innerHTML=[{label:tema.fonte||'Tema',cor:'#6c5ce7'},{label:tema.eixo||'Eixo Social',cor:'#45edee'},{label:nivel.charAt(0).toUpperCase()+nivel.slice(1),cor:COR_NIVEL[nivel]||'#fabd00'}].map(t=>`<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider" style="background:${t.cor}18;border:1px solid ${t.cor}35;color:${t.cor}">${t.label}</span>`).join('');
 let repFeito=false,estFeito=false;
 function marcarPasso(p){const c=document.getElementById('check-'+p);const i=document.getElementById(p==='repertorio'?'icoRep':'icoEst');if(c)c.classList.add('feito');if(i)i.classList.remove('hidden');}
-const gerado={legislacao:false,historia:false,especialistas:false,atualidades:false};
+const gerado={legislacao:false,historia:false,especialistas:false,atualidades:false,literatura:false,filosofia:false,cinema:false,ciencia:false,culturapop:false};
 const quizRepR={};
-const LABELS={legislacao:'Legislação',historia:'História',especialistas:'Especialistas',atualidades:'Atualidades'};
-const PR={legislacao:`Liste os 5 principais artigos da Constituição Federal e leis relevantes para o tema: "${TITULO}". Para cada: número, nome e aplicação ao tema em 1 frase. Use marcadores.`,historia:`Explique o contexto histórico de "${TITULO}" com 5 marcos temporais numerados. Cada: data/período, fato e relevância para o Brasil.`,especialistas:`Liste 5 especialistas (filósofos/sociólogos) relevantes para "${TITULO}". Para cada: nome, área, obra principal e 1 ideia aplicável ao ENEM.`,atualidades:`Liste 5 dados estatísticos recentes (IBGE, OMS, ONU) sobre "${TITULO}". Para cada: fonte, dado numérico e como usar como argumento.`};
+const LABELS={legislacao:'Legislação',historia:'História',especialistas:'Especialistas',atualidades:'Atualidades',literatura:'Literatura',filosofia:'Filosofia',cinema:'Cinema',ciencia:'Ciência',culturapop:'Cultura Pop'};
+const PR={
+  legislacao:`Liste os 5 principais artigos da Constituição Federal e leis relevantes para o tema: "${TITULO}". Para cada: número, nome e aplicação ao tema em 1 frase. Use marcadores.`,
+  historia:`Explique o contexto histórico de "${TITULO}" com 5 marcos temporais numerados. Cada: data/período, fato e relevância para o Brasil.`,
+  especialistas:`Liste 5 especialistas (filósofos/sociólogos) relevantes para "${TITULO}". Para cada: nome, área, obra principal e 1 ideia aplicável ao ENEM.`,
+  atualidades:`Liste 5 dados estatísticos recentes (IBGE, OMS, ONU) sobre "${TITULO}". Para cada: fonte, dado numérico e como usar como argumento.`,
+  literatura:`Liste 5 obras literárias (brasileiras e mundiais) que dialogam com o tema "${TITULO}". Para cada: título, autor, breve descrição e como usar como repertório no ENEM.`,
+  filosofia:`Liste 5 pensadores ou correntes filosóficas relevantes para "${TITULO}". Para cada: nome do pensador/corrente, conceito-chave e como aplicar ao tema de forma articulada (sem repertório de bolso).`,
+  cinema:`Liste 5 filmes, documentários ou séries que abordam "${TITULO}". Para cada: título, ano, breve sinopse e como usar como repertório argumentativo.`,
+  ciencia:`Liste 5 pesquisas, descobertas científicas ou cientistas relevantes para "${TITULO}". Para cada: pesquisa/cientista, conclusão principal e aplicação ao tema.`,
+  culturapop:`Liste 5 referências de cultura pop brasileira (músicas, artistas, fenômenos sociais, séries nacionais) ligadas a "${TITULO}". Para cada: referência, contexto e como articular como repertório no ENEM.`
+};
+
+// ─────────────────────────────────────────────────────────────
+// TRAVA DE SEGURANÇA — palavras/frases bloqueadas
+// ─────────────────────────────────────────────────────────────
+const FRASES_BLOQUEADAS_HUB = [
+  'apologia ao nazismo','apologia ao fascismo','apologia ao racismo',
+  'genocídio','extermínio de',
+  'pornografia infantil','pedofilia','abuso sexual infantil',
+  'incentivo ao suicídio','apologia ao suicídio',
+  'raça superior','raça inferior',
+  'matar pessoas','eliminar grupo','inferiorizar',
+  'discurso de ódio','estupro como solução','tortura como solução'
+];
+function checarTemaSensivelHub(t){
+  if(!t)return null;
+  const lower=t.toLowerCase();
+  for(const f of FRASES_BLOQUEADAS_HUB){if(lower.includes(f.toLowerCase()))return f;}
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────
+// CACHE — busca/salva material no banco RedaON
+// Só funciona se TEMA_ID existir (tema oficial da biblioteca)
+// ─────────────────────────────────────────────────────────────
+const TEMA_ID_HUB = (function(){
+  try { const s = sessionStorage.getItem('tema_selecionado'); return s ? (JSON.parse(s).id || null) : null; } catch(e){ return null; }
+})();
+
+async function _hubBuscarMaterial(eixo){
+  if(!TEMA_ID_HUB)return null;
+  try{
+    const url=`${SUPABASE_URL}/rest/v1/rpc/buscar_material_apoio`;
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${authGetToken()}`},body:JSON.stringify({p_tema_id:TEMA_ID_HUB,p_eixo:eixo})});
+    if(!res.ok)return null;
+    const data=await res.json();
+    return (typeof data==='string'&&data.length>30)?data:null;
+  }catch(e){console.warn('[hub buscar]',e);return null;}
+}
+async function _hubSalvarMaterial(eixo,conteudo){
+  if(!TEMA_ID_HUB||!conteudo)return;
+  try{
+    const url=`${SUPABASE_URL}/rest/v1/rpc/salvar_material_apoio`;
+    await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${authGetToken()}`},body:JSON.stringify({p_tema_id:TEMA_ID_HUB,p_eixo:eixo,p_conteudo:conteudo})});
+  }catch(e){console.warn('[hub salvar]',e);}
+}
 
 window.toggleRep=async function(tipo){
   const body=document.getElementById('body-'+tipo);
@@ -344,14 +439,58 @@ window.toggleRep=async function(tipo){
   if(body.classList.contains('aberto')){body.classList.remove('aberto');chevron.classList.remove('aberto');return;}
   body.classList.add('aberto');chevron.classList.add('aberto');
   if(gerado[tipo])return;
+
+  // 1. Trava de segurança
+  const fraseBloqueada = checarTemaSensivelHub(TITULO);
+  if(fraseBloqueada){
+    document.getElementById('conteudo-'+tipo).innerHTML=`<div style="padding:1rem;background:rgba(255,180,171,.08);border:1px solid rgba(255,180,171,.25);border-radius:.625rem;">
+      <p style="font-size:.78rem;color:#ffb4ab;font-weight:700;margin-bottom:.4rem;">🛡️ Tema não pôde ser processado</p>
+      <p style="font-size:.72rem;color:#c8c4d7;line-height:1.5;">Identificamos termos sensíveis no tema. A RedaON foca em temas que respeitam direitos humanos, dignidade e diversidade — alinhados com as competências oficiais do ENEM (especialmente C5).</p>
+      <p style="font-size:.72rem;color:#c8c4d7;line-height:1.5;margin-top:.5rem;">Volte à <a href="temas.html" style="color:#45edee;text-decoration:underline;">Biblioteca de Temas</a> e escolha um tema oficial.</p>
+    </div>`;
+    return;
+  }
+
   gerado[tipo]=true;card.classList.add('carregando');
   try{
-    const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});
-    const result=await model.generateContent(PR[tipo]+'\n\nUse markdown leve. Português.');
+    let texto = null;
+    let veioDoBanco = false;
+
+    // 2. Tema oficial (UUID) → tenta cache primeiro
+    if(TEMA_ID_HUB){
+      texto = await _hubBuscarMaterial(tipo);
+      if(texto){
+        veioDoBanco = true;
+        console.log(`[hub material] '${tipo}' veio do banco (cache hit) — custo zero.`);
+      }
+    }
+
+    // 3. Cache miss ou tema livre → chama Gemini
+    if(!texto){
+      const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});
+      const result=await model.generateContent(PR[tipo]+'\n\nUse markdown leve. Português.');
+      texto = result.response.text();
+
+      // 4. Tema oficial → salva pra próximos alunos (fire-and-forget)
+      if(TEMA_ID_HUB && texto){
+        _hubSalvarMaterial(tipo, texto);
+        console.log(`[hub material] '${tipo}' gerado pelo Gemini e salvo no banco.`);
+      }
+    }
+
     card.classList.remove('carregando');card.classList.add('pronto');
+
+    // 5. Selo "tema oficial" se aplicável
+    let selo = '';
+    if(TEMA_ID_HUB){
+      selo = `<div style="display:flex;align-items:center;gap:.375rem;margin-bottom:.625rem;padding:.3rem .6rem;background:rgba(69,237,238,.08);border:1px solid rgba(69,237,238,.2);border-radius:.5rem;font-size:.7rem;color:#45edee;font-weight:600;width:fit-content;">
+        <span class="material-symbols-outlined" style="font-size:.85rem;">verified</span>
+        Tema oficial ENEM ${veioDoBanco ? '· do banco RedaON' : '· novo no banco'}
+      </div>`;
+    }
+
     document.getElementById('conteudo-'+tipo).innerHTML=
-      md(result.response.text())+
-      /* Botão quiz inline */
+      selo + md(texto)+
       `<div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(71,69,84,.2);">
         <button onclick="gerarQuizRep('${tipo}')" id="btnQuizRep-${tipo}"
           style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:rgba(69,237,238,.08);border:1px solid rgba(69,237,238,.2);border-radius:.75rem;font-size:.75rem;font-weight:700;color:#45edee;cursor:pointer;transition:all .2s;"
@@ -363,6 +502,7 @@ window.toggleRep=async function(tipo){
       </div>`;
     if(!repFeito){repFeito=true;marcarPasso('repertorio');}
   }catch(err){
+    console.error('[toggleRep] erro:',err);
     card.classList.remove('carregando');
     document.getElementById('conteudo-'+tipo).innerHTML='<p class="text-xs text-error">Erro. Tente novamente.</p>';
     gerado[tipo]=false;
@@ -378,7 +518,12 @@ window.gerarQuizRep=async function(tipo){
     legislacao:`legislação e leis relacionadas ao tema "${TITULO}"`,
     historia:`contexto histórico e marcos temporais do tema "${TITULO}"`,
     especialistas:`especialistas, filósofos e sociólogos relevantes ao tema "${TITULO}"`,
-    atualidades:`dados estatísticos e atualidades sobre o tema "${TITULO}"`
+    atualidades:`dados estatísticos e atualidades sobre o tema "${TITULO}"`,
+    literatura:`obras literárias e autores relacionados ao tema "${TITULO}"`,
+    filosofia:`filósofos e correntes filosóficas aplicáveis ao tema "${TITULO}"`,
+    cinema:`filmes, documentários e séries que abordam o tema "${TITULO}"`,
+    ciencia:`pesquisas científicas e cientistas relevantes ao tema "${TITULO}"`,
+    culturapop:`referências de cultura pop relacionadas ao tema "${TITULO}"`
   };
   const prompt=`Crie 3 questões objetivas sobre ${subTema[tipo]}, no estilo ENEM. APENAS JSON, sem mais nada: [{"pergunta":"...","alternativas":["A) ...","B) ...","C) ...","D) ...","E) ..."],"correta":0,"explicacao":"..."}]`;
   try{
@@ -423,7 +568,7 @@ window.respRep=function(tipo,qi,ai,correta,explicacao){
   e.style.display='block';
   e.style.cssText+=`background:${ai===correta?'rgba(74,222,128,.06)':'rgba(255,180,171,.06)'};border:1px solid ${ai===correta?'rgba(74,222,128,.2)':'rgba(255,180,171,.2)'};color:${ai===correta?'#4ade80':'#ffb4ab'};`;
 };
-window.carregarTudo=async function(){const btn=document.getElementById('btnGerarTudo');btn.disabled=true;btn.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ml-2">PROfa gerando tudo...</span>';for(const tipo of['legislacao','historia','especialistas','atualidades']){document.getElementById('body-'+tipo).classList.add('aberto');document.getElementById('chevron-'+tipo).classList.add('aberto');if(!gerado[tipo])await window.toggleRep(tipo);}btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1;">check_circle</span><span>Repertório completo!</span>';btn.style.cssText='background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:#4ade80;';};
+window.carregarTudo=async function(){const btn=document.getElementById('btnGerarTudo');btn.disabled=true;btn.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ml-2">PROfa gerando tudo...</span>';for(const tipo of['legislacao','historia','especialistas','atualidades','literatura','filosofia','cinema','ciencia','culturapop']){document.getElementById('body-'+tipo).classList.add('aberto');document.getElementById('chevron-'+tipo).classList.add('aberto');if(!gerado[tipo])await window.toggleRep(tipo);}btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:\'FILL\' 1;">check_circle</span><span>Repertório completo!</span>';btn.style.cssText='background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:#4ade80;';};
 let resultadoAtual='';
 const PS={resumo:`Crie um RESUMO DIDÁTICO de "${TITULO}" para redação ENEM. Problema, causas, consequências, dados e soluções.`,audio:`ROTEIRO DE PODCAST sobre "${TITULO}". Tom conversacional, com [pausa]. ~8 minutos.`,video:`ROTEIRO DE VÍDEO-AULA sobre "${TITULO}" em cenas numeradas. Fala + recurso visual sugerido. ~10 minutos.`,mapa:`MAPA MENTAL hierárquico de "${TITULO}" com →. Ramos: Causas, Consequências, Legislação, Especialistas, Dados, Soluções.`,infografico:`CONTEÚDO DE INFOGRÁFICO sobre "${TITULO}": título, seções, dados, comparações, timeline e curiosidades.`,relatorio:`RELATÓRIO ACADÊMICO sobre "${TITULO}": Resumo, Introdução, Contexto, Análise, Legislação, Especialistas, Dados, Perspectivas, Conclusão.`,redacao_modelo:`REDAÇÃO NOTA 1000 sobre "${TITULO}". Introdução com repertório + 2 parágrafos + conclusão com proposta de intervenção completa. 28-30 linhas. Linguagem formal.`};
 window.gerarSaida=async function(tipo,icone,titulo){document.getElementById('modalResultado').classList.add('aberto');document.getElementById('modalTitulo').textContent=titulo;document.getElementById('modalIcon').textContent=icone;document.getElementById('modalConteudo').innerHTML='<div style="display:flex;align-items:center;gap:.75rem;padding:1rem 0;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;font-size:.85rem;">PROfa gerando...</span></div>';try{const model=genAI.getGenerativeModel({model:'gemini-2.0-flash'});const result=await model.generateContent(PS[tipo]+'
