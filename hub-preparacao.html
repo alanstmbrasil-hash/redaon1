@@ -365,7 +365,8 @@ let tema=null;try{if(temaRaw)tema=JSON.parse(temaRaw);}catch(e){}
 if(!tema)tema={titulo:'Desafios para a valorização de comunidades e povos tradicionais no Brasil',eixo:'ENEM 2022',fonte:'ENEM 2022',nivel:'avancado'};
 const TITULO=tema.titulo;
 document.getElementById('tituloPagina').textContent=TITULO;
-document.getElementById('breadcrumb').textContent=TITULO.length>40?TITULO.substring(0,40)+'...':TITULO;
+const _breadcrumbEl = document.getElementById('breadcrumb');
+if(_breadcrumbEl) _breadcrumbEl.textContent = TITULO.length>40?TITULO.substring(0,40)+'...':TITULO;
 document.getElementById('descPagina').textContent=`Tema ${tema.fonte?'oficial do '+tema.fonte:'selecionado'}. Explore o repertório e escolha os materiais de estudo antes de escrever para garantir a nota máxima.`;
 const COR_NIVEL={avancado:'#ffb4ab',intermediario:'#fabd00',basico:'#45edee'};
 const nivel=tema.nivel||'avancado';
