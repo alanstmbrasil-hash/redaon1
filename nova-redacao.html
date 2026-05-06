@@ -2011,6 +2011,102 @@ function mdSimples(t) {
     .replace(/\n\n/g,'<br/>').replace(/\n/g,'<br/>');
 }
 
+// ─────────────────────────────────────────────────────────────
+// TRAVA DE SEGURANÇA — palavras/frases bloqueadas
+// Lista mínima de partida. Profa. Blanche e admin podem refinar.
+// Usa frases (não palavras isoladas) pra evitar falso positivo
+// com temas ENEM legítimos (ex: "violência contra mulher").
+// ─────────────────────────────────────────────────────────────
+const FRASES_BLOQUEADAS = [
+  'apologia ao nazismo', 'apologia ao fascismo', 'apologia ao racismo',
+  'genocídio', 'extermínio de',
+  'pornografia infantil', 'pedofilia', 'abuso sexual infantil',
+  'incentivo ao suicídio', 'apologia ao suicídio',
+  'raça superior', 'raça inferior',
+  'matar pessoas', 'eliminar grupo', 'inferiorizar',
+  'discurso de ódio',
+  'estupro como solução',
+  'tortura como solução'
+];
+
+function checarTemaSensivel(tema) {
+  if (!tema) return null;
+  const lower = tema.toLowerCase();
+  for (const frase of FRASES_BLOQUEADAS) {
+    if (lower.includes(frase.toLowerCase())) {
+      return frase;
+    }
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────
+// HELPER: pega tema atual (texto + ID se vier da biblioteca)
+// ─────────────────────────────────────────────────────────────
+function obterTemaAtual() {
+  const titulo = document.getElementById('tituloRedacao')?.value.trim();
+  const temaSession = sessionStorage.getItem('tema_selecionado');
+  let temaObj = null;
+  try { temaObj = temaSession ? JSON.parse(temaSession) : null; } catch(e) {}
+
+  // Se aluno digitou título DIFERENTE do tema da biblioteca, prioriza o digitado
+  if (titulo && (!temaObj || titulo !== temaObj.titulo)) {
+    return { titulo: titulo, id: null, oficial: false };
+  }
+  // Se tem tema da biblioteca e título vazio ou igual, usa o da biblioteca
+  if (temaObj && temaObj.id) {
+    return { titulo: temaObj.titulo, id: temaObj.id, oficial: true };
+  }
+  // Só título digitado, sem biblioteca
+  if (titulo) {
+    return { titulo: titulo, id: null, oficial: false };
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────
+// CACHE: busca material no banco
+// ─────────────────────────────────────────────────────────────
+async function _buscarMaterialNoBanco(temaId, eixo) {
+  if (!temaId) return null;
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/rpc/buscar_material_apoio`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${authGetToken()}`
+      },
+      body: JSON.stringify({ p_tema_id: temaId, p_eixo: eixo })
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (typeof data === 'string' && data.length > 30) ? data : null;
+  } catch (e) {
+    console.warn('[buscar material] erro:', e);
+    return null;
+  }
+}
+
+async function _salvarMaterialNoBanco(temaId, eixo, conteudo) {
+  if (!temaId || !conteudo) return;
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/rpc/salvar_material_apoio`;
+    await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${authGetToken()}`
+      },
+      body: JSON.stringify({ p_tema_id: temaId, p_eixo: eixo, p_conteudo: conteudo })
+    });
+  } catch (e) {
+    console.warn('[salvar material] erro:', e);
+  }
+}
+
 window.toggleMaterial = async function(tipo) {
   const body    = document.getElementById('body-' + tipo);
   const chevron = document.getElementById('chevron-' + tipo);
@@ -2030,11 +2126,10 @@ window.toggleMaterial = async function(tipo) {
   chevron.style.transform = 'rotate(180deg)';
   if (materialGerado[tipo]) return;
 
-  const titulo = document.getElementById('tituloRedacao')?.value.trim();
-  const temaSession = sessionStorage.getItem('tema_selecionado');
-  const tema = titulo || (temaSession ? JSON.parse(temaSession).titulo : '');
+  const tema = obterTemaAtual();
   const conteudo = document.getElementById('conteudo-' + tipo);
 
+  // 1. Tema vazio
   if (!tema) {
     conteudo.innerHTML = `<div style="padding:.625rem;background:rgba(250,189,0,.08);border:1px solid rgba(250,189,0,.2);border-radius:.625rem;margin:.5rem 0;">
       <p style="font-size:.75rem;color:#fabd00;font-weight:700;">⚠️ Digite o título da redação primeiro!</p>
@@ -2043,14 +2138,64 @@ window.toggleMaterial = async function(tipo) {
     return;
   }
 
+  // 2. Trava de segurança — checa tema sensível
+  const fraseBloqueada = checarTemaSensivel(tema.titulo);
+  if (fraseBloqueada) {
+    conteudo.innerHTML = `<div style="padding:1rem;background:rgba(255,180,171,.08);border:1px solid rgba(255,180,171,.25);border-radius:.625rem;margin:.5rem 0;">
+      <p style="font-size:.78rem;color:#ffb4ab;font-weight:700;margin-bottom:.4rem;">🛡️ Tema não pôde ser processado</p>
+      <p style="font-size:.72rem;color:#c8c4d7;line-height:1.5;">Identificamos termos sensíveis no seu tema. A RedaON foca em temas que respeitam direitos humanos, dignidade e diversidade — alinhados com as competências oficiais do ENEM (especialmente C5 — proposta de intervenção que respeita os direitos humanos).</p>
+      <p style="font-size:.72rem;color:#c8c4d7;line-height:1.5;margin-top:.5rem;">Reformule o tema com foco construtivo, ou escolha um dos temas oficiais na <a href="temas.html" style="color:#45edee;text-decoration:underline;">Biblioteca de Temas</a>.</p>
+    </div>`;
+    return;
+  }
+
+  // 3. Loading
+  const labelLoading = tema.oficial
+    ? 'Buscando material no banco RedaON...'
+    : 'PROfa gerando...';
   conteudo.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;padding:.75rem 0;color:#928ea0;font-size:.78rem;">
     <span style="width:1rem;height:1rem;border:2px solid rgba(69,237,238,.3);border-top-color:#45edee;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;flex-shrink:0;"></span>
-    PROfa gerando...
+    ${labelLoading}
   </div>`;
 
   try {
-    const texto = await geminiGenerate(PROMPTS_MATERIAL[tipo](tema));
-    conteudo.innerHTML = `<div style="padding-top:.5rem;">${mdSimples(texto)}</div>
+    let texto = null;
+    let veioDoBanco = false;
+
+    // 4. Se tema é oficial (UUID), tenta cache primeiro
+    if (tema.oficial && tema.id) {
+      texto = await _buscarMaterialNoBanco(tema.id, tipo);
+      if (texto) {
+        veioDoBanco = true;
+        console.log(`[material] '${tipo}' veio do banco (cache hit) — custo zero.`);
+      }
+    }
+
+    // 5. Cache miss ou tema livre — chama Gemini
+    if (!texto) {
+      conteudo.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;padding:.75rem 0;color:#928ea0;font-size:.78rem;">
+        <span style="width:1rem;height:1rem;border:2px solid rgba(69,237,238,.3);border-top-color:#45edee;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;flex-shrink:0;"></span>
+        PROfa gerando conteúdo...
+      </div>`;
+      texto = await geminiGenerate(PROMPTS_MATERIAL[tipo](tema.titulo));
+
+      // 6. Se tema é oficial, salva pra cache de próximos alunos
+      if (tema.oficial && tema.id && texto) {
+        _salvarMaterialNoBanco(tema.id, tipo, texto); // fire-and-forget
+        console.log(`[material] '${tipo}' gerado pelo Gemini e salvo no banco pra próximos alunos.`);
+      }
+    }
+
+    // 7. Selo "tema oficial" + indicador de fonte
+    let selo = '';
+    if (tema.oficial) {
+      selo = `<div style="display:flex;align-items:center;gap:.375rem;margin-bottom:.5rem;padding:.3rem .6rem;background:rgba(69,237,238,.08);border:1px solid rgba(69,237,238,.2);border-radius:.5rem;font-size:.7rem;color:#45edee;font-weight:600;width:fit-content;">
+        <span class="material-symbols-outlined" style="font-size:.85rem;">verified</span>
+        Tema oficial ENEM ${veioDoBanco ? '· do banco RedaON' : '· novo no banco'}
+      </div>`;
+    }
+
+    conteudo.innerHTML = `${selo}<div style="padding-top:.25rem;">${mdSimples(texto)}</div>
       <button onclick="copiarMaterial('${tipo}')" style="margin-top:.75rem;display:flex;align-items:center;gap:.375rem;padding:.375rem .75rem;border-radius:.625rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.3);color:#928ea0;font-size:.72rem;font-weight:600;cursor:pointer;">
         <span class="material-symbols-outlined" style="font-size:.85rem;">content_copy</span>Copiar
       </button>`;
@@ -2059,6 +2204,7 @@ window.toggleMaterial = async function(tipo) {
     if (badge) badge.style.display = 'inline-block';
     body.style.maxHeight = (body.scrollHeight + 100) + 'px';
   } catch(e) {
+    console.error('[toggleMaterial] erro:', e);
     conteudo.innerHTML = `<p style="font-size:.75rem;color:#ffb4ab;padding:.5rem 0;">Erro ao gerar. Tente novamente.</p>`;
   }
 };
