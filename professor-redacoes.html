@@ -91,6 +91,16 @@
   /* ── Modal Por que Nota 1000 ── */
   #modalAnalise { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.85); align-items:center; justify-content:center; padding:1rem; }
   #modalAnalise.aberto { display:flex; }
+
+  /* ── Itens bloqueados (Em breve) ─────────── */
+  .em-breve-link{position:relative;opacity:.5;cursor:pointer!important;}
+  .em-breve-link:hover{background:transparent!important;color:inherit!important;}
+  .badge-em-breve-mini{display:inline-block;background:rgba(250,189,0,.15);border:1px solid rgba(250,189,0,.4);color:#fabd00;font-size:.5rem;font-weight:700;padding:.1rem .35rem;border-radius:.4rem;text-transform:uppercase;letter-spacing:.05em;line-height:1;margin-left:.4rem;vertical-align:middle;}
+  /* ── Modal "Em breve" ─────────────────────────── */
+  #modalEmBreve{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem;}
+  #modalEmBreve.aberto{display:flex;}
+  #modalEmBreve .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:440px;width:100%;padding:2rem;text-align:center;}
+  #modalEmBreve .icone-grande{width:64px;height:64px;border-radius:50%;background:rgba(250,189,0,.12);border:1px solid rgba(250,189,0,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
 </style>
 <script src="supabase-auth.js"></script>
 </head>
@@ -107,11 +117,11 @@
     <div class="nav-section-label">Portal</div>
     <a class="nav-item" href="professor.html"><span class="material-symbols-outlined">school</span>Dashboard</a>
     <div class="nav-section-label" style="margin-top:.5rem;">Gestão</div>
-    <a class="nav-item" href="professor-alunos.html"><span class="material-symbols-outlined">group</span>Gerenciar Alunos</a>
+    <a class="nav-item em-breve-link" onclick="mostrarEmBreve('Gerenciar Alunos');return false;"><span class="material-symbols-outlined">group</span>Gerenciar Alunos<span class="badge-em-breve-mini">Em breve</span></a>
     <a class="nav-item ativo" href="professor-redacoes.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">edit_note</span>Redações dos Alunos</a>
-    <a class="nav-item" href="professor-relatorios.html"><span class="material-symbols-outlined">bar_chart</span>Relatórios</a>
+    <a class="nav-item em-breve-link" onclick="mostrarEmBreve('Relatórios');return false;"><span class="material-symbols-outlined">bar_chart</span>Relatórios<span class="badge-em-breve-mini">Em breve</span></a>
     <div class="nav-section-label" style="margin-top:.5rem;">Conteúdo</div>
-    <a class="nav-item" href="professor-estudio.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">neurology</span><span>Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span></a>
+    <a class="nav-item em-breve-link" onclick="mostrarEmBreve('PedagoIA');return false;"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">neurology</span><span>Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span><span class="badge-em-breve-mini">Em breve</span></a>
     <a class="nav-item" href="temas.html"><span class="material-symbols-outlined">description</span>Temas</a>
     <a class="nav-item" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span>Ranking</a>
     <a class="nav-item" href="configuracoes.html"><span class="material-symbols-outlined">settings</span>Configurações</a>
@@ -895,8 +905,36 @@
     }
   }
 
+  // ─── Modal "Em breve" — telas não conectadas ainda ───
+  window.mostrarEmBreve = function(titulo) {
+    document.getElementById('emBreveTitulo').textContent = titulo;
+    document.getElementById('modalEmBreve').classList.add('aberto');
+  };
+  window.fecharEmBreve = function() {
+    document.getElementById('modalEmBreve').classList.remove('aberto');
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var m = document.getElementById('modalEmBreve');
+      if (m) m.classList.remove('aberto');
+    }
+  });
+
   // ─── Boot ───
   inicializar();
 </script>
+
+<!-- Modal "Em breve" — telas ainda não conectadas ao Supabase -->
+<div id="modalEmBreve" onclick="if(event.target===this)fecharEmBreve()">
+  <div class="conteudo">
+    <div class="icone-grande">
+      <span class="material-symbols-outlined" style="color:#fabd00;font-size:2rem;font-variation-settings:'FILL' 1;">construction</span>
+    </div>
+    <h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;">Em desenvolvimento</h2>
+    <p style="font-size:.85rem;color:#c8c4d7;line-height:1.6;margin-bottom:.4rem;">A área <strong id="emBreveTitulo" style="color:#45edee;">—</strong> está sendo finalizada e será liberada em breve.</p>
+    <p style="font-size:.8rem;color:#928ea0;line-height:1.55;margin-bottom:1.5rem;">Durante o piloto, você pode acompanhar suas turmas e validar correções diretamente em <strong style="color:#4ade80;">Redações dos Alunos</strong>.</p>
+    <button onclick="fecharEmBreve()" style="width:100%;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;">Entendi</button>
+  </div>
+</div>
 </body>
 </html>
