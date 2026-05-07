@@ -103,22 +103,24 @@
 
     <!-- Gestão -->
     <div class="nav-section-label" style="margin-top:.5rem;">Gestão</div>
-    <a class="nav-item prof-only" href="professor-alunos.html">
+    <a class="nav-item prof-only em-breve-link" onclick="mostrarEmBreve('Gerenciar Alunos');return false;" style="cursor:pointer;">
       <span class="material-symbols-outlined">group</span>
       Gerenciar Alunos
+      <span class="badge-em-breve-mini">Em breve</span>
     </a>
     <a class="nav-item prof-only" href="professor-redacoes.html">
       <span class="material-symbols-outlined">edit_note</span>
       Redações dos Alunos
     </a>
-    <a class="nav-item prof-only" href="professor-relatorios.html">
+    <a class="nav-item prof-only em-breve-link" onclick="mostrarEmBreve('Relatórios');return false;" style="cursor:pointer;">
       <span class="material-symbols-outlined">bar_chart</span>
       Relatórios
+      <span class="badge-em-breve-mini">Em breve</span>
     </a>
 
     <!-- Conteúdo -->
     <div class="nav-section-label" style="margin-top:.5rem;">Conteúdo</div>
-    <a class="nav-item prof-only" href="professor-estudio.html"><span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1;">neurology</span><span>Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span>
+    <a class="nav-item prof-only em-breve-link" onclick="mostrarEmBreve('PedagoIA');return false;" style="cursor:pointer;"><span class="material-symbols-outlined" style="font-variation-settings:\'FILL\' 1;">neurology</span><span>Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span><span class="badge-em-breve-mini">Em breve</span>
     </a>
     <a class="nav-item" href="temas.html">
       <span class="material-symbols-outlined">description</span>
@@ -319,15 +321,18 @@
         <span class="material-symbols-outlined" style="color:#45edee;font-size:1.75rem;">edit_note</span>
         <span style="font-size:.8rem;font-weight:600;">Corrigir Redações</span>
       </button>
-      <button onclick="window.location.href='professor-relatorios.html'" style="padding:1rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;color:#e1e2eb;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.5rem;" onmouseover="this.style.borderColor='#6c5ce7'" onmouseout="this.style.borderColor='rgba(71,69,84,.2)'">
+      <button onclick="mostrarEmBreve('Relatórios')" class="em-breve-btn" style="padding:1rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;color:#e1e2eb;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.5rem;position:relative;">
+        <span class="badge-em-breve">Em breve</span>
         <span class="material-symbols-outlined" style="color:#6c5ce7;font-size:1.75rem;">bar_chart</span>
         <span style="font-size:.8rem;font-weight:600;">Ver Relatórios</span>
       </button>
-      <button onclick="window.location.href='professor-estudio.html'" style="padding:1rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;color:#e1e2eb;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.5rem;" onmouseover="this.style.borderColor='#c6bfff'" onmouseout="this.style.borderColor='rgba(71,69,84,.2)'">
+      <button onclick="mostrarEmBreve('PedagoIA')" class="em-breve-btn" style="padding:1rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;color:#e1e2eb;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.5rem;position:relative;">
+        <span class="badge-em-breve">Em breve</span>
         <span class="material-symbols-outlined" style="color:#c6bfff;font-size:1.75rem;font-variation-settings:'FILL' 1;">neurology</span>
         <span style="font-size:.8rem;font-weight:600;">Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span>
       </button>
-      <button onclick="window.location.href='professor-alunos.html'" style="padding:1rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;color:#e1e2eb;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.5rem;" onmouseover="this.style.borderColor='#4ade80'" onmouseout="this.style.borderColor='rgba(71,69,84,.2)'">
+      <button onclick="mostrarEmBreve('Gerenciar Alunos')" class="em-breve-btn" style="padding:1rem;background:#1d2026;border:1px solid rgba(71,69,84,.2);border-radius:1rem;color:#e1e2eb;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.5rem;position:relative;">
+        <span class="badge-em-breve">Em breve</span>
         <span class="material-symbols-outlined" style="color:#4ade80;font-size:1.75rem;">group</span>
         <span style="font-size:.8rem;font-weight:600;">Gerenciar Alunos</span>
       </button>
@@ -377,6 +382,18 @@
     font-size:1.3rem; font-weight:900; color:#45edee; letter-spacing:.02em;
     font-family:'Courier New',monospace; word-break:break-all;
   }
+  /* ── Botões/links bloqueados (Em breve) ─────────── */
+  .em-breve-btn{position:relative;opacity:.5;cursor:pointer!important;}
+  .em-breve-btn:hover{border-color:rgba(71,69,84,.2)!important;transform:none!important;box-shadow:none!important;}
+  .em-breve-link{position:relative;opacity:.5;}
+  .em-breve-link:hover{background:transparent!important;color:inherit!important;}
+  .badge-em-breve{position:absolute;top:.4rem;right:.4rem;background:rgba(250,189,0,.15);border:1px solid rgba(250,189,0,.4);color:#fabd00;font-size:.5rem;font-weight:700;padding:.1rem .4rem;border-radius:.5rem;text-transform:uppercase;letter-spacing:.05em;line-height:1;}
+  .badge-em-breve-mini{display:inline-block;background:rgba(250,189,0,.15);border:1px solid rgba(250,189,0,.4);color:#fabd00;font-size:.5rem;font-weight:700;padding:.1rem .35rem;border-radius:.4rem;text-transform:uppercase;letter-spacing:.05em;line-height:1;margin-left:.4rem;vertical-align:middle;}
+  /* ── Modal "Em breve" ─────────────────────────────── */
+  #modalEmBreve{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem;}
+  #modalEmBreve.aberto{display:flex;}
+  #modalEmBreve .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:440px;width:100%;padding:2rem;text-align:center;}
+  #modalEmBreve .icone-grande{width:64px;height:64px;border-radius:50%;background:rgba(250,189,0,.12);border:1px solid rgba(250,189,0,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
 </style>
 
 <div id="modalTurma" onclick="if(event.target===this)fecharModalTurma()">
@@ -483,6 +500,19 @@
       </p>
     </div>
 
+  </div>
+</div>
+
+<!-- Modal "Em breve" — telas ainda não conectadas ao Supabase -->
+<div id="modalEmBreve" onclick="if(event.target===this)fecharEmBreve()">
+  <div class="conteudo">
+    <div class="icone-grande">
+      <span class="material-symbols-outlined" style="color:#fabd00;font-size:2rem;font-variation-settings:'FILL' 1;">construction</span>
+    </div>
+    <h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;">Em desenvolvimento</h2>
+    <p style="font-size:.85rem;color:#c8c4d7;line-height:1.6;margin-bottom:.4rem;">A área <strong id="emBreveTitulo" style="color:#45edee;">—</strong> está sendo finalizada e será liberada em breve.</p>
+    <p style="font-size:.8rem;color:#928ea0;line-height:1.55;margin-bottom:1.5rem;">Durante o piloto, você pode acompanhar suas turmas e validar correções diretamente em <strong style="color:#4ade80;">Redações dos Alunos</strong>.</p>
+    <button onclick="fecharEmBreve()" style="width:100%;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;">Entendi</button>
   </div>
 </div>
 
@@ -1003,6 +1033,23 @@
     el.textContent = msg; el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), dur);
   }
+
+  // ════════════════════════════════════════════════════════════════
+  // MODAL "EM BREVE" — telas não conectadas ainda
+  // ════════════════════════════════════════════════════════════════
+  window.mostrarEmBreve = function(titulo) {
+    document.getElementById('emBreveTitulo').textContent = titulo;
+    document.getElementById('modalEmBreve').classList.add('aberto');
+  };
+  window.fecharEmBreve = function() {
+    document.getElementById('modalEmBreve').classList.remove('aberto');
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var m = document.getElementById('modalEmBreve');
+      if (m) m.classList.remove('aberto');
+    }
+  });
 
   // ════════════════════════════════════════════════════════════════
   // INICIALIZAÇÃO
