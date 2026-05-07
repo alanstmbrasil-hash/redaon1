@@ -269,7 +269,7 @@
         </section>
 
         <!-- BOTÃO SUGERIR (sempre visível abaixo) -->
-        <section>
+        <section class="modo-prof-sugestao">
           <button onclick="abrirModal()" class="w-full max-w-md mx-auto block bg-gradient-to-r from-[#6c5ce7] to-[#45edee] text-white font-bold py-3 px-6 rounded-xl hover:opacity-90 transition-opacity">
             <span class="flex items-center justify-center gap-2">
               <span class="material-symbols-outlined text-sm">lightbulb</span>
@@ -293,6 +293,7 @@
   let MEUS_TEMAS_IDS     = JSON.parse(localStorage.getItem('redaon_temas_salvos') || '[]'); // favoritos
   let ABA_ATUAL          = 'recentes';
   let CATEGORIA_ATUAL    = null;
+  let MODO_PROFESSOR     = false; // true se usuário logado for professor
 
   // ============================================================
   // INICIALIZAÇÃO
@@ -301,6 +302,12 @@
     if (!authEstaLogado()) {
       window.location.href = 'login.html';
       return;
+    }
+
+    // Detecta perfil e adapta interface se for professor
+    MODO_PROFESSOR = (typeof authGetTipo === 'function' && authGetTipo() === 'professor');
+    if (MODO_PROFESSOR) {
+      adaptarInterfaceProfessor();
     }
 
     try {
@@ -313,6 +320,121 @@
       document.getElementById('vazioTexto').textContent = 'Erro ao carregar temas. Recarregue a página.';
     }
   })();
+
+  // ============================================================
+  // ADAPTAÇÃO PARA PROFESSOR
+  // ============================================================
+  function adaptarInterfaceProfessor() {
+    // 1) Substitui sidebar de aluno pela sidebar de professor
+    const nav = document.querySelector('aside#sidebar nav');
+    if (nav) {
+      nav.innerHTML = `
+        <div style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin-bottom:.5rem;">Portal</div>
+        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="professor.html"><span class="material-symbols-outlined">school</span><span class="font-medium text-sm">Dashboard</span></a>
+        <div style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin:.75rem 0 .5rem;">Gestão</div>
+        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300 em-breve-link" onclick="mostrarEmBreveTemas('Gerenciar Alunos');return false;" style="cursor:pointer;opacity:.5;"><span class="material-symbols-outlined">group</span><span class="font-medium text-sm">Gerenciar Alunos</span><span class="badge-em-breve-mini">Em breve</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="professor-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Redações dos Alunos</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300 em-breve-link" onclick="mostrarEmBreveTemas('Relatórios');return false;" style="cursor:pointer;opacity:.5;"><span class="material-symbols-outlined">bar_chart</span><span class="font-medium text-sm">Relatórios</span><span class="badge-em-breve-mini">Em breve</span></a>
+        <div style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin:.75rem 0 .5rem;">Conteúdo</div>
+        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300 em-breve-link" onclick="mostrarEmBreveTemas('PedagoIA');return false;" style="cursor:pointer;opacity:.5;"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">neurology</span><span class="font-medium text-sm">Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span><span class="badge-em-breve-mini">Em breve</span></a>
+        <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span><span class="font-medium text-sm">Temas</span></a>
+      `;
+    }
+
+    // 2) Troca rótulo "Estudante" por "Professor(a)" no rodapé
+    const rotuloEl = document.querySelector('aside#sidebar .text-xs.text-on-surface-variant');
+    if (rotuloEl) rotuloEl.textContent = 'Professor(a)';
+
+    // 3) Esconde botão "Sugerir Tema" estilo aluno (manteremos visualização limpa)
+    // (intencionalmente preservado — pode ser útil para professor sugerir temas)
+
+    // 4) Ajusta título e descrição da página para contexto professor
+    const subtituloEl = document.querySelector('main p.text-on-surface-variant');
+    if (subtituloEl && subtituloEl.textContent.includes('Nota 1.000')) {
+      subtituloEl.innerHTML = 'Catálogo de temas oficiais do ENEM (2009-2025) disponíveis para sua turma estudar no RedaON.';
+    }
+
+    // 5) Injeta CSS dos badges + modal "Em breve"
+    const style = document.createElement('style');
+    style.textContent = `
+      .badge-em-breve-mini{display:inline-block;background:rgba(250,189,0,.15);border:1px solid rgba(250,189,0,.4);color:#fabd00;font-size:.5rem;font-weight:700;padding:.1rem .35rem;border-radius:.4rem;text-transform:uppercase;letter-spacing:.05em;line-height:1;margin-left:.4rem;vertical-align:middle;}
+      .em-breve-link:hover{background:transparent!important;color:inherit!important;}
+      /* Modo professor: esconde botão de salvar tema (push_pin) e aba "Meus Temas" */
+      .card-tema button[title*="meus temas"], .card-tema button[title*="Meus Temas"]{display:none!important;}
+      #tab-meus{display:none!important;}
+      /* "Sugerir Tema" mantido para professor — pode ser canal útil de feedback. Para esconder: descomente abaixo. */
+      /* .modo-prof-sugestao{display:none!important;} */
+      #modalEmBreveTemas{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem;}
+      #modalEmBreveTemas.aberto{display:flex;}
+      #modalEmBreveTemas .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:440px;width:100%;padding:2rem;text-align:center;}
+      #modalTemaProf{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:1rem;}
+      #modalTemaProf.aberto{display:flex;}
+      #modalTemaProf .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:560px;width:100%;padding:2rem;}
+    `;
+    document.head.appendChild(style);
+
+    // 6) Injeta modais "Em breve" e "Visualizar Tema"
+    const modais = document.createElement('div');
+    modais.innerHTML = `
+      <div id="modalEmBreveTemas" onclick="if(event.target===this)fecharEmBreveTemas()">
+        <div class="conteudo">
+          <div style="width:64px;height:64px;border-radius:50%;background:rgba(250,189,0,.12);border:1px solid rgba(250,189,0,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <span class="material-symbols-outlined" style="color:#fabd00;font-size:2rem;font-variation-settings:'FILL' 1;">construction</span>
+          </div>
+          <h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;text-align:center;">Em desenvolvimento</h2>
+          <p style="font-size:.85rem;color:#c8c4d7;line-height:1.6;margin-bottom:1.5rem;text-align:center;">A área <strong id="emBreveTemasTitulo" style="color:#45edee;">—</strong> será liberada em breve.</p>
+          <button onclick="fecharEmBreveTemas()" style="width:100%;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;">Entendi</button>
+        </div>
+      </div>
+      <div id="modalTemaProf" onclick="if(event.target===this)fecharModalTemaProf()">
+        <div class="conteudo">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
+            <span class="material-symbols-outlined" style="color:#45edee;font-size:1.5rem;font-variation-settings:'FILL' 1;">description</span>
+            <h2 id="modalTemaTitulo" style="font-size:1.05rem;font-weight:800;color:#e1e2eb;line-height:1.3;flex:1;">—</h2>
+          </div>
+          <div id="modalTemaMeta" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem;font-size:.7rem;"></div>
+          <div id="modalTemaDesc" style="font-size:.875rem;color:#c8c4d7;line-height:1.65;margin-bottom:1.5rem;max-height:50vh;overflow-y:auto;"></div>
+          <button onclick="fecharModalTemaProf()" style="width:100%;padding:.875rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.875rem;cursor:pointer;">Fechar</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modais);
+  }
+
+  // Funções dos modais (escopo global para onclick funcionar)
+  window.mostrarEmBreveTemas = function(titulo) {
+    document.getElementById('emBreveTemasTitulo').textContent = titulo;
+    document.getElementById('modalEmBreveTemas').classList.add('aberto');
+  };
+  window.fecharEmBreveTemas = function() {
+    document.getElementById('modalEmBreveTemas').classList.remove('aberto');
+  };
+  window.fecharModalTemaProf = function() {
+    document.getElementById('modalTemaProf').classList.remove('aberto');
+  };
+  window.visualizarTemaProf = function(id) {
+    const tema = TEMAS.find(t => t.id === id) || TEMAS_PROFESSOR.find(t => t.id === id);
+    if (!tema) return;
+    document.getElementById('modalTemaTitulo').textContent = tema.titulo || '';
+    let meta = '';
+    if (tema.ano_enem) meta += `<span style="background:rgba(69,237,238,.12);color:#45edee;padding:.2rem .55rem;border-radius:.4rem;font-weight:700;">ENEM ${tema.ano_enem}${tema.aplicacao && tema.aplicacao !== 'Regular' ? ' · ' + tema.aplicacao : ''}</span>`;
+    if (tema.categoria) meta += `<span style="background:rgba(108,92,231,.12);color:#c6bfff;padding:.2rem .55rem;border-radius:.4rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${tema.categoria}</span>`;
+    if (tema.nivel) meta += `<span style="background:rgba(250,189,0,.12);color:#fabd00;padding:.2rem .55rem;border-radius:.4rem;font-weight:700;">${tema.nivel}</span>`;
+    document.getElementById('modalTemaMeta').innerHTML = meta;
+    document.getElementById('modalTemaDesc').innerHTML = tema.descricao
+      ? tema.descricao.replace(/\n/g, '<br>')
+      : '<em style="color:#928ea0;">Sem descrição disponível para este tema.</em>';
+    document.getElementById('modalTemaProf').classList.add('aberto');
+  };
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      ['modalEmBreveTemas', 'modalTemaProf'].forEach(id => {
+        const m = document.getElementById(id);
+        if (m) m.classList.remove('aberto');
+      });
+    }
+  });
 
   // ============================================================
   // CARREGAMENTO DO BANCO
@@ -565,6 +687,11 @@
   // ESCREVER TEMA — vai pro hub de preparação com tema selecionado
   // ============================================================
   function escreverTema(id) {
+    // Modo professor: abre modal de visualização em vez de levar ao hub do aluno
+    if (MODO_PROFESSOR) {
+      window.visualizarTemaProf(id);
+      return;
+    }
     const tema = TEMAS.find(t => t.id === id) || TEMAS_PROFESSOR.find(t => t.id === id);
     if (!tema) {
       toast('❌ Tema não encontrado.');
