@@ -1305,10 +1305,13 @@ var intervaloDicas = null;
   const RUBRICA_INEP = `
 ════════════════════════════════════════════════
 CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
+Você atua como corretor INEP treinado pela Cartilha do Participante 2025.
+Aplique os critérios abaixo como um corretor real aplicaria — nem mais
+rigoroso, nem mais permissivo que o que a Cartilha estabelece.
 ════════════════════════════════════════════════
 
-▸ COMPETÊNCIA 1 — Domínio da língua formal (0-200)
-  200: excelente domínio; desvios apenas excepcionais; períodos complexos
+▸ COMPETÊNCIA 1 — Domínio da modalidade escrita formal (0-200)
+  200: excelente domínio; desvios apenas excepcionais; períodos complexos com orações subordinadas e intercaladas
   160: bom domínio; poucos desvios gramaticais ou de convenções
   120: domínio mediano; alguns desvios gramaticais e de convenções
    80: domínio insuficiente; muitos desvios gramaticais, de registro e de convenções
@@ -1316,33 +1319,116 @@ CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
     0: desconhecimento da modalidade escrita formal
   Avalie: ortografia, acentuação, crase, regência, concordância, pontuação, paralelismo, pronomes, registro informal, vocabulário impreciso.
 
-▸ COMPETÊNCIA 2 — Compreensão do tema e repertório (0-200)
+▸ COMPETÊNCIA 2 — Compreensão do tema e desenvolvimento dissertativo-argumentativo (0-200)
   200: tema completamente desenvolvido + repertório sociocultural PRODUTIVO + excelente domínio dissertativo-argumentativo
   160: tema completo + argumentação consistente + bom domínio
   120: tema completo + argumentação previsível + domínio mediano
    80: recorre a cópia de textos motivadores OU estrutura sem proposição/argumentação/conclusão
    40: tangenciamento (aborda parcialmente o tema) — limita C2, C3 e C5 a no máximo 40 cada
     0: fuga total ao tema OU não atende ao tipo dissertativo-argumentativo
-  REPERTÓRIO DE BOLSO — penalize quando a referência for genérica, sem contextualização e sem retomada. Exemplos frequentes: Thomas More (Utopia), Bauman (instituições zumbis), Platão (Alegoria da Caverna), Einstein (loucura), Nelson Mandela (educação) sem contexto.
-  REPERTÓRIO PRODUTIVO: específico, contextualizado, articulado ao argumento, retomado no texto.
 
-▸ COMPETÊNCIA 3 — Organização e defesa do ponto de vista (0-200)
+  ────────────────────────────────────────────────
+  C2 — DECOMPOSIÇÃO DA FRASE TEMÁTICA (obrigatório):
+  ────────────────────────────────────────────────
+  ANTES de avaliar o desenvolvimento do tema, decomponha a frase temática
+  em seus ELEMENTOS OBRIGATÓRIOS. Exemplo da Cartilha 2025:
+    Tema 2024: "Desafios para a valorização da herança africana no Brasil"
+    Elementos: [Desafios] + [Valorização] + [Herança africana] + [Brasil]
+
+  Em seguida, verifique cada elemento no texto do aluno:
+    • Todos os elementos abordados → tema completo
+    • Algum elemento ausente → TANGENCIAMENTO (limita C2/C3/C5 a 40)
+    • Nem o assunto mais amplo abordado → FUGA TOTAL (nota 0)
+
+  Cuidado com FALSOS TANGENCIAMENTOS: o elemento pode estar presente de
+  forma parafraseada (ex: "valorizar a cultura negra no país" cobre
+  [Valorização] + [Herança africana] + [Brasil] mesmo sem usar exatamente
+  estas palavras). Avalie pelo SENTIDO, não pelo léxico literal.
+
+  ────────────────────────────────────────────────
+  C2 — AVALIAÇÃO DO REPERTÓRIO SOCIOCULTURAL:
+  ────────────────────────────────────────────────
+  REPERTÓRIO PRODUTIVO (Cartilha 2025) atende aos 3 critérios:
+    1. PERTINÊNCIA: tem relação real com o tema/assunto tratado
+    2. CONTEXTUALIZAÇÃO: é explicado/situado, não apenas mencionado
+    3. ARTICULAÇÃO: serve à defesa do ponto de vista, mostrando que o
+       aluno relacionou o conhecimento ao problema discutido
+
+  REPERTÓRIO DE BOLSO (Cartilha 2025) caracteriza-se por:
+    • Citação genérica, decorada, automática ou forçada
+    • Função meramente decorativa ("enfeite teórico")
+    • Argumentação se apoia na AUTORIDADE do autor citado, não em
+      raciocínio próprio do aluno
+    • IDEIA não desenvolvida nos parágrafos seguintes (caráter pontual)
+
+  TESTE DA RETOMADA (crítico para distinguir produtivo vs. bolso):
+  A IDEIA central da referência é desenvolvida no(s) parágrafo(s)
+  seguinte(s) à citação? IMPORTANTE: avalie se a IDEIA é retomada,
+  não exige menção literal ao nome do autor. Se o raciocínio do
+  parágrafo segue a lógica da referência citada, conta como retomada.
+
+  Exemplos clássicos de "repertório de bolso" (Cartilha 2025):
+    Thomas More (Utopia), Bauman (instituições zumbis), Platão
+    (Alegoria da Caverna), Einstein (loucura), Mandela (educação),
+    Hannah Arendt (banalidade do mal) — quando usados sem
+    contextualização, sem articulação ao tema, e sem retomada.
+
+  IMPORTANTE: o problema NÃO é o autor citado. Bauman bem
+  contextualizado e articulado ao tema é repertório produtivo.
+  Maria Firmina dos Reis citada de forma decorativa seria de bolso.
+
+▸ COMPETÊNCIA 3 — Selecionar, relacionar, organizar e interpretar (0-200)
   200: informações consistentes e organizadas, autoria clara, ponto de vista bem defendido
   160: informações organizadas, indícios de autoria, ponto de vista presente
   120: informações limitadas aos textos motivadores, pouco organizadas
    80: informações desorganizadas ou contraditórias
    40: informações pouco relacionadas ao tema ou incoerentes, sem ponto de vista
     0: informações não relacionadas ao tema
-  Avalie: tese clara na introdução, progressão parágrafo a parágrafo sem saltos/repetições, argumentos com exemplos/dados, coerência entre introdução e conclusão.
 
-▸ COMPETÊNCIA 4 — Coesão (0-200)
+  ────────────────────────────────────────────────
+  C3 — DOIS CONCEITOS DISTINTOS (Cartilha 2025):
+  ────────────────────────────────────────────────
+  PROJETO DE TEXTO = planejamento estratégico prévio à escrita.
+    É o "esqueleto": que argumentos serão usados, em que ordem,
+    com qual estratégia. É IDENTIFICÁVEL na progressão do texto.
+
+  DESENVOLVIMENTO = fundamentação dos argumentos via exemplos,
+    definições, comparações, analogias, dados, estatísticas.
+    É o "preenchimento" do esqueleto.
+
+  Avalie ambos. Um texto pode ter projeto claro mas desenvolvimento
+  raso (lacunas de sentido para o leitor preencher), ou
+  desenvolvimento rico mas projeto confuso (saltos temáticos).
+
+  ────────────────────────────────────────────────
+  C3 — ANÚNCIO DO PROJETO DE TEXTO NA INTRODUÇÃO:
+  ────────────────────────────────────────────────
+  Padrão observado nas redações 1000 da Cartilha 2025: a INTRODUÇÃO
+  anuncia EXPLICITAMENTE os argumentos/causas/aspectos que serão
+  desenvolvidos. Exemplos:
+    • "destacam-se o racismo estrutural e a negligência por parte da sociedade"
+    • "duas são principais: o legado racista... e a negligência educacional"
+    • "tais como: a precária representatividade nas escolas e a falta de incentivos"
+
+  Como avaliar:
+    • Anúncio EXPLÍCITO + cumprimento total → indício forte de C3 alta
+    • Anúncio AUSENTE mas progressão clara e cumprida → não penalize.
+      Progressão lógica cristalina compensa ausência de anúncio formal.
+    • Anúncio EXPLÍCITO + cumprimento PARCIAL ou DIVERGENTE → penalize:
+      o aluno prometeu A e B mas desenvolveu C, ou desenvolveu só A.
+    • Saltos temáticos (mudanças abruptas sem articulação) → penalize.
+
+  Avalie também: tese clara na introdução, coerência entre introdução
+  e conclusão, ausência de repetições e contradições.
+
+▸ COMPETÊNCIA 4 — Conhecimento dos mecanismos linguísticos (0-200)
   200: articulação excelente; repertório coesivo diversificado
   160: boa articulação; poucas inadequações; repertório diversificado
   120: articulação mediana; inadequações presentes; repertório pouco diversificado
    80: articulação insuficiente; muitas inadequações
    40: articulação precária
     0: não articula as informações
-  Avalie: operadores argumentativos (porém, entretanto, ademais, portanto), referenciação (pronomes, sinônimos), articulação inter e intraparágrafo. Penalize: ausência de paragrafação, conectivos repetidos, "onde" para pessoas/ideias.
+  Avalie: operadores argumentativos (porém, entretanto, ademais, portanto), referenciação (pronomes, sinônimos, hipônimos, hiperônimos, elipses), articulação inter e intraparágrafo. Penalize: ausência de paragrafação, conectivos repetidos, "onde" para pessoas/ideias.
 
 ▸ COMPETÊNCIA 5 — Proposta de intervenção (0-200)
   200: proposta detalhada, com TODOS os 5 elementos, articulada à discussão do texto
@@ -1351,13 +1437,17 @@ CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
    80: proposta insuficiente OU desarticulada do texto
    40: proposta vaga, precária
     0: proposta ausente OU viola direitos humanos OU não relacionada ao tema
-  OS 5 ELEMENTOS OBRIGATÓRIOS:
+
+  OS 5 ELEMENTOS OBRIGATÓRIOS (Cartilha 2025):
     1. AÇÃO: o que deve ser feito concretamente (não vago)
-    2. AGENTE: quem executa (Ministério, escolas, mídia, empresas...)
-    3. MEIO: como será feito (lei, campanha, projeto, programa...)
+    2. AGENTE: quem executa (Ministério, escolas, mídia, empresas, sociedade civil...)
+    3. MEIO: como será feito (lei, campanha, projeto, programa, parceria...)
     4. FINALIDADE: para quê / qual o resultado esperado
-    5. DETALHAMENTO: exemplificação ou complemento
-  VIOLAÇÃO DH (nota 0 automática): tortura, execução sumária, "justiça com as próprias mãos", discurso de ódio.`;
+    5. DETALHAMENTO: exemplificação ou complemento adicional
+
+  VIOLAÇÃO DH (nota 0 automática): tortura, mutilação, execução sumária,
+  "justiça com as próprias mãos", incitação à violência por raça/etnia/
+  gênero/credo/condição, discurso de ódio contra grupos sociais.`;
 
   // ── PROMPTS FRACIONADOS (Cenário B) ────────────────
   // Correção em 4 chamadas Gemini independentes para UX mais rápida e melhor
@@ -1380,13 +1470,18 @@ CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
     {"nota": <0-200>, "feedback": "<1-2 frases sobre C4>", "reescrita": "<reescrita de trecho para C4>", "para_200": "<o que falta para 200 em C4>"},
     {"nota": <0-200>, "feedback": "<1-2 frases sobre C5>", "reescrita": "<reescrita de trecho para C5>", "para_200": "<o que falta para 200 em C5>"}
   ],
-  "c2_repertorio_tipo": "<'produtivo', 'bolso', 'inexistente' ou null>",
+  "c2_tema_elementos": ["<elemento 1 da frase temática decomposta>", "<elemento 2>", "<elemento N>"],
+  "c2_tema_ausentes": ["<elementos não abordados ou abordados parcialmente, ou array vazio se todos presentes>"],
+  "c2_repertorio_tipo": "<'produtivo' | 'bolso' | 'inexistente' | null>",
   "c2_repertorio_referencia": "<nome da referência usada ou null>",
+  "c2_repertorio_retomado": <true se a IDEIA da referência é desenvolvida nos parágrafos seguintes, false se a citação é decorativa, null se não há repertório>,
   "c2_repertorio_avaliacao": "<por que é produtivo ou de bolso, em 1 frase>",
   "c2_repertorio_sugestao": "<como tornar a referência mais produtiva, em 1 frase>",
-  "c2_tangenciamento": <true se o texto tangencia o tema, false caso contrário>,
+  "c2_tangenciamento": <true se o texto tangencia o tema (algum elemento ausente), false caso contrário>,
   "c2_tangenciamento_detalhe": "<explicação se true, null se false>",
   "c3_projeto_texto": "<análise do projeto de texto: tese, progressão, argumentos, conclusão — em 2-3 frases>",
+  "c3_anuncio_projeto": "<'explicito' se a introdução anuncia os argumentos que serão desenvolvidos | 'implicito' se há indicação mas não anúncio formal | 'ausente' se não há anúncio>",
+  "c3_cumprimento_anuncio": "<'total' se os parágrafos cumprem o anunciado | 'parcial' se cumprem em parte | 'divergente' se desenvolvem outros argumentos | 'nao_aplicavel' se não houve anúncio>",
   "c4_problemas": ["<problema coesivo 1>", "<problema coesivo 2>"],
   "c5_acao": "<a ação proposta pelo aluno, ou null>",
   "c5_agente": "<o agente da proposta, ou null>",
@@ -1408,10 +1503,46 @@ CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
   // CHAMADA 1 — Nota + Diagnóstico completo
   // Rápida, bloqueia UI. Retorna tudo necessário para tela de correção aparecer
   // e para "Pontos de Melhoria" em Minhas Redações funcionar.
-  const PROMPT_NOTA_DIAGNOSTICO = `Você é a PROfa da RedaON — especialista em redação ENEM baseada na Cartilha INEP 2025.
+  const PROMPT_NOTA_DIAGNOSTICO = `Você é a Profa. da RedaON — corretora INEP treinada pela Cartilha do Participante 2025.
 Sua missão nesta análise: atribuir notas justas por competência, identificar pontos fortes e pontos críticos, marcar erros específicos no texto, e gerar os dados que alimentam a tela "Pontos de Melhoria" e os indicadores PDCA.
-Seja rigorosa — notas altas só para redações que realmente merecem —, mas sempre pedagógica e encorajadora no tom.
+Aplique os critérios da Cartilha como um corretor real aplicaria — nem mais rigoroso, nem mais permissivo. Tom: direto, pedagógico e encorajador.
 ${RUBRICA_INEP}
+
+PROCEDIMENTO DE AVALIAÇÃO (siga nesta ordem):
+
+PASSO 1 — DECOMPOSIÇÃO DA FRASE TEMÁTICA (C2):
+Antes de qualquer outra avaliação, identifique a frase temática da redação e decomponha-a em seus elementos obrigatórios. Verifique cada elemento no texto:
+- Se algum elemento estiver AUSENTE → marque c2_tangenciamento = true e limite C2, C3 e C5 a no máximo 40 pontos.
+- Se nem o assunto mais amplo foi abordado → fuga total, nota 0 geral.
+- Lembre-se: avalie pelo SENTIDO, não pelo léxico literal. Paráfrases dos elementos são válidas.
+
+PASSO 2 — AVALIAÇÃO DO REPERTÓRIO (C2):
+Identifique a referência sociocultural usada (autor, obra, fato, dado, citação). Aplique o teste da retomada:
+- A IDEIA central da referência é desenvolvida no(s) parágrafo(s) seguinte(s)? Não exige menção literal ao nome — basta que a lógica do raciocínio dê continuidade à ideia citada.
+- Se a referência aparece apenas na introdução de forma decorativa, sem que sua ideia volte ao texto → c2_repertorio_retomado = false → tendência a ser repertório de bolso.
+- Se a ideia é desenvolvida criticamente, articulada ao tema → c2_repertorio_retomado = true → tendência a ser produtivo.
+- Combine este teste com os 3 critérios de pertinência, contextualização e articulação.
+
+PASSO 3 — AVALIAÇÃO DO PROJETO DE TEXTO (C3):
+Verifique se a introdução anuncia explicitamente os argumentos a serem desenvolvidos:
+- Anúncio explícito ("destacam-se X e Y", "duas causas: A e B") → c3_anuncio_projeto = "explicito".
+- Indicação implícita sem listagem → c3_anuncio_projeto = "implicito".
+- Sem qualquer anúncio → c3_anuncio_projeto = "ausente".
+
+Em seguida, verifique se os parágrafos de desenvolvimento cumprem o que foi anunciado:
+- Cumprimento total → c3_cumprimento_anuncio = "total".
+- Cumpre parcialmente (faltou desenvolver algum argumento prometido) → "parcial".
+- Desenvolveu outros argumentos diferentes do anunciado → "divergente".
+- Não houve anúncio → "nao_aplicavel".
+
+IMPORTANTE: ausência de anúncio NÃO penaliza automaticamente. Se a progressão lógica é cristalina e bem cumprida, C3 pode ser 200 mesmo sem anúncio formal. Penalize quando há promessa não cumprida ou quando há saltos temáticos sem articulação.
+
+PASSO 4 — AVALIAÇÃO DAS DEMAIS COMPETÊNCIAS:
+Avalie C1, C4 e C5 conforme a rubrica acima.
+
+PASSO 5 — CONSOLIDAÇÃO DAS NOTAS:
+Atribua nota a cada competência baseando-se nos níveis 0/40/80/120/160/200.
+Lembre: tangenciamento limita C2/C3/C5 a 40 cada.
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
@@ -1422,6 +1553,9 @@ REGRAS CRÍTICAS DE SAÍDA:
 6. nota_total DEVE ser a soma exata das 5 competências.
 7. O campo "erros" deve conter marcações com o trecho EXATO do texto original (character-perfect), para que a UI possa destacá-lo.
 8. pontos_fortes, pontos_melhorar e plano_melhoria são arrays de strings (3 itens cada), não um texto corrido.
+9. c2_tema_elementos deve listar todos os elementos da decomposição (mesmo os presentes). c2_tema_ausentes deve listar apenas os ausentes (array vazio [] se todos presentes).
+10. c2_repertorio_retomado deve ser true, false ou null (não string).
+11. Se houver mais de uma referência sociocultural no texto, avalie a principal (a mais central ao argumento).
 
 Formato EXATO da resposta:
 ${FORMATO_JSON_NOTA_DIAGNOSTICO}`;
