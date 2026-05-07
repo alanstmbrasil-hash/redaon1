@@ -40,6 +40,27 @@
   .saida-card:hover{border-color:rgba(108,92,231,.5);background:#1d2026;transform:translateY(-3px);box-shadow:0 10px 28px rgba(108,92,231,.15);}
   .saida-card .shine{position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%);transform:translateX(-100%);transition:transform .6s;}
   .saida-card:hover .shine{transform:translateX(100%);}
+  /* ── Formato bloqueado (em desenvolvimento) ─────── */
+  .saida-card.bloqueado{opacity:.55;}
+  .saida-card.bloqueado:hover{border-color:rgba(71,69,84,.25);background:#191c22;transform:none;box-shadow:none;}
+  .saida-card.bloqueado:hover .shine{transform:translateX(-100%);}
+  .badge-em-breve{position:absolute;top:.5rem;right:.5rem;background:rgba(250,189,0,.15);border:1px solid rgba(250,189,0,.4);color:#fabd00;font-size:.55rem;font-weight:700;padding:.15rem .45rem;border-radius:.5rem;text-transform:uppercase;letter-spacing:.05em;}
+  /* ── Modal "Em breve" ─────────────────────────────── */
+  #modalEmBreve{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem;}
+  #modalEmBreve.aberto{display:flex;}
+  #modalEmBreve .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:440px;width:100%;padding:2rem;text-align:center;animation:fadeUp .3s ease;}
+  #modalEmBreve .icone-grande{width:64px;height:64px;border-radius:50%;background:rgba(250,189,0,.12);border:1px solid rgba(250,189,0,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
+  /* ── Resumo estruturado (cards do JSON) ───────────── */
+  .resumo-secao{margin-bottom:1.25rem;padding:1rem 1.25rem;background:rgba(255,255,255,.02);border-left:3px solid #45edee;border-radius:.5rem;}
+  .resumo-secao.causas{border-left-color:#fabd00;}
+  .resumo-secao.consequencias{border-left-color:#ffb4ab;}
+  .resumo-secao.dados{border-left-color:#c6bfff;}
+  .resumo-secao.solucoes{border-left-color:#4ade80;}
+  .resumo-secao h3{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#928ea0;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem;}
+  .resumo-secao p{font-size:.875rem;color:#c8c4d7;line-height:1.6;}
+  .resumo-secao ul{margin:0;padding:0;list-style:none;}
+  .resumo-secao li{font-size:.875rem;color:#c8c4d7;line-height:1.55;padding:.3rem 0 .3rem 1rem;position:relative;}
+  .resumo-secao li::before{content:'•';position:absolute;left:0;color:#45edee;font-weight:700;}
   #modalResultado{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
   #modalResultado.aberto{display:flex;}
   #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(5rem);background:#272a31;border:1px solid rgba(255,255,255,.1);color:#e1e2eb;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:300;transition:transform .3s;pointer-events:none;white-space:nowrap;}
@@ -110,6 +131,19 @@ function toggleSidebar(){
       <button onclick="irEscrever()" style="flex:2;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:900;font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;"><span class="material-symbols-outlined" style="font-size:1rem;">edit</span>Escrever Redação Agora</button>
       <button onclick="fecharModal()" style="padding:.875rem 1.25rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.875rem;cursor:pointer;">Fechar</button>
     </div>
+  </div>
+</div>
+
+<!-- Modal "Em breve" — formatos ainda não implementados -->
+<div id="modalEmBreve" onclick="if(event.target===this)fecharEmBreve()">
+  <div class="conteudo">
+    <div class="icone-grande">
+      <span class="material-symbols-outlined" style="color:#fabd00;font-size:2rem;font-variation-settings:'FILL' 1;">construction</span>
+    </div>
+    <h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;">Em desenvolvimento</h2>
+    <p style="font-size:.85rem;color:#c8c4d7;line-height:1.6;margin-bottom:.4rem;">O formato <strong id="emBreveTitulo" style="color:#45edee;">—</strong> está sendo refinado pela nossa equipe pedagógica e será liberado em breve.</p>
+    <p style="font-size:.8rem;color:#928ea0;line-height:1.55;margin-bottom:1.5rem;">Por enquanto, você pode estudar este tema usando <strong style="color:#4ade80;">Resumo em Texto</strong>, <strong style="color:#4ade80;">Cartões de Memória</strong> ou <strong style="color:#4ade80;">Quiz</strong> — todos validados pela Profa. Blanche.</p>
+    <button onclick="fecharEmBreve()" style="width:100%;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;">Entendi</button>
   </div>
 </div>
 <!-- SIDEBAR -->
@@ -320,13 +354,13 @@ function toggleSidebar(){
       <p class="text-sm text-on-surface-variant">Escolha o formato que melhor se adapta ao seu jeito de estudar.</p>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div class="saida-card p-5" onclick="gerarSaida('resumo','article','Resumo em Texto')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-primary mb-3 block" style="font-variation-settings:'FILL' 1;">article</span><p class="text-sm font-bold text-on-surface">Resumo em Texto</p><p class="text-[10px] text-on-surface-variant mt-1">Síntese completa do tema</p></div>
-        <div class="saida-card p-5" onclick="gerarSaida('audio','spatial_audio','Resumo em Áudio')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-secondary mb-3 block" style="font-variation-settings:'FILL' 1;">spatial_audio</span><p class="text-sm font-bold text-on-surface">Resumo em Áudio</p><p class="text-[10px] text-on-surface-variant mt-1">Roteiro de podcast de estudo</p></div>
-        <div class="saida-card p-5" onclick="gerarSaida('video','smart_display','Roteiro de Vídeo')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-error mb-3 block" style="font-variation-settings:'FILL' 1;">smart_display</span><p class="text-sm font-bold text-on-surface">Roteiro de Vídeo</p><p class="text-[10px] text-on-surface-variant mt-1">Script de vídeo-aula</p></div>
-        <div class="saida-card p-5" onclick="gerarSaida('mapa','account_tree','Mapa Mental')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-tertiary mb-3 block" style="font-variation-settings:'FILL' 1;">account_tree</span><p class="text-sm font-bold text-on-surface">Mapa Mental</p><p class="text-[10px] text-on-surface-variant mt-1">Estrutura visual dos argumentos</p></div>
+        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Resumo em Áudio')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl text-secondary mb-3 block" style="font-variation-settings:'FILL' 1;">spatial_audio</span><p class="text-sm font-bold text-on-surface">Resumo em Áudio</p><p class="text-[10px] text-on-surface-variant mt-1">Roteiro de podcast de estudo</p></div>
+        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Roteiro de Vídeo')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl text-error mb-3 block" style="font-variation-settings:'FILL' 1;">smart_display</span><p class="text-sm font-bold text-on-surface">Roteiro de Vídeo</p><p class="text-[10px] text-on-surface-variant mt-1">Script de vídeo-aula</p></div>
+        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Mapa Mental')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl text-tertiary mb-3 block" style="font-variation-settings:'FILL' 1;">account_tree</span><p class="text-sm font-bold text-on-surface">Mapa Mental</p><p class="text-[10px] text-on-surface-variant mt-1">Estrutura visual dos argumentos</p></div>
         <div class="saida-card p-5" onclick="gerarFlashcards()"><div class="shine"></div><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#4ade80;font-variation-settings:'FILL' 1;">style</span><p class="text-sm font-bold text-on-surface">Cartões de Memória</p><p class="text-[10px] text-on-surface-variant mt-1">Flashcards — clique para virar</p></div>
         <div class="saida-card p-5" onclick="gerarQuiz()"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-primary mb-3 block" style="font-variation-settings:'FILL' 1;">quiz</span><p class="text-sm font-bold text-on-surface">Teste / Quiz</p><p class="text-[10px] text-on-surface-variant mt-1">Questões estilo ENEM</p></div>
-        <div class="saida-card p-5" onclick="gerarSaida('infografico','bar_chart','Infográfico')"><div class="shine"></div><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#c6bfff;font-variation-settings:'FILL' 1;">bar_chart</span><p class="text-sm font-bold text-on-surface">Infográfico</p><p class="text-[10px] text-on-surface-variant mt-1">Dados e números do tema</p></div>
-        <div class="saida-card p-5" onclick="gerarSaida('relatorio','assessment','Relatório Completo')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-secondary mb-3 block" style="font-variation-settings:'FILL' 1;">assessment</span><p class="text-sm font-bold text-on-surface">Relatório</p><p class="text-[10px] text-on-surface-variant mt-1">Análise acadêmica aprofundada</p></div>
+        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Infográfico')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#c6bfff;font-variation-settings:'FILL' 1;">bar_chart</span><p class="text-sm font-bold text-on-surface">Infográfico</p><p class="text-[10px] text-on-surface-variant mt-1">Dados e números do tema</p></div>
+        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Relatório Completo')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl text-secondary mb-3 block" style="font-variation-settings:'FILL' 1;">assessment</span><p class="text-sm font-bold text-on-surface">Relatório</p><p class="text-[10px] text-on-surface-variant mt-1">Análise acadêmica aprofundada</p></div>
       </div>
       <!-- Flashcards inline -->
       <div id="areaFlashcards" class="hidden pt-2">
@@ -576,8 +610,47 @@ window.respRep=function(tipo,qi,ai,correta,explicacao){
 };
 window.carregarTudo=async function(){const btn=document.getElementById('btnGerarTudo');btn.disabled=true;btn.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ml-2">PROfa gerando tudo...</span>';for(const tipo of['legislacao','historia','especialistas','atualidades','literatura','filosofia','cinema','ciencia','culturapop']){document.getElementById('body-'+tipo).classList.add('aberto');document.getElementById('chevron-'+tipo).classList.add('aberto');if(!gerado[tipo])await window.toggleRep(tipo);}btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:\'FILL\' 1;">check_circle</span><span>Repertório completo!</span>';btn.style.cssText='background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:#4ade80;';};
 let resultadoAtual='';
-const PS={resumo:`Crie um RESUMO DIDÁTICO de "${TITULO}" para redação ENEM. Problema, causas, consequências, dados e soluções.`,audio:`ROTEIRO DE PODCAST sobre "${TITULO}". Tom conversacional, com [pausa]. ~8 minutos.`,video:`ROTEIRO DE VÍDEO-AULA sobre "${TITULO}" em cenas numeradas. Fala + recurso visual sugerido. ~10 minutos.`,mapa:`MAPA MENTAL hierárquico de "${TITULO}" com →. Ramos: Causas, Consequências, Legislação, Especialistas, Dados, Soluções.`,infografico:`CONTEÚDO DE INFOGRÁFICO sobre "${TITULO}": título, seções, dados, comparações, timeline e curiosidades.`,relatorio:`RELATÓRIO ACADÊMICO sobre "${TITULO}": Resumo, Introdução, Contexto, Análise, Legislação, Especialistas, Dados, Perspectivas, Conclusão.`,redacao_modelo:`REDAÇÃO NOTA 1000 sobre "${TITULO}". Introdução com repertório + 2 parágrafos + conclusão com proposta de intervenção completa. 28-30 linhas. Linguagem formal.`};
-window.gerarSaida=async function(tipo,icone,titulo){document.getElementById('modalResultado').classList.add('aberto');document.getElementById('modalTitulo').textContent=titulo;document.getElementById('modalIcon').textContent=icone;document.getElementById('modalConteudo').innerHTML='<div style="display:flex;align-items:center;gap:.75rem;padding:1rem 0;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;font-size:.85rem;">PROfa gerando...</span></div>';try{resultadoAtual=await geminiGenerate(PS[tipo]+'\n\nPortuguês brasileiro com markdown.');document.getElementById('modalConteudo').innerHTML=md(resultadoAtual);if(!estFeito){estFeito=true;marcarPasso('estudio');}}catch(err){document.getElementById('modalConteudo').innerHTML='<p style="color:#ffb4ab">Erro. Tente novamente.</p>';}};
+const PS={resumo:`Crie um RESUMO DIDÁTICO de "${TITULO}" para redação ENEM.
+Retorne APENAS um JSON válido, sem markdown e sem texto adicional, no formato:
+{
+  "titulo": "${TITULO}",
+  "resumo_didatico": {
+    "problema": "<1-2 frases descrevendo o problema central>",
+    "causas": ["<causa 1>", "<causa 2>", "<causa 3>"],
+    "consequencias": ["<consequência 1>", "<consequência 2>", "<consequência 3>", "<consequência 4>"],
+    "dados_relevantes": ["<dado 1 com fonte se possível>", "<dado 2>", "<dado 3>"],
+    "solucoes_propostas": ["<solução 1>", "<solução 2>", "<solução 3>", "<solução 4>"]
+  }
+}
+Cada item deve ter 1-2 frases completas, em português brasileiro. Não use markdown dentro dos campos.`,audio:`ROTEIRO DE PODCAST sobre "${TITULO}". Tom conversacional, com [pausa]. ~8 minutos.`,video:`ROTEIRO DE VÍDEO-AULA sobre "${TITULO}" em cenas numeradas. Fala + recurso visual sugerido. ~10 minutos.`,mapa:`MAPA MENTAL hierárquico de "${TITULO}" com →. Ramos: Causas, Consequências, Legislação, Especialistas, Dados, Soluções.`,infografico:`CONTEÚDO DE INFOGRÁFICO sobre "${TITULO}": título, seções, dados, comparações, timeline e curiosidades.`,relatorio:`RELATÓRIO ACADÊMICO sobre "${TITULO}": Resumo, Introdução, Contexto, Análise, Legislação, Especialistas, Dados, Perspectivas, Conclusão.`,redacao_modelo:`REDAÇÃO NOTA 1000 sobre "${TITULO}". Introdução com repertório + 2 parágrafos + conclusão com proposta de intervenção completa. 28-30 linhas. Linguagem formal.`};
+window.gerarSaida=async function(tipo,icone,titulo){
+  document.getElementById('modalResultado').classList.add('aberto');
+  document.getElementById('modalTitulo').textContent=titulo;
+  document.getElementById('modalIcon').textContent=icone;
+  document.getElementById('modalConteudo').innerHTML='<div style="display:flex;align-items:center;gap:.75rem;padding:1rem 0;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;font-size:.85rem;">PROfa gerando...</span></div>';
+  try{
+    resultadoAtual=await geminiGenerate(PS[tipo]);
+    document.getElementById('modalConteudo').innerHTML=renderResumoSaida(resultadoAtual);
+    if(!estFeito){estFeito=true;marcarPasso('estudio');}
+  }catch(err){
+    document.getElementById('modalConteudo').innerHTML='<p style="color:#ffb4ab">Erro. Tente novamente.</p>';
+  }
+};
+// Funções de controle do modal "Em breve" (formatos não implementados)
+window.mostrarEmBreve=function(titulo){
+  document.getElementById('emBreveTitulo').textContent=titulo;
+  document.getElementById('modalEmBreve').classList.add('aberto');
+};
+window.fecharEmBreve=function(){
+  document.getElementById('modalEmBreve').classList.remove('aberto');
+};
+// ESC fecha qualquer modal aberto
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    document.getElementById('modalEmBreve').classList.remove('aberto');
+    document.getElementById('modalResultado').classList.remove('aberto');
+  }
+});
 window.gerarFlashcards=async function(){toast('🃏 Gerando cartões...');const prompt=`Crie 8 flashcards sobre "${TITULO}" para o ENEM. APENAS JSON: [{"frente":"...","verso":"..."}]`;try{const _txt=await geminiGenerate(prompt);const cards=JSON.parse(_txt.replace(/```json|```/g,'').trim());const area=document.getElementById('areaFlashcards');area.classList.remove('hidden');document.getElementById('areaQuiz').classList.add('hidden');document.getElementById('labelFlashcard').textContent=cards.length+' cartões · clique para virar';const grid=document.getElementById('gridFlashcards');grid.innerHTML='';cards.forEach(c=>{const div=document.createElement('div');div.className='flashcard';div.onclick=()=>div.classList.toggle('flipped');div.innerHTML=`<div class="flashcard-inner"><div class="flashcard-front"><div><p class="text-[9px] text-secondary font-bold uppercase tracking-widest mb-2">Frente</p><p class="text-sm font-bold text-on-surface">${c.frente}</p></div></div><div class="flashcard-back"><div><p class="text-[9px] text-primary font-bold uppercase tracking-widest mb-2">Verso</p><p class="text-xs text-on-surface leading-relaxed">${c.verso}</p></div></div></div>`;grid.appendChild(div);});area.scrollIntoView({behavior:'smooth',block:'start'});if(!estFeito){estFeito=true;marcarPasso('estudio');}toast('✓ '+cards.length+' cartões gerados!');}catch(err){toast('Erro ao gerar flashcards.');}};
 let quizR={};
 window.gerarQuiz=async function(){toast('🧪 Gerando quiz...');const prompt=`5 questões ENEM sobre "${TITULO}". APENAS JSON: [{"pergunta":"...","alternativas":["A)...","B)...","C)...","D)...","E)..."],"correta":0,"explicacao":"..."}]`;try{const _txt=await geminiGenerate(prompt);const qs=JSON.parse(_txt.replace(/```json|```/g,'').trim());quizR={};const area=document.getElementById('areaQuiz');area.classList.remove('hidden');document.getElementById('areaFlashcards').classList.add('hidden');const cont=document.getElementById('containerQuiz');cont.innerHTML='';qs.forEach((q,qi)=>{const div=document.createElement('div');div.className='p-5 rounded-2xl';div.style.cssText='background:#191c22;border:1px solid rgba(71,69,84,.25);';div.innerHTML=`<p class="text-xs font-bold text-on-surface-variant mb-3">Questão ${qi+1} / ${qs.length}</p><p class="text-sm font-bold text-on-surface mb-4">${q.pergunta}</p><div class="space-y-2" id="alt${qi}">${q.alternativas.map((a,ai)=>`<button onclick="resp(${qi},${ai},${q.correta},'${q.explicacao.replace(/'/g,"\'")}',this)" class="w-full text-left px-4 py-3 rounded-xl border text-sm transition-all hover:border-secondary/40" style="background:#0b0e14;border-color:rgba(71,69,84,.3);color:#c8c4d7;">${a}</button>`).join('')}</div><div id="exp${qi}" class="hidden mt-3 p-3 rounded-xl text-xs leading-relaxed"></div>`;cont.appendChild(div);});area.scrollIntoView({behavior:'smooth',block:'start'});if(!estFeito){estFeito=true;marcarPasso('estudio');}toast('✓ Quiz gerado!');}catch(err){toast('Erro ao gerar quiz.');}};
@@ -586,6 +659,45 @@ window.fecharModal=function(){document.getElementById('modalResultado').classLis
 document.getElementById('modalResultado').addEventListener('click',function(e){if(e.target===this)window.fecharModal();});
 window.copiarResultado=function(){navigator.clipboard.writeText(resultadoAtual).then(()=>toast('✓ Copiado!'));};
 window.irEscrever=function(){window.location.href='nova-redacao.html';};
+function renderResumoSaida(raw){
+  // Tenta detectar JSON estruturado (formato atual do Gemini com responseMimeType=json)
+  const limpo=(raw||'').trim().replace(/^```json|```$|^```/g,'').trim();
+  let dados=null;
+  try{
+    if(limpo.startsWith('{')){
+      dados=JSON.parse(limpo);
+    }
+  }catch(e){/* não é JSON, segue para markdown */}
+
+  // Se for JSON com a estrutura de resumo didático, renderiza em seções visuais
+  if(dados && (dados.resumo_didatico || dados.problema || dados.causas)){
+    const r=dados.resumo_didatico||dados;
+    const titulo=dados.titulo||'';
+    let html='';
+    if(titulo){
+      html+=`<p style="font-size:1.05rem;font-weight:800;color:#45edee;margin-bottom:1.25rem;line-height:1.4;">${escapeHTML(titulo)}</p>`;
+    }
+    if(r.problema){
+      html+=`<div class="resumo-secao"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#45edee;">lightbulb</span>Problema</h3><p>${escapeHTML(r.problema)}</p></div>`;
+    }
+    if(Array.isArray(r.causas)&&r.causas.length){
+      html+=`<div class="resumo-secao causas"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#fabd00;">flag</span>Causas</h3><ul>${r.causas.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul></div>`;
+    }
+    if(Array.isArray(r.consequencias)&&r.consequencias.length){
+      html+=`<div class="resumo-secao consequencias"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#ffb4ab;">trending_down</span>Consequências</h3><ul>${r.consequencias.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul></div>`;
+    }
+    if(Array.isArray(r.dados_relevantes)&&r.dados_relevantes.length){
+      html+=`<div class="resumo-secao dados"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#c6bfff;">analytics</span>Dados relevantes</h3><ul>${r.dados_relevantes.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul></div>`;
+    }
+    if(Array.isArray(r.solucoes_propostas)&&r.solucoes_propostas.length){
+      html+=`<div class="resumo-secao solucoes"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#4ade80;">construction</span>Soluções propostas</h3><ul>${r.solucoes_propostas.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul></div>`;
+    }
+    return html||md(limpo);
+  }
+  // Fallback: trata como markdown ou texto puro
+  return md(limpo);
+}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);}
 function md(t){return t.replace(/\*\*(.*?)\*\*/g,'<strong style="color:#e1e2eb">$1</strong>').replace(/^### (.*)/gm,'<p style="font-size:.875rem;font-weight:700;color:#45edee;margin:.75rem 0 .25rem">$1</p>').replace(/^## (.*)/gm,'<p style="font-size:1rem;font-weight:700;color:#e1e2eb;margin:.875rem 0 .3rem">$1</p>').replace(/^# (.*)/gm,'<p style="font-size:1.1rem;font-weight:800;color:#45edee;margin:1rem 0 .4rem">$1</p>').replace(/^[-—•] (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0;color:#c8c4d7">• $1</p>').replace(/^(\d+)\. (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0"><strong style="color:#45edee">$1.</strong> $2</p>').replace(/\[pausa\]/gi,'<span style="color:#fabd00;font-style:italic">[pausa]</span>').replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');}
 </script>
 </body>
