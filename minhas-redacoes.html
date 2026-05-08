@@ -1182,8 +1182,12 @@ Formato EXATO da resposta:
 
     try {
       // Monta prompt com contexto das notas/feedbacks da Chamada 1 (pra consistência).
+      const _temaC2 = (redacao.titulo && redacao.titulo !== 'Redacao sem titulo')
+        ? redacao.titulo
+        : '(tema não informado pelo aluno — infira do texto da redação)';
       const comps = dadosAtuais._competencias_objetos || [];
       const contexto = '\n\nCONTEXTO — Análise já atribuída a esta redação:\n'
+        + 'Tema da redação: ' + _temaC2 + '\n'
         + 'Nota total: ' + (dadosAtuais.nota_total || '—') + '/1000\n'
         + 'Notas por competência: '
         + (Array.isArray(dadosAtuais.competencias)
@@ -1253,6 +1257,22 @@ Formato EXATO da resposta:
       return;
     }
     const colElite = document.getElementById('colElite');
+
+    // ── SALVAGUARDA: redação antiga sem texto (legado pré-v2.2) ─────
+    // Algumas redações no banco têm texto = '[Arquivo enviado]' porque foram
+    // submetidas por foto antes da v2.2 (que faz OCR no upload). Sem texto real,
+    // a IA da Chamada 3 alucina. Bloqueamos com mensagem útil.
+    if (!redacao.texto || redacao.texto.trim() === '[Arquivo enviado]' || redacao.texto.trim().length < 50) {
+      colElite.innerHTML =
+        '<div style="text-align:center;padding:2.5rem 1.5rem;">'
+        + '<span class="material-symbols-outlined" style="font-size:2.5rem;color:#fabd00;margin-bottom:.5rem;">info</span>'
+        + '<p style="color:#e1e2eb;font-size:.95rem;font-weight:700;margin-bottom:.5rem;">Versão nota 1000 indisponível</p>'
+        + '<p style="color:#c8c4d7;font-size:.8rem;line-height:1.6;margin-bottom:1rem;">Esta redação foi enviada por foto antes da atualização que transcreve o texto automaticamente.</p>'
+        + '<p style="color:#928ea0;font-size:.75rem;line-height:1.55;">Para receber a versão nota 1000, envie uma nova redação digitando o texto ou usando uma foto recente — o sistema agora transcreve a imagem para você revisar antes de corrigir.</p>'
+        + '</div>';
+      return;
+    }
+
     colElite.innerHTML =
       '<div style="text-align:center;padding:2.5rem 1.5rem;">'
       + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
@@ -1261,8 +1281,13 @@ Formato EXATO da resposta:
       + '</div>';
 
     try {
-      // Monta prompt com contexto da redação original + notas já atribuídas
+      // Monta prompt com contexto da redação original + tema + notas já atribuídas
+      const _temaC3 = (redacao.titulo && redacao.titulo !== 'Redacao sem titulo')
+        ? redacao.titulo
+        : '(tema não informado pelo aluno — infira do texto da redação)';
+
       const contexto = '\n\nCONTEXTO — Notas já atribuídas:\n'
+        + 'Tema da redação: ' + _temaC3 + '\n'
         + (dadosAtuais.nota_total ? 'Nota total: ' + dadosAtuais.nota_total + '/1000\n' : '')
         + (Array.isArray(dadosAtuais.competencias)
             ? 'Notas por competência: ' + dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + v).join(', ') + '\n'
@@ -1324,7 +1349,11 @@ Formato EXATO da resposta:
     }
 
     try {
+      const _temaC4 = (redacao.titulo && redacao.titulo !== 'Redacao sem titulo')
+        ? redacao.titulo
+        : '(tema não informado pelo aluno)';
       const contexto = '\n\nCONTEXTO:\n'
+        + 'TEMA DA REDAÇÃO: ' + _temaC4 + '\n'
         + 'REDAÇÃO ORIGINAL:\n' + redacao.texto
         + '\n\nREDAÇÃO NOTA 1000 REESCRITA:\n'
         + 'Introdução: '        + (dadosAtuais.redacao_nota_1000_intro     || '') + '\n'

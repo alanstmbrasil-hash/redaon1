@@ -352,6 +352,13 @@
     box-shadow: 0 4px 16px rgba(201,162,39,.35);
   }
 
+  /* ── Badge "Em breve" no botão de método de envio ───── */
+  .badge-em-breve-metodo{position:absolute;top:.2rem;right:.2rem;background:rgba(250,189,0,.18);border:1px solid rgba(250,189,0,.4);color:#fabd00;font-size:.45rem;font-weight:700;padding:.08rem .3rem;border-radius:.35rem;text-transform:uppercase;letter-spacing:.04em;line-height:1;}
+  /* ── Modal "Em breve" para método de envio ─────────── */
+  #modalEmBreveMetodo{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem;}
+  #modalEmBreveMetodo.aberto{display:flex;}
+  #modalEmBreveMetodo .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:440px;width:100%;padding:2rem;text-align:center;}
+  #modalEmBreveMetodo .icone-grande{width:64px;height:64px;border-radius:50%;background:rgba(250,189,0,.12);border:1px solid rgba(250,189,0,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
 </style>
 <script src="supabase-auth.js"></script>
 </head>
@@ -377,6 +384,19 @@
 <div id="toast"></div>
 <input type="file" id="inputPDF" accept=".pdf"/>
 <input type="file" id="inputImagem" accept="image/*"/>
+
+<!-- Modal "Em breve" para método de envio (Voz, etc.) -->
+<div id="modalEmBreveMetodo" onclick="if(event.target===this)fecharEmBreveMetodo()">
+  <div class="conteudo">
+    <div class="icone-grande">
+      <span class="material-symbols-outlined" style="color:#fabd00;font-size:2rem;font-variation-settings:'FILL' 1;">construction</span>
+    </div>
+    <h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;">Em desenvolvimento</h2>
+    <p style="font-size:.85rem;color:#c8c4d7;line-height:1.6;margin-bottom:.4rem;"><strong id="emBreveMetodoTitulo" style="color:#45edee;">—</strong> está sendo refinado pela nossa equipe e será liberado em breve.</p>
+    <p style="font-size:.8rem;color:#928ea0;line-height:1.55;margin-bottom:1.5rem;">Por enquanto, você pode escrever sua redação digitando, enviando uma <strong style="color:#4ade80;">imagem</strong> ou um <strong style="color:#4ade80;">PDF</strong>.</p>
+    <button onclick="fecharEmBreveMetodo()" style="width:100%;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;">Entendi</button>
+  </div>
+</div>
 
 <!-- OVERLAY -->
 <div id="overlay" onclick="toggleSidebar()"></div>
@@ -573,7 +593,8 @@
               <span class="material-symbols-outlined metodo-icon text-primary mb-1">text_fields</span>
               <span class="text-[10px] font-bold text-on-surface-variant metodo-label">Texto</span>
             </button>
-            <button id="btnVoz" onclick="selecionarMetodo('voz')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container-low border border-outline-variant/10 hover:bg-primary-container transition-all">
+            <button id="btnVoz" onclick="mostrarEmBreveMetodo('Reda&ccedil;&atilde;o por Voz')" class="metodo-btn flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container-low border border-outline-variant/10 transition-all relative" style="opacity:.55;cursor:pointer;">
+              <span class="badge-em-breve-metodo">Em breve</span>
               <span class="material-symbols-outlined metodo-icon text-primary mb-1">mic</span>
               <span class="text-[10px] font-bold text-on-surface-variant metodo-label">Voz</span>
             </button>
@@ -1166,21 +1187,125 @@ var intervaloDicas = null;
     toast('Gravação encerrada.');
   }
 
-  document.getElementById('inputPDF').addEventListener('change', (e) => {
+  // ── Modal "Em breve" para métodos de envio bloqueados ──
+  window.mostrarEmBreveMetodo = function(titulo) {
+    document.getElementById('emBreveMetodoTitulo').textContent = titulo;
+    document.getElementById('modalEmBreveMetodo').classList.add('aberto');
+  };
+  window.fecharEmBreveMetodo = function() {
+    document.getElementById('modalEmBreveMetodo').classList.remove('aberto');
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var m = document.getElementById('modalEmBreveMetodo');
+      if (m) m.classList.remove('aberto');
+    }
+  });
+
+  document.getElementById('inputPDF').addEventListener('change', async (e) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      arquivoBase64 = ev.target.result.split(',')[1]; arquivoMime = 'application/pdf';
-      mostrarArquivo(file.name); atualizarContador(); toast('PDF carregado!');
+    reader.onload = async (ev) => {
+      arquivoBase64 = ev.target.result.split(',')[1];
+      arquivoMime = 'application/pdf';
+      mostrarArquivo(file.name);
+      atualizarContador();
+      toast('📄 PDF carregado! Extraindo o texto...', 5000);
+
+      // ── EXTRAÇÃO AUTOMÁTICA DE TEXTO DO PDF ──────────────
+      // Mesma lógica do upload de imagem: extrai texto via Gemini, preenche
+      // textarea para revisão e descarta arquivoBase64. Garante que Chamadas
+      // 2/3/4 recebam texto real (e não '[Arquivo enviado]') no banco.
+      try {
+        const promptOCR = `Você é um extrator especializado em redações do ENEM em PDF.
+
+TAREFA: Extraia FIELMENTE o texto completo da redação contida neste PDF, mantendo:
+- Todos os erros ortográficos e gramaticais do aluno (NÃO corrija nada)
+- A pontuação exatamente como está
+- Quebras de parágrafo (parágrafos começam recuados)
+- Palavras riscadas devem ser ignoradas (use a versão substitutiva quando houver)
+
+Se houver título ou tema escrito no topo, inclua na primeira linha.
+Não adicione comentários, notas ou observações. Apenas o texto extraído.
+Se alguma palavra for ilegível, marque como [ilegível] em vez de inventar.
+
+Responda APENAS com o texto extraído, sem markdown, sem aspas, sem prefixos.`;
+
+        const textoExtraido = await geminiGenerate(promptOCR, arquivoBase64, arquivoMime);
+        const textoLimpo = (textoExtraido || '').trim()
+          .replace(/^```[a-z]*\n?/i, '')
+          .replace(/\n?```$/, '')
+          .trim();
+
+        if (textoLimpo && textoLimpo.length > 30) {
+          textarea.value = textoLimpo;
+          atualizarContador();
+          arquivoBase64 = null;
+          arquivoMime = null;
+          document.getElementById('area-arquivo').classList.remove('visivel');
+          toast('✅ Texto extraído! Revise e corrija antes de enviar.', 6000);
+        } else {
+          toast('⚠️ Extração incompleta. Você pode digitar manualmente ou tentar de novo.', 6000);
+        }
+      } catch (err) {
+        console.error('[RedaON] Erro na extração de PDF:', err);
+        toast('⚠️ Não consegui extrair automaticamente. Você pode digitar ou enviar mesmo assim.', 6000);
+      }
     };
     reader.readAsDataURL(file); e.target.value = '';
   });
-  document.getElementById('inputImagem').addEventListener('change', (e) => {
+  document.getElementById('inputImagem').addEventListener('change', async (e) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      arquivoBase64 = ev.target.result.split(',')[1]; arquivoMime = file.type;
-      mostrarArquivo(file.name); atualizarContador(); toast('Imagem carregada!');
+    reader.onload = async (ev) => {
+      arquivoBase64 = ev.target.result.split(',')[1];
+      arquivoMime = file.type;
+      mostrarArquivo(file.name);
+      atualizarContador();
+      toast('📸 Imagem carregada! Transcrevendo o texto...', 5000);
+
+      // ── OCR AUTOMÁTICO ──────────────────────────────────
+      // Transcreve o manuscrito e preenche o textarea para o aluno revisar
+      // antes de submeter. Resolve bug das Chamadas 3/4 receberem '[Arquivo enviado]'
+      // como texto da redação no banco.
+      try {
+        const promptOCR = `Você é um transcritor especializado em redações manuscritas do ENEM.
+
+TAREFA: Transcreva FIELMENTE o texto manuscrito desta redação, linha por linha, mantendo:
+- Todos os erros ortográficos e gramaticais do aluno (NÃO corrija nada)
+- A pontuação exatamente como está
+- Quebras de parágrafo onde o aluno fez (parágrafos começam recuados)
+- Palavras riscadas devem ser ignoradas (use a versão substitutiva quando houver)
+
+Se houver título ou tema escrito no topo, inclua na primeira linha.
+Não adicione comentários, notas ou observações. Apenas o texto transcrito.
+Se alguma palavra for ilegível, marque como [ilegível] em vez de inventar.
+
+Responda APENAS com o texto transcrito, sem markdown, sem aspas, sem prefixos.`;
+
+        const textoTranscrito = await geminiGenerate(promptOCR, arquivoBase64, arquivoMime);
+        const textoLimpo = (textoTranscrito || '').trim()
+          .replace(/^```[a-z]*\n?/i, '')
+          .replace(/\n?```$/, '')
+          .trim();
+
+        if (textoLimpo && textoLimpo.length > 30) {
+          textarea.value = textoLimpo;
+          atualizarContador();
+          // Libera o arquivoBase64 — a correção agora parte do texto digitado
+          arquivoBase64 = null;
+          arquivoMime = null;
+          document.getElementById('area-arquivo').classList.remove('visivel');
+          toast('✅ Texto transcrito! Revise e corrija antes de enviar.', 6000);
+        } else {
+          // OCR falhou ou retornou pouco — mantém arquivoBase64 como fallback
+          toast('⚠️ Transcrição incompleta. Você pode digitar manualmente ou tentar de novo.', 6000);
+        }
+      } catch (err) {
+        console.error('[RedaON] Erro no OCR:', err);
+        // Mantém arquivoBase64 como fallback — correção ainda funciona via foto
+        toast('⚠️ Não consegui transcrever automaticamente. Você pode digitar ou enviar mesmo assim.', 6000);
+      }
     };
     reader.readAsDataURL(file); e.target.value = '';
   });
@@ -1868,8 +1993,14 @@ ${FORMATO_JSON_MELHORIAS}`;
           // sob demanda em minhas-redacoes.html (Commit 3/4).
           (async () => {
             try {
+              // Captura tema da redação (input título OU tema selecionado em sessionStorage)
+              const _tituloC2 = document.getElementById('tituloRedacao')?.value?.trim() || null;
+              const _temaSessC2 = (() => { try { const s = sessionStorage.getItem('tema_selecionado'); return s ? JSON.parse(s).titulo : null; } catch(e) { return null; } })();
+              const _temaC2 = _tituloC2 || _temaSessC2 || '(tema não informado pelo aluno)';
+
               const prompt2 = PROMPT_ANALISE_COMPLETA
                 + '\n\nCONTEXTO — Análise já atribuída a esta redação:\n'
+                + 'Tema da redação: ' + _temaC2 + '\n'
                 + 'Nota total: ' + dados.nota_total + '/1000\n'
                 + 'Notas por competência: '
                 + dados.competencias.map((c,i) => `C${i+1}=${c.nota}`).join(', ') + '\n'
