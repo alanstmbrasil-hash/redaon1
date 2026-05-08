@@ -1035,8 +1035,10 @@ var intervaloDicas = null;
     return data.candidates[0].content.parts[0].text;
   }
 
-  // Versão para OCR: timeout do cliente (default 30s, com Vercel Pro permite até 60s)
-  // e tratamento robusto de respostas não-JSON.
+  // Versão para OCR: timeout do cliente (default 30s, com Vercel Pro permite até 60s),
+  // tratamento robusto de respostas não-JSON, E força resposta em texto puro
+  // (sobrescreve o default 'application/json' do api/gemini.js que estava fazendo
+  // o Gemini retornar JSON estruturado com bounding boxes em vez do texto da redação).
   async function geminiOCR(prompt, arquivoBase64, arquivoMime, timeoutMs = 30000) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -1048,7 +1050,15 @@ var intervaloDicas = null;
           contents: [{ parts: [
             { inline_data: { mime_type: arquivoMime, data: arquivoBase64 } },
             { text: prompt }
-          ]}]
+          ]}],
+          generationConfig: {
+            // CRITICAL: desliga o JSON forçado para esta chamada específica.
+            // Sem isso, o Gemini retorna JSON com box_2d e text_content
+            // (formato de OCR avançado), que polui o textarea.
+            responseMimeType: 'text/plain',
+            temperature: 0.1,
+            maxOutputTokens: 8000
+          }
         }),
         signal: ctrl.signal
       });
@@ -1301,9 +1311,19 @@ var intervaloDicas = null;
       // textarea para revisão e descarta arquivoBase64. Garante que Chamadas
       // 2/3/4 recebam texto real (e não '[Arquivo enviado]') no banco.
       try {
-        const promptOCR = `Extraia fielmente o texto da redação ENEM neste PDF. Mantenha erros ortográficos, pontuação e quebras de parágrafo originais. Ignore palavras riscadas. Marque ilegíveis como [ilegível]. Responda APENAS com o texto, sem markdown, aspas ou prefixos.`;
+        const promptOCR = `Você é um extrator de texto de redações em PDF. Sua única tarefa é extrair o texto desta redação ENEM como TEXTO PURO em português.
 
-        const textoExtraido = await geminiGenerate(promptOCR, arquivoBase64, arquivoMime);
+REGRAS:
+- NÃO use JSON, XML, HTML ou qualquer formato estruturado
+- NÃO inclua coordenadas, bounding boxes, números de linha ou metadados
+- Mantenha erros ortográficos e gramaticais do aluno (não corrija)
+- Mantenha pontuação e quebras de parágrafo originais
+- Ignore palavras riscadas (use a versão substituta quando houver)
+- Marque palavras ilegíveis como [ilegível]
+
+FORMATO DE SAÍDA: Apenas o texto da redação, em parágrafos separados por linha em branco. Nada antes, nada depois.`;
+
+        const textoExtraido = await geminiOCR(promptOCR, arquivoBase64, arquivoMime, 30000);
         const textoLimpo = (textoExtraido || '').trim()
           .replace(/^```[a-z]*\n?/i, '')
           .replace(/\n?```$/, '')
@@ -1360,7 +1380,17 @@ var intervaloDicas = null;
     // antes de submeter. Resolve bug das Chamadas 3/4 receberem '[Arquivo enviado]'
     // como texto da redação no banco.
     try {
-      const promptOCR = `Transcreva fielmente o texto manuscrito desta redação ENEM. Mantenha erros ortográficos, pontuação e quebras de parágrafo originais. Ignore palavras riscadas. Marque ilegíveis como [ilegível]. Responda APENAS com o texto, sem markdown, aspas ou prefixos.`;
+      const promptOCR = `Você é um transcritor de redações manuscritas. Sua única tarefa é transcrever o texto manuscrito desta redação ENEM como TEXTO PURO em português.
+
+REGRAS:
+- NÃO use JSON, XML, HTML ou qualquer formato estruturado
+- NÃO inclua coordenadas, bounding boxes, números de linha ou metadados
+- Mantenha erros ortográficos e gramaticais do aluno (não corrija)
+- Mantenha pontuação e quebras de parágrafo originais
+- Ignore palavras riscadas (use a versão substituta quando houver)
+- Marque palavras ilegíveis como [ilegível]
+
+FORMATO DE SAÍDA: Apenas o texto da redação, em parágrafos separados por linha em branco. Nada antes, nada depois.`;
 
       const textoTranscrito = await geminiOCR(promptOCR, arquivoBase64, arquivoMime, 30000);
       const textoLimpo = (textoTranscrito || '').trim()
@@ -1905,10 +1935,17 @@ ${FORMATO_JSON_MELHORIAS}`;
   const PROMPT_ELITE = PROMPT_NOTA_DIAGNOSTICO;
 
   // ── ENVIO ──────────────────────────────────────────
+  let _enviando = false; // flag anti-duplicação (evita clique duplo gerar 2 redações)
   async function enviar() {
+    // Proteção contra clique duplo / múltiplos envios simultâneos
+    if (_enviando) {
+      console.warn('[RedaON] Envio em andamento — ignorando clique duplicado');
+      return;
+    }
     const texto = textarea.value.trim();
     if (!texto && !arquivoBase64) { toast('Escreva sua redação ou envie um arquivo!'); return; }
     if (!arquivoBase64 && texto.split(/\s+/).length < 50) { toast('Mínimo de 50 palavras para enviar.'); return; }
+    _enviando = true;
     const elite = modoEliteAtivo;
     document.getElementById('btnEnviar').textContent = elite ? '⭐ Analisando no Elite...' : 'Analisando...';
     document.getElementById('btnEnviar').disabled = true;
@@ -2130,6 +2167,7 @@ ${FORMATO_JSON_MELHORIAS}`;
     } finally {
       document.getElementById('btnEnviar').textContent = elite ? '⭐ Enviar para análise Elite' : 'Enviar para correção';
       document.getElementById('btnEnviar').disabled = false;
+      _enviando = false; // libera para próximo envio
     }
   }
 
