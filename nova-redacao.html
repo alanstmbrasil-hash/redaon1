@@ -1311,9 +1311,18 @@ var intervaloDicas = null;
       // textarea para revisão e descarta arquivoBase64. Garante que Chamadas
       // 2/3/4 recebam texto real (e não '[Arquivo enviado]') no banco.
       try {
-        const promptOCR = `Você é um extrator de texto de redações em PDF. Sua única tarefa é extrair o texto desta redação ENEM como TEXTO PURO em português.
+        const promptOCR = `Você é um extrator de texto de redações em PDF. Sua única tarefa é extrair APENAS o texto da redação ENEM contida neste PDF, como TEXTO PURO em português.
 
-REGRAS:
+IMPORTANTE — IGNORAR PARTES IMPRESSAS:
+- IGNORE cabeçalhos, logos, números de folha, códigos de barras
+- IGNORE textos impressos como "FOLHA DE REDAÇÃO", "EXAME NACIONAL DO ENSINO MÉDIO", "ENEM 2025", "INSTRUÇÕES"
+- IGNORE dados pessoais impressos (nome, CPF, data de nascimento, número de inscrição)
+- IGNORE instruções pré-impressas (ex: "Transcreva a sua redação com caneta...", "Não será avaliado texto escrito em local indevido")
+- IGNORE rodapés, brasões, marcas d'água, paginação
+
+EXTRAIA APENAS o conteúdo da redação que o aluno escreveu (à mão ou digitada). Comece pela primeira linha de redação.
+
+REGRAS DE FORMATO:
 - NÃO use JSON, XML, HTML ou qualquer formato estruturado
 - NÃO inclua coordenadas, bounding boxes, números de linha ou metadados
 - Mantenha erros ortográficos e gramaticais do aluno (não corrija)
@@ -1380,9 +1389,18 @@ FORMATO DE SAÍDA: Apenas o texto da redação, em parágrafos separados por lin
     // antes de submeter. Resolve bug das Chamadas 3/4 receberem '[Arquivo enviado]'
     // como texto da redação no banco.
     try {
-      const promptOCR = `Você é um transcritor de redações manuscritas. Sua única tarefa é transcrever o texto manuscrito desta redação ENEM como TEXTO PURO em português.
+      const promptOCR = `Você é um transcritor de redações manuscritas. Sua única tarefa é transcrever o texto MANUSCRITO desta redação ENEM como TEXTO PURO em português.
 
-REGRAS:
+IMPORTANTE — IGNORAR PARTES IMPRESSAS:
+- IGNORE cabeçalhos, logos, números de folha, códigos de barras
+- IGNORE textos impressos como "FOLHA DE REDAÇÃO", "EXAME NACIONAL DO ENSINO MÉDIO", "ENEM 2025", "INSTRUÇÕES"
+- IGNORE dados pessoais impressos (nome, CPF, data de nascimento, número de inscrição)
+- IGNORE instruções pré-impressas (ex: "Transcreva a sua redação com caneta...", "Não será avaliado texto escrito em local indevido")
+- IGNORE rodapés, brasões, marcas d'água
+
+TRANSCREVA APENAS o que o aluno escreveu À MÃO. Comece pela primeira linha de redação manuscrita do aluno.
+
+REGRAS DE FORMATO:
 - NÃO use JSON, XML, HTML ou qualquer formato estruturado
 - NÃO inclua coordenadas, bounding boxes, números de linha ou metadados
 - Mantenha erros ortográficos e gramaticais do aluno (não corrija)
@@ -1390,7 +1408,7 @@ REGRAS:
 - Ignore palavras riscadas (use a versão substituta quando houver)
 - Marque palavras ilegíveis como [ilegível]
 
-FORMATO DE SAÍDA: Apenas o texto da redação, em parágrafos separados por linha em branco. Nada antes, nada depois.`;
+FORMATO DE SAÍDA: Apenas o texto da redação que o aluno escreveu à mão, em parágrafos separados por linha em branco. Nada antes, nada depois.`;
 
       const textoTranscrito = await geminiOCR(promptOCR, arquivoBase64, arquivoMime, 30000);
       const textoLimpo = (textoTranscrito || '').trim()

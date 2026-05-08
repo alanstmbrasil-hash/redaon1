@@ -493,7 +493,9 @@ REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
 2. Dentro de strings, use \\n (escapado) para quebras de linha.
 3. MANTENHA o tema, o ponto de vista e a tese do aluno. A reescrita deve ser reconhecível como "a redação dele melhorada", não uma redação completamente diferente.
-4. A conclusão DEVE incluir os 5 elementos obrigatórios da proposta de intervenção: AÇÃO + AGENTE + MEIO + FINALIDADE + DETALHAMENTO.
+4. A conclusão DEVE conter os 5 elementos da proposta de intervenção (ação, agente, meio, finalidade e detalhamento) integrados em prosa fluida.
+5. NÃO use marcadores, rótulos ou destaques como "(AÇÃO)", "**(AGENTE)**", "[MEIO]" no meio do texto. A redação deve fluir como prosa natural — os elementos devem ser identificáveis pela leitura, não por etiquetas.
+6. NÃO use asteriscos, parênteses ou colchetes para marcar partes da redação. Escreva como uma redação real entregue ao corretor INEP.
 
 Formato EXATO da resposta:
 {
@@ -858,12 +860,20 @@ Formato EXATO da resposta:
       for (const k of keys) { if (dados[k]) return dados[k]; }
       return null;
     };
+    // Limpa marcadores tipo **(AÇÃO)**, [AGENTE], (MEIO), etc. que a IA pode
+    // inserir mesmo com prompt pedindo prosa fluida. Normaliza espaços.
+    const limparMarcadores = (txt) => (txt || '')
+      .replace(/\*\*\s*\(?\s*(AÇÃO|AGENTE|MEIO|FINALIDADE|DETALHAMENTO)\s*\)?\s*\*\*/gi, '')
+      .replace(/\[\s*(AÇÃO|AGENTE|MEIO|FINALIDADE|DETALHAMENTO)\s*\]/gi, '')
+      .replace(/\(\s*(AÇÃO|AGENTE|MEIO|FINALIDADE|DETALHAMENTO)\s*\)/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
     // Fallback: se vier versao_elite como string única, dividir em parágrafos
     let eliteHtml = '';
     const temSecoes = secoesList.some(s => leCampo(s.keys));
     if (temSecoes) {
       eliteHtml = secoesList.map(s => {
-        const texto = leCampo(s.keys);
+        const texto = limparMarcadores(leCampo(s.keys));
         if (!texto) return '';
         return '<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,.08);">'
           + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;">'
