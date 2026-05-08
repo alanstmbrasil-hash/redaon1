@@ -1035,6 +1035,40 @@ var intervaloDicas = null;
     return data.candidates[0].content.parts[0].text;
   }
 
+  // Versão para OCR: timeout do cliente (9s, antes do 504 da Vercel) e tratamento
+  // robusto de respostas não-JSON (Vercel às vezes retorna 'An error occurred' como texto)
+  async function geminiOCR(prompt, arquivoBase64, arquivoMime, timeoutMs = 9000) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [
+            { inline_data: { mime_type: arquivoMime, data: arquivoBase64 } },
+            { text: prompt }
+          ]}]
+        }),
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      if (!res.ok) {
+        // Vercel pode retornar texto puro em erros — tenta JSON, cai pra texto
+        let detalhe;
+        try { const j = await res.json(); detalhe = j.error?.message || 'erro ' + res.status; }
+        catch { detalhe = 'erro ' + res.status; }
+        throw new Error(detalhe);
+      }
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } catch (err) {
+      clearTimeout(timer);
+      if (err.name === 'AbortError') throw new Error('OCR_TIMEOUT');
+      throw err;
+    }
+  }
+
   // ── NOME USUÁRIO ───────────────────────────────────
   const NOME_USUARIO = authGetNome();
   document.getElementById('nomeUsuarioSidebar').textContent = NOME_USUARIO;
@@ -1205,11 +1239,11 @@ var intervaloDicas = null;
   // ════════════════════════════════════════════════════════════
   // COMPRESSÃO DE IMAGEM NO CLIENTE (necessária para Vercel Hobby)
   // ════════════════════════════════════════════════════════════
-  // Reduz imagem para no máximo 1500px de largura e qualidade JPEG 80%.
-  // Foto de 770KB / 2256x3112 / 300DPI → ~200KB / 1500x2070.
+  // Reduz imagem para no máximo 1100px e qualidade JPEG 70%.
+  // Se ainda ficar > 250KB, reduz mais (900px / 60%) para evitar 504.
   // Tempo de OCR no Gemini cai de 10-15s para 4-7s (cabe no timeout 10s).
-  // Qualidade preservada: 1500px é mais que suficiente para OCR de texto.
-  function comprimirImagem(file, maxWidth = 1500, qualidade = 0.8) {
+  // Qualidade preservada: 1100px é mais que suficiente para OCR de texto manuscrito.
+  function comprimirImagem(file, maxWidth = 1100, qualidade = 0.7) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (ev) => {
@@ -1226,14 +1260,37 @@ var intervaloDicas = null;
           canvas.width = w;
           canvas.height = h;
           const ctx = canvas.getContext('2d');
-          // Fundo branco para PNGs com transparência (importante para fotos com bordas)
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, w, h);
           ctx.drawImage(img, 0, 0, w, h);
           // toDataURL retorna 'data:image/jpeg;base64,XXXX' — extraímos só o base64
-          const dataUrl = canvas.toDataURL('image/jpeg', qualidade);
-          const base64 = dataUrl.split(',')[1];
-          resolve({ base64, mime: 'image/jpeg', tamanhoOriginal: file.size, tamanhoComprimido: Math.round(base64.length * 0.75) });
+          let dataUrl = canvas.toDataURL('image/jpeg', qualidade);
+          let base64 = dataUrl.split(',')[1];
+          // Tamanho real em bytes do que será enviado (após decode base64)
+          let tamanhoBytes = Math.round(base64.length * 3 / 4);
+
+          // Se ainda > 250KB, recomprime mais agressivamente (uma única vez)
+          if (tamanhoBytes > 250 * 1024 && qualidade > 0.5) {
+            const w2 = Math.min(w, 900);
+            const h2 = Math.round(h * (w2 / w));
+            canvas.width = w2;
+            canvas.height = h2;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w2, h2);
+            ctx.drawImage(img, 0, 0, w2, h2);
+            dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+            base64 = dataUrl.split(',')[1];
+            tamanhoBytes = Math.round(base64.length * 3 / 4);
+            console.log('[RedaON] Imagem ainda pesada — recomprimida para 900px / 60%');
+          }
+
+          resolve({
+            base64,
+            mime: 'image/jpeg',
+            tamanhoOriginal: file.size,
+            tamanhoComprimido: tamanhoBytes,
+            dimensoes: canvas.width + 'x' + canvas.height
+          });
         };
         img.onerror = () => reject(new Error('Falha ao carregar imagem'));
         img.src = ev.target.result;
@@ -1289,12 +1346,13 @@ var intervaloDicas = null;
     // Sem compressão, foto típica de celular (2-5MB / 4032x3024) faz o OCR
     // estourar o timeout de 10s da Vercel Hobby.
     try {
-      const comprimida = await comprimirImagem(file, 1500, 0.8);
+      const comprimida = await comprimirImagem(file, 1100, 0.7);
       arquivoBase64 = comprimida.base64;
       arquivoMime = comprimida.mime;
       console.log('[RedaON] Imagem comprimida:',
         Math.round(comprimida.tamanhoOriginal/1024) + 'KB →',
-        Math.round(comprimida.tamanhoComprimido/1024) + 'KB');
+        Math.round(comprimida.tamanhoComprimido/1024) + 'KB',
+        '(' + comprimida.dimensoes + ')');
     } catch (err) {
       // Se compressão falhar, usa arquivo original como fallback
       console.warn('[RedaON] Compressão falhou, usando original:', err);
@@ -1318,7 +1376,7 @@ var intervaloDicas = null;
     try {
       const promptOCR = `Transcreva fielmente o texto manuscrito desta redação ENEM. Mantenha erros ortográficos, pontuação e quebras de parágrafo originais. Ignore palavras riscadas. Marque ilegíveis como [ilegível]. Responda APENAS com o texto, sem markdown, aspas ou prefixos.`;
 
-      const textoTranscrito = await geminiGenerate(promptOCR, arquivoBase64, arquivoMime);
+      const textoTranscrito = await geminiOCR(promptOCR, arquivoBase64, arquivoMime, 9000);
       const textoLimpo = (textoTranscrito || '').trim()
         .replace(/^```[a-z]*\n?/i, '')
         .replace(/\n?```$/, '')
@@ -1333,13 +1391,17 @@ var intervaloDicas = null;
         document.getElementById('area-arquivo').classList.remove('visivel');
         toast('✅ Texto transcrito! Revise e corrija antes de enviar.', 6000);
       } else {
-        // OCR falhou ou retornou pouco — mantém arquivoBase64 como fallback
-        toast('⚠️ Transcrição incompleta. Você pode digitar manualmente ou tentar de novo.', 6000);
+        // OCR retornou pouco — mantém arquivoBase64 como fallback
+        toast('⚠️ Transcrição incompleta. Você pode digitar manualmente ou enviar mesmo assim.', 6000);
       }
     } catch (err) {
       console.error('[RedaON] Erro no OCR:', err);
-      // Mantém arquivoBase64 como fallback — correção ainda funciona via foto
-      toast('⚠️ Não consegui transcrever automaticamente. Você pode digitar ou enviar mesmo assim.', 6000);
+      // Mensagem específica para timeout (caso mais comum no plano Hobby)
+      const msg = err.message === 'OCR_TIMEOUT'
+        ? '⏱️ A transcrição demorou. Você pode digitar o texto ou clicar em Corrigir para enviar a foto direto.'
+        : '⚠️ Não consegui transcrever. Você pode digitar ou enviar a foto mesmo assim.';
+      toast(msg, 7000);
+      // Mantém arquivoBase64 — correção ainda funciona via foto (com bug conhecido na Chamada 3)
     }
     e.target.value = '';
   });
