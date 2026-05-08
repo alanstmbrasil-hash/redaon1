@@ -1202,6 +1202,47 @@ var intervaloDicas = null;
     }
   });
 
+  // ════════════════════════════════════════════════════════════
+  // COMPRESSÃO DE IMAGEM NO CLIENTE (necessária para Vercel Hobby)
+  // ════════════════════════════════════════════════════════════
+  // Reduz imagem para no máximo 1500px de largura e qualidade JPEG 80%.
+  // Foto de 770KB / 2256x3112 / 300DPI → ~200KB / 1500x2070.
+  // Tempo de OCR no Gemini cai de 10-15s para 4-7s (cabe no timeout 10s).
+  // Qualidade preservada: 1500px é mais que suficiente para OCR de texto.
+  function comprimirImagem(file, maxWidth = 1500, qualidade = 0.8) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          // Calcula dimensões mantendo proporção
+          let w = img.width, h = img.height;
+          if (w > maxWidth) {
+            h = Math.round(h * (maxWidth / w));
+            w = maxWidth;
+          }
+          // Desenha em canvas e exporta como JPEG comprimido
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          // Fundo branco para PNGs com transparência (importante para fotos com bordas)
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          // toDataURL retorna 'data:image/jpeg;base64,XXXX' — extraímos só o base64
+          const dataUrl = canvas.toDataURL('image/jpeg', qualidade);
+          const base64 = dataUrl.split(',')[1];
+          resolve({ base64, mime: 'image/jpeg', tamanhoOriginal: file.size, tamanhoComprimido: Math.round(base64.length * 0.75) });
+        };
+        img.onerror = () => reject(new Error('Falha ao carregar imagem'));
+        img.src = ev.target.result;
+      };
+      reader.onerror = () => reject(new Error('Falha ao ler arquivo'));
+      reader.readAsDataURL(file);
+    });
+  }
+
   document.getElementById('inputPDF').addEventListener('change', async (e) => {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
@@ -1217,19 +1258,7 @@ var intervaloDicas = null;
       // textarea para revisão e descarta arquivoBase64. Garante que Chamadas
       // 2/3/4 recebam texto real (e não '[Arquivo enviado]') no banco.
       try {
-        const promptOCR = `Você é um extrator especializado em redações do ENEM em PDF.
-
-TAREFA: Extraia FIELMENTE o texto completo da redação contida neste PDF, mantendo:
-- Todos os erros ortográficos e gramaticais do aluno (NÃO corrija nada)
-- A pontuação exatamente como está
-- Quebras de parágrafo (parágrafos começam recuados)
-- Palavras riscadas devem ser ignoradas (use a versão substitutiva quando houver)
-
-Se houver título ou tema escrito no topo, inclua na primeira linha.
-Não adicione comentários, notas ou observações. Apenas o texto extraído.
-Se alguma palavra for ilegível, marque como [ilegível] em vez de inventar.
-
-Responda APENAS com o texto extraído, sem markdown, sem aspas, sem prefixos.`;
+        const promptOCR = `Extraia fielmente o texto da redação ENEM neste PDF. Mantenha erros ortográficos, pontuação e quebras de parágrafo originais. Ignore palavras riscadas. Marque ilegíveis como [ilegível]. Responda APENAS com o texto, sem markdown, aspas ou prefixos.`;
 
         const textoExtraido = await geminiGenerate(promptOCR, arquivoBase64, arquivoMime);
         const textoLimpo = (textoExtraido || '').trim()
@@ -1256,58 +1285,63 @@ Responda APENAS com o texto extraído, sem markdown, sem aspas, sem prefixos.`;
   });
   document.getElementById('inputImagem').addEventListener('change', async (e) => {
     const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
+    // ── COMPRIME ANTES DE QUALQUER COISA ───────────────
+    // Sem compressão, foto típica de celular (2-5MB / 4032x3024) faz o OCR
+    // estourar o timeout de 10s da Vercel Hobby.
+    try {
+      const comprimida = await comprimirImagem(file, 1500, 0.8);
+      arquivoBase64 = comprimida.base64;
+      arquivoMime = comprimida.mime;
+      console.log('[RedaON] Imagem comprimida:',
+        Math.round(comprimida.tamanhoOriginal/1024) + 'KB →',
+        Math.round(comprimida.tamanhoComprimido/1024) + 'KB');
+    } catch (err) {
+      // Se compressão falhar, usa arquivo original como fallback
+      console.warn('[RedaON] Compressão falhou, usando original:', err);
+      const ev = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = resolve;
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
       arquivoBase64 = ev.target.result.split(',')[1];
       arquivoMime = file.type;
-      mostrarArquivo(file.name);
-      atualizarContador();
-      toast('📸 Imagem carregada! Transcrevendo o texto...', 5000);
+    }
+    mostrarArquivo(file.name);
+    atualizarContador();
+    toast('📸 Imagem carregada! Transcrevendo o texto...', 5000);
 
-      // ── OCR AUTOMÁTICO ──────────────────────────────────
-      // Transcreve o manuscrito e preenche o textarea para o aluno revisar
-      // antes de submeter. Resolve bug das Chamadas 3/4 receberem '[Arquivo enviado]'
-      // como texto da redação no banco.
-      try {
-        const promptOCR = `Você é um transcritor especializado em redações manuscritas do ENEM.
+    // ── OCR AUTOMÁTICO ──────────────────────────────────
+    // Transcreve o manuscrito e preenche o textarea para o aluno revisar
+    // antes de submeter. Resolve bug das Chamadas 3/4 receberem '[Arquivo enviado]'
+    // como texto da redação no banco.
+    try {
+      const promptOCR = `Transcreva fielmente o texto manuscrito desta redação ENEM. Mantenha erros ortográficos, pontuação e quebras de parágrafo originais. Ignore palavras riscadas. Marque ilegíveis como [ilegível]. Responda APENAS com o texto, sem markdown, aspas ou prefixos.`;
 
-TAREFA: Transcreva FIELMENTE o texto manuscrito desta redação, linha por linha, mantendo:
-- Todos os erros ortográficos e gramaticais do aluno (NÃO corrija nada)
-- A pontuação exatamente como está
-- Quebras de parágrafo onde o aluno fez (parágrafos começam recuados)
-- Palavras riscadas devem ser ignoradas (use a versão substitutiva quando houver)
+      const textoTranscrito = await geminiGenerate(promptOCR, arquivoBase64, arquivoMime);
+      const textoLimpo = (textoTranscrito || '').trim()
+        .replace(/^```[a-z]*\n?/i, '')
+        .replace(/\n?```$/, '')
+        .trim();
 
-Se houver título ou tema escrito no topo, inclua na primeira linha.
-Não adicione comentários, notas ou observações. Apenas o texto transcrito.
-Se alguma palavra for ilegível, marque como [ilegível] em vez de inventar.
-
-Responda APENAS com o texto transcrito, sem markdown, sem aspas, sem prefixos.`;
-
-        const textoTranscrito = await geminiGenerate(promptOCR, arquivoBase64, arquivoMime);
-        const textoLimpo = (textoTranscrito || '').trim()
-          .replace(/^```[a-z]*\n?/i, '')
-          .replace(/\n?```$/, '')
-          .trim();
-
-        if (textoLimpo && textoLimpo.length > 30) {
-          textarea.value = textoLimpo;
-          atualizarContador();
-          // Libera o arquivoBase64 — a correção agora parte do texto digitado
-          arquivoBase64 = null;
-          arquivoMime = null;
-          document.getElementById('area-arquivo').classList.remove('visivel');
-          toast('✅ Texto transcrito! Revise e corrija antes de enviar.', 6000);
-        } else {
-          // OCR falhou ou retornou pouco — mantém arquivoBase64 como fallback
-          toast('⚠️ Transcrição incompleta. Você pode digitar manualmente ou tentar de novo.', 6000);
-        }
-      } catch (err) {
-        console.error('[RedaON] Erro no OCR:', err);
-        // Mantém arquivoBase64 como fallback — correção ainda funciona via foto
-        toast('⚠️ Não consegui transcrever automaticamente. Você pode digitar ou enviar mesmo assim.', 6000);
+      if (textoLimpo && textoLimpo.length > 30) {
+        textarea.value = textoLimpo;
+        atualizarContador();
+        // Libera o arquivoBase64 — a correção agora parte do texto digitado
+        arquivoBase64 = null;
+        arquivoMime = null;
+        document.getElementById('area-arquivo').classList.remove('visivel');
+        toast('✅ Texto transcrito! Revise e corrija antes de enviar.', 6000);
+      } else {
+        // OCR falhou ou retornou pouco — mantém arquivoBase64 como fallback
+        toast('⚠️ Transcrição incompleta. Você pode digitar manualmente ou tentar de novo.', 6000);
       }
-    };
-    reader.readAsDataURL(file); e.target.value = '';
+    } catch (err) {
+      console.error('[RedaON] Erro no OCR:', err);
+      // Mantém arquivoBase64 como fallback — correção ainda funciona via foto
+      toast('⚠️ Não consegui transcrever automaticamente. Você pode digitar ou enviar mesmo assim.', 6000);
+    }
+    e.target.value = '';
   });
   function mostrarArquivo(nome) {
     document.getElementById('nome-arquivo').textContent = nome;
