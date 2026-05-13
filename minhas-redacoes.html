@@ -136,23 +136,22 @@
   }
 
   /* ═══════════════════════════════════════════════════════════
-     FASE 3 — TELA CELEBRAÇÃO NOTA 1000
+     FASE 3 — TELA CELEBRAÇÃO NOTA 1000 (v2 — layout corrigido)
      ═══════════════════════════════════════════════════════════ */
 
-  /* Container principal da celebração — aparece dentro de #colElite */
+  /* Container principal */
   .celebracao-1000 {
     position: relative;
     background: linear-gradient(135deg, #1a1530, #0f0c1d 60%, #2d1f4a);
     border-radius: 1rem;
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
     overflow: hidden;
-    min-height: 600px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    gap: 1.25rem;
   }
-  /* Brilho de fundo difuso (efeito troféu) */
+  /* Brilho de fundo difuso */
   .celebracao-1000::before {
     content: '';
     position: absolute;
@@ -168,18 +167,17 @@
     50% { opacity: 1; }
   }
 
-  /* "Lista de aprovados" rolante */
+  /* "Lista de aprovados" rolante — container externo */
   .lista-aprovados {
+    position: relative;
     width: 100%;
     max-width: 480px;
     background: rgba(0,0,0,0.4);
     border: 1px solid rgba(201,162,39,0.3);
     border-radius: .75rem;
     padding: 1rem;
-    margin-bottom: 1.5rem;
-    height: 320px;
+    height: 360px;
     overflow: hidden;
-    position: relative;
     z-index: 1;
   }
   .lista-aprovados-titulo {
@@ -189,25 +187,29 @@
     font-size: .7rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    margin-bottom: 1rem;
+    margin-bottom: .75rem;
     padding-bottom: .5rem;
     border-bottom: 1px solid rgba(201,162,39,0.2);
   }
   .lista-aprovados-rolagem {
     position: relative;
     overflow: hidden;
-    height: calc(100% - 2.5rem);
+    height: calc(100% - 2.25rem);
   }
   .lista-aprovados-itens {
     display: flex;
     flex-direction: column;
     gap: .35rem;
-    animation: rolarLista 4.5s cubic-bezier(.16,1,.3,1) forwards;
+    /* Animação: rola pra cima até o card do aluno ficar no topo da janela
+       visível. Card tem 3 linhas (~110px), nomes ficticios ~32px cada.
+       Deslocamento calculado para deixar o card a ~30px do topo, com
+       espaço abaixo para o carimbo cair sem cobrir o card. */
+    animation: rolarListaV2 4.5s cubic-bezier(.16,1,.3,1) forwards;
   }
-  @keyframes rolarLista {
+  @keyframes rolarListaV2 {
     0%   { transform: translateY(0); }
-    85%  { transform: translateY(-1750px); }
-    100% { transform: translateY(-1800px); }
+    85%  { transform: translateY(-2200px); }
+    100% { transform: translateY(-2250px); }
   }
   .item-aprovado {
     font-family: 'Courier New', monospace;
@@ -216,71 +218,130 @@
     padding: .35rem .5rem;
     border-radius: .25rem;
     line-height: 1.4;
-    transition: all .3s ease;
   }
+  /* Nome do aluno destacado — agora é um CARD de 3 linhas:
+     1. "🏆 PARABÉNS, NOME!"
+     2. "Você atingiu nota 1000/1000"
+     3. Linha-padrão da lista (★ 0053 NOME COMPLETO)
+     Substitui o item simples da lista, expandindo-se em altura. */
   .item-aprovado.aluno-real {
-    background: linear-gradient(90deg, rgba(201,162,39,0.25), rgba(201,162,39,0.1));
-    color: #ffe98a;
-    font-weight: 800;
-    font-family: 'Inter', sans-serif;
-    font-size: 1.05rem;
-    border-left: 3px solid #c9a227;
-    padding: .65rem .75rem;
-    box-shadow: 0 0 20px rgba(201,162,39,0.4);
+    background: linear-gradient(135deg, rgba(201,162,39,0.30), rgba(201,162,39,0.12));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(201,162,39,0.5);
+    border-left: 4px solid #c9a227;
+    border-radius: .5rem;
+    padding: 1rem .9rem;
+    box-shadow: 0 0 25px rgba(201,162,39,0.4), 0 4px 16px rgba(0,0,0,0.3);
+    /* Pulsa o card quando a animação para */
     animation: destacarNome 0.6s ease 4.2s both;
+    position: relative;
+    z-index: 3;
+    color: #ffe98a;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+    margin: .35rem 0;
+  }
+  .card-parabens-titulo {
+    font-size: 1.05rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #c9a227, #ffe98a 50%, #c9a227);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: .35rem;
+    letter-spacing: 0.02em;
+  }
+  .card-parabens-badge {
+    display: inline-block;
+    background: rgba(201,162,39,0.18);
+    border: 1px solid rgba(201,162,39,0.45);
+    color: #ffe98a;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: .25rem .7rem;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+    margin-bottom: .5rem;
+    text-transform: uppercase;
+  }
+  .card-parabens-nota {
+    font-size: .78rem;
+    color: #e1e2eb;
+    font-weight: 500;
+    margin-bottom: .55rem;
+    line-height: 1.4;
+  }
+  .card-parabens-linha {
+    font-family: 'Inter', sans-serif;
+    font-size: .9rem;
+    font-weight: 700;
+    color: #ffe98a;
+    padding-top: .5rem;
+    border-top: 1px solid rgba(201,162,39,0.25);
+    letter-spacing: 0.01em;
   }
   @keyframes destacarNome {
     0%   { transform: scale(1); }
-    50%  { transform: scale(1.08); box-shadow: 0 0 40px rgba(201,162,39,0.8); }
+    50%  { transform: scale(1.04); box-shadow: 0 0 50px rgba(201,162,39,0.8), 0 4px 16px rgba(0,0,0,0.3); }
     100% { transform: scale(1); }
   }
 
-  /* Carimbo APROVADO caindo */
-  .carimbo-aprovado {
+  /* Carimbo APROVADO — aparece DENTRO da lista, abaixo do card do aluno.
+     Posicionado absoluto dentro da .lista-aprovados-rolagem para sobrepor
+     os nomes fictícios que estão abaixo do nome real do aluno.
+     Top 65% = abaixo do card de 3 linhas (que ocupa ~25-35% da janela). */
+  .carimbo-container {
     position: absolute;
-    top: 30%;
+    top: 65%;
     left: 50%;
-    transform: translate(-50%, -50%) rotate(-15deg);
-    z-index: 5;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .carimbo-aprovado {
     font-family: 'Impact', 'Arial Black', sans-serif;
-    font-size: 4rem;
+    font-size: 2.5rem;
     font-weight: 900;
     color: #dc2626;
-    border: 8px solid #dc2626;
-    padding: .5rem 2rem;
-    border-radius: .5rem;
-    letter-spacing: 0.15em;
+    border: 6px solid #dc2626;
+    padding: .35rem 1.5rem;
+    border-radius: .4rem;
+    letter-spacing: 0.12em;
     background: rgba(255,255,255,0.95);
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
     opacity: 0;
-    pointer-events: none;
+    transform: rotate(-15deg) scale(2) translateY(-300px);
     animation: cairCarimbo 0.8s cubic-bezier(.5,1.8,.5,1) 5s forwards;
   }
   @keyframes cairCarimbo {
     0% {
       opacity: 0;
-      transform: translate(-50%, -250%) rotate(-15deg) scale(2);
+      transform: rotate(-15deg) scale(2) translateY(-300px);
     }
     60% {
       opacity: 1;
-      transform: translate(-50%, -50%) rotate(-15deg) scale(1.3);
+      transform: rotate(-15deg) scale(1.25) translateY(0);
     }
     75% {
-      transform: translate(-50%, -50%) rotate(-15deg) scale(0.95);
+      transform: rotate(-15deg) scale(0.92) translateY(0);
     }
     90% {
-      transform: translate(-50%, -50%) rotate(-15deg) scale(1.05);
+      transform: rotate(-15deg) scale(1.04) translateY(0);
     }
     100% {
       opacity: 1;
-      transform: translate(-50%, -50%) rotate(-15deg) scale(1);
+      transform: rotate(-15deg) scale(1) translateY(0);
     }
   }
   /* "Onda" da batida do carimbo */
   .carimbo-onda {
     position: absolute;
-    top: 30%;
+    top: 65%;
     left: 50%;
     width: 200px;
     height: 200px;
@@ -288,47 +349,28 @@
     border: 4px solid rgba(201,162,39,0.6);
     transform: translate(-50%, -50%) scale(0);
     pointer-events: none;
-    z-index: 4;
-    animation: ondaBatida 0.8s ease-out 5.5s forwards;
+    z-index: 1;
+    animation: ondaBatida 0.8s ease-out 5.6s forwards;
   }
   @keyframes ondaBatida {
     0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
     100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
   }
 
-  /* Mensagem final + botões */
-  .mensagem-final-1000 {
-    text-align: center;
-    margin-top: 2rem;
-    opacity: 0;
-    animation: fadeInFinal 0.6s ease 6s forwards;
-    position: relative;
-    z-index: 2;
-  }
-  @keyframes fadeInFinal {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .titulo-parabens {
-    font-size: 1.5rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, #c9a227, #ffe98a 50%, #c9a227);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: .5rem;
-  }
-  .subtitulo-1000 {
-    font-size: .95rem;
-    color: #e1e2eb;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
-  }
+  /* Botões finais — aparecem após a batida */
   .botoes-1000 {
     display: flex;
     gap: .75rem;
     justify-content: center;
     flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeInBotoes 0.6s ease 6s forwards;
+    position: relative;
+    z-index: 4;
+  }
+  @keyframes fadeInBotoes {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .btn-celebracao {
     padding: .75rem 1.25rem;
@@ -359,7 +401,7 @@
     width: 8px;
     height: 14px;
     pointer-events: none;
-    z-index: 3;
+    z-index: 10;
     animation: cairConfete linear forwards;
   }
   @keyframes cairConfete {
@@ -368,9 +410,8 @@
   }
 
   @media(max-width:640px){
-    .carimbo-aprovado { font-size: 2.5rem; padding: .3rem 1.25rem; border-width: 5px; }
-    .lista-aprovados { height: 280px; }
-    .titulo-parabens { font-size: 1.15rem; }
+    .carimbo-aprovado { font-size: 1.6rem; padding: .25rem 1rem; border-width: 4px; }
+    .lista-aprovados { height: 320px; }
   }
 </style>
 <script src="supabase-auth.js"></script>
@@ -1023,44 +1064,58 @@ Formato EXATO da resposta:
    * @param {string} tema - Tema da redação (para o PNG de download)
    */
   function montarCelebracao1000(nomeAluno, tema) {
-    // Gera lista de aprovados: ~80 nomes fictícios + nome do aluno na posição final.
-    // A animação CSS desloca a lista até o último item (que é o nome do aluno).
-    const totalNomesAntes = NOMES_FICTICIOS_CELEBRACAO.length * 2; // ~70 nomes
-    const nomesShuffled = embaralhar([...NOMES_FICTICIOS_CELEBRACAO, ...NOMES_FICTICIOS_CELEBRACAO]);
+    // Estrutura da lista (sentimento "Rei do Mundo"):
+    //  - Nome do aluno como POSIÇÃO #0001 (primeiro lugar absoluto)
+    //  - 30+ nomes fictícios abaixo (#0002, #0003, ...) — figurantes
+    //  - Animação rola lista de baixo para cima até parar no #0001
+    // Conceito: aluno se sente como Jack na proa do Titanic — Rei do Mundo.
+    const nomesDepois = embaralhar([...NOMES_FICTICIOS_CELEBRACAO]).slice(0, 35);
 
-    let itensHtml = nomesShuffled.map((nome, i) =>
-      '<div class="item-aprovado">' + String(i + 1).padStart(4, '0') + ' &nbsp;&nbsp; ' + escHtml(nome) + '</div>'
+    // Para criar o efeito de "lista rolando até parar no topo",
+    // colocamos placeholders ANTES do nome do aluno na DOM, mas o aluno
+    // continua sendo #0001 visualmente. Os placeholders rolam pra fora.
+    const placeholdersAntes = embaralhar([...NOMES_FICTICIOS_CELEBRACAO, ...NOMES_FICTICIOS_CELEBRACAO]);
+
+    // 1. Placeholders (rolam pra fora) — numeração fake só pra rolagem
+    let itensHtml = placeholdersAntes.map((nome, i) =>
+      '<div class="item-aprovado item-placeholder">' + String(1000 + i).padStart(4, '0') + ' &nbsp;&nbsp; ' + escHtml(nome) + '</div>'
     ).join('');
 
-    // Nome do aluno em destaque (item final)
-    const numAluno = String(totalNomesAntes + 1).padStart(4, '0');
+    // 2. Card do aluno — POSIÇÃO #0001 (Rei do Mundo)
+    const primeiroNome = nomeAluno.split(' ')[0].toUpperCase();
     itensHtml += '<div class="item-aprovado aluno-real">'
-              + '★ ' + numAluno + ' &nbsp;&nbsp; ' + escHtml(nomeAluno)
+              +   '<div class="card-parabens-titulo">🏆 PARABÉNS, ' + escHtml(primeiroNome) + '!</div>'
+              +   '<div class="card-parabens-badge">Você é RedaON #0001</div>'
+              +   '<div class="card-parabens-nota">Você atingiu a nota máxima — 1000/1000</div>'
+              +   '<div class="card-parabens-linha">★ 0001 &nbsp;&nbsp; ' + escHtml(nomeAluno.toUpperCase()) + '</div>'
               + '</div>';
+
+    // 3. Demais aprovados (#0002, #0003, ...) — figurantes
+    itensHtml += nomesDepois.map((nome, i) =>
+      '<div class="item-aprovado">' + String(i + 2).padStart(4, '0') + ' &nbsp;&nbsp; ' + escHtml(nome) + '</div>'
+    ).join('');
 
     return ''
       + '<div class="celebracao-1000" id="celebracaoConteudo">'
       +   '<div class="lista-aprovados">'
-      +     '<div class="lista-aprovados-titulo">Resultado Final · ENEM Redação</div>'
+      +     '<div class="lista-aprovados-titulo">Resultado Final · ENEM Redação · 1000/1000</div>'
       +     '<div class="lista-aprovados-rolagem">'
       +       '<div class="lista-aprovados-itens">' + itensHtml + '</div>'
+      +       '<div class="carimbo-onda"></div>'
+      +       '<div class="carimbo-container">'
+      +         '<div class="carimbo-aprovado">APROVADO</div>'
+      +       '</div>'
       +     '</div>'
       +   '</div>'
-      +   '<div class="carimbo-onda"></div>'
-      +   '<div class="carimbo-aprovado">APROVADO</div>'
-      +   '<div class="mensagem-final-1000">'
-      +     '<div class="titulo-parabens">🏆 PARABÉNS, ' + escHtml(nomeAluno.split(' ')[0].toUpperCase()) + '!</div>'
-      +     '<div class="subtitulo-1000">Você atingiu a nota máxima — 1000/1000.<br>Sua redação representa o padrão de excelência ENEM.</div>'
-      +     '<div class="botoes-1000">'
-      +       '<button class="btn-celebracao primario" onclick="window.baixarConquistaPNG()">'
-      +         '<span class="material-symbols-outlined" style="font-size:18px;">download</span>'
-      +         'Baixar imagem'
-      +       '</button>'
-      +       '<button class="btn-celebracao secundario" onclick="window.repetirAnimacao1000()">'
-      +         '<span class="material-symbols-outlined" style="font-size:18px;">replay</span>'
-      +         'Repetir'
-      +       '</button>'
-      +     '</div>'
+      +   '<div class="botoes-1000">'
+      +     '<button class="btn-celebracao primario" onclick="window.baixarConquistaPNG()">'
+      +       '<span class="material-symbols-outlined" style="font-size:18px;">download</span>'
+      +       'Baixar imagem'
+      +     '</button>'
+      +     '<button class="btn-celebracao secundario" onclick="window.repetirAnimacao1000()">'
+      +       '<span class="material-symbols-outlined" style="font-size:18px;">replay</span>'
+      +       'Repetir'
+      +     '</button>'
       +   '</div>'
       + '</div>';
   }
@@ -1079,28 +1134,43 @@ Formato EXATO da resposta:
   }
 
   /**
-   * Dispara confetes coloridos caindo do topo. Roda em paralelo à animação principal.
+   * Dispara confetes coloridos caindo do topo. Chamado no momento da
+   * batida do carimbo (5.5s após início da animação), para reforçar
+   * visualmente o impacto da aprovação.
    */
   function disparaConfetes() {
     const container = document.querySelector('.celebracao-1000');
     if (!container) return;
-    const cores = ['#c9a227', '#ffe98a', '#45edee', '#6c5ce7', '#4ade80', '#fa6e6e'];
-    // Confetes leves contínuos por ~6s (sincroniza com animação principal)
-    const totalConfetes = 80;
-    for (let i = 0; i < totalConfetes; i++) {
-      setTimeout(() => {
-        const confete = document.createElement('div');
-        confete.className = 'confete';
-        confete.style.left = Math.random() * 100 + '%';
-        confete.style.background = cores[Math.floor(Math.random() * cores.length)];
-        confete.style.animationDuration = (2.5 + Math.random() * 2) + 's';
-        // Rotação aleatória inicial
-        confete.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
-        container.appendChild(confete);
-        // Remove após animação
-        setTimeout(() => confete.remove(), 5000);
-      }, i * 60);
+    const cores = ['#c9a227', '#ffe98a', '#45edee', '#6c5ce7', '#4ade80', '#fa6e6e', '#ffffff'];
+    // Burst inicial denso (50 confetes em 800ms) + cauda mais leve (60 em 2s)
+    const burstInicial = 50;
+    const caudaTotal = 60;
+
+    // Burst inicial — bem rápido, simulando explosão dos confetes
+    for (let i = 0; i < burstInicial; i++) {
+      setTimeout(() => criarConfete(container, cores), i * 16);
     }
+    // Cauda mais espaçada
+    for (let i = 0; i < caudaTotal; i++) {
+      setTimeout(() => criarConfete(container, cores), 800 + i * 33);
+    }
+  }
+
+  function criarConfete(container, cores) {
+    if (!container || !document.body.contains(container)) return;
+    const confete = document.createElement('div');
+    confete.className = 'confete';
+    confete.style.left = Math.random() * 100 + '%';
+    confete.style.background = cores[Math.floor(Math.random() * cores.length)];
+    confete.style.animationDuration = (2 + Math.random() * 2) + 's';
+    confete.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+    // Variação de tamanho (algumas tiras maiores, mais visíveis)
+    if (Math.random() > 0.7) {
+      confete.style.width = '12px';
+      confete.style.height = '18px';
+    }
+    container.appendChild(confete);
+    setTimeout(() => confete.remove(), 5000);
   }
 
   /**
@@ -1114,7 +1184,8 @@ Formato EXATO da resposta:
     if (!colElite) return;
     // Limpa confetes antigos e re-renderiza
     colElite.innerHTML = montarCelebracao1000(nomeAluno, '');
-    setTimeout(() => disparaConfetes(), 200);
+    // Confetes sincronizados com a batida (5.5s)
+    setTimeout(() => disparaConfetes(), 5500);
   };
 
   /**
@@ -1161,9 +1232,32 @@ Formato EXATO da resposta:
       ctx.font = '20px Inter, sans-serif';
       ctx.fillText('Plataforma de correção ENEM', 540, 145);
 
+      // Badge "VOCÊ É REDAON #0001" (gênero-neutro, marketeiro, sem ambiguidades)
+      ctx.fillStyle = 'rgba(201, 162, 39, 0.15)';
+      const badgeW = 360, badgeH = 50, badgeX = 540 - badgeW/2, badgeY = 175;
+      // Retângulo arredondado (compatibilidade canvas)
+      ctx.beginPath();
+      ctx.moveTo(badgeX + 25, badgeY);
+      ctx.lineTo(badgeX + badgeW - 25, badgeY);
+      ctx.quadraticCurveTo(badgeX + badgeW, badgeY, badgeX + badgeW, badgeY + 25);
+      ctx.lineTo(badgeX + badgeW, badgeY + badgeH - 25);
+      ctx.quadraticCurveTo(badgeX + badgeW, badgeY + badgeH, badgeX + badgeW - 25, badgeY + badgeH);
+      ctx.lineTo(badgeX + 25, badgeY + badgeH);
+      ctx.quadraticCurveTo(badgeX, badgeY + badgeH, badgeX, badgeY + badgeH - 25);
+      ctx.lineTo(badgeX, badgeY + 25);
+      ctx.quadraticCurveTo(badgeX, badgeY, badgeX + 25, badgeY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(201, 162, 39, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = '#ffe98a';
+      ctx.font = 'bold 26px Inter, sans-serif';
+      ctx.fillText('★  VOCÊ É REDAON #0001  ★', 540, badgeY + 33);
+
       // Carimbo APROVADO (rotacionado)
       ctx.save();
-      ctx.translate(540, 380);
+      ctx.translate(540, 420);
       ctx.rotate(-15 * Math.PI / 180);
       ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
       ctx.strokeStyle = '#dc2626';
@@ -1445,8 +1539,8 @@ Formato EXATO da resposta:
         ? redacao.titulo
         : 'Redação ENEM';
       document.getElementById('colElite').innerHTML = montarCelebracao1000(nomeAluno, temaRedacao);
-      // Dispara confetes após pequeno delay
-      setTimeout(() => disparaConfetes(), 200);
+      // Dispara confetes sincronizados com a batida do carimbo (5s + queda 0.5s = 5.5s)
+      setTimeout(() => disparaConfetes(), 5500);
     } else {
       document.getElementById('colElite').innerHTML = eliteHtml;
     }
