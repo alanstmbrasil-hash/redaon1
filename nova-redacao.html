@@ -2129,6 +2129,17 @@ ${FORMATO_JSON_MELHORIAS}`;
               if (dados.competencias[3].para_200) {
                 dados.competencias[3].para_200 = null;
               }
+              // Sobrescreve feedback da C4 com mensagem coerente com nota 200.
+              // Sem isso, a tela mostra "180" virou "200" mas o texto do feedback
+              // ainda fala em "repetição que poderia ser evitada", o que é contraditório.
+              if (dados.competencias[3].feedback) {
+                dados.competencias[3].feedback =
+                  'Articulação clara entre as partes do texto, com repertório coesivo adequado. As repetições de conectivos são pontuais e não comprometem a coesão do texto.';
+              }
+              // Limpa reescrita sugerida (não há o que reescrever quando nota é 200)
+              if (dados.competencias[3].reescrita) {
+                dados.competencias[3].reescrita = null;
+              }
               // Recalcula nota_total
               const novaSoma = dados.competencias.reduce((s, c) => s + (Number(c?.nota) || 0), 0);
               dados.nota_total = novaSoma;
@@ -2140,6 +2151,18 @@ ${FORMATO_JSON_MELHORIAS}`;
       } catch (errC4) {
         console.error('[RedaON] Erro na validação C4:', errC4);
         // Não bloqueia o fluxo se a salvaguarda falhar
+      }
+
+      // ── LIMPEZA DA CHAMADA 2 QUANDO C4 FOI FORÇADA ──────
+      // A Chamada 2 (preload em background) gera "pontos de melhoria" listando
+      // repetições de conectivos. Se a salvaguarda forçou C4=200, esses pontos
+      // são contraditórios (aluno com 1000 não tem ponto de melhoria sistemático).
+      // Esta limpeza roda quando a Chamada 2 retornar — guardamos um flag.
+      // A função filtrarMelhoriasC4() é chamada em minhas-redacoes.html ao
+      // renderizar os pontos de melhoria.
+      if (dados._c4_salvaguarda_ativada) {
+        // Marca o flag no dados final para o front-end usar
+        dados._filtrar_pontos_c4 = true;
       }
 
       // ── STATUS DAS CHAMADAS (Cenário B) ──────────────

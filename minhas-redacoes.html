@@ -1004,8 +1004,16 @@ Formato EXATO da resposta:
       cardsAnalise.push(blocoFolha('#dc2626', '⚡ Padrão dominante', '', paragrafoFolha(dados.analise_padrao_dominante)));
     }
 
-    // Problemas de coesão (C4) — vem da Chamada 1, lista itens
-    if (dados.c4_problemas?.length) {
+    // Problemas de coesão (C4) — vem da Chamada 1, lista itens.
+    // FILTRO: só exibe se C4 < 200 (caso contrário é contraditório com nota máxima).
+    // Também respeita flag _filtrar_pontos_c4 (vem de nova-redacao.html quando
+    // a salvaguarda forçou C4=200 mas a IA gerou pontos errados).
+    const notaC4Atual = (Array.isArray(dados.competencias) && dados.competencias[3]
+                        && typeof dados.competencias[3].nota !== 'undefined')
+                       ? dados.competencias[3].nota
+                       : (Array.isArray(dados.competencias) ? dados.competencias[3] : null);
+    const c4Eh200 = (notaC4Atual === 200 || dados._filtrar_pontos_c4 === true);
+    if (dados.c4_problemas?.length && !c4Eh200) {
       const itensC4 = dados.c4_problemas.map(p =>
         '<li style="margin-bottom:.4rem;color:#1f2937;">' + escHtml(p) + '</li>'
       ).join('');
