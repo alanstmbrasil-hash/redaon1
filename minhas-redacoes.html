@@ -134,6 +134,244 @@
     .layout-redacoes { flex-direction: column; }
     .lista-col { width: 100% !important; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); max-height: 320px; }
   }
+
+  /* ═══════════════════════════════════════════════════════════
+     FASE 3 — TELA CELEBRAÇÃO NOTA 1000
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Container principal da celebração — aparece dentro de #colElite */
+  .celebracao-1000 {
+    position: relative;
+    background: linear-gradient(135deg, #1a1530, #0f0c1d 60%, #2d1f4a);
+    border-radius: 1rem;
+    padding: 2rem 1.5rem;
+    overflow: hidden;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  /* Brilho de fundo difuso (efeito troféu) */
+  .celebracao-1000::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(201,162,39,0.15) 0%, transparent 60%);
+    pointer-events: none;
+    animation: pulsoOuro 3s ease-in-out infinite;
+  }
+  @keyframes pulsoOuro {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  /* "Lista de aprovados" rolante */
+  .lista-aprovados {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(201,162,39,0.3);
+    border-radius: .75rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    height: 320px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+  .lista-aprovados-titulo {
+    text-align: center;
+    color: #c9a227;
+    font-weight: 800;
+    font-size: .7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding-bottom: .5rem;
+    border-bottom: 1px solid rgba(201,162,39,0.2);
+  }
+  .lista-aprovados-rolagem {
+    position: relative;
+    overflow: hidden;
+    height: calc(100% - 2.5rem);
+  }
+  .lista-aprovados-itens {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    animation: rolarLista 4.5s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  @keyframes rolarLista {
+    0%   { transform: translateY(0); }
+    85%  { transform: translateY(-1750px); }
+    100% { transform: translateY(-1800px); }
+  }
+  .item-aprovado {
+    font-family: 'Courier New', monospace;
+    color: #b5b1c5;
+    font-size: .85rem;
+    padding: .35rem .5rem;
+    border-radius: .25rem;
+    line-height: 1.4;
+    transition: all .3s ease;
+  }
+  .item-aprovado.aluno-real {
+    background: linear-gradient(90deg, rgba(201,162,39,0.25), rgba(201,162,39,0.1));
+    color: #ffe98a;
+    font-weight: 800;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.05rem;
+    border-left: 3px solid #c9a227;
+    padding: .65rem .75rem;
+    box-shadow: 0 0 20px rgba(201,162,39,0.4);
+    animation: destacarNome 0.6s ease 4.2s both;
+  }
+  @keyframes destacarNome {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.08); box-shadow: 0 0 40px rgba(201,162,39,0.8); }
+    100% { transform: scale(1); }
+  }
+
+  /* Carimbo APROVADO caindo */
+  .carimbo-aprovado {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    z-index: 5;
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: #dc2626;
+    border: 8px solid #dc2626;
+    padding: .5rem 2rem;
+    border-radius: .5rem;
+    letter-spacing: 0.15em;
+    background: rgba(255,255,255,0.95);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    animation: cairCarimbo 0.8s cubic-bezier(.5,1.8,.5,1) 5s forwards;
+  }
+  @keyframes cairCarimbo {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -250%) rotate(-15deg) scale(2);
+    }
+    60% {
+      opacity: 1;
+      transform: translate(-50%, -50%) rotate(-15deg) scale(1.3);
+    }
+    75% {
+      transform: translate(-50%, -50%) rotate(-15deg) scale(0.95);
+    }
+    90% {
+      transform: translate(-50%, -50%) rotate(-15deg) scale(1.05);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -50%) rotate(-15deg) scale(1);
+    }
+  }
+  /* "Onda" da batida do carimbo */
+  .carimbo-onda {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 4px solid rgba(201,162,39,0.6);
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
+    z-index: 4;
+    animation: ondaBatida 0.8s ease-out 5.5s forwards;
+  }
+  @keyframes ondaBatida {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+  }
+
+  /* Mensagem final + botões */
+  .mensagem-final-1000 {
+    text-align: center;
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadeInFinal 0.6s ease 6s forwards;
+    position: relative;
+    z-index: 2;
+  }
+  @keyframes fadeInFinal {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .titulo-parabens {
+    font-size: 1.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #c9a227, #ffe98a 50%, #c9a227);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: .5rem;
+  }
+  .subtitulo-1000 {
+    font-size: .95rem;
+    color: #e1e2eb;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+  .botoes-1000 {
+    display: flex;
+    gap: .75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-celebracao {
+    padding: .75rem 1.25rem;
+    border-radius: .75rem;
+    font-weight: 700;
+    font-size: .85rem;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    transition: transform .15s ease;
+  }
+  .btn-celebracao:hover { transform: translateY(-2px); }
+  .btn-celebracao.primario {
+    background: linear-gradient(135deg, #c9a227, #ffe98a);
+    color: #1a0e00;
+  }
+  .btn-celebracao.secundario {
+    background: rgba(255,255,255,0.1);
+    color: #e1e2eb;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  /* Confetes (gerados via JS) */
+  .confete {
+    position: absolute;
+    width: 8px;
+    height: 14px;
+    pointer-events: none;
+    z-index: 3;
+    animation: cairConfete linear forwards;
+  }
+  @keyframes cairConfete {
+    0%   { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(700px) rotate(720deg); opacity: 0; }
+  }
+
+  @media(max-width:640px){
+    .carimbo-aprovado { font-size: 2.5rem; padding: .3rem 1.25rem; border-width: 5px; }
+    .lista-aprovados { height: 280px; }
+    .titulo-parabens { font-size: 1.15rem; }
+  }
 </style>
 <script src="supabase-auth.js"></script>
 </head>
@@ -750,6 +988,250 @@ Formato EXATO da resposta:
     }
   };
 
+  // ════════════════════════════════════════════════════════════
+  // FASE 3 — TELA DE CELEBRAÇÃO NOTA 1000
+  // ════════════════════════════════════════════════════════════
+  // Substitui a aba "Elite da PROfa" quando o aluno tira 1000.
+  // Em vez de mostrar versão reescrita (que seria idêntica), mostra
+  // animação celebrativa estilo "lista de aprovados de vestibular":
+  //  1. Lista fictícia de nomes rola descendo (4.5s)
+  //  2. Para quando o nome real do aluno aparece (destacado em dourado)
+  //  3. Carimbo "APROVADO" cai do alto com efeito de batida (5s)
+  //  4. Confetes caem do topo
+  //  5. Mensagem final + botão "Baixar PNG"
+
+  // Nomes fictícios brasileiros realistas (mistura de comuns + alguns mais raros)
+  // Não usamos nomes muito comuns como "João Silva" pra não parecer placeholder.
+  const NOMES_FICTICIOS_CELEBRACAO = [
+    'Ana Beatriz Santos', 'Lucas Ferreira Lima', 'Maria Eduarda Costa',
+    'Pedro Henrique Almeida', 'Júlia Ribeiro Souza', 'Gabriel Mendes Rocha',
+    'Isabella Carvalho Pereira', 'Matheus Oliveira Santos', 'Sofia Cardoso Silva',
+    'Rafael Barbosa Martins', 'Beatriz Nascimento Lopes', 'Enzo Vieira Gomes',
+    'Larissa Castro Araújo', 'Davi Pinto Cavalcanti', 'Helena Moreira Dias',
+    'Bernardo Tavares Freitas', 'Manuela Correia Rocha', 'Arthur Pacheco Nunes',
+    'Valentina Andrade Costa', 'Heitor Coelho Ramos', 'Yasmin Borges Teixeira',
+    'Theo Macedo Cunha', 'Alice Marinho Sales', 'Samuel Aguiar Brito',
+    'Lara Magalhães Pires', 'Bryan Falcão Antunes', 'Cecília Marques Drummond',
+    'Vinícius Esteves Camargo', 'Antonella Botelho Lacerda', 'Otávio Sandes Galvão',
+    'Lavínia Quintela Sampaio', 'Caio Veloso Boaventura', 'Esther Rebouças Toledo',
+    'Murilo Bittencourt Soares', 'Mariana Furtado Bezerra', 'Henrique Saldanha Cabral'
+  ];
+
+  /**
+   * Monta o HTML da tela de celebração nota 1000.
+   * @param {string} nomeAluno - Nome real do aluno (vai aparecer destacado)
+   * @param {string} tema - Tema da redação (para o PNG de download)
+   */
+  function montarCelebracao1000(nomeAluno, tema) {
+    // Gera lista de aprovados: ~80 nomes fictícios + nome do aluno na posição final.
+    // A animação CSS desloca a lista até o último item (que é o nome do aluno).
+    const totalNomesAntes = NOMES_FICTICIOS_CELEBRACAO.length * 2; // ~70 nomes
+    const nomesShuffled = embaralhar([...NOMES_FICTICIOS_CELEBRACAO, ...NOMES_FICTICIOS_CELEBRACAO]);
+
+    let itensHtml = nomesShuffled.map((nome, i) =>
+      '<div class="item-aprovado">' + String(i + 1).padStart(4, '0') + ' &nbsp;&nbsp; ' + escHtml(nome) + '</div>'
+    ).join('');
+
+    // Nome do aluno em destaque (item final)
+    const numAluno = String(totalNomesAntes + 1).padStart(4, '0');
+    itensHtml += '<div class="item-aprovado aluno-real">'
+              + '★ ' + numAluno + ' &nbsp;&nbsp; ' + escHtml(nomeAluno)
+              + '</div>';
+
+    return ''
+      + '<div class="celebracao-1000" id="celebracaoConteudo">'
+      +   '<div class="lista-aprovados">'
+      +     '<div class="lista-aprovados-titulo">Resultado Final · ENEM Redação</div>'
+      +     '<div class="lista-aprovados-rolagem">'
+      +       '<div class="lista-aprovados-itens">' + itensHtml + '</div>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="carimbo-onda"></div>'
+      +   '<div class="carimbo-aprovado">APROVADO</div>'
+      +   '<div class="mensagem-final-1000">'
+      +     '<div class="titulo-parabens">🏆 PARABÉNS, ' + escHtml(nomeAluno.split(' ')[0].toUpperCase()) + '!</div>'
+      +     '<div class="subtitulo-1000">Você atingiu a nota máxima — 1000/1000.<br>Sua redação representa o padrão de excelência ENEM.</div>'
+      +     '<div class="botoes-1000">'
+      +       '<button class="btn-celebracao primario" onclick="window.baixarConquistaPNG()">'
+      +         '<span class="material-symbols-outlined" style="font-size:18px;">download</span>'
+      +         'Baixar imagem'
+      +       '</button>'
+      +       '<button class="btn-celebracao secundario" onclick="window.repetirAnimacao1000()">'
+      +         '<span class="material-symbols-outlined" style="font-size:18px;">replay</span>'
+      +         'Repetir'
+      +       '</button>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
+  /**
+   * Embaralha array (Fisher-Yates). Garante ordem aleatória dos nomes fictícios
+   * a cada vez que a celebração é exibida.
+   */
+  function embaralhar(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  /**
+   * Dispara confetes coloridos caindo do topo. Roda em paralelo à animação principal.
+   */
+  function disparaConfetes() {
+    const container = document.querySelector('.celebracao-1000');
+    if (!container) return;
+    const cores = ['#c9a227', '#ffe98a', '#45edee', '#6c5ce7', '#4ade80', '#fa6e6e'];
+    // Confetes leves contínuos por ~6s (sincroniza com animação principal)
+    const totalConfetes = 80;
+    for (let i = 0; i < totalConfetes; i++) {
+      setTimeout(() => {
+        const confete = document.createElement('div');
+        confete.className = 'confete';
+        confete.style.left = Math.random() * 100 + '%';
+        confete.style.background = cores[Math.floor(Math.random() * cores.length)];
+        confete.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+        // Rotação aleatória inicial
+        confete.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+        container.appendChild(confete);
+        // Remove após animação
+        setTimeout(() => confete.remove(), 5000);
+      }, i * 60);
+    }
+  }
+
+  /**
+   * Permite o aluno repetir a animação (re-renderiza a celebração).
+   */
+  window.repetirAnimacao1000 = function() {
+    const container = document.getElementById('celebracaoConteudo');
+    if (!container) return;
+    const nomeAluno = (typeof NOME_USUARIO !== 'undefined' && NOME_USUARIO) ? NOME_USUARIO : 'Aluno RedaON';
+    const colElite = document.getElementById('colElite');
+    if (!colElite) return;
+    // Limpa confetes antigos e re-renderiza
+    colElite.innerHTML = montarCelebracao1000(nomeAluno, '');
+    setTimeout(() => disparaConfetes(), 200);
+  };
+
+  /**
+   * Gera PNG da conquista usando canvas. Inclui:
+   * - Cabeçalho "RedaON"
+   * - Nome do aluno
+   * - Nota 1000
+   * - Selo APROVADO
+   * - Data
+   * Resultado: imagem 1080x1080 (formato Instagram).
+   */
+  window.baixarConquistaPNG = async function() {
+    try {
+      const nomeAluno = (typeof NOME_USUARIO !== 'undefined' && NOME_USUARIO) ? NOME_USUARIO : 'Aluno RedaON';
+      const dataConquista = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1080;
+      const ctx = canvas.getContext('2d');
+
+      // Fundo gradiente
+      const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+      grad.addColorStop(0, '#1a1530');
+      grad.addColorStop(0.6, '#0f0c1d');
+      grad.addColorStop(1, '#2d1f4a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      // Brilho central dourado
+      const radial = ctx.createRadialGradient(540, 540, 0, 540, 540, 500);
+      radial.addColorStop(0, 'rgba(201, 162, 39, 0.25)');
+      radial.addColorStop(1, 'rgba(201, 162, 39, 0)');
+      ctx.fillStyle = radial;
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      // Logo "RedaON" no topo
+      ctx.fillStyle = '#c9a227';
+      ctx.font = 'bold 36px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('RedaON', 540, 110);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.font = '20px Inter, sans-serif';
+      ctx.fillText('Plataforma de correção ENEM', 540, 145);
+
+      // Carimbo APROVADO (rotacionado)
+      ctx.save();
+      ctx.translate(540, 380);
+      ctx.rotate(-15 * Math.PI / 180);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 12;
+      const w = 480, h = 180;
+      ctx.fillRect(-w/2, -h/2, w, h);
+      ctx.strokeRect(-w/2, -h/2, w, h);
+      ctx.fillStyle = '#dc2626';
+      ctx.font = 'bold 100px Impact, Arial Black, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('APROVADO', 0, 5);
+      ctx.restore();
+
+      // Nota 1000
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#ffe98a';
+      ctx.font = 'bold 220px Inter, sans-serif';
+      ctx.fillText('1000', 540, 720);
+
+      ctx.fillStyle = '#c9a227';
+      ctx.font = '32px Inter, sans-serif';
+      ctx.fillText('/ 1000 pontos', 540, 770);
+
+      // Nome do aluno
+      ctx.fillStyle = '#e1e2eb';
+      ctx.font = 'bold 42px Inter, sans-serif';
+      ctx.fillText(nomeAluno, 540, 870);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '22px Inter, sans-serif';
+      ctx.fillText('atingiu a nota máxima na redação ENEM', 540, 910);
+
+      // Rodapé com data
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.font = '20px Inter, sans-serif';
+      ctx.fillText(dataConquista + ' · redaon.com', 540, 1010);
+
+      // Linha decorativa
+      ctx.strokeStyle = 'rgba(201, 162, 39, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(380, 970);
+      ctx.lineTo(700, 970);
+      ctx.stroke();
+
+      // Converte para blob e faz download
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          window.toast && window.toast('Não consegui gerar a imagem. Tente de novo.');
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'RedaON-Nota-1000-' + nomeAluno.replace(/\s+/g, '_') + '.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        window.toast && window.toast('✓ Imagem baixada!');
+      }, 'image/png');
+    } catch (err) {
+      console.error('[RedaON] Erro ao gerar PNG:', err);
+      window.toast && window.toast('Não consegui gerar a imagem.');
+    }
+  };
+
   // ── RENDER ANÁLISE ─────────────────────────────────
   function renderAnalise(redacao, dados) {
     const nomes = ['C1','C2','C3','C4','C5'];
@@ -951,7 +1433,23 @@ Formato EXATO da resposta:
         eliteHtml = '<p style="color:#928ea0;text-align:center;padding:2rem;">Versão nota 1000 não disponível.</p>';
       }
     }
-    document.getElementById('colElite').innerHTML = eliteHtml;
+    // ── DETECÇÃO NOTA 1000: substitui aba Elite pela tela de celebração ──
+    // Se a nota total for 1000, em vez de mostrar versão reescrita (que seria
+    // idêntica ao original), mostra animação celebrativa com carimbo APROVADO,
+    // lista de aprovados fictícia e botão de download em PNG.
+    if (notaCabecalho === 1000) {
+      const nomeAluno = (typeof NOME_USUARIO !== 'undefined' && NOME_USUARIO)
+        ? NOME_USUARIO
+        : 'Aluno RedaON';
+      const temaRedacao = redacao.titulo && redacao.titulo !== 'Redacao sem titulo'
+        ? redacao.titulo
+        : 'Redação ENEM';
+      document.getElementById('colElite').innerHTML = montarCelebracao1000(nomeAluno, temaRedacao);
+      // Dispara confetes após pequeno delay
+      setTimeout(() => disparaConfetes(), 200);
+    } else {
+      document.getElementById('colElite').innerHTML = eliteHtml;
+    }
 
     // ── Por que Nota 1000: análise por competência
     //     Compatível com nomes novos (melhoria_c*) e antigos (por_que_elite_*).
