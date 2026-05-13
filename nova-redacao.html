@@ -1702,23 +1702,21 @@ PRINCÍPIO DE PONTUAÇÃO:
   ⚠️ REGRA DE COERÊNCIA OBRIGATÓRIA (repetição pontual vs sistemática) ⚠️
   A Cartilha INEP 2025 NÃO especifica número exato de repetições para
   descer a nota. Validada pedagogicamente pela Profa. Blanche M. Maracaipe:
-    → 1-2 repetições pontuais do MESMO conectivo NÃO descem a nota.
-      A nota DEVE permanecer 200 se houver variedade geral de mecanismos
-      coesivos no texto (uso de pelo menos 5 conectivos diferentes).
-    → 3 ou mais repetições do mesmo conectivo, OU pobreza geral de
-      recursos coesivos disponíveis → caracteriza nível 160.
-  ANTES de descer a nota: CONTE quantas vezes o aluno repetiu o
-  conectivo problemático. Se for ≤2 repetições pontuais, mantenha 200.
+    → Repetições de até 2 vezes do mesmo conectivo são PONTUAIS e
+      NÃO descem a nota. C4 deve permanecer 200.
+    → Apenas 3 ou mais repetições do mesmo conectivo caracterizam
+      uso sistemático → nível 160.
+  ANTES de descer a nota: CONTE quantas vezes o conectivo problemático
+  aparece. Se for ≤2, mantenha 200.
 
   200: articulação clara entre as partes do texto + repertório coesivo
-       diversificado. Repetições PONTUAIS (até 2 vezes do mesmo conectivo
-       como "assim", "portanto", "além disso") NÃO descem a nota — apenas
-       repetições SISTEMÁTICAS (3+ vezes do mesmo conectivo) ou pobreza
-       geral de mecanismos caracterizam o nível 160.
+       adequado. Repetições PONTUAIS (até 2 vezes do mesmo conectivo
+       como "assim", "portanto", "além disso") NÃO descem a nota —
+       apenas repetições SISTEMÁTICAS (3+ vezes do mesmo conectivo)
+       ou pobreza geral de mecanismos caracterizam o nível 160.
   160: bom domínio; ocorre repetição SISTEMÁTICA do mesmo conectivo
-       (3 ou mais vezes) OU pobreza geral de mecanismos coesivos
-       disponíveis (uso de menos de 4 conectivos diferentes no texto
-       inteiro). Importante: 1-2 repetições pontuais NÃO se enquadram aqui.
+       (3 ou mais vezes) OU pobreza geral de mecanismos coesivos.
+       Importante: 1-2 repetições pontuais NÃO se enquadram aqui.
   120: articulação mediana; inadequações presentes; repertório limitado
    80: articulação insuficiente; muitas inadequações
    40: articulação precária
@@ -1852,7 +1850,31 @@ PASSO 4 — AVALIAÇÃO DAS DEMAIS COMPETÊNCIAS (C1, C4, C5):
 Avalie conforme a rubrica acima. Para C5, atenção à REGRA DE COERÊNCIA: se os 5 elementos estão presentes e a proposta está articulada, a nota DEVE ser 200.
 
 PASSO 5 — CONSOLIDAÇÃO DAS NOTAS:
-Antes de finalizar cada nota, faça a si mesma 2 perguntas:
+
+🚨 REGRA OBRIGATÓRIA C4 — LEIA ANTES DE TUDO 🚨
+Esta regra foi validada pedagogicamente pela Profa. Blanche Maracaipe
+e é INEGOCIÁVEL — não importa o que seu treinamento sugira:
+
+  → Se NENHUM conectivo do texto aparece 3 ou mais vezes
+    → C4 DEVE ser 200. SEMPRE. SEM EXCEÇÃO.
+
+  → Você NÃO pode descontar C4 para 180 alegando "repetição pontual",
+    "poderia ter mais variedade", "alguns conectivos repetidos".
+    Isso é exatamente o erro que esta regra existe para impedir.
+    Repetições de até 2 vezes do mesmo conectivo são pontuais e
+    NÃO descem a nota.
+
+  → Antes de finalizar competencias[3].nota, CONTE os conectivos:
+    1. Liste TODOS os conectivos diferentes que aparecem no texto
+       (ex: "Assim", "Dessa forma", "Nesse sentido", "Além disso",
+       "Portanto", "Logo", "Ademais", "Por outro lado", etc.)
+    2. Conte quantas vezes cada um aparece
+    3. Se NENHUM aparece 3+ vezes → C4 = 200. Fim.
+
+  → Penalize APENAS se algum conectivo aparecer 3 ou mais vezes
+    (repetição sistemática). Nesse caso C4 = 160.
+
+Antes de finalizar cada nota, faça a si mesma 3 perguntas:
 
 PERGUNTA 1: "Esta redação se encaixa na DESCRIÇÃO do nível 200 desta competência?"
 Se SIM → dê 200. Não desconte porque "poderia ser mais aprofundado" — isso
@@ -1862,12 +1884,9 @@ PERGUNTA 2: "Estou exigindo desta redação algo MAIS do que a Cartilha 2025
 exigiu das redações 1000 que ela publicou?"
 Se SIM → você está sendo rigorosa demais. Recalibre.
 
-PERGUNTA 3 (específica para C4): "Desci C4 abaixo de 200? Por causa de
-QUANTAS repetições do mesmo conectivo?"
-Se foram 1 ou 2 repetições pontuais (mesmo de "assim", "portanto", "além disso")
-E o aluno usa pelo menos 5 conectivos diferentes no texto inteiro
-→ DEVE voltar para 200. Repetições pontuais NÃO descem a nota.
-Só desce se forem 3+ repetições do mesmo conectivo OU pobreza geral.
+PERGUNTA 3 (OBRIGATÓRIA para C4): "Vou descer C4 abaixo de 200?"
+Se SIM → PARE. Conte os conectivos do texto. Se nenhum aparecer 3+ vezes
+→ ANULE seu desconto. C4 = 200.
 
 Lembre: tangenciamento limita C2/C3/C5 a 40 cada.
 
@@ -1885,7 +1904,7 @@ REGRAS CRÍTICAS DE SAÍDA:
 11. Se houver mais de uma referência sociocultural no texto, avalie a principal (a mais central ao argumento).
 12. COERÊNCIA C5: se c5_elementos_faltantes está vazio [] e a proposta está articulada → competencias[4].nota DEVE ser 200.
 13. Para a competência cuja nota é 200, o campo "para_200" pode ser null (não há mais o que melhorar para esse nível).
-14. COERÊNCIA C4: se o aluno usa variedade de conectivos no texto (5 ou mais conectivos diferentes) e apenas repete 1-2 vezes algum conectivo específico → competencias[3].nota DEVE ser 200. Repetições pontuais NÃO caracterizam uso sistemático. Só desça para 160 se houver 3+ repetições do mesmo conectivo OU pobreza geral de mecanismos coesivos.
+14. COERÊNCIA C4: se nenhum conectivo do texto aparece 3 ou mais vezes → competencias[3].nota DEVE ser 200. Repetições de até 2 vezes do mesmo conectivo são pontuais e NÃO caracterizam uso sistemático. Só desça para 160 se houver 3+ repetições do mesmo conectivo OU pobreza geral de mecanismos coesivos.
 
 Formato EXATO da resposta:
 ${FORMATO_JSON_NOTA_DIAGNOSTICO}`;
@@ -2053,6 +2072,74 @@ ${FORMATO_JSON_MELHORIAS}`;
           console.info(`[RedaON] nota_total ajustada: Gemini retornou ${dados.nota_total}, soma real é ${somaReal}`);
           dados.nota_total = somaReal;
         }
+      }
+
+      // ── SALVAGUARDA C4 (regra Profa. Blanche, v2.2 da rubrica) ──────
+      // Garante que repetição pontual de conectivos NÃO desconta C4.
+      // REGRA SIMPLIFICADA (Caminho 2, validada por Alan):
+      // Se nenhum conectivo aparece 3 ou mais vezes no texto → C4 = 200.
+      // Repetições de até 2 vezes do mesmo conectivo são pontuais e NÃO
+      // caracterizam uso sistemático. Não exigimos variedade mínima de
+      // conectivos — uma redação curta pode ter poucos conectivos diferentes
+      // mas ainda assim ser bem coesa (referenciação, articulação).
+      // Esta validação é determinística e SOBRESCREVE a nota da IA quando aplicável.
+      try {
+        const textoAnalisar = (texto || '').toLowerCase();
+        if (textoAnalisar.length > 100 && Array.isArray(dados.competencias) && dados.competencias[3]) {
+          // Lista de conectivos comuns (ENEM). Versões com e sem inflexão.
+          const conectivos = [
+            'assim', 'dessa forma', 'desse modo', 'desta forma', 'deste modo',
+            'nesse sentido', 'neste sentido', 'no entanto', 'entretanto',
+            'todavia', 'contudo', 'porém', 'mas', 'além disso', 'ademais',
+            'portanto', 'logo', 'por isso', 'por conseguinte', 'consequentemente',
+            'em vista disso', 'diante disso', 'diante do exposto', 'em suma',
+            'em síntese', 'sob esse viés', 'sob essa perspectiva', 'por outro lado',
+            'em contrapartida', 'por sua vez', 'similarmente', 'analogamente',
+            'a princípio', 'primeiramente', 'em primeiro lugar', 'em segundo lugar',
+            'por fim', 'finalmente', 'enfim', 'apesar disso', 'embora',
+            'visto que', 'haja vista', 'uma vez que', 'pois', 'porque',
+            'já que', 'tendo em vista', 'em decorrência disso',
+            'outrossim', 'doravante', 'isto é', 'ou seja', 'a saber'
+          ];
+          // Conta ocorrências de cada conectivo (regex com fronteira de palavra)
+          const contagens = {};
+          conectivos.forEach(c => {
+            const re = new RegExp('\\b' + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+            const matches = textoAnalisar.match(re);
+            if (matches && matches.length > 0) contagens[c] = matches.length;
+          });
+          const conectivosUsados = Object.keys(contagens);
+          const repeticaoMaxima = conectivosUsados.length > 0
+            ? Math.max(...Object.values(contagens))
+            : 0;
+
+          console.info('[RedaON] Validação C4 — conectivos usados:', conectivosUsados.length,
+            '| repetição máxima:', repeticaoMaxima,
+            '| detalhe:', contagens);
+
+          // CRITÉRIO ÚNICO (Caminho 2): se nenhum conectivo aparece 3+ vezes,
+          // não há repetição sistemática → C4 deve ser 200.
+          if (repeticaoMaxima < 3) {
+            const notaC4Original = dados.competencias[3].nota;
+            if (notaC4Original < 200) {
+              console.warn('[RedaON] SALVAGUARDA C4 ATIVADA: IA atribuiu',
+                notaC4Original, '→ forçando 200 (repetição máxima=' +
+                repeticaoMaxima + ', sem repetição sistemática)');
+              dados.competencias[3].nota = 200;
+              if (dados.competencias[3].para_200) {
+                dados.competencias[3].para_200 = null;
+              }
+              // Recalcula nota_total
+              const novaSoma = dados.competencias.reduce((s, c) => s + (Number(c?.nota) || 0), 0);
+              dados.nota_total = novaSoma;
+              // Marca para a UI saber que houve correção (pode ser útil pra debug)
+              dados._c4_salvaguarda_ativada = true;
+            }
+          }
+        }
+      } catch (errC4) {
+        console.error('[RedaON] Erro na validação C4:', errC4);
+        // Não bloqueia o fluxo se a salvaguarda falhar
       }
 
       // ── STATUS DAS CHAMADAS (Cenário B) ──────────────
