@@ -1698,16 +1698,32 @@ PRINCÍPIO DE PONTUAÇÃO:
     • Saltos temáticos (mudanças abruptas sem articulação) → penalize.
 
 ▸ COMPETÊNCIA 4 — Conhecimento dos mecanismos linguísticos (0-200)
+
+  ⚠️ REGRA DE COERÊNCIA OBRIGATÓRIA (repetição pontual vs sistemática) ⚠️
+  A Cartilha INEP 2025 NÃO especifica número exato de repetições para
+  descer a nota. Validada pedagogicamente pela Profa. Blanche M. Maracaipe:
+    → 1-2 repetições pontuais do MESMO conectivo NÃO descem a nota.
+      A nota DEVE permanecer 200 se houver variedade geral de mecanismos
+      coesivos no texto (uso de pelo menos 5 conectivos diferentes).
+    → 3 ou mais repetições do mesmo conectivo, OU pobreza geral de
+      recursos coesivos disponíveis → caracteriza nível 160.
+  ANTES de descer a nota: CONTE quantas vezes o aluno repetiu o
+  conectivo problemático. Se for ≤2 repetições pontuais, mantenha 200.
+
   200: articulação clara entre as partes do texto + repertório coesivo
-       diversificado. Aceita repetição pontual de algum conectivo (como
-       "assim", "portanto") sem desconto, desde que não seja sistemática.
-  160: boa articulação; algumas inadequações ou repetições; repertório
-       coesivo razoável mas pouco diversificado
+       diversificado. Repetições PONTUAIS (até 2 vezes do mesmo conectivo
+       como "assim", "portanto", "além disso") NÃO descem a nota — apenas
+       repetições SISTEMÁTICAS (3+ vezes do mesmo conectivo) ou pobreza
+       geral de mecanismos caracterizam o nível 160.
+  160: bom domínio; ocorre repetição SISTEMÁTICA do mesmo conectivo
+       (3 ou mais vezes) OU pobreza geral de mecanismos coesivos
+       disponíveis (uso de menos de 4 conectivos diferentes no texto
+       inteiro). Importante: 1-2 repetições pontuais NÃO se enquadram aqui.
   120: articulação mediana; inadequações presentes; repertório limitado
    80: articulação insuficiente; muitas inadequações
    40: articulação precária
     0: não articula as informações
-  Avalie: operadores argumentativos (porém, entretanto, ademais, portanto), referenciação (pronomes, sinônimos, hipônimos, hiperônimos, elipses), articulação inter e intraparágrafo. Penalize: ausência de paragrafação, conectivos repetidos sistematicamente, "onde" para pessoas/ideias.
+  Avalie: operadores argumentativos (porém, entretanto, ademais, portanto), referenciação (pronomes, sinônimos, hipônimos, hiperônimos, elipses), articulação inter e intraparágrafo. Penalize: ausência de paragrafação, conectivos repetidos SISTEMATICAMENTE (3+ vezes do mesmo), "onde" para pessoas/ideias.
 
 ▸ COMPETÊNCIA 5 — Proposta de intervenção (0-200)
 
@@ -1846,6 +1862,13 @@ PERGUNTA 2: "Estou exigindo desta redação algo MAIS do que a Cartilha 2025
 exigiu das redações 1000 que ela publicou?"
 Se SIM → você está sendo rigorosa demais. Recalibre.
 
+PERGUNTA 3 (específica para C4): "Desci C4 abaixo de 200? Por causa de
+QUANTAS repetições do mesmo conectivo?"
+Se foram 1 ou 2 repetições pontuais (mesmo de "assim", "portanto", "além disso")
+E o aluno usa pelo menos 5 conectivos diferentes no texto inteiro
+→ DEVE voltar para 200. Repetições pontuais NÃO descem a nota.
+Só desce se forem 3+ repetições do mesmo conectivo OU pobreza geral.
+
 Lembre: tangenciamento limita C2/C3/C5 a 40 cada.
 
 REGRAS CRÍTICAS DE SAÍDA:
@@ -1862,6 +1885,7 @@ REGRAS CRÍTICAS DE SAÍDA:
 11. Se houver mais de uma referência sociocultural no texto, avalie a principal (a mais central ao argumento).
 12. COERÊNCIA C5: se c5_elementos_faltantes está vazio [] e a proposta está articulada → competencias[4].nota DEVE ser 200.
 13. Para a competência cuja nota é 200, o campo "para_200" pode ser null (não há mais o que melhorar para esse nível).
+14. COERÊNCIA C4: se o aluno usa variedade de conectivos no texto (5 ou mais conectivos diferentes) e apenas repete 1-2 vezes algum conectivo específico → competencias[3].nota DEVE ser 200. Repetições pontuais NÃO caracterizam uso sistemático. Só desça para 160 se houver 3+ repetições do mesmo conectivo OU pobreza geral de mecanismos coesivos.
 
 Formato EXATO da resposta:
 ${FORMATO_JSON_NOTA_DIAGNOSTICO}`;

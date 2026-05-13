@@ -484,45 +484,74 @@ Formato EXATO da resposta:
   "analise_proximo_passo": "<1 parágrafo. Qual é o PRÓXIMO PASSO concreto no percurso deste aluno? Uma recomendação específica e acionável para a próxima redação, não um checklist genérico. Ex: 'Antes de escrever a próxima redação, escolha 2 referências específicas sobre o tema e anote como cada uma se conecta à sua tese — esse exercício resolve o repertório de bolso.'>"
 }`;
 
-  // CHAMADA 3 — Gera a redação nota 1000 reescrita.
+  // CHAMADA 3 — Gera a versão refinada da redação do aluno.
+  // NOVA LÓGICA (v2.2 da rubrica): reescreve APENAS os trechos onde há erro
+  // nas competências com nota < 200. Mantém intactos os trechos correspondentes
+  // a competências que já estão em 200 (preservando o trabalho do aluno).
   const PROMPT_REDACAO_NOTA_1000 = `Você é a PROfa da RedaON — especialista em redação ENEM.
-Sua missão agora é REESCREVER a redação do aluno em nível nota 1000, mantendo o tema e o ponto de vista original, mas elevando linguagem, argumentação, coesão e proposta de intervenção ao nível máximo.
+
+CONTEXTO: O aluno já recebeu uma correção com notas por competência. Sua missão agora é REFINAR a redação dele, mas com uma regra pedagógica importante: você só pode reescrever trechos que correspondam às competências com nota MENOR que 200. As competências que já alcançaram 200 estão excelentes — você NÃO deve mexer no que está bom.
+
+REGRA PRINCIPAL — REESCRITA PARCIAL POR COMPETÊNCIA:
+• Você receberá no contexto as notas por competência (C1, C2, C3, C4, C5)
+• Para cada competência com nota 200: NÃO altere o que o aluno escreveu para atender essa competência. Mantenha as escolhas lexicais, estruturas e ideias originais que demonstram domínio desse critério.
+• Para cada competência com nota < 200: identifique os trechos problemáticos e reescreva APENAS esses trechos, no mesmo parágrafo onde estavam.
+• A redação final deve ser reconhecível como "a redação do aluno com correções pontuais" — não uma redação totalmente nova.
+
+EXEMPLOS DE APLICAÇÃO:
+• Aluno tem C2 = 200 e C1 = 160 → mantenha o repertório/tema do aluno intactos. Corrija apenas desvios da norma culta (concordância, ortografia, pontuação).
+• Aluno tem C4 = 180 e demais = 200 → mantenha a estrutura inteira. Apenas substitua conectivos repetidos por sinônimos no parágrafo onde apareceram.
+• Aluno tem C5 = 160 e demais = 200 → mantenha introdução, desenvolvimento intactos. Refine apenas a conclusão para completar os 5 elementos da proposta de intervenção.
+• Aluno tem todas competências < 200 → reescreva a redação amplamente, mantendo o ponto de vista e a tese original.
+
 ${RUBRICA_INEP_COMPACTA}
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
 2. Dentro de strings, use \\n (escapado) para quebras de linha.
-3. MANTENHA o tema, o ponto de vista e a tese do aluno. A reescrita deve ser reconhecível como "a redação dele melhorada", não uma redação completamente diferente.
-4. A conclusão DEVE conter os 5 elementos da proposta de intervenção (ação, agente, meio, finalidade e detalhamento) integrados em prosa fluida.
-5. NÃO use marcadores, rótulos ou destaques como "(AÇÃO)", "**(AGENTE)**", "[MEIO]" no meio do texto. A redação deve fluir como prosa natural — os elementos devem ser identificáveis pela leitura, não por etiquetas.
-6. NÃO use asteriscos, parênteses ou colchetes para marcar partes da redação. Escreva como uma redação real entregue ao corretor INEP.
+3. MANTENHA o tema, o ponto de vista e a tese do aluno. SEMPRE.
+4. Para competências com nota 200, preserve as escolhas do aluno nos trechos que demonstram esse domínio.
+5. A conclusão DEVE conter os 5 elementos da proposta de intervenção (ação, agente, meio, finalidade e detalhamento) integrados em prosa fluida — mas se o aluno JÁ tem C5 = 200, mantenha a conclusão dele intacta.
+6. NÃO use marcadores, rótulos ou destaques como "(AÇÃO)", "**(AGENTE)**", "[MEIO]" no meio do texto. A redação deve fluir como prosa natural.
+7. NÃO use asteriscos, parênteses ou colchetes para marcar partes da redação. Escreva como uma redação real entregue ao corretor INEP.
+8. O campo "competencias_preservadas" deve listar as competências (C1-C5) com nota 200 que tiveram trechos do aluno mantidos. Se o aluno tem 1000 cravado, todos os 4 parágrafos devem ser idênticos ao original e competencias_preservadas deve listar todas.
 
 Formato EXATO da resposta:
 {
-  "redacao_nota_1000_intro": "<parágrafo de introdução reescrito nível nota 1000, mantendo tema e ponto de vista do aluno>",
-  "redacao_nota_1000_dev1": "<1º parágrafo de desenvolvimento reescrito nível nota 1000>",
-  "redacao_nota_1000_dev2": "<2º parágrafo de desenvolvimento reescrito nível nota 1000>",
-  "redacao_nota_1000_conclusao": "<parágrafo de conclusão reescrito com proposta COMPLETA (5 elementos)>"
+  "redacao_nota_1000_intro": "<parágrafo de introdução, com trechos do aluno preservados onde apropriado e refinamentos onde necessário>",
+  "redacao_nota_1000_dev1": "<1º parágrafo de desenvolvimento, mesmo princípio>",
+  "redacao_nota_1000_dev2": "<2º parágrafo de desenvolvimento, mesmo princípio>",
+  "redacao_nota_1000_conclusao": "<parágrafo de conclusão, mesmo princípio>",
+  "competencias_preservadas": ["<lista de competências com nota 200 cujos trechos foram preservados, ex: C2, C5>"]
 }`;
 
   // CHAMADA 4 — Explica o que foi melhorado em cada competência.
   // Depende dos dados da Chamada 3 (redação reescrita) passados como contexto.
+  // NOVA LÓGICA (v2.2 da rubrica): para competências com nota 200, gera mensagem
+  // de parabéns curta. Para competências com nota < 200, gera comparação detalhada.
   const PROMPT_MELHORIAS = `Você é a PROfa da RedaON — especialista em redação ENEM.
-Sua missão agora é comparar a REDAÇÃO ORIGINAL do aluno com a REDAÇÃO NOTA 1000 reescrita (ambas fornecidas no contexto) e explicar, competência por competência, o que foi melhorado e por que a mudança eleva a nota para 200.
+
+CONTEXTO: O aluno já recebeu uma correção com notas por competência. Você receberá no contexto: a redação original, a redação refinada (Chamada 3) e as notas por competência.
+
+REGRA PRINCIPAL — TRATAMENTO POR COMPETÊNCIA:
+• Para cada competência com nota 200: NÃO faça comparação. Gere uma mensagem CURTA de reconhecimento (2-3 frases) destacando o que o aluno fez bem nessa competência. Tom: parabenizador, valoriza o domínio demonstrado. Exemplo: "Em C2, você dominou o tema com profundidade. Sua articulação do repertório sociocultural com os argumentos foi precisa e produtiva. Continue assim — este é o nível de excelência."
+• Para cada competência com nota < 200: faça a comparação DETALHADA entre o trecho original e o trecho refinado. Cite as mudanças específicas e explique por que elevam a nota. 3-5 frases. Tom: pedagógico, mostra o caminho da evolução.
+
 ${RUBRICA_INEP_COMPACTA}
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
-2. Seja concreta: cite trechos específicos da reescrita e compare com os originais quando útil.
-3. Cada campo melhoria_cN deve ter entre 3 e 5 frases.
+2. Para competências com nota 200, comece a mensagem com "✓ " (check + espaço) para indicar visualmente o domínio.
+3. Para competências com nota < 200, comece a mensagem com "↗ " (seta + espaço) para indicar evolução possível.
+4. Seja concreta: cite trechos específicos quando comparar (apenas para competências < 200).
 
 Formato EXATO da resposta:
 {
-  "melhoria_c1": "<explique o que foi melhorado em C1 na redação nota 1000 comparada à original, e por que eleva para 200>",
-  "melhoria_c2": "<explique o que foi melhorado em C2>",
-  "melhoria_c3": "<explique o que foi melhorado em C3>",
-  "melhoria_c4": "<explique o que foi melhorado em C4>",
-  "melhoria_c5": "<explique o que foi melhorado em C5>"
+  "melhoria_c1": "<mensagem curta de parabéns se nota=200, OU comparação detalhada se nota<200>",
+  "melhoria_c2": "<mesma lógica para C2>",
+  "melhoria_c3": "<mesma lógica para C3>",
+  "melhoria_c4": "<mesma lógica para C4>",
+  "melhoria_c5": "<mesma lógica para C5>"
 }`;
 
   // ── NOME USUÁRIO ───────────────────────────────────
@@ -1296,12 +1325,30 @@ Formato EXATO da resposta:
         ? redacao.titulo
         : '(tema não informado pelo aluno — infira do texto da redação)';
 
+      // Identifica explicitamente quais competências estão em 200 (preservar)
+      // e quais estão < 200 (refinar). Isso ajuda a IA a aplicar a regra de
+      // reescrita parcial conforme v2.2 da rubrica.
+      let competenciasPreservar = '';
+      let competenciasRefinar = '';
+      if (Array.isArray(dadosAtuais.competencias)) {
+        const c200 = [];
+        const cMenos = [];
+        dadosAtuais.competencias.forEach((v, i) => {
+          if (parseInt(v, 10) === 200) c200.push('C' + (i+1));
+          else cMenos.push('C' + (i+1) + '=' + v);
+        });
+        if (c200.length > 0) competenciasPreservar = c200.join(', ');
+        if (cMenos.length > 0) competenciasRefinar = cMenos.join(', ');
+      }
+
       const contexto = '\n\nCONTEXTO — Notas já atribuídas:\n'
         + 'Tema da redação: ' + _temaC3 + '\n'
         + (dadosAtuais.nota_total ? 'Nota total: ' + dadosAtuais.nota_total + '/1000\n' : '')
         + (Array.isArray(dadosAtuais.competencias)
             ? 'Notas por competência: ' + dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + v).join(', ') + '\n'
             : '')
+        + (competenciasPreservar ? 'COMPETÊNCIAS COM NOTA 200 (PRESERVAR trechos do aluno): ' + competenciasPreservar + '\n' : '')
+        + (competenciasRefinar ? 'COMPETÊNCIAS PARA REFINAR (nota < 200): ' + competenciasRefinar + '\n' : '')
         + '\nRedação original:\n' + redacao.texto;
 
       const raw = await geminiGenerate(PROMPT_REDACAO_NOTA_1000 + contexto);
