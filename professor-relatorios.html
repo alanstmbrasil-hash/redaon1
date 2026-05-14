@@ -42,6 +42,26 @@
 <div id="toast"></div>
 <div id="overlay" onclick="toggleSidebar()"></div>
 
+<!-- ══════════════════════════════════════════════════════════
+     MODAL "EM BREVE" BLOQUEANTE
+     Esta página está em construção. Bloqueia o acesso direto
+     via URL durante o piloto, redirecionando ao Dashboard.
+     ══════════════════════════════════════════════════════════ -->
+<div id="modalEmConstrucao" style="position:fixed;inset:0;z-index:9999;background:rgba(8,10,14,0.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+  <div style="background:linear-gradient(135deg,#191c22,#13151a);border:1px solid rgba(108,92,231,0.3);border-radius:1.25rem;max-width:440px;width:100%;padding:2.5rem 2rem;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
+    <div style="width:72px;height:72px;border-radius:50%;background:rgba(250,189,0,0.12);border:1px solid rgba(250,189,0,0.35);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+      <span class="material-symbols-outlined" style="color:#fabd00;font-size:2.25rem;font-variation-settings:'FILL' 1;">construction</span>
+    </div>
+    <h2 style="font-size:1.25rem;font-weight:800;color:#e1e2eb;margin-bottom:.6rem;">Relatórios</h2>
+    <p style="font-size:.9rem;color:#c8c4d7;line-height:1.6;margin-bottom:.5rem;">Esta funcionalidade está <strong style="color:#fabd00;">em construção</strong> e será liberada após o período de piloto.</p>
+    <p style="font-size:.82rem;color:#928ea0;line-height:1.55;margin-bottom:1.75rem;">Durante o piloto, os dados de desempenho da turma serão coletados e analisados manualmente pela equipe pedagógica.</p>
+    <a href="professor.html" style="display:inline-flex;align-items:center;gap:.5rem;width:100%;justify-content:center;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.9rem;text-decoration:none;cursor:pointer;">
+      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+      Voltar ao Dashboard
+    </a>
+  </div>
+</div>
+
 <aside id="sidebar">
   <div style="display:flex;align-items:baseline;padding:.5rem .5rem 2rem;font-style:italic;">
     <span style="font-size:1.75rem;font-weight:900;color:white;letter-spacing:-.05em;">Reda</span>
