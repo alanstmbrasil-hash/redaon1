@@ -964,6 +964,15 @@ Formato EXATO da resposta:
       if (painel) painel.classList.toggle('hidden', a !== aba);
       if (btn) btn.classList.toggle('ativa', a === aba);
     });
+    // Se ativou a aba Elite e existe celebração 1000 pendente (ainda não tocou),
+    // dispara animação + confetes agora que o painel está visível.
+    if (aba === 'elite' && document.getElementById('cardAluno1000') && window._celebracaoPendente) {
+      window._celebracaoPendente = false;
+      setTimeout(() => {
+        ajustarAnimacao1000();
+        setTimeout(() => disparaConfetes(), 5500);
+      }, 50);
+    }
   };
 
   // ── SELECIONAR REDAÇÃO ─────────────────────────────
@@ -1118,40 +1127,65 @@ Formato EXATO da resposta:
    * Ajusta a animação CSS dinamicamente para garantir que o card do aluno
    * PARE no topo da janela visível. Mede a posição real (em vez de chutar
    * pixels). Aplica via JavaScript depois que o HTML é inserido no DOM.
+   *
+   * IMPORTANTE: aguarda até o elemento estar realmente visível (com altura > 0).
+   * Sem isso, na primeira execução o offsetTop retorna 0 porque a aba pode
+   * estar com display:none ou ainda não renderizada.
    */
-  function ajustarAnimacao1000() {
-    // Esperar 2 frames para o navegador renderizar e medir corretamente
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const card = document.getElementById('cardAluno1000');
-        const lista = document.getElementById('listaAprovadosItens');
-        if (!card || !lista) return;
+  function ajustarAnimacao1000(tentativas) {
+    tentativas = tentativas || 0;
+    const card = document.getElementById('cardAluno1000');
+    const lista = document.getElementById('listaAprovadosItens');
+    if (!card || !lista) {
+      // Elementos ainda não no DOM — tenta de novo
+      if (tentativas < 20) {
+        return setTimeout(() => ajustarAnimacao1000(tentativas + 1), 50);
+      }
+      console.warn('[RedaON] Animação 1000: card/lista não encontrados após 20 tentativas');
+      return;
+    }
+    // Verifica se o elemento está realmente renderizado (offsetTop confiável)
+    // Se a aba Elite não estiver ativa, offsetTop volta 0 e a animação quebra.
+    if (card.offsetTop === 0 || card.offsetHeight === 0) {
+      if (tentativas < 20) {
+        // Aguarda 50ms e tenta de novo (até 20 tentativas = 1 segundo)
+        return setTimeout(() => ajustarAnimacao1000(tentativas + 1), 50);
+      }
+      console.warn('[RedaON] Animação 1000: card ainda invisível após 1s, usando fallback');
+      // Fallback: usa cálculo estimado baseado em CSS
+      aplicarAnimacao1000(1110); // valor médio razoável
+      return;
+    }
 
-        // offsetTop do card dentro da lista = quanto subir para deixar o card no topo
-        // Subtrai 20px para deixar uma margem suave acima do card.
-        const desloc = card.offsetTop - 20;
+    // offsetTop do card dentro da lista = quanto subir para deixar o card no topo
+    // Subtrai 20px para deixar uma margem suave acima do card.
+    const desloc = card.offsetTop - 20;
+    console.info('[RedaON] Animação 1000 ajustada: card está em', card.offsetTop, 'px — rolagem total:', desloc, 'px (tentativa', tentativas, ')');
+    aplicarAnimacao1000(desloc);
+  }
 
-        // Cria/atualiza animação CSS keyframe com valor real medido
-        // Como não dá pra editar @keyframes existente, usamos animation-name novo
-        const styleId = 'animacao-celebracao-dinamica';
-        let styleEl = document.getElementById(styleId);
-        if (!styleEl) {
-          styleEl = document.createElement('style');
-          styleEl.id = styleId;
-          document.head.appendChild(styleEl);
-        }
-        styleEl.textContent = ''
-          + '@keyframes rolarListaDinamica { '
-          + '  0%   { transform: translateY(0); } '
-          + '  85%  { transform: translateY(-' + desloc + 'px); } '
-          + '  100% { transform: translateY(-' + (desloc + 30) + 'px); } '
-          + '} '
-          + '.lista-aprovados-itens { '
-          + '  animation: rolarListaDinamica 4.5s cubic-bezier(.16,1,.3,1) forwards !important; '
-          + '}';
-        console.info('[RedaON] Animação 1000 ajustada: card está em', card.offsetTop, 'px — rolagem total:', desloc, 'px');
-      });
-    });
+  /**
+   * Cria/atualiza @keyframes CSS dinamicamente com o deslocamento calculado.
+   */
+  function aplicarAnimacao1000(desloc) {
+    const styleId = 'animacao-celebracao-dinamica';
+    let styleEl = document.getElementById(styleId);
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+    // Para o card NÃO ficar engolido pela borda superior da janela visível,
+    // a rolagem deve parar com o card a ~20px do topo (já contabilizado em desloc).
+    styleEl.textContent = ''
+      + '@keyframes rolarListaDinamica { '
+      + '  0%   { transform: translateY(0); } '
+      + '  85%  { transform: translateY(-' + desloc + 'px); } '
+      + '  100% { transform: translateY(-' + desloc + 'px); } '  // mantém posição final (não passa do card)
+      + '} '
+      + '.lista-aprovados-itens { '
+      + '  animation: rolarListaDinamica 4.5s cubic-bezier(.16,1,.3,1) forwards !important; '
+      + '}';
   }
 
   /**
@@ -1581,10 +1615,15 @@ Formato EXATO da resposta:
         ? redacao.titulo
         : 'Redação ENEM';
       document.getElementById('colElite').innerHTML = montarCelebracao1000(nomeAluno, temaRedacao);
-      // Ajusta a animação CSS baseada na posição REAL do card no DOM
-      ajustarAnimacao1000();
-      // Dispara confetes sincronizados com a batida do carimbo (5s + queda 0.5s = 5.5s)
-      setTimeout(() => disparaConfetes(), 5500);
+      // Marca como pendente para o mudarAba reativar caso a aba mude
+      window._celebracaoPendente = true;
+      // Verifica se a aba Elite está visível agora — se sim, dispara animação imediato.
+      // Se não (caso comum: usuário está na aba "Texto Original"), espera o clique.
+      const painelElite = document.getElementById('painel-elite');
+      if (painelElite && !painelElite.classList.contains('hidden')) {
+        ajustarAnimacao1000();
+        setTimeout(() => disparaConfetes(), 5500);
+      }
     } else {
       document.getElementById('colElite').innerHTML = eliteHtml;
     }
