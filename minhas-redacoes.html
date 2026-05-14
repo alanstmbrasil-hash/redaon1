@@ -176,7 +176,7 @@
     border: 1px solid rgba(201,162,39,0.3);
     border-radius: .75rem;
     padding: 1rem;
-    height: 360px;
+    height: 400px;
     overflow: hidden;
     z-index: 1;
   }
@@ -201,15 +201,14 @@
     flex-direction: column;
     gap: .35rem;
     /* Animação: rola pra cima até o card do aluno ficar no topo da janela
-       visível. Card tem 3 linhas (~110px), nomes ficticios ~32px cada.
-       Deslocamento calculado para deixar o card a ~30px do topo, com
-       espaço abaixo para o carimbo cair sem cobrir o card. */
+       visível. 30 placeholders × ~38px ≈ 1140px. Rolagem -1110px deixa
+       o card a ~30px do topo, com espaço abaixo para o carimbo cair. */
     animation: rolarListaV2 4.5s cubic-bezier(.16,1,.3,1) forwards;
   }
   @keyframes rolarListaV2 {
     0%   { transform: translateY(0); }
-    85%  { transform: translateY(-2200px); }
-    100% { transform: translateY(-2250px); }
+    85%  { transform: translateY(-1110px); }
+    100% { transform: translateY(-1140px); }
   }
   .item-aprovado {
     font-family: 'Courier New', monospace;
@@ -1064,33 +1063,28 @@ Formato EXATO da resposta:
    * @param {string} tema - Tema da redação (para o PNG de download)
    */
   function montarCelebracao1000(nomeAluno, tema) {
-    // Estrutura da lista (sentimento "Rei do Mundo"):
-    //  - Nome do aluno como POSIÇÃO #0001 (primeiro lugar absoluto)
-    //  - 30+ nomes fictícios abaixo (#0002, #0003, ...) — figurantes
-    //  - Animação rola lista de baixo para cima até parar no #0001
-    // Conceito: aluno se sente como Jack na proa do Titanic — Rei do Mundo.
-    const nomesDepois = embaralhar([...NOMES_FICTICIOS_CELEBRACAO]).slice(0, 35);
+    // Estrutura da lista (sentimento "Você é RedaON #0001"):
+    //  - 30 placeholders antes (rolam pra fora — numerados 1001+)
+    //  - Card do aluno como #0001 (1º lugar)
+    //  - 25 nomes fictícios depois (#0002+, figurantes que o carimbo cobre)
+    const placeholdersAntes = embaralhar([...NOMES_FICTICIOS_CELEBRACAO]).slice(0, 30);
+    const nomesDepois = embaralhar([...NOMES_FICTICIOS_CELEBRACAO]).slice(0, 25);
 
-    // Para criar o efeito de "lista rolando até parar no topo",
-    // colocamos placeholders ANTES do nome do aluno na DOM, mas o aluno
-    // continua sendo #0001 visualmente. Os placeholders rolam pra fora.
-    const placeholdersAntes = embaralhar([...NOMES_FICTICIOS_CELEBRACAO, ...NOMES_FICTICIOS_CELEBRACAO]);
-
-    // 1. Placeholders (rolam pra fora) — numeração fake só pra rolagem
+    // 1. Placeholders rolam pra fora — numeração 1001+ (não confunde com aprovados)
     let itensHtml = placeholdersAntes.map((nome, i) =>
-      '<div class="item-aprovado item-placeholder">' + String(1000 + i).padStart(4, '0') + ' &nbsp;&nbsp; ' + escHtml(nome) + '</div>'
+      '<div class="item-aprovado item-placeholder">' + String(1001 + i).padStart(4, '0') + ' &nbsp;&nbsp; ' + escHtml(nome) + '</div>'
     ).join('');
 
-    // 2. Card do aluno — POSIÇÃO #0001 (Rei do Mundo)
+    // 2. Card do aluno — #0001 (com id para medição dinâmica)
     const primeiroNome = nomeAluno.split(' ')[0].toUpperCase();
-    itensHtml += '<div class="item-aprovado aluno-real">'
+    itensHtml += '<div class="item-aprovado aluno-real" id="cardAluno1000">'
               +   '<div class="card-parabens-titulo">🏆 PARABÉNS, ' + escHtml(primeiroNome) + '!</div>'
               +   '<div class="card-parabens-badge">Você é RedaON #0001</div>'
               +   '<div class="card-parabens-nota">Você atingiu a nota máxima — 1000/1000</div>'
               +   '<div class="card-parabens-linha">★ 0001 &nbsp;&nbsp; ' + escHtml(nomeAluno.toUpperCase()) + '</div>'
               + '</div>';
 
-    // 3. Demais aprovados (#0002, #0003, ...) — figurantes
+    // 3. Demais aprovados (#0002, #0003...) — figurantes que o carimbo cobre
     itensHtml += nomesDepois.map((nome, i) =>
       '<div class="item-aprovado">' + String(i + 2).padStart(4, '0') + ' &nbsp;&nbsp; ' + escHtml(nome) + '</div>'
     ).join('');
@@ -1100,7 +1094,7 @@ Formato EXATO da resposta:
       +   '<div class="lista-aprovados">'
       +     '<div class="lista-aprovados-titulo">Resultado Final · ENEM Redação · 1000/1000</div>'
       +     '<div class="lista-aprovados-rolagem">'
-      +       '<div class="lista-aprovados-itens">' + itensHtml + '</div>'
+      +       '<div class="lista-aprovados-itens" id="listaAprovadosItens">' + itensHtml + '</div>'
       +       '<div class="carimbo-onda"></div>'
       +       '<div class="carimbo-container">'
       +         '<div class="carimbo-aprovado">APROVADO</div>'
@@ -1118,6 +1112,46 @@ Formato EXATO da resposta:
       +     '</button>'
       +   '</div>'
       + '</div>';
+  }
+
+  /**
+   * Ajusta a animação CSS dinamicamente para garantir que o card do aluno
+   * PARE no topo da janela visível. Mede a posição real (em vez de chutar
+   * pixels). Aplica via JavaScript depois que o HTML é inserido no DOM.
+   */
+  function ajustarAnimacao1000() {
+    // Esperar 2 frames para o navegador renderizar e medir corretamente
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const card = document.getElementById('cardAluno1000');
+        const lista = document.getElementById('listaAprovadosItens');
+        if (!card || !lista) return;
+
+        // offsetTop do card dentro da lista = quanto subir para deixar o card no topo
+        // Subtrai 20px para deixar uma margem suave acima do card.
+        const desloc = card.offsetTop - 20;
+
+        // Cria/atualiza animação CSS keyframe com valor real medido
+        // Como não dá pra editar @keyframes existente, usamos animation-name novo
+        const styleId = 'animacao-celebracao-dinamica';
+        let styleEl = document.getElementById(styleId);
+        if (!styleEl) {
+          styleEl = document.createElement('style');
+          styleEl.id = styleId;
+          document.head.appendChild(styleEl);
+        }
+        styleEl.textContent = ''
+          + '@keyframes rolarListaDinamica { '
+          + '  0%   { transform: translateY(0); } '
+          + '  85%  { transform: translateY(-' + desloc + 'px); } '
+          + '  100% { transform: translateY(-' + (desloc + 30) + 'px); } '
+          + '} '
+          + '.lista-aprovados-itens { '
+          + '  animation: rolarListaDinamica 4.5s cubic-bezier(.16,1,.3,1) forwards !important; '
+          + '}';
+        console.info('[RedaON] Animação 1000 ajustada: card está em', card.offsetTop, 'px — rolagem total:', desloc, 'px');
+      });
+    });
   }
 
   /**
@@ -1139,21 +1173,25 @@ Formato EXATO da resposta:
    * visualmente o impacto da aprovação.
    */
   function disparaConfetes() {
-    const container = document.querySelector('.celebracao-1000');
-    if (!container) return;
-    const cores = ['#c9a227', '#ffe98a', '#45edee', '#6c5ce7', '#4ade80', '#fa6e6e', '#ffffff'];
-    // Burst inicial denso (50 confetes em 800ms) + cauda mais leve (60 em 2s)
-    const burstInicial = 50;
-    const caudaTotal = 60;
+    requestAnimationFrame(() => {
+      const container = document.querySelector('.celebracao-1000');
+      if (!container) {
+        console.warn('[RedaON] Confetes: container não encontrado');
+        return;
+      }
+      console.info('[RedaON] Disparando confetes — container OK');
+      const cores = ['#c9a227', '#ffe98a', '#45edee', '#6c5ce7', '#4ade80', '#fa6e6e', '#ffffff'];
+      // Burst inicial denso (50 confetes em 800ms) + cauda mais leve (60 em 2s)
+      const burstInicial = 50;
+      const caudaTotal = 60;
 
-    // Burst inicial — bem rápido, simulando explosão dos confetes
-    for (let i = 0; i < burstInicial; i++) {
-      setTimeout(() => criarConfete(container, cores), i * 16);
-    }
-    // Cauda mais espaçada
-    for (let i = 0; i < caudaTotal; i++) {
-      setTimeout(() => criarConfete(container, cores), 800 + i * 33);
-    }
+      for (let i = 0; i < burstInicial; i++) {
+        setTimeout(() => criarConfete(container, cores), i * 16);
+      }
+      for (let i = 0; i < caudaTotal; i++) {
+        setTimeout(() => criarConfete(container, cores), 800 + i * 33);
+      }
+    });
   }
 
   function criarConfete(container, cores) {
@@ -1182,8 +1220,12 @@ Formato EXATO da resposta:
     const nomeAluno = (typeof NOME_USUARIO !== 'undefined' && NOME_USUARIO) ? NOME_USUARIO : 'Aluno RedaON';
     const colElite = document.getElementById('colElite');
     if (!colElite) return;
-    // Limpa confetes antigos e re-renderiza
+    // Remove animação anterior para forçar restart
+    const styleAntigo = document.getElementById('animacao-celebracao-dinamica');
+    if (styleAntigo) styleAntigo.remove();
+    // Re-renderiza
     colElite.innerHTML = montarCelebracao1000(nomeAluno, '');
+    ajustarAnimacao1000();
     // Confetes sincronizados com a batida (5.5s)
     setTimeout(() => disparaConfetes(), 5500);
   };
@@ -1539,6 +1581,8 @@ Formato EXATO da resposta:
         ? redacao.titulo
         : 'Redação ENEM';
       document.getElementById('colElite').innerHTML = montarCelebracao1000(nomeAluno, temaRedacao);
+      // Ajusta a animação CSS baseada na posição REAL do card no DOM
+      ajustarAnimacao1000();
       // Dispara confetes sincronizados com a batida do carimbo (5s + queda 0.5s = 5.5s)
       setTimeout(() => disparaConfetes(), 5500);
     } else {
