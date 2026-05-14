@@ -394,18 +394,19 @@
     border: 1px solid rgba(255,255,255,0.2);
   }
 
-  /* Confetes (gerados via JS) */
+  /* Confetes (gerados via JS, anexados ao document.body) */
   .confete {
-    position: absolute;
-    width: 8px;
-    height: 14px;
+    position: fixed;
+    width: 10px;
+    height: 16px;
     pointer-events: none;
-    z-index: 10;
+    z-index: 9999;
+    top: 0;
     animation: cairConfete linear forwards;
   }
   @keyframes cairConfete {
-    0%   { transform: translateY(-50px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(700px) rotate(720deg); opacity: 0; }
+    0%   { transform: translateY(-30px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
   }
 
   @media(max-width:640px){
@@ -1186,6 +1187,21 @@ Formato EXATO da resposta:
       + '.lista-aprovados-itens { '
       + '  animation: rolarListaDinamica 4.5s cubic-bezier(.16,1,.3,1) forwards !important; '
       + '}';
+
+    // FORÇA REFLOW antes da animação aplicar.
+    // Sem isso, na primeira execução o navegador pode "atrasar" o registro
+    // dos elementos e a animação não dispara. Lê offsetHeight para forçar
+    // o browser a calcular o layout atual antes de pintar a próxima frame.
+    const lista = document.getElementById('listaAprovadosItens');
+    if (lista) {
+      // Trigger reflow lendo uma propriedade que requer recalculo de layout
+      // eslint-disable-next-line no-unused-expressions
+      void lista.offsetHeight;
+      // Remove e re-adiciona a animação para forçar restart (técnica padrão)
+      lista.style.animation = 'none';
+      void lista.offsetHeight; // segundo reflow
+      lista.style.animation = '';
+    }
   }
 
   /**
@@ -1206,43 +1222,51 @@ Formato EXATO da resposta:
    * batida do carimbo (5.5s após início da animação), para reforçar
    * visualmente o impacto da aprovação.
    */
+  // Timeouts pendentes dos confetes — permite cancelar se a celebração for fechada
+  let _confetesTimeouts = [];
+
   function disparaConfetes() {
     requestAnimationFrame(() => {
+      // Verifica se ainda existe celebração na tela (caso aluno tenha trocado de redação)
       const container = document.querySelector('.celebracao-1000');
       if (!container) {
         console.warn('[RedaON] Confetes: container não encontrado');
         return;
       }
-      console.info('[RedaON] Disparando confetes — container OK');
+      console.info('[RedaON] Disparando confetes (anexados ao body)');
       const cores = ['#c9a227', '#ffe98a', '#45edee', '#6c5ce7', '#4ade80', '#fa6e6e', '#ffffff'];
-      // Burst inicial denso (50 confetes em 800ms) + cauda mais leve (60 em 2s)
+      // Cancela timeouts pendentes de uma exibição anterior (caso ainda haja)
+      _confetesTimeouts.forEach(t => clearTimeout(t));
+      _confetesTimeouts = [];
+
       const burstInicial = 50;
       const caudaTotal = 60;
 
       for (let i = 0; i < burstInicial; i++) {
-        setTimeout(() => criarConfete(container, cores), i * 16);
+        _confetesTimeouts.push(setTimeout(() => criarConfete(cores), i * 16));
       }
       for (let i = 0; i < caudaTotal; i++) {
-        setTimeout(() => criarConfete(container, cores), 800 + i * 33);
+        _confetesTimeouts.push(setTimeout(() => criarConfete(cores), 800 + i * 33));
       }
     });
   }
 
-  function criarConfete(container, cores) {
-    if (!container || !document.body.contains(container)) return;
+  function criarConfete(cores) {
+    // Anexa ao document.body para os confetes aparecerem em tela inteira
+    // (não cortados pelo overflow:hidden do .celebracao-1000)
     const confete = document.createElement('div');
     confete.className = 'confete';
     confete.style.left = Math.random() * 100 + '%';
     confete.style.background = cores[Math.floor(Math.random() * cores.length)];
-    confete.style.animationDuration = (2 + Math.random() * 2) + 's';
+    confete.style.animationDuration = (2.5 + Math.random() * 2.5) + 's';
     confete.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
     // Variação de tamanho (algumas tiras maiores, mais visíveis)
     if (Math.random() > 0.7) {
-      confete.style.width = '12px';
-      confete.style.height = '18px';
+      confete.style.width = '14px';
+      confete.style.height = '20px';
     }
-    container.appendChild(confete);
-    setTimeout(() => confete.remove(), 5000);
+    document.body.appendChild(confete);
+    setTimeout(() => confete.remove(), 6000);
   }
 
   /**
