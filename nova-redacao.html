@@ -2590,79 +2590,6 @@ Foque em: pesquisas acadêmicas, relatórios científicos, índices de desenvolv
 Foque em: séries, games, eventos culturais, redes sociais, fenômenos contemporâneos aceitos pelo ENEM. Português, direto ao ponto.`,
 };
 
-// ─────────────────────────────────────────────────────────────
-// NORMALIZAÇÃO DE MATERIAL DE APOIO
-// O Gemini às vezes ignora o formato markdown pedido e devolve
-// JSON. Pior: esse JSON pode ter sido salvo no cache do banco,
-// então todo aluno que pegar o tema verá JSON cru.
-// Esta função detecta JSON e converte para o markdown esperado.
-// Se já for markdown, devolve intacto.
-// ─────────────────────────────────────────────────────────────
-function normalizarMaterial(texto) {
-  if (!texto || typeof texto !== 'string') return texto || '';
-  let t = texto.trim();
-
-  // Remove cercas de código que o Gemini às vezes adiciona
-  t = t.replace(/^```(?:json)?/i, '').replace(/```$/,'').trim();
-
-  // Se não parece JSON, é markdown — devolve como está
-  const pareceJson = (t.startsWith('[') || t.startsWith('{'));
-  if (!pareceJson) return texto;
-
-  // Tenta fazer parse tolerante do JSON (cobre malformações comuns do Gemini)
-  let dados = null;
-  const tentativas = [
-    () => JSON.parse(t),
-    () => { const m = t.match(/\[[\s\S]*\]/); return m ? JSON.parse(m[0]) : null; },
-    () => {
-      // Conserta aspas curvas e vírgula sobrando antes de ] ou }
-      const limpo = t
-        .replace(/[\u201C\u201D]/g, '"')
-        .replace(/[\u2018\u2019]/g, "'")
-        .replace(/,\s*([\]}])/g, '$1');
-      return JSON.parse(limpo);
-    }
-  ];
-  for (const fn of tentativas) {
-    try { const r = fn(); if (r) { dados = r; break; } } catch(e) {}
-  }
-
-  // Se nem o parse tolerante funcionou, devolve o original
-  // (mdSimples ainda mostra algo, melhor que quebrar)
-  if (!dados) return texto;
-
-  // Garante que é um array de argumentos
-  const lista = Array.isArray(dados) ? dados : [dados];
-
-  // Lê um campo aceitando variações de nome/caixa que o Gemini usa
-  const campo = (obj, ...nomes) => {
-    for (const chave of Object.keys(obj)) {
-      const norm = chave.toUpperCase().replace(/[_\s]/g,'');
-      for (const n of nomes) {
-        if (norm === n.toUpperCase().replace(/[_\s]/g,'')) return obj[chave];
-      }
-    }
-    return '';
-  };
-
-  // Reconstrói no formato markdown que o mdSimples já sabe renderizar
-  let md = '';
-  lista.forEach((arg, i) => {
-    if (typeof arg !== 'object' || arg === null) return;
-    const num     = campo(arg, 'ARGUMENTO', 'NUMERO') || (i + 1);
-    const usar    = campo(arg, 'USE AGORA', 'USEAGORA', 'USAR');
-    const entenda = campo(arg, 'ENTENDA', 'EXPLICACAO');
-    const conect  = campo(arg, 'COMO CONECTAR', 'COMOCONECTAR', 'CONECTAR');
-    md += `**ARGUMENTO ${String(num).replace(/[^\d]/g,'') || (i+1)}:**\n`;
-    if (usar)    md += `**USE AGORA:** ${usar}\n`;
-    if (entenda) md += `**ENTENDA:** ${entenda}\n`;
-    if (conect)  md += `**COMO CONECTAR:** ${conect}\n`;
-    md += '\n';
-  });
-
-  return md.trim() || texto;
-}
-
 function mdSimples(t) {
   return t
     .replace(/\*\*(.*?)\*\*/g,'<strong style="color:#e1e2eb">$1</strong>')
@@ -2833,10 +2760,8 @@ window.toggleMaterial = async function(tipo) {
       texto = await geminiGenerate(PROMPTS_MATERIAL[tipo](tema.titulo));
 
       // 6. Se tema é oficial, salva pra cache de próximos alunos
-      //    Salva SEMPRE normalizado (markdown) — nunca JSON cru,
-      //    pra não envenenar o cache de quem pegar o tema depois.
       if (tema.oficial && tema.id && texto) {
-        _salvarMaterialNoBanco(tema.id, tipo, normalizarMaterial(texto)); // fire-and-forget
+        _salvarMaterialNoBanco(tema.id, tipo, texto); // fire-and-forget
         console.log(`[material] '${tipo}' gerado pelo Gemini e salvo no banco pra próximos alunos.`);
       }
     }
@@ -2850,7 +2775,7 @@ window.toggleMaterial = async function(tipo) {
       </div>`;
     }
 
-    conteudo.innerHTML = `${selo}<div style="padding-top:.25rem;">${mdSimples(normalizarMaterial(texto))}</div>
+    conteudo.innerHTML = `${selo}<div style="padding-top:.25rem;">${mdSimples(texto)}</div>
       <button onclick="copiarMaterial('${tipo}')" style="margin-top:.75rem;display:flex;align-items:center;gap:.375rem;padding:.375rem .75rem;border-radius:.625rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.3);color:#928ea0;font-size:.72rem;font-weight:600;cursor:pointer;">
         <span class="material-symbols-outlined" style="font-size:.85rem;">content_copy</span>Copiar
       </button>`;
