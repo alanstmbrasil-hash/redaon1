@@ -1028,20 +1028,7 @@ var intervaloDicas = null;
     const res = await fetch('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts }],
-        // ── DETERMINISMO DA CORREÇÃO ─────────────────────────────────
-        // temperature: 0.1 reduz drasticamente a variabilidade entre
-        // execuções da mesma redação. Sem este controle, o Gemini operava
-        // no default do servidor (~0.7-1.0), produzindo notas oscilantes
-        // (ex: mesma redação alternando entre 780 e 1000 em corridas
-        // sucessivas). A correção precisa ser determinística para que a
-        // rubrica da Profa. Blanche seja aplicada de forma consistente.
-        // Valor alinhado com geminiOCR (que também usa 0.1).
-        generationConfig: {
-          temperature: 0.1
-        }
-      })
+      body: JSON.stringify({ contents: [{ parts }] })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'Erro Gemini');
