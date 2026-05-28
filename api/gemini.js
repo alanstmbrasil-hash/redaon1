@@ -24,9 +24,13 @@ module.exports = async function handler(req, res) {
     // Apenas correção (Chamadas 1 e 2 do fluxo de avaliação INEP) usa o modelo
     // superior. As demais tarefas (versão 1000, por que 1000, material de
     // apoio, Hub quiz/flashcards/resumo, OCR) seguem no Flash Lite.
+    //
+    // Nome do modelo verificado em ai.google.dev/gemini-api/docs (28/05/2026):
+    // - 'gemini-3.5-flash'      → Flash 3.5, lançado I/O 2026 (Pro-level intelligence at Flash speed)
+    // - 'gemini-2.5-flash-lite' → Flash Lite 2.5, modelo barato (correção atual oscilava nele)
     const TASKS_PREMIUM = ['correcao'];
     const modelo = TASKS_PREMIUM.includes(task)
-      ? 'gemini-3-flash'
+      ? 'gemini-3.5-flash'
       : 'gemini-2.5-flash-lite';
 
     // Endpoint v1beta: suporta responseMimeType (o v1 estável não suporta)
