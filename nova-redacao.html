@@ -1019,19 +1019,26 @@ var intervaloDicas = null;
 
 <script>
   // Chama o Gemini via função serverless do Vercel — key protegida no servidor
-  async function geminiGenerate(prompt, arquivoBase64 = null, arquivoMime = null) {
+  // Roteamento por task (v2 — 28/05/2026): task='correcao' → Gemini 3 Flash;
+  // demais (ou ausente) → Gemini 2.5 Flash Lite (padrão).
+  async function geminiGenerate(prompt, arquivoBase64 = null, arquivoMime = null, task = null) {
     const parts = [];
     if (arquivoBase64) {
       parts.push({ inline_data: { mime_type: arquivoMime, data: arquivoBase64 } });
     }
     parts.push({ text: prompt });
+    const body = { contents: [{ parts }] };
+    if (task) body.task = task;
     const res = await fetch('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts }] })
+      body: JSON.stringify(body)
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'Erro Gemini');
+    if (data._redaon_modelo_usado) {
+      console.info(`[RedaON] Modelo usado nesta chamada: ${data._redaon_modelo_usado}`);
+    }
     return data.candidates[0].content.parts[0].text;
   }
 
@@ -2186,7 +2193,8 @@ ${FORMATO_JSON_MELHORIAS}`;
       const prompt = arquivoBase64 ? instrucao : instrucao + "\n\nRedação:\n" + texto;
 
       // ── 3. CHAMAR GEMINI ─────────────────────────────
-      const raw = await geminiGenerate(prompt, arquivoBase64 || null, arquivoMime || null);
+      // task='correcao' → roteado para Gemini 3 Flash (resolve oscilação C3/C4)
+      const raw = await geminiGenerate(prompt, arquivoBase64 || null, arquivoMime || null, 'correcao');
       let dados;
       try {
         dados = JSON.parse(raw.trim().replace(/```json|```/g,'').trim());
@@ -2359,7 +2367,8 @@ ${FORMATO_JSON_MELHORIAS}`;
                 + 'Feedbacks: ' + dados.competencias.map((c,i) => `C${i+1}: ${c.feedback}`).join(' | ')
                 + '\n\nRedação:\n' + (texto || '[Arquivo enviado]');
 
-              const raw2 = await geminiGenerate(prompt2);
+              // task='correcao' → roteado para Gemini 3 Flash (mesmo motor da Chamada 1)
+              const raw2 = await geminiGenerate(prompt2, null, null, 'correcao');
               let dados2;
               try {
                 dados2 = JSON.parse(raw2.trim().replace(/```json|```/g, '').trim());
