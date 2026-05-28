@@ -21,12 +21,15 @@ module.exports = async function handler(req, res) {
     // - maxOutputTokens 32000: folga durante transição para Cenário B (chamadas
     //   fracionadas). No estado final cada chamada pedirá 1500-3000 tokens,
     //   mas agora ainda existem chamadas maiores que precisam caber inteiras.
-    // - temperature 0.3: correção consistente, não criativa
+    // - temperature 0.1: correção determinística. Baixado de 0.3 para 0.1 em
+    //   28/05/2026 para eliminar a variância entre rodadas (C3/C5 oscilavam
+    //   entre 160 e 200 na mesma redação). 0.1 (não 0.0) mantém respiro mínimo
+    //   sem travar o modelo num único viés. OCR mantém sua própria temperature.
     // - responseMimeType application/json: força JSON válido e parseável,
     //   elimina os erros "Expected ',' or ']' at position X" no console
     const defaultConfig = {
       maxOutputTokens: 32000,
-      temperature: 0.3,
+      temperature: 0.1,
       responseMimeType: 'application/json'
     };
 
