@@ -159,6 +159,10 @@ function authGuard(tipoRequerido = null) {
 
 function dbHeaders(token = null) {
   const t = token || authGetToken();
+  // IMPORTANTE: para operações autenticadas, NUNCA cair na SUPABASE_KEY (anon)
+  // como Bearer — a RLS rejeita INSERT/UPDATE anônimo com 401. Se não há token
+  // de usuário, é melhor enviar o header com o anon e deixar o dbFetch tratar
+  // a renovação/redirect do que mascarar o problema.
   return {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_KEY,
@@ -168,25 +172,65 @@ function dbHeaders(token = null) {
 }
 
 /**
+ * Decodifica o payload de um JWT (sem validar assinatura) para ler o exp.
+ * Retorna o timestamp de expiração em ms, ou null se não conseguir.
+ */
+function _jwtExpiraEm(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp ? payload.exp * 1000 : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+/**
+ * Garante que o token está válido ANTES de usá-lo. Se expira em menos de 90s
+ * (ou já expirou), renova proativamente. Retorna o token válido, ou null se
+ * não foi possível renovar (sessão realmente perdida).
+ */
+async function _garantirTokenValido() {
+  let token = authGetToken();
+  if (!token) return null;
+
+  const expiraEm = _jwtExpiraEm(token);
+  const agora = Date.now();
+  // Renova se já expirou ou se falta menos de 90 segundos
+  if (expiraEm !== null && expiraEm - agora < 90000) {
+    const novo = await authRefreshToken();
+    return novo || null; // authRefreshToken já faz logout se o refresh falhar
+  }
+  return token;
+}
+
+/**
  * Versão segura do fetch para o Supabase.
- * Se receber 401 (JWT expirado), renova o token automaticamente e tenta de novo.
+ * 1) Renova o token PROATIVAMENTE antes da chamada (se perto de expirar).
+ * 2) Se ainda assim receber 401, renova de forma reativa e tenta de novo.
+ * 3) Se o refresh falhar, redireciona para login com mensagem clara.
  */
 async function dbFetch(url, options = {}) {
-  const res = await fetch(url, {
-    ...options,
-    headers: { ...dbHeaders(), ...(options.headers || {}) }
-  });
+  // Passo 1 — refresh proativo
+  const tokenValido = await _garantirTokenValido();
+  const headersIniciais = tokenValido
+    ? { ...dbHeaders(tokenValido), ...(options.headers || {}) }
+    : { ...dbHeaders(), ...(options.headers || {}) };
+
+  let res = await fetch(url, { ...options, headers: headersIniciais });
 
   if (res.status !== 401) return res;
 
-  // Token expirado — tenta renovar
+  // Passo 2 — refresh reativo (token pode ter expirado entre o check e a chamada)
   const novoToken = await authRefreshToken();
   if (!novoToken) {
+    // Sessão realmente perdida — sinaliza e redireciona
+    console.error('[RedaON] Sessão expirada. Redirecionando para login.');
+    try { sessionStorage.setItem('redaon_aviso_login', 'Sua sessão expirou. Faça login novamente para salvar seu trabalho.'); } catch (_) {}
     window.location.href = 'login.html';
     return res;
   }
 
-  // Segunda tentativa com token novo
+  // Passo 3 — segunda tentativa com token renovado
   return fetch(url, {
     ...options,
     headers: { ...dbHeaders(novoToken), ...(options.headers || {}) }
