@@ -2405,14 +2405,47 @@ ${FORMATO_JSON_MELHORIAS}`;
       gate = { tema_cumprido: 'sim', tangenciamento: false, tamanho_ok: true, copia: false };
     }
 
-    // ETAPA 2 — 5 AGENTES EM PARALELO
-    const [c1, c2, c3, c4, c5] = await Promise.all([
-      geminiGenerate(r(AG_C1), null, null, 'c1').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C1: '+e.message})),
-      geminiGenerate(r(AG_C2), null, null, 'c2').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C2: '+e.message})),
-      geminiGenerate(r(AG_C3), null, null, 'c3').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C3: '+e.message})),
-      geminiGenerate(r(AG_C4), null, null, 'c4').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C4: '+e.message})),
-      geminiGenerate(r(AG_C5), null, null, 'c5').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C5: '+e.message})),
+    // ETAPA 2 — 5 AGENTES com paralelismo CONTROLADO (2 ondas) + retry.
+    // 5 chamadas simultâneas ao /api/gemini estouravam a concorrência da função
+    // serverless (erro 500, geralmente no C5 que é o prompt mais pesado).
+    // Solução: 2 ondas (C1+C2+C3, depois C4+C5) reduzem a concorrência, e cada
+    // agente tenta 2x antes de desistir (resolve 500 intermitente).
+    const _rodarAgente = async (prompt, task, nome) => {
+      for (let tentativa = 1; tentativa <= 2; tentativa++) {
+        try {
+          return _parseAgente(await geminiGenerate(prompt, null, null, task));
+        } catch(e) {
+          if (tentativa === 1) {
+            console.warn(`[7agentes] ${nome} falhou (tentativa 1/2): ${e.message}. Retry...`);
+            await new Promise(res => setTimeout(res, 600)); // pausa antes do retry
+          } else {
+            console.error(`[7agentes] ${nome} falhou nas 2 tentativas: ${e.message}`);
+            return { nota: null, _erro: true, feedback: `Não foi possível avaliar ${nome} (erro técnico). Tente reenviar.` };
+          }
+        }
+      }
+    };
+
+    // Onda 1: C1, C2, C3
+    const [c1, c2, c3] = await Promise.all([
+      _rodarAgente(r(AG_C1), 'c1', 'C1'),
+      _rodarAgente(r(AG_C2), 'c2', 'C2'),
+      _rodarAgente(r(AG_C3), 'c3', 'C3'),
     ]);
+    // Onda 2: C4, C5
+    const [c4, c5] = await Promise.all([
+      _rodarAgente(r(AG_C4), 'c4', 'C4'),
+      _rodarAgente(r(AG_C5), 'c5', 'C5'),
+    ]);
+
+    // Se algum agente falhou tecnicamente (nota null após 2 tentativas), aborta
+    // com erro claro em vez de produzir uma nota falsa. Melhor o aluno reenviar
+    // do que receber uma correção com competência zerada por erro de servidor.
+    const agentesObj = { C1: c1, C2: c2, C3: c3, C4: c4, C5: c5 };
+    const falhou = Object.entries(agentesObj).filter(([nome, a]) => a && a._erro === true).map(([nome]) => nome);
+    if (falhou.length > 0) {
+      throw new Error(`Falha técnica ao avaliar ${falhou.join(', ')}. Isso costuma ser instabilidade momentânea do servidor — por favor, reenvie a redação.`);
+    }
 
     // Trava de tangenciamento (gatekeeper manda)
     const travado = gate.tangenciamento === true || gate.tema_cumprido === 'nao' || gate.tema_cumprido === 'parcial';
