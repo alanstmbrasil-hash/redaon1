@@ -662,14 +662,40 @@
   //     Depende da Chamada 3; se ausente, dispara ambas em sequência.
 
   async function geminiGenerate(prompt) {
-    const res = await fetch('/api/gemini', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Erro Gemini');
-    return data.candidates[0].content.parts[0].text;
+    // Retry automático para erros transitórios do Gemini (503 Service
+    // Unavailable, 500, 429 rate limit). 3 tentativas com backoff crescente.
+    const TRANSITORIOS = [429, 500, 502, 503, 504];
+    let ultimoErro;
+    for (let tentativa = 1; tentativa <= 3; tentativa++) {
+      try {
+        const res = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (TRANSITORIOS.includes(res.status) && tentativa < 3) {
+            ultimoErro = new Error(data.error?.message || `Erro ${res.status}`);
+            console.warn(`[Minhas Redações] Gemini ${res.status} (tentativa ${tentativa}/3). Retry em ${tentativa}s...`);
+            await new Promise(r => setTimeout(r, tentativa * 1000)); // backoff: 1s, 2s
+            continue;
+          }
+          throw new Error(data.error?.message || `Erro Gemini (${res.status})`);
+        }
+        const data = await res.json();
+        return data.candidates[0].content.parts[0].text;
+      } catch (e) {
+        ultimoErro = e;
+        // Erro de rede (fetch falhou) também merece retry
+        if (tentativa < 3 && (e.message.includes('fetch') || e.message.includes('network'))) {
+          await new Promise(r => setTimeout(r, tentativa * 1000));
+          continue;
+        }
+        if (tentativa >= 3) throw ultimoErro;
+      }
+    }
+    throw ultimoErro || new Error('Erro Gemini');
   }
 
   // Parse seguro do JSON retornado pela Gemini (idempotente com o de nova-redacao.html).
@@ -1486,19 +1512,27 @@ Formato EXATO da resposta:
         + '<p style="font-size:.85rem;color:rgba(0,0,0,.5);margin-top:.5rem;font-style:italic;">Efeito: C2, C3 e C5 ficam limitadas a 40 pontos cada.</p>';
       alertasC2 += blocoFolha('#dc2626', '⚠ Tangenciamento detectado', 'C2', conteudo);
     }
+    // Fonte do texto de avaliação do repertório: prioriza c2_repertorio_avaliacao
+    // (ponte), mas cai para o feedback do agente C2 (competencias[1].feedback),
+    // que SEMPRE vem preenchido. Isso evita o bloco vazio quando a ponte não
+    // gravou o campo (descompasso de versão na geração).
+    const _objs = dados._competencias_objetos || (Array.isArray(dados.competencias) && typeof dados.competencias[0] === 'object' ? dados.competencias : null);
+    const _avaliacaoC2 = dados.c2_repertorio_avaliacao
+      || (_objs && _objs[1] && _objs[1].feedback)
+      || '';
     if (dados.c2_repertorio_tipo === 'bolso') {
       let conteudo = '';
       if (dados.c2_repertorio_referencia) {
         conteudo += '<p style="color:rgba(0,0,0,.55);font-size:.95rem;margin-bottom:.5rem;">Referência citada: <strong style="color:#1f2937;">' + escHtml(dados.c2_repertorio_referencia) + '</strong></p>';
       }
-      conteudo += paragrafoFolha(dados.c2_repertorio_avaliacao || '');
+      conteudo += paragrafoFolha(_avaliacaoC2);
       if (dados.c2_repertorio_sugestao) {
         conteudo += '<p style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(0,0,0,.5);margin-top:1rem;margin-bottom:.25rem;">Como tornar produtivo</p>'
           + paragrafoFolha(dados.c2_repertorio_sugestao);
       }
       alertasC2 += blocoFolha('#6c5ce7', 'Repertório de bolso', 'C2', conteudo);
     } else if (dados.c2_repertorio_tipo === 'produtivo') {
-      alertasC2 += blocoFolha('#16a34a', '✓ Repertório produtivo', 'C2', paragrafoFolha(dados.c2_repertorio_avaliacao || ''));
+      alertasC2 += blocoFolha('#16a34a', '✓ Repertório produtivo', 'C2', paragrafoFolha(_avaliacaoC2));
     }
 
     // ── C5 — Proposta de intervenção (padrão folha)
@@ -1659,12 +1693,11 @@ Formato EXATO da resposta:
       document.getElementById('colElite').innerHTML = eliteHtml;
     }
 
-    // ── Por que Nota 1000: análise por competência
-    //     FONTE PRIMÁRIA (v5.4): para_200 de cada agente (já no correcao_json).
-    //     Cada agente especialista gera "o que faria a nota subir" — é exatamente
-    //     o conteúdo desta tela, competência por competência, sempre coerente com
-    //     a nota dada. Aposenta a Chamada 4 antiga (que tinha viés do schema único).
-    //     Fallback: nomes antigos (melhoria_c*, por_que_elite_*) para redações já salvas.
+    // ── Por que Nota 1000: comparação por competência (original vs Elite)
+    //     FONTE PRIMÁRIA: melhoria_c* (Chamada 4 — compara a redação com a versão
+    //     nota 1000 reescrita). Requer a Elite gerada primeiro.
+    //     FALLBACK: para_200 do agente ("o que falta") quando a comparação ainda
+    //     não existe — assim a tela nunca fica totalmente vazia.
     const porQueCompetencias = [
       { idx: 0, keys: ['melhoria_c1', 'por_que_elite_c1'], label: 'C1 — Língua formal',     cor: '#45edee' },
       { idx: 1, keys: ['melhoria_c2', 'por_que_elite_c2'], label: 'C2 — Tema e repertório', cor: '#6c5ce7' },
@@ -1672,20 +1705,24 @@ Formato EXATO da resposta:
       { idx: 3, keys: ['melhoria_c4', 'por_que_elite_c4'], label: 'C4 — Coesão',            cor: '#fabd00' },
       { idx: 4, keys: ['melhoria_c5', 'por_que_elite_c5'], label: 'C5 — Intervenção',       cor: '#fa6e6e' }
     ];
-    // Helper: pega o texto da competência — primeiro para_200 do agente, depois fallback antigo
+    const _objsPQ = dados._competencias_objetos || (Array.isArray(dados.competencias) && typeof dados.competencias[0] === 'object' ? dados.competencias : null);
+    // Existe a comparação real da Chamada 4?
+    const temComparacaoReal = porQueCompetencias.some(c => leCampo(c.keys));
+    // Helper: comparação real (primária) ou para_200 (fallback)
     const _textoPorQue = (c) => {
-      const comp = Array.isArray(dados.competencias) ? dados.competencias[c.idx] : null;
+      const real = leCampo(c.keys);
+      if (real) return real;
+      const comp = _objsPQ ? _objsPQ[c.idx] : null;
       const nota = comp && typeof comp.nota !== 'undefined' ? comp.nota : null;
-      // Se já é 200, não há "o que melhorar"
       if (nota === 200) return 'Competência no nível máximo (200). Parabéns!';
-      // Fonte primária: para_200 do agente
       if (comp && comp.para_200) return comp.para_200;
-      // Fallback: campos antigos
-      return leCampo(c.keys) || '';
+      return '';
     };
     const temPorQueComp = porQueCompetencias.some(c => _textoPorQue(c));
     if (temPorQueComp) {
-      window._porQueElite = porQueCompetencias.map(c => {
+      const aviso = temComparacaoReal ? '' :
+        '<p style="font-size:11px;color:#fabd00;background:rgba(250,189,0,.08);padding:8px 12px;border-radius:8px;margin-bottom:12px;">Gere a "Elite da PROfa" (versão nota 1000) para ver a comparação detalhada. Abaixo, o que falta em cada competência:</p>';
+      window._porQueElite = aviso + porQueCompetencias.map(c => {
         const texto = _textoPorQue(c);
         if (!texto) return '';
         return '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid ' + c.cor + ';border-radius:0 8px 8px 0;">'
@@ -2222,16 +2259,43 @@ Formato EXATO da resposta:
     document.getElementById('modalAnaliseTitle').textContent = 'Por que Nota 1000?';
     document.getElementById('modalAnalise').classList.remove('hidden');
 
-    // v5.4: o conteúdo já foi montado por renderAnalise a partir do para_200 de
-    // cada agente (fonte no correcao_json). Não dispara mais a Chamada 4 antiga.
-    const conteudo = window._porQueElite
+    // Já existe a comparação real (Chamada 4) montada em _porQueElite? Exibe.
+    const jaTemComparacao = window._porQueElite
       && !window._porQueElite.includes('em breve disponível')
       && !window._porQueElite.includes('não disponível')
-        ? window._porQueElite
-        : '<p style="color:#928ea0;text-align:center;padding:2rem;">Análise por competência indisponível para esta redação. Reenvie a redação para gerar a análise atualizada.</p>';
-    const ehHtml = conteudo.trim().startsWith('<');
-    document.getElementById('modalAnaliseTexto').innerHTML = ehHtml
-      ? conteudo
+      && !window._porQueElite.includes('o que falta em cada competência'); // não é só o fallback
+
+    if (jaTemComparacao) {
+      const conteudo = window._porQueElite;
+      document.getElementById('modalAnaliseTexto').innerHTML =
+        conteudo.trim().startsWith('<') ? conteudo
+        : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
+      return;
+    }
+
+    // Não tem comparação ainda → precisa da Elite (Chamada 3) gerada primeiro.
+    const temElite = dadosAtuais && (dadosAtuais.redacao_nota_1000_intro || dadosAtuais.versao_elite_intro);
+    if (!temElite) {
+      document.getElementById('modalAnaliseTexto').innerHTML =
+        '<div style="text-align:center;padding:2rem;">'
+        + '<p style="color:#e1e2eb;font-size:.9rem;margin-bottom:.75rem;">Para ver a comparação competência por competência, primeiro gere a <strong>Versão Nota 1000</strong> na aba "Elite da PROfa".</p>'
+        + '<p style="color:#928ea0;font-size:.8rem;">Enquanto isso, abaixo está o que falta em cada competência:</p>'
+        + (window._porQueElite || '') + '</div>';
+      return;
+    }
+
+    // Tem Elite mas não tem comparação → dispara Chamada 4 (gerarMelhorias).
+    document.getElementById('modalAnaliseTexto').innerHTML =
+      '<div style="text-align:center;padding:2.5rem 1.5rem;">'
+      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
+      + '<p style="color:#c8c4d7;font-size:.9rem;font-weight:600;">Comparando sua redação com a versão nota 1000...</p>'
+      + '</div>';
+    const ok = await window.gerarMelhorias();
+    const conteudo = (ok && window._porQueElite) ? window._porQueElite
+      : '<div style="text-align:center;padding:2rem;"><p style="color:#ffb4ab;font-size:.85rem;margin-bottom:1rem;">Não foi possível gerar a comparação (instabilidade momentânea).</p>'
+        + '<button onclick="window.verPorQueElite()" style="background:rgba(108,92,231,.15);color:#c6bfff;border:1px solid rgba(108,92,231,.3);padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.8rem;cursor:pointer;">Tentar novamente</button></div>';
+    document.getElementById('modalAnaliseTexto').innerHTML =
+      conteudo.trim().startsWith('<') ? conteudo
       : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
   };
   window.fecharModal = function() {
