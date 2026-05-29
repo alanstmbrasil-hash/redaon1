@@ -845,22 +845,30 @@ REGRA DE OURO — NUNCA parabenize o aluno por algo que está APENAS na versão 
 
 TRATAMENTO POR COMPETÊNCIA:
 • Competência com nota 200 (o aluno JÁ acertou): reconheça o que o ALUNO fez na redação ORIGINAL. Mensagem curta (2-3 frases), tom parabenizador. Comece com "✓ ".
-• Competência com nota < 200 (havia o que melhorar): faça o CONTRASTE em 3 partes, nesta ordem:
-   1. "Na sua redação:" — cite o trecho/abordagem REAL do aluno (da versão A) e o que limitou a nota.
-   2. "Na versão nota 1000:" — cite como o mesmo ponto foi reescrito (da versão B).
-   3. "Por que melhora:" — explique o ganho pedagógico da mudança.
-   Comece a mensagem com "↗ ". 4-6 frases.
+• Competência com nota < 200 (havia o que melhorar): avalie PRIMEIRO se houve mudança real nessa competência entre a versão A e a versão B.
+   — Se houve mudança real: faça o CONTRASTE em 3 partes, nesta ordem:
+      1. "Na sua redação:" — cite o trecho/abordagem REAL do aluno (da versão A) e o que limitou a nota.
+      2. "Na versão nota 1000:" — cite como o mesmo ponto foi reescrito (da versão B).
+      3. "Por que melhora:" — explique o ganho pedagógico da mudança.
+      Comece com "↗ ". 4-6 frases.
+   — Se NÃO houve mudança real (o trecho da versão B é idêntico ou quase idêntico ao da versão A): NÃO invente um erro que não existe. Explique objetivamente qual aspecto da competência limitou a nota nessa redação, sem forjar contraste entre as versões. Comece com "⚠️ ". 2-4 frases.
 
-EXEMPLO de contraste correto (C5 com nota < 200):
+ATENÇÃO CRÍTICA: É proibido inventar erros para criar contraste. Se a versão 1000 manteve um trecho igual ao do aluno, isso significa que o trecho JÁ ESTAVA CORRETO — diga isso. Nunca finja que havia um erro quando a reescrita não mudou nada.
+
+EXEMPLO de contraste correto (C5 com nota < 200, com mudança real):
 "↗ Na sua redação: a proposta listava 'metrô, BRT e ciclovias', mas não dizia POR MEIO DE QUE viabilizar o investimento — faltava o elemento Meio e o detalhamento. Na versão nota 1000: foi acrescentado 'por meio de um plano nacional de mobilidade com destinação de verbas específicas do orçamento federal'. Por que melhora: a proposta deixa de ser uma intenção genérica e ganha um mecanismo concreto de execução, completando os 5 elementos exigidos pela C5."
+
+EXEMPLO de ausência de mudança real (C1 com nota < 200, sem mudança nas construções):
+"⚠️ Nesta competência, a reescrita manteve a maior parte das construções originais, pois os desvios identificados eram pontuais e não estruturais. O que limitou a nota foi [explicar o desvio real encontrado na correção]. A versão nota 1000 não alterou esse trecho, pois a questão não estava na construção das frases mas em [razão real]."
 
 ${RUBRICA_INEP_COMPACTA}
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
 2. Competência nota 200 → comece com "✓ " e fale do que o ALUNO fez.
-3. Competência nota < 200 → comece com "↗ " e use a estrutura "Na sua redação / Na versão nota 1000 / Por que melhora".
-4. Cite trechos REAIS de cada versão. Nunca atribua ao aluno o que foi escrito na reescrita.
+3. Competência nota < 200 com mudança real → comece com "↗ " e use a estrutura "Na sua redação / Na versão nota 1000 / Por que melhora".
+4. Competência nota < 200 SEM mudança real entre as versões → comece com "⚠️ " e explique o problema real SEM forjar contraste.
+5. Cite trechos REAIS de cada versão. Nunca atribua ao aluno o que foi escrito na reescrita. Nunca invente erro onde a reescrita não mudou nada.
 
 Formato EXATO da resposta:
 {
