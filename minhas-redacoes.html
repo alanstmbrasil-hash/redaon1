@@ -1653,18 +1653,33 @@ Formato EXATO da resposta:
     }
 
     // ── Por que Nota 1000: análise por competência
-    //     Compatível com nomes novos (melhoria_c*) e antigos (por_que_elite_*).
+    //     FONTE PRIMÁRIA (v5.4): para_200 de cada agente (já no correcao_json).
+    //     Cada agente especialista gera "o que faria a nota subir" — é exatamente
+    //     o conteúdo desta tela, competência por competência, sempre coerente com
+    //     a nota dada. Aposenta a Chamada 4 antiga (que tinha viés do schema único).
+    //     Fallback: nomes antigos (melhoria_c*, por_que_elite_*) para redações já salvas.
     const porQueCompetencias = [
-      { keys: ['melhoria_c1', 'por_que_elite_c1'], label: 'C1 — Língua formal',     cor: '#45edee' },
-      { keys: ['melhoria_c2', 'por_que_elite_c2'], label: 'C2 — Tema e repertório', cor: '#6c5ce7' },
-      { keys: ['melhoria_c3', 'por_que_elite_c3'], label: 'C3 — Argumentação',      cor: '#4ade80' },
-      { keys: ['melhoria_c4', 'por_que_elite_c4'], label: 'C4 — Coesão',            cor: '#fabd00' },
-      { keys: ['melhoria_c5', 'por_que_elite_c5'], label: 'C5 — Intervenção',       cor: '#fa6e6e' }
+      { idx: 0, keys: ['melhoria_c1', 'por_que_elite_c1'], label: 'C1 — Língua formal',     cor: '#45edee' },
+      { idx: 1, keys: ['melhoria_c2', 'por_que_elite_c2'], label: 'C2 — Tema e repertório', cor: '#6c5ce7' },
+      { idx: 2, keys: ['melhoria_c3', 'por_que_elite_c3'], label: 'C3 — Argumentação',      cor: '#4ade80' },
+      { idx: 3, keys: ['melhoria_c4', 'por_que_elite_c4'], label: 'C4 — Coesão',            cor: '#fabd00' },
+      { idx: 4, keys: ['melhoria_c5', 'por_que_elite_c5'], label: 'C5 — Intervenção',       cor: '#fa6e6e' }
     ];
-    const temPorQueComp = porQueCompetencias.some(c => leCampo(c.keys));
+    // Helper: pega o texto da competência — primeiro para_200 do agente, depois fallback antigo
+    const _textoPorQue = (c) => {
+      const comp = Array.isArray(dados.competencias) ? dados.competencias[c.idx] : null;
+      const nota = comp && typeof comp.nota !== 'undefined' ? comp.nota : null;
+      // Se já é 200, não há "o que melhorar"
+      if (nota === 200) return 'Competência no nível máximo (200). Parabéns!';
+      // Fonte primária: para_200 do agente
+      if (comp && comp.para_200) return comp.para_200;
+      // Fallback: campos antigos
+      return leCampo(c.keys) || '';
+    };
+    const temPorQueComp = porQueCompetencias.some(c => _textoPorQue(c));
     if (temPorQueComp) {
       window._porQueElite = porQueCompetencias.map(c => {
-        const texto = leCampo(c.keys);
+        const texto = _textoPorQue(c);
         if (!texto) return '';
         return '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid ' + c.cor + ';border-radius:0 8px 8px 0;">'
           + '<p style="font-size:11px;font-weight:700;color:' + c.cor + ';margin-bottom:5px;">' + c.label + '</p>'
@@ -2041,21 +2056,60 @@ Formato EXATO da resposta:
         const c200 = [];
         const cMenos = [];
         dadosAtuais.competencias.forEach((v, i) => {
-          if (parseInt(v, 10) === 200) c200.push('C' + (i+1));
-          else cMenos.push('C' + (i+1) + '=' + v);
+          // Formato 7-agentes: {nota,...}. Formato antigo: número direto.
+          const n = (v && typeof v.nota !== 'undefined') ? v.nota : parseInt(v, 10);
+          if (n === 200) c200.push('C' + (i+1));
+          else cMenos.push('C' + (i+1) + '=' + n);
         });
         if (c200.length > 0) competenciasPreservar = c200.join(', ');
         if (cMenos.length > 0) competenciasRefinar = cMenos.join(', ');
+      }
+
+      // Monta diagnóstico DETALHADO por competência a partir dos campos que os
+      // 7 agentes salvaram no correcao_json. Isso diz à Chamada 3 EXATAMENTE o que
+      // corrigir (não só a nota). Ex.: C5=120 → "faltam Meio e Detalhamento".
+      let diagnosticoDetalhado = '\n\nDIAGNÓSTICO ESPECÍFICO (o que corrigir em cada competência abaixo de 200):\n';
+      const d = dadosAtuais;
+      const comps = Array.isArray(d.competencias) ? d.competencias : [];
+      const notaDe = (i) => {
+        const c = comps[i];
+        return (c && typeof c.nota !== 'undefined') ? c.nota : c;
+      };
+      const fbDe = (i) => (comps[i] && comps[i].feedback) ? comps[i].feedback : '';
+      const paraSubirDe = (i) => (comps[i] && comps[i].para_200) ? comps[i].para_200 : '';
+
+      if (notaDe(0) < 200) diagnosticoDetalhado += `• C1 (${notaDe(0)}): ${fbDe(0)} ${paraSubirDe(0)}\n`;
+      if (notaDe(1) < 200) {
+        diagnosticoDetalhado += `• C2 (${notaDe(1)}): ${fbDe(1)} ${paraSubirDe(1)}`;
+        if (d.c2_repertorio_tipo === 'bolso') diagnosticoDetalhado += ` ATENÇÃO: o repertório foi classificado como DE BOLSO (citado mas não desdobrado). Na reescrita, DESDOBRE a ideia da referência ao longo dos parágrafos de desenvolvimento, não apenas a cite na introdução.`;
+        diagnosticoDetalhado += '\n';
+      }
+      if (notaDe(2) < 200) diagnosticoDetalhado += `• C3 (${notaDe(2)}): ${fbDe(2)} ${paraSubirDe(2)}\n`;
+      if (notaDe(3) < 200) diagnosticoDetalhado += `• C4 (${notaDe(3)}): ${fbDe(3)} ${paraSubirDe(3)}\n`;
+      if (notaDe(4) < 200) {
+        diagnosticoDetalhado += `• C5 (${notaDe(4)}): ${fbDe(4)} ${paraSubirDe(4)}`;
+        const faltam = Array.isArray(d.c5_elementos_faltantes) ? d.c5_elementos_faltantes : [];
+        if (faltam.length > 0) {
+          diagnosticoDetalhado += ` ELEMENTOS FALTANTES NA PROPOSTA: ${faltam.join(', ')}. Na conclusão reescrita, INCLUA OBRIGATORIAMENTE esses elementos.`;
+          if (faltam.some(x => String(x).toLowerCase().includes('meio'))) {
+            diagnosticoDetalhado += ` Lembre: MEIO é o mecanismo de viabilização (ex: "por meio de parcerias público-privadas", "mediante destinação de verba do orçamento federal", "através de um programa nacional"), NÃO a lista do que será feito.`;
+          }
+          if (faltam.some(x => String(x).toLowerCase().includes('detalh'))) {
+            diagnosticoDetalhado += ` DETALHAMENTO: aprofunde concretamente ao menos um elemento, conectando-o aos argumentos discutidos no texto.`;
+          }
+        }
+        diagnosticoDetalhado += '\n';
       }
 
       const contexto = '\n\nCONTEXTO — Notas já atribuídas:\n'
         + 'Tema da redação: ' + _temaC3 + '\n'
         + (dadosAtuais.nota_total ? 'Nota total: ' + dadosAtuais.nota_total + '/1000\n' : '')
         + (Array.isArray(dadosAtuais.competencias)
-            ? 'Notas por competência: ' + dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + v).join(', ') + '\n'
+            ? 'Notas por competência: ' + dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + (notaDe(i))).join(', ') + '\n'
             : '')
         + (competenciasPreservar ? 'COMPETÊNCIAS COM NOTA 200 (PRESERVAR trechos do aluno): ' + competenciasPreservar + '\n' : '')
         + (competenciasRefinar ? 'COMPETÊNCIAS PARA REFINAR (nota < 200): ' + competenciasRefinar + '\n' : '')
+        + diagnosticoDetalhado
         + '\nRedação original:\n' + redacao.texto;
 
       const raw = await geminiGenerate(PROMPT_REDACAO_NOTA_1000 + contexto);
@@ -2161,41 +2215,17 @@ Formato EXATO da resposta:
     document.getElementById('modalAnaliseTitle').textContent = 'Por que Nota 1000?';
     document.getElementById('modalAnalise').classList.remove('hidden');
 
-    // Se já temos melhorias no banco, exibe direto
-    const jaTem = window._porQueElite && !window._porQueElite.includes('em breve disponível')
-                                      && !window._porQueElite.includes('não disponível');
-    if (jaTem) {
-      const conteudo = window._porQueElite;
-      const ehHtml = conteudo.trim().startsWith('<');
-      document.getElementById('modalAnaliseTexto').innerHTML = ehHtml
-        ? conteudo
-        : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
-      return;
-    }
-
-    // Caso contrário, dispara Chamada 4 (e, se necessário, Chamada 3 antes)
-    document.getElementById('modalAnaliseTexto').innerHTML =
-      '<div style="text-align:center;padding:2.5rem 1.5rem;">'
-      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
-      + '<p style="color:#c8c4d7;font-size:.9rem;font-weight:600;margin-bottom:.375rem;">Analisando o que foi melhorado...</p>'
-      + '<p style="color:#928ea0;font-size:.75rem;">A PROfa está comparando sua redação com a versão nota 1000 competência por competência.</p>'
-      + '</div>';
-
-    const ok = await window.gerarMelhorias();
-    if (ok) {
-      // gerarMelhorias já re-renderizou — agora lê _porQueElite atualizado
-      const conteudo = window._porQueElite || '<p style="color:#928ea0;">Não disponível.</p>';
-      const ehHtml = conteudo.trim().startsWith('<');
-      document.getElementById('modalAnaliseTexto').innerHTML = ehHtml
-        ? conteudo
-        : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
-    } else {
-      document.getElementById('modalAnaliseTexto').innerHTML =
-        '<div style="text-align:center;padding:2rem;">'
-        + '<p style="color:#ffb4ab;font-size:.85rem;margin-bottom:1rem;">Não foi possível gerar a análise por competência.</p>'
-        + '<button onclick="window.verPorQueElite()" style="background:rgba(108,92,231,.15);color:#c6bfff;border:1px solid rgba(108,92,231,.3);padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.8rem;cursor:pointer;">Tentar novamente</button>'
-        + '</div>';
-    }
+    // v5.4: o conteúdo já foi montado por renderAnalise a partir do para_200 de
+    // cada agente (fonte no correcao_json). Não dispara mais a Chamada 4 antiga.
+    const conteudo = window._porQueElite
+      && !window._porQueElite.includes('em breve disponível')
+      && !window._porQueElite.includes('não disponível')
+        ? window._porQueElite
+        : '<p style="color:#928ea0;text-align:center;padding:2rem;">Análise por competência indisponível para esta redação. Reenvie a redação para gerar a análise atualizada.</p>';
+    const ehHtml = conteudo.trim().startsWith('<');
+    document.getElementById('modalAnaliseTexto').innerHTML = ehHtml
+      ? conteudo
+      : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
   };
   window.fecharModal = function() {
     document.getElementById('modalAnalise').classList.add('hidden');
