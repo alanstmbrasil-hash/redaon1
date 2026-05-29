@@ -1883,12 +1883,15 @@ decisivo de 200, ela é 160 — não 200.
     {"articulador": "<conectivo ou expressão de articulação real do texto>", "contexto_trecho": "<frase curta em que aparece>", "adequado": <true se a relação lógica que o articulador estabelece é coerente com o contexto, false caso contrário>, "motivo_inadequacao": "<se inadequado, explique em 1 frase; se adequado, deixe null>"}
   ],
   "c4_problemas": ["<problema coesivo 1>", "<problema coesivo 2>"],
+  "c2_repertorio_retomada_trecho": "<frase EXATA dos parágrafos 2-4 que retoma a ideia central da referência (entre aspas, copiada do texto). Se não conseguir apontar uma frase específica → null. Se null, c2_repertorio_retomado DEVE ser false.>",
   "c5_acao": "<a ação proposta pelo aluno, ou null>",
   "c5_agente": "<o agente da proposta, ou null>",
   "c5_meio": "<o meio da proposta, ou null>",
   "c5_finalidade": "<a finalidade da proposta, ou null>",
   "c5_detalhamento": "<o detalhamento da proposta, ou null>",
   "c5_elementos_faltantes": ["<quais dos 5 elementos estão ausentes, array vazio [] se todos presentes>"],
+  "c5_detalhamento_real": <true APENAS se a proposta tem detalhamento concreto (com 'como', 'através de', 'por meio de exemplos específicos') em pelo menos um dos elementos. false se os elementos estão presentes mas de forma genérica ('investir em educação', 'criar políticas', 'reduzir os impactos' — sem dizer COMO concretamente).>,
+  "c5_detalhamento_justificativa": "<aponte a frase do texto que demonstra detalhamento real, OU explique por que considera genérico>",
   "c5_direitos_humanos": <true se viola DH (nota 0 automática), false caso contrário>,
   "erros": [
     {"original": "<trecho exato do texto com erro>", "correto": "<como deveria ser>", "tipo": "<'gramatica'|'vocabulario'|'pontuacao'|'coesao'|'concordancia'>", "competencia": <1-5>}
@@ -1923,6 +1926,20 @@ Identifique a referência sociocultural usada (autor, obra, fato, dado, citaçã
 - Se a ideia é desenvolvida criticamente nos parágrafos seguintes e ANCORA a argumentação → c2_repertorio_retomado = true → repertório PRODUTIVO.
 - CONSEQUÊNCIA: repertório de bolso limita C2 a NO MÁXIMO 160. Para C2 = 200, o repertório precisa ser PRODUTIVO (retomada real da IDEIA).
 - ATENÇÃO: fatos históricos pertinentes mas citados e abandonados continuam sendo repertório de bolso. Exemplo: "JK e a indústria automobilística" mencionado na introdução de uma redação sobre mobilidade urbana e depois NÃO retomado nos parágrafos de desenvolvimento = repertório de bolso.
+
+TESTE TEXTUAL OBRIGATÓRIO DA RETOMADA (preencha em c2_repertorio_retomada_trecho):
+Para marcar c2_repertorio_retomado = true, você é OBRIGADO a apontar a FRASE EXATA dos parágrafos 2, 3 ou 4 que retoma a IDEIA central da referência. Cite o trecho literal (entre aspas, copiado do texto original). Se você não conseguir apontar uma frase específica que claramente retoma a ideia, é porque ela não foi retomada → c2_repertorio_retomado = false → repertório DE BOLSO.
+
+ATENÇÃO — falsos positivos comuns:
+- Mencionar o mesmo TEMA (mobilidade urbana, racismo, etc.) nos parágrafos seguintes NÃO é retomar a referência. É só permanecer no tema.
+- A retomada exige reaproveitar a IDEIA ESPECÍFICA da referência (no caso JK: "modelo desenvolvimentista priorizou rodovias em detrimento do transporte público").
+- "Crise gerada pelo excesso de veículos" NÃO retoma JK — discute uma consequência, não a causa histórica citada.
+- "Ineficiência da gestão estatal" NÃO retoma JK — é uma generalização sobre o Estado, não a política JKista específica.
+- Só conta como retomada se a frase apontada CITA OU DESDOBRA a ideia central da referência. Exemplo de retomada VÁLIDA seria: "Como consequência dessa opção rodoviarista nascida nos anos 1950, hoje os centros urbanos sufocam em congestionamentos".
+
+REGRA DE TETO C2 (vinculada ao teste textual):
+- c2_repertorio_retomada_trecho preenchido com uma frase legítima → c2_repertorio_retomado pode ser true → C2 pode ser 200.
+- c2_repertorio_retomada_trecho = null (não consegui apontar frase específica) → c2_repertorio_retomado DEVE ser false → C2 é NO MÁXIMO 160.
 
 PASSO 3 — AVALIAÇÃO DO PROJETO DE TEXTO (C3):
 Verifique se a introdução anuncia explicitamente os argumentos a serem desenvolvidos:
@@ -2008,11 +2025,14 @@ Se a redação atende a 160 mas falha no critério decisivo de 200, ela é 160.
 Lembre: tangenciamento limita C2/C3/C5 a 40 cada.
 
 CHECAGEM FINAL OBRIGATÓRIA (antes de fechar o JSON):
-Releia os campos preenchidos no PASSO 4 e aplique mecanicamente as regras de teto:
+Releia os campos de verificação e aplique MECANICAMENTE as regras de teto:
 - Se c1_desvios_detectados tem 1+ itens e competencias[0].nota = 200 → CORRIJA para 160 (ou menos, conforme o número de desvios).
+- Se c2_repertorio_retomada_trecho = null e competencias[1].nota = 200 → CORRIJA para 160.
 - Se c3_sobreposicao_paragrafos = true e competencias[2].nota = 200 → CORRIJA para 160.
 - Se algum item de c4_articuladores_avaliados tem adequado = false e competencias[3].nota = 200 → CORRIJA para 160.
-Estas regras NÃO podem ser violadas. Se você atribuiu 200 e a verificação acima exige 160, o 160 PREVALECE. A verificação textual em c1_desvios_detectados, c3_sobreposicao_paragrafos e c4_articuladores_avaliados é a evidência objetiva da nota — o feedback narrativo se ajusta à nota, não o contrário.
+- Se c5_detalhamento_real = false e competencias[4].nota = 200 → CORRIJA para 160.
+- Se c5_elementos_faltantes tem 1+ itens e competencias[4].nota >= 160 → CORRIJA para 120.
+Estas regras NÃO podem ser violadas. Se você atribuiu nota maior e a verificação acima exige menor, a verificação PREVALECE. Os campos textuais (c1_desvios_detectados, c2_repertorio_retomada_trecho, c3_sobreposicao_paragrafos, c4_articuladores_avaliados, c5_detalhamento_real, c5_elementos_faltantes) são a EVIDÊNCIA OBJETIVA da nota — o feedback narrativo se ajusta à nota, não o contrário.
 
 REGRAS CRÍTICAS DE SAÍDA:
 
@@ -2040,13 +2060,30 @@ RedaON também não pode. nota_total será uma soma de valores oficiais
 9. c2_tema_elementos deve listar todos os elementos da decomposição. c2_tema_ausentes deve listar apenas os ausentes (array vazio [] se todos presentes).
 10. c2_repertorio_retomado deve ser true, false ou null (não string).
 11. Se houver mais de uma referência sociocultural no texto, avalie a principal (a mais central ao argumento).
-12. TETO C5: se c5_elementos_faltantes tem 1 item, competencias[4].nota NÃO PODE ser 200 (máximo 160). Se tem 2+ itens, máximo 120. Esta é apenas uma regra de TETO — ter todos os 5 elementos presentes NÃO força 200; para 200 a proposta também precisa ser DETALHADA conforme distinção Cartilha entre níveis 160 e 200.
+12. TETO C5 (regra MECÂNICA, não suaviza): aplique nesta ordem rígida:
+    - Se c5_elementos_faltantes tem 2+ itens → C5 = NO MÁXIMO 120.
+    - Se c5_elementos_faltantes tem 1 item → C5 = NO MÁXIMO 120 (não 160 — a Cartilha exige 5 elementos para passar de 120).
+    - Se c5_elementos_faltantes tem 0 itens E c5_detalhamento_real = false → C5 = NO MÁXIMO 160.
+    - Se c5_elementos_faltantes tem 0 itens E c5_detalhamento_real = true → C5 pode ser 200.
+    Esta regra é MECÂNICA e PREVALECE sobre qualquer impressão narrativa. "Detalhamento real" exige frase do texto que demonstre o COMO concreto, não apenas o QUE genérico.
 13. Para a competência cuja nota é 200, o campo "para_200" pode ser null (não há mais o que melhorar para esse nível).
 14. C4 — DISTINÇÃO PONTUAL vs SISTEMÁTICA: repetições de até 2 vezes do mesmo conectivo são pontuais e NÃO caracterizam uso sistemático. 3+ repetições do mesmo conectivo OU pobreza geral de mecanismos coesivos caracterizam o nível 160. Avalie ALÉM da contagem: adequação semântica dos conectivos (relação lógica correta com o contexto) e diversidade do repertório coesivo.
 15. RECHEQUE ANTES DE ENVIAR: leia cada competencias[i].nota uma última vez. Se algum valor não estiver em {0, 40, 80, 120, 160, 200}, AJUSTE para o valor válido mais próximo escolhendo conscientemente entre os dois níveis (não arredonde automaticamente — decida qual nível descreve melhor a redação).
-16. CAMPOS DE VERIFICAÇÃO OBRIGATÓRIOS: c1_desvios_detectados, c3_sobreposicao_paragrafos, c3_sobreposicao_detalhe e c4_articuladores_avaliados PRECISAM ser preenchidos com base em análise textual real. NÃO preencha mecanicamente como array vazio ou false sem ter verificado. A correção depende destes campos.
-17. COERÊNCIA ENTRE VERIFICAÇÃO E NOTA: a nota de C1, C3, C4 DEVE ser coerente com os campos de verificação correspondentes. Se você listou desvios em c1_desvios_detectados mas atribuiu C1=200, a inconsistência será detectada. Idem para C3 e C4.
+16. CAMPOS DE VERIFICAÇÃO OBRIGATÓRIOS: c1_desvios_detectados, c3_sobreposicao_paragrafos, c3_sobreposicao_detalhe, c4_articuladores_avaliados, c2_repertorio_retomada_trecho, c5_detalhamento_real e c5_detalhamento_justificativa PRECISAM ser preenchidos com base em análise textual real. NÃO preencha mecanicamente como array vazio ou false sem ter verificado. A correção depende destes campos.
+17. COERÊNCIA ENTRE VERIFICAÇÃO E NOTA: a nota de C1, C2, C3, C4, C5 DEVE ser coerente com os campos de verificação correspondentes. Se você listou desvios em c1_desvios_detectados mas atribuiu C1=200, a inconsistência será detectada. Idem para todas as competências.
 18. c4_articuladores_avaliados deve ter no mínimo 3 e no máximo 8 entradas — avalie os articuladores mais relevantes do texto (não todos, apenas os representativos).
+19. TETO C2 (regra MECÂNICA, vinculada a c2_repertorio_retomada_trecho):
+    - c2_repertorio_retomada_trecho = null (não conseguiu apontar frase específica) → c2_repertorio_retomado DEVE ser false → c2_repertorio_tipo DEVE ser "bolso" → C2 = NO MÁXIMO 160.
+    - c2_repertorio_retomada_trecho com frase legítima dos parágrafos 2-4 → c2_repertorio_retomado pode ser true → C2 pode ser 200.
+    Importante: o trecho apontado precisa CITAR OU DESDOBRAR a IDEIA ESPECÍFICA da referência (não apenas permanecer no mesmo tema). Repertório de bolso (citado na intro e abandonado depois) é o caso MAIS COMUM em redações ENEM — não classifique como produtivo por inércia.
+20. CHECAGEM FINAL OBRIGATÓRIA — releia mecanicamente antes de fechar o JSON:
+    - Se c1_desvios_detectados tem 1+ itens e competencias[0].nota = 200 → CORRIJA para 160.
+    - Se c2_repertorio_retomada_trecho = null e competencias[1].nota = 200 → CORRIJA para 160.
+    - Se c3_sobreposicao_paragrafos = true e competencias[2].nota = 200 → CORRIJA para 160.
+    - Se algum item de c4_articuladores_avaliados tem adequado = false e competencias[3].nota = 200 → CORRIJA para 160.
+    - Se c5_detalhamento_real = false e competencias[4].nota = 200 → CORRIJA para 160.
+    - Se c5_elementos_faltantes tem 1+ itens e competencias[4].nota >= 160 → CORRIJA para 120.
+    Estas regras NÃO podem ser violadas. A verificação textual prevalece sobre a impressão narrativa.
 
 Formato EXATO da resposta:
 ${FORMATO_JSON_NOTA_DIAGNOSTICO}`;
@@ -2137,6 +2174,289 @@ ${FORMATO_JSON_MELHORIAS}`;
   const PROMPT_NORMAL = PROMPT_NOTA_DIAGNOSTICO;
   const PROMPT_ELITE = PROMPT_NOTA_DIAGNOSTICO;
 
+  // ════════ ARQUITETURA 7 AGENTES (v5.0) ════════
+  // ════════════════════════════════════════════════════════════════════════
+  // ARQUITETURA DE 7 CHAMADAS — Correção por agentes especializados (v5.0)
+  // Substitui a Chamada 1 única. Cada agente foca em UMA competência, com
+  // schema mínimo (evita o truncamento de campos que o Flash Lite fazia no
+  // schema gigante do v4.18). Gatekeeper roda primeiro; 5 agentes em paralelo;
+  // orquestrador consolida. Produz objeto `dados` idêntico ao da chamada única,
+  // então todo o código downstream (normalização, save, render) não muda.
+  // ════════════════════════════════════════════════════════════════════════
+
+  // ── PROMPT 1: GATEKEEPER (tangenciamento, tamanho, cópia) ──
+  const AG_GATEKEEPER = `Você é o verificador de pré-requisitos de uma redação ENEM. Sua ÚNICA função é checar 4 coisas objetivas. NÃO avalie qualidade, NÃO dê notas de competência.
+
+  Tema proposto: a redação deve abordar o tema indicado. Verifique:
+  1. TEMA: a redação aborda o tema central? Responda "sim" (aborda plenamente), "parcial" (tangencia — fala de assunto próximo mas não do núcleo) ou "nao" (fugiu completamente).
+  2. TANGENCIAMENTO: true se aborda o tema só de raspão, sem tratar o núcleo. false se trata o núcleo.
+  3. TAMANHO: a redação tem 7 linhas ou mais de texto desenvolvido? true/false.
+  4. CÓPIA: a redação é cópia literal dos textos motivadores, sem desenvolvimento próprio? true/false.
+
+  Responda APENAS com este JSON (sem markdown, sem texto extra):
+  {
+    "tema_cumprido": "sim" | "parcial" | "nao",
+    "tangenciamento": true | false,
+    "tamanho_ok": true | false,
+    "copia": true | false,
+    "justificativa": "<1 frase explicando o veredito>"
+  }`;
+
+  // ── PROMPT 2: AGENTE C1 (norma culta) ──
+  const AG_C1 = `Você é um corretor ENEM especialista EXCLUSIVAMENTE na Competência 1: domínio da modalidade escrita formal da língua portuguesa. Avalie SOMENTE C1. Ignore tema, argumentação, coesão e proposta — outros corretores cuidam disso.
+
+  C1 avalia: gramática, ortografia, acentuação, pontuação, regência (verbal e nominal), concordância (verbal e nominal), paralelismo sintático, colocação pronominal, registro formal (sem marcas de oralidade ou informalidade).
+
+  PROCEDIMENTO OBRIGATÓRIO:
+  1. Releia a redação procurando ATIVAMENTE desvios. Liste TODOS no campo "desvios" (mesmo os pontuais).
+  2. Conte os desvios e aplique a régua INEP:
+     - 0 desvios reais → 200
+     - 1 a 2 desvios → 160 (bom domínio, desvios pontuais)
+     - 3 a 4 desvios → 120 (domínio mediano)
+     - 5 a 8 desvios → 80
+     - muitos desvios graves → 40 ou 0
+  ATENÇÃO: 200 só se você NÃO encontrou NENHUM desvio após releitura ativa. Se listou qualquer desvio em "desvios", a nota é no máximo 160.
+
+  NÃO avalie pontuação que seja função de coesão (isso é C4). Foque em pontuação gramatical (vírgula em enumeração, ponto final, etc.).
+
+  Responda APENAS com este JSON:
+  {
+    "nota": 0 | 40 | 80 | 120 | 160 | 200,
+    "desvios": ["<desvio 1 com o trecho>", "<desvio 2>"],
+    "feedback": "<2-3 frases pedagógicas sobre a norma culta nesta redação>",
+    "para_subir": "<o que faria a nota subir um nível, ou null se já é 200>"
+  }`;
+
+  // ── PROMPT 3: AGENTE C2 (compreensão do tema + repertório) ──
+  const AG_C2 = `Você é um corretor ENEM especialista EXCLUSIVAMENTE na Competência 2: compreensão da proposta e aplicação de repertório sociocultural produtivo. Avalie SOMENTE C2.
+
+  C2 avalia: (a) o tema foi compreendido e desenvolvido em texto dissertativo-argumentativo? (b) há repertório sociocultural (fato histórico, dado, citação, obra, lei) e ele é PRODUTIVO?
+
+  CONCEITO CRÍTICO — repertório produtivo vs de bolso:
+  - PRODUTIVO: a IDEIA da referência é retomada e desdobrada ao longo dos parágrafos de desenvolvimento, ancorando a argumentação.
+  - DE BOLSO: a referência é citada (geralmente na introdução) e depois ABANDONADA — os parágrafos seguintes argumentam por outros caminhos, mesmo que sobre o mesmo tema.
+
+  TESTE TEXTUAL OBRIGATÓRIO DA RETOMADA:
+  Para classificar como PRODUTIVO, você DEVE apontar a FRASE EXATA (copiada do texto, entre aspas) de um parágrafo de DESENVOLVIMENTO (não da introdução) que retoma a IDEIA ESPECÍFICA da referência. Preencha em "retomada_trecho".
+  - Se você NÃO consegue apontar essa frase → retomada_trecho = null → repertório DE BOLSO.
+  - Permanecer no mesmo TEMA não é retomar a referência. Ex: citar "JK e a indústria automobilística" na intro e depois falar de "congestionamentos" e "exclusão social" é permanecer no tema mobilidade, mas NÃO retomar a ideia de JK → de bolso.
+
+  RÉGUA:
+  - Tema não compreendido / tangenciado → no máximo 40.
+  - Tema OK + sem repertório OU repertório de bolso → no máximo 160.
+  - Tema OK + repertório PRODUTIVO (retomada_trecho preenchido com frase legítima) → pode ser 200.
+
+  Responda APENAS com este JSON:
+  {
+    "nota": 0 | 40 | 80 | 120 | 160 | 200,
+    "repertorio_referencia": "<qual referência sociocultural foi usada>",
+    "repertorio_tipo": "produtivo" | "bolso" | "ausente",
+    "retomada_trecho": "<frase EXATA do desenvolvimento que retoma a ideia, ou null>",
+    "feedback": "<2-3 frases pedagógicas>",
+    "para_subir": "<o que faria subir um nível, ou null se 200>"
+  }`;
+
+  // ── PROMPT 4: AGENTE C3 (seleção/organização de argumentos — autoria) ──
+  const AG_C3 = `Você é um corretor ENEM especialista EXCLUSIVAMENTE na Competência 3: seleção, organização e interpretação de informações em defesa de um ponto de vista (projeto de texto e autoria). Avalie SOMENTE C3.
+
+  C3 avalia: há um PROJETO DE TEXTO claro (a redação tem um plano perceptível)? Os argumentos são organizados com progressão? Há AUTORIA (desenvolvimento próprio e aprofundado, não só constatação)?
+
+  VERIFICAÇÃO OBRIGATÓRIA DE SOBREPOSIÇÃO:
+  Compare os parágrafos de desenvolvimento (tipicamente P2 e P3). Pergunte:
+  - Eles tratam de EIXOS ARGUMENTATIVOS DISTINTOS, ou o segundo é uma reformulação/repetição do primeiro?
+  - Se eu fundisse os dois parágrafos, perderia um argumento real ou só removeria redundância?
+  Preencha "sobreposicao": true se há sobreposição temática (dois parágrafos no mesmo eixo), false se cada um traz eixo distinto.
+
+  RÉGUA:
+  - Sem projeto de texto / ideias soltas → 40 a 80.
+  - Projeto de texto presente mas com falhas (sobreposição entre parágrafos, argumentos pouco desenvolvidos, autoria parcial) → 120 a 160.
+  - sobreposicao = true → no máximo 160 (autoria com falha de organização, não plena).
+  - Projeto de texto claro + argumentos distintos e aprofundados + autoria plena (sobreposicao = false) → pode ser 200.
+  ATENÇÃO: progressão fluida entre parágrafos NÃO basta para 200 se os parágrafos cobrem o mesmo eixo. Fluidez sem distinção é redundância elegante, não autoria.
+
+  Responda APENAS com este JSON:
+  {
+    "nota": 0 | 40 | 80 | 120 | 160 | 200,
+    "sobreposicao": true | false,
+    "sobreposicao_detalhe": "<qual eixo se repete, ou null se sobreposicao=false>",
+    "feedback": "<2-3 frases pedagógicas>",
+    "para_subir": "<o que faria subir um nível, ou null se 200>"
+  }`;
+
+  // ── PROMPT 5: AGENTE C4 (coesão) ──
+  const AG_C4 = `Você é um corretor ENEM especialista EXCLUSIVAMENTE na Competência 4: conhecimento dos mecanismos linguísticos necessários para a construção da argumentação (coesão). Avalie SOMENTE C4.
+
+  C4 avalia: uso de conectivos e elementos coesivos entre e dentro dos parágrafos. Diversidade, adequação semântica e ausência de repetição excessiva.
+
+  VERIFICAÇÃO OBRIGATÓRIA DE ADEQUAÇÃO SEMÂNTICA:
+  Identifique de 3 a 6 articuladores REAIS do texto. Para CADA um, verifique se a relação lógica que ele estabelece (finalidade, causa, oposição, conclusão, adição) é coerente com o contexto. Preencha "articuladores" listando cada um com adequado true/false.
+  Exemplos de INADEQUAÇÃO:
+  - "Para isso" usado sem antecedente de finalidade (ex: depois de descrever um problema, não uma meta).
+  - "Desse modo" sem modo/causa real anterior.
+  - "Portanto" sem conclusão lógica.
+
+  RÉGUA:
+  - Ausência de coesão / muitos problemas → 40 a 80.
+  - Poucos recursos OU repetição sistemática (3+ vezes o mesmo conectivo) OU 1+ articulador inadequado → no máximo 160.
+  - Diversidade boa + TODOS os articuladores adequados + sem repetição → pode ser 200.
+  ATENÇÃO: repetição de até 2 vezes do mesmo conectivo é pontual (não penaliza). 3+ é sistemático (penaliza). Ausência de repetição NÃO basta para 200 — exige adequação semântica plena.
+
+  Responda APENAS com este JSON:
+  {
+    "nota": 0 | 40 | 80 | 120 | 160 | 200,
+    "articuladores": [{"conectivo":"<x>","adequado":true|false,"motivo":"<se inadequado>"}],
+    "feedback": "<2-3 frases pedagógicas>",
+    "para_subir": "<o que faria subir um nível, ou null se 200>"
+  }`;
+
+  // ── PROMPT 6: AGENTE C5 (proposta de intervenção) ──
+  const AG_C5 = `Você é um corretor ENEM especialista EXCLUSIVAMENTE na Competência 5: elaboração de proposta de intervenção que respeite os direitos humanos. Avalie SOMENTE C5.
+
+  C5 avalia os 5 ELEMENTOS da proposta de intervenção, que devem estar no texto (geralmente na conclusão):
+  1. AÇÃO — o que deve ser feito
+  2. AGENTE — quem executa (governo, ONGs, escola, mídia, etc.)
+  3. MEIO/MODO — como será feito (por meio de quê)
+  4. FINALIDADE — para quê / qual objetivo
+  5. DETALHAMENTO — desenvolvimento concreto de algum dos elementos (o "como" específico, não genérico)
+
+  VERIFICAÇÃO OBRIGATÓRIA:
+  - Liste em "elementos_faltantes" quais dos 5 NÃO estão presentes.
+  - Avalie "detalhamento_real": true SOMENTE se há detalhamento concreto (com "por meio de exemplos específicos", "através de mecanismos descritos"). false se a proposta é genérica ("investir em educação", "criar políticas", "reduzir impactos" — sem dizer COMO concretamente).
+  - Verifique violação de direitos humanos → se viola, nota 0.
+
+  RÉGUA (mecânica):
+  - Proposta ausente → 0 a 40.
+  - 2+ elementos faltando → no máximo 120.
+  - 1 elemento faltando → no máximo 120 (a Cartilha exige os 5 para passar de 120).
+  - 5 elementos presentes MAS detalhamento_real = false → no máximo 160.
+  - 5 elementos presentes E detalhamento_real = true → pode ser 200.
+
+  Responda APENAS com este JSON:
+  {
+    "nota": 0 | 40 | 80 | 120 | 160 | 200,
+    "elementos_faltantes": ["<elemento ausente>"],
+    "detalhamento_real": true | false,
+    "viola_direitos_humanos": true | false,
+    "feedback": "<2-3 frases pedagógicas>",
+    "para_subir": "<o que faria subir um nível, ou null se 200>"
+  }`;
+
+  // ── PROMPT 7: ORQUESTRADOR (consolida + coerência cruzada) ──
+  const AG_ORQUESTRADOR = `Você é o corretor-chefe da RedaON. Você NÃO recorrige a redação. Você recebe as avaliações de 5 corretores especialistas (um por competência) e o veredito do verificador de pré-requisitos. Sua função: (1) verificar COERÊNCIA entre as avaliações, (2) consolidar a nota final, (3) escrever o feedback geral integrado.
+
+  VERIFICAÇÕES DE COERÊNCIA CRUZADA:
+  - Se C2 classificou repertório como "bolso" mas C3 deu 200 (autoria plena): isso é suspeito. Repertório de bolso costuma indicar projeto de texto mais frágil. Avalie se C3=200 se justifica mesmo assim; se não, registre o alerta em "coerencia_ajustes" (mas NÃO altere a nota do especialista — apenas registre para calibragem).
+  - Se o gatekeeper marcou tangenciamento=true: confirme que C2/C3/C5 estão em no máximo 40.
+  - NÃO altere as notas dos especialistas por conta própria, exceto a trava de tangenciamento. Os especialistas são a autoridade de cada competência.
+
+  CONSOLIDAÇÃO:
+  - nota_total = soma das 5 notas (aritmética exata).
+  - Escreva feedback_geral integrando os pontos das 5 competências em 2-3 frases.
+  - Escreva comentario_geral: mensagem encorajadora e direta para o aluno (use o tom DISC se informado no contexto).
+  - Escreva pontos_fortes: 3 pontos fortes REAIS da redação, derivados das competências que foram bem (ex: se C1=200, "Domínio sólido da norma culta"). Array de 3 strings curtas.
+  - Escreva pontos_melhorar: 3 pontos a melhorar, derivados das competências mais baixas (ex: se C5=120, "Detalhar a proposta de intervenção"). Array de 3 strings curtas.
+  - Escreva plano_melhoria: 3 passos concretos e acionáveis para a próxima redação. Array de 3 strings.
+
+  Você recebeu este resumo dos especialistas:
+  {{RESUMO_AGENTES}}
+
+  Responda APENAS com este JSON:
+  {
+    "nota_total": <soma das 5 notas>,
+    "competencias": [
+      {"nota": <C1>}, {"nota": <C2>}, {"nota": <C3>}, {"nota": <C4>}, {"nota": <C5>}
+    ],
+    "feedback_geral": "<2-3 frases integradas>",
+    "comentario_geral": "<mensagem encorajadora ao aluno>",
+    "pontos_fortes": ["<ponto 1>", "<ponto 2>", "<ponto 3>"],
+    "pontos_melhorar": ["<ponto 1>", "<ponto 2>", "<ponto 3>"],
+    "plano_melhoria": ["<passo 1>", "<passo 2>", "<passo 3>"],
+    "coerencia_ajustes": ["<alertas de incoerência detectados, ou vazio []>"]
+  }`;
+
+
+  // ── ORQUESTRAÇÃO DAS 7 CHAMADAS ──────────────────────────────────────────
+  // Substitui a chamada única de correção. Retorna objeto `dados` no MESMO
+  // formato que a Chamada 1 antiga produzia (competencias[], comentario_geral,
+  // pontos_fortes, etc.), pra todo o código downstream continuar funcionando.
+  async function corrigirCom7Agentes(textoRedacao, contexto) {
+    const r = (txt) => txt + (contexto || '') + "\n\nRedação:\n" + textoRedacao;
+
+    // ETAPA 1 — GATEKEEPER (bloqueante, primeiro)
+    let gate;
+    try {
+      gate = _parseAgente(await geminiGenerate(r(AG_GATEKEEPER), null, null, 'gate'));
+    } catch(e) {
+      console.warn('[7agentes] Gatekeeper falhou, assumindo tema OK:', e.message);
+      gate = { tema_cumprido: 'sim', tangenciamento: false, tamanho_ok: true, copia: false };
+    }
+
+    // ETAPA 2 — 5 AGENTES EM PARALELO
+    const [c1, c2, c3, c4, c5] = await Promise.all([
+      geminiGenerate(r(AG_C1), null, null, 'c1').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C1: '+e.message})),
+      geminiGenerate(r(AG_C2), null, null, 'c2').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C2: '+e.message})),
+      geminiGenerate(r(AG_C3), null, null, 'c3').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C3: '+e.message})),
+      geminiGenerate(r(AG_C4), null, null, 'c4').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C4: '+e.message})),
+      geminiGenerate(r(AG_C5), null, null, 'c5').then(_parseAgente).catch(e => ({nota:0, feedback:'Erro C5: '+e.message})),
+    ]);
+
+    // Trava de tangenciamento (gatekeeper manda)
+    const travado = gate.tangenciamento === true || gate.tema_cumprido === 'nao' || gate.tema_cumprido === 'parcial';
+    let notas = [Number(c1.nota)||0, Number(c2.nota)||0, Number(c3.nota)||0, Number(c4.nota)||0, Number(c5.nota)||0];
+    if (travado) {
+      notas[1] = Math.min(notas[1], 40);
+      notas[2] = Math.min(notas[2], 40);
+      notas[4] = Math.min(notas[4], 40);
+      console.info('[7agentes] Tangenciamento detectado → C2/C3/C5 travados em ≤40');
+    }
+
+    // ETAPA 3 — ORQUESTRADOR
+    const resumo = JSON.stringify({
+      c1:{nota:notas[0], ...c1}, c2:{nota:notas[1], ...c2}, c3:{nota:notas[2], ...c3},
+      c4:{nota:notas[3], ...c4}, c5:{nota:notas[4], ...c5}, gatekeeper: gate
+    });
+    let orq;
+    try {
+      const orqPrompt = AG_ORQUESTRADOR.replace('{{RESUMO_AGENTES}}', resumo) + (contexto || '');
+      orq = _parseAgente(await geminiGenerate(orqPrompt, null, null, 'orq'));
+    } catch(e) {
+      console.warn('[7agentes] Orquestrador falhou, montando fallback:', e.message);
+      orq = null;
+    }
+
+    // Montar objeto `dados` compatível com downstream
+    const agentes = [c1, c2, c3, c4, c5];
+    const dados = {
+      nota_total: notas.reduce((s,n)=>s+n, 0),
+      competencias: notas.map((n, i) => ({
+        nota: n,
+        feedback: agentes[i].feedback || '',
+        para_200: agentes[i].para_subir || null
+      })),
+      feedback_geral: (orq && orq.feedback_geral) || '',
+      comentario_geral: (orq && orq.comentario_geral) || (orq && orq.feedback_geral) || 'Correção concluída.',
+      pontos_fortes: (orq && orq.pontos_fortes) || [],
+      pontos_melhorar: (orq && orq.pontos_melhorar) || [],
+      plano_melhoria: (orq && orq.plano_melhoria) || [],
+      // dados crus dos agentes pra calibragem e debug
+      _agentes: { gate, c1, c2, c3, c4, c5, orq, travado }
+    };
+    return dados;
+  }
+
+  // Parser tolerante (reusa lógica do parser principal)
+  function _parseAgente(raw) {
+    if (!raw) throw new Error('resposta vazia');
+    try {
+      return JSON.parse(raw.trim().replace(/```json|```/g,'').trim());
+    } catch(e) {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (!m) throw new Error('JSON não encontrado na resposta do agente');
+      return JSON.parse(m[0]);
+    }
+  }
+
+
   // ── ENVIO ──────────────────────────────────────────
   let _enviando = false; // flag anti-duplicação (evita clique duplo gerar 2 redações)
   async function enviar() {
@@ -2192,17 +2512,20 @@ ${FORMATO_JSON_MELHORIAS}`;
       const instrucao = (elite ? PROMPT_ELITE : PROMPT_NORMAL) + contexto;
       const prompt = arquivoBase64 ? instrucao : instrucao + "\n\nRedação:\n" + texto;
 
-      // ── 3. CHAMAR GEMINI ─────────────────────────────
-      // task='correcao' → roteado para Gemini 3 Flash (resolve oscilação C3/C4)
-      const raw = await geminiGenerate(prompt, arquivoBase64 || null, arquivoMime || null, 'correcao');
-      let dados;
-      try {
-        dados = JSON.parse(raw.trim().replace(/```json|```/g,'').trim());
-      } catch(e) {
-        const match = raw.match(/\{[\s\S]*\}/);
-        if (!match) throw new Error('JSON não encontrado');
-        dados = JSON.parse(match[0]);
+      // ── 3. CHAMAR CORREÇÃO (Arquitetura 7 Agentes v5.0) ─────────
+      // Gatekeeper → 5 agentes em paralelo → orquestrador.
+      // Retorna `dados` no mesmo formato da chamada única antiga.
+      // OCR: se veio arquivo, transcreve primeiro (chamada à parte, Flash Lite).
+      let textoParaCorrigir = texto;
+      if (arquivoBase64) {
+        const ocrPrompt = 'Transcreva fielmente o texto manuscrito/impresso desta imagem de redação. Responda APENAS com o texto transcrito, sem comentários.';
+        try {
+          textoParaCorrigir = await geminiGenerate(ocrPrompt, arquivoBase64, arquivoMime, null);
+        } catch(e) {
+          throw new Error('Falha ao transcrever a imagem: ' + e.message);
+        }
       }
+      const dados = await corrigirCom7Agentes(textoParaCorrigir, contexto);
 
       // ── NORMALIZAÇÃO DE NOTAS À RÉGUA OFICIAL INEP ───────────
       // A régua INEP só admite 0, 40, 80, 120, 160, 200 por competência.

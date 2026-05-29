@@ -21,18 +21,19 @@ module.exports = async function handler(req, res) {
     if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada' });
 
     // ─── Seleção de modelo por task ─────────────────────────────────────
-    // Estrutura de roteamento mantida para uso futuro (quando voltarmos a
-    // testar modelos superiores). Por ora (28/05/2026), TODAS as tasks usam
-    // gemini-2.5-flash-lite: o teste com gemini-3.5-flash mostrou amplitude
-    // de 120pts (pior que o 2.5 FL) e custo 19x maior. Decisão: voltar ao
-    // 2.5 FL e atacar instabilidade restante via prompt-engineering (v4.18).
+    // Arquitetura de 7 agentes (v5.0): cada agente é uma task própria.
+    // Tasks de correção: 'gate', 'c1', 'c2', 'c3', 'c4', 'c5', 'orq'.
+    // Tasks auxiliares e legado: 'correcao', OCR (sem task), Hub, Material.
     //
-    // Quando quiser reativar modelo premium para correção: trocar a string
-    // 'gemini-2.5-flash-lite' abaixo por 'gemini-3.5-flash' (ou outro válido).
-    const TASKS_PREMIUM = ['correcao'];
-    const modelo = TASKS_PREMIUM.includes(task)
-      ? 'gemini-2.5-flash-lite'
-      : 'gemini-2.5-flash-lite';
+    // Decisão (28/05/2026): TODAS as tasks usam gemini-2.5-flash-lite. O teste
+    // com gemini-3.5-flash mostrou pior estabilidade e custo 19x maior. A
+    // arquitetura de agentes resolve a instabilidade dividindo o trabalho,
+    // não trocando o modelo. Estrutura mantida para reativar premium se preciso:
+    // basta listar a task em TASKS_PREMIUM e definir o modelo premium abaixo.
+    const TASKS_PREMIUM = []; // vazio: nenhuma task usa modelo premium por ora
+    const MODELO_PREMIUM = 'gemini-3.5-flash';
+    const MODELO_PADRAO = 'gemini-2.5-flash-lite';
+    const modelo = TASKS_PREMIUM.includes(task) ? MODELO_PREMIUM : MODELO_PADRAO;
 
     // Endpoint v1beta: suporta responseMimeType (o v1 estável não suporta)
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
