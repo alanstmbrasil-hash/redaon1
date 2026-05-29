@@ -1011,13 +1011,20 @@ Formato EXATO da resposta:
 
       const dados = correcao.correcao_json;
 
-      // 2. Normaliza formato de competências (banco pode ter objetos com {nota, feedback, ...}
-      //    ou array de números puros em registros legados).
+      // 2. Normaliza formato de competências.
+      //    IMPORTANTE: os 7 agentes salvam objetos {nota, feedback, para_200}.
+      //    NÃO destruímos esse array (isso apagava para_200/feedback e quebrava
+      //    o modal "Por que Nota 1000" e o bloco de repertório). Mantemos os
+      //    objetos em dados.competencias e expomos as notas puras em dados._notas.
       if (Array.isArray(dados.competencias) && dados.competencias.length > 0 && typeof dados.competencias[0] === 'object') {
-        // Extrai só as notas pra compatibilidade com código antigo de barras.
-        // Mantém o array original em outra variável para os feedbacks ricos.
-        dados._competencias_objetos = dados.competencias;
-        dados.competencias = dados.competencias.map(c => c?.nota || 0);
+        dados._competencias_objetos = dados.competencias;          // alias histórico
+        dados._notas = dados.competencias.map(c => (c && typeof c.nota !== 'undefined') ? c.nota : 0);
+        // dados.competencias PERMANECE como array de objetos (não sobrescreve!)
+      } else if (Array.isArray(dados.competencias)) {
+        // Registro legado: array de números puros. Cria _notas igual e
+        // empacota objetos mínimos pra manter a interface uniforme.
+        dados._notas = dados.competencias.slice();
+        dados._competencias_objetos = dados.competencias.map(n => ({ nota: n }));
       }
 
       // 3. Renderiza
@@ -1432,7 +1439,7 @@ Formato EXATO da resposta:
     // Cores por competência — 5 cores distintas para evitar confusão visual.
     // C2 roxo (tema), C3 verde (argumentação/solidez), C4 âmbar, C5 vermelho.
     const cores = ['#45edee','#6c5ce7','#4ade80','#fabd00','#fa6e6e'];
-    const comp = dados.competencias || [0,0,0,0,0];
+    const comp = dados._notas || (Array.isArray(dados.competencias) ? dados.competencias.map(c => (c && typeof c.nota !== 'undefined') ? c.nota : (typeof c === 'number' ? c : 0)) : [0,0,0,0,0]);
     // Soma real das competências (para as barras e total interno)
     const somaComp = comp.reduce((a,b)=>a+b,0);
     // Nota exibida no cabeçalho: prioriza banco, senão JSON, senão soma
@@ -1952,7 +1959,7 @@ Formato EXATO da resposta:
         + 'Nota total: ' + (dadosAtuais.nota_total || '—') + '/1000\n'
         + 'Notas por competência: '
         + (Array.isArray(dadosAtuais.competencias)
-            ? dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + v).join(', ')
+            ? dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + ((v && typeof v.nota !== 'undefined') ? v.nota : v)).join(', ')
             : '—')
         + '\n'
         + (comps.length > 0
