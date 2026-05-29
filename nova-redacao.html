@@ -2313,29 +2313,43 @@ ${FORMATO_JSON_MELHORIAS}`;
   const AG_C5 = `Você é um corretor ENEM especialista EXCLUSIVAMENTE na Competência 5: elaboração de proposta de intervenção que respeite os direitos humanos. Avalie SOMENTE C5.
 
   C5 avalia os 5 ELEMENTOS da proposta de intervenção, que devem estar no texto (geralmente na conclusão):
-  1. AÇÃO — o que deve ser feito
-  2. AGENTE — quem executa (governo, ONGs, escola, mídia, etc.)
-  3. MEIO/MODO — como será feito (por meio de quê)
-  4. FINALIDADE — para quê / qual objetivo
-  5. DETALHAMENTO — desenvolvimento concreto de algum dos elementos (o "como" específico, não genérico)
+  1. AÇÃO — o QUE deve ser feito (ex: "investir em transporte coletivo", "promover campanhas educativas")
+  2. AGENTE — QUEM executa (governo federal, municípios, ONGs, escolas, mídia, etc.)
+  3. MEIO — POR MEIO DE QUAL MECANISMO a ação se viabiliza. Atenção crítica: o MEIO é o instrumento de execução (lei, programa nacional, verba/orçamento, parceria público-privada, política pública), NÃO o objeto da ação.
+  4. FINALIDADE — PARA QUÊ / qual objetivo
+  5. DETALHAMENTO — aprofundamento concreto de ALGUM dos outros elementos (explicar melhor o como/onde/consequência), idealmente retomando os argumentos discutidos no texto.
+
+  DISTINÇÃO CRÍTICA — Meio vs especificação da Ação (erro comum):
+  Listar exemplos/tipos do que será feito NÃO é o Meio — é especificar a Ação.
+  - "investir em transporte coletivo — metrô, BRT e ciclovias" → "metrô, BRT e ciclovias" é ESPECIFICAÇÃO DA AÇÃO (diz em quê investir), NÃO o Meio. O Meio (por meio de qual mecanismo viabilizar o investimento) está AUSENTE aqui.
+  - Para o Meio estar PRESENTE, precisaria de algo como: "por meio da destinação de percentual do orçamento federal", "mediante um programa nacional de mobilidade", "através de parcerias público-privadas com incentivos fiscais". Esses são MECANISMOS de viabilização.
+  Pergunte sempre: "isto diz COMO a ação sai do papel (Meio), ou apenas DETALHA o que será feito (Ação)?"
+
+  DISTINÇÃO — Detalhamento vs presença dos elementos:
+  O Detalhamento é o 5º elemento. Ele está presente quando ao menos UM dos outros elementos é aprofundado concretamente (não enunciado de forma telegráfica). Uma proposta que apenas LISTA agente+ação+finalidade sem desenvolver nenhum, e sem retomar os argumentos do texto, NÃO tem Detalhamento.
 
   VERIFICAÇÃO OBRIGATÓRIA:
-  - Liste em "elementos_faltantes" quais dos 5 NÃO estão presentes.
-  - Avalie "detalhamento_real": true SOMENTE se há detalhamento concreto (com "por meio de exemplos específicos", "através de mecanismos descritos"). false se a proposta é genérica ("investir em educação", "criar políticas", "reduzir impactos" — sem dizer COMO concretamente).
+  - Avalie CADA um dos 5 elementos. Liste em "elementos_faltantes" os que estão AUSENTES (use os nomes: "Ação", "Agente", "Meio", "Finalidade", "Detalhamento").
+  - Para o Meio: aplique a distinção acima. Se só há especificação da ação (lista do que fazer) sem mecanismo de viabilização, o Meio está AUSENTE.
+  - Para o Detalhamento: se nenhum elemento é aprofundado e a proposta não retoma os argumentos do texto, o Detalhamento está AUSENTE.
   - Verifique violação de direitos humanos → se viola, nota 0.
 
-  RÉGUA (mecânica):
-  - Proposta ausente → 0 a 40.
-  - 2+ elementos faltando → no máximo 120.
-  - 1 elemento faltando → no máximo 120 (a Cartilha exige os 5 para passar de 120).
-  - 5 elementos presentes MAS detalhamento_real = false → no máximo 160.
-  - 5 elementos presentes E detalhamento_real = true → pode ser 200.
+  RÉGUA (mecânica, por contagem de elementos presentes):
+  - Proposta totalmente ausente → 0.
+  - Proposta vaga / 1-2 elementos presentes → 40 a 80.
+  - 3 elementos presentes (faltam 2) → 120.
+  - 4 elementos presentes (falta 1) → 120 a 160 (160 só se os 4 forem bem desenvolvidos).
+  - 5 elementos presentes (incluindo Detalhamento real + retomada da tese) → 160 a 200.
+  IMPORTANTE: enunciar elementos de forma telegráfica não garante nota alta. A redação de referência (Mobilidade Urbana) tem Agente+Ação+Finalidade mas NÃO tem Meio (só especifica os modais) NEM Detalhamento → 3 elementos → 120.
 
   Responda APENAS com este JSON:
   {
     "nota": 0 | 40 | 80 | 120 | 160 | 200,
-    "elementos_faltantes": ["<elemento ausente>"],
+    "elementos_presentes": ["<elementos presentes>"],
+    "elementos_faltantes": ["<elementos ausentes>"],
+    "meio_mecanismo": "<cite o mecanismo de viabilização encontrado, ou null se ausente (só houve especificação da ação)>",
     "detalhamento_real": true | false,
+    "retomada_tese": true | false,
     "viola_direitos_humanos": true | false,
     "feedback": "<2-3 frases pedagógicas>",
     "para_subir": "<o que faria subir um nível, ou null se 200>"
@@ -2426,6 +2440,11 @@ ${FORMATO_JSON_MELHORIAS}`;
 
     // Montar objeto `dados` compatível com downstream
     const agentes = [c1, c2, c3, c4, c5];
+    // Mapear elementos C5 para os campos c5_* que a tela "Pontos de Melhoria" consome.
+    // O agente C5 retorna elementos_faltantes/elementos_presentes; convertemos para
+    // os campos individuais (presente = texto, ausente = null) pra compat com schema antigo.
+    const _c5faltantes = (c5.elementos_faltantes || []).map(e => String(e).toLowerCase());
+    const _c5presente = (nome) => !_c5faltantes.some(f => f.includes(nome.toLowerCase()));
     const dados = {
       nota_total: notas.reduce((s,n)=>s+n, 0),
       competencias: notas.map((n, i) => ({
@@ -2438,6 +2457,16 @@ ${FORMATO_JSON_MELHORIAS}`;
       pontos_fortes: (orq && orq.pontos_fortes) || [],
       pontos_melhorar: (orq && orq.pontos_melhorar) || [],
       plano_melhoria: (orq && orq.plano_melhoria) || [],
+      // Campos C5 individuais (compat com tela "Pontos de Melhoria")
+      c5_acao: _c5presente('ação') ? 'Presente' : null,
+      c5_agente: _c5presente('agente') ? 'Presente' : null,
+      c5_meio: (c5.meio_mecanismo && c5.meio_mecanismo !== null) ? c5.meio_mecanismo : null,
+      c5_finalidade: _c5presente('finalidade') ? 'Presente' : null,
+      c5_detalhamento: c5.detalhamento_real === true ? 'Presente' : null,
+      c5_elementos_faltantes: c5.elementos_faltantes || [],
+      // Campos C2 individuais (compat)
+      c2_repertorio_tipo: c2.repertorio_tipo || null,
+      c2_repertorio_retomado: (c2.retomada_trecho && c2.retomada_trecho !== null) ? true : false,
       // dados crus dos agentes pra calibragem e debug
       _agentes: { gate, c1, c2, c3, c4, c5, orq, travado }
     };
