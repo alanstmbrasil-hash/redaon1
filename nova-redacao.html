@@ -3173,9 +3173,16 @@ window.toggleMaterial = async function(tipo) {
 
   if (aberto) { body.style.maxHeight = '0'; chevron.style.transform = ''; return; }
 
-  body.style.maxHeight = '800px';
   chevron.style.transform = 'rotate(180deg)';
-  if (materialGerado[tipo]) return;
+
+  // Já gerado antes: reabre na altura TOTAL do conteúdo (não corta textos longos).
+  if (materialGerado[tipo]) {
+    body.style.maxHeight = (body.scrollHeight + 100) + 'px';
+    setTimeout(() => { if (body.style.maxHeight && body.style.maxHeight !== '0px') body.style.maxHeight = 'none'; }, 450);
+    return;
+  }
+
+  body.style.maxHeight = '800px';      // mostra o spinner enquanto gera
   if (materialGerando[tipo]) return;   // já está gerando este material — ignora reclique
 
   // Serializa: gera UM material por vez (evita rajada de chamadas simultâneas → erro 429).
@@ -3269,7 +3276,9 @@ async function _gerarMaterialApoio(tipo) {
     materialGerado[tipo] = true;
     const badge = document.getElementById('status-' + tipo);
     if (badge) badge.style.display = 'inline-block';
+    // Anima a abertura e depois libera a trava de altura (evita cortar textos longos).
     body.style.maxHeight = (body.scrollHeight + 100) + 'px';
+    setTimeout(() => { if (body.style.maxHeight && body.style.maxHeight !== '0px') body.style.maxHeight = 'none'; }, 450);
   } catch(e) {
     console.error('[toggleMaterial] erro:', e);
     conteudo.innerHTML = `<p style="font-size:.75rem;color:#ffb4ab;padding:.5rem 0;">Erro ao gerar. Tente novamente.</p>`;
