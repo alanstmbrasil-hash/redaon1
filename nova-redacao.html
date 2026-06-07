@@ -1021,7 +1021,7 @@ var intervaloDicas = null;
   // Chama o Gemini via função serverless do Vercel — key protegida no servidor
   // Roteamento por task (v2 — 28/05/2026): task='correcao' → Gemini 3 Flash;
   // demais (ou ausente) → Gemini 2.5 Flash Lite (padrão).
-  async function geminiGenerate(prompt, arquivoBase64 = null, arquivoMime = null, task = null) {
+  async function geminiGenerate(prompt, arquivoBase64 = null, arquivoMime = null, task = null, genConfig = null) {
     const parts = [];
     if (arquivoBase64) {
       parts.push({ inline_data: { mime_type: arquivoMime, data: arquivoBase64 } });
@@ -1029,6 +1029,7 @@ var intervaloDicas = null;
     parts.push({ text: prompt });
     const body = { contents: [{ parts }] };
     if (task) body.task = task;
+    if (genConfig) body.generationConfig = genConfig;
     const res = await fetch('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -3243,7 +3244,7 @@ async function _gerarMaterialApoio(tipo) {
         <span style="width:1rem;height:1rem;border:2px solid rgba(69,237,238,.3);border-top-color:#45edee;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;flex-shrink:0;"></span>
         PROfa gerando conteúdo...
       </div>`;
-      texto = await geminiGenerate(PROMPTS_MATERIAL[tipo](tema.titulo));
+      texto = await geminiGenerate(PROMPTS_MATERIAL[tipo](tema.titulo), null, null, null, { responseMimeType: 'text/plain' });
 
       // 6. Se tema é oficial, salva pra cache de próximos alunos
       if (tema.oficial && tema.id && texto) {
