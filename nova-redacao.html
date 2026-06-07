@@ -2989,6 +2989,9 @@ function atualizarContadorDicas() {
 // MATERIAL DE APOIO COM IA REAL
 // ══════════════════════════════════════
 const materialGerado = { legislacao:false, historia:false, especialistas:false, atualidades:false, literatura:false, filosofia:false, cinema:false, ciencia:false, culturapop:false };
+// Controle anti-rajada (evita erro 429 por chamadas simultâneas ao Gemini):
+const materialGerando = {};            // trava por material enquanto está gerando
+let _materialQueue = Promise.resolve(); // fila serial — uma geração de material por vez
 
 const TODAS_CATEGORIAS = ['legislacao','historia','especialistas','atualidades','literatura','filosofia','cinema','ciencia','culturapop'];
 
@@ -3172,9 +3175,25 @@ window.toggleMaterial = async function(tipo) {
   body.style.maxHeight = '800px';
   chevron.style.transform = 'rotate(180deg)';
   if (materialGerado[tipo]) return;
+  if (materialGerando[tipo]) return;   // já está gerando este material — ignora reclique
+
+  // Serializa: gera UM material por vez (evita rajada de chamadas simultâneas → erro 429).
+  materialGerando[tipo] = true;
+  _materialQueue = _materialQueue
+    .then(() => _gerarMaterialApoio(tipo))
+    .catch(() => {})
+    .finally(() => { materialGerando[tipo] = false; });
+};
+
+async function _gerarMaterialApoio(tipo) {
+  const body     = document.getElementById('body-' + tipo);
+  const conteudo = document.getElementById('conteudo-' + tipo);
+
+  // Se o usuário fechou este material antes de chegar a vez dele na fila,
+  // não gasta uma chamada à API (economia + evita 429 à toa).
+  if (!(body && body.style.maxHeight && body.style.maxHeight !== '0px')) return;
 
   const tema = obterTemaAtual();
-  const conteudo = document.getElementById('conteudo-' + tipo);
 
   // 1. Tema vazio
   if (!tema) {
