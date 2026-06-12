@@ -1,0 +1,203 @@
+/* ============================================================
+   RedaON Design System — redaon.css (v1 · branch redesign)
+   Fundação única para as 10 telas. Tema escuro ativo;
+   tema claro "folha da PROfa" definido e pronto, mas inativo.
+   Convenções: tipografia funcional mínima 11px · toque mínimo 44px
+   ============================================================ */
+
+:root {
+  /* ---- Tema escuro (ativo) ---- */
+  --rd-bg: #10131a;
+  --rd-surface: #1d2026;
+  --rd-surface-2: #272a31;
+  --rd-surface-top: #191c22;
+  --rd-border: rgba(255, 255, 255, 0.08);
+  --rd-text: #e1e2eb;
+  --rd-text-2: #c8c4d7;
+  --rd-muted: #928ea0;
+  --rd-cyan: #45edee;
+  --rd-cyan-ink: #10131a;      /* texto sobre ciano */
+  --rd-purple: #6c5ce7;
+  --rd-purple-soft: #c6bfff;
+  --rd-gold: #fabd00;
+  --rd-green: #4ade80;
+  --rd-red: #e87468;
+  --rd-paper: #fdfbf4;          /* folha ENEM */
+  --rd-paper-line: #d8d2c0;
+  --rd-paper-ink: #3a3d44;
+
+  /* ---- Métricas ---- */
+  --rd-radius: 12px;
+  --rd-radius-lg: 16px;
+  --rd-nav-h: 64px;
+  --rd-touch: 44px;
+  --rd-font-min: 11px;
+}
+
+/* Tema claro "folha da PROfa" — definido, NÃO ativo no piloto.
+   Ativação futura: <html class="light"> + persistência. */
+html.light {
+  --rd-bg: #f7f5f0;
+  --rd-surface: #ffffff;
+  --rd-surface-2: #efece4;
+  --rd-surface-top: #ffffff;
+  --rd-border: #e6e2d8;
+  --rd-text: #2a2d34;
+  --rd-text-2: #444441;
+  --rd-muted: #888780;
+  --rd-cyan: #0a8c8d;           /* ciano da marca escurecido p/ contraste AA */
+  --rd-cyan-ink: #ffffff;
+  --rd-purple: #534ab7;
+  --rd-purple-soft: #534ab7;
+  --rd-gold: #854f0b;
+  --rd-green: #3b6d11;
+  --rd-red: #b3261e;
+}
+
+/* ============================================================
+   BARRA DE NAVEGAÇÃO INFERIOR (mobile/tablet < 1024px)
+   Injetada por redaon-ui.js · padrão aprovado:
+   Início · Temas · [Escrever] · Redações · Mais
+   ============================================================ */
+.rd-bottomnav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 6px 4px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--rd-surface-top);
+  border-top: 1px solid var(--rd-border);
+}
+.rd-bottomnav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  min-width: 52px;
+  min-height: var(--rd-touch);
+  font-size: var(--rd-font-min);
+  font-weight: 500;
+  color: var(--rd-muted);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.rd-bottomnav a .material-symbols-outlined { font-size: 22px; }
+.rd-bottomnav a.rd-on { color: var(--rd-cyan); }
+.rd-bottomnav a.rd-on .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+}
+.rd-bottomnav .rd-fab {
+  width: 50px; height: 50px;
+  min-width: 50px;
+  border-radius: 50%;
+  background: var(--rd-cyan);
+  color: var(--rd-cyan-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -22px;
+  box-shadow: 0 4px 14px rgba(69, 237, 238, 0.35);
+}
+.rd-fab .material-symbols-outlined { font-size: 24px; }
+
+/* Desktop: a sidebar comanda; a barra some */
+@media (min-width: 1024px) {
+  .rd-bottomnav { display: none; }
+}
+/* Mobile: reservar espaço para a barra no fim da página */
+@media (max-width: 1023px) {
+  body.rd-has-nav { padding-bottom: calc(var(--rd-nav-h) + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ============================================================
+   COMPONENTES APROVADOS (mockups 11–12/06)
+   ============================================================ */
+.rd-card {
+  background: var(--rd-surface);
+  border: 1px solid transparent;
+  border-radius: var(--rd-radius);
+  padding: 12px 14px;
+}
+.rd-card--destaque { border-color: rgba(69, 237, 238, 0.3); }
+
+.rd-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: var(--rd-surface);
+  color: var(--rd-text);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.rd-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--rd-surface);
+  border: 1px solid var(--rd-border);
+  color: var(--rd-text-2);
+  font-size: 12px;
+}
+.rd-chip.rd-on {
+  background: rgba(69, 237, 238, 0.14);
+  border-color: rgba(69, 237, 238, 0.4);
+  color: var(--rd-cyan);
+}
+.rd-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--rd-touch);
+  padding: 0 16px;
+  border-radius: 11px;
+  background: var(--rd-cyan);
+  color: var(--rd-cyan-ink);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+.rd-btn--ghost {
+  background: var(--rd-surface-2);
+  color: var(--rd-purple-soft);
+}
+.rd-muted { color: var(--rd-muted); font-size: var(--rd-font-min); }
+
+/* Faixa de chips/carrossel com rolagem horizontal */
+.rd-hscroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.rd-hscroll::-webkit-scrollbar { display: none; }
+
+/* ============================================================
+   PERFORMANCE — Android de entrada (auditoria, item transversal 1)
+   Desliga blurs decorativos e backdrop-filter no smartphone
+   ============================================================ */
+@media (max-width: 639px) {
+  .blur-\[120px\] { display: none !important; }
+  .backdrop-blur-md,
+  .glass-card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+}
+
+/* ============================================================
+   ACESSIBILIDADE DE TOQUE — correção transversal
+   ============================================================ */
+@media (max-width: 1023px) {
+  button, a[onclick], .rd-btn { min-height: var(--rd-touch); }
+}

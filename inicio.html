@@ -6,6 +6,7 @@
 <title>RedaON | Início</title>
 <script>tailwind = { config: {} };</script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link rel="stylesheet" href="redaon.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -280,6 +281,28 @@
           Entrar em turma
         </button>
       </div>
+    </section>
+
+    <!-- TEMA DA SEMANA + EVOLUÇÃO (redesign 12/06 — mockups aprovados) -->
+    <section class="space-y-3 !mt-6">
+      <div class="rd-card rd-card--destaque">
+        <p class="rd-muted" style="text-transform:uppercase;letter-spacing:.08em;">Tema da semana · PROfa Blanche</p>
+        <p id="temaDaSemanaTitulo" style="margin:6px 0 12px;font-size:15px;font-weight:700;line-height:1.4;color:var(--rd-text);">
+          A crise da mobilidade urbana nas capitais brasileiras
+        </p>
+        <a class="rd-btn" href="nova-redacao.html">
+          Escrever agora
+          <span class="material-symbols-outlined" style="font-size:18px;">stylus_note</span>
+        </a>
+      </div>
+      <a class="rd-card" href="evolucao.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+        <span class="material-symbols-outlined" style="color:var(--rd-cyan);font-size:22px;">trending_up</span>
+        <span style="flex:1;">
+          <span class="rd-muted" style="display:block;">Sua evolução</span>
+          <span id="evolucaoResumoLinha" style="font-size:13px;font-weight:600;color:var(--rd-text);">Acompanhe sua média por competência</span>
+        </span>
+        <span class="material-symbols-outlined" style="color:var(--rd-muted);font-size:18px;">chevron_right</span>
+      </a>
     </section>
 
     <!-- POTENCIALIZE SUA ESCRITA -->
@@ -750,5 +773,8 @@
     }, { passive: true });
   })();
 </script>
+<!-- Barra de navegação inferior (redesign 12/06) -->
+<script>window.REDAON_NAV = 'inicio';</script>
+<script src="redaon-ui.js"></script>
 </body>
 </html>
