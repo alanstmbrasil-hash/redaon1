@@ -382,10 +382,118 @@
   #sidebar::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:10px;}
   #sidebar{scrollbar-width:thin;scrollbar-color:var(--scroll) transparent;}
 </style>
-<script>
-/* Produção: authGuard, authGetNome e dbGet* vêm dos scripts reais do projeto (Supabase). */
-</script>
+<script src="supabase-auth.js"></script>
 </head>
+
+<script>
+/* ============================================================
+   Camada de dados do portal do professor
+   Usa dbFetch e SUPABASE_URL do supabase-auth.js (já carregado acima).
+   Tabelas: escolas, turmas, alunos_turma, redacoes, correcoes, temas.
+   ============================================================ */
+(function(){
+  function _url(caminho){
+    var base = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : '';
+    return base + '/rest/v1/' + caminho;
+  }
+  async function _get(caminho){
+    if (typeof dbFetch !== 'function') { console.error('dbFetch indisponível'); return []; }
+    try {
+      var res = await dbFetch(_url(caminho), { method:'GET' });
+      if (!res.ok) { console.error('Consulta falhou:', caminho, res.status); return []; }
+      return await res.json();
+    } catch(e){ console.error('Erro na consulta:', caminho, e); return []; }
+  }
+  function _meuId(){
+    if (typeof authGetUserId === 'function') return authGetUserId();
+    return null;
+  }
+
+  // Turmas do professor, com a escola embutida
+  window.dbGetTurmasDoProfessor = async function(){
+    var id = _meuId(); if (!id) return [];
+    var turmas = await _get('turmas?select=id,nome,codigo,serie,ano_letivo,escola_id,escolas(nome)&professor_id=eq.'+id+'&order=nome.asc');
+    if (!Array.isArray(turmas)) return [];
+    // conta alunos e calcula média/pendentes por turma
+    var ids = turmas.map(function(t){ return t.id; });
+    if (!ids.length) return turmas;
+    var lista = '(' + ids.join(',') + ')';
+    var vinculos = await _get('alunos_turma?select=turma_id&status=eq.ativo&turma_id=in.'+lista);
+    var reds = await _get('redacoes?select=turma_id,status,nota_final&turma_id=in.'+lista);
+    turmas.forEach(function(t){
+      t.alunos = (vinculos||[]).filter(function(v){ return v.turma_id === t.id; }).length;
+      var minhas = (reds||[]).filter(function(r){ return r.turma_id === t.id; });
+      var notas = minhas.map(function(r){ return r.nota_final; }).filter(function(n){ return typeof n === 'number' && n > 0; });
+      t.media = notas.length ? Math.round(notas.reduce(function(a,b){return a+b;},0)/notas.length) : null;
+      t.pendentes = minhas.filter(function(r){ return (r.status||'') === 'enviada'; }).length;
+    });
+    return turmas;
+  };
+
+  // Alunos das turmas do professor
+  window.dbGetAlunosDoProfessor = async function(){
+    var id = _meuId(); if (!id) return [];
+    var turmas = await _get('turmas?select=id&professor_id=eq.'+id);
+    var ids = (turmas||[]).map(function(t){ return t.id; });
+    if (!ids.length) return [];
+    var vinc = await _get('alunos_turma?select=aluno_id,turma_id,status,usuarios!alunos_turma_aluno_id_fkey(id,nome,email)&status=eq.ativo&turma_id=in.(' + ids.join(',') + ')');
+    return (vinc||[]).map(function(v){
+      var u = v.usuarios || {};
+      return { id: u.id || v.aluno_id, nome: u.nome || 'Aluno', email: u.email,
+               turma_id: v.turma_id, turmas: { id: v.turma_id } };
+    });
+  };
+
+  // Redações das turmas do professor, com aluno, turma e notas por competência
+  window.dbGetRedacoesDoProfessor = async function(opcoes){
+    var id = _meuId(); if (!id) return [];
+    var limite = (opcoes && opcoes.limit) ? opcoes.limit : 200;
+    var sel = 'id,aluno_id,turma_id,tema_id,tema_livre,status,nota_final,texto,created_at,'
+            + 'usuarios!redacoes_aluno_id_fkey(id,nome),turmas(id,nome),temas(id,titulo),'
+            + 'correcoes(c1,c2,c3,c4,c5,nota_total,feedback_c1,feedback_c2,feedback_c3,feedback_c4,feedback_c5,pontos_fortes,pontos_melhorar,revisao_professor,correcao_json)';
+    var reds = await _get('redacoes?select='+sel+'&professor_id=eq.'+id+'&order=created_at.desc&limit='+limite);
+    if (!Array.isArray(reds)) return [];
+    return reds.map(function(r){
+      var c = (r.correcoes && r.correcoes.length) ? r.correcoes[0] : (r.correcoes || {});
+      r.c1 = c.c1; r.c2 = c.c2; r.c3 = c.c3; r.c4 = c.c4; r.c5 = c.c5;
+      if (typeof r.nota_final !== 'number' || !r.nota_final) r.nota_final = c.nota_total;
+      r.porque = { c1:c.feedback_c1, c2:c.feedback_c2, c3:c.feedback_c3, c4:c.feedback_c4, c5:c.feedback_c5 };
+      if (!r.tema_livre && r.temas && r.temas.titulo) r.tema_livre = r.temas.titulo;
+      // já validada pelo professor?
+      if (c.revisao_professor) r.status = 'revisada';
+      return r;
+    });
+  };
+
+  // Temas ativos (biblioteca compartilhada)
+  window.dbGetTemas = async function(){
+    return await _get('temas?select=id,titulo,categoria,nivel,ano_enem,aplicacao,descricao&ativo=eq.true&order=ano_enem.desc.nullsfirst');
+  };
+
+  // Criação de escola e turma (modal Nova turma)
+  window.dbSalvarEscola = async function(dados){
+    var id = _meuId();
+    var res = await dbFetch(_url('escolas'), {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Prefer':'return=representation' },
+      body: JSON.stringify(Object.assign({ professor_id:id }, dados||{}))
+    });
+    var j = await res.json();
+    return Array.isArray(j) ? j[0] : j;
+  };
+  window.dbSalvarTurma = async function(dados){
+    var id = _meuId();
+    var res = await dbFetch(_url('turmas'), {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Prefer':'return=representation' },
+      body: JSON.stringify(Object.assign({ professor_id:id }, dados||{}))
+    });
+    var j = await res.json();
+    return Array.isArray(j) ? j[0] : j;
+  };
+})();
+</script>
+
 <body>
 <script>
 /* Produção: authGuard, authGetNome, dbGetTemas, dbGetTurmasDoProfessor e
