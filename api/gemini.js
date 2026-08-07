@@ -5,6 +5,12 @@
 //
 // Frontend envia o task no body. Tudo que NÃO é correção usa o modelo barato por default
 // (mantém o comportamento histórico dos endpoints que ainda não foram migrados).
+//
+// ─── ACRÉSCIMO (28/07/2026): modo simples para o IA Estúdio ──────────────
+// O portal do professor envia { prompt, buscarNaWeb } em vez de { contents }.
+// Nesse caso a função monta o contents sozinha e liga o grounding com Google
+// Search, devolvendo { texto, fontes }. NADA do fluxo de correção mudou:
+// quem envia 'contents' continua caindo no caminho original, intacto.
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,11 +20,24 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
 
   try {
-    const { contents, generationConfig: clientConfig, task } = req.body;
-    if (!contents) return res.status(400).json({ error: 'Campo contents obrigatório' });
+    const { contents, generationConfig: clientConfig, task, prompt, buscarNaWeb } = req.body;
+
+    // Aceita o formato antigo (contents) e o novo (prompt). Um dos dois é obrigatório.
+    if (!contents && !prompt) {
+      return res.status(400).json({ error: 'Campo contents obrigatório' });
+    }
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada' });
+
+    // Modo simples: veio prompt em texto (IA Estúdio do professor)
+    const modoSimples = !contents && typeof prompt === 'string';
+    if (modoSimples && prompt.trim().length < 3) {
+      return res.status(400).json({ error: 'Prompt muito curto' });
+    }
+    if (modoSimples && prompt.length > 12000) {
+      return res.status(400).json({ error: 'Prompt longo demais' });
+    }
 
     // ─── Seleção de modelo por task ─────────────────────────────────────
     // Arquitetura de 7 agentes (v5.0): cada agente é uma task própria.
@@ -51,9 +70,35 @@ module.exports = async function handler(req, res) {
       responseMimeType: 'application/json'
     };
 
+    // No modo simples a saída é TEXTO CORRIDO (material de aula, prompt para
+    // app parceiro), não JSON. E temperature um pouco maior, porque aqui a
+    // variação é desejável — não é correção determinística.
+    const configSimples = {
+      maxOutputTokens: 8000,
+      temperature: 0.7,
+      responseMimeType: 'text/plain'
+    };
+
     // Frontend pode sobrescrever campos específicos por chamada
     // (ex: OCR sobrescreve responseMimeType para 'text/plain')
-    const generationConfig = { ...defaultConfig, ...(clientConfig || {}) };
+    const generationConfig = modoSimples
+      ? { ...configSimples, ...(clientConfig || {}) }
+      : { ...defaultConfig, ...(clientConfig || {}) };
+
+    // Corpo da requisição
+    const corpo = {
+      contents: modoSimples ? [{ parts: [{ text: prompt }] }] : contents,
+      generationConfig
+    };
+
+    // Busca real na web — só no modo simples, e só quando pedida.
+    // Reduz alucinação (legislação, dados, citações) e devolve as fontes.
+    // O fluxo de correção NUNCA usa isto.
+    if (modoSimples && buscarNaWeb) {
+      corpo.tools = [{ google_search: {} }];
+      // grounding não aceita responseMimeType json; garante texto
+      corpo.generationConfig.responseMimeType = 'text/plain';
+    }
 
     const geminiRes = await fetch(url, {
       method: 'POST',
@@ -61,16 +106,28 @@ module.exports = async function handler(req, res) {
         'Content-Type': 'application/json',
         'x-goog-api-key': apiKey
       },
-      body: JSON.stringify({
-        contents,
-        generationConfig
-      }),
+      body: JSON.stringify(corpo),
     });
 
     const data = await geminiRes.json();
 
     if (!geminiRes.ok) {
       return res.status(geminiRes.status).json({ error: data.error?.message || 'Erro do Gemini' });
+    }
+
+    // ─── Resposta do modo simples: texto + fontes ───────────────────────
+    if (modoSimples) {
+      const texto = (data?.candidates?.[0]?.content?.parts || [])
+        .map(p => p.text || '')
+        .join('')
+        .trim();
+
+      const meta = data?.candidates?.[0]?.groundingMetadata;
+      const fontes = (meta?.groundingChunks || [])
+        .map(c => (c?.web ? { titulo: c.web.title, url: c.web.uri } : null))
+        .filter(Boolean);
+
+      return res.status(200).json({ texto, fontes, _redaon_modelo_usado: modelo });
     }
 
     // Retorna data + meta informando qual modelo foi usado (útil pra debug

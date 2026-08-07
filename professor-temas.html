@@ -25,10 +25,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <style>
-/* ===== CAUSA DO ESTOURO NO CELULAR =====
-   Sem esta regra, elementos com width:100% + padding ficam MAIORES que o pai
-   (os botões "Gerar reforço", "Nova turma", "Copiar código" etc.).
-   Com border-box, o padding passa a caber dentro da largura. */
+/* Preenchimento cabe dentro da largura (evita estouro lateral no celular) */
 *, *::before, *::after { box-sizing: border-box; }
 
   /* Gaveta de seleção (padrão aprovado) */
@@ -240,7 +237,7 @@
   }
 
   /* ===== Suas turmas: carrossel no mobile, lista no desktop ===== */
-  .turmasWrap{ display:flex; flex-direction:column; gap:.6rem; }
+  .turmasWrap{ display:flex; flex-direction:column; gap:.6rem; min-width:0; }
   .turmaCard{ display:block; background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); border-radius:1rem; padding:.9rem 1rem; }
   .turmaBadge{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex:0 0 auto; }
   @media (max-width:640px){
@@ -280,60 +277,63 @@
 
   .stat-card { background:var(--surface); border:1px solid rgba(var(--borderRGB),0.2); border-radius:1rem; padding:1.25rem 1.5rem; }
 
+  /* ===== Temas ===== */
+  .abasTemas{ display:flex; gap:.3rem; overflow-x:auto; background:var(--surface);
+              border:1px solid rgba(var(--borderRGB),.2); border-radius:.9rem; padding:.3rem; scrollbar-width:none; }
+  .abasTemas::-webkit-scrollbar{ display:none; }
+  .abaT{ flex:0 0 auto; padding:.6rem .85rem; border:none; border-radius:.65rem; background:transparent;
+         color:var(--muted); font-size:.78rem; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .abaT.ativa{ background:var(--cyan); color:var(--bg); }
+
+  .campoBtnT{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; min-width:11rem;
+              background:var(--surface); border:1px solid rgba(var(--borderRGB),.3); border-radius:.75rem;
+              padding:.6rem .9rem; color:var(--text); font-size:.82rem; font-family:inherit; cursor:pointer; }
+
+  .cardCriarTema{ display:flex; align-items:center; gap:.75rem; background:var(--surface);
+                  border:1px dashed rgba(var(--cyanRGB),.45); border-radius:1rem; padding:.9rem 1rem;
+                  cursor:pointer; margin-bottom:.9rem; }
+  .cardCriarTema:hover{ border-color:var(--cyan); }
+
+  .gridTemas{ display:grid; grid-template-columns:minmax(0,1fr); gap:.7rem; }
+  @media (min-width:760px){ .gridTemas{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+  @media (min-width:1200px){ .gridTemas{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+
+  .temaCard{ display:flex; flex-direction:column; background:var(--surface);
+             border:1px solid rgba(var(--borderRGB),.2); border-radius:1rem; padding:1rem 1.1rem; cursor:pointer; }
+  .temaCard:hover{ border-color:rgba(var(--cyanRGB),.45); }
+  .temaTop{ display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; margin-bottom:.55rem; }
+  .selo{ font-size:.64rem; font-weight:800; padding:.18rem .5rem; border-radius:.4rem;
+         text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
+  .selo-enem{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+  .selo-profa{ background:rgba(var(--goldRGB),.16); color:var(--gold); }
+  .selo-meus{ background:rgba(var(--purpleRGB),.18); color:var(--purple); }
+  .selo-ppl{ background:rgba(var(--purpleRGB),.18); color:var(--purple); }
+  .selo-digital{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+  .selo-segunda{ background:rgba(var(--greenRGB),.16); color:var(--green); }
+  .selo-cancelada{ background:rgba(var(--redRGB),.16); color:var(--red); }
+  .temaTit{ font-size:.92rem; font-weight:700; color:var(--text); line-height:1.35; margin-bottom:.5rem; }
+  .temaInc{ font-size:.73rem; color:var(--muted); line-height:1.45; }
+  .temaVer{ margin-top:.7rem; font-size:.76rem; font-weight:800; color:var(--cyan); }
+
+  .cardBoxT{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); border-radius:1rem; padding:1.1rem 1.25rem; }
+  .rotuloT{ font-size:.7rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .matGrid{ display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; align-items:start; }
+  @media (min-width:1024px){ .matGrid{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+  .incItem{ display:flex; align-items:center; gap:.6rem; background:var(--bg);
+            border:1px solid rgba(var(--borderRGB),.25); border-radius:.75rem; padding:.6rem .8rem; }
+
+  .acoesMaterial{ display:flex; gap:.7rem; margin-top:1rem; flex-wrap:wrap; }
+  .btnSecT{ flex:1; min-width:9rem; padding:.8rem; border-radius:.8rem; border:1px solid rgba(var(--borderRGB),.35);
+            background:var(--surface); color:var(--text2); font-size:.86rem; font-weight:800; cursor:pointer; font-family:inherit; }
+  .btnPriT{ flex:1; min-width:9rem; padding:.8rem; border:none; border-radius:.8rem;
+            background:var(--cyan); color:var(--bg); font-size:.86rem; font-weight:800; cursor:pointer; font-family:inherit; }
+  .gvOptT{ width:100%; text-align:left; padding:.85rem 1rem; border-radius:.75rem;
+           border:1px solid rgba(var(--borderRGB),.25); background:var(--bg); color:var(--text);
+           font-size:.88rem; font-weight:600; cursor:pointer; font-family:inherit; min-height:3.25rem; }
+  .gvOptT:hover{ border-color:rgba(var(--cyanRGB),.45); }
+
   /* Grade dos 4 cartões: 2 colunas no tablet, 4 no desktop largo (nunca 3+1 órfão).
      NÃO forçamos display aqui — quem controla mostrar/esconder é .statsDesktop (some no mobile). */
-  /* Detalhe da turma: 2 colunas no desktop, empilhado no mobile */
-  .dtGrid{ display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; align-items:start; }
-  .dtGrid > *{ min-width:0; }
-  .listaScroll{ display:block; }
-  @media (min-width:900px){
-    .dtGrid{
-      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-      grid-template-areas:"comp car" "lista car";
-      /* minmax(0,1fr): permite a linha encolher e a lista rolar por dentro */
-      grid-template-rows:auto minmax(0,1fr);
-      align-items:stretch;
-    }
-    .dtComp{ grid-area:comp; align-self:start; min-width:0; }
-    .dtCar{ grid-area:car; min-width:0; }
-    /* Coluna esquerda embaixo: busca fixa + caixa da lista com rolagem própria */
-    .dtAlunosWrap{ grid-area:lista; display:flex; flex-direction:column; min-height:0; min-width:0; }
-    .dtAlunosWrap .listaScroll{
-      flex:1 1 0; min-height:14rem; overflow-y:auto;
-      background:var(--surface);
-      border:1px solid rgba(var(--borderRGB),.2);
-      border-radius:1rem;
-      padding:.6rem;
-    }
-    .dtAlunosWrap .listaScroll::-webkit-scrollbar{ width:6px; }
-    .dtAlunosWrap .listaScroll::-webkit-scrollbar-thumb{ background:rgba(var(--borderRGB),.55); border-radius:99px; }
-    .dtAlunosWrap .listaScroll::-webkit-scrollbar-track{ background:transparent; }
-    /* dentro da caixa, os cards ficam mais leves para não pesar visualmente */
-    .dtAlunosWrap .listaScroll .alunoLinha{ border-color:rgba(var(--borderRGB),.14); }
-  }
-  .compRow{ display:flex; align-items:center; gap:.6rem; margin-bottom:.55rem; }
-  .compRow:last-child{ margin-bottom:0; }
-  .compNome{ width:5.2rem; font-size:.72rem; color:var(--text2); flex:0 0 auto; }
-  .compBar{ flex:1; height:.7rem; background:var(--sunken,rgba(var(--borderRGB),.25)); border-radius:99px; overflow:hidden; }
-  .compBar span{ display:block; height:100%; border-radius:99px; }
-  .compVal{ width:2rem; text-align:right; font-size:.75rem; font-weight:700; flex:0 0 auto; }
-  .carCard{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); border-radius:1rem; padding:.9rem 1rem; }
-
-  /* ===== Trava global contra estouro horizontal ===== */
-  html, body { max-width:100%; overflow-x:hidden; }
-  #main-content { max-width:100%; overflow-x:hidden; }
-  #viewLista, #viewDetalhe, #viewAluno { max-width:100%; }
-  #viewAluno p, #viewDetalhe p, #viewLista p { overflow-wrap:anywhere; }
-  #viewAluno svg, #viewDetalhe svg { max-width:100%; }
-  /* Telas estreitas: rótulos de competência mais enxutos (depois das regras base) */
-  @media (max-width:420px){
-    .compNome{ width:4.2rem !important; font-size:.66rem !important; }
-    .compVal{ width:1.8rem !important; font-size:.7rem !important; }
-    .compRow{ gap:.45rem; }
-  }
-  .carCard.urgente{ border-color:rgba(var(--goldRGB),.45); }
-  .alunoLinha{ display:flex; align-items:center; gap:.7rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); border-radius:.9rem; padding:.8rem 1rem; cursor:pointer; }
-
   .statsGrid{ grid-template-columns:1fr 1fr !important; gap:1rem; }
   @media (min-width:1100px){ .statsGrid{ grid-template-columns:1fr 1fr 1fr 1fr !important; } }
 
@@ -383,11 +383,15 @@
   #sidebar{scrollbar-width:thin;scrollbar-color:var(--scroll) transparent;}
 </style>
 <script>
-/* Produção: a camada de dados (authGuard, authGetNome, dbGet*) vem dos scripts
-   reais do projeto (Supabase). Sem dados de exemplo aqui. */
+/* Produção: authGuard, authGetNome e dbGet* vêm dos scripts reais do projeto (Supabase). */
 </script>
 </head>
 <body>
+<script>
+/* Produção: authGuard, authGetNome, dbGetTemas, dbGetTurmasDoProfessor e
+   dbGetAlunosDoProfessor vêm dos scripts reais do projeto (Supabase). */
+</script>
+
 <div id="toast"></div>
 <div id="overlay" onclick="toggleSidebar()"></div>
 
@@ -403,13 +407,13 @@
   <nav style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.2rem;">
     <!-- ── Principal (espelha o rodapé mobile) ── -->
     <a class="nav-item" href="professor.html" title="Início"><i class="em">&#127968;</i><span class="tx">Início</span></a>
-    <a class="nav-item ativo" href="professor-alunos.html" title="Turmas"><i class="em">&#128101;</i><span class="tx">Turmas</span></a>
+    <a class="nav-item" href="professor-alunos.html" title="Turmas"><i class="em">&#128101;</i><span class="tx">Turmas</span></a>
     <a class="nav-item" href="professor-redacoes.html" title="Validar"><i class="em">&#10004;&#65039;</i><span class="tx">Validar</span></a>
     <a class="nav-item" href="professor-estudio.html" title="IA Estúdio"><i class="em">&#10024;</i><span class="tx">IA Estúdio</span></a>
 
     <!-- ── Mais ── -->
     <p class="nav-section-label"><span>Mais</span></p>
-    <a class="nav-item" href="professor-temas.html" title="Temas"><i class="em">&#128203;</i><span class="tx">Temas</span></a>
+    <a class="nav-item ativo" href="professor-temas.html" title="Temas"><i class="em">&#128203;</i><span class="tx">Temas</span></a>
     <a class="nav-item" onclick="mostrarEmBreve('Notificações')" style="cursor:pointer;" title="Notificações"><i class="em">&#128276;</i><span class="tx">Notificações</span></a>
     <a class="nav-item" onclick="irModoAluno()" style="cursor:pointer;" title="Modo Aluno"><i class="em">&#127891;</i><span class="tx">Modo Aluno</span></a>
     <a class="nav-item" onclick="mostrarEmBreve('Enviar sugestão')" style="cursor:pointer;" title="Enviar sugestão"><i class="em">&#128172;</i><span class="tx">Enviar sugestão</span></a>
@@ -429,7 +433,7 @@
       <span style="font-size:.65rem;color:var(--purple);font-weight:700;letter-spacing:.04em;">&#11088; PORTAL PRO</span>
     </span>
   </div>
-  <p class="sideVersao">Turmas · produção · v6</p>
+  <p class="sideVersao">Temas · produção · v3</p>
 </aside>
 
 <!-- MAIN -->
@@ -442,8 +446,8 @@
         <span class="material-symbols-outlined">menu</span>
       </button>
       <div style="display:flex;align-items:center;gap:.5rem;">
-        <span class="material-symbols-outlined" style="color:var(--cyan);font-variation-settings:'FILL' 1;">group</span>
-        <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);">Turmas</h2>
+        <span class="material-symbols-outlined" style="color:var(--cyan);font-variation-settings:'FILL' 1;">list_alt</span>
+        <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);">Temas</h2>
       </div>
     </div>
 
@@ -464,141 +468,91 @@
   </header>
 
   <!-- CONTEÚDO -->
-  <div style="flex:1;padding:1.5rem;max-width:1400px;margin:0 auto;width:100%;box-sizing:border-box;">
+  <div style="flex:1;padding:1.5rem;max-width:1400px;margin:0 auto;width:100%;">
 
-    <!-- ═══ VISÃO 1: LISTA DE TURMAS ═══ -->
-    <div id="viewLista">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:1rem;flex-wrap:wrap;">
-        <div>
-          <h1 style="font-size:1.5rem;font-weight:800;color:var(--text);">Suas turmas</h1>
-          <p id="turmasResumo" style="font-size:.8rem;color:var(--muted);margin-top:.15rem;">Carregando…</p>
-        </div>
-        <button onclick="abrirModalTurma()" style="padding:.7rem 1.25rem;background:var(--cyan);color:var(--bg);font-weight:900;border:none;border-radius:.75rem;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem;white-space:nowrap;">
-          <span class="material-symbols-outlined" style="font-size:1.1rem;">add</span>Nova turma
-        </button>
+    <!-- ═══════════ LISTA DE TEMAS ═══════════ -->
+    <div id="viewTemas">
+
+      <div style="margin-bottom:1rem;">
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text);">Temas</h1>
+        <p style="font-size:.82rem;color:var(--muted);margin-top:.15rem;">Veja o material antes de enviar. Ao abrir um tema, você escolhe o que vai para a turma.</p>
       </div>
-      <div id="listaTurmasEscolas"><div style="text-align:center;padding:2rem;color:var(--muted);font-size:.85rem;">Carregando turmas…</div></div>
+
+      <!-- Abas -->
+      <div class="abasTemas">
+        <button class="abaT ativa" data-aba="recentes"  onclick="irAba('recentes')">Recentes</button>
+        <button class="abaT" data-aba="classicos" onclick="irAba('classicos')">Clássicos</button>
+        <button class="abaT" data-aba="outras"    onclick="irAba('outras')">Outras aplicações</button>
+        <button class="abaT" data-aba="categoria" onclick="irAba('categoria')">Por categoria</button>
+        <button class="abaT" data-aba="meus"      onclick="irAba('meus')">Meus temas</button>
+      </div>
+
+      <!-- Contexto da aba -->
+      <p id="ctxAba" style="font-size:.76rem;color:var(--muted);margin:.7rem 0;"></p>
+
+      <!-- Filtro interno (aparece em Outras aplicações e Por categoria) -->
+      <div id="linhaFiltro" style="display:none;align-items:center;gap:.6rem;margin-bottom:.8rem;flex-wrap:wrap;">
+        <button class="campoBtnT" onclick="abrirGavetaTema()"><span id="lblFiltro">Todas</span><span style="color:var(--muted);">▾</span></button>
+      </div>
+
+      <!-- Busca -->
+      <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:1rem;">
+        <input id="buscaTema" type="text" placeholder="Buscar tema…" oninput="renderTemas()"
+               style="flex:1;background:var(--surface);border:1px solid rgba(var(--borderRGB),.3);border-radius:.75rem;padding:.7rem 1rem;color:var(--text);font-size:.85rem;outline:none;font-family:inherit;"/>
+        <span id="contTemas" style="flex:0 0 auto;font-size:.75rem;color:var(--muted);white-space:nowrap;">—</span>
+      </div>
+
+      <!-- Criar meu próprio tema -->
+      <div class="cardCriarTema" onclick="criarTema()">
+        <span style="font-size:1.5rem;flex:0 0 auto;">✍️</span>
+        <div style="flex:1;min-width:0;">
+          <p style="font-size:.9rem;font-weight:800;color:var(--text);">Criar meu próprio tema</p>
+          <p style="font-size:.75rem;color:var(--muted);">A IA monta o repertório e o material de apoio</p>
+        </div>
+        <span style="flex:0 0 auto;color:var(--cyan);font-weight:800;">→</span>
+      </div>
+
+      <!-- Grade de temas -->
+      <div id="gridTemas" class="gridTemas"></div>
+
     </div>
 
-    <!-- ═══ VISÃO 2: DETALHE DA TURMA ═══ -->
-    <div id="viewDetalhe" style="display:none;">
+    <!-- ═══════════ MATERIAL DO TEMA ═══════════ -->
+    <div id="viewMaterial" style="display:none;">
 
-      <!-- Cabeçalho: voltar + nome + Convidar -->
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;">
-        <button onclick="voltarParaLista()" title="Voltar" style="width:2.5rem;height:2.5rem;border-radius:.75rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.25);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
+        <button onclick="voltarTemas()" title="Voltar" style="width:2.5rem;height:2.5rem;border-radius:.75rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.25);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
         <div style="flex:1;min-width:0;">
-          <h1 id="dtNome" style="font-size:1.3rem;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Turma</h1>
-          <p id="dtEscola" style="font-size:.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Escola</p>
-        </div>
-        <button onclick="abrirCodigoTurma()" style="flex:0 0 auto;display:flex;align-items:center;gap:.4rem;background:var(--surface);border:1px solid rgba(var(--cyanRGB),.35);border-radius:.75rem;padding:.6rem .9rem;cursor:pointer;color:var(--cyan);font-size:.8rem;font-weight:700;">
-          <span class="material-symbols-outlined" style="font-size:1.1rem;">person_add</span>Convidar
-        </button>
-      </div>
-
-      <!-- 3 indicadores -->
-      <div style="display:flex;background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:1rem;overflow:hidden;margin-bottom:1.25rem;">
-        <div style="flex:1;text-align:center;padding:.9rem .4rem;">
-          <p id="dtAlunos" style="font-size:1.35rem;font-weight:800;color:var(--text);line-height:1;">0</p>
-          <p style="font-size:.72rem;color:var(--muted);margin-top:.2rem;">alunos</p>
-        </div>
-        <div style="flex:1;text-align:center;padding:.9rem .4rem;border-left:1px solid rgba(var(--borderRGB),.2);">
-          <p id="dtMedia" style="font-size:1.35rem;font-weight:800;color:var(--gold);line-height:1;">—</p>
-          <p style="font-size:.72rem;color:var(--muted);margin-top:.2rem;">média</p>
-        </div>
-        <div style="flex:1;text-align:center;padding:.9rem .4rem;border-left:1px solid rgba(var(--borderRGB),.2);">
-          <p id="dtPendentes" style="font-size:1.35rem;font-weight:800;color:var(--gold);line-height:1;">0</p>
-          <p style="font-size:.72rem;color:var(--muted);margin-top:.2rem;">pendentes</p>
+          <h1 id="mtTitulo" style="font-size:1.2rem;font-weight:800;color:var(--text);line-height:1.25;">Tema</h1>
+          <p id="mtSub" style="font-size:.76rem;color:var(--muted);margin-top:.15rem;">—</p>
         </div>
       </div>
 
-      <!-- Desktop: esquerda = competências + alunos (rolável) | direita = grupos -->
-      <div class="dtGrid">
+      <div id="mtBadges" style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;"></div>
 
-        <!-- Média por competência -->
-        <div class="dtComp" style="background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:1rem;padding:1.1rem 1.25rem;">
-          <p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.85rem;">Média por competência</p>
-          <div id="dtCompetencias"></div>
+      <div class="matGrid">
+        <div class="cardBoxT">
+          <p class="rotuloT">O que este tema inclui</p>
+          <div id="mtInclui" style="display:flex;flex-direction:column;gap:.55rem;margin-top:.6rem;"></div>
         </div>
-
-        <!-- Grupos por carência -->
-        <div class="dtCar">
-          <p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;">Grupos por carência</p>
-          <div id="dtCarencia" style="display:flex;flex-direction:column;gap:.6rem;"></div>
+        <div class="cardBoxT">
+          <p class="rotuloT">Proposta</p>
+          <p id="mtDesc" style="font-size:.88rem;line-height:1.7;color:var(--text2);margin-top:.5rem;">—</p>
         </div>
+      </div>
 
-        <!-- Alunos: busca + lista rolável -->
-        <div class="dtAlunosWrap">
-          <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.7rem;">
-            <input id="dtBusca" type="text" placeholder="Buscar aluno…" oninput="renderAlunosTurma()" style="flex:1;background:var(--surface);border:1px solid rgba(var(--borderRGB),.3);border-radius:.75rem;padding:.7rem 1rem;color:var(--text);font-size:.85rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='var(--cyan)'" onblur="this.style.borderColor='rgba(var(--borderRGB),.3)'"/>
-            <button onclick="abrirCodigoTurma()" title="Adicionar aluno" style="width:2.75rem;height:2.75rem;border-radius:.75rem;background:var(--cyan);border:none;color:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
-              <span class="material-symbols-outlined">add</span>
-            </button>
-          </div>
-          <div class="listaScroll">
-            <div id="dtAlunosLista" style="display:flex;flex-direction:column;gap:.6rem;"></div>
-          </div>
-        </div>
-
+      <!-- Ações -->
+      <div class="acoesMaterial">
+        <button onclick="baixarMaterial()" class="btnSecT">⬇ Baixar</button>
+        <button onclick="abrirEnviar()" class="btnPriT">📤 Enviar para…</button>
       </div>
 
     </div>
 
-    <!-- ═══ VISÃO 3: DETALHE DO ALUNO ═══ -->
-    <div id="viewAluno" style="display:none;">
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;">
-        <button onclick="voltarParaTurma()" title="Voltar" style="width:2.5rem;height:2.5rem;border-radius:.75rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.25);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
-          <span class="material-symbols-outlined">arrow_back</span>
-        </button>
-        <div style="width:2.75rem;height:2.75rem;border-radius:50%;background:rgba(var(--purpleRGB),.22);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex:0 0 auto;">🧑‍🎓</div>
-        <div style="flex:1;min-width:0;">
-          <h1 id="alNome" style="font-size:1.3rem;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Aluno</h1>
-          <p id="alTurma" style="font-size:.78rem;color:var(--muted);">Turma</p>
-        </div>
-      </div>
-
-      <!-- Faixa larga: média + evolução (mesma posição dos 3 indicadores da turma) -->
-      <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:1rem;padding:1rem 1.25rem;margin-bottom:1.25rem;overflow:hidden;">
-        <div style="flex:1 1 8rem;min-width:0;">
-          <p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Média do aluno</p>
-          <div style="display:flex;align-items:flex-end;gap:.5rem;margin-top:.15rem;flex-wrap:wrap;">
-            <span id="alMedia" style="font-size:2rem;font-weight:800;color:var(--gold);line-height:1;">—</span>
-            <span id="alTend" style="font-size:.75rem;color:var(--green);margin-bottom:.3rem;"></span>
-          </div>
-        </div>
-        <div style="flex:1 1 10rem;min-width:0;">
-          <div id="alGrafico"></div>
-          <p id="alGraficoLeg" style="font-size:.7rem;color:var(--muted);text-align:right;"></p>
-        </div>
-      </div>
-
-      <!-- Mesmo esqueleto da turma: esq = competências + lista | dir = bloco de ação -->
-      <div class="dtGrid">
-
-        <div class="dtComp" style="background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:1rem;padding:1.1rem 1.25rem;">
-          <p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.85rem;">Por competência</p>
-          <div id="alCompetencias"></div>
-        </div>
-
-        <div class="dtCar">
-          <p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;">Ponto de melhoria</p>
-          <div id="alPontoMelhoria" style="display:flex;flex-direction:column;gap:.6rem;"></div>
-        </div>
-
-        <div class="dtAlunosWrap">
-          <p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;">Últimas redações</p>
-          <div class="listaScroll">
-            <div id="alRedacoes" style="display:flex;flex-direction:column;gap:.6rem;"></div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
   </div>
-
-  </div>
+</div>
 
 <!-- ============ MODAL CRIAR TURMA ============ -->
 <style>
@@ -782,18 +736,13 @@
 </div>
 
 <!-- GAVETA "MAIS" (sobe por trás da barra — padrão do mockup) -->
-<!-- Gaveta: Convidar alunos (código da turma) -->
-<div id="gvCodigoBg" onclick="fecharCodigoTurma()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:190;"></div>
-<div id="gvCodigo" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:191;background:var(--surface);border-radius:1.25rem 1.25rem 0 0;border-top:1px solid rgba(var(--borderRGB),.25);padding:.9rem 1.25rem 1.5rem;max-width:34rem;margin:0 auto;">
+<!-- Gaveta de seleção -->
+<div id="gvTBg" onclick="fecharGavetaTema()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:190;"></div>
+<div id="gvT" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:191;background:var(--surface);border-radius:1.25rem 1.25rem 0 0;border-top:1px solid rgba(var(--borderRGB),.25);padding:.9rem 1.25rem 1.5rem;max-width:34rem;margin:0 auto;max-height:72vh;overflow-y:auto;">
   <div style="width:2.4rem;height:.25rem;border-radius:99px;background:rgba(var(--borderRGB),.5);margin:0 auto .9rem;"></div>
-  <p style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:.2rem;">Convidar alunos</p>
-  <p id="gvCodigoTurma" style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;">Turma</p>
-  <p style="font-size:.72rem;color:var(--muted);margin-bottom:.4rem;">Compartilhe este código com a turma:</p>
-  <div id="gvCodigoValor" style="background:var(--bg);border:1px dashed rgba(var(--cyanRGB),.45);border-radius:.75rem;padding:.85rem 1rem;color:var(--cyan);font-size:.95rem;font-weight:700;text-align:center;letter-spacing:.02em;word-break:break-all;margin-bottom:.9rem;">redaon-…</div>
-  <button onclick="copiarCodigoTurma()" style="width:100%;padding:.8rem;background:var(--cyan);color:var(--bg);border:none;border-radius:.75rem;font-size:.85rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;">
-    <span class="material-symbols-outlined" style="font-size:1.1rem;">content_copy</span>Copiar código
-  </button>
-  <p style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.7rem;">O aluno digita esse código no app dele e entra automaticamente na turma.</p>
+  <p id="gvTTit" style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:.3rem;">Escolher</p>
+  <p id="gvTSub" style="font-size:.75rem;color:var(--muted);margin-bottom:.8rem;"></p>
+  <div id="gvTOpts" style="display:flex;flex-direction:column;gap:.45rem;"></div>
 </div>
 
 <div id="gavetaBg" onclick="fecharMais()"></div>
@@ -813,7 +762,7 @@
 <!-- BARRA INFERIOR (padrão do mockup mobile v2A.3) — só em telas pequenas -->
 <nav id="barraInferior">
   <a href="professor.html"><i class="bEmoji">&#127968;</i>Início</a>
-  <a class="on" href="professor-alunos.html"><i class="bEmoji">&#128101;</i>Turmas</a>
+  <a href="professor-alunos.html"><i class="bEmoji">&#128101;</i>Turmas</a>
   <a class="fabWrap" href="professor-redacoes.html">
     <span class="fab"><i class="bEmoji" style="font-size:20px;">&#10004;&#65039;</i></span>
     <span class="fabCap">Validar</span>
@@ -852,39 +801,283 @@
   // ════════════════════════════════════════════════════════════════
   // CARREGAMENTO INICIAL — decide entre empty state e dashboard
   // ════════════════════════════════════════════════════════════════
-  async function carregarPainel() {
-    // Tela Turmas: carrega turmas, alunos e redações; renderiza a lista.
-    if (typeof dbGetTurmasDoProfessor === 'function') {
-      try {
-        turmasDoProfessor = await dbGetTurmasDoProfessor();
-      } catch (e) {
-        console.error('Falha ao carregar turmas:', e);
-        toast('Não foi possível carregar suas turmas. Tente recarregar a página.', 5000);
-        turmasDoProfessor = [];
-      }
-    } else {
-      turmasDoProfessor = [];
-    }
-    // Alunos e redações alimentam o detalhe da turma
-    try {
-      if (typeof dbGetAlunosDoProfessor === 'function') {
-        const r = await dbGetAlunosDoProfessor();
-        todosAlunos = Array.isArray(r) ? r : [];
-      }
-    } catch(e){ console.error(e); todosAlunos = []; }
-    try {
-      if (typeof dbGetRedacoesDoProfessor === 'function') {
-        const r = await dbGetRedacoesDoProfessor({ limit: 500 });
-        todasRedacoes = Array.isArray(r) ? r : [];
-      }
-    } catch(e){ console.error(e); todasRedacoes = []; }
+  var TEMAS=[], _aba='recentes', _filtro='todas', _temaAtual=null;
 
-    renderListaTurmas();
+  var APLIC = {
+    ppl:               {rot:'PPL',            cls:'selo-ppl'},
+    digital:           {rot:'Digital',        cls:'selo-digital'},
+    segunda_aplicacao: {rot:'2ª aplicação',   cls:'selo-segunda'}
+  };
+
+  var CTX = {
+    recentes:  'Temas oficiais das provas de 2020 a 2025.',
+    classicos: 'Temas oficiais das provas de 2009 a 2019.',
+    outras:    'Temas oficiais do ENEM que não caíram na aplicação regular. Menos usados nos cursinhos — ótimos para simulado sem repertório decorado.',
+    categoria: 'Filtre por eixo temático.',
+    meus:      'Temas que você criou para suas turmas.'
+  };
+
+  var CATEGORIAS = ['Social','Direitos','Saúde','Tecnologia','Educação','Consumo','Meio Ambiente','Trabalho','Economia','Cultura'];
+
+  async function carregarPainel() {
+    try { if (typeof dbGetTurmasDoProfessor === 'function') turmasDoProfessor = await dbGetTurmasDoProfessor() || []; }
+    catch(e){ turmasDoProfessor = []; }
+    try { if (typeof dbGetAlunosDoProfessor === 'function') todosAlunos = await dbGetAlunosDoProfessor() || []; }
+    catch(e){ todosAlunos = []; }
+    try {
+      if (typeof dbGetTemas === 'function') TEMAS = await dbGetTemas() || [];
+      // Temas de provas canceladas não entram na lista (decisão do Alan).
+      // Para reverter, basta remover este filtro — o dado continua no banco.
+      TEMAS = TEMAS.filter(function(t){ return t.aplicacao !== 'cancelada'; });
+    }
+    catch(e){ console.error(e); TEMAS = []; }
+    irAba('recentes');
+  }
+  function renderizarDashboard(){ /* não usado */ }
+
+  window.irAba = function(a){
+    _aba=a; _filtro='todas';
+    document.querySelectorAll('.abaT').forEach(function(b){ b.classList.toggle('ativa', b.getAttribute('data-aba')===a); });
+    var ctx=document.getElementById('ctxAba'); if(ctx) ctx.textContent = CTX[a] || '';
+    var lf=document.getElementById('linhaFiltro');
+    if(lf) lf.style.display = (a==='outras' || a==='categoria') ? 'flex' : 'none';
+    var lbl=document.getElementById('lblFiltro'); if(lbl) lbl.textContent='Todas';
+    renderTemas();
+  };
+
+  function temasDaAba(){
+    var lista = TEMAS || [];
+    if(_aba==='recentes')  return lista.filter(function(t){ return t.ano_enem!=null && t.ano_enem>=2020 && (!t.aplicacao || t.aplicacao==='regular'); });
+    if(_aba==='classicos') return lista.filter(function(t){ return t.ano_enem!=null && t.ano_enem<2020 && (!t.aplicacao || t.aplicacao==='regular'); });
+    if(_aba==='outras'){
+      var l = lista.filter(function(t){ return t.aplicacao && t.aplicacao!=='regular'; });
+      if(_filtro!=='todas') l = l.filter(function(t){ return t.aplicacao===_filtro; });
+      return l;
+    }
+    if(_aba==='categoria'){
+      return (_filtro==='todas') ? lista : lista.filter(function(t){ return t.categoria===_filtro; });
+    }
+    if(_aba==='meus') return lista.filter(function(t){ return t.origem==='professor'; });
+    return lista;
   }
 
-  function renderizarDashboard(){ /* não usado na tela Turmas */ }
+  window.renderTemas = function(){
+    var box=document.getElementById('gridTemas'); if(!box) return;
+    var busca=(document.getElementById('buscaTema')||{}).value||'';
+    busca=busca.toLowerCase().trim();
+    var lista=temasDaAba();
+    if(busca) lista=lista.filter(function(t){
+      return (t.titulo||'').toLowerCase().indexOf(busca)>=0
+          || (t.categoria||'').toLowerCase().indexOf(busca)>=0
+          || String(t.ano_enem||'').indexOf(busca)>=0;
+    });
+    var c=document.getElementById('contTemas');
+    if(c) c.textContent = lista.length + ' tema' + (lista.length===1?'':'s');
+    if(!lista.length){
+      box.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:2rem 1rem;color:var(--muted);font-size:.85rem;">'
+        + (busca ? 'Nenhum tema com esse termo.' : (_aba==='meus' ? 'Você ainda não criou temas. Use "Criar meu próprio tema" acima.' : 'Nenhum tema nesta aba.'))
+        + '</p>';
+      return;
+    }
+    box.innerHTML = lista.map(cardTema).join('');
+  };
 
-// renderizarDashboard original removido (tela Turmas não usa dashboard)
+  function cardTema(t){
+    var selos='';
+    if(t.origem==='professor')      selos += '<span class="selo selo-meus">Meu tema</span>';
+    else if(t.origem==='profa')     selos += '<span class="selo selo-profa">PROfa</span>';
+    else if(t.ano_enem)             selos += '<span class="selo selo-enem">ENEM ' + t.ano_enem + '</span>';
+    if(t.aplicacao && APLIC[t.aplicacao]) selos += '<span class="selo ' + APLIC[t.aplicacao].cls + '">' + APLIC[t.aplicacao].rot + '</span>';
+    if(t.categoria) selos += '<span class="selo" style="background:rgba(var(--borderRGB),.25);color:var(--muted);">' + t.categoria + '</span>';
+    var inclui = t.inclui || '💡 repertório (9 eixos) · ❓ quiz';
+    return '<div class="temaCard" onclick="abrirMaterial(\'' + t.id + '\')">'
+      + '<div class="temaTop">' + selos + '</div>'
+      + '<p class="temaTit">' + (t.titulo||'Tema') + '</p>'
+      + '<p class="temaInc">Inclui: ' + inclui + '</p>'
+      + '<p class="temaVer">Ver material →</p>'
+      + '</div>';
+  }
+
+  // ─── Material do tema ───
+  window.abrirMaterial = function(id){
+    var t=(TEMAS||[]).filter(function(x){ return String(x.id)===String(id); })[0];
+    if(!t){ toast('Tema não encontrado'); return; }
+    _temaAtual=t;
+    document.getElementById('viewTemas').style.display='none';
+    document.getElementById('viewMaterial').style.display='block';
+    window.scrollTo(0,0);
+
+    document.getElementById('mtTitulo').textContent = t.titulo || 'Tema';
+    document.getElementById('mtSub').textContent =
+      (t.origem==='professor' ? 'Criado por você' : (t.origem==='profa' ? 'por Profa. Blanche' : 'Proposta oficial do ENEM'))
+      + (t.ano_enem ? ' · ' + t.ano_enem : '');
+
+    var b='';
+    if(t.aplicacao && APLIC[t.aplicacao]) b += '<span class="selo ' + APLIC[t.aplicacao].cls + '">' + APLIC[t.aplicacao].rot + '</span>';
+    if(t.categoria) b += '<span class="selo" style="background:rgba(var(--borderRGB),.25);color:var(--muted);">' + t.categoria + '</span>';
+    if(t.nivel) b += '<span class="selo" style="background:rgba(var(--borderRGB),.25);color:var(--muted);">nível ' + t.nivel + '</span>';
+    document.getElementById('mtBadges').innerHTML = b;
+
+    document.getElementById('mtDesc').textContent = t.descricao || 'Proposta de redação do ENEM.';
+
+    var itens = [
+      {ic:'💡', nm:'Repertório por eixo', ds:'9 categorias · do banco RedaON'},
+      {ic:'📄', nm:'Textos motivadores',  ds: (t.ano_enem ? 'oficiais da prova' : 'gerados pela IA')},
+      {ic:'❓', nm:'Quiz do tema',        ds:'para fixar o repertório'},
+      {ic:'⭐', nm:'Redação nota mil',    ds:'modelo comentado'}
+    ];
+    document.getElementById('mtInclui').innerHTML = itens.map(function(i){
+      return '<div class="incItem"><span style="font-size:1.1rem;flex:0 0 auto;">'+i.ic+'</span>'
+        + '<span style="min-width:0;flex:1;"><span style="display:block;font-size:.83rem;font-weight:700;color:var(--text);">'+i.nm+'</span>'
+        + '<span style="display:block;font-size:.72rem;color:var(--muted);">'+i.ds+'</span></span></div>';
+    }).join('');
+  };
+  window.voltarTemas = function(){
+    document.getElementById('viewMaterial').style.display='none';
+    document.getElementById('viewTemas').style.display='block';
+    window.scrollTo(0,0);
+  };
+  window.baixarMaterial = function(){ toast('⬇ Download do material — em breve'); };
+  window.criarTema = function(){
+    abrirGvTexto('Criar meu próprio tema',
+      'Escreva o tema. A IA monta o repertório e o material de apoio no IA Estúdio.',
+      function(txt){
+        if(!txt){ toast('Escreva o tema primeiro'); return; }
+        window.location.href = 'professor-estudio.html?tema=' + encodeURIComponent(txt);
+      });
+  };
+  // Gaveta com campo de texto
+  function abrirGvTexto(titulo, sub, cb){
+    document.getElementById('gvTTit').textContent = titulo;
+    document.getElementById('gvTSub').textContent = sub || '';
+    document.getElementById('gvTOpts').innerHTML =
+        '<input id="gvTInput" type="text" placeholder="Ex.: o impacto da desinformação na saúde pública" '
+      + 'style="width:100%;background:var(--bg);border:1px solid rgba(var(--borderRGB),.35);border-radius:.75rem;'
+      + 'padding:.8rem 1rem;color:var(--text);font-size:.9rem;font-family:inherit;outline:none;"/>'
+      + '<button class="gvOptT" style="text-align:center;background:var(--cyan);color:var(--bg);font-weight:800;border:none;margin-top:.5rem;" '
+      + 'onclick="confirmarGvTexto()">✨ Criar no IA Estúdio</button>';
+    window._gvTextoCB = cb;
+    document.getElementById('gvTBg').style.display='block';
+    document.getElementById('gvT').style.display='block';
+    setTimeout(function(){ var i=document.getElementById('gvTInput'); if(i) i.focus(); }, 60);
+  }
+  window.confirmarGvTexto = function(){
+    var i=document.getElementById('gvTInput');
+    var txt = i ? i.value.trim() : '';
+    var cb = window._gvTextoCB;
+    if(!txt){ toast('Escreva o tema primeiro'); return; }
+    fecharGavetaTema();
+    if(cb) cb(txt);
+  };
+
+  // ─── Enviar para… (3 níveis) ───
+  window.abrirEnviar = function(){
+    var nomeT = _temaAtual ? (_temaAtual.titulo||'este tema') : 'este tema';
+    abrirGvT('Enviar material', nomeT, [
+      {v:'turma',   r:'👥 Turma inteira'},
+      {v:'precisa', r:'🎯 Só quem precisa'},
+      {v:'aluno',   r:'🧑‍🎓 Um aluno'}
+    ], function(v){
+      if(v==='turma')   escolherTurmaParaEnvio();
+      if(v==='precisa') toast('🎯 Enviado a quem tem carência relacionada');
+      if(v==='aluno')   escolherAlunoParaEnvio();
+    });
+  };
+  function escolherTurmaParaEnvio(){
+    var ops=(turmasDoProfessor||[]).map(function(t){ return {v:t.id, r:t.nome}; });
+    abrirGvT('Para qual turma?', '', ops, function(v){
+      var t=(turmasDoProfessor||[]).filter(function(x){ return String(x.id)===String(v); })[0];
+      toast('📤 Enviado para ' + (t?t.nome:'a turma'));
+    });
+  }
+  function escolherAlunoParaEnvio(){
+    var ops=(todosAlunos||[]).slice(0,20).map(function(a){ return {v:a.id, r:a.nome}; });
+    abrirGvT('Para qual aluno?', '', ops, function(v){
+      var a=(todosAlunos||[]).filter(function(x){ return String(x.id)===String(v); })[0];
+      toast('📤 Enviado para ' + (a?a.nome:'o aluno'));
+    });
+  }
+
+  // ─── Gaveta ───
+  function abrirGvT(titulo, sub, opcoes, cb){
+    document.getElementById('gvTTit').textContent=titulo;
+    document.getElementById('gvTSub').textContent=sub||'';
+    document.getElementById('gvTOpts').innerHTML = opcoes.length
+      ? opcoes.map(function(o){ return '<button class="gvOptT" onclick="escolherGvT(\'' + o.v + '\')">' + o.r + '</button>'; }).join('')
+      : '<p style="font-size:.8rem;color:var(--muted);text-align:center;padding:1rem 0;">Nenhuma opção.</p>';
+    window._gvTCB = cb;
+    document.getElementById('gvTBg').style.display='block';
+    document.getElementById('gvT').style.display='block';
+  }
+  window.escolherGvT = function(v){
+    var cb=window._gvTCB;
+    fecharGavetaTema();
+    if(cb) cb(v);
+  };
+  window.fecharGavetaTema = function(){
+    document.getElementById('gvTBg').style.display='none';
+    document.getElementById('gvT').style.display='none';
+  };
+  window.abrirGavetaTema = function(){
+    var ops, tit;
+    if(_aba==='outras'){
+      tit='Tipo de aplicação';
+      var todas=(TEMAS||[]).filter(function(t){ return t.aplicacao && t.aplicacao!=='regular'; });
+      ops=[{v:'todas', r:'Todas (' + todas.length + ')'}];
+      Object.keys(APLIC).forEach(function(k){
+        var n=todas.filter(function(t){ return t.aplicacao===k; }).length;
+        if(n) ops.push({v:k, r:APLIC[k].rot + ' (' + n + ')'});
+      });
+    } else {
+      tit='Eixo temático';
+      ops=[{v:'todas', r:'Todas'}].concat(CATEGORIAS.map(function(c){
+        var n=(TEMAS||[]).filter(function(t){ return t.categoria===c; }).length;
+        return {v:c, r:c + (n ? ' (' + n + ')' : '')};
+      }));
+    }
+    abrirGvT(tit, '', ops, function(v){
+      _filtro=v;
+      var lbl=document.getElementById('lblFiltro');
+      if(lbl) lbl.textContent = (v==='todas') ? 'Todas' : ((APLIC[v] && APLIC[v].rot) || v);
+      renderTemas();
+    });
+  };
+
+  function renderizarDashboard() {
+    // Saudação (desktop)
+    document.getElementById('saudacaoProf').textContent = `${s}, ${NOME_PROF}! 👋`;
+    // Espelho no card de identidade mobile
+    var _fcN = document.getElementById('fcNome'); if (_fcN) _fcN.textContent = NOME_PROF;
+    var _fcS = document.getElementById('fcSaudacao'); if (_fcS) _fcS.textContent = `${s} 👋`;
+
+    // Stat: turmas (contagem real)
+    const n = turmasDoProfessor.length;
+    document.getElementById('statTurmas').textContent = n;
+    var _mT = document.getElementById('mTurmas'); if (_mT) _mT.textContent = n;
+    document.getElementById('statTurmasDesc').textContent =
+      n === 1 ? 'Você tem 1 turma cadastrada' : `Você tem ${n} turmas cadastradas`;
+
+    // (A seção "Últimas Entregas" foi removida conforme o mockup;
+    //  os cálculos abaixo continuam alimentando os cartões de métricas.)
+    var _ge = document.getElementById('gridEntregas');
+    if (_ge) _ge.innerHTML = `
+      <div style="padding:1rem;text-align:center;color:var(--muted);font-size:.8rem;">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;color:var(--cyan);display:block;margin-bottom:.25rem;animation:spin 1s linear infinite;">progress_activity</span>
+        Carregando entregas...
+      </div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
+
+    // Sem a camada de dados (arquivo solto / sessão fora): zera os cartões e para aqui.
+    if (typeof dbGetRedacoesDoProfessor !== 'function') {
+      atualizarStatsAlunos([]);
+      atualizarStatsRedacoes([]);
+      renderTurmasHome();
+      return;
+    }
+
+    // Carrega dados reais (em paralelo pra ser mais rápido)
+    carregarDadosReais();
+  }
 
   async function carregarDadosReais() {
     try {
@@ -1170,419 +1363,6 @@
           <p class="turmaSub">${sub}</p>
           ${statusPend}
         </a>`;
-    }).join('');
-  }
-
-  // ═══ LISTA DE TURMAS agrupada por escola (tela Turmas) ═══
-  function _corTurma(idx){
-    const cores=[{bg:'rgba(var(--cyanRGB),.14)',fg:'var(--cyan)'},{bg:'rgba(var(--purpleRGB),.18)',fg:'var(--purple)'},{bg:'rgba(var(--goldRGB),.16)',fg:'var(--gold)'}];
-    return cores[idx%cores.length];
-  }
-  function _sigla(nome){
-    return (nome||'').replace(/[^0-9A-Za-zÀ-ú]/g,' ').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase().slice(0,3)||'•';
-  }
-  function renderListaTurmas(){
-    const box=document.getElementById('listaTurmasEscolas');
-    if(!box) return;
-    const turmas=turmasDoProfessor||[];
-    // agrupa por escola (campo escolas.nome, como vem do Supabase)
-    const grupos={};
-    turmas.forEach(t=>{
-      const esc=(t.escolas&&t.escolas.nome)||t.escola_nome||'Minha escola';
-      (grupos[esc]=grupos[esc]||[]).push(t);
-    });
-    const nEscolas=Object.keys(grupos).length;
-    let totAlunos=0; turmas.forEach(t=>totAlunos+=(t.alunos||0));
-    const resumo=document.getElementById('turmasResumo');
-    if(resumo) resumo.textContent = turmas.length===0
-      ? 'Nenhuma turma ainda — crie a primeira'
-      : `${turmas.length} turma${turmas.length>1?'s':''}`+(totAlunos?` · ${totAlunos} aluno${totAlunos>1?'s':''}`:'')+` · ${nEscolas} escola${nEscolas>1?'s':''}`;
-
-    if(turmas.length===0){
-      box.innerHTML=`<div style="text-align:center;padding:2.5rem 1rem;color:var(--muted);">
-        <span class="material-symbols-outlined" style="font-size:2.5rem;color:var(--cyan);display:block;margin-bottom:.5rem;">school</span>
-        Você ainda não tem turmas.<br>Toque em "Nova turma" para começar.</div>`;
-      return;
-    }
-    let idx=0;
-    box.innerHTML=Object.keys(grupos).map(escola=>{
-      const cards=grupos[escola].map(t=>{
-        const c=_corTurma(idx++);
-        const nAlunos=t.alunos||0;
-        const media=t.media||null;
-        const pend=t.pendentes||0;
-        const tag = pend>0
-          ? `<div style="text-align:right;flex:0 0 auto;"><p style="font-size:1.05rem;font-weight:800;color:var(--gold);line-height:1;">${pend}</p><p style="font-size:.68rem;color:var(--gold);">pendente${pend>1?'s':''}</p></div>`
-          : `<div style="text-align:right;flex:0 0 auto;"><p style="font-size:.9rem;font-weight:800;color:var(--green);line-height:1;">✓</p><p style="font-size:.68rem;color:var(--green);">em dia</p></div>`;
-        const sub=`${nAlunos} aluno${nAlunos>1?'s':''}`+(media?` · média ${media}`:'');
-        return `
-          <div onclick="abrirDetalheTurma('${t.id}')" style="display:flex;align-items:center;gap:.75rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:.9rem;padding:.85rem 1rem;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='rgba(var(--cyanRGB),.4)'" onmouseout="this.style.borderColor='rgba(var(--borderRGB),.2)'">
-            <div style="width:42px;height:42px;border-radius:12px;background:${c.bg};color:${c.fg};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex:0 0 auto;">${_sigla(t.nome)}</div>
-            <div style="flex:1;min-width:0;">
-              <p style="font-size:.9rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.nome}</p>
-              <p style="font-size:.75rem;color:var(--muted);">${sub}</p>
-            </div>
-            ${tag}
-          </div>`;
-      }).join('');
-      return `
-        <div style="margin-bottom:1.5rem;">
-          <p style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.6rem;padding-left:.15rem;">${escola}</p>
-          <div style="display:flex;flex-direction:column;gap:.6rem;">${cards}</div>
-        </div>`;
-    }).join('');
-  }
-  // ═══ DETALHE DA TURMA (Parte 2) ═══
-  var _turmaAtual = null;
-
-  window.abrirDetalheTurma = function(id){
-    const t = (turmasDoProfessor||[]).find(x => String(x.id) === String(id));
-    if(!t){ toast('Turma não encontrada'); return; }
-    _turmaAtual = t;
-
-    document.getElementById('viewLista').style.display = 'none';
-    document.getElementById('viewDetalhe').style.display = 'block';
-    window.scrollTo(0,0);
-
-    document.getElementById('dtNome').textContent = t.nome || 'Turma';
-    document.getElementById('dtEscola').textContent = (t.escolas && t.escolas.nome) || t.escola_nome || '';
-
-    const alunos = alunosDaTurma(t.id);
-    const reds   = redacoesDaTurma(t.id);
-    const pend   = reds.filter(r => (r.status||'enviada')==='enviada').length;
-    const notas  = reds.filter(r => typeof r.nota_final==='number' && r.nota_final>0).map(r=>r.nota_final);
-    const media  = notas.length ? Math.round(notas.reduce((a,b)=>a+b,0)/notas.length) : null;
-
-    document.getElementById('dtAlunos').textContent = alunos.length || (t.alunos||0);
-    document.getElementById('dtMedia').textContent = media !== null ? media : (t.media||'—');
-    document.getElementById('dtPendentes').textContent = pend || (t.pendentes||0);
-
-    renderCompetencias(t, reds);
-    renderCarencia(t, reds, alunos.length || (t.alunos||0));
-    renderAlunosTurma();
-  };
-
-  window.voltarParaLista = function(){
-    document.getElementById('viewDetalhe').style.display = 'none';
-    var va = document.getElementById('viewAluno'); if(va) va.style.display = 'none';
-    document.getElementById('viewLista').style.display = 'block';
-    window.scrollTo(0,0);
-  };
-
-  function alunosDaTurma(turmaId){
-    return (todosAlunos||[]).filter(a => (a.turmas && String(a.turmas.id)===String(turmaId)) || String(a.turma_id)===String(turmaId));
-  }
-  function redacoesDaTurma(turmaId){
-    return (todasRedacoes||[]).filter(r => String(r.turma_id)===String(turmaId));
-  }
-
-  // Média por competência (C1–C5)
-  const _COMPS = [
-    {k:'c1', rot:'C1 Norma'},
-    {k:'c2', rot:'C2 Tema'},
-    {k:'c3', rot:'C3 Argum.'},
-    {k:'c4', rot:'C4 Coesão'},
-    {k:'c5', rot:'C5 Interv.'}
-  ];
-  function mediasPorCompetencia(reds){
-    const out = {};
-    _COMPS.forEach(c=>{
-      const vals = reds.map(r => r[c.k]).filter(v => typeof v==='number' && v>=0);
-      out[c.k] = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : null;
-    });
-    return out;
-  }
-  function renderCompetencias(t, reds){
-    const box = document.getElementById('dtCompetencias');
-    if(!box) return;
-    const m = mediasPorCompetencia(reds);
-    const temDados = _COMPS.some(c => m[c.k] !== null);
-    if(!temDados){
-      box.innerHTML = `<p style="font-size:.78rem;color:var(--muted);text-align:center;padding:.8rem 0;">Sem redações corrigidas ainda.<br>As médias aparecem aqui após as primeiras validações.</p>`;
-      return;
-    }
-    // a menor média fica destacada em dourado
-    const valores = _COMPS.map(c=>m[c.k]).filter(v=>v!==null);
-    const pior = Math.min.apply(null, valores);
-    box.innerHTML = _COMPS.map(c=>{
-      const v = m[c.k];
-      if(v===null) return '';
-      const isPior = (v===pior);
-      const cor = isPior ? 'var(--gold)' : 'var(--cyan)';
-      const pct = Math.max(2, Math.round((v/200)*100));
-      return `<div class="compRow">
-        <span class="compNome" style="${isPior?'color:var(--gold);font-weight:700;':''}">${c.rot}</span>
-        <span class="compBar"><span style="width:${pct}%;background:${cor};"></span></span>
-        <span class="compVal" style="color:${cor};">${v}</span>
-      </div>`;
-    }).join('');
-  }
-
-  // Grupos por carência — 5 competências ordenadas por urgência
-  const _CAR_DESC = {
-    c1:'gramática e norma culta',
-    c2:'repertório e compreensão do tema',
-    c3:'argumentação e projeto de texto',
-    c4:'conectivos e transições',
-    c5:'proposta de intervenção'
-  };
-  const _CAR_ROT = { c1:'Norma culta', c2:'Repertório', c3:'Argumentação', c4:'Coesão', c5:'Intervenção' };
-
-  function renderCarencia(t, reds, totalAlunos){
-    const box = document.getElementById('dtCarencia');
-    if(!box) return;
-    const m = mediasPorCompetencia(reds);
-    const temDados = _COMPS.some(c => m[c.k] !== null);
-    if(!temDados){
-      box.innerHTML = `<div class="carCard"><p style="font-size:.78rem;color:var(--muted);text-align:center;">Os grupos aparecem quando houver redações corrigidas.</p></div>`;
-      return;
-    }
-    // nº de alunos com necessidade: quanto pior a média, mais alunos
-    const itens = _COMPS.map(c=>{
-      const v = m[c.k];
-      if(v===null) return null;
-      const falta = Math.max(0, 200 - v);              // 0..200
-      const n = Math.round((falta/200) * (totalAlunos||0));
-      return { k:c.k, media:v, alunos:n };
-    }).filter(Boolean).sort((a,b)=> a.media - b.media); // pior primeiro
-
-    box.innerHTML = itens.map((it,i)=>{
-      const urgente = (i===0);
-      const cor = urgente ? 'var(--gold)' : 'var(--cyan)';
-      const bg  = urgente ? 'rgba(var(--goldRGB),.16)' : 'rgba(var(--cyanRGB),.16)';
-      return `<div class="carCard${urgente?' urgente':''}">
-        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;">
-          <div style="width:2.2rem;height:2.2rem;border-radius:.7rem;background:${bg};color:${cor};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex:0 0 auto;">${it.k.toUpperCase()}</div>
-          <div style="min-width:0;">
-            <p style="font-size:.85rem;font-weight:700;color:var(--text);">${_CAR_ROT[it.k]} · ${it.alunos} aluno${it.alunos===1?'':'s'}</p>
-            <p style="font-size:.72rem;color:var(--muted);">${_CAR_DESC[it.k]}${urgente?' · mais urgente':''}</p>
-          </div>
-        </div>
-        <button onclick="window.location.href='professor-estudio.html'" style="width:100%;padding:.6rem;border:none;border-radius:.7rem;cursor:pointer;font-size:.8rem;font-weight:700;background:${urgente?'var(--cyan)':'var(--surface2)'};color:${urgente?'var(--bg)':'var(--text2)'};">✨ Gerar reforço</button>
-      </div>`;
-    }).join('');
-  }
-
-  // Lista de alunos da turma (com busca)
-  window.renderAlunosTurma = function(){
-    const box = document.getElementById('dtAlunosLista');
-    if(!box || !_turmaAtual) return;
-    const termo = (document.getElementById('dtBusca')?.value || '').toLowerCase().trim();
-    let alunos = alunosDaTurma(_turmaAtual.id);
-    if(termo) alunos = alunos.filter(a => (a.nome||'').toLowerCase().indexOf(termo) >= 0);
-
-    if(alunos.length === 0){
-      box.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem;">
-        ${termo ? 'Nenhum aluno com esse nome.' : 'Nenhum aluno ainda. Use "Convidar" para compartilhar o código da turma.'}</div>`;
-      return;
-    }
-    const reds = redacoesDaTurma(_turmaAtual.id);
-    box.innerHTML = alunos.map(a=>{
-      const meus = reds.filter(r => String(r.aluno_id)===String(a.id) || (r.usuarios && r.usuarios.nome===a.nome));
-      const notas = meus.filter(r=>typeof r.nota_final==='number'&&r.nota_final>0).map(r=>r.nota_final);
-      const med = notas.length ? Math.round(notas.reduce((x,y)=>x+y,0)/notas.length) : null;
-      const pend = meus.filter(r=>(r.status||'enviada')==='enviada').length;
-      const sub = (med!==null?`média ${med}`:'sem nota') + ` · ${meus.length} redaç${meus.length===1?'ão':'ões'}`;
-      const tag = pend>0
-        ? `<span style="font-size:.72rem;font-weight:700;color:var(--gold);flex:0 0 auto;">${pend} pendente${pend>1?'s':''}</span>`
-        : `<span style="font-size:.72rem;font-weight:700;color:var(--green);flex:0 0 auto;">em dia</span>`;
-      return `<div class="alunoLinha" onclick="abrirDetalheAluno('${a.id}')">
-        <div style="width:2.4rem;height:2.4rem;border-radius:50%;background:rgba(var(--purpleRGB),.22);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex:0 0 auto;">🧑‍🎓</div>
-        <div style="flex:1;min-width:0;">
-          <p style="font-size:.85rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome||'Aluno'}</p>
-          <p style="font-size:.72rem;color:var(--muted);">${sub}</p>
-        </div>
-        ${tag}
-      </div>`;
-    }).join('');
-  };
-
-  // Gaveta do código de convite
-  window.abrirCodigoTurma = function(){
-    if(!_turmaAtual) return;
-    document.getElementById('gvCodigoTurma').textContent = _turmaAtual.nome || 'Turma';
-    document.getElementById('gvCodigoValor').textContent = _turmaAtual.codigo || gerarCodigoDemo(_turmaAtual.id);
-    document.getElementById('gvCodigoBg').style.display = 'block';
-    document.getElementById('gvCodigo').style.display = 'block';
-  };
-  window.fecharCodigoTurma = function(){
-    document.getElementById('gvCodigoBg').style.display = 'none';
-    document.getElementById('gvCodigo').style.display = 'none';
-  };
-  function gerarCodigoDemo(id){
-    var a=['pleno','forte','claro','vivo'], b=['pantera','falcao','jaguar','tucano'];
-    var i=String(id).length % a.length, j=String(id).charCodeAt(String(id).length-1) % b.length;
-    return 'redaon-'+a[i]+'-'+b[j]+'-'+(10 + (String(id).charCodeAt(0) % 89));
-  }
-  window.copiarCodigoTurma = function(){
-    var txt = document.getElementById('gvCodigoValor').textContent;
-    var ta = document.createElement('textarea');
-    ta.value = txt; ta.style.position='fixed'; ta.style.left='-9999px';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); toast('✅ Código copiado!'); }
-    catch(e) { toast('Não consegui copiar. Selecione manualmente.'); }
-    document.body.removeChild(ta);
-  };
-
-  // ═══ DETALHE DO ALUNO ═══
-  var _alunoAtual = null;
-
-  window.abrirDetalheAluno = function(alunoId){
-    const a = (todosAlunos||[]).find(x => String(x.id) === String(alunoId));
-    if(!a){ toast('Aluno não encontrado'); return; }
-    _alunoAtual = a;
-
-    document.getElementById('viewDetalhe').style.display = 'none';
-    document.getElementById('viewAluno').style.display = 'block';
-    window.scrollTo(0,0);
-
-    document.getElementById('alNome').textContent = a.nome || 'Aluno';
-    document.getElementById('alTurma').textContent = _turmaAtual ? (_turmaAtual.nome||'') : '';
-
-    const reds = redacoesDoAluno(a);
-    const corrigidas = reds.filter(r => typeof r.nota_final==='number' && r.nota_final>0);
-
-    // Média + tendência
-    const notas = corrigidas.map(r=>r.nota_final);
-    const media = notas.length ? Math.round(notas.reduce((x,y)=>x+y,0)/notas.length) : null;
-    document.getElementById('alMedia').textContent = media!==null ? media : '—';
-    const tend = document.getElementById('alTend');
-    if(notas.length >= 2){
-      const dif = notas[0] - notas[notas.length-1]; // mais recente vs mais antiga
-      tend.textContent = (dif>=0?'↑ ':'↓ ') + Math.abs(dif) + ' desde a primeira';
-      tend.style.color = dif>=0 ? 'var(--green)' : 'var(--red)';
-    } else tend.textContent = '';
-
-    // Gráfico simples das últimas redações
-    renderGraficoAluno(notas);
-
-    // Competências do aluno
-    renderCompetenciasAluno(corrigidas);
-
-    // Ponto de melhoria
-    renderPontoMelhoria(corrigidas);
-
-    // Últimas redações
-    renderRedacoesAluno(reds);
-  };
-
-  window.voltarParaTurma = function(){
-    document.getElementById('viewAluno').style.display = 'none';
-    document.getElementById('viewDetalhe').style.display = 'block';
-    window.scrollTo(0,0);
-  };
-
-  function redacoesDoAluno(a){
-    return (todasRedacoes||[])
-      .filter(r => String(r.aluno_id)===String(a.id))
-      .sort((x,y)=> new Date(y.created_at||0) - new Date(x.created_at||0));
-  }
-
-  function renderGraficoAluno(notas){
-    const box = document.getElementById('alGrafico');
-    const leg = document.getElementById('alGraficoLeg');
-    if(!box) return;
-    const serie = notas.slice(0,8).reverse();  // cronológico, até 8
-    if(serie.length < 2){
-      box.innerHTML = '';
-      if(leg) leg.textContent = serie.length===1 ? '1 redação corrigida' : 'sem redações corrigidas';
-      return;
-    }
-    const W=260, H=50, pad=8;
-    const min = Math.min.apply(null,serie), max = Math.max.apply(null,serie);
-    const span = (max-min) || 1;
-    const pts = serie.map(function(v,i){
-      const x = pad + (i*(W-2*pad)/(serie.length-1));
-      const y = H - pad - ((v-min)/span)*(H-2*pad);
-      return x.toFixed(1)+','+y.toFixed(1);
-    }).join(' ');
-    const ultimo = pts.split(' ').pop().split(',');
-    box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:2.6rem;">
-      <polyline points="${pts}" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="${ultimo[0]}" cy="${ultimo[1]}" r="3.5" fill="var(--cyan)"/>
-    </svg>`;
-    if(leg) leg.textContent = `últimas ${serie.length} redações`;
-  }
-
-  function renderCompetenciasAluno(reds){
-    const box = document.getElementById('alCompetencias');
-    if(!box) return;
-    if(reds.length === 0){
-      box.innerHTML = `<p style="font-size:.78rem;color:var(--muted);text-align:center;padding:.6rem 0;">Sem redações corrigidas ainda.</p>`;
-      return;
-    }
-    const m = mediasPorCompetencia(reds);
-    const vals = _COMPS.map(c=>m[c.k]).filter(v=>v!==null);
-    const pior = vals.length ? Math.min.apply(null,vals) : null;
-    box.innerHTML = _COMPS.map(c=>{
-      const v = m[c.k]; if(v===null) return '';
-      const isPior = (v===pior);
-      const cor = isPior ? 'var(--gold)' : 'var(--cyan)';
-      const pct = Math.max(2, Math.round((v/200)*100));
-      return `<div class="compRow">
-        <span class="compNome" style="${isPior?'color:var(--gold);font-weight:700;':''}">${c.rot}</span>
-        <span class="compBar"><span style="width:${pct}%;background:${cor};"></span></span>
-        <span class="compVal" style="color:${cor};">${v}</span>
-      </div>`;
-    }).join('');
-  }
-
-  function renderPontoMelhoria(reds){
-    const box = document.getElementById('alPontoMelhoria');
-    if(!box) return;
-    if(reds.length === 0){
-      box.innerHTML = `<div class="carCard"><p style="font-size:.78rem;color:var(--muted);text-align:center;">As competências aparecem quando houver redações corrigidas.</p></div>`;
-      return;
-    }
-    const m = mediasPorCompetencia(reds);
-    // Mesma lógica da turma: ordena por urgência (pior primeiro)
-    const itens = _COMPS.map(c=>({k:c.k, v:m[c.k]})).filter(x=>x.v!==null).sort((a,b)=>a.v-b.v);
-    if(itens.length === 0){ box.innerHTML=''; return; }
-
-    box.innerHTML = itens.map(function(it,i){
-      const urgente = (i===0);
-      // faixas aprovadas: crítico <120 · oportunidade 120-179 · no teto >=180
-      let faixa, cor, bg;
-      if(it.v < 120){ faixa='crítico'; cor='var(--red)'; bg='rgba(var(--redRGB),.16)'; }
-      else if(it.v < 180){ faixa='oportunidade'; cor='var(--gold)'; bg='rgba(var(--goldRGB),.16)'; }
-      else { faixa='no teto ✓'; cor='var(--green)'; bg='rgba(var(--greenRGB),.16)'; }
-      return `<div class="carCard${urgente?' urgente':''}">
-        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;">
-          <div style="width:2.2rem;height:2.2rem;border-radius:.7rem;background:${bg};color:${cor};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex:0 0 auto;">${it.k.toUpperCase()}</div>
-          <div style="min-width:0;">
-            <p style="font-size:.85rem;font-weight:700;color:var(--text);">${_CAR_ROT[it.k]} · ${it.v}</p>
-            <p style="font-size:.72rem;color:var(--muted);">${_CAR_DESC[it.k]} · <span style="color:${cor};font-weight:600;">${faixa}</span>${urgente?' · mais urgente':''}</p>
-          </div>
-        </div>
-        <button onclick="window.location.href='professor-estudio.html'" style="width:100%;padding:.6rem;border:none;border-radius:.7rem;cursor:pointer;font-size:.8rem;font-weight:700;background:${urgente?'var(--cyan)':'var(--surface2)'};color:${urgente?'var(--bg)':'var(--text2)'};">✨ Gerar reforço</button>
-      </div>`;
-    }).join('');
-  }
-
-  function renderRedacoesAluno(reds){
-    const box = document.getElementById('alRedacoes');
-    if(!box) return;
-    if(reds.length === 0){
-      box.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem;">Este aluno ainda não enviou redações.</div>`;
-      return;
-    }
-    box.innerHTML = reds.map(r=>{
-      const pend = (r.status||'enviada') === 'enviada';
-      const tema = r.tema_livre || 'Redação';
-      const quando = tempoRelativo(r.created_at);
-      const dir = pend
-        ? `<span style="font-size:.8rem;font-weight:800;color:var(--gold);flex:0 0 auto;">validar</span>`
-        : `<span style="font-size:1rem;font-weight:800;color:${corDaNota(r.nota_final)};flex:0 0 auto;">${r.nota_final}</span>`;
-      const sub = pend
-        ? `<span style="color:var(--gold);">⏳ aguardando você</span>`
-        : `<span style="color:var(--green);">✓ Validada</span> · ${quando}`;
-      return `<div onclick="window.location.href='professor-redacoes.html?id=${r.id}'" style="display:flex;align-items:center;gap:.7rem;background:var(--surface);border:1px solid ${pend?'rgba(var(--goldRGB),.4)':'rgba(var(--borderRGB),.18)'};border-radius:.9rem;padding:.8rem 1rem;cursor:pointer;">
-        <div style="flex:1;min-width:0;">
-          <p style="font-size:.85rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${tema}</p>
-          <p style="font-size:.73rem;color:var(--muted);">${sub}</p>
-        </div>
-        ${dir}
-      </div>`;
     }).join('');
   }
 
@@ -1920,9 +1700,6 @@
   // INICIALIZAÇÃO
   // ════════════════════════════════════════════════════════════════
   carregarPainel();
-  // Rede de segurança: garante que a lista apareça mesmo se algo atrasar o load
-  document.addEventListener('DOMContentLoaded', function(){ try{ carregarPainel(); }catch(e){ console.error(e); } });
-  setTimeout(function(){ try{ var el=document.getElementById('listaTurmasEscolas'); if(el && el.textContent.indexOf('Carregando')>=0){ carregarPainel(); } }catch(e){} }, 800);
 
   // Card rotativo de avisos (do mockup)
   function initAvisoCarrossel(){
