@@ -3,745 +3,1767 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Biblioteca de Temas</title>
+<title>RedaON | Portal Professor</title>
+<script>
+/* Tema RedaON — aplicado antes da pintura, evita piscada.
+   Preferência salva em localStorage; se indisponível, cai no escuro. */
+(function(){
+  var pref = 'auto';
+  try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+  var efetivo = pref;
+  if (pref === 'auto') {
+    var claroNoSistema = false;
+    try { claroNoSistema = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+    efetivo = claroNoSistema ? 'claro' : 'escuro';
+  }
+  document.documentElement.setAttribute('data-tema', efetivo);
+  document.documentElement.setAttribute('data-tema-pref', pref);
+})();
+</script>
 <script>tailwind = { config: {} };</script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "on-primary-fixed": "#160066", "on-error-container": "#ffdad6", "on-secondary": "#003737",
-          "inverse-on-surface": "#2e3037", "secondary-fixed": "#56f9f9", "surface-container": "#1d2026",
-          "tertiary-container": "#906c00", "tertiary": "#fabd00", "surface-container-lowest": "#0b0e14",
-          "surface-container-low": "#191c22", "background": "#10131a", "primary-fixed-dim": "#c6bfff",
-          "outline-variant": "#474554", "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
-          "on-primary": "#2900a0", "on-primary-container": "#faf6ff", "inverse-surface": "#e1e2eb",
-          "on-error": "#690005", "on-surface": "#e1e2eb", "secondary-fixed-dim": "#26dcdd",
-          "surface-container-highest": "#32353c", "primary": "#c6bfff", "outline": "#928ea0",
-          "on-background": "#e1e2eb", "surface-bright": "#363940", "error-container": "#93000a",
-          "surface-dim": "#10131a", "surface-variant": "#32353c", "error": "#ffb4ab",
-          "surface-container-high": "#272a31", "primary-fixed": "#e4dfff", "on-tertiary-container": "#fff6ec",
-          "secondary": "#45edee", "on-tertiary": "#3f2e00", "secondary-container": "#00d0d1",
-          "tertiary-fixed": "#ffdf9e", "surface": "#10131a", "inverse-primary": "#5847d2"
-        },
-        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
-        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-      },
-    },
-  }
-</script>
 <style>
-  body { font-family: 'Inter', sans-serif; background-color: #10131a; }
+/* Preenchimento cabe dentro da largura (evita estouro lateral no celular) */
+*, *::before, *::after { box-sizing: border-box; }
+
+  /* Gaveta de seleção (padrão aprovado) */
+  .filtroBtn{display:flex;align-items:center;gap:.4rem;justify-content:space-between;
+    min-height:40px;padding:0 .75rem;border-radius:11px;background:var(--surface);
+    border:1px solid rgba(var(--borderRGB),.28);color:var(--text2);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;}
+  .filtroBtn:hover{border-color:rgba(var(--cyanRGB),.35);}
+  .filtroBtn.ativo{border-color:rgba(var(--cyanRGB),.5);color:var(--cyan);background:rgba(var(--cyanRGB),.10);}
+  .filtroBtn .txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .filtroBtn .seta{font-size:.6rem;opacity:.7;flex:0 0 auto;}
+  #gvFiltroBg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:46;}
+  #gvFiltroBg.open{display:block;}
+  #gvFiltro{position:fixed;left:0;right:0;bottom:0;z-index:47;background:var(--top);
+    border-top:1px solid rgba(var(--borderRGB),.2);border-radius:20px 20px 0 0;
+    padding:10px 14px 104px;transform:translateY(100%);
+    transition:transform .28s cubic-bezier(.16,.84,.44,1);max-height:82vh;overflow-y:auto;}
+  #gvFiltro.open{transform:translateY(0);}
+  #gvFiltro .grip{width:38px;height:4px;border-radius:99px;background:rgba(var(--borderRGB),.45);margin:0 auto 12px;}
+  #gvFiltro .tit{font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:.6rem;padding:0 .25rem;}
+  .optFiltro{display:flex;align-items:center;gap:.7rem;min-height:52px;padding:0 .875rem;border-radius:13px;
+    background:var(--surface);color:var(--text);font-size:.875rem;font-weight:600;cursor:pointer;margin-bottom:.5rem;
+    border:1px solid transparent;}
+  .optFiltro .em{font-size:1.1rem;flex:0 0 auto;font-style:normal;}
+  .optFiltro .ck{margin-left:auto;color:var(--cyan);font-size:1.05rem;opacity:0;font-weight:900;}
+  .optFiltro.sel{background:rgba(var(--cyanRGB),.13);color:var(--cyan);border-color:rgba(var(--cyanRGB),.4);}
+  .optFiltro.sel .ck{opacity:1;}
+  @media(min-width:1024px){ #gvFiltro{max-width:520px;left:50%;transform:translate(-50%,100%);}
+    #gvFiltro.open{transform:translate(-50%,0);} }
+  /* ===== SISTEMA DE DESIGN RedaON — 2 TEMAS ===== */
+  /* ESCURO (padrão) */
+  :root{
+    --bg:#10131a;      --bgRGB:16,19,26;      --sunken:#0b0e14;
+    --surface:#1d2026; --surface2:#272a31;    --top:#191c22;
+    --text:#e1e2eb;    --text2:#c8c4d7;       --muted:#928ea0;  --muted2:#474554;
+    --scroll:#32353c;  --borderRGB:71,69,84;
+    --cyan:#45edee;    --cyanRGB:69,237,238;  --onCyan:#002020;
+    --purple:#6c5ce7;  --purpleRGB:108,92,231;--purpleSoft:#c6bfff;
+    --gold:#fabd00;    --goldRGB:250,189,0;
+    --green:#4ade80;   --greenRGB:74,222,128;
+    --red:#ff8b8b;     --red2:#ffb4ab;        --orange:#ff9d68;
+    --redRGB:255,139,139;  --orangeRGB:255,157,104;
+    --sombra:0 4px 16px rgba(0,0,0,.25);
+  }
+  /* CLARO — "Folha da PROfa" (identidade própria, não é inversão do escuro) */
+  html[data-tema="claro"]{
+    --bg:#fdfbf4;      --bgRGB:253,251,244;   --sunken:#f2ede0;
+    --surface:#ffffff; --surface2:#f6f2e6;    --top:#fbf8ee;
+    --text:#0a4a4b;    --text2:#3a5556;       --muted:#8a8576;  --muted2:#b9b3a2;
+    --scroll:#d8d2c0;  --borderRGB:10,74,75;
+    --cyan:#0a8c8d;    --cyanRGB:10,140,141;  --onCyan:#ffffff;
+    --purple:#5a4fc4;  --purpleRGB:90,79,196; --purpleSoft:#5a4fc4;
+    --gold:#9a7a10;    --goldRGB:154,122,16;
+    --green:#0f8a4d;   --greenRGB:15,138,77;
+    --red:#c0473b;     --red2:#a83a2f;        --orange:#b45f24;
+    --redRGB:192,71,59;    --orangeRGB:180,95,36;
+    --sombra:0 4px 16px rgba(10,74,75,.10);
+  }
+  html{ background: var(--bg); }
+  body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); transition: background-color .25s ease, color .25s ease; }
+  /* Botão de tema (header) */
+  #btnTema{ width:2.5rem;height:2.5rem;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,background .2s; }
+  #btnTema:hover{ color:var(--cyan); background:rgba(var(--cyanRGB),.10); }
+  @media(min-width:1024px){ #btnTema{ display:none !important; } }
+  #btnTema .material-symbols-outlined{ font-size:1.35rem; }
+  @media(max-width:640px){
+    #btnVerAluno{ display:none !important; }   /* mora na gaveta "Mais" no celular */
+    header{ padding:0 .625rem !important; }
+    header > div:last-child{ gap:.25rem !important; }
+  }
   .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  .glass-card { background: rgba(25,28,34,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  #sidebar-toggle:checked ~ aside { transform: translateX(0); }
-  #sidebar-toggle:checked ~ .content-overlay { display: block; }
 
-  .tab-btn { background: #1d2026; color: #c8c4d7; border: 1px solid rgba(255,255,255,0.05); transition: all .2s; }
-  .tab-btn.ativo { background: #6c5ce7 !important; color: #fff !important; border-color: #6c5ce7 !important; }
-  .tab-btn:hover:not(.ativo) { background: #272a31; color: #e1e2eb; }
-  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(0.7)} }
-  .card-compartilhado { border: 1px solid rgba(69,237,238,0.15); }
-  .card-compartilhado:hover { border-color: rgba(69,237,238,0.4) !important; }
-  .prazo-urgente { color: #ffb4ab; }
-  .prazo-ok { color: #4ade80; }
+  /* ===== SIDEBAR (padrão do mockup vD1.4) ===== */
+  #sidebar {
+    position: fixed; left: 0; top: 0; height: 100%; width: 232px;
+    transform: translateX(-232px); transition: transform .3s ease, width .2s ease; z-index: 50;
+    background: var(--surface); border-right: 1px solid rgba(var(--borderRGB),.2);
+    display: flex; flex-direction: column; padding: .875rem .625rem .625rem; overflow: hidden;
+  }
+  #sidebar.open { transform: translateX(0); }
+  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:45; }
+  #overlay.open { display:block; }
+  @media(min-width:1024px){
+    #sidebar { transform: translateX(0) !important; }
+    #overlay { display:none !important; }
+    #main-content { margin-left: 232px; transition: margin-left .2s ease; }
+    #sidebar.mini ~ #main-content { margin-left: 62px; }
+    #btnHamburger { display:none !important; }
+  }
+  @media(max-width:1023px){ #main-content { margin-left: 0; } #sidebar { display:none !important; } #overlay { display:none !important; } }
 
-  /* Modal sugestão */
-  #modalSugestao { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.75); align-items:center; justify-content:center; padding:1rem; }
-  #modalSugestao.aberto { display:flex; }
+  /* ===== GAVETA "MAIS" (padrão do mockup: sobe por trás da barra) ===== */
+  #gavetaBg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:42; }
+  #gavetaBg.open { display:block; }
+  #gavetaMais {
+    position:fixed; left:0; right:0; bottom:0; z-index:43;
+    background:var(--top); border-top:1px solid rgba(var(--borderRGB),.2);
+    border-radius:20px 20px 0 0; padding:10px 14px 104px;
+    transform:translateY(100%); transition:transform .28s cubic-bezier(.16,.84,.44,1);
+    max-height:82vh; overflow-y:auto;
+  }
+  #gavetaMais.open { transform:translateY(0); }
+  #gavetaMais .grip { width:38px;height:4px;border-radius:99px;background:rgba(var(--borderRGB),.45);margin:0 auto 12px; }
+  #gavetaMais .tit { font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:.6rem;padding:0 .25rem; }
+  .pill { display:flex;align-items:center;gap:.7rem;min-height:52px;padding:0 .875rem;border-radius:13px;background:var(--surface);color:var(--text);font-size:.85rem;font-weight:600;cursor:pointer;text-decoration:none;margin-bottom:.5rem; }
+  .pill .pemoji { font-size:1.15rem;line-height:1;font-style:normal; }
+  .pill .fim { margin-left:auto;color:var(--muted);font-size:1.1rem; }
+  @media(min-width:1024px){ #gavetaMais, #gavetaBg { display:none !important; } }
+
+  /* Logo + botão recolher */
+  .sideLogo { display:flex; align-items:center; gap:.55rem; padding:.25rem .5rem .75rem; white-space:nowrap; }
+  .sideLogo .lg { width:30px;height:30px;border-radius:9px;background:var(--cyan);color:var(--onCyan);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;flex:0 0 auto;cursor:pointer;font-style:italic; }
+  .sideLogo .nm { font-size:1.05rem;font-weight:900;font-style:italic;letter-spacing:-.04em;color:var(--text); }
+  .sideLogo .nm i { color:var(--cyan);font-style:italic; }
+  #btnRecolher { margin-left:auto;color:var(--muted);font-size:1rem;cursor:pointer;padding:.15rem .35rem;border-radius:.4rem;background:none;border:none;line-height:1; }
+  #btnRecolher:hover { background:var(--surface2); color:var(--text2); }
+  #sidebar.mini { width:62px; padding:.875rem .5rem .625rem; }
+  #sidebar.mini .sideLogo { flex-direction:column; gap:.45rem; padding:.25rem 0 .6rem; }
+  #sidebar.mini #btnRecolher { margin-left:0; }
+  #sidebar.mini .sideLogo .nm,
+  #sidebar.mini .nav-item span.tx,
+  #sidebar.mini .nav-section-label span,
+  #sidebar.mini .badge-em-breve-mini,
+  #sidebar.mini .perfilProf .tx,
+  #sidebar.mini .sideVersao { display:none; }
+  #sidebar.mini .nav-item { justify-content:center; padding:.65rem 0; }
+  #sidebar.mini .nav-section-label { text-align:center; padding:.5rem 0 .25rem; }
+  #sidebar.mini .perfilProf { justify-content:center; padding:.5rem 0; border:none; background:none; }
+
+  /* Nav items */
+  .nav-item { display:flex; align-items:center; gap:.7rem; padding:.6rem .75rem; border-radius:.7rem; font-size:.85rem; font-weight:500; color:var(--text2); transition:background .18s,color .18s; cursor:pointer; text-decoration:none; white-space:nowrap; }
+  .nav-item .em { font-size:1.05rem; line-height:1; width:1.35rem; text-align:center; flex:0 0 auto; font-style:normal; }
+  .nav-item:hover { background:var(--surface2); color:var(--text); }
+  .nav-item.ativo { background:rgba(var(--cyanRGB),.13); color:var(--cyan); font-weight:700; }
+  .nav-item.prof-only { color:var(--text2); }
+  .nav-item.prof-only:hover { background:var(--surface2); color:var(--text); }
+
+  /* Balãozinho de perfil (pé da sidebar) */
+  .perfilProf { margin-top:auto; display:flex; align-items:center; gap:.6rem; padding:.5rem .6rem; border-radius:.7rem; border:1px solid rgba(var(--borderRGB),.2); background:var(--surface2); white-space:nowrap; cursor:pointer; }
+  .perfilProf:hover { border-color:rgba(var(--cyanRGB),.35); }
+  .perfilProf .avt { width:2rem;height:2rem;border-radius:50%;background:rgba(var(--purpleRGB),.18);display:flex;align-items:center;justify-content:center;font-size:1rem;flex:0 0 auto; }
+  .sideVersao { font-size:.6rem;color:var(--muted2);text-align:center;padding-top:.5rem;letter-spacing:.04em;white-space:nowrap; }
+
+  /* ===== BARRA INFERIOR (padrão do mockup mobile v2A.3 — "papel suspenso") ===== */
+  #barraInferior { display:none; }
+  @media(max-width:1023px){
+    #barraInferior {
+      display:flex; align-items:flex-end; justify-content:space-between;
+      position:fixed; bottom:12px; left:50%; transform:translateX(-50%);
+      width:calc(100% - 24px); max-width:560px; margin:0;
+      box-sizing:border-box; overflow:visible;
+      padding:8px 6px 10px; border-radius:18px; z-index:44;
+      background:var(--surface); border:1px solid rgba(var(--borderRGB),.2);
+      box-shadow:var(--sombra);
+    }
+    #barraInferior a {
+      flex:1 1 0; min-width:0; box-sizing:border-box;
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;
+      font-size:10px;font-weight:600;color:var(--muted);text-decoration:none;cursor:pointer;
+      padding:5px 2px;border-radius:12px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;max-width:100%;
+    }
+    #barraInferior a.on { color:var(--cyan); background:rgba(var(--cyanRGB),.16); }
+    #barraInferior .bEmoji { font-size:17px;font-style:normal;line-height:1;flex:0 0 auto; }
+    /* FAB: largura própria e sem recorte, para poder subir acima da barra */
+    #barraInferior .fabWrap { flex:0 0 auto; width:58px; padding:0; background:none; overflow:visible; }
+    #barraInferior .fabWrap .fab { width:46px;height:46px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;margin-top:-19px;box-shadow:0 4px 14px rgba(var(--cyanRGB),.4);flex:0 0 auto; }
+    #barraInferior .fabCap { font-size:9.5px;color:var(--cyan);font-weight:700;line-height:1.1; }
+    #main-content { padding-bottom: 98px; }
+  }
+  /* Telas bem estreitas */
+  @media(max-width:359px){
+    #barraInferior { padding:8px 4px 10px; }
+    #barraInferior a { font-size:9px; }
+    #barraInferior .bEmoji { font-size:16px; }
+    #barraInferior .fabWrap { width:52px; }
+  }
+  /* Nenhum elemento pode gerar rolagem lateral na página */
+  html, body { overflow-x: hidden; max-width: 100%; }
+
+  /* Toggle Aluno/Professor */
+  .modo-btn { padding:.35rem .9rem; border-radius:9999px; font-size:.75rem; font-weight:700; transition:all .2s; cursor:pointer; border:none; background:transparent; }
+  .modo-btn.ativo { background:var(--purple); color:white; }
+  .modo-btn:not(.ativo) { color:var(--muted); }
+
+  /* Cards de stat */
+  /* ===== Card de identidade — SÓ no mobile (≤640px) ===== */
+  .feedCardMobile{ display:none; }
+  .secMobile{ display:none; }
+  @media (max-width:640px){
+    .feedCardMobile{ display:block; margin-bottom:1rem; border-radius:16px; overflow:hidden; background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); }
+    .fcCover{ position:relative; height:230px; background:linear-gradient(160deg,#2b3a4d 0%,#33506b 40%,#6a5a7d 75%,#caa988 100%); }
+    .fcFoto{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:88px; opacity:.9; z-index:1; }
+    .fcTop{ position:absolute; top:0; left:0; right:0; z-index:2; display:flex; align-items:center; gap:9px; padding:12px 12px; background:linear-gradient(180deg,rgba(8,10,15,.55),transparent); }
+    .fcAv{ width:38px; height:38px; border-radius:50%; border:2px solid #fff; background:linear-gradient(160deg,#3a4a6a,#222a3a); display:flex; align-items:center; justify-content:center; font-size:18px; flex:0 0 auto; }
+    .fcNome{ margin:0; font-size:14px; font-weight:800; color:#fff; }
+    .fcSub{ margin:1px 0 0; font-size:10.5px; color:rgba(255,255,255,.85); }
+    .fcDots{ margin-left:auto; color:#fff; font-size:19px; background:rgba(0,0,0,.3); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .fcBot{ position:absolute; left:0; right:0; bottom:0; z-index:2; padding:26px 14px 14px; background:linear-gradient(0deg,rgba(8,12,18,.9) 0%,rgba(8,12,18,.45) 55%,transparent 100%); }
+    .fcMetrics{ display:flex; align-items:flex-end; justify-content:space-between; }
+    .fcM{ display:flex; flex-direction:column; align-items:center; }
+    .fcM .v{ font-size:19px; font-weight:800; line-height:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.5); }
+    .fcM .l{ font-size:9.5px; color:rgba(255,255,255,.72); margin-top:3px; }
+
+    /* No mobile: some a saudação-título e os 4 cartões soltos (as métricas vão pro card de foto) */
+    .saudacaoDesktop{ display:none !important; }
+    .statsDesktop{ display:none !important; }
+    /* Seções em faixa (título + Ver todas) só no mobile */
+    .secMobile{ display:flex; }
+  }
+
+  /* ===== Suas turmas: carrossel no mobile, lista no desktop ===== */
+  .turmasWrap{ display:flex; flex-direction:column; gap:.6rem; min-width:0; }
+  .turmaCard{ display:block; background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); border-radius:1rem; padding:.9rem 1rem; }
+  .turmaBadge{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex:0 0 auto; }
+  @media (max-width:640px){
+    .turmasWrap{ flex-direction:row; overflow-x:auto; gap:10px; padding:0 0 4px; scroll-snap-type:x mandatory; scrollbar-width:none; }
+    .turmasWrap::-webkit-scrollbar{ display:none; }
+    .turmasWrap > .turmaCard{ scroll-snap-align:start; flex:0 0 64%; }
+  }
+
+  /* Faixa de seção (título + Ver todas) — visível só no mobile */
+  .sec{ display:flex; align-items:center; justify-content:space-between; margin:16px 0 11px; }
+  .secL{ display:flex; align-items:center; gap:8px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--text2); }
+  .secL .bar{ width:16px; height:3px; background:var(--cyan); border-radius:99px; }
+  .verT{ font-size:10.5px; font-weight:700; color:var(--cyan); cursor:pointer; }
+
+  .turmaNome{ font-size:.85rem; font-weight:700; color:var(--text); }
+  .turmaSub{ font-size:.72rem; color:var(--muted); }
+  .btnNovaTurma{ width:100%; margin-top:.6rem; padding:.7rem; background:var(--surface2); border:1px dashed rgba(var(--borderRGB),.4); border-radius:.7rem; color:var(--text2); font-size:.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:.4rem; }
+  .vazioSec{ text-align:center; padding:1.2rem .5rem; color:var(--muted); font-size:.8rem; }
+  /* Placeholder de vídeos (esperança) */
+  /* Vídeos para a turma — 3 vagas reservadas */
+  .videosSoonGrid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:.75rem; }
+  .vidSlot{ background:linear-gradient(135deg,rgba(var(--purpleRGB),.08),rgba(var(--cyanRGB),.05)); border:1px dashed rgba(var(--cyanRGB),.35); border-radius:1rem; min-height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3rem; padding:1rem; text-align:center; }
+  .vidSlot .vsIco{ font-size:1.75rem; opacity:.7; }
+  .vidSlot .vsBadge{ font-size:.6rem; font-weight:800; color:var(--cyan); background:rgba(var(--cyanRGB),.12); padding:.2rem .55rem; border-radius:99px; letter-spacing:.04em; text-transform:uppercase; }
+  .vidSlot .vsSlotTxt{ font-size:.72rem; color:var(--muted); font-weight:600; }
+  @media (max-width:640px){
+    .videosSoonGrid{ display:flex; overflow-x:auto; gap:10px; padding:0 0 4px; scroll-snap-type:x mandatory; scrollbar-width:none; }
+    .videosSoonGrid::-webkit-scrollbar{ display:none; }
+    .videosSoonGrid > .vidSlot{ scroll-snap-align:start; flex:0 0 64%; }
+  }
+
+  .videosSoon{background:linear-gradient(135deg,rgba(var(--purpleRGB),.08),rgba(var(--cyanRGB),.05));border:1px dashed rgba(var(--cyanRGB),.35);border-radius:1rem;padding:1.5rem;text-align:center;margin-bottom:1.5rem;margin-top:1rem;}
+  .videosSoon .vsIco{font-size:2rem;display:block;margin-bottom:.5rem;opacity:.85;}
+  .videosSoon .vsTit{font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:.25rem;}
+  .videosSoon .vsSub{font-size:.8rem;color:var(--muted);}
+  .videosSoon .vsBadge{display:inline-block;font-size:.65rem;font-weight:800;color:var(--cyan);background:rgba(var(--cyanRGB),.12);padding:.2rem .6rem;border-radius:99px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.6rem;}
+
+  .stat-card { background:var(--surface); border:1px solid rgba(var(--borderRGB),0.2); border-radius:1rem; padding:1.25rem 1.5rem; }
+
+  /* ===== Temas ===== */
+  .abasTemas{ display:flex; gap:.3rem; overflow-x:auto; background:var(--surface);
+              border:1px solid rgba(var(--borderRGB),.2); border-radius:.9rem; padding:.3rem; scrollbar-width:none; }
+  .abasTemas::-webkit-scrollbar{ display:none; }
+  .abaT{ flex:0 0 auto; padding:.6rem .85rem; border:none; border-radius:.65rem; background:transparent;
+         color:var(--muted); font-size:.78rem; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .abaT.ativa{ background:var(--cyan); color:var(--bg); }
+
+  .campoBtnT{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; min-width:11rem;
+              background:var(--surface); border:1px solid rgba(var(--borderRGB),.3); border-radius:.75rem;
+              padding:.6rem .9rem; color:var(--text); font-size:.82rem; font-family:inherit; cursor:pointer; }
+
+  .cardCriarTema{ display:flex; align-items:center; gap:.75rem; background:var(--surface);
+                  border:1px dashed rgba(var(--cyanRGB),.45); border-radius:1rem; padding:.9rem 1rem;
+                  cursor:pointer; margin-bottom:.9rem; }
+  .cardCriarTema:hover{ border-color:var(--cyan); }
+
+  .gridTemas{ display:grid; grid-template-columns:minmax(0,1fr); gap:.7rem; }
+  @media (min-width:760px){ .gridTemas{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+  @media (min-width:1200px){ .gridTemas{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+
+  .temaCard{ display:flex; flex-direction:column; background:var(--surface);
+             border:1px solid rgba(var(--borderRGB),.2); border-radius:1rem; padding:1rem 1.1rem; cursor:pointer; }
+  .temaCard:hover{ border-color:rgba(var(--cyanRGB),.45); }
+  .temaTop{ display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; margin-bottom:.55rem; }
+  .selo{ font-size:.64rem; font-weight:800; padding:.18rem .5rem; border-radius:.4rem;
+         text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
+  .selo-enem{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+  .selo-profa{ background:rgba(var(--goldRGB),.16); color:var(--gold); }
+  .selo-meus{ background:rgba(var(--purpleRGB),.18); color:var(--purple); }
+  .selo-ppl{ background:rgba(var(--purpleRGB),.18); color:var(--purple); }
+  .selo-digital{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+  .selo-segunda{ background:rgba(var(--greenRGB),.16); color:var(--green); }
+  .selo-cancelada{ background:rgba(var(--redRGB),.16); color:var(--red); }
+  .temaTit{ font-size:.92rem; font-weight:700; color:var(--text); line-height:1.35; margin-bottom:.5rem; }
+  .temaInc{ font-size:.73rem; color:var(--muted); line-height:1.45; }
+  .temaVer{ margin-top:.7rem; font-size:.76rem; font-weight:800; color:var(--cyan); }
+
+  .cardBoxT{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); border-radius:1rem; padding:1.1rem 1.25rem; }
+  .rotuloT{ font-size:.7rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .matGrid{ display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; align-items:start; }
+  @media (min-width:1024px){ .matGrid{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+  .incItem{ display:flex; align-items:center; gap:.6rem; background:var(--bg);
+            border:1px solid rgba(var(--borderRGB),.25); border-radius:.75rem; padding:.6rem .8rem; }
+
+  .acoesMaterial{ display:flex; gap:.7rem; margin-top:1rem; flex-wrap:wrap; }
+  .btnSecT{ flex:1; min-width:9rem; padding:.8rem; border-radius:.8rem; border:1px solid rgba(var(--borderRGB),.35);
+            background:var(--surface); color:var(--text2); font-size:.86rem; font-weight:800; cursor:pointer; font-family:inherit; }
+  .btnPriT{ flex:1; min-width:9rem; padding:.8rem; border:none; border-radius:.8rem;
+            background:var(--cyan); color:var(--bg); font-size:.86rem; font-weight:800; cursor:pointer; font-family:inherit; }
+  .gvOptT{ width:100%; text-align:left; padding:.85rem 1rem; border-radius:.75rem;
+           border:1px solid rgba(var(--borderRGB),.25); background:var(--bg); color:var(--text);
+           font-size:.88rem; font-weight:600; cursor:pointer; font-family:inherit; min-height:3.25rem; }
+  .gvOptT:hover{ border-color:rgba(var(--cyanRGB),.45); }
+
+  /* Grade dos 4 cartões: 2 colunas no tablet, 4 no desktop largo (nunca 3+1 órfão).
+     NÃO forçamos display aqui — quem controla mostrar/esconder é .statsDesktop (some no mobile). */
+  .statsGrid{ grid-template-columns:1fr 1fr !important; gap:1rem; }
+  @media (min-width:1100px){ .statsGrid{ grid-template-columns:1fr 1fr 1fr 1fr !important; } }
+
+  /* Tabs de filtro de status */
+  .tab-status {
+    padding:.4rem .8rem; background:transparent; border:1px solid rgba(var(--borderRGB),.4);
+    border-radius:99px; color:var(--muted); font-size:.72rem; font-weight:600; font-family:inherit;
+    cursor:pointer; white-space:nowrap; transition:all .15s; flex-shrink:0;
+  }
+  .tab-status:hover { color:var(--text); border-color:rgba(var(--borderRGB),.7); }
+  .tab-status.tab-ativa {
+    background:linear-gradient(135deg,var(--cyan) 0%,var(--purple) 100%);
+    border-color:transparent; color:var(--bg); font-weight:700;
+  }
+
+  /* Select customizado */
+  #filtroTurma:hover { border-color:rgba(var(--cyanRGB),.4); }
+  #filtroTurma:focus { outline:none; border-color:var(--cyan); box-shadow:0 0 0 3px rgba(var(--cyanRGB),.15); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-thumb { background:var(--scroll); border-radius:10px; }
 
   /* Toast */
-  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; white-space:nowrap; }
+  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:var(--surface2); border:1px solid rgba(var(--borderRGB),.1); color:var(--text); padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s; pointer-events:none; }
   #toast.show { transform:translateX(-50%) translateY(0); }
 
-  .nivel-basico { color: #45edee; }
-  .nivel-intermediario { color: #fabd00; }
-  .nivel-avancado { color: #ffb4ab; }
+  /* Card rotativo de avisos (do mockup) */
+  .avisoCard{background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:14px;overflow:hidden;margin-bottom:1.5rem;}
+  .avisoTrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;}
+  .avisoTrack::-webkit-scrollbar{display:none;}
+  .avisoSlide{flex:0 0 100%;scroll-snap-align:start;display:flex;align-items:center;gap:11px;padding:13px 15px;box-sizing:border-box;}
+  .avisoIco{font-size:22px;line-height:1;flex:0 0 auto;}
+  .avisoTit{font-size:11px;font-weight:700;color:var(--cyan);margin:0 0 2px;}
+  .avisoTxt{font-size:12.5px;color:var(--text2);margin:0;line-height:1.35;}
+  .avisoDots{display:flex;justify-content:center;gap:5px;padding:0 0 10px;}
+  .avisoDots span{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.4;transition:opacity .2s,width .2s;}
+  .avisoDots span.on{opacity:1;width:16px;border-radius:3px;background:var(--cyan);}
 
-  .card-tema { transition: all 0.3s; }
-  .card-tema:hover { transform: translateY(-4px); border-color: rgba(108,92,231,0.3) !important; }
-  .card-tema.oculto { display: none; }
+  /* Divisor do menu */
+  .nav-divider { height:1px; background:rgba(var(--borderRGB),0.2); margin:.5rem 0; }
+  .nav-section-label { font-size:.65rem; font-weight:700; color:var(--muted2); text-transform:uppercase; letter-spacing:.1em; padding:.5rem 1rem .25rem; }
 
-  /* Painel categoria dropdown */
-  #painelCategoria { display:none; }
-  #painelCategoria.aberto { display:block; }
-
-  /* Hamburger sidebar */
-  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
-  #sidebar.open { transform: translateX(0); }
-  @media (min-width: 1024px) { #sidebar { transform: translateX(0); } #btnHamburger { display:none; } }
-  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:40; }
-  #overlay.show { display:block; }
-  .main-with-sidebar { width: 100%; }
-  @media (min-width: 1024px) { .main-with-sidebar { margin-left: 16rem; width: calc(100% - 16rem); } }
-
-  /* Aplicação badges */
-  .badge-aplicacao { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
-  .badge-regular         { background:rgba(108,92,231,.15); color:#c6bfff; }
-  .badge-ppl             { background:rgba(250,189,0,.12); color:#fabd00; }
-  .badge-segunda         { background:rgba(74,222,128,.12); color:#4ade80; }
-  .badge-digital         { background:rgba(69,237,238,.12); color:#45edee; }
-  .badge-cancelada       { background:rgba(255,180,171,.12); color:#ffb4ab; }
-
-  /* Loading spinner */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner-grande { width:48px; height:48px; border:3px solid #1e2330; border-top-color:#45edee; border-radius:50%; animation:spin .8s linear infinite; margin: 0 auto; }
+  h1,h2,h3,h4,p,span,a,button,div{word-break:normal!important;overflow-wrap:break-word;hyphens:none!important;}
+  #sidebar::-webkit-scrollbar{width:4px;}
+  #sidebar::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:10px;}
+  #sidebar{scrollbar-width:thin;scrollbar-color:var(--scroll) transparent;}
 </style>
-<script src="supabase-auth.js"></script>
+<script>
+/* Produção: authGuard, authGetNome e dbGet* vêm dos scripts reais do projeto (Supabase). */
+</script>
 </head>
-<body class="bg-background text-on-surface antialiased overflow-x-hidden">
-
-<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
-  <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
-</div>
+<body>
+<script>
+/* Produção: authGuard, authGetNome, dbGetTemas, dbGetTurmasDoProfessor e
+   dbGetAlunosDoProfessor vêm dos scripts reais do projeto (Supabase). */
+</script>
 
 <div id="toast"></div>
+<div id="overlay" onclick="toggleSidebar()"></div>
 
-<!-- MODAL SUGESTÃO -->
-<div id="modalSugestao">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,0.08);border-radius:1.25rem;width:100%;max-width:480px;padding:2rem;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-      <h3 style="font-weight:700;font-size:1.1rem;color:#e1e2eb;">💡 Sugerir um Tema</h3>
-      <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;font-size:1.2rem;">✕</button>
+<!-- SIDEBAR PROFESSOR (padrão do mockup vD1.4) -->
+<aside id="sidebar">
+  <!-- Logo + recolher -->
+  <div class="sideLogo">
+    <span class="lg" onclick="toggleRecolher()">R</span>
+    <span class="nm">Reda<i>ON</i></span>
+    <button id="btnRecolher" onclick="toggleRecolher()" title="Recolher menu" aria-label="Recolher menu">&laquo;</button>
+  </div>
+
+  <nav style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.2rem;">
+    <!-- ── Principal (espelha o rodapé mobile) ── -->
+    <a class="nav-item" href="professor.html" title="Início"><i class="em">&#127968;</i><span class="tx">Início</span></a>
+    <a class="nav-item" href="professor-alunos.html" title="Turmas"><i class="em">&#128101;</i><span class="tx">Turmas</span></a>
+    <a class="nav-item" href="professor-redacoes.html" title="Validar"><i class="em">&#10004;&#65039;</i><span class="tx">Validar</span></a>
+    <a class="nav-item" href="professor-estudio.html" title="IA Estúdio"><i class="em">&#10024;</i><span class="tx">IA Estúdio</span></a>
+
+    <!-- ── Mais ── -->
+    <p class="nav-section-label"><span>Mais</span></p>
+    <a class="nav-item ativo" href="temas.html" title="Temas"><i class="em">&#128203;</i><span class="tx">Temas</span></a>
+    <a class="nav-item" onclick="mostrarEmBreve('Notificações')" style="cursor:pointer;" title="Notificações"><i class="em">&#128276;</i><span class="tx">Notificações</span></a>
+    <a class="nav-item" onclick="irModoAluno()" style="cursor:pointer;" title="Modo Aluno"><i class="em">&#127891;</i><span class="tx">Modo Aluno</span></a>
+    <a class="nav-item" onclick="mostrarEmBreve('Enviar sugestão')" style="cursor:pointer;" title="Enviar sugestão"><i class="em">&#128172;</i><span class="tx">Enviar sugestão</span></a>
+
+    <!-- ── Conta ── -->
+    <p class="nav-section-label"><span>Conta</span></p>
+    <a class="nav-item" onclick="alternarTema()" style="cursor:pointer;" title="Aparência (claro/escuro/automático)"><i class="em" id="iconeTemaSide">&#9728;&#65039;</i><span class="tx" id="txtTemaSide">Aparência</span></a>
+    <a class="nav-item" href="configuracoes.html" title="Configurações"><i class="em">&#9881;&#65039;</i><span class="tx">Configurações</span></a>
+    <a class="nav-item" onclick="authLogout()" style="cursor:pointer;color:var(--red);margin-top:.3rem;" title="Sair"><i class="em">&#128682;</i><span class="tx">Sair</span></a>
+  </nav>
+
+  <!-- Balãozinho de perfil -->
+  <div class="perfilProf" onclick="mostrarEmBreve('Perfil e conta')">
+    <span class="avt">&#128105;&#8205;&#127979;</span>
+    <span class="tx">
+      <span id="nomeProf" style="font-size:.8rem;font-weight:700;color:var(--text);display:block;">Professor</span>
+      <span style="font-size:.65rem;color:var(--purple);font-weight:700;letter-spacing:.04em;">&#11088; PORTAL PRO</span>
+    </span>
+  </div>
+  <p class="sideVersao">Temas · produção · v3</p>
+</aside>
+
+<!-- MAIN -->
+<div id="main-content" style="min-height:100vh;display:flex;flex-direction:column;">
+
+  <!-- HEADER -->
+  <header style="position:sticky;top:0;z-index:40;height:4.5rem;background:rgba(var(--bgRGB),.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(var(--borderRGB),.15);display:flex;align-items:center;justify-content:space-between;padding:0 1rem 0 1rem;">
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <button id="btnHamburger" onclick="toggleSidebar()" style="padding:.5rem;border-radius:.5rem;background:none;border:none;color:var(--muted);cursor:pointer;">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <span class="material-symbols-outlined" style="color:var(--cyan);font-variation-settings:'FILL' 1;">list_alt</span>
+        <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);">Temas</h2>
+      </div>
     </div>
-    <div>
-      <div style="margin-bottom:1rem;">
-        <label style="display:block;font-size:0.75rem;font-weight:600;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Título do Tema</label>
-        <input id="sugestaoTitulo" type="text" placeholder="Ex: Impacto das fake news na democracia" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;box-sizing:border-box;"/>
-      </div>
-      <div style="margin-bottom:1rem;">
-        <label style="display:block;font-size:0.75rem;font-weight:600;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Categoria</label>
-        <select id="sugestaoCategoria" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;">
-          <option>Social</option>
-          <option>Direitos</option>
-          <option>Saúde</option>
-          <option>Tecnologia</option>
-          <option>Educação</option>
-          <option>Consumo</option>
-          <option>Meio Ambiente</option>
-          <option>Trabalho</option>
-          <option>Economia</option>
-          <option>Cultura</option>
-        </select>
-      </div>
-      <div style="margin-bottom:1.5rem;">
-        <label style="display:block;font-size:0.75rem;font-weight:600;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Justificativa</label>
-        <textarea id="sugestaoJustificativa" rows="3" placeholder="Por que este tema é relevante para o ENEM?" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;resize:none;box-sizing:border-box;"></textarea>
-      </div>
-      <button onclick="enviarSugestao()" style="width:100%;padding:.875rem;background:#6c5ce7;color:white;border:none;border-radius:.75rem;font-weight:700;font-size:.9rem;cursor:pointer;letter-spacing:.05em;">
-        Enviar Sugestão
+
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <!-- Toggle Aluno/Professor -->
+<button id="btnVerAluno" onclick="irModoAluno()" title="Abrir o portal do aluno" style="display:flex;align-items:center;gap:.375rem;padding:.4rem .875rem;background:rgba(var(--borderRGB),.15);border:1px solid rgba(var(--borderRGB),.3);border-radius:.75rem;color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap;" onmouseover="this.style.color='var(--text)';this.style.borderColor='rgba(var(--borderRGB),.5)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='rgba(var(--borderRGB),.3)'">
+        <span style="font-size:.9rem;font-style:normal;">&#127891;</span>
+        Modo Aluno
+      </button>
+      <button id="btnTema" onclick="alternarTema()" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+        <span class="material-symbols-outlined" id="iconeTema">light_mode</span>
+      </button>
+      <button style="width:2.5rem;height:2.5rem;border-radius:50%;background:none;border:none;color:var(--muted);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;">
+        <span class="material-symbols-outlined">notifications</span>
+        <span style="position:absolute;top:.4rem;right:.4rem;width:.5rem;height:.5rem;background:var(--cyan);border-radius:50%;border:2px solid var(--bg);"></span>
       </button>
     </div>
+  </header>
+
+  <!-- CONTEÚDO -->
+  <div style="flex:1;padding:1.5rem;max-width:1400px;margin:0 auto;width:100%;">
+
+    <!-- ═══════════ LISTA DE TEMAS ═══════════ -->
+    <div id="viewTemas">
+
+      <div style="margin-bottom:1rem;">
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text);">Temas</h1>
+        <p style="font-size:.82rem;color:var(--muted);margin-top:.15rem;">Veja o material antes de enviar. Ao abrir um tema, você escolhe o que vai para a turma.</p>
+      </div>
+
+      <!-- Abas -->
+      <div class="abasTemas">
+        <button class="abaT ativa" data-aba="recentes"  onclick="irAba('recentes')">Recentes</button>
+        <button class="abaT" data-aba="classicos" onclick="irAba('classicos')">Clássicos</button>
+        <button class="abaT" data-aba="outras"    onclick="irAba('outras')">Outras aplicações</button>
+        <button class="abaT" data-aba="categoria" onclick="irAba('categoria')">Por categoria</button>
+        <button class="abaT" data-aba="meus"      onclick="irAba('meus')">Meus temas</button>
+      </div>
+
+      <!-- Contexto da aba -->
+      <p id="ctxAba" style="font-size:.76rem;color:var(--muted);margin:.7rem 0;"></p>
+
+      <!-- Filtro interno (aparece em Outras aplicações e Por categoria) -->
+      <div id="linhaFiltro" style="display:none;align-items:center;gap:.6rem;margin-bottom:.8rem;flex-wrap:wrap;">
+        <button class="campoBtnT" onclick="abrirGavetaTema()"><span id="lblFiltro">Todas</span><span style="color:var(--muted);">▾</span></button>
+      </div>
+
+      <!-- Busca -->
+      <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:1rem;">
+        <input id="buscaTema" type="text" placeholder="Buscar tema…" oninput="renderTemas()"
+               style="flex:1;background:var(--surface);border:1px solid rgba(var(--borderRGB),.3);border-radius:.75rem;padding:.7rem 1rem;color:var(--text);font-size:.85rem;outline:none;font-family:inherit;"/>
+        <span id="contTemas" style="flex:0 0 auto;font-size:.75rem;color:var(--muted);white-space:nowrap;">—</span>
+      </div>
+
+      <!-- Criar meu próprio tema -->
+      <div class="cardCriarTema" onclick="criarTema()">
+        <span style="font-size:1.5rem;flex:0 0 auto;">✍️</span>
+        <div style="flex:1;min-width:0;">
+          <p style="font-size:.9rem;font-weight:800;color:var(--text);">Criar meu próprio tema</p>
+          <p style="font-size:.75rem;color:var(--muted);">A IA monta o repertório e o material de apoio</p>
+        </div>
+        <span style="flex:0 0 auto;color:var(--cyan);font-weight:800;">→</span>
+      </div>
+
+      <!-- Grade de temas -->
+      <div id="gridTemas" class="gridTemas"></div>
+
+    </div>
+
+    <!-- ═══════════ MATERIAL DO TEMA ═══════════ -->
+    <div id="viewMaterial" style="display:none;">
+
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
+        <button onclick="voltarTemas()" title="Voltar" style="width:2.5rem;height:2.5rem;border-radius:.75rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.25);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div style="flex:1;min-width:0;">
+          <h1 id="mtTitulo" style="font-size:1.2rem;font-weight:800;color:var(--text);line-height:1.25;">Tema</h1>
+          <p id="mtSub" style="font-size:.76rem;color:var(--muted);margin-top:.15rem;">—</p>
+        </div>
+      </div>
+
+      <div id="mtBadges" style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;"></div>
+
+      <div class="matGrid">
+        <div class="cardBoxT">
+          <p class="rotuloT">O que este tema inclui</p>
+          <div id="mtInclui" style="display:flex;flex-direction:column;gap:.55rem;margin-top:.6rem;"></div>
+        </div>
+        <div class="cardBoxT">
+          <p class="rotuloT">Proposta</p>
+          <p id="mtDesc" style="font-size:.88rem;line-height:1.7;color:var(--text2);margin-top:.5rem;">—</p>
+        </div>
+      </div>
+
+      <!-- Ações -->
+      <div class="acoesMaterial">
+        <button onclick="baixarMaterial()" class="btnSecT">⬇ Baixar</button>
+        <button onclick="abrirEnviar()" class="btnPriT">📤 Enviar para…</button>
+      </div>
+
+    </div>
+
   </div>
 </div>
 
-<input class="hidden peer" id="sidebar-toggle" type="checkbox"/>
-<button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden mr-2"><span class="material-symbols-outlined">menu</span></button>
+<!-- ============ MODAL CRIAR TURMA ============ -->
+<style>
+  #modalTurma { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(6px); z-index:200; align-items:flex-start; justify-content:center; padding:1rem; overflow-y:auto; }
+  #modalTurma.aberto { display:flex; }
+  .modal-card { background:var(--surface); border:1px solid rgba(var(--borderRGB),.3); border-radius:1.25rem; padding:1.75rem; max-width:30rem; width:100%; margin:auto; box-shadow:0 24px 64px rgba(0,0,0,.5); }
+  .modal-step { display:none; }
+  .modal-step.ativo { display:block; }
 
-<div class="flex h-screen overflow-hidden relative z-10">
+  .modal-input {
+    width:100%; padding:.75rem 1rem; background:var(--sunken); border:1px solid rgba(var(--borderRGB),.3);
+    border-radius:.75rem; color:var(--text); font-size:.9rem; font-family:inherit; transition:all .2s;
+  }
+  .modal-input:focus { outline:none; border-color:var(--cyan); box-shadow:0 0 0 3px rgba(var(--cyanRGB),.15); }
+  .modal-input::placeholder { color:var(--muted2); }
 
-  <!-- SIDEBAR -->
-  <div id="overlay" onclick="toggleSidebar()"></div>
-  <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50 transition-transform duration-300 -translate-x-full lg:translate-x-0 shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)]">
-    <div class="flex items-center px-2 mb-10">
-      <div class="flex items-baseline italic">
-        <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
-        <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
+  .modal-label { display:block; font-size:.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:.4rem; }
+  .modal-label .opt { color:var(--muted2); font-weight:500; text-transform:none; letter-spacing:0; }
+
+  .btn-primario {
+    width:100%; padding:.875rem; background:linear-gradient(135deg,var(--cyan) 0%,var(--purple) 100%);
+    border:none; border-radius:.75rem; color:var(--bg); font-size:.9rem; font-weight:800; cursor:pointer; transition:all .2s;
+  }
+  .btn-primario:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(var(--cyanRGB),.25); }
+  .btn-primario:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+  .btn-secundario {
+    width:100%; padding:.7rem; background:transparent; border:1px solid rgba(var(--borderRGB),.3);
+    border-radius:.75rem; color:var(--muted); font-size:.85rem; font-weight:600; cursor:pointer; transition:all .2s;
+  }
+  .btn-secundario:hover { color:var(--text); border-color:rgba(var(--borderRGB),.6); }
+
+  .codigo-display {
+    background:linear-gradient(135deg,rgba(var(--cyanRGB),.1) 0%,rgba(var(--purpleRGB),.1) 100%);
+    border:2px dashed var(--cyan); border-radius:1rem; padding:1.5rem; text-align:center; margin:1rem 0 1.5rem;
+  }
+  .codigo-texto {
+    font-size:1.3rem; font-weight:900; color:var(--cyan); letter-spacing:.02em;
+    font-family:'Courier New',monospace; word-break:break-all;
+  }
+  /* ── Botões/links bloqueados (Em breve) ─────────── */
+  .em-breve-btn{position:relative;opacity:.5;cursor:pointer!important;}
+  .em-breve-btn:hover{border-color:rgba(var(--borderRGB),.2)!important;transform:none!important;box-shadow:none!important;}
+  .em-breve-link{position:relative;opacity:.5;}
+  .em-breve-link:hover{background:transparent!important;color:inherit!important;}
+  .badge-em-breve{position:absolute;top:.4rem;right:.4rem;background:rgba(var(--goldRGB),.15);border:1px solid rgba(var(--goldRGB),.4);color:var(--gold);font-size:.5rem;font-weight:700;padding:.1rem .4rem;border-radius:.5rem;text-transform:uppercase;letter-spacing:.05em;line-height:1;}
+  .badge-em-breve-mini{display:inline-block;background:rgba(var(--goldRGB),.15);border:1px solid rgba(var(--goldRGB),.4);color:var(--gold);font-size:.5rem;font-weight:700;padding:.1rem .35rem;border-radius:.4rem;text-transform:uppercase;letter-spacing:.05em;line-height:1;margin-left:.4rem;vertical-align:middle;}
+  /* ── Modal "Em breve" ─────────────────────────────── */
+  #modalEmBreve{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem;}
+  #modalEmBreve.aberto{display:flex;}
+  #modalEmBreve .conteudo{background:var(--top);border:1px solid rgba(var(--purpleRGB),.25);border-radius:1.25rem;max-width:440px;width:100%;padding:2rem;text-align:center;}
+  #modalEmBreve .icone-grande{width:64px;height:64px;border-radius:50%;background:rgba(var(--goldRGB),.12);border:1px solid rgba(var(--goldRGB),.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
+</style>
+
+<div id="modalTurma" onclick="if(event.target===this)fecharModalTurma()">
+  <div class="modal-card">
+
+    <!-- Cabeçalho -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <span id="modalIcone" class="material-symbols-outlined" style="color:var(--cyan);font-size:1.5rem;font-variation-settings:'FILL' 1;">school</span>
+        <h3 id="modalTitulo" style="font-size:1.05rem;font-weight:800;color:var(--text);">Nova escola</h3>
       </div>
+      <button onclick="fecharModalTurma()" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:.25rem;border-radius:.5rem;display:flex;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
-    <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="inicio.html"><span class="material-symbols-outlined">home</span><span class="font-medium text-sm">Início</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span><span class="font-medium text-sm">Nova Redação</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span><span class="font-medium text-sm">Temas</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Minhas Redações</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span><span class="font-medium text-sm">Evolução</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html"><span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Elite <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
-    </nav>
-    <div class="mt-auto pt-6 border-t border-outline-variant/10">
-      <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
-        <img alt="usuario" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
-        <div class="flex flex-col"><span class="text-sm font-semibold text-on-surface" data-user-name>{{USUARIO}}</span><span class="text-xs text-on-surface-variant">Estudante</span></div>
+
+    <!-- Indicador de passos -->
+    <div style="display:flex;gap:.4rem;margin-bottom:1.5rem;">
+      <div id="bar1" style="flex:1;height:3px;background:var(--cyan);border-radius:99px;transition:all .3s;"></div>
+      <div id="bar2" style="flex:1;height:3px;background:var(--scroll);border-radius:99px;transition:all .3s;"></div>
+      <div id="bar3" style="flex:1;height:3px;background:var(--scroll);border-radius:99px;transition:all .3s;"></div>
+    </div>
+
+    <!-- PASSO 1: ESCOLA -->
+    <div id="step-escola" class="modal-step ativo">
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem;">Vamos começar identificando a escola onde sua turma vai funcionar.</p>
+
+      <div style="margin-bottom:1rem;">
+        <label class="modal-label">Nome da escola *</label>
+        <input id="inpEscolaNome" class="modal-input" type="text" placeholder="Ex: Colégio Estadual João Silva" maxlength="120" />
       </div>
-      <a onclick="authLogout()" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
-        <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
-      </a>
-    </div>
-  </aside>
 
-  <!-- MAIN -->
-  <main class="flex-1 flex flex-col h-full relative bg-surface-container-lowest lg:ml-64 main-with-sidebar w-full">
-
-    <header class="h-20 flex items-center justify-between px-6 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5 w-full">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">library_books</span>
-          <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Temas</h2>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:.75rem;margin-bottom:1.5rem;align-items:end;">
+        <div style="display:flex;flex-direction:column;">
+          <label class="modal-label" style="white-space:nowrap;">Cidade <span class="opt">(opcional)</span></label>
+          <input id="inpEscolaCidade" class="modal-input" type="text" placeholder="Manaus" value="Manaus" />
+        </div>
+        <div style="display:flex;flex-direction:column;">
+          <label class="modal-label" style="white-space:nowrap;">Estado <span class="opt">(opc.)</span></label>
+          <input id="inpEscolaEstado" class="modal-input" type="text" placeholder="AM" value="AM" maxlength="2" style="text-transform:uppercase;" />
         </div>
       </div>
-      <div class="flex items-center gap-4 lg:gap-6">
-        <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
-          <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
-          <span class="text-xs font-bold text-on-surface" id="totalPontos">— pts</span>
-        </div>
-        <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
-        </button>
-      </div>
-    </header>
 
-    <div class="flex-1 overflow-y-auto custom-scrollbar">
-      <div class="p-10 max-w-7xl mx-auto space-y-10">
-
-        <!-- CABEÇALHO -->
-        <section>
-          <h2 class="text-4xl font-black text-white tracking-tight mb-2 italic">Biblioteca de Temas</h2>
-          <p class="text-[#c8c4d7] max-w-2xl text-lg font-light leading-relaxed">
-            Temas oficiais do ENEM (2009-2025). Todos cuidadosamente selecionados pra te levar à Nota 1.000.
-          </p>
-        </section>
-
-        <!-- ABAS -->
-        <section class="flex flex-col gap-6">
-          <div class="flex gap-3 overflow-x-auto pb-2 no-scrollbar flex-wrap">
-            <button onclick="mudarAba('recentes')"        id="tab-recentes"        class="tab-btn ativo px-5 py-2 text-sm font-bold rounded-lg whitespace-nowrap">Recentes (2020-2025)</button>
-            <button onclick="mudarAba('classicos')"       id="tab-classicos"       class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap">Clássicos (2009-2019)</button>
-            <button onclick="mudarAba('ppl')"             id="tab-ppl"             class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap">PPL e Reaplicações</button>
-            <button onclick="mudarAba('categoria')"       id="tab-categoria"       class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap">Por Categoria</button>
-            <button onclick="mudarAba('meus')"            id="tab-meus"            class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap">Meus Temas</button>
-            <button onclick="mudarAba('compartilhados')"  id="tab-compartilhados"  class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap flex items-center gap-2">
-              <span style="display:inline-block;width:8px;height:8px;background:#45edee;border-radius:50%;animation:pulse-dot 1.5s infinite;"></span>
-              Compartilhados
-            </button>
-          </div>
-
-          <!-- BUSCA -->
-          <div class="flex items-center gap-3 bg-[#1d2026] border border-white/10 rounded-xl px-4 py-3 w-full max-w-2xl">
-            <span class="material-symbols-outlined text-[#6c5ce7]">search</span>
-            <input id="campoBusca" oninput="filtrarTemas()" class="bg-transparent border-none focus:ring-0 text-sm w-full text-white placeholder:text-white/20" placeholder="Buscar temas, anos, categorias..." type="text"/>
-            <button onclick="limparBusca()" class="text-white/20 hover:text-white/60 transition-colors">
-              <span class="material-symbols-outlined text-sm">close</span>
-            </button>
-          </div>
-
-          <!-- FILTRO DE CATEGORIA (aparece na aba Categoria) -->
-          <div id="painelCategoria" class="bg-[#1d2026] border border-white/10 rounded-2xl p-6">
-            <h3 class="text-lg font-bold text-white mb-4">Filtrar por Categoria</h3>
-            <div id="botoesCategoria" class="flex gap-2 flex-wrap">
-              <!-- preenchido por JS -->
-            </div>
-          </div>
-        </section>
-
-        <!-- HEADER DA SEÇÃO -->
-        <section class="flex items-center justify-between">
-          <h3 id="tituloSecao" class="text-2xl font-bold text-white">Recentes (2020-2025)</h3>
-          <span id="contagemTemas" class="text-sm text-[#928ea0]">— temas</span>
-        </section>
-
-        <!-- LOADING -->
-        <section id="loadingTemas" class="py-20">
-          <div class="spinner-grande"></div>
-          <p class="text-center text-[#928ea0] text-sm mt-4">Carregando temas...</p>
-        </section>
-
-        <!-- GRID DE TEMAS -->
-        <section id="gridTemas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style="display:none;">
-          <!-- preenchido por JS -->
-        </section>
-
-        <!-- VAZIO -->
-        <section id="vazioTemas" class="py-20 text-center" style="display:none;">
-          <div class="text-5xl mb-4 opacity-50">📚</div>
-          <p class="text-[#c8c4d7] text-lg font-medium" id="vazioTexto">Nenhum tema encontrado.</p>
-        </section>
-
-        <!-- BOTÃO SUGERIR (sempre visível abaixo) -->
-        <section class="modo-prof-sugestao">
-          <button onclick="abrirModal()" class="w-full max-w-md mx-auto block bg-gradient-to-r from-[#6c5ce7] to-[#45edee] text-white font-bold py-3 px-6 rounded-xl hover:opacity-90 transition-opacity">
-            <span class="flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined text-sm">lightbulb</span>
-              Sugerir um novo tema
-            </span>
-          </button>
-        </section>
-
-      </div>
+      <button id="btnAvancarEscola" class="btn-primario" onclick="avancarParaTurma()">Próximo →</button>
     </div>
 
-  </main>
+    <!-- PASSO 2: TURMA -->
+    <div id="step-turma" class="modal-step">
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem;">Agora os dados da turma. Você pode criar mais turmas depois.</p>
+
+      <div style="margin-bottom:1rem;">
+        <label class="modal-label">Nome da turma *</label>
+        <input id="inpTurmaNome" class="modal-input" type="text" placeholder="Ex: 3º Ano A — Manhã" maxlength="80" />
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.5rem;align-items:end;">
+        <div style="display:flex;flex-direction:column;">
+          <label class="modal-label" style="white-space:nowrap;">Série <span class="opt">(opc.)</span></label>
+          <select id="inpTurmaSerie" class="modal-input">
+            <option value="">— Selecionar —</option>
+            <option value="1º Ano">1º Ano</option>
+            <option value="2º Ano">2º Ano</option>
+            <option value="3º Ano">3º Ano</option>
+            <option value="EJA">EJA</option>
+            <option value="Pré-Vestibular">Pré-Vestibular</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;">
+          <label class="modal-label" style="white-space:nowrap;">Ano letivo <span class="opt">(opc.)</span></label>
+          <input id="inpTurmaAno" class="modal-input" type="number" min="2024" max="2030" value="2026" />
+        </div>
+      </div>
+
+      <button id="btnCriarTurma" class="btn-primario" onclick="criarTurmaFinal()">Criar turma →</button>
+      <button class="btn-secundario" style="margin-top:.5rem;" onclick="voltarParaEscola()">← Voltar</button>
+    </div>
+
+    <!-- PASSO 3: SUCESSO -->
+    <div id="step-sucesso" class="modal-step">
+      <div style="text-align:center;margin-bottom:1rem;">
+        <div style="width:3.5rem;height:3.5rem;border-radius:50%;background:rgba(var(--greenRGB),.15);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+          <span class="material-symbols-outlined" style="color:var(--green);font-size:2rem;font-variation-settings:'FILL' 1;">check_circle</span>
+        </div>
+        <h4 style="font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:.4rem;">Turma criada! 🎉</h4>
+        <p style="font-size:.85rem;color:var(--muted);">Compartilhe este código com seus alunos:</p>
+      </div>
+
+      <div class="codigo-display">
+        <p id="codigoGeradoTexto" class="codigo-texto">redaon-...</p>
+      </div>
+
+      <button class="btn-primario" onclick="copiarCodigoTurma()">
+        <span style="display:inline-flex;align-items:center;gap:.4rem;justify-content:center;">
+          <span class="material-symbols-outlined" style="font-size:1.1rem;">content_copy</span>
+          Copiar código
+        </span>
+      </button>
+      <button class="btn-secundario" style="margin-top:.5rem;" onclick="finalizarECarregar()">Continuar pro painel</button>
+
+      <p style="font-size:.7rem;color:var(--muted2);text-align:center;margin-top:1rem;line-height:1.5;">
+        Os alunos entram em <strong style="color:var(--muted);">redaon.com</strong>, vão em "Entrar em uma turma"<br>
+        e digitam o código. Pronto — vinculados à sua turma.
+      </p>
+    </div>
+
+  </div>
 </div>
 
+<!-- Modal "Em breve" — telas ainda não conectadas ao Supabase -->
+<div id="modalEmBreve" onclick="if(event.target===this)fecharEmBreve()">
+  <div class="conteudo">
+    <div class="icone-grande">
+      <span class="material-symbols-outlined" style="color:var(--gold);font-size:2rem;font-variation-settings:'FILL' 1;">construction</span>
+    </div>
+    <h2 style="font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:.5rem;">Em desenvolvimento</h2>
+    <p style="font-size:.85rem;color:var(--text2);line-height:1.6;margin-bottom:.4rem;">A área <strong id="emBreveTitulo" style="color:var(--cyan);">—</strong> está sendo finalizada e será liberada em breve.</p>
+    <p style="font-size:.8rem;color:var(--muted);line-height:1.55;margin-bottom:1.5rem;">Durante o piloto, você pode acompanhar suas turmas e validar correções diretamente em <strong style="color:var(--green);">Redações dos Alunos</strong>.</p>
+    <button onclick="fecharEmBreve()" style="width:100%;padding:.875rem;background:linear-gradient(135deg,var(--cyan),var(--purple));color:var(--onCyan);border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;">Entendi</button>
+  </div>
+</div>
+
+<!-- GAVETA DE SELEÇÃO (padrão aprovado) -->
+<div id="gvFiltroBg" onclick="fecharFiltro()"></div>
+<div id="gvFiltro">
+  <div class="grip"></div>
+  <p class="tit" id="gvFiltroTit">Selecionar</p>
+  <div id="gvFiltroOpts"></div>
+</div>
+
+<!-- GAVETA "MAIS" (sobe por trás da barra — padrão do mockup) -->
+<!-- Gaveta de seleção -->
+<div id="gvTBg" onclick="fecharGavetaTema()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:190;"></div>
+<div id="gvT" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:191;background:var(--surface);border-radius:1.25rem 1.25rem 0 0;border-top:1px solid rgba(var(--borderRGB),.25);padding:.9rem 1.25rem 1.5rem;max-width:34rem;margin:0 auto;max-height:72vh;overflow-y:auto;">
+  <div style="width:2.4rem;height:.25rem;border-radius:99px;background:rgba(var(--borderRGB),.5);margin:0 auto .9rem;"></div>
+  <p id="gvTTit" style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:.3rem;">Escolher</p>
+  <p id="gvTSub" style="font-size:.75rem;color:var(--muted);margin-bottom:.8rem;"></p>
+  <div id="gvTOpts" style="display:flex;flex-direction:column;gap:.45rem;"></div>
+</div>
+
+<div id="gavetaBg" onclick="fecharMais()"></div>
+<div id="gavetaMais">
+  <div class="grip"></div>
+  <p class="tit">Mais</p>
+  <a class="pill" href="temas.html"><i class="pemoji">&#128203;</i>Temas<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="mostrarEmBreve('Notificações')"><i class="pemoji">&#128276;</i>Notificações<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="irModoAluno()"><i class="pemoji">&#127891;</i>Modo Aluno<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="mostrarEmBreve('Enviar sugestão')"><i class="pemoji">&#128172;</i>Enviar sugestão<i class="fim">&#8250;</i></a>
+  <p class="tit" style="margin-top:.9rem;">Conta</p>
+  <a class="pill" onclick="alternarTema()"><i class="pemoji" id="iconeTemaMais">&#9728;&#65039;</i><span id="txtTemaMais">Aparência</span></a>
+  <a class="pill" href="configuracoes.html"><i class="pemoji">&#9881;&#65039;</i>Configurações<i class="fim">&#8250;</i></a>
+  <a class="pill" style="color:var(--red);" onclick="authLogout()"><i class="pemoji">&#128682;</i>Sair</a>
+</div>
+
+<!-- BARRA INFERIOR (padrão do mockup mobile v2A.3) — só em telas pequenas -->
+<nav id="barraInferior">
+  <a href="professor.html"><i class="bEmoji">&#127968;</i>Início</a>
+  <a href="professor-alunos.html"><i class="bEmoji">&#128101;</i>Turmas</a>
+  <a class="fabWrap" href="professor-redacoes.html">
+    <span class="fab"><i class="bEmoji" style="font-size:20px;">&#10004;&#65039;</i></span>
+    <span class="fabCap">Validar</span>
+  </a>
+  <a href="professor-estudio.html"><i class="bEmoji">&#10024;</i>IA Estúdio</a>
+  <a id="bMais" onclick="toggleMais()"><i class="bEmoji">&#9776;</i>Mais</a>
+</nav>
+
 <script>
-  // ============================================================
-  // ESTADO GLOBAL
-  // ============================================================
-  let TEMAS              = [];   // Carregado do banco
-  let TEMAS_PROFESSOR    = [];   // Compartilhados (será populado depois pelo professor)
-  let MEUS_TEMAS_IDS     = JSON.parse(localStorage.getItem('redaon_temas_salvos') || '[]'); // favoritos
-  let ABA_ATUAL          = 'recentes';
-  let CATEGORIA_ATUAL    = null;
-  let MODO_PROFESSOR     = false; // true se usuário logado for professor
+  authGuard('professor');
 
-  // ============================================================
-  // INICIALIZAÇÃO
-  // ============================================================
-  (async function init() {
-    if (!authEstaLogado()) {
+  // Logout local — garante funcionamento mesmo se supabase-auth.js falhar
+  window.authLogout = window.authLogout || function() {
+    if (confirm('Deseja sair da sua conta?')) {
+      localStorage.clear();
       window.location.href = 'login.html';
-      return;
     }
+  };
 
-    // Detecta perfil e adapta interface se for professor
-    MODO_PROFESSOR = (typeof authGetTipo === 'function' && authGetTipo() === 'professor');
-    if (MODO_PROFESSOR) {
-      adaptarInterfaceProfessor();
-    }
+  // ─── Identificação da professora ───
+  const NOME_PROF = authGetNome();
+  document.getElementById('nomeProf').textContent = NOME_PROF;
+  const h = new Date().getHours();
+  const s = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
 
+  // ─── Estado em memória ───
+  let escolaCriada = null;   // guarda escola entre passo 1 e passo 2
+  let turmasDoProfessor = [];
+
+  // Estado dos filtros (3.3)
+  let todasRedacoes = [];     // cache de redações carregadas
+  let todosAlunos   = [];     // cache de alunos carregados
+  let filtroTurmaId = '';     // '' = todas
+  let filtroStatus  = '';     // '' = todos
+
+  // ════════════════════════════════════════════════════════════════
+  // CARREGAMENTO INICIAL — decide entre empty state e dashboard
+  // ════════════════════════════════════════════════════════════════
+  var TEMAS=[], _aba='recentes', _filtro='todas', _temaAtual=null;
+
+  var APLIC = {
+    ppl:               {rot:'PPL',            cls:'selo-ppl'},
+    digital:           {rot:'Digital',        cls:'selo-digital'},
+    segunda_aplicacao: {rot:'2ª aplicação',   cls:'selo-segunda'}
+  };
+
+  var CTX = {
+    recentes:  'Temas oficiais das provas de 2020 a 2025.',
+    classicos: 'Temas oficiais das provas de 2009 a 2019.',
+    outras:    'Temas oficiais do ENEM que não caíram na aplicação regular. Menos usados nos cursinhos — ótimos para simulado sem repertório decorado.',
+    categoria: 'Filtre por eixo temático.',
+    meus:      'Temas que você criou para suas turmas.'
+  };
+
+  var CATEGORIAS = ['Social','Direitos','Saúde','Tecnologia','Educação','Consumo','Meio Ambiente','Trabalho','Economia','Cultura'];
+
+  async function carregarPainel() {
+    try { if (typeof dbGetTurmasDoProfessor === 'function') turmasDoProfessor = await dbGetTurmasDoProfessor() || []; }
+    catch(e){ turmasDoProfessor = []; }
+    try { if (typeof dbGetAlunosDoProfessor === 'function') todosAlunos = await dbGetAlunosDoProfessor() || []; }
+    catch(e){ todosAlunos = []; }
     try {
-      await carregarTemas();
-      renderTemas();
-    } catch (err) {
-      console.error('[init] Erro carregando temas:', err);
-      document.getElementById('loadingTemas').style.display = 'none';
-      document.getElementById('vazioTemas').style.display = 'block';
-      document.getElementById('vazioTexto').textContent = 'Erro ao carregar temas. Recarregue a página.';
+      if (typeof dbGetTemas === 'function') TEMAS = await dbGetTemas() || [];
+      // Temas de provas canceladas não entram na lista (decisão do Alan).
+      // Para reverter, basta remover este filtro — o dado continua no banco.
+      TEMAS = TEMAS.filter(function(t){ return t.aplicacao !== 'cancelada'; });
     }
-  })();
-
-  // ============================================================
-  // ADAPTAÇÃO PARA PROFESSOR
-  // ============================================================
-  function adaptarInterfaceProfessor() {
-    // 1) Substitui sidebar de aluno pela sidebar de professor
-    const nav = document.querySelector('aside#sidebar nav');
-    if (nav) {
-      nav.innerHTML = `
-        <div style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin-bottom:.5rem;">Portal</div>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="professor.html"><span class="material-symbols-outlined">school</span><span class="font-medium text-sm">Dashboard</span></a>
-        <div style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin:.75rem 0 .5rem;">Gestão</div>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300 em-breve-link" onclick="mostrarEmBreveTemas('Gerenciar Alunos');return false;" style="cursor:pointer;opacity:.5;"><span class="material-symbols-outlined">group</span><span class="font-medium text-sm">Gerenciar Alunos</span><span class="badge-em-breve-mini">Em breve</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="professor-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Redações dos Alunos</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300 em-breve-link" onclick="mostrarEmBreveTemas('Relatórios');return false;" style="cursor:pointer;opacity:.5;"><span class="material-symbols-outlined">bar_chart</span><span class="font-medium text-sm">Relatórios</span><span class="badge-em-breve-mini">Em breve</span></a>
-        <div style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin:.75rem 0 .5rem;">Conteúdo</div>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300 em-breve-link" onclick="mostrarEmBreveTemas('PedagoIA');return false;" style="cursor:pointer;opacity:.5;"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">neurology</span><span class="font-medium text-sm">Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span><span class="badge-em-breve-mini">Em breve</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span><span class="font-medium text-sm">Temas</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
-      `;
-    }
-
-    // 2) Troca rótulo "Estudante" por "Professor(a)" no rodapé
-    const rotuloEl = document.querySelector('aside#sidebar .text-xs.text-on-surface-variant');
-    if (rotuloEl) rotuloEl.textContent = 'Professor(a)';
-
-    // 3) Esconde botão "Sugerir Tema" estilo aluno (manteremos visualização limpa)
-    // (intencionalmente preservado — pode ser útil para professor sugerir temas)
-
-    // 4) Ajusta título e descrição da página para contexto professor
-    const subtituloEl = document.querySelector('main p.text-on-surface-variant');
-    if (subtituloEl && subtituloEl.textContent.includes('Nota 1.000')) {
-      subtituloEl.innerHTML = 'Catálogo de temas oficiais do ENEM (2009-2025) disponíveis para sua turma estudar no RedaON.';
-    }
-
-    // 5) Injeta CSS dos badges + modal "Em breve"
-    const style = document.createElement('style');
-    style.textContent = `
-      .badge-em-breve-mini{display:inline-block;background:rgba(250,189,0,.15);border:1px solid rgba(250,189,0,.4);color:#fabd00;font-size:.5rem;font-weight:700;padding:.1rem .35rem;border-radius:.4rem;text-transform:uppercase;letter-spacing:.05em;line-height:1;margin-left:.4rem;vertical-align:middle;}
-      .em-breve-link:hover{background:transparent!important;color:inherit!important;}
-      /* Modo professor: esconde botão de salvar tema (push_pin) e aba "Meus Temas" */
-      .card-tema button[title*="meus temas"], .card-tema button[title*="Meus Temas"]{display:none!important;}
-      #tab-meus{display:none!important;}
-      /* "Sugerir Tema" mantido para professor — pode ser canal útil de feedback. Para esconder: descomente abaixo. */
-      /* .modo-prof-sugestao{display:none!important;} */
-      #modalEmBreveTemas{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem;}
-      #modalEmBreveTemas.aberto{display:flex;}
-      #modalEmBreveTemas .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:440px;width:100%;padding:2rem;text-align:center;}
-      #modalTemaProf{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:1rem;}
-      #modalTemaProf.aberto{display:flex;}
-      #modalTemaProf .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:560px;width:100%;padding:2rem;}
-    `;
-    document.head.appendChild(style);
-
-    // 6) Injeta modais "Em breve" e "Visualizar Tema"
-    const modais = document.createElement('div');
-    modais.innerHTML = `
-      <div id="modalEmBreveTemas" onclick="if(event.target===this)fecharEmBreveTemas()">
-        <div class="conteudo">
-          <div style="width:64px;height:64px;border-radius:50%;background:rgba(250,189,0,.12);border:1px solid rgba(250,189,0,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-            <span class="material-symbols-outlined" style="color:#fabd00;font-size:2rem;font-variation-settings:'FILL' 1;">construction</span>
-          </div>
-          <h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;text-align:center;">Em desenvolvimento</h2>
-          <p style="font-size:.85rem;color:#c8c4d7;line-height:1.6;margin-bottom:1.5rem;text-align:center;">A área <strong id="emBreveTemasTitulo" style="color:#45edee;">—</strong> será liberada em breve.</p>
-          <button onclick="fecharEmBreveTemas()" style="width:100%;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;">Entendi</button>
-        </div>
-      </div>
-      <div id="modalTemaProf" onclick="if(event.target===this)fecharModalTemaProf()">
-        <div class="conteudo">
-          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
-            <span class="material-symbols-outlined" style="color:#45edee;font-size:1.5rem;font-variation-settings:'FILL' 1;">description</span>
-            <h2 id="modalTemaTitulo" style="font-size:1.05rem;font-weight:800;color:#e1e2eb;line-height:1.3;flex:1;">—</h2>
-          </div>
-          <div id="modalTemaMeta" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem;font-size:.7rem;"></div>
-          <div id="modalTemaDesc" style="font-size:.875rem;color:#c8c4d7;line-height:1.65;margin-bottom:1.5rem;max-height:50vh;overflow-y:auto;"></div>
-          <button onclick="fecharModalTemaProf()" style="width:100%;padding:.875rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.875rem;cursor:pointer;">Fechar</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modais);
+    catch(e){ console.error(e); TEMAS = []; }
+    irAba('recentes');
   }
+  function renderizarDashboard(){ /* não usado */ }
 
-  // Funções dos modais (escopo global para onclick funcionar)
-  window.mostrarEmBreveTemas = function(titulo) {
-    document.getElementById('emBreveTemasTitulo').textContent = titulo;
-    document.getElementById('modalEmBreveTemas').classList.add('aberto');
-  };
-  window.fecharEmBreveTemas = function() {
-    document.getElementById('modalEmBreveTemas').classList.remove('aberto');
-  };
-  window.fecharModalTemaProf = function() {
-    document.getElementById('modalTemaProf').classList.remove('aberto');
-  };
-  window.visualizarTemaProf = function(id) {
-    const tema = TEMAS.find(t => t.id === id) || TEMAS_PROFESSOR.find(t => t.id === id);
-    if (!tema) return;
-    document.getElementById('modalTemaTitulo').textContent = tema.titulo || '';
-    let meta = '';
-    if (tema.ano_enem) meta += `<span style="background:rgba(69,237,238,.12);color:#45edee;padding:.2rem .55rem;border-radius:.4rem;font-weight:700;">ENEM ${tema.ano_enem}${tema.aplicacao && tema.aplicacao !== 'Regular' ? ' · ' + tema.aplicacao : ''}</span>`;
-    if (tema.categoria) meta += `<span style="background:rgba(108,92,231,.12);color:#c6bfff;padding:.2rem .55rem;border-radius:.4rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${tema.categoria}</span>`;
-    if (tema.nivel) meta += `<span style="background:rgba(250,189,0,.12);color:#fabd00;padding:.2rem .55rem;border-radius:.4rem;font-weight:700;">${tema.nivel}</span>`;
-    document.getElementById('modalTemaMeta').innerHTML = meta;
-    document.getElementById('modalTemaDesc').innerHTML = tema.descricao
-      ? tema.descricao.replace(/\n/g, '<br>')
-      : '<em style="color:#928ea0;">Sem descrição disponível para este tema.</em>';
-    document.getElementById('modalTemaProf').classList.add('aberto');
+  window.irAba = function(a){
+    _aba=a; _filtro='todas';
+    document.querySelectorAll('.abaT').forEach(function(b){ b.classList.toggle('ativa', b.getAttribute('data-aba')===a); });
+    var ctx=document.getElementById('ctxAba'); if(ctx) ctx.textContent = CTX[a] || '';
+    var lf=document.getElementById('linhaFiltro');
+    if(lf) lf.style.display = (a==='outras' || a==='categoria') ? 'flex' : 'none';
+    var lbl=document.getElementById('lblFiltro'); if(lbl) lbl.textContent='Todas';
+    renderTemas();
   };
 
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      ['modalEmBreveTemas', 'modalTemaProf'].forEach(id => {
-        const m = document.getElementById(id);
-        if (m) m.classList.remove('aberto');
-      });
+  function temasDaAba(){
+    var lista = TEMAS || [];
+    if(_aba==='recentes')  return lista.filter(function(t){ return t.ano_enem!=null && t.ano_enem>=2020 && (!t.aplicacao || t.aplicacao==='regular'); });
+    if(_aba==='classicos') return lista.filter(function(t){ return t.ano_enem!=null && t.ano_enem<2020 && (!t.aplicacao || t.aplicacao==='regular'); });
+    if(_aba==='outras'){
+      var l = lista.filter(function(t){ return t.aplicacao && t.aplicacao!=='regular'; });
+      if(_filtro!=='todas') l = l.filter(function(t){ return t.aplicacao===_filtro; });
+      return l;
     }
-  });
-
-  // ============================================================
-  // CARREGAMENTO DO BANCO
-  // ============================================================
-  async function carregarTemas() {
-    const url = `${SUPABASE_URL}/rest/v1/temas?select=id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,ativo&ativo=eq.true&order=ano_enem.desc.nullsfirst&order=aplicacao.asc`;
-    const res = await dbFetch(url, {});
-    if (!res.ok) throw new Error('Erro ao buscar temas: ' + res.status);
-    TEMAS = await res.json();
-    console.log(`[carregarTemas] ${TEMAS.length} temas carregados do banco.`);
-  }
-
-  // ============================================================
-  // FILTRAGEM POR ABA
-  // ============================================================
-  function obterTemasFiltrados() {
-    const busca = (document.getElementById('campoBusca').value || '').toLowerCase().trim();
-
-    let lista = [];
-    switch (ABA_ATUAL) {
-      case 'recentes':
-        lista = TEMAS.filter(t => t.ano_enem != null && t.ano_enem >= 2020);
-        break;
-      case 'classicos':
-        lista = TEMAS.filter(t => t.ano_enem != null && t.ano_enem < 2020);
-        break;
-      case 'ppl':
-        lista = TEMAS.filter(t => t.aplicacao && t.aplicacao !== 'regular');
-        break;
-      case 'categoria':
-        lista = CATEGORIA_ATUAL
-          ? TEMAS.filter(t => t.categoria === CATEGORIA_ATUAL)
-          : TEMAS;
-        break;
-      case 'meus':
-        lista = TEMAS.filter(t => MEUS_TEMAS_IDS.includes(t.id));
-        break;
-      case 'compartilhados':
-        lista = TEMAS_PROFESSOR;
-        break;
+    if(_aba==='categoria'){
+      return (_filtro==='todas') ? lista : lista.filter(function(t){ return t.categoria===_filtro; });
     }
-
-    if (busca) {
-      lista = lista.filter(t =>
-        (t.titulo    || '').toLowerCase().includes(busca) ||
-        (t.categoria || '').toLowerCase().includes(busca) ||
-        String(t.ano_enem || '').includes(busca) ||
-        (t.aplicacao || '').toLowerCase().includes(busca)
-      );
-    }
+    if(_aba==='meus') return lista.filter(function(t){ return t.origem==='professor'; });
     return lista;
   }
 
-  // ============================================================
-  // RENDERIZAÇÃO
-  // ============================================================
-  function renderTemas() {
-    document.getElementById('loadingTemas').style.display = 'none';
+  window.renderTemas = function(){
+    var box=document.getElementById('gridTemas'); if(!box) return;
+    var busca=(document.getElementById('buscaTema')||{}).value||'';
+    busca=busca.toLowerCase().trim();
+    var lista=temasDaAba();
+    if(busca) lista=lista.filter(function(t){
+      return (t.titulo||'').toLowerCase().indexOf(busca)>=0
+          || (t.categoria||'').toLowerCase().indexOf(busca)>=0
+          || String(t.ano_enem||'').indexOf(busca)>=0;
+    });
+    var c=document.getElementById('contTemas');
+    if(c) c.textContent = lista.length + ' tema' + (lista.length===1?'':'s');
+    if(!lista.length){
+      box.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:2rem 1rem;color:var(--muted);font-size:.85rem;">'
+        + (busca ? 'Nenhum tema com esse termo.' : (_aba==='meus' ? 'Você ainda não criou temas. Use "Criar meu próprio tema" acima.' : 'Nenhum tema nesta aba.'))
+        + '</p>';
+      return;
+    }
+    box.innerHTML = lista.map(cardTema).join('');
+  };
 
-    const lista = obterTemasFiltrados();
-    const grid  = document.getElementById('gridTemas');
-    const vazio = document.getElementById('vazioTemas');
+  function cardTema(t){
+    var selos='';
+    if(t.origem==='professor')      selos += '<span class="selo selo-meus">Meu tema</span>';
+    else if(t.origem==='profa')     selos += '<span class="selo selo-profa">PROfa</span>';
+    else if(t.ano_enem)             selos += '<span class="selo selo-enem">ENEM ' + t.ano_enem + '</span>';
+    if(t.aplicacao && APLIC[t.aplicacao]) selos += '<span class="selo ' + APLIC[t.aplicacao].cls + '">' + APLIC[t.aplicacao].rot + '</span>';
+    if(t.categoria) selos += '<span class="selo" style="background:rgba(var(--borderRGB),.25);color:var(--muted);">' + t.categoria + '</span>';
+    var inclui = t.inclui || '💡 repertório (9 eixos) · ❓ quiz';
+    return '<div class="temaCard" onclick="abrirMaterial(\'' + t.id + '\')">'
+      + '<div class="temaTop">' + selos + '</div>'
+      + '<p class="temaTit">' + (t.titulo||'Tema') + '</p>'
+      + '<p class="temaInc">Inclui: ' + inclui + '</p>'
+      + '<p class="temaVer">Ver material →</p>'
+      + '</div>';
+  }
 
-    document.getElementById('contagemTemas').textContent =
-      lista.length === 1 ? '1 tema' : `${lista.length} temas`;
+  // ─── Material do tema ───
+  window.abrirMaterial = function(id){
+    var t=(TEMAS||[]).filter(function(x){ return String(x.id)===String(id); })[0];
+    if(!t){ toast('Tema não encontrado'); return; }
+    _temaAtual=t;
+    document.getElementById('viewTemas').style.display='none';
+    document.getElementById('viewMaterial').style.display='block';
+    window.scrollTo(0,0);
 
-    // Atualiza painel de categoria
-    document.getElementById('painelCategoria').className =
-      ABA_ATUAL === 'categoria' ? 'aberto bg-[#1d2026] border border-white/10 rounded-2xl p-6' : '';
+    document.getElementById('mtTitulo').textContent = t.titulo || 'Tema';
+    document.getElementById('mtSub').textContent =
+      (t.origem==='professor' ? 'Criado por você' : (t.origem==='profa' ? 'por Profa. Blanche' : 'Proposta oficial do ENEM'))
+      + (t.ano_enem ? ' · ' + t.ano_enem : '');
 
-    if (lista.length === 0) {
-      grid.style.display  = 'none';
-      vazio.style.display = 'block';
-      const msgs = {
-        recentes:       'Nenhum tema recente encontrado.',
-        classicos:      'Nenhum tema clássico encontrado.',
-        ppl:            'Nenhum tema PPL ou de reaplicação encontrado.',
-        categoria:      CATEGORIA_ATUAL ? `Nenhum tema na categoria "${CATEGORIA_ATUAL}".` : 'Selecione uma categoria acima.',
-        meus:           'Você ainda não salvou nenhum tema. Toque no 📌 dos cards para favoritar.',
-        compartilhados: 'Sua professora ainda não compartilhou nenhum tema.'
-      };
-      document.getElementById('vazioTexto').textContent = msgs[ABA_ATUAL] || 'Nenhum tema encontrado.';
+    var b='';
+    if(t.aplicacao && APLIC[t.aplicacao]) b += '<span class="selo ' + APLIC[t.aplicacao].cls + '">' + APLIC[t.aplicacao].rot + '</span>';
+    if(t.categoria) b += '<span class="selo" style="background:rgba(var(--borderRGB),.25);color:var(--muted);">' + t.categoria + '</span>';
+    if(t.nivel) b += '<span class="selo" style="background:rgba(var(--borderRGB),.25);color:var(--muted);">nível ' + t.nivel + '</span>';
+    document.getElementById('mtBadges').innerHTML = b;
+
+    document.getElementById('mtDesc').textContent = t.descricao || 'Proposta de redação do ENEM.';
+
+    var itens = [
+      {ic:'💡', nm:'Repertório por eixo', ds:'9 categorias · do banco RedaON'},
+      {ic:'📄', nm:'Textos motivadores',  ds: (t.ano_enem ? 'oficiais da prova' : 'gerados pela IA')},
+      {ic:'❓', nm:'Quiz do tema',        ds:'para fixar o repertório'},
+      {ic:'⭐', nm:'Redação nota mil',    ds:'modelo comentado'}
+    ];
+    document.getElementById('mtInclui').innerHTML = itens.map(function(i){
+      return '<div class="incItem"><span style="font-size:1.1rem;flex:0 0 auto;">'+i.ic+'</span>'
+        + '<span style="min-width:0;flex:1;"><span style="display:block;font-size:.83rem;font-weight:700;color:var(--text);">'+i.nm+'</span>'
+        + '<span style="display:block;font-size:.72rem;color:var(--muted);">'+i.ds+'</span></span></div>';
+    }).join('');
+  };
+  window.voltarTemas = function(){
+    document.getElementById('viewMaterial').style.display='none';
+    document.getElementById('viewTemas').style.display='block';
+    window.scrollTo(0,0);
+  };
+  window.baixarMaterial = function(){ toast('⬇ Download do material — em breve'); };
+  window.criarTema = function(){
+    abrirGvTexto('Criar meu próprio tema',
+      'Escreva o tema. A IA monta o repertório e o material de apoio no IA Estúdio.',
+      function(txt){
+        if(!txt){ toast('Escreva o tema primeiro'); return; }
+        window.location.href = 'professor-estudio.html?tema=' + encodeURIComponent(txt);
+      });
+  };
+  // Gaveta com campo de texto
+  function abrirGvTexto(titulo, sub, cb){
+    document.getElementById('gvTTit').textContent = titulo;
+    document.getElementById('gvTSub').textContent = sub || '';
+    document.getElementById('gvTOpts').innerHTML =
+        '<input id="gvTInput" type="text" placeholder="Ex.: o impacto da desinformação na saúde pública" '
+      + 'style="width:100%;background:var(--bg);border:1px solid rgba(var(--borderRGB),.35);border-radius:.75rem;'
+      + 'padding:.8rem 1rem;color:var(--text);font-size:.9rem;font-family:inherit;outline:none;"/>'
+      + '<button class="gvOptT" style="text-align:center;background:var(--cyan);color:var(--bg);font-weight:800;border:none;margin-top:.5rem;" '
+      + 'onclick="confirmarGvTexto()">✨ Criar no IA Estúdio</button>';
+    window._gvTextoCB = cb;
+    document.getElementById('gvTBg').style.display='block';
+    document.getElementById('gvT').style.display='block';
+    setTimeout(function(){ var i=document.getElementById('gvTInput'); if(i) i.focus(); }, 60);
+  }
+  window.confirmarGvTexto = function(){
+    var i=document.getElementById('gvTInput');
+    var txt = i ? i.value.trim() : '';
+    var cb = window._gvTextoCB;
+    if(!txt){ toast('Escreva o tema primeiro'); return; }
+    fecharGavetaTema();
+    if(cb) cb(txt);
+  };
+
+  // ─── Enviar para… (3 níveis) ───
+  window.abrirEnviar = function(){
+    var nomeT = _temaAtual ? (_temaAtual.titulo||'este tema') : 'este tema';
+    abrirGvT('Enviar material', nomeT, [
+      {v:'turma',   r:'👥 Turma inteira'},
+      {v:'precisa', r:'🎯 Só quem precisa'},
+      {v:'aluno',   r:'🧑‍🎓 Um aluno'}
+    ], function(v){
+      if(v==='turma')   escolherTurmaParaEnvio();
+      if(v==='precisa') toast('🎯 Enviado a quem tem carência relacionada');
+      if(v==='aluno')   escolherAlunoParaEnvio();
+    });
+  };
+  function escolherTurmaParaEnvio(){
+    var ops=(turmasDoProfessor||[]).map(function(t){ return {v:t.id, r:t.nome}; });
+    abrirGvT('Para qual turma?', '', ops, function(v){
+      var t=(turmasDoProfessor||[]).filter(function(x){ return String(x.id)===String(v); })[0];
+      toast('📤 Enviado para ' + (t?t.nome:'a turma'));
+    });
+  }
+  function escolherAlunoParaEnvio(){
+    var ops=(todosAlunos||[]).slice(0,20).map(function(a){ return {v:a.id, r:a.nome}; });
+    abrirGvT('Para qual aluno?', '', ops, function(v){
+      var a=(todosAlunos||[]).filter(function(x){ return String(x.id)===String(v); })[0];
+      toast('📤 Enviado para ' + (a?a.nome:'o aluno'));
+    });
+  }
+
+  // ─── Gaveta ───
+  function abrirGvT(titulo, sub, opcoes, cb){
+    document.getElementById('gvTTit').textContent=titulo;
+    document.getElementById('gvTSub').textContent=sub||'';
+    document.getElementById('gvTOpts').innerHTML = opcoes.length
+      ? opcoes.map(function(o){ return '<button class="gvOptT" onclick="escolherGvT(\'' + o.v + '\')">' + o.r + '</button>'; }).join('')
+      : '<p style="font-size:.8rem;color:var(--muted);text-align:center;padding:1rem 0;">Nenhuma opção.</p>';
+    window._gvTCB = cb;
+    document.getElementById('gvTBg').style.display='block';
+    document.getElementById('gvT').style.display='block';
+  }
+  window.escolherGvT = function(v){
+    var cb=window._gvTCB;
+    fecharGavetaTema();
+    if(cb) cb(v);
+  };
+  window.fecharGavetaTema = function(){
+    document.getElementById('gvTBg').style.display='none';
+    document.getElementById('gvT').style.display='none';
+  };
+  window.abrirGavetaTema = function(){
+    var ops, tit;
+    if(_aba==='outras'){
+      tit='Tipo de aplicação';
+      var todas=(TEMAS||[]).filter(function(t){ return t.aplicacao && t.aplicacao!=='regular'; });
+      ops=[{v:'todas', r:'Todas (' + todas.length + ')'}];
+      Object.keys(APLIC).forEach(function(k){
+        var n=todas.filter(function(t){ return t.aplicacao===k; }).length;
+        if(n) ops.push({v:k, r:APLIC[k].rot + ' (' + n + ')'});
+      });
+    } else {
+      tit='Eixo temático';
+      ops=[{v:'todas', r:'Todas'}].concat(CATEGORIAS.map(function(c){
+        var n=(TEMAS||[]).filter(function(t){ return t.categoria===c; }).length;
+        return {v:c, r:c + (n ? ' (' + n + ')' : '')};
+      }));
+    }
+    abrirGvT(tit, '', ops, function(v){
+      _filtro=v;
+      var lbl=document.getElementById('lblFiltro');
+      if(lbl) lbl.textContent = (v==='todas') ? 'Todas' : ((APLIC[v] && APLIC[v].rot) || v);
+      renderTemas();
+    });
+  };
+
+  function renderizarDashboard() {
+    // Saudação (desktop)
+    document.getElementById('saudacaoProf').textContent = `${s}, ${NOME_PROF}! 👋`;
+    // Espelho no card de identidade mobile
+    var _fcN = document.getElementById('fcNome'); if (_fcN) _fcN.textContent = NOME_PROF;
+    var _fcS = document.getElementById('fcSaudacao'); if (_fcS) _fcS.textContent = `${s} 👋`;
+
+    // Stat: turmas (contagem real)
+    const n = turmasDoProfessor.length;
+    document.getElementById('statTurmas').textContent = n;
+    var _mT = document.getElementById('mTurmas'); if (_mT) _mT.textContent = n;
+    document.getElementById('statTurmasDesc').textContent =
+      n === 1 ? 'Você tem 1 turma cadastrada' : `Você tem ${n} turmas cadastradas`;
+
+    // (A seção "Últimas Entregas" foi removida conforme o mockup;
+    //  os cálculos abaixo continuam alimentando os cartões de métricas.)
+    var _ge = document.getElementById('gridEntregas');
+    if (_ge) _ge.innerHTML = `
+      <div style="padding:1rem;text-align:center;color:var(--muted);font-size:.8rem;">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;color:var(--cyan);display:block;margin-bottom:.25rem;animation:spin 1s linear infinite;">progress_activity</span>
+        Carregando entregas...
+      </div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
+
+    // Sem a camada de dados (arquivo solto / sessão fora): zera os cartões e para aqui.
+    if (typeof dbGetRedacoesDoProfessor !== 'function') {
+      atualizarStatsAlunos([]);
+      atualizarStatsRedacoes([]);
+      renderTurmasHome();
       return;
     }
 
-    vazio.style.display = 'none';
-    grid.style.display  = 'grid';
-
-    grid.innerHTML = lista.map(t => cardTemaHtml(t)).join('');
+    // Carrega dados reais (em paralelo pra ser mais rápido)
+    carregarDadosReais();
   }
 
-  function cardTemaHtml(t) {
-    const corCategoria = corDaCategoria(t.categoria);
-    const corNivel     = corDoNivel(t.nivel);
-    const isSalvo      = MEUS_TEMAS_IDS.includes(t.id);
-    const idEscapado   = String(t.id).replace(/'/g, "\\'");
+  async function carregarDadosReais() {
+    try {
+      const [redacoes, alunos] = await Promise.all([
+        dbGetRedacoesDoProfessor({ limit: 50 }),
+        dbGetAlunosDoProfessor()
+      ]);
 
-    // Badge de aplicação
-    let badgeAplic = '';
-    if (t.aplicacao && t.aplicacao !== 'regular') {
-      const labels = {
-        ppl:                'PPL',
-        digital:            'DIGITAL',
-        cancelada:          'CANCELADA',
-        segunda_aplicacao:  '2ª APLICAÇÃO'
-      };
-      const classes = {
-        ppl:                'badge-ppl',
-        digital:            'badge-digital',
-        cancelada:          'badge-cancelada',
-        segunda_aplicacao:  'badge-segunda'
-      };
-      badgeAplic = `<span class="badge-aplicacao ${classes[t.aplicacao] || 'badge-regular'}">${labels[t.aplicacao] || t.aplicacao.toUpperCase()}</span>`;
+      // Guarda em cache pra os filtros usarem
+      todasRedacoes = Array.isArray(redacoes) ? redacoes : [];
+      todosAlunos   = Array.isArray(alunos)   ? alunos   : [];
+
+      // Popula dropdown de turmas com as turmas reais do professor
+      popularFiltroTurmas();
+
+      // Atualiza contagens das tabs (independente do filtro atual)
+      atualizarContagensTabs();
+
+      // Aplica os filtros atuais (estado inicial: todos)
+      aplicarFiltros();
+
+      // Novas seções da inicial (imagem 1 de volta)
+      renderTurmasHome();
+    } catch (e) {
+      console.error('Erro ao carregar dados do dashboard:', e);
+      toast('Não foi possível carregar todos os dados. Recarregue para tentar de novo.', 5000);
+      var _geErr = document.getElementById('gridEntregas');
+      if (_geErr) _geErr.innerHTML = `
+        <div style="padding:1.5rem 1rem;text-align:center;color:var(--red2);font-size:.8rem;">
+          <span class="material-symbols-outlined" style="font-size:1.5rem;display:block;margin-bottom:.4rem;">error</span>
+          Erro ao carregar entregas
+        </div>`;
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // FILTROS — sub-etapa 3.3
+  // ════════════════════════════════════════════════════════════════
+
+  function popularFiltroTurmas() {
+    const sel = document.getElementById('filtroTurma');
+    if (!sel) return;
+    // Preserva a opção atualmente selecionada
+    const atual = sel.value;
+    sel.innerHTML = '<option value="">Todas as turmas</option>'
+      + turmasDoProfessor.map(t =>
+          `<option value="${t.id}">${escapeHtml(t.nome)}${t.serie ? ' · '+escapeHtml(t.serie) : ''}</option>`
+        ).join('');
+    // Se a turma anteriormente selecionada ainda existe, mantém
+    if (atual && turmasDoProfessor.some(t => t.id === atual)) {
+      sel.value = atual;
+    }
+  }
+
+  function atualizarContagensTabs() {
+    // As tabs mostram contagem GLOBAL (não filtrada por turma)
+    // pra a professora ver "tenho 3 pendentes em qualquer turma"
+    const r = todasRedacoes;
+    const total      = r.length;
+    const pendentes  = r.filter(x => x.status === 'enviada').length;
+    const corrigidas = r.filter(x => x.status === 'corrigida').length;
+    const revisadas  = r.filter(x => x.status === 'revisada').length;
+
+    const tabs = document.querySelectorAll('.tab-status');
+    tabs.forEach(t => {
+      const stat = t.dataset.status;
+      let label, count;
+      if (stat === '')              { label = 'Todas';      count = total; }
+      else if (stat === 'enviada')  { label = 'Pendentes';  count = pendentes; }
+      else if (stat === 'corrigida'){ label = 'Corrigidas'; count = corrigidas; }
+      else if (stat === 'revisada') { label = 'Revisadas';  count = revisadas; }
+      t.textContent = `${label} (${count})`;
+    });
+  }
+
+  function setStatusFiltro(btn, status) {
+    filtroStatus = status;
+    document.querySelectorAll('.tab-status').forEach(t => t.classList.remove('tab-ativa'));
+    btn.classList.add('tab-ativa');
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros() {
+    // Lê o estado atual do dropdown de turma
+    const sel = document.getElementById('filtroTurma');
+    if (sel) filtroTurmaId = sel.value || '';
+
+    // Filtra redações em memória
+    const redacoesFiltradas = todasRedacoes.filter(r => {
+      if (filtroTurmaId && r.turma_id !== filtroTurmaId) return false;
+      if (filtroStatus  && r.status   !== filtroStatus)  return false;
+      return true;
+    });
+
+    // Filtra alunos pela turma (se aplicável)
+    const alunosFiltrados = filtroTurmaId
+      ? todosAlunos.filter(a => a.turmas && a.turmas.id === filtroTurmaId)
+      : todosAlunos;
+
+    // Atualiza stats e grid com os dados filtrados
+    atualizarStatsAlunos(alunosFiltrados);
+    atualizarStatsRedacoes(redacoesFiltradas);
+    renderizarUltimasEntregas(redacoesFiltradas);
+
+    // Atualiza descrição do card "Turmas" se filtrar por uma turma específica
+    atualizarDescricaoTurmas();
+  }
+
+  function atualizarDescricaoTurmas() {
+    const desc = document.getElementById('statTurmasDesc');
+    if (!desc) return;
+    if (filtroTurmaId) {
+      const t = turmasDoProfessor.find(x => x.id === filtroTurmaId);
+      desc.textContent = t ? `Filtro: ${t.nome}` : 'Filtro ativo';
+      desc.style.color = 'var(--cyan)';
     } else {
-      badgeAplic = `<span class="badge-aplicacao badge-regular">REGULAR</span>`;
+      const n = turmasDoProfessor.length;
+      desc.textContent = n === 1 ? 'Você tem 1 turma cadastrada' : `Você tem ${n} turmas cadastradas`;
+      desc.style.color = 'var(--muted)';
+    }
+  }
+
+  function atualizarStatsAlunos(alunos) {
+    const total = alunos.length;
+    document.getElementById('statAlunos').textContent = total;
+    var _mA = document.getElementById('mAlunos'); if (_mA) _mA.textContent = total;
+    const desc = document.getElementById('statAlunosDesc');
+    if (total === 0) {
+      desc.textContent = 'Compartilhe o código de turma para receber alunos';
+      desc.style.color = 'var(--muted)';
+    } else if (total === 1) {
+      desc.textContent = '1 aluno vinculado às suas turmas';
+      desc.style.color = 'var(--green)';
+    } else {
+      desc.textContent = `${total} alunos vinculados às suas turmas`;
+      desc.style.color = 'var(--green)';
+    }
+  }
+
+  function atualizarStatsRedacoes(redacoes) {
+    const corrigidas = redacoes.filter(r => r.status === 'corrigida' || r.status === 'revisada');
+    const pendentes  = redacoes.filter(r => r.status === 'enviada');
+
+    // ── Cartão 3: VALIDADAS ──
+    document.getElementById('statRedacoes').textContent = corrigidas.length;
+    var _mV = document.getElementById('mValidadas'); if (_mV) _mV.textContent = corrigidas.length;
+    const descRed = document.getElementById('statRedacoesDesc');
+    if (corrigidas.length === 0) {
+      descRed.textContent = 'Nenhuma redação validada ainda';
+      descRed.style.color = 'var(--muted)';
+    } else {
+      descRed.textContent = corrigidas.length === 1
+        ? '1 redação validada' : `${corrigidas.length} redações validadas`;
+      descRed.style.color = 'var(--green)';
     }
 
-    const fonte = t.ano_enem ? `ENEM ${t.ano_enem}` : 'RedaON';
+    // Espelho Pendentes no card mobile
+    var _mP = document.getElementById('mPendentes'); if (_mP) _mP.textContent = pendentes.length;
+
+    // ── Cartão 4: PENDENTES (alerta) ──
+    const elPend = document.getElementById('statPendentes');
+    const elPendDesc = document.getElementById('statPendentesDesc');
+    const cardPend = document.getElementById('cardPendentes');
+    if (elPend) elPend.textContent = pendentes.length;
+    if (pendentes.length === 0) {
+      if (elPendDesc){ elPendDesc.textContent = 'Nenhuma redação aguardando'; elPendDesc.style.color = 'var(--muted)'; }
+      if (cardPend) cardPend.style.borderColor = 'rgba(var(--borderRGB),.2)';
+      if (elPend) elPend.style.color = 'var(--text)';
+    } else {
+      if (elPendDesc){
+        elPendDesc.innerHTML = `Aguardando o seu aval`;
+        elPendDesc.style.color = 'var(--red)';
+      }
+      if (cardPend) cardPend.style.borderColor = 'rgba(var(--redRGB),.5)';
+      if (elPend) elPend.style.color = 'var(--red)';
+    }
+  }
+
+  function renderizarUltimasEntregas(redacoes) {
+    const grid = document.getElementById('gridEntregas');
+    if (!grid) return; // seção "Últimas Entregas" removida (mockup) — nada a renderizar
+    if (!redacoes || redacoes.length === 0) {
+      const filtroAtivo = filtroTurmaId || filtroStatus;
+      const mensagem = filtroAtivo
+        ? 'Nenhuma entrega para esses filtros'
+        : 'Nenhuma entrega ainda';
+      const sub = filtroAtivo
+        ? '<p style="font-size:.7rem;color:var(--muted2);margin-top:.4rem;">Tente ajustar os filtros acima</p>'
+        : '';
+      grid.innerHTML = `
+        <div style="padding:2rem 1rem;text-align:center;color:var(--muted);font-size:.8rem;">
+          <span class="material-symbols-outlined" style="font-size:2rem;color:var(--muted2);display:block;margin-bottom:.5rem;">inbox</span>
+          ${mensagem}
+          ${sub}
+        </div>`;
+      return;
+    }
+
+    // Mostra as 8 mais recentes
+    const top = redacoes.slice(0, 8);
+    grid.innerHTML = top.map(r => cardEntrega(r)).join('');
+  }
+
+  function cardEntrega(r) {
+    const aluno     = r.usuarios || {};
+    const nome      = aluno.nome || 'Aluno';
+    const inicial   = nome.trim().charAt(0).toUpperCase();
+    const tema      = r.tema_livre || (r.tema_id ? 'Tema atribuído' : 'Sem tema');
+    const tempo     = tempoRelativo(r.created_at);
+    const stat      = r.status || 'enviada';
+
+    const corStatus = stat === 'revisada' ? 'var(--purple)'
+                    : stat === 'corrigida' ? 'var(--cyan)'
+                    : 'var(--gold)';
+    const labelStat = stat === 'revisada' ? 'Revisada'
+                    : stat === 'corrigida' ? 'Corrigida'
+                    : 'Pendente';
+
+    const nota      = r.nota_final;
+    const corNota   = corDaNota(nota);
+    const exibeNota = (stat === 'corrigida' || stat === 'revisada') && typeof nota === 'number';
 
     return `
-      <div class="card-tema rounded-2xl p-6 bg-gradient-to-br ${corCategoria} border border-white/5 cursor-pointer flex flex-col gap-4" onclick="escreverTema('${idEscapado}')">
-        <div class="flex items-start justify-between gap-2">
-          <div class="flex flex-col gap-2">
-            <span class="text-xs font-bold uppercase tracking-wider" style="color:${corDaCategoriaText(t.categoria)};">${escapeHtml(t.categoria || '')}</span>
-            ${badgeAplic}
+      <a href="professor-redacoes.html?id=${r.id}"
+         style="display:flex;align-items:center;gap:.75rem;padding:.75rem;background:var(--sunken);border-radius:.75rem;border:1px solid rgba(var(--borderRGB),.15);text-decoration:none;transition:all .2s;"
+         onmouseover="this.style.borderColor='rgba(var(--cyanRGB),.3)';this.style.transform='translateX(2px)'"
+         onmouseout="this.style.borderColor='rgba(var(--borderRGB),.15)';this.style.transform='translateX(0)'">
+
+        <div style="width:2.25rem;height:2.25rem;border-radius:50%;background:linear-gradient(135deg,var(--cyan) 0%,var(--purple) 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--bg);font-size:.85rem;">
+          ${inicial}
+        </div>
+
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.15rem;">
+            <p style="font-size:.8rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${escapeHtml(nome)}</p>
+            <span style="font-size:.6rem;font-weight:700;color:${corStatus};text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;">${labelStat}</span>
           </div>
-          <button onclick="event.stopPropagation();toggleSalvar('${idEscapado}', this)" class="text-[#928ea0] hover:text-[#fabd00] transition-colors" title="${isSalvo ? 'Remover dos meus temas' : 'Salvar nos meus temas'}">
-            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' ${isSalvo ? 1 : 0};">push_pin</span>
-          </button>
+          <p style="font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(tema)} · ${tempo}</p>
         </div>
-        <h4 class="font-bold text-white text-base leading-snug flex-1">${escapeHtml(t.titulo)}</h4>
-        <div class="flex items-center justify-between text-xs">
-          <span class="text-[#928ea0]">${fonte}</span>
-          <span class="font-bold ${corNivel}">${escapeHtml(t.nivel || '')}</span>
-        </div>
-      </div>
-    `;
+
+        ${exibeNota ? `<span style="font-size:1.05rem;font-weight:900;color:${corNota};flex-shrink:0;">${nota}</span>` : ''}
+      </a>`;
   }
 
-  function corDaCategoria(categoria) {
-    const map = {
-      'Social':         'from-[#6c5ce7]/15',
-      'Direitos':       'from-[#ffb4ab]/15',
-      'Saúde':          'from-[#45edee]/15',
-      'Tecnologia':     'from-[#c6bfff]/15',
-      'Educação':       'from-[#fabd00]/15',
-      'Consumo':        'from-[#fb923c]/15',
-      'Meio Ambiente':  'from-[#4ade80]/15',
-      'Trabalho':       'from-[#a78bfa]/15',
-      'Economia':       'from-[#22d3ee]/15',
-      'Cultura':        'from-[#f472b6]/15'
-    };
-    return map[categoria] || 'from-[#6c5ce7]/10';
+  // ─── Seção: Suas turmas ───
+  function renderTurmasHome() {
+    const box = document.getElementById('listaTurmasHome');
+    if (!box) return;
+    const turmas = turmasDoProfessor || [];
+    if (turmas.length === 0) {
+      box.innerHTML = `<div class="vazioSec">Você ainda não tem turmas.<br>Crie a primeira abaixo 👇</div>`;
+      return;
+    }
+    const cores = [
+      {bg:'rgba(var(--cyanRGB),.14)',   fg:'var(--cyan)'},
+      {bg:'rgba(var(--purpleRGB),.18)', fg:'var(--purple)'},
+      {bg:'rgba(var(--goldRGB),.14)',   fg:'var(--gold)'}
+    ];
+    box.innerHTML = turmas.map((t, idx) => {
+      const c = cores[idx % cores.length];
+      const nAlunos = (todosAlunos || []).filter(a => a.turmas && a.turmas.id === t.id).length;
+      const notas = (todasRedacoes || [])
+        .filter(r => r.turma_id === t.id && (r.status === 'corrigida' || r.status === 'revisada') && typeof r.nota_final === 'number')
+        .map(r => r.nota_final);
+      const media = notas.length ? Math.round(notas.reduce((a,b)=>a+b,0)/notas.length) : null;
+      const nPend = (todasRedacoes || []).filter(r => r.turma_id === t.id && (r.status||'enviada')==='enviada').length;
+      // sigla curta (ex.: "3º A — Manhã" -> "3A")
+      const sigla = (t.nome||'').replace(/[^0-9A-Za-zÀ-ú]/g,' ').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase().slice(0,3) || '•';
+      const escola = t.escola_nome || t.serie || '';
+      const sub = `${nAlunos} aluno${nAlunos===1?'':'s'}` + (media !== null ? ` · média ${media}` : '');
+      const statusPend = nPend > 0
+        ? `<p style="font-size:.75rem;font-weight:700;color:var(--gold);margin-top:.4rem;">${nPend} pendente${nPend>1?'s':''}</p>`
+        : `<p style="font-size:.75rem;font-weight:700;color:var(--green);margin-top:.4rem;">em dia</p>`;
+      return `
+        <a class="turmaCard" href="professor-alunos.html?turma=${t.id}" style="text-decoration:none;">
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;">
+            <span class="turmaBadge" style="background:${c.bg};color:${c.fg};">${sigla}</span>
+            <span style="min-width:0;">
+              <span class="turmaNome" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(t.nome)}</span>
+              ${escola ? `<span class="turmaSub">${escapeHtml(escola)}</span>` : ''}
+            </span>
+          </div>
+          <p class="turmaSub">${sub}</p>
+          ${statusPend}
+        </a>`;
+    }).join('');
   }
 
-  function corDaCategoriaText(categoria) {
-    const map = {
-      'Social':         '#c6bfff',
-      'Direitos':       '#ffb4ab',
-      'Saúde':          '#45edee',
-      'Tecnologia':     '#c6bfff',
-      'Educação':       '#fabd00',
-      'Consumo':        '#fb923c',
-      'Meio Ambiente':  '#4ade80',
-      'Trabalho':       '#a78bfa',
-      'Economia':       '#22d3ee',
-      'Cultura':        '#f472b6'
-    };
-    return map[categoria] || '#c6bfff';
+  // ─── Helpers ───
+  function corDaNota(n) {
+    if (typeof n !== 'number') return 'var(--muted)';
+    if (n >= 800) return 'var(--green)';   // verde
+    if (n >= 600) return 'var(--gold)';   // amarelo
+    if (n >= 400) return 'var(--orange)';   // laranja
+    return 'var(--red2)';                  // vermelho
   }
 
-  function corDoNivel(nivel) {
-    if (!nivel) return '';
-    const n = nivel.toLowerCase();
-    if (n.includes('básico') || n.includes('basico')) return 'nivel-basico';
-    if (n.includes('avançado') || n.includes('avancado')) return 'nivel-avancado';
-    return 'nivel-intermediario';
+  function tempoRelativo(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const diff = Date.now() - d.getTime();
+    const min = Math.floor(diff / 60000);
+    if (min < 1)  return 'agora';
+    if (min < 60) return `há ${min}min`;
+    const h = Math.floor(min / 60);
+    if (h < 24)   return `há ${h}h`;
+    const dias = Math.floor(h / 24);
+    if (dias < 7) return `há ${dias}d`;
+    if (dias < 30) return `há ${Math.floor(dias/7)}sem`;
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
   }
 
-  // ============================================================
-  // ABAS
-  // ============================================================
-  function mudarAba(aba) {
-    ABA_ATUAL = aba;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
-    const btn = document.getElementById('tab-' + aba);
-    if (btn) btn.classList.add('ativo');
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
 
+  // ════════════════════════════════════════════════════════════════
+  // MODAL DE CRIAÇÃO DE TURMA
+  // ════════════════════════════════════════════════════════════════
+
+  function abrirModalTurma() {
+    // Reset
+    escolaCriada = null;
+    document.getElementById('inpEscolaNome').value = '';
+    document.getElementById('inpEscolaCidade').value = 'Manaus';
+    document.getElementById('inpEscolaEstado').value = 'AM';
+    document.getElementById('inpTurmaNome').value = '';
+    document.getElementById('inpTurmaSerie').value = '';
+    document.getElementById('inpTurmaAno').value = new Date().getFullYear();
+
+    mostrarPasso('escola');
+    document.getElementById('modalTurma').classList.add('aberto');
+    setTimeout(() => document.getElementById('inpEscolaNome').focus(), 100);
+  }
+
+  function fecharModalTurma() {
+    document.getElementById('modalTurma').classList.remove('aberto');
+  }
+
+  function mostrarPasso(qual) {
+    // Esconde todos
+    document.querySelectorAll('.modal-step').forEach(s => s.classList.remove('ativo'));
+    // Mostra o pedido
+    document.getElementById('step-' + qual).classList.add('ativo');
+
+    // Atualiza barras de progresso e título do header
     const titulos = {
-      recentes:       'Recentes (2020-2025)',
-      classicos:      'Clássicos (2009-2019)',
-      ppl:            'PPL e Reaplicações',
-      categoria:      CATEGORIA_ATUAL ? `Categoria: ${CATEGORIA_ATUAL}` : 'Por Categoria',
-      meus:           'Meus Temas Salvos',
-      compartilhados: 'Compartilhados pela Professora'
+      escola:  { titulo: 'Nova escola',  icone: 'school' },
+      turma:   { titulo: 'Nova turma',   icone: 'class' },
+      sucesso: { titulo: 'Tudo pronto!', icone: 'check_circle' }
     };
-    document.getElementById('tituloSecao').textContent = titulos[aba] || 'Temas';
+    document.getElementById('modalTitulo').textContent = titulos[qual].titulo;
+    document.getElementById('modalIcone').textContent = titulos[qual].icone;
 
-    if (aba === 'categoria') {
-      renderBotoesCategoria();
+    document.getElementById('bar1').style.background = 'var(--cyan)';
+    document.getElementById('bar2').style.background = (qual === 'turma' || qual === 'sucesso') ? 'var(--cyan)' : 'var(--scroll)';
+    document.getElementById('bar3').style.background = (qual === 'sucesso') ? 'var(--green)' : 'var(--scroll)';
+  }
+
+  // ─── Passo 1 → 2: criar escola ───
+  async function avancarParaTurma() {
+    const nome    = document.getElementById('inpEscolaNome').value.trim();
+    const cidade  = document.getElementById('inpEscolaCidade').value.trim();
+    const estado  = document.getElementById('inpEscolaEstado').value.trim().toUpperCase();
+
+    if (!nome) {
+      toast('Por favor, informe o nome da escola.');
+      document.getElementById('inpEscolaNome').focus();
+      return;
     }
 
-    renderTemas();
+    const btn = document.getElementById('btnAvancarEscola');
+    btn.disabled = true;
+    btn.textContent = 'Criando escola...';
+
+    try {
+      escolaCriada = await dbSalvarEscola({
+        nome,
+        cidade: cidade || null,
+        estado: estado || null
+      });
+      mostrarPasso('turma');
+      setTimeout(() => document.getElementById('inpTurmaNome').focus(), 100);
+    } catch (e) {
+      console.error('Erro ao criar escola:', e);
+      toast('Não foi possível criar a escola. Tente de novo.', 5000);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Próximo →';
+    }
   }
 
-  function renderBotoesCategoria() {
-    const categorias = [...new Set(TEMAS.map(t => t.categoria).filter(Boolean))].sort();
-    const container = document.getElementById('botoesCategoria');
-    container.innerHTML = `
-      <button onclick="filtrarPorCategoria(null)" class="tab-btn px-4 py-2 text-xs rounded-lg ${CATEGORIA_ATUAL === null ? 'ativo' : ''}">Todas</button>
-      ${categorias.map(c => `
-        <button onclick="filtrarPorCategoria('${c.replace(/'/g, "\\'")}')" class="tab-btn px-4 py-2 text-xs rounded-lg ${CATEGORIA_ATUAL === c ? 'ativo' : ''}">${escapeHtml(c)}</button>
-      `).join('')}
-    `;
+  function voltarParaEscola() {
+    mostrarPasso('escola');
   }
 
-  function filtrarPorCategoria(cat) {
-    CATEGORIA_ATUAL = cat;
-    document.getElementById('tituloSecao').textContent = cat ? `Categoria: ${cat}` : 'Por Categoria';
-    renderBotoesCategoria();
-    renderTemas();
+  // ─── Passo 2 → 3: criar turma ───
+  async function criarTurmaFinal() {
+    const nome  = document.getElementById('inpTurmaNome').value.trim();
+    const serie = document.getElementById('inpTurmaSerie').value || null;
+    const anoIn = document.getElementById('inpTurmaAno').value;
+    const ano   = anoIn ? parseInt(anoIn, 10) : null;
+
+    if (!nome) {
+      toast('Por favor, informe o nome da turma.');
+      document.getElementById('inpTurmaNome').focus();
+      return;
+    }
+    if (!escolaCriada) {
+      toast('Erro interno: escola não encontrada. Recarregue a página.');
+      return;
+    }
+
+    const btn = document.getElementById('btnCriarTurma');
+    btn.disabled = true;
+    btn.textContent = 'Criando turma...';
+
+    try {
+      const turma = await dbSalvarTurma({
+        escola_id:  escolaCriada.id,
+        nome,
+        serie,
+        ano_letivo: ano
+      });
+
+      // Mostra o código gerado pelo trigger
+      document.getElementById('codigoGeradoTexto').textContent = turma.codigo;
+      window._turmaRecemCriada = turma;
+      mostrarPasso('sucesso');
+    } catch (e) {
+      console.error('Erro ao criar turma:', e);
+      toast('Não foi possível criar a turma. Tente de novo.', 5000);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Criar turma →';
+    }
   }
 
-  // ============================================================
-  // BUSCA
-  // ============================================================
-  function filtrarTemas() { renderTemas(); }
-  function limparBusca() {
-    document.getElementById('campoBusca').value = '';
-    renderTemas();
-  }
+  // ─── Passo 3: copiar código ───
+  function copiarCodigoTurma() {
+    const codigo = document.getElementById('codigoGeradoTexto').textContent;
+    if (!codigo || codigo === 'redaon-...') return;
 
-  // ============================================================
-  // SALVAR / DESSALVAR (favoritos local)
-  // ============================================================
-  function toggleSalvar(id, btn) {
-    const idx = MEUS_TEMAS_IDS.indexOf(id);
-    if (idx >= 0) {
-      MEUS_TEMAS_IDS.splice(idx, 1);
-      toast('📌 Removido dos seus temas.');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(codigo)
+        .then(() => toast('✅ Código copiado!'))
+        .catch(() => fallbackCopiar(codigo));
     } else {
-      MEUS_TEMAS_IDS.push(id);
-      toast('📌 Tema salvo nos seus favoritos!');
+      fallbackCopiar(codigo);
     }
-    localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS));
-    renderTemas();
   }
 
-  // ============================================================
-  // ESCREVER TEMA — vai pro hub de preparação com tema selecionado
-  // ============================================================
-  function escreverTema(id) {
-    // Modo professor: abre modal de visualização em vez de levar ao hub do aluno
-    if (MODO_PROFESSOR) {
-      window.visualizarTemaProf(id);
-      return;
-    }
-    const tema = TEMAS.find(t => t.id === id) || TEMAS_PROFESSOR.find(t => t.id === id);
-    if (!tema) {
-      toast('❌ Tema não encontrado.');
-      return;
-    }
-    sessionStorage.setItem('tema_selecionado', JSON.stringify(tema));
-    window.location.href = 'hub-preparacao.html';
+  function fallbackCopiar(texto) {
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('✅ Código copiado!'); }
+    catch { toast('Não consegui copiar. Selecione e copie manualmente.'); }
+    document.body.removeChild(ta);
   }
 
-  // ============================================================
-  // MODAL DE SUGESTÃO
-  // ============================================================
-  function abrirModal()   { document.getElementById('modalSugestao').classList.add('aberto'); }
-  function fecharModal()  { document.getElementById('modalSugestao').classList.remove('aberto'); }
-  function enviarSugestao() {
-    const titulo = document.getElementById('sugestaoTitulo').value.trim();
-    if (!titulo) { toast('⚠️ Informe o título do tema.'); return; }
-    // TODO: implementar envio pro banco numa próxima sessão
-    toast('💡 Sugestão recebida! Obrigada.');
-    document.getElementById('sugestaoTitulo').value = '';
-    document.getElementById('sugestaoJustificativa').value = '';
-    fecharModal();
+  function finalizarECarregar() {
+    fecharModalTurma();
+    carregarPainel();   // recarrega o painel — agora deve mostrar dashboard
   }
 
-  // ============================================================
-  // SIDEBAR MOBILE
-  // ============================================================
+  // ════════════════════════════════════════════════════════════════
+  // UTILITÁRIOS (sidebar, ver como aluno, toast)
+  // ════════════════════════════════════════════════════════════════
+
+  // ─── Gaveta "Mais" (mobile/tablet) ───
+  function abrirMais() {
+    var g = document.getElementById('gavetaMais'), b = document.getElementById('gavetaBg'), m = document.getElementById('bMais');
+    if (g) g.classList.add('open');
+    if (b) b.classList.add('open');
+    if (m) m.classList.add('on');
+  }
+  function fecharMais() {
+    var g = document.getElementById('gavetaMais'), b = document.getElementById('gavetaBg'), m = document.getElementById('bMais');
+    if (g) g.classList.remove('open');
+    if (b) b.classList.remove('open');
+    if (m) m.classList.remove('on');
+  }
+  function toggleMais() {
+    var g = document.getElementById('gavetaMais');
+    if (g && g.classList.contains('open')) fecharMais(); else abrirMais();
+  }
+
+  // ─── Sidebar recolhível (desktop) ───
+  function toggleRecolher() {
+    var s = document.getElementById('sidebar');
+    if (!s) return;
+    if (window.innerWidth < 1024) { toggleSidebar(); return; }
+    s.classList.toggle('mini');
+    var mini = s.classList.contains('mini');
+    var b = document.getElementById('btnRecolher');
+    if (b) { b.innerHTML = mini ? '&raquo;' : '&laquo;'; b.title = mini ? 'Expandir menu' : 'Recolher menu'; }
+    try { localStorage.setItem('redaon-menu', mini ? 'mini' : 'full'); } catch(e) {}
+  }
+  (function(){
+    try {
+      if (localStorage.getItem('redaon-menu') === 'mini' && window.innerWidth >= 1024) {
+        var s = document.getElementById('sidebar');
+        if (s) s.classList.add('mini');
+        var b = document.getElementById('btnRecolher');
+        if (b) { b.innerHTML = '&raquo;'; b.title = 'Expandir menu'; }
+      }
+    } catch(e) {}
+  })();
+
+  // ─── Tema claro/escuro ───
+  // ===== Aparência: Claro · Escuro · Automático =====
+  function temaPreferido(){
+    var p = document.documentElement.getAttribute('data-tema-pref');
+    return p || 'auto';
+  }
+  function sistemaEstaClaro(){
+    try { return window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) { return false; }
+  }
+  function aplicarTema(pref){
+    var efetivo = (pref === 'auto') ? (sistemaEstaClaro() ? 'claro' : 'escuro') : pref;
+    document.documentElement.setAttribute('data-tema', efetivo);
+    document.documentElement.setAttribute('data-tema-pref', pref);
+    try { localStorage.setItem('redaon-tema', pref); } catch(e) {}
+    aplicarIconeTema();
+  }
+
+  // Mostra o estado atual por escrito no menu ("Aparência · Automático")
+  function atualizarRotuloTema(){
+    var pref = temaPreferido();
+    var nome = (pref === 'auto') ? 'Autom\u00e1tico' : (pref === 'claro' ? 'Claro' : 'Escuro');
+    var s = document.getElementById('txtTemaSide');
+    if (s) s.textContent = 'Apar\u00eancia \u00b7 ' + nome;
+    var m = document.getElementById('txtTemaMais');
+    if (m) m.textContent = 'Apar\u00eancia \u00b7 ' + nome;
+  }
+
+  function aplicarIconeTema() {
+    var pref = temaPreferido();
+    var efetivo = document.documentElement.getAttribute('data-tema');
+    // ícone reflete a PREFERÊNCIA (auto tem ícone próprio)
+    var icMat = (pref === 'auto') ? 'brightness_medium' : (efetivo === 'claro' ? 'dark_mode' : 'light_mode');
+    var emoji = (pref === 'auto') ? '\u{1F317}' : (efetivo === 'claro' ? '\u{1F319}' : '\u2600\uFE0F');
+    var ic = document.getElementById('iconeTema');      if (ic) ic.textContent = icMat;
+    var is = document.getElementById('iconeTemaSide');  if (is) is.textContent = emoji;
+    var im = document.getElementById('iconeTemaMais');  if (im) im.textContent = emoji;
+    atualizarRotuloTema();
+  }
+  // Ciclo direto: Claro → Escuro → Automático → Claro
+  var _ORDEM_TEMA = ['claro','escuro','auto'];
+  var _NOME_TEMA  = {
+    claro:  '\u2600\uFE0F Claro',
+    escuro: '\u{1F319} Escuro',
+    auto:   '\u{1F317} Autom\u00e1tico'
+  };
+  function alternarTema() {
+    var atual = temaPreferido();
+    var i = _ORDEM_TEMA.indexOf(atual);
+    var proximo = _ORDEM_TEMA[(i + 1) % _ORDEM_TEMA.length];
+    aplicarTema(proximo);
+    if (typeof toast === 'function') {
+      toast(proximo === 'auto'
+        ? '\u{1F317} Autom\u00e1tico \u2014 segue o aparelho'
+        : _NOME_TEMA[proximo], 1800);
+    }
+  }
+  // Se estiver em automático, acompanha a mudança do aparelho em tempo real
+  (function(){
+    try {
+      var mq = window.matchMedia('(prefers-color-scheme: light)');
+      var reagir = function(){ if (temaPreferido() === 'auto') aplicarTema('auto'); };
+      if (mq.addEventListener) mq.addEventListener('change', reagir);
+      else if (mq.addListener) mq.addListener(reagir);
+    } catch(e) {}
+  })();
+  aplicarIconeTema();
+
   function toggleSidebar() {
+    // Abaixo de 1024px não existe gaveta lateral (padrão do mockup): abre a gaveta "Mais".
+    if (window.innerWidth < 1024) { toggleMais(); return; }
     document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('overlay').classList.toggle('show');
+    document.getElementById('overlay').classList.toggle('open');
   }
 
-  // ============================================================
-  // HELPERS
-  // ============================================================
-  function escapeHtml(s) {
-    if (s == null) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  function irModoAluno() {
+    if(confirm('Abrir o RedaON como aluno em uma nova aba?')) {
+      localStorage.setItem('modo_professor_ativo','1');
+      window.open('inicio.html','_blank');
+    }
   }
 
-  let toastTimer;
-  function toast(msg) {
+  function toast(msg, dur=3000) {
     const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+    el.textContent = msg; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
   }
+
+  // ════════════════════════════════════════════════════════════════
+  // MODAL "EM BREVE" — telas não conectadas ainda
+  // ════════════════════════════════════════════════════════════════
+  window.mostrarEmBreve = function(titulo) {
+    document.getElementById('emBreveTitulo').textContent = titulo;
+    document.getElementById('modalEmBreve').classList.add('aberto');
+  };
+  window.fecharEmBreve = function() {
+    document.getElementById('modalEmBreve').classList.remove('aberto');
+  };
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var m = document.getElementById('modalEmBreve');
+      if (m) m.classList.remove('aberto');
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════
+  // INICIALIZAÇÃO
+  // ════════════════════════════════════════════════════════════════
+  carregarPainel();
+
+  // Card rotativo de avisos (do mockup)
+  function initAvisoCarrossel(){
+    var track=document.getElementById('avisoTrack'); var dotsBox=document.getElementById('avisoDots');
+    if(!track||!dotsBox)return;
+    var slides=track.querySelectorAll('.avisoSlide'); var total=slides.length; var atual=0;
+    if(!total)return;
+    dotsBox.innerHTML='';
+    for(var i=0;i<total;i++){ var d=document.createElement('span'); if(i===0)d.className='on'; dotsBox.appendChild(d); }
+    var dots=dotsBox.querySelectorAll('span');
+    function marcar(idx){ dots.forEach(function(d,k){ d.className=(k===idx)?'on':''; }); }
+    track.addEventListener('scroll',function(){ var idx=Math.round(track.scrollLeft/track.clientWidth); if(idx!==atual){atual=idx;marcar(atual);} });
+    setInterval(function(){ atual=(atual+1)%total; track.scrollTo({left:atual*track.clientWidth,behavior:'smooth'}); marcar(atual); },5000);
+  }
+  try{ initAvisoCarrossel(); }catch(e){}
+</script>
+
+<script>
+  // Gaveta de seleção — o <select> segue como fonte de verdade.
+  var _filtroAlvo = null;
+  var _PARES_GV = [['filtroTurma','btnF_filtroTurma']];
+  function abrirFiltro(idSelect, titulo, emoji) {
+    var sel = document.getElementById(idSelect);
+    if (!sel) return;
+    _filtroAlvo = idSelect;
+    document.getElementById('gvFiltroTit').textContent = titulo;
+    var html = '';
+    for (var i = 0; i < sel.options.length; i++) {
+      var o = sel.options[i];
+      var em = (i === 0 && o.value === '') ? '\u{1F4CB}' : emoji;
+      var marcado = (i === sel.selectedIndex) ? ' sel' : '';
+      html += '<div class="optFiltro' + marcado + '" onclick="escolherFiltro(' + i + ')">' +
+              '<span class="em">' + em + '</span>' + o.textContent +
+              '<span class="ck">\u2713</span></div>';
+    }
+    document.getElementById('gvFiltroOpts').innerHTML = html;
+    document.getElementById('gvFiltro').classList.add('open');
+    document.getElementById('gvFiltroBg').classList.add('open');
+  }
+  function fecharFiltro() {
+    document.getElementById('gvFiltro').classList.remove('open');
+    document.getElementById('gvFiltroBg').classList.remove('open');
+  }
+  function escolherFiltro(i) {
+    var sel = document.getElementById(_filtroAlvo);
+    if (sel) {
+      sel.selectedIndex = i;
+      if (typeof sel.onchange === 'function') sel.onchange();
+      else sel.dispatchEvent(new Event('change'));
+    }
+    sincronizarGavetas();
+    fecharFiltro();
+  }
+  function sincronizarGavetas() {
+    _PARES_GV.forEach(function(par){
+      var sel = document.getElementById(par[0]), btn = document.getElementById(par[1]);
+      if (!sel || !btn) return;
+      var o = sel.options[sel.selectedIndex];
+      if (!o) return;
+      btn.querySelector('.txt').textContent = o.textContent;
+      if (o.value === '') btn.classList.remove('ativo'); else btn.classList.add('ativo');
+    });
+  }
+  setInterval(sincronizarGavetas, 1500);
 </script>
 </body>
 </html>
