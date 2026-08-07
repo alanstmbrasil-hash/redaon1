@@ -450,7 +450,10 @@
   async function _get(caminho){
     if (typeof dbFetch !== 'function') { console.error('dbFetch indisponível'); return []; }
     try {
-      var res = await dbFetch(_url(caminho), { method:'GET' });
+      var res = await dbFetch(_url(caminho), {
+        method:'GET',
+        headers: { 'Range-Unit':'items', 'Range':'0-999' }
+      });
       if (!res.ok) { console.error('Consulta falhou:', caminho, res.status); return []; }
       return await res.json();
     } catch(e){ console.error('Erro na consulta:', caminho, e); return []; }
@@ -509,9 +512,40 @@
       r.c1 = c.c1; r.c2 = c.c2; r.c3 = c.c3; r.c4 = c.c4; r.c5 = c.c5;
       if (typeof r.nota_final !== 'number' || !r.nota_final) r.nota_final = c.nota_total;
       r.porque = { c1:c.feedback_c1, c2:c.feedback_c2, c3:c.feedback_c3, c4:c.feedback_c4, c5:c.feedback_c5 };
+      r.feedback_geral = c.feedback_geral || null;
+      // Monta a Análise a partir dos campos reais do banco
+      var _itens = [];
+      function _linhas(txt){
+        return String(txt||'').split(/\r?\n/)
+          .map(function(l){ return l.replace(/^[•\-\*\u2022]\s*/, '').trim(); })
+          .filter(function(l){ return l.length > 2; });
+      }
+      _linhas(c.pontos_fortes).forEach(function(l){
+        _itens.push({ tipo:'forte', titulo:'Ponto forte', texto:l });
+      });
+      _linhas(c.pontos_melhorar).forEach(function(l){
+        _itens.push({ tipo:'fraco', titulo:'A melhorar', texto:l });
+      });
+      r.analise = _itens.length ? _itens : null;
+
+      // Reescrita: o banco guarda em 4 partes dentro do correcao_json
+      var j = c.correcao_json || {};
+      var partes = [j.redacao_nota_1000_intro, j.redacao_nota_1000_dev1,
+                    j.redacao_nota_1000_dev2, j.redacao_nota_1000_conclusao]
+                   .filter(function(p){ return p && String(p).trim().length > 20; });
+      if (partes.length) r.reescrita = partes.join('\n\n');
+
+      // Comparar: melhoria_c1..c5 explicam o que mudaria em cada competência
+      var cmp = {};
+      ['c1','c2','c3','c4','c5'].forEach(function(k){
+        var m = j['melhoria_' + k];
+        if (m && String(m).trim().length > 5) cmp[k] = { texto: String(m).trim() };
+      });
+      if (Object.keys(cmp).length) r.comparar = cmp;
       if (!r.tema_livre && r.temas && r.temas.titulo) r.tema_livre = r.temas.titulo;
-      // já validada pelo professor?
-      if (c.revisao_professor) r.status = 'revisada';
+      // O banco não tem status 'revisada'. Quem tem revisao_professor já passou pelo aval.
+      r.validada = !!c.revisao_professor;
+      r.revisao_professor = c.revisao_professor || null;
       return r;
     });
   };
@@ -1049,7 +1083,7 @@
     var box = document.getElementById('filaLista');
     if(!box) return;
     var pend = (todasRedacoes||[]).filter(function(r){ return (r.status||'enviada')==='enviada'; });
-    var val  = (todasRedacoes||[]).filter(function(r){ return (r.status||'')==='corrigida' || (r.status||'')==='revisada'; })
+    var val  = (todasRedacoes||[]).filter(function(r){ return (r.status||'')==='corrigida'; })
                  .sort(function(a,b){ return new Date(b.created_at||0) - new Date(a.created_at||0); })
                  .slice(0,5);
 
@@ -1279,7 +1313,7 @@
   }
 
   function atualizarStatsRedacoes(redacoes) {
-    const corrigidas = redacoes.filter(r => r.status === 'corrigida' || r.status === 'revisada');
+    const corrigidas = redacoes.filter(r => r.status === 'corrigida');
     const pendentes  = redacoes.filter(r => r.status === 'enviada');
 
     // ── Cartão 3: VALIDADAS ──
@@ -1401,7 +1435,7 @@
       const c = cores[idx % cores.length];
       const nAlunos = (todosAlunos || []).filter(a => a.turmas && a.turmas.id === t.id).length;
       const notas = (todasRedacoes || [])
-        .filter(r => r.turma_id === t.id && (r.status === 'corrigida' || r.status === 'revisada') && typeof r.nota_final === 'number')
+        .filter(r => r.turma_id === t.id && (r.status === 'corrigida') && typeof r.nota_final === 'number')
         .map(r => r.nota_final);
       const media = notas.length ? Math.round(notas.reduce((a,b)=>a+b,0)/notas.length) : null;
       const nPend = (todasRedacoes || []).filter(r => r.turma_id === t.id && (r.status||'enviada')==='enviada').length;
@@ -1499,12 +1533,17 @@
         + '<p style="font-size:.9rem;line-height:1.75;color:var(--text2);white-space:pre-wrap;">'+(r.texto||'(texto da redação)')+'</p>');
     } else if(aba==='analise'){
       html = caixa('<p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;">Pontos fortes e a melhorar</p>'
+        + (r.feedback_geral
+            ? '<p style="font-size:.86rem;line-height:1.65;color:var(--text2);background:rgba(var(--cyanRGB),.07);border:1px solid rgba(var(--cyanRGB),.22);border-radius:.7rem;padding:.7rem .85rem;margin-bottom:.9rem;">'+r.feedback_geral+'</p>'
+            : '')
         + (r.analise ? r.analise.map(function(a){
             var cor = a.tipo==='forte' ? 'var(--green)' : 'var(--gold)';
-            return '<div style="border-left:2px solid '+cor+';padding-left:.7rem;margin-bottom:.8rem;">'
-              + '<p style="font-size:.78rem;font-weight:700;color:'+cor+';">'+a.titulo+'</p>'
-              + '<p style="font-size:.82rem;color:var(--text2);line-height:1.5;">'+a.texto+'</p></div>';
-          }).join('') : '<p style="font-size:.83rem;color:var(--muted);">A análise aparece aqui.</p>'));
+            var ic  = a.tipo==='forte' ? '✓' : '↗';
+            return '<div style="border-left:2px solid '+cor+';padding-left:.7rem;margin-bottom:.7rem;">'
+              + '<p style="font-size:.74rem;font-weight:700;color:'+cor+';margin-bottom:.1rem;">'+ic+' '+a.titulo+'</p>'
+              + '<p style="font-size:.85rem;color:var(--text2);line-height:1.55;">'+a.texto+'</p></div>';
+          }).join('')
+          : (r.feedback_geral ? '' : '<p style="font-size:.83rem;color:var(--muted);text-align:center;padding:1rem 0;">Esta correção não trouxe pontos fortes e a melhorar separados.</p>')));
     } else if(aba==='reescrita'){
       html = caixa('<p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem;">Reescrita</p>'
         + '<p style="font-size:.78rem;color:var(--text2);background:rgba(var(--cyanRGB),.08);border:1px solid rgba(var(--cyanRGB),.25);border-radius:.7rem;padding:.6rem .8rem;margin-bottom:.9rem;">'
@@ -1697,7 +1736,7 @@
 
   window.enviarAoAluno = function(){
     if(!_validado) return;
-    if(_redAtual) _redAtual.status = 'revisada';
+    if(_redAtual){ _redAtual.status = 'corrigida'; _redAtual.validada = true; }
     toast('✅ Enviado ao aluno');
     voltarParaFila();
   };
