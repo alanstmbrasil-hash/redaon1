@@ -1,88 +1,140 @@
-// ============================================================
-//  /api/gemini.js  —  RedaON
-//  Guarda a chave do Gemini NO SERVIDOR. O navegador nunca a vê.
+// api/gemini.js – Função serverless do Vercel
+// ROTEAMENTO POR TASK (v2 — 28/05/2026):
+// - task='correcao'  → gemini-3-flash       (R$ 0,07/correção, raciocínio superior, resolve oscilação C3/C4)
+// - task=qualquer outro ou ausente → gemini-2.5-flash-lite (R$ 0,001/chamada, suficiente pra Hub, OCR, Material de Apoio)
 //
-//  COMO INSTALAR (Alan / Pedro):
-//  1. Salve este arquivo como  api/gemini.js  na raiz do projeto.
-//  2. No painel do Vercel → Settings → Environment Variables,
-//     crie a variável:   GEMINI_API_KEY = <a chave NOVA>
-//  3. REVOGUE a chave antiga no Google AI Studio — ela já circulou.
-//  4. Faça o deploy.
+// Frontend envia o task no body. Tudo que NÃO é correção usa o modelo barato por default
+// (mantém o comportamento histórico dos endpoints que ainda não foram migrados).
 //
-//  A página chama assim:
-//     fetch('/api/gemini', { method:'POST',
-//       headers:{'Content-Type':'application/json'},
-//       body: JSON.stringify({ prompt: '...', buscarNaWeb: true }) })
-// ============================================================
+// ─── ACRÉSCIMO (28/07/2026): modo simples para o IA Estúdio ──────────────
+// O portal do professor envia { prompt, buscarNaWeb } em vez de { contents }.
+// Nesse caso a função monta o contents sozinha e liga o grounding com Google
+// Search, devolvendo { texto, fontes }. NADA do fluxo de correção mudou:
+// quem envia 'contents' continua caindo no caminho original, intacto.
 
-export default async function handler(req, res) {
-  // Só aceita POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ erro: 'Método não permitido' });
-  }
-
-  const CHAVE = process.env.GEMINI_API_KEY;
-  if (!CHAVE) {
-    console.error('GEMINI_API_KEY não configurada no ambiente');
-    return res.status(500).json({ erro: 'Serviço de IA não configurado' });
-  }
-
-  const { prompt, buscarNaWeb = true, modelo = 'gemini-2.5-flash' } = req.body || {};
-
-  if (!prompt || typeof prompt !== 'string' || prompt.trim().length < 3) {
-    return res.status(400).json({ erro: 'Prompt ausente ou muito curto' });
-  }
-  // Trava simples de tamanho, para evitar custo acidental
-  if (prompt.length > 12000) {
-    return res.status(400).json({ erro: 'Prompt longo demais' });
-  }
-
-  const corpo = {
-    contents: [{ parts: [{ text: prompt }] }]
-  };
-
-  // Busca real na web (decisão aprovada: todas as categorias).
-  // Reduz alucinação e traz fontes verificáveis.
-  if (buscarNaWeb) {
-    corpo.tools = [{ google_search: {} }];
-  }
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
+module.exports = async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
 
   try {
-    const resposta = await fetch(url, {
+    const { contents, generationConfig: clientConfig, task, prompt, buscarNaWeb } = req.body;
+
+    // Aceita o formato antigo (contents) e o novo (prompt). Um dos dois é obrigatório.
+    if (!contents && !prompt) {
+      return res.status(400).json({ error: 'Campo contents obrigatório' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada' });
+
+    // Modo simples: veio prompt em texto (IA Estúdio do professor)
+    const modoSimples = !contents && typeof prompt === 'string';
+    if (modoSimples && prompt.trim().length < 3) {
+      return res.status(400).json({ error: 'Prompt muito curto' });
+    }
+    if (modoSimples && prompt.length > 12000) {
+      return res.status(400).json({ error: 'Prompt longo demais' });
+    }
+
+    // ─── Seleção de modelo por task ─────────────────────────────────────
+    // Arquitetura de 7 agentes (v5.0): cada agente é uma task própria.
+    // Tasks de correção: 'gate', 'c1', 'c2', 'c3', 'c4', 'c5', 'orq'.
+    // Tasks auxiliares e legado: 'correcao', OCR (sem task), Hub, Material.
+    //
+    // Decisão (28/05/2026): TODAS as tasks usam gemini-2.5-flash-lite. O teste
+    // com gemini-3.5-flash mostrou pior estabilidade e custo 19x maior. A
+    // arquitetura de agentes resolve a instabilidade dividindo o trabalho,
+    // não trocando o modelo. Estrutura mantida para reativar premium se preciso:
+    // basta listar a task em TASKS_PREMIUM e definir o modelo premium abaixo.
+    const TASKS_PREMIUM = []; // vazio: nenhuma task usa modelo premium por ora
+    const MODELO_PREMIUM = 'gemini-3.5-flash';
+    const MODELO_PADRAO = 'gemini-2.5-flash-lite';
+    const modelo = TASKS_PREMIUM.includes(task) ? MODELO_PREMIUM : MODELO_PADRAO;
+
+    // Endpoint v1beta: suporta responseMimeType (o v1 estável não suporta)
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
+
+    // Configuração padrão para correção ENEM:
+    // - maxOutputTokens 32000: folga durante transição para Cenário B (chamadas
+    //   fracionadas). No estado final cada chamada pedirá 1500-3000 tokens.
+    // - temperature 0.1: correção determinística. Reduzido de 0.3 → 0.1 em
+    //   28/05/2026 para eliminar variância entre rodadas. OCR mantém sua
+    //   própria temperature (sobrescrita pelo frontend).
+    // - responseMimeType application/json: força JSON válido e parseável.
+    const defaultConfig = {
+      maxOutputTokens: 32000,
+      temperature: 0.1,
+      responseMimeType: 'application/json'
+    };
+
+    // No modo simples a saída é TEXTO CORRIDO (material de aula, prompt para
+    // app parceiro), não JSON. E temperature um pouco maior, porque aqui a
+    // variação é desejável — não é correção determinística.
+    const configSimples = {
+      maxOutputTokens: 8000,
+      temperature: 0.7,
+      responseMimeType: 'text/plain'
+    };
+
+    // Frontend pode sobrescrever campos específicos por chamada
+    // (ex: OCR sobrescreve responseMimeType para 'text/plain')
+    const generationConfig = modoSimples
+      ? { ...configSimples, ...(clientConfig || {}) }
+      : { ...defaultConfig, ...(clientConfig || {}) };
+
+    // Corpo da requisição
+    const corpo = {
+      contents: modoSimples ? [{ parts: [{ text: prompt }] }] : contents,
+      generationConfig
+    };
+
+    // Busca real na web — só no modo simples, e só quando pedida.
+    // Reduz alucinação (legislação, dados, citações) e devolve as fontes.
+    // O fluxo de correção NUNCA usa isto.
+    if (modoSimples && buscarNaWeb) {
+      corpo.tools = [{ google_search: {} }];
+      // grounding não aceita responseMimeType json; garante texto
+      corpo.generationConfig.responseMimeType = 'text/plain';
+    }
+
+    const geminiRes = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': CHAVE          // chave vai no cabeçalho, nunca na URL
+        'x-goog-api-key': apiKey
       },
-      body: JSON.stringify(corpo)
+      body: JSON.stringify(corpo),
     });
 
-    if (!resposta.ok) {
-      const detalhe = await resposta.text();
-      console.error('Erro do Gemini:', resposta.status, detalhe.slice(0, 500));
-      return res.status(502).json({ erro: 'A IA não respondeu. Tente novamente.' });
+    const data = await geminiRes.json();
+
+    if (!geminiRes.ok) {
+      return res.status(geminiRes.status).json({ error: data.error?.message || 'Erro do Gemini' });
     }
 
-    const dados = await resposta.json();
+    // ─── Resposta do modo simples: texto + fontes ───────────────────────
+    if (modoSimples) {
+      const texto = (data?.candidates?.[0]?.content?.parts || [])
+        .map(p => p.text || '')
+        .join('')
+        .trim();
 
-    // Texto gerado
-    const texto = (dados?.candidates?.[0]?.content?.parts || [])
-      .map(p => p.text || '')
-      .join('')
-      .trim();
+      const meta = data?.candidates?.[0]?.groundingMetadata;
+      const fontes = (meta?.groundingChunks || [])
+        .map(c => (c?.web ? { titulo: c.web.title, url: c.web.uri } : null))
+        .filter(Boolean);
 
-    // Fontes usadas na busca (para mostrar ao professor)
-    const meta = dados?.candidates?.[0]?.groundingMetadata;
-    const fontes = (meta?.groundingChunks || [])
-      .map(c => c?.web ? { titulo: c.web.title, url: c.web.uri } : null)
-      .filter(Boolean);
+      return res.status(200).json({ texto, fontes, _redaon_modelo_usado: modelo });
+    }
 
-    return res.status(200).json({ texto, fontes });
+    // Retorna data + meta informando qual modelo foi usado (útil pra debug
+    // e pra UI confirmar "correção foi feita com Gemini 3 Flash")
+    return res.status(200).json({ ...data, _redaon_modelo_usado: modelo });
 
-  } catch (e) {
-    console.error('Falha ao chamar o Gemini:', e);
-    return res.status(500).json({ erro: 'Falha ao gerar. Tente novamente.' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Erro interno: ' + err.message });
   }
 }
