@@ -1657,8 +1657,8 @@
         +   '<button class="btnAval '+(est==='discordo'?'on-discordo':'')+'" onclick="avaliar(\''+k+'\',\'discordo\')">Discordo</button>'
         + '</div>'
         + (est==='discordo'
-            ? '<textarea id="disc_'+k+'" rows="2" placeholder="O que a IA errou nesta competência?" style="width:100%;margin-top:.6rem;background:var(--surface);border:1px solid rgba(var(--goldRGB),.4);border-radius:.6rem;padding:.55rem .7rem;color:var(--text);font-size:.8rem;font-family:inherit;outline:none;resize:vertical;"></textarea>'
-              + '<p style="font-size:.68rem;color:var(--muted);margin-top:.3rem;">🔒 Uso interno — vai para análise da RedaON. O aluno não vê.</p>'
+            ? '<textarea id="disc_'+k+'" rows="2" placeholder="Qual o seu ponto de discordância?" style="width:100%;margin-top:.6rem;background:var(--surface);border:1px solid rgba(var(--goldRGB),.4);border-radius:.6rem;padding:.55rem .7rem;color:var(--text);font-size:.8rem;font-family:inherit;outline:none;resize:vertical;"></textarea>'
+              + '<p style="font-size:.68rem;color:var(--muted);margin-top:.3rem;">🔒 Sua observação ajuda a calibrar a correção. O aluno não vê.</p>'
             : '')
         + '<details style="margin-top:.6rem;"><summary style="font-size:.72rem;color:var(--muted);cursor:pointer;">📏 Critério INEP — '+k.toUpperCase()+'</summary>'
         +   '<p style="font-size:.76rem;color:var(--text2);line-height:1.5;margin-top:.4rem;">'+_CRIT[k].inep+'</p></details>'
