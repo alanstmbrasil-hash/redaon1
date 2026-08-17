@@ -1,638 +1,667 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Início</title>
-<script>tailwind = { config: {} };</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- RedaON · Portal do Aluno · Início · v3-10 · sobre aluno-base-v6 -->
+<script>
+(function(){
+  var pref = 'auto';
+  try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+  var efetivo = pref;
+  if (pref === 'auto') {
+    var claroNoSistema = false;
+    try { claroNoSistema = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+    efetivo = claroNoSistema ? 'claro' : 'escuro';
+  }
+  document.documentElement.setAttribute('data-tema', efetivo);
+  document.documentElement.setAttribute('data-tema-pref', pref);
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "surface-container": "#1d2026", "tertiary": "#fabd00",
-          "surface-container-lowest": "#0b0e14", "surface-container-low": "#191c22",
-          "background": "#10131a", "outline-variant": "#474554",
-          "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
-          "primary": "#c6bfff", "outline": "#928ea0",
-          "on-background": "#e1e2eb", "on-surface": "#e1e2eb",
-          "surface-container-highest": "#32353c",
-          "secondary": "#45edee", "surface": "#10131a",
-          "error": "#ffb4ab", "surface-container-high": "#272a31",
-        },
-        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
-        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-      },
-    },
-  }
-</script>
+<link href="aluno-base-v6.css" rel="stylesheet"/>
 <style>
-  body { font-family: 'Inter', sans-serif; background-color: #10131a; }
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  .glass-card { background: rgba(25,28,34,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
-  @keyframes countUp { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
-  .count-anim { animation: countUp 0.6s ease forwards; }
+/* ===== Só o que é próprio do INÍCIO ===== */
+.saudacaoDesktop { margin-bottom:1rem; }
+.saudacaoDesktop h1 { font-size:1.35rem; font-weight:800; color:var(--text); }
+.saudacaoDesktop p { font-size:.85rem; color:var(--muted); margin-top:.15rem; }
+#indicadorTurmas { font-size:.75rem; color:var(--muted); margin-top:.35rem; }
+#indicadorTurmas b { color:var(--text2); font-weight:600; }
+.statsDesktop { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; margin-bottom:1rem; }
+.statCard { background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:14px; padding:.875rem 1rem; }
+.statCard .l { font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+.statCard .v { font-size:1.6rem; font-weight:800; line-height:1.1; margin-top:.2rem; }
+@media(max-width:640px){ .saudacaoDesktop, .statsDesktop { display:none !important; } }
+@media(max-width:900px) and (min-width:641px){ .statsDesktop{ grid-template-columns:repeat(2,1fr);} }
 
-  /* ── Sidebar hambúrguer ── */
-  #sidebar {
-    position: fixed; left: 0; top: 0; height: 100%; width: 256px;
-    transform: translateX(-256px);
-    transition: transform .3s ease;
-    z-index: 50;
-  }
-  #sidebar.open { transform: translateX(0); }
-  #overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,.6); z-index: 45;
-  }
-  #overlay.open { display: block; }
+.feedCardMobile{ display:none; }
+@media (max-width:640px){
+  .feedCardMobile{ display:block; margin-bottom:.875rem; border-radius:16px; overflow:hidden; background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); }
+  .fcCover{ position:relative; height:290px; background:linear-gradient(160deg,#2b3a4d 0%,#33506b 40%,#6a5a7d 75%,#caa988 100%); background-size:cover; background-position:center; }
+  html[data-tema="claro"] .fcCover{ background:linear-gradient(160deg,#0a8c8d 0%,#0c6b6c 52%,#3a8a7e 78%,#d8c9a8 100%); background-size:cover; background-position:center; }
+  .fcCover.comFoto{ background-image:var(--fotoCapa) !important; background-position:center var(--posCapa, 50%) !important; }
+  .fcTop{ position:absolute; top:0; left:0; right:0; z-index:2; display:flex; align-items:center; gap:9px; padding:12px 12px; background:linear-gradient(180deg,rgba(8,10,15,.55),transparent); }
+  .fcAv{ width:38px; height:38px; border-radius:50%; border:2px solid #fff; background:linear-gradient(160deg,#3a4a6a,#222a3a); background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-size:18px; flex:0 0 auto; }
+  .fcNome{ margin:0; font-size:14px; font-weight:800; color:#fff; }
+  .fcSub{ margin:1px 0 0; font-size:10.5px; color:rgba(255,255,255,.85); }
+  .fcDots{ margin-left:auto; color:#fff; font-size:19px; background:rgba(0,0,0,.3); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .fcBot{ position:absolute; left:0; right:0; bottom:0; z-index:2; padding:26px 14px 14px; background:linear-gradient(0deg,rgba(8,12,18,.9) 0%,rgba(8,12,18,.45) 55%,transparent 100%); }
+  .fcMetrics{ display:flex; align-items:flex-end; justify-content:space-between; }
+  .fcM{ display:flex; flex-direction:column; align-items:center; }
+  .fcM .v{ font-size:19px; font-weight:800; line-height:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.5); }
+  .fcM .l{ font-size:9.5px; color:rgba(255,255,255,.72); margin-top:3px; }
+  .feedCardMobile.tam-medio .fcCover{ height:auto; background:linear-gradient(160deg,#1f2a3a,#2d3d52) !important; }
+  .feedCardMobile.tam-medio .fcTop{ position:relative; background:transparent; padding:12px 13px 4px; }
+  .feedCardMobile.tam-medio .fcBot{ position:relative; background:transparent; padding:6px 13px 13px; }
+  .feedCardMobile.tam-grande .fcCover{ height:290px; }
+  .feedCardMobile.tam-xg .fcCover{ height:auto; aspect-ratio:4/5; }
+  .feedCardMobile.tam-xg .fcBot{ padding:34px 14px 14px; }
+  .feedCardMobile.tam-xg .fcM .v{ font-size:21px; }
+}
 
-  /* Desktop: sidebar sempre visível */
-  @media (min-width: 1024px) {
-    #sidebar { transform: translateX(0) !important; }
-    #overlay { display: none !important; }
-    #main-content { margin-left: 256px; }
-    #btnHamburger { display: none !important; }
-  }
-  @media (max-width: 1023px) {
-    #main-content { margin-left: 0 !important; }
-  }
+.avisoCard{ margin-bottom:1rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:14px; overflow:hidden; }
+.avisoTrack{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -ms-overflow-style:none; }
+.avisoTrack::-webkit-scrollbar{ display:none; }
+.avisoSlide{ flex:0 0 100%; scroll-snap-align:start; display:flex; align-items:center; gap:11px; padding:13px 15px; }
+.avisoIco{ font-size:22px; line-height:1; flex:0 0 auto; }
+.avisoTit{ font-size:11px; font-weight:700; color:var(--cyan); margin:0 0 2px; }
+.avisoTxt{ font-size:12.5px; color:var(--text2); margin:0; line-height:1.35; }
+.avisoTxt b{ color:var(--text); }
+.avisoDots{ display:flex; justify-content:center; gap:5px; padding:0 0 10px; }
+.avisoDots span{ width:6px; height:6px; border-radius:50%; background:var(--muted); opacity:.4; transition:opacity .2s,width .2s; }
+.avisoDots span.on{ opacity:1; width:16px; border-radius:3px; background:var(--cyan); }
 
-  /* Badge dos vídeos */
-  .video-badge {
-    display: inline-block;
-    padding: .2rem .6rem;
-    border-radius: 9999px;
-    font-size: .65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    margin-right: .4rem;
-  }
+#bannerEntrarTurma{ margin-bottom:1rem; background:rgba(var(--purpleRGB),.08); border:1px dashed rgba(var(--purpleRGB),.4); border-radius:14px; padding:.875rem 1rem; display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+#bannerEntrarTurma p{ font-size:.8rem; color:var(--text2); line-height:1.4; }
+#bannerEntrarTurma b{ color:var(--text); }
+.btnTurma{ flex:0 0 auto; padding:.55rem 1rem; background:var(--purple); color:#fff; border:none; border-radius:.7rem; font-size:.78rem; font-weight:700; cursor:pointer; }
 
-  /* ── Ticker horizontal CNN ── */
-  @keyframes tickerScroll {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-  .ticker-track {
-    animation: tickerScroll 20s linear infinite;
-    width: max-content;
-  }
-  .ticker-track.paused { animation-play-state: paused; }
-  .ticker-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: #c8c4d7;
-    flex-shrink: 0;
-  }
-  .ticker-item strong { color: #e1e2eb; font-weight: 700; }
-  .ticker-divider {
-    width: 4px; height: 4px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+.carrA{ display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; }
+.carrV{ display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; }
+@media(max-width:900px) and (min-width:641px){ .carrA{ grid-template-columns:repeat(2,1fr);} .carrV{ grid-template-columns:repeat(2,1fr);} }
+@media(max-width:640px){
+  .carrA,.carrV{ display:flex; gap:10px; overflow-x:auto; scrollbar-width:none; scroll-snap-type:x mandatory; align-items:stretch; margin:0 -1rem; padding:0 1rem 4px; }
+  .carrA::-webkit-scrollbar,.carrV::-webkit-scrollbar{ display:none; }
+  .carrA>*,.carrV>*{ scroll-snap-align:start; flex:0 0 64%; }
+}
+.aCard{ position:relative; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:15px; padding:13px; cursor:pointer; min-height:150px; }
+.aCard .ic{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:19px; margin-bottom:9px; }
+.aCard h4{ margin:0 0 4px; font-size:13.5px; font-weight:700; color:var(--text); }
+.aCard p{ margin:0; font-size:11px; color:var(--muted); line-height:1.4; }
+.vCard{ position:relative; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:15px; overflow:hidden; cursor:pointer; display:flex; flex-direction:column; min-height:150px; }
+.vThumb{ flex:1; min-height:112px; position:relative; display:flex; flex-direction:column; align-items:flex-start; padding:9px; }
+.vTitle{ margin-top:auto; font-size:12px; font-weight:700; line-height:1.3; color:#fff; padding:18px 4px 4px; width:100%; background:linear-gradient(0deg,rgba(8,12,18,.85) 0%,rgba(8,12,18,.45) 55%,transparent 100%); text-shadow:0 1px 3px rgba(0,0,0,.5); border-radius:0 0 8px 8px; }
+.vBadge{ font-size:9.5px; font-weight:700; padding:3px 9px; border-radius:6px; background:#fff; color:#0f1419; box-shadow:0 1px 4px rgba(0,0,0,.18); }
+.emBreve{ position:absolute; top:9px; right:9px; z-index:3; font-size:9px; font-weight:800; letter-spacing:.04em; color:var(--gold); background:rgba(var(--goldRGB),.14); border:1px solid rgba(var(--goldRGB),.4); padding:3px 8px; border-radius:999px; }
 
-  /* ── Modal Entrar em Turma ── */
-  #modalEntrarTurma {
-    display: none;
-    position: fixed; inset: 0;
-    z-index: 200;
-    background: rgba(0,0,0,.85);
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-  #modalEntrarTurma.aberto { display: flex; }
-  .input-codigo {
-    width: 100%;
-    background: #10131a;
-    border: 1px solid rgba(71,69,84,.4);
-    border-radius: .625rem;
-    padding: .75rem 1rem;
-    color: #e1e2eb;
-    font-size: .95rem;
-    font-family: 'Inter', monospace;
-    letter-spacing: .02em;
-    outline: none;
-  }
-  .input-codigo:focus { border-color: #45edee; box-shadow: 0 0 0 3px rgba(69,237,238,.15); }
+.input-codigo { width:100%; padding:.75rem .875rem; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.3); border-radius:.7rem; color:var(--text); font-size:.9rem; font-family:inherit; }
+.input-codigo:focus { outline:none; border-color:rgba(var(--cyanRGB),.6); }
+.msgErro { display:none; margin-top:.6rem; padding:.5rem .75rem; background:rgba(var(--redRGB),.1); border:1px solid rgba(var(--redRGB),.3); border-radius:.5rem; color:var(--red2); font-size:.78rem; }
+.msgOk { display:none; margin-top:.6rem; padding:.5rem .75rem; background:rgba(var(--greenRGB),.1); border:1px solid rgba(var(--greenRGB),.3); border-radius:.5rem; color:var(--green); font-size:.78rem; }
+.btnModal { width:100%; margin-top:1rem; padding:.75rem; background:linear-gradient(135deg,var(--cyan),var(--purple)); color:var(--onCyan); font-weight:800; border:none; border-radius:.75rem; font-size:.875rem; cursor:pointer; }
+#enqFundo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:80;align-items:center;justify-content:center;flex-direction:column;padding:1rem;}
+#enqFundo.aberto{display:flex;}
+#enqPalco{position:relative;width:100%;max-width:340px;touch-action:none;cursor:grab;border-radius:12px;overflow:hidden;background:#000;}
+#enqFoto{display:block;width:100%;height:auto;filter:grayscale(1) brightness(.42);}
+#enqJanela{position:absolute;left:0;right:0;overflow:hidden;pointer-events:none;}
+#enqJanela img{position:absolute;left:0;width:100%;display:block;}
+#enqMolduraG{position:absolute;left:0;right:0;border:2px dashed rgba(255,255,255,.9);border-radius:6px;pointer-events:none;}
+#enqMolduraM{position:absolute;left:0;right:0;border:2px solid var(--cyan);border-radius:6px;pointer-events:none;}
+.enqLeg{display:flex;gap:1rem;justify-content:center;margin-top:.6rem;font-size:.7rem;color:#fff;opacity:.9;}
+.enqLeg i{font-style:normal;margin-right:.3rem;}
+#enqDica{color:#fff;font-size:.8rem;margin:.9rem 0;text-align:center;opacity:.85;}
+.enqBtns{display:flex;gap:.6rem;width:100%;max-width:360px;}
+.enqBtns button{flex:1;min-height:46px;border-radius:.75rem;border:none;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;}
 </style>
-<script src="supabase-auth.js"></script>
 </head>
-<body class="bg-background text-on-surface antialiased overflow-x-hidden">
+<body>
 
-<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
-  <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
-</div>
+<div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
+  <div id="conteudo">
 
-<!-- Overlay -->
-<div id="overlay" onclick="toggleSidebar()"></div>
-
-<!-- SIDEBAR -->
-<aside id="sidebar" class="bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)]">
-  <div class="flex items-center px-2 mb-10">
-    <div class="flex items-baseline italic">
-      <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
-      <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
+    <div class="saudacaoDesktop">
+      <h1 id="saudacaoLinha">Ol&aacute;, <span style="color:var(--cyan);">Estudante</span> &#9997;&#65039;</h1>
+      <p>Bem-vindo(a) ao seu espa&ccedil;o de escrita.</p>
+      <div id="indicadorTurmas" class="hidden"></div>
     </div>
-  </div>
-  <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="inicio.html">
-      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span>
-      <span class="font-medium text-sm">Início</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="nova-redacao.html">
-      <span class="material-symbols-outlined">add_circle</span>
-      <span class="font-medium text-sm">Nova Redação</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="temas.html">
-      <span class="material-symbols-outlined">description</span>
-      <span class="font-medium text-sm">Temas</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html">
-      <span class="material-symbols-outlined">edit_note</span>
-      <span class="font-medium text-sm">Minhas Redações</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="evolucao.html">
-      <span class="material-symbols-outlined">trending_up</span>
-      <span class="font-medium text-sm">Evolução</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html">
-      <span class="material-symbols-outlined">menu_book</span>
-      <span class="font-medium text-sm">Plano de Estudo</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Elite <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html">
-      <span class="material-symbols-outlined">leaderboard</span>
-      <span class="font-medium text-sm">Ranking</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html">
-      <span class="material-symbols-outlined">settings</span>
-      <span class="font-medium text-sm">Configurações</span>
-    </a>
-  </nav>
-  <div class="mt-auto pt-6 border-t border-outline-variant/10">
-    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
-      <img alt="Usuário" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
-      <div class="flex flex-col">
-        <span id="nomeUsuarioSidebar" class="text-sm font-semibold text-on-surface">Estudante</span>
-        <span class="text-xs text-on-surface-variant">Estudante Premium</span>
+
+    <div class="feedCardMobile tam-grande" id="feedCard">
+      <div class="fcCover" id="fcCover">
+        <div class="fcTop">
+          <div class="fcAv" id="avatarCard">&#129333;&#8205;&#127891;</div>
+          <div style="min-width:0;">
+            <p class="fcNome" id="nomeUsuarioCard">Estudante</p>
+            <p class="fcSub" id="subCard">Portal do Aluno</p>
+          </div>
+          <div class="fcDots" onclick="abrirGaveta('gavetaCard')">&#8943;</div>
+        </div>
+        <div class="fcBot">
+          <div class="fcMetrics">
+            <div class="fcM"><span class="v" id="mMedia">&mdash;</span><span class="l">M&eacute;dia</span></div>
+            <div class="fcM"><span class="v" id="mRedacoes">&mdash;</span><span class="l">Reda&ccedil;&otilde;es</span></div>
+            <div class="fcM"><span class="v" id="mPontos">&mdash;</span><span class="l">pontos</span></div>
+            <div class="fcM"><svg width="40" height="22" viewBox="0 0 40 22" id="mSpark"><polyline points="2,18 12,14 22,15 31,8 38,4" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="l">Evolu&ccedil;&atilde;o</span></div>
+          </div>
+        </div>
       </div>
     </div>
-    <a onclick="sair()" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 cursor-pointer">
-      <span class="material-symbols-outlined text-sm">logout</span>
-      <span class="font-medium text-sm">Sair</span>
-    </a>
-  </div>
-</aside>
 
-<!-- MAIN -->
-<div id="main-content" class="flex flex-col min-h-screen relative z-10">
+    <div id="indicadorTurmasMobile" class="hidden" style="font-size:.72rem;color:var(--muted);margin:-.35rem 0 .875rem;"></div>
 
-  <!-- TOP BAR -->
-  <header class="h-20 flex items-center justify-between px-4 lg:px-10 bg-surface/40 backdrop-blur-md sticky top-0 z-40 border-b border-white/5 w-full">
-    <div class="flex items-center gap-3">
-      <!-- Botão hambúrguer — apenas mobile/tablet -->
-      <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
-        <span class="material-symbols-outlined">menu</span>
-      </button>
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">home</span>
-        <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Início</h2>
-      </div>
+    <div class="statsDesktop">
+      <div class="statCard"><span class="l">M&eacute;dia</span><p class="v" id="dMedia" style="color:var(--cyan);">&mdash;</p></div>
+      <div class="statCard"><span class="l">Reda&ccedil;&otilde;es</span><p class="v" id="dRedacoes" style="color:var(--purpleSoft);">&mdash;</p></div>
+      <div class="statCard"><span class="l">&Uacute;ltima evolu&ccedil;&atilde;o</span><p class="v" id="dPontos" style="color:var(--green);">&mdash;</p></div>
+      <div class="statCard"><span class="l">Trajet&oacute;ria</span><svg viewBox="0 0 120 40" style="width:100%;height:38px;margin-top:.3rem;" id="dSpark"><polyline points="4,32 34,26 64,28 94,14 116,8" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     </div>
-    <div class="flex items-center gap-4 lg:gap-6">
-      <div class="hidden sm:flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
-        <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
-        <span class="text-xs font-bold text-on-surface" id="headerPontos">— pts</span>
-      </div>
-      <button onclick="toggleNotificacoes()" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
-        <span class="material-symbols-outlined">notifications</span>
-        <span id="badgeNotif" class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
-      </button>
+
+    <div class="avisoCard" id="avisoCard">
+      <div class="avisoTrack" id="avisoTrack"></div>
+      <div class="avisoDots" id="avisoDots"></div>
     </div>
-  </header>
 
-  <!-- CONTEÚDO -->
-  <div class="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar space-y-12">
+    <div id="bannerEntrarTurma" class="hidden">
+      <p>&#127979; <b>Entre na sua turma</b> com o c&oacute;digo que sua professora passou.</p>
+      <button class="btnTurma" onclick="abrirModalEntrarTurma()">Entrar</button>
+    </div>
 
-    <!-- BANNER NOVO — saudação discreta + stats fixos + ticker horizontal -->
-    <section>
-      <!-- Linha de saudação + indicação de turma -->
-      <div class="flex items-center justify-between mb-3 px-1">
-        <p id="saudacaoLinha" class="text-sm text-outline font-medium">
-          Olá, <span id="nomeUsuarioBanner">Estudante</span> ✍️
-        </p>
-        <div id="indicadorTurmas" class="hidden text-xs text-outline">
-          <!-- Preenchido por JS quando aluno tem turma(s) -->
-        </div>
-      </div>
+    <div class="sec"><span class="secL"><span class="bar"></span>Potencialize sua Escrita</span><button class="verT" onclick="mostrarEmBreve('Aulas')">Ver Todos</button></div>
+    <div class="carrA">
+      <div class="aCard" onclick="mostrarEmBreve('Sugest&atilde;o da PROfa')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">&#129504;</div><h4>Sugest&atilde;o da PROfa</h4><p>Repert&oacute;rios cr&iacute;ticos e an&aacute;lises personalizadas.</p></div>
+      <div class="aCard" onclick="mostrarEmBreve('Projeto de Texto')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">&#128208;</div><h4>Projeto de Texto</h4><p>Estrutura&ccedil;&atilde;o l&oacute;gica para a nota m&aacute;xima na C3.</p></div>
+      <div class="aCard" onclick="mostrarEmBreve('Proposta Premium')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">&#11088;</div><h4>Proposta Premium</h4><p>O segredo dos 200 pontos na Compet&ecirc;ncia 5.</p></div>
+      <div class="aCard" onclick="mostrarEmBreve('Gram&aacute;tica &Aacute;gil')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">&#9997;&#65039;</div><h4>Gram&aacute;tica &Aacute;gil</h4><p>Erros comuns que tiram pontos na C1.</p></div>
+    </div>
 
-      <!-- Painel principal: stats grandes + ticker -->
-      <div class="bg-surface-container border border-outline-variant/30 rounded-2xl p-5 lg:p-6">
+    <div class="sec"><span class="secL"><span class="bar"></span>Explore e Inspire-se</span></div>
+    <div class="carrV" style="margin-bottom:1rem;">
+      <div class="vCard" onclick="mostrarEmBreve('V&iacute;deos')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#9a7a10,#6b540a);"><span class="vBadge">Aposta da Semana</span><div class="vTitle">O impacto do etarismo</div></div></div>
+      <div class="vCard" onclick="mostrarEmBreve('V&iacute;deos')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#0a8c8d,#0c6b6c);"><span class="vBadge">Rota 1.000</span><div class="vTitle">Repert&oacute;rios de Filosofia</div></div></div>
+      <div class="vCard" onclick="mostrarEmBreve('V&iacute;deos')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#6c5ce7,#4a3fb0);"><span class="vBadge">Corre&ccedil;&atilde;o Guiada</span><div class="vTitle">Como estruturar a tese</div></div></div>
+    </div>
 
-        <!-- 3 stats fixos -->
-        <div class="grid grid-cols-3 gap-4 mb-4">
-          <div>
-            <p class="text-[10px] text-outline font-bold uppercase tracking-wider mb-1">Média</p>
-            <p id="statMedia" class="text-2xl lg:text-3xl font-black text-tertiary leading-none">—</p>
-          </div>
-          <div>
-            <p class="text-[10px] text-outline font-bold uppercase tracking-wider mb-1">Ranking</p>
-            <p id="statRanking" class="text-2xl lg:text-3xl font-black text-secondary leading-none">—</p>
-          </div>
-          <div>
-            <p class="text-[10px] text-outline font-bold uppercase tracking-wider mb-1">Evolução</p>
-            <p id="statEvolucao" class="text-2xl lg:text-3xl font-black text-primary leading-none">—</p>
-          </div>
-        </div>
-
-        <!-- Ticker horizontal animado -->
-        <div id="tickerContainer" class="bg-surface-container-lowest border border-white/5 rounded-xl py-3 overflow-hidden relative">
-          <div id="tickerTrack" class="ticker-track flex gap-8 whitespace-nowrap">
-            <!-- preenchido por JS -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Banner "Entrar em uma turma" (só aparece se aluno NÃO está em nenhuma turma) -->
-      <div id="bannerEntrarTurma" class="hidden mt-3 bg-primary-container/10 border border-dashed border-primary-container/40 rounded-xl p-3 lg:p-4 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings:'FILL' 1;">school</span>
-          <div>
-            <p class="text-sm text-primary font-bold">Você ainda não entrou em uma turma</p>
-            <p class="text-xs text-outline mt-0.5">Use o código que sua professora passou</p>
-          </div>
-        </div>
-        <button onclick="abrirModalEntrarTurma()" class="bg-gradient-to-r from-secondary to-primary-container text-surface-container-lowest text-xs font-extrabold px-4 py-2 rounded-lg whitespace-nowrap hover:opacity-90 transition flex-shrink-0">
-          Entrar em turma
-        </button>
-      </div>
-    </section>
-
-    <!-- POTENCIALIZE SUA ESCRITA -->
-    <section>
-      <div class="flex items-center justify-between mb-8">
-        <h2 class="text-lg lg:text-xl font-black text-on-surface tracking-widest uppercase flex items-center gap-3">
-          <span class="w-8 h-1 bg-[#45edee] rounded-full"></span>
-          Potencialize sua Escrita
-        </h2>
-        <button class="text-[#45edee] text-sm font-bold hover:underline">Ver Todos</button>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div onclick="acessarAula('Sugestão da PROfa')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full cursor-pointer">
-          <div class="w-12 h-12 rounded-2xl bg-[#6c5ce7]/20 flex items-center justify-center text-[#6c5ce7] mb-6">
-            <span class="material-symbols-outlined text-3xl">psychology</span>
-          </div>
-          <h3 class="text-lg font-bold text-white mb-2">Sugestão da PROfa</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Repertórios críticos e análises sociológicas personalizadas.</p>
-          <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
-            <span>Acessar Aula</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </div>
-        </div>
-        <div onclick="acessarAula('Projeto de Texto')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full cursor-pointer">
-          <div class="w-12 h-12 rounded-2xl bg-secondary/20 flex items-center justify-center text-secondary mb-6">
-            <span class="material-symbols-outlined text-3xl">architecture</span>
-          </div>
-          <h3 class="text-lg font-bold text-white mb-2">Projeto de Texto</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Estruturação lógica para garantir a nota máxima na C3.</p>
-          <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
-            <span>Acessar Aula</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </div>
-        </div>
-        <div onclick="acessarAula('Proposta Premium')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 border-l-2 border-[#45edee] flex flex-col h-full cursor-pointer">
-          <div class="w-12 h-12 rounded-2xl bg-tertiary/20 flex items-center justify-center text-tertiary mb-6">
-            <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">star</span>
-          </div>
-          <h3 class="text-lg font-bold text-white mb-2">Proposta Premium</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">O segredo dos 200 pontos na Competência 5.</p>
-          <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
-            <span>Acessar Aula</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </div>
-        </div>
-        <div onclick="acessarAula('Gramática Ágil')" class="glass-card rounded-3xl p-6 group hover:translate-y-[-4px] transition-all duration-300 flex flex-col h-full cursor-pointer">
-          <div class="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary mb-6">
-            <span class="material-symbols-outlined text-3xl">history_edu</span>
-          </div>
-          <h3 class="text-lg font-bold text-white mb-2">Gramática Ágil</h3>
-          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Erros comuns que tiram pontos preciosos na C1.</p>
-          <div class="flex items-center gap-2 text-[10px] font-black text-[#45edee] uppercase tracking-wider group-hover:gap-3 transition-all mt-auto">
-            <span>Acessar Aula</span><span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- EXPLORE E INSPIRE-SE -->
-    <section class="pb-24 lg:pb-10">
-      <div class="flex items-center justify-between mb-8">
-        <h2 class="text-lg lg:text-xl font-black text-on-surface tracking-widest uppercase flex items-center gap-3">
-          <span class="w-8 h-1 bg-[#6c5ce7] rounded-full"></span>
-          Explore e Inspire-se
-        </h2>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-        <!-- Vídeo 1 -->
-        <div onclick="assistirVideo('Como estruturar a Tese 1 e 2 com clareza')" class="group bg-[#1d2026] rounded-3xl overflow-hidden border border-white/5 shadow-lg cursor-pointer hover:border-white/10 transition-all">
-          <div class="aspect-video relative overflow-hidden">
-            <img alt="Video Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4yXHFvsa61Gr0AcJW22PaxbuzAKVPrQzAgg9UmwRwG4qhA16LlQKbBXwD9pW9F0PCQLyMaMILMIHS1WLyiF-84Clw30Ct7s-c5vOVaTvXW-ikWP_erQAansgQT3fq7GZnuQ9wWBTStdpmZQktWf2OKCbx_gCgGuEUAc5uwUBWzjpaTjAjpDUXOKRFEVD_MjKwRn7xJjJgXADsbmPHuUjLOswOYLX-s_l4HrTZZQSXQLu4AIBrnMe0EkKAIqS7dakX5DOmpi-Zo_dN"/>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <button class="w-14 h-14 rounded-full bg-[#45edee] text-[#002020] flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
-                <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
-              </button>
-            </div>
-            <div class="absolute bottom-3 right-3 bg-black/60 px-2 py-1 rounded-md text-[10px] font-bold text-white backdrop-blur-sm">08:42</div>
-          </div>
-          <div class="p-5">
-            <span class="video-badge bg-[#45edee] text-[#002020]">Correção Guiada</span>
-            <h4 class="text-white font-bold mt-2 mb-1">Como estruturar a Tese 1 e 2 com clareza</h4>
-            <p class="text-on-surface-variant text-xs">Aumente sua coesão textual hoje mesmo.</p>
-          </div>
-        </div>
-
-        <!-- Vídeo 2 -->
-        <div onclick="assistirVideo('Repertórios de Filosofia para Redação')" class="group bg-[#1d2026] rounded-3xl overflow-hidden border border-white/5 shadow-lg cursor-pointer hover:border-white/10 transition-all">
-          <div class="aspect-video relative overflow-hidden">
-            <img alt="Video Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZr8Wt_eY6zvZSZ-BBGrKZjkuKd84NTPlBtIORQNQMCmoyYAFTtH2FaXzUKOhtoGPDSI-jkePpEXMHgKuTNPQKdApT1dBySLBSC_SpEnW02uEB0jVtoLUd8BwRauO93Luj_ejSdMjXWL9JyMmG_9dQa1m8y7UCsFxvySFafxuyulPFAsCdxwSqB0c3pLRWN9eWRsutsuh6KVYG-tmifQr3Pd6ImM-Saoi3233qA9EhAwy0MQ2EdweYeOWrVbJsfalT4xtUsm5zB9wi"/>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <button class="w-14 h-14 rounded-full bg-[#45edee] text-[#002020] flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
-                <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
-              </button>
-            </div>
-            <div class="absolute bottom-3 right-3 bg-black/60 px-2 py-1 rounded-md text-[10px] font-bold text-white backdrop-blur-sm">12:15</div>
-          </div>
-          <div class="p-5">
-            <span class="video-badge bg-[#45edee] text-[#002020]">Rota 1.000</span>
-            <h4 class="text-white font-bold mt-2 mb-1">Repertórios de Filosofia para Redação</h4>
-            <p class="text-on-surface-variant text-xs">Possíveis caminhos para este tema polêmico.</p>
-          </div>
-        </div>
-
-        <!-- Vídeo 3 -->
-        <div onclick="assistirVideo('O Impacto do Etarismo no Brasil')" class="group bg-[#1d2026] rounded-3xl overflow-hidden border border-white/5 shadow-lg cursor-pointer hover:border-white/10 transition-all">
-          <div class="aspect-video relative overflow-hidden">
-            <img alt="Video Thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZD5oRBiylbdtIJaSmhxfo0uFY7YJ2fM396jdaqdVKD4h1nRXMuW3bFrsl2hyej-Ii5nwIb-YI_jLcT0rlVJJs01vB1WX_IEkpz5pv8rg-baXrGhZ4no09_x6XQCYXnaLY5IdSPI7FSDBILJsCf6o3fJTC_zXJGYzD7_z8_AqN3Ehze-_qegh1g8uSLdKGPmo5UAW7Ztv_DnmrOjoci4PDFLtX99EegOTIkTpxeLVFYfvpGcIaQXBIvzpAMA1OfaEiNMD3l0eSQmAc"/>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <button class="w-14 h-14 rounded-full bg-[#45edee] text-[#002020] flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
-                <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
-              </button>
-            </div>
-            <div class="absolute bottom-3 right-3 bg-black/60 px-2 py-1 rounded-md text-[10px] font-bold text-white backdrop-blur-sm">15:50</div>
-          </div>
-          <div class="p-5">
-            <span class="video-badge bg-[#FABD00] text-[#261a00]">Aposta da Semana</span>
-            <h4 class="text-white font-bold mt-2 mb-1">O Impacto do Etarismo no Brasil</h4>
-            <p class="text-on-surface-variant text-xs">Comece sua redação de forma impactante.</p>
-          </div>
-        </div>
-
-      </div>
-    </section>
   </div>
 </div>
 
-<!-- FAB -->
-<button onclick="window.location.href='nova-redacao.html'" class="fixed bottom-6 right-6 lg:bottom-10 lg:right-10 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#45edee] text-[#002020] shadow-[0_0_30px_rgba(69,237,238,0.4)] hover:shadow-[0_0_50px_rgba(69,237,238,0.6)] transform hover:scale-105 transition-all active:scale-95 z-[60] font-black italic tracking-tighter">
-  <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">edit_square</span>
-  <span class="uppercase text-sm">Escrever Redação</span>
-</button>
-
-<script>
-
-  // ── GUARD + DISC ────────────────────────────────────
-  authGuard('aluno');
-
-  // Verificar perfil DISC — se não tem, redirecionar para questionário
-  if (typeof authTemDiscPerfil === 'function' && !authTemDiscPerfil()) {
-    window.location.href = 'questionario-perfil.html';
-  }
-
-  // ── NOME ─────────────────────────────────────────────
-  // (a saudação no banner agora é montada dentro de carregarDadosBanner)
-  const NOME_USUARIO = authGetNome();
-  const elNomeSidebar = document.getElementById('nomeUsuarioSidebar');
-  if (elNomeSidebar) elNomeSidebar.textContent = NOME_USUARIO;
-
-  // ── SIDEBAR ─────────────────────────────────────────
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('overlay').classList.toggle('open');
-  }
-
-  // ── NOTIFICAÇÕES ────────────────────────────────────
-  let notifLidas = false;
-  window.toggleNotificacoes = function() {
-    notifLidas = !notifLidas;
-    document.getElementById('badgeNotif').style.display = notifLidas ? 'none' : 'block';
-  };
-
-  // ── AULAS ───────────────────────────────────────────
-  window.acessarAula = function(nome) {
-    const toast = document.createElement('div');
-    toast.textContent = `Acessando: ${nome} 📚`;
-    toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1d2026;border:1px solid rgba(69,237,238,0.3);color:#45edee;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:999;';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2500);
-  };
-
-  // ── VÍDEOS ──────────────────────────────────────────
-  window.assistirVideo = function(titulo) {
-    const toast = document.createElement('div');
-    toast.textContent = `▶ ${titulo}`;
-    toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1d2026;border:1px solid rgba(108,92,231,0.3);color:#c6bfff;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:999;';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2500);
-  };
-
-  // ── SAIR ────────────────────────────────────────────
-  window.sair = function() {
-    if (confirm('Deseja sair da sua conta?')) { authLogout(); }
-  };
-
-  // ── BANNER NOVO: stats fixos + ticker horizontal ────────────
-  function fmtNum(n) {
-    if (n === null || n === undefined || isNaN(n)) return '—';
-    return n;
-  }
-
-  function escapeHtmlBanner(s) {
-    if (s === null || s === undefined) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-
-  function montarTicker(itens) {
-    // itens = [{ icone: '🎯', html: 'texto com <strong>destaque</strong>' }, ...]
-    if (!itens || itens.length === 0) {
-      itens = [
-        { icone: '👋', html: 'Bem-vindo ao RedaON' },
-        { icone: '✍️', html: 'Envie sua primeira redação para começar' },
-        { icone: '🚀', html: 'Sua jornada para a nota 1000 começa agora' }
-      ];
-    }
-    const itemHtml = itens.map(function(it) {
-      return '<div class="ticker-item">' +
-        '<span style="font-size:14px;">' + it.icone + '</span>' +
-        '<span>' + it.html + '</span>' +
-        '<span class="ticker-divider"></span>' +
-      '</div>';
-    }).join('');
-
-    // Duplica pra criar loop infinito sem "salto"
-    const track = document.getElementById('tickerTrack');
-    if (track) {
-      track.innerHTML = itemHtml + itemHtml;
-    }
-  }
-
-  async function carregarDadosBanner() {
-    // Atualiza saudação com nome + período do dia
-    const nome = (typeof authGetNome === 'function') ? authGetNome() : 'Estudante';
-    const primeiroNome = nome.split(' ')[0];
-    const elNome = document.getElementById('nomeUsuarioBanner');
-    if (elNome) elNome.textContent = primeiroNome;
-
-    // Atualiza linha de saudação inteira pra incluir período (Bom dia/tarde/noite)
-    const h = new Date().getHours();
-    const periodo = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-    const elSauda = document.getElementById('saudacaoLinha');
-    if (elSauda) {
-      elSauda.innerHTML = periodo + ', <span id="nomeUsuarioBanner" style="color:#e1e2eb;font-weight:600;">' + escapeHtmlBanner(primeiroNome) + '</span> ✍️';
-    }
-
-    try {
-      const historico = await dbGetHistoricoRedacoes(5);
-
-      // Sem redações ainda
-      if (!historico || historico.length === 0) {
-        document.getElementById('statMedia').textContent = '—';
-        document.getElementById('statRanking').textContent = '—';
-        document.getElementById('statEvolucao').textContent = '—';
-        montarTicker([
-          { icone: '✍️', html: '<strong>Envie sua primeira redação</strong> para ver seus dados aqui' },
-          { icone: '🎯', html: 'O RedaON corrige em <strong>tempo real</strong> com IA' },
-          { icone: '🏆', html: 'Acompanhe sua evolução pelo <strong>ranking</strong>' },
-          { icone: '🚀', html: 'Cada redação é um passo rumo à <strong>nota 1000</strong>' }
-        ]);
-        return;
-      }
-
-      // Calcular dados reais
-      const notas = historico.map(function(r) { return r.total; });
-      const media = Math.round(notas.reduce(function(a,b) { return a+b; }, 0) / notas.length);
-      const ultima = notas[0];
-      const penultima = notas[1] || ultima;
-      const evolucao = ultima - penultima;
-      const evolStr = evolucao >= 0 ? '+' + evolucao : '' + evolucao;
-      const totalRedacoes = historico.length;
-      const melhorNota = Math.max.apply(null, notas);
-
-      // Ranking
-      let posicaoRanking = '—';
-      try {
-        const ranking = await dbGetRanking();
-        if (Array.isArray(ranking)) {
-          const userId = authGetUserId();
-          const pos = ranking.findIndex(function(r) { return r.aluno_id === userId; });
-          if (pos >= 0) posicaoRanking = '#' + (pos + 1);
-        }
-      } catch(e) {}
-
-      // PDCA / Pareto
-      let pareto = null;
-      try { pareto = await dbGetCompetenciaPareto(); } catch(e) {}
-
-      // Competências consolidadas
-      let consolidadas = [];
-      try { consolidadas = await dbGetCompetenciasConsolidadas(); } catch(e) {}
-
-      // Atualiza stats fixos
-      document.getElementById('statMedia').textContent = fmtNum(media);
-      document.getElementById('statRanking').textContent = posicaoRanking;
-      const elEvol = document.getElementById('statEvolucao');
-      elEvol.textContent = evolStr;
-      // Cor da evolução: verde se positiva, vermelha se negativa, cinza se 0
-      if (evolucao > 0)      elEvol.style.color = '#4ade80';
-      else if (evolucao < 0) elEvol.style.color = '#ffb4ab';
-      else                   elEvol.style.color = '#928ea0';
-
-      // Header pontos (se existir)
-      const elHP = document.getElementById('headerPontos');
-      if (elHP) elHP.textContent = media + ' pts';
-
-      // Monta ticker com info dinâmica
-      const itens = [];
-      itens.push({ icone: '✍️', html: '<strong>' + totalRedacoes + ' reda' + (totalRedacoes === 1 ? 'ção</strong> escrita' : 'ções</strong> escritas') });
-      itens.push({ icone: '🌟', html: 'Última nota: <strong>' + ultima + '</strong>' });
-      if (melhorNota > ultima) {
-        itens.push({ icone: '🏆', html: 'Sua melhor nota: <strong>' + melhorNota + '</strong>' });
-      }
-      if (pareto) {
-        itens.push({ icone: '🎯', html: '<strong>Foco agora:</strong> ' + escapeHtmlBanner(pareto) });
-      }
-      if (consolidadas && consolidadas.length > 0) {
-        itens.push({ icone: '✅', html: 'Conquistas: <strong>' + escapeHtmlBanner(consolidadas.join(' · ')) + '</strong>' });
-      }
-      if (evolucao > 0) {
-        itens.push({ icone: '📈', html: 'Você subiu <strong>' + evolucao + ' pontos</strong> na última redação' });
-      } else if (evolucao < 0) {
-        itens.push({ icone: '💪', html: 'Próxima redação você sobe — bora!' });
-      }
-      itens.push({ icone: '🚀', html: 'Cada redação é um passo rumo à <strong>nota 1000</strong>' });
-
-      montarTicker(itens);
-    } catch(e) {
-      console.warn('Erro ao carregar dados do banner:', e);
-      montarTicker(null);
-    }
-  }
-
-  // Carregar dados ao iniciar
-  carregarDadosBanner();
-
-</script>
+<!-- Gaveta do card (foto + tamanho) — própria do Início -->
+<div class="gvBg atrasBarra" id="gavetaCardBg" onclick="fecharGaveta('gavetaCard')"></div>
+<div class="gv atrasBarra" id="gavetaCard">
+  <div class="grip"></div>
+  <p class="tit">Seu cart&atilde;o</p>
+  <p class="sub">A foto aparece como capa do seu cart&atilde;o inicial.</p>
+  <a class="pill" onclick="escolherFoto()"><i class="pemoji">&#128247;</i>Trocar foto de capa<i class="fim">&#8250;</i></a>
+  <a class="pill" id="pillEnquadrar" onclick="abrirEnquadre()"><i class="pemoji">&#128207;</i>Ajustar enquadramento<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="escolherPerfil()"><i class="pemoji">&#128100;</i>Trocar foto de perfil<i class="fim">&#8250;</i></a>
+  <p class="tit" style="margin-top:.75rem;">Tamanho do cart&atilde;o</p>
+  <a class="pill tamOpt" id="opt-medio" onclick="setTamanhoCard('medio')"><i class="pemoji">&#9644;</i>Pequeno<i class="fim" style="opacity:0;">&#10003;</i></a>
+  <a class="pill tamOpt sel" id="opt-grande" onclick="setTamanhoCard('grande')"><i class="pemoji">&#9645;</i>M&eacute;dio<i class="fim">&#10003;</i></a>
+  <a class="pill tamOpt" id="opt-xg" onclick="setTamanhoCard('xg')"><i class="pemoji">&#11036;</i>Grande<i class="fim" style="opacity:0;">&#10003;</i></a>
+</div>
+<div id="enqFundo">
+  <div id="enqPalco">
+    <img id="enqFoto" alt=""/>
+    <div id="enqJanela"><img id="enqFotoNitida" alt=""/></div>
+    <div id="enqMolduraG"></div>
+    <div id="enqMolduraM"></div>
+  </div>
+  <div class="enqLeg"><span><i style="color:var(--cyan);">&#9646;</i>M&eacute;dio</span><span><i>&#9647;</i>Grande</span></div>
+  <p id="enqDica">Arraste a foto: o que ficar fora das molduras n&atilde;o aparece no cart&atilde;o</p>
+  <div class="enqBtns">
+    <button style="background:var(--surface2);color:var(--text);" onclick="fecharEnquadre()">Cancelar</button>
+    <button style="background:var(--cyan);color:var(--onCyan);" onclick="salvarEnquadre()">Salvar</button>
+  </div>
+</div>
+<input type="file" id="inputFoto" accept="image/jpeg,image/png,image/webp" style="display:none;"/>
+<input type="file" id="inputPerfil" accept="image/jpeg,image/png,image/webp" style="display:none;"/>
 
 <!-- Modal Entrar em Turma -->
-<div id="modalEntrarTurma" onclick="if(event.target===this)fecharModalEntrarTurma()">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:1rem;width:100%;max-width:28rem;box-shadow:0 24px 64px rgba(0,0,0,.5);">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;border-bottom:1px solid rgba(255,255,255,.05);">
+<div id="modalEntrarTurma" class="modalFundo" onclick="if(event.target===this)fecharModalEntrarTurma()">
+  <div class="modalBox">
+    <div class="modalTopo">
       <div style="display:flex;align-items:center;gap:.5rem;">
-        <span class="material-symbols-outlined" style="color:#c6bfff;font-size:1.25rem;font-variation-settings:'FILL' 1;">school</span>
-        <h3 style="font-weight:800;color:#e1e2eb;font-size:.95rem;">Entrar em uma turma</h3>
+        <span class="material-symbols-outlined" style="color:var(--purpleSoft);font-size:1.25rem;font-variation-settings:'FILL' 1;">school</span>
+        <h3>Entrar em uma turma</h3>
       </div>
-      <button onclick="fecharModalEntrarTurma()" style="background:none;border:none;color:#928ea0;cursor:pointer;display:flex;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+      <button class="btnFecharX" onclick="fecharModalEntrarTurma()"><span class="material-symbols-outlined">close</span></button>
     </div>
-    <div style="padding:1.25rem;">
-      <p style="font-size:.85rem;color:#c8c4d7;margin-bottom:1rem;line-height:1.5;">
-        Cole abaixo o <strong style="color:#e1e2eb;">código da turma</strong> que sua professora passou pra você.
-      </p>
-      <input type="text" id="codigoTurmaInput" class="input-codigo" placeholder="ex: redaon-bravo-jaguar-84" autocomplete="off" />
-      <div id="erroEntrarTurma" style="display:none;margin-top:.6rem;padding:.5rem .75rem;background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.3);border-radius:.5rem;color:#ffb4ab;font-size:.78rem;"></div>
-      <div id="sucessoEntrarTurma" style="display:none;margin-top:.6rem;padding:.5rem .75rem;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:.5rem;color:#4ade80;font-size:.78rem;"></div>
-      <button onclick="confirmarEntrarTurma()" id="btnEntrarTurma" style="width:100%;margin-top:1rem;padding:.75rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#0b0e14;font-weight:800;border:none;border-radius:.75rem;font-size:.875rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
-        Entrar na turma
-      </button>
+    <div class="modalCorpo">
+      <p style="font-size:.85rem;color:var(--text2);margin-bottom:1rem;line-height:1.5;">Cole abaixo o <strong style="color:var(--text);">c&oacute;digo da turma</strong> que sua professora passou pra voc&ecirc;.</p>
+      <input type="text" id="codigoTurmaInput" class="input-codigo" placeholder="ex: redaon-bravo-jaguar-84" autocomplete="off"/>
+      <div id="erroEntrarTurma" class="msgErro"></div>
+      <div id="sucessoEntrarTurma" class="msgOk"></div>
+      <button onclick="confirmarEntrarTurma()" id="btnEntrarTurma" class="btnModal">Entrar na turma</button>
     </div>
   </div>
 </div>
 
+<script src="supabase-auth.js"></script>
+<script src="aluno-base-v6.js"></script>
 <script>
-  // ── Modal Entrar em Turma ──
+  if (typeof authGuard === 'function') { authGuard('aluno'); }
+
+  montarEsqueleto({
+    ativo:  'inicio',
+    titulo: 'In\u00edcio',
+    icone:  'edit_note',
+    sino:   true,
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-10'
+  });
+
+  // Sauda\u00e7\u00e3o
+  (function(){
+    var h = new Date().getHours();
+    var periodo = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+    var s = document.getElementById('saudacaoLinha');
+    if (s) s.innerHTML = periodo + ', <span style="color:var(--cyan);">' + escapeHtmlSimples(window.PRIMEIRO_NOME || 'Estudante') + '</span> \u270D\uFE0F';
+    var c = document.getElementById('nomeUsuarioCard');
+    if (c) c.textContent = window.NOME_ALUNO || 'Estudante';
+  })();
+
+  // Perfil da sidebar abre a gaveta do cart\u00e3o
+  (function(){
+    var p = document.getElementById('perfilAluno');
+    if (p) p.onclick = function(){ abrirGaveta('gavetaCard'); };
+  })();
+
+  // ─── Tamanho do cart\u00e3o ───
+  function setTamanhoCard(tam, silencioso) {
+    var card = document.getElementById('feedCard');
+    if (card) {
+      card.classList.remove('tam-medio','tam-grande','tam-xg');
+      card.classList.add('tam-' + tam);
+    }
+    ['medio','grande','xg'].forEach(function(t){
+      var o = document.getElementById('opt-' + t);
+      if (!o) return;
+      var eh = (t === tam);
+      o.classList.toggle('sel', eh);
+      var ck = o.querySelector('.fim');
+      if (ck) ck.style.opacity = eh ? '1' : '0';
+    });
+    try { localStorage.setItem('redaon-card-tam', tam); } catch(e) {}
+    if (!silencioso) toast('Cart\u00e3o: ' + (tam === 'medio' ? 'Pequeno' : tam === 'grande' ? 'M\u00e9dio' : 'Grande'));
+  }
+  (function(){
+    var tam = 'grande';
+    try { tam = localStorage.getItem('redaon-card-tam') || 'grande'; } catch(e) {}
+    if (['medio','grande','xg'].indexOf(tam) < 0) tam = 'grande';
+    setTamanhoCard(tam, true);
+  })();
+
+  // ─── Foto de capa (bucket privado: avatares-alunos/<id>/capa.jpg) ───
+  var _BUCKET_AVATAR = 'avatares-alunos';
+  function clienteSupabase(){
+    if (window.supabaseClient) return window.supabaseClient;
+    if (window.supabase && window.supabase.storage) return window.supabase;
+    if (window._supabase) return window._supabase;
+    return null;
+  }
+  async function carregarFotoCapa() {
+    var sb = clienteSupabase();
+    if (!sb || !sb.storage) return;
+    try {
+      var r = await sb.auth.getUser();
+      var user = r && r.data ? r.data.user : null;
+      if (!user) return;
+      var s = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/capa.jpg', 3600);
+      if (s && s.data && s.data.signedUrl) aplicarFotoCapa(s.data.signedUrl);
+      // Foto de perfil da conta (definida em Configura\u00e7\u00f5es) \u2014 usada na bolinha
+      var p = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/perfil.jpg', 3600);
+      if (p && p.data && p.data.signedUrl) aplicarFotoPerfil(p.data.signedUrl);
+    } catch(e) { /* sem foto \u2014 mant\u00e9m o degrad\u00ea */ }
+  }
+  var _urlCapa = null, _posCapa = 50;
+  try { _posCapa = parseFloat(localStorage.getItem('redaon-capa-pos')) || 50; } catch(e) {}
+  function aplicarFotoCapa(url) {
+    _urlCapa = url;
+    var capa = document.getElementById('fcCover');
+    if (capa) {
+      capa.style.setProperty('--fotoCapa', 'url("' + url + '")');
+      capa.style.setProperty('--posCapa', _posCapa + '%');
+      capa.classList.add('comFoto');
+    }
+    var pe = document.getElementById('pillEnquadrar');
+    if (pe) pe.style.display = '';
+  }
+  /* A bolinha usa a foto de PERFIL da conta (Configurações) — não a capa */
+  function aplicarFotoPerfil(url) {
+    ['avatarCard','avatarSidebar'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) { el.style.backgroundImage = 'url("' + url + '")'; el.textContent = ''; }
+    });
+  }
+  /* Enquadramento: moldura do Médio (sólida) e do Grande (tracejada).
+     O que fica fora aparece em cinza e escurecido. */
+  var _enqPos = 50, _arrastando = false, _yIni = 0, _posIni = 50;
+  function abrirEnquadre(){
+    if (!_urlCapa) { toast('Envie uma foto de capa primeiro.', 2400); return; }
+    fecharGaveta('gavetaCard');
+    _enqPos = _posCapa;
+    var f = document.getElementById('enqFoto'), fn = document.getElementById('enqFotoNitida');
+    f.onload = function(){ posicionarMolduras(); desenharEnquadre(); };
+    f.src = _urlCapa; fn.src = _urlCapa;
+    document.getElementById('enqFundo').classList.add('aberto');
+    setTimeout(function(){ posicionarMolduras(); desenharEnquadre(); }, 60);
+  }
+  function posicionarMolduras(){
+    var palco = document.getElementById('enqPalco');
+    var largura = palco.offsetWidth || 320, altura = palco.offsetHeight || 400;
+    var hG = Math.min(altura, largura * 1.25);
+    var hM = Math.min(altura, largura * 0.744);
+    var gG = document.getElementById('enqMolduraG'), gM = document.getElementById('enqMolduraM');
+    gG.style.height = hG + 'px'; gM.style.height = hM + 'px';
+    gG.dataset.h = hG; gM.dataset.h = hM;
+  }
+  function desenharEnquadre(){
+    var palco = document.getElementById('enqPalco');
+    var altura = palco.offsetHeight || 400;
+    var gG = document.getElementById('enqMolduraG'), gM = document.getElementById('enqMolduraM');
+    var hG = parseFloat(gG.dataset.h || 0), hM = parseFloat(gM.dataset.h || 0);
+    var topoG = (altura - hG) * (_enqPos / 100);
+    gG.style.top = topoG + 'px';
+    gM.style.top = (topoG + (hG - hM) / 2) + 'px';
+    var jan = document.getElementById('enqJanela'), fn = document.getElementById('enqFotoNitida');
+    jan.style.top = topoG + 'px'; jan.style.height = hG + 'px';
+    fn.style.top = (-topoG) + 'px';
+  }
+  function fecharEnquadre(){ document.getElementById('enqFundo').classList.remove('aberto'); }
+  function salvarEnquadre(){
+    _posCapa = _enqPos;
+    try { localStorage.setItem('redaon-capa-pos', String(_posCapa)); } catch(e) {}
+    var capa = document.getElementById('fcCover');
+    if (capa) capa.style.setProperty('--posCapa', _posCapa + '%');
+    fecharEnquadre();
+    toast('\u2705 Enquadramento salvo');
+  }
+  (function(){
+    var palco = document.getElementById('enqPalco');
+    if (!palco) return;
+    function inicio(y){ _arrastando = true; _yIni = y; _posIni = _enqPos; }
+    function move(y){
+      if (!_arrastando) return;
+      var alt = palco.offsetHeight || 300;
+      _enqPos = Math.max(0, Math.min(100, _posIni + ((_yIni - y) / alt) * 100));
+      desenharEnquadre();
+    }
+    palco.addEventListener('pointerdown', function(e){ inicio(e.clientY); try{ palco.setPointerCapture(e.pointerId); }catch(err){} });
+    palco.addEventListener('pointermove', function(e){ if(_arrastando){ e.preventDefault(); move(e.clientY); } });
+    ['pointerup','pointercancel'].forEach(function(ev){ palco.addEventListener(ev, function(){ _arrastando = false; }); });
+    palco.addEventListener('touchstart', function(e){ inicio(e.touches[0].clientY); }, { passive:true });
+    palco.addEventListener('touchmove', function(e){ move(e.touches[0].clientY); }, { passive:true });
+    palco.addEventListener('touchend', function(){ _arrastando = false; }, { passive:true });
+    window.addEventListener('resize', function(){ posicionarMolduras(); desenharEnquadre(); });
+  })();
+
+  function escolherFoto() {
+    document.getElementById('inputFoto').click();
+    setTimeout(function(){ fecharGaveta('gavetaCard'); }, 0);
+  }
+  function escolherPerfil() {
+    document.getElementById('inputPerfil').click();
+    setTimeout(function(){ fecharGaveta('gavetaCard'); }, 0);
+  }
+  document.getElementById('inputFoto').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    this.value = '';
+    if (f) enviarFotoCapa(f);
+  });
+  document.getElementById('inputPerfil').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    this.value = '';
+    if (f) enviarFotoPerfil(f);
+  });
+  async function enviarFotoPerfil(arquivo) {
+    if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0) { toast('Use JPG, PNG ou WebP.', 3000); return; }
+    var sb = clienteSupabase();
+    if (!sb || !sb.storage) {
+      try { var b = await comprimirImagem(arquivo); aplicarFotoPerfil(URL.createObjectURL(b)); toast('Foto de perfil aplicada (pr\u00e9via)', 2600); }
+      catch(e) { toast('N\u00e3o consegui ler a imagem.', 2600); }
+      return;
+    }
+    toast('Enviando foto\u2026', 4000);
+    try {
+      var r = await sb.auth.getUser();
+      var user = r && r.data ? r.data.user : null;
+      if (!user) { toast('Sua sess\u00e3o expirou.', 3200); return; }
+      var blob = await comprimirImagem(arquivo);
+      var up = await sb.storage.from(_BUCKET_AVATAR).upload(user.id + '/perfil.jpg', blob, { cacheControl:'3600', upsert:true, contentType:'image/jpeg' });
+      if (up.error) throw up.error;
+      var s = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/perfil.jpg', 3600);
+      if (s && s.data && s.data.signedUrl) aplicarFotoPerfil(s.data.signedUrl + '&t=' + Date.now());
+      toast('\u2705 Foto de perfil atualizada!');
+    } catch(e) { console.warn(e); toast('N\u00e3o consegui enviar a foto.', 3200); }
+  }
+  function comprimirImagem(arquivo) {
+    return new Promise(function(resolve, reject){
+      var img = new Image();
+      var url = URL.createObjectURL(arquivo);
+      img.onload = function(){
+        URL.revokeObjectURL(url);
+        var MAX = 1200;
+        var w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        var c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        c.toBlob(function(blob){
+          if (blob) resolve(blob); else reject(new Error('Falha ao processar imagem'));
+        }, 'image/jpeg', 0.82);
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); reject(new Error('Falha ao carregar imagem')); };
+      img.src = url;
+    });
+  }
+  async function enviarFotoCapa(arquivo) {
+    if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0) {
+      toast('Formato n\u00e3o aceito. Use JPG, PNG ou WebP.', 3000);
+      return;
+    }
+    var sb = clienteSupabase();
+    if (!sb || !sb.storage) { toast('Sem conex\u00e3o com o armazenamento agora.', 3000); return; }
+    toast('Enviando foto\u2026', 4000);
+    try {
+      var r = await sb.auth.getUser();
+      var user = r && r.data ? r.data.user : null;
+      if (!user) { toast('Sua sess\u00e3o expirou. Entre novamente.', 3200); return; }
+      var blob = await comprimirImagem(arquivo);
+      if (blob.size > 5 * 1024 * 1024) { toast('Imagem muito grande mesmo comprimida.', 3200); return; }
+      var up = await sb.storage.from(_BUCKET_AVATAR).upload(user.id + '/capa.jpg', blob, {
+        cacheControl:'3600', upsert:true, contentType:'image/jpeg'
+      });
+      if (up.error) throw up.error;
+      var s = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/capa.jpg', 3600);
+      if (s && s.data && s.data.signedUrl) aplicarFotoCapa(s.data.signedUrl + '&t=' + Date.now());
+      toast('\u2705 Foto de capa atualizada!');
+    } catch(e) {
+      console.warn('Erro ao enviar foto:', e);
+      toast('N\u00e3o consegui enviar a foto. Tente de novo.', 3200);
+    }
+  }
+  (function(){ var pe=document.getElementById('pillEnquadrar'); if(pe) pe.style.display='none'; })();
+  carregarFotoCapa();
+
+  // ─── Card rotativo de avisos ───
+  function montarAvisos(itens) {
+    if (!itens || itens.length === 0) {
+      itens = [
+        { ico:'\u{1F44B}', tit:'Bem-vindo(a)', txt:'Este \u00e9 o seu espa\u00e7o de escrita no RedaON' },
+        { ico:'\u270D\uFE0F', tit:'Primeiro passo', txt:'Envie sua primeira reda\u00e7\u00e3o para ver seus dados aqui' },
+        { ico:'\u{1F680}', tit:'Rumo \u00e0 nota 1000', txt:'Cada reda\u00e7\u00e3o \u00e9 um passo na sua evolu\u00e7\u00e3o' }
+      ];
+    }
+    var track = document.getElementById('avisoTrack');
+    var dotsBox = document.getElementById('avisoDots');
+    if (!track || !dotsBox) return;
+    track.innerHTML = itens.map(function(it){
+      return '<div class="avisoSlide"><span class="avisoIco">' + it.ico + '</span><div>' +
+        '<p class="avisoTit">' + it.tit + '</p>' +
+        '<p class="avisoTxt">' + it.txt + '</p></div></div>';
+    }).join('');
+    dotsBox.innerHTML = '';
+    for (var i = 0; i < itens.length; i++) {
+      var d = document.createElement('span');
+      if (i === 0) d.className = 'on';
+      dotsBox.appendChild(d);
+    }
+    iniciarRotacaoAvisos(itens.length);
+  }
+  var _avisoTimer = null, _avisoObs = null;
+  function iniciarRotacaoAvisos(total) {
+    var track = document.getElementById('avisoTrack');
+    var dots = document.querySelectorAll('#avisoDots span');
+    var slides = track.querySelectorAll('.avisoSlide');
+    var atual = 0;
+    function marcar(idx) {
+      atual = idx;
+      dots.forEach(function(d, k){ d.className = (k === idx) ? 'on' : ''; });
+    }
+    var proximo = 1;  // o relógio conta sozinho, sem depender do slide em cena
+    function reiniciarRelogio(){
+      if (_avisoTimer) clearInterval(_avisoTimer);
+      _avisoTimer = setInterval(function(){
+        proximo = (atual + 1) % total;
+        track.scrollTo({ left: proximo * track.clientWidth, behavior:'smooth' });
+        marcar(proximo);
+      }, 5000);
+    }
+    // O navegador avisa qual slide está em cena — sem calcular posição na mão.
+    if (_avisoObs) { _avisoObs.disconnect(); _avisoObs = null; }
+    if (window.IntersectionObserver) {
+      _avisoObs = new IntersectionObserver(function(entradas){
+        entradas.forEach(function(e){
+          if (e.isIntersecting && e.intersectionRatio > 0.55) {
+            var idx = Array.prototype.indexOf.call(slides, e.target);
+            if (idx >= 0 && idx !== atual) marcar(idx);
+          }
+        });
+      }, { root: track, threshold: [0.56] });
+      slides.forEach(function(s){ _avisoObs.observe(s); });
+    } else {
+      // Navegador antigo: acompanha pela rolagem
+      track.addEventListener('scroll', function(){
+        var idx = Math.round(track.scrollLeft / (track.clientWidth || 1));
+        if (idx < 0) idx = 0;
+        if (idx > total - 1) idx = total - 1;
+        if (idx !== atual) marcar(idx);
+      }, { passive:true });
+    }
+    // Qualquer interação manual reinicia a contagem dos 5s
+    if (!track.dataset.toqueLigado) {
+      track.dataset.toqueLigado = '1';
+      ['touchstart','pointerdown','mousedown','wheel'].forEach(function(ev){
+        track.addEventListener(ev, function(){ if (_avisoTimer) clearInterval(_avisoTimer); }, { passive:true });
+      });
+      ['touchend','pointerup','mouseup'].forEach(function(ev){
+        track.addEventListener(ev, function(){ setTimeout(reiniciarRelogio, 400); }, { passive:true });
+      });
+    }
+    marcar(0);
+    reiniciarRelogio();
+  }
+
+  montarAvisos(null);
+
+  // ─── Sparkline ───
+  function desenharSpark(idSvg, notas, largura, altura) {
+    var svg = document.getElementById(idSvg);
+    if (!svg || !notas || notas.length < 2) return;
+    var min = Math.min.apply(null, notas), max = Math.max.apply(null, notas);
+    var faixa = (max - min) || 1;
+    var padX = 4, padY = 4;
+    var pts = notas.map(function(n, i){
+      var x = padX + i * ((largura - 2 * padX) / (notas.length - 1));
+      var y = (altura - padY) - ((n - min) / faixa) * (altura - 2 * padY);
+      return Math.round(x) + ',' + Math.round(y);
+    }).join(' ');
+    var poly = svg.querySelector('polyline');
+    if (poly) poly.setAttribute('points', pts);
+  }
+
+  // ─── Dados reais ───
+  async function carregarDados() {
+    try {
+      if (typeof dbGetHistoricoRedacoes !== 'function') return;
+      var historico = await dbGetHistoricoRedacoes(8);
+      if (!historico || historico.length === 0) return;
+      var notas = historico.map(function(r){ return r.total; });
+      var media = Math.round(notas.reduce(function(a,b){ return a + b; }, 0) / notas.length);
+      var ultima = notas[0];
+      var penultima = (notas.length > 1) ? notas[1] : ultima;
+      var evolucao = ultima - penultima;
+      var evolStr = evolucao >= 0 ? '+' + evolucao : '' + evolucao;
+      var totalRedacoes = historico.length;
+      var melhorNota = Math.max.apply(null, notas);
+      var el;
+      el = document.getElementById('mMedia');    if (el) el.textContent = fmtNum(media);
+      el = document.getElementById('mRedacoes'); if (el) el.textContent = fmtNum(totalRedacoes);
+      el = document.getElementById('mPontos');   if (el) el.textContent = evolStr;
+      el = document.getElementById('dMedia');    if (el) el.textContent = fmtNum(media);
+      el = document.getElementById('dRedacoes'); if (el) el.textContent = fmtNum(totalRedacoes);
+      el = document.getElementById('dPontos');
+      if (el) {
+        el.textContent = evolStr;
+        el.style.color = evolucao > 0 ? 'var(--green)' : (evolucao < 0 ? 'var(--red2)' : 'var(--muted)');
+      }
+      var cronologia = notas.slice().reverse();
+      desenharSpark('mSpark', cronologia, 40, 22);
+      desenharSpark('dSpark', cronologia, 120, 40);
+
+      var pareto = null, consolidadas = [];
+      try { if (typeof dbGetCompetenciaPareto === 'function') pareto = await dbGetCompetenciaPareto(); } catch(e) {}
+      try { if (typeof dbGetCompetenciasConsolidadas === 'function') consolidadas = await dbGetCompetenciasConsolidadas(); } catch(e) {}
+
+      var avisos = [];
+      avisos.push({ ico:'\u{1F31F}', tit:'\u00DAltima nota', txt:'Voc\u00ea fez <b>' + ultima + '</b> na \u00faltima reda\u00e7\u00e3o' });
+      if (melhorNota > ultima) avisos.push({ ico:'\u{1F3C6}', tit:'Sua melhor nota', txt:'<b>' + melhorNota + '</b> \u2014 d\u00e1 pra alcan\u00e7ar de novo' });
+      if (pareto) avisos.push({ ico:'\u{1F3AF}', tit:'Foco agora', txt: escapeHtmlSimples(pareto) });
+      if (consolidadas && consolidadas.length > 0) avisos.push({ ico:'\u2705', tit:'Conquistas', txt: escapeHtmlSimples(consolidadas.join(' \u00B7 ')) });
+      if (evolucao > 0) avisos.push({ ico:'\u{1F4C8}', tit:'Evolu\u00e7\u00e3o', txt:'Voc\u00ea subiu <b>' + evolucao + ' pontos</b> na \u00faltima reda\u00e7\u00e3o' });
+      else if (evolucao < 0) avisos.push({ ico:'\u{1F4AA}', tit:'Bora', txt:'Pr\u00f3xima reda\u00e7\u00e3o voc\u00ea sobe \u2014 vamos juntos' });
+      montarAvisos(avisos.slice(0, 5));
+    } catch(e) {
+      console.warn('Erro ao carregar dados do aluno:', e);
+    }
+  }
+  carregarDados();
+
+  // ─── Turmas ───
+  async function carregarMinhasTurmas() {
+    try {
+      if (typeof dbGetMinhasTurmas !== 'function') return;
+      var turmas = await dbGetMinhasTurmas();
+      var indicador = document.getElementById('indicadorTurmas');
+      var indicadorM = document.getElementById('indicadorTurmasMobile');
+      var banner = document.getElementById('bannerEntrarTurma');
+      if (!turmas || turmas.length === 0) {
+        if (indicador) indicador.classList.add('hidden');
+        if (indicadorM) indicadorM.classList.add('hidden');
+        if (banner) banner.classList.remove('hidden');
+      } else {
+        var principais = turmas.slice(0, 2).map(function(t){
+          var escola = t.escolas && t.escolas.nome ? t.escolas.nome : '';
+          var prof = t.professor ? ' \u00B7 ' + escapeHtmlSimples(t.professor) : '';
+          return '<b>' + escapeHtmlSimples(t.nome) + '</b>' + (escola ? ' (' + escapeHtmlSimples(escola) + ')' : '') + prof;
+        }).join(' &nbsp;\u00B7&nbsp; ');
+        var mais = turmas.length > 2 ? ' &nbsp;+' + (turmas.length - 2) : '';
+        var htmlTurmas = '\u{1F3EB} ' + principais + mais;
+        if (indicador) { indicador.innerHTML = htmlTurmas; indicador.classList.remove('hidden'); }
+        if (indicadorM) { indicadorM.innerHTML = htmlTurmas; indicadorM.classList.remove('hidden'); }
+        if (banner) banner.classList.add('hidden');
+        var sub = document.getElementById('subCard');
+        if (sub && turmas[0] && turmas[0].nome) sub.textContent = turmas[0].nome;
+      }
+    } catch(e) {
+      console.warn('Erro ao carregar turmas do aluno:', e);
+    }
+  }
+  carregarMinhasTurmas();
+
+  // ─── Modal Entrar em Turma ───
   window.abrirModalEntrarTurma = function() {
     document.getElementById('codigoTurmaInput').value = '';
     document.getElementById('erroEntrarTurma').style.display = 'none';
@@ -643,112 +672,46 @@
   window.fecharModalEntrarTurma = function() {
     document.getElementById('modalEntrarTurma').classList.remove('aberto');
   };
-
-  // Enter no input dispara confirmação
-  document.getElementById('codigoTurmaInput').addEventListener('keydown', function(e) {
+  document.getElementById('codigoTurmaInput').addEventListener('keydown', function(e){
     if (e.key === 'Enter') confirmarEntrarTurma();
   });
-
   window.confirmarEntrarTurma = async function() {
-    const codigo = document.getElementById('codigoTurmaInput').value.trim();
-    const elErro = document.getElementById('erroEntrarTurma');
-    const elSucesso = document.getElementById('sucessoEntrarTurma');
-    const btn = document.getElementById('btnEntrarTurma');
-
+    var codigo = document.getElementById('codigoTurmaInput').value.trim();
+    var elErro = document.getElementById('erroEntrarTurma');
+    var elSucesso = document.getElementById('sucessoEntrarTurma');
+    var btn = document.getElementById('btnEntrarTurma');
     elErro.style.display = 'none';
     elSucesso.style.display = 'none';
-
     if (!codigo) {
-      elErro.textContent = 'Digite o código da turma.';
+      elErro.textContent = 'Digite o c\u00f3digo da turma.';
       elErro.style.display = 'block';
       return;
     }
-
     btn.disabled = true;
     btn.textContent = 'Entrando...';
-
     try {
-      const r = await dbAlunoEntrarComCodigo(codigo);
-      const nomeTurma = r.turma.nome;
-      const nomeEscola = r.turma.escolas && r.turma.escolas.nome ? r.turma.escolas.nome : '';
-      const local = nomeEscola ? (nomeEscola + ' · ' + nomeTurma) : nomeTurma;
-
-      if (r.jaEstava) {
-        elSucesso.textContent = '✓ Você já está nessa turma: ' + local;
-      } else {
-        elSucesso.textContent = '✓ Bem-vindo(a) à turma ' + local + '!';
-      }
+      if (typeof dbAlunoEntrarComCodigo !== 'function') throw new Error('Sem conex\u00e3o agora. Tente de novo.');
+      var r = await dbAlunoEntrarComCodigo(codigo);
+      var nomeTurma = r.turma.nome;
+      var nomeEscola = r.turma.escolas && r.turma.escolas.nome ? r.turma.escolas.nome : '';
+      var local = nomeEscola ? (nomeEscola + ' \u00B7 ' + nomeTurma) : nomeTurma;
+      elSucesso.textContent = r.jaEstava
+        ? '\u2713 Voc\u00ea j\u00e1 est\u00e1 nessa turma: ' + local
+        : '\u2713 Bem-vindo(a) \u00e0 turma ' + local + '!';
       elSucesso.style.display = 'block';
-
-      // Fecha modal e recarrega indicação após 1.2s
-      setTimeout(function() {
+      setTimeout(function(){
         fecharModalEntrarTurma();
         carregarMinhasTurmas();
       }, 1200);
-    } catch (e) {
+    } catch(e) {
       console.error('Erro ao entrar em turma:', e);
-      elErro.textContent = e.message || 'Não foi possível entrar na turma. Verifique o código.';
+      elErro.textContent = e.message || 'N\u00e3o foi poss\u00edvel entrar na turma. Verifique o c\u00f3digo.';
       elErro.style.display = 'block';
     } finally {
       btn.disabled = false;
       btn.textContent = 'Entrar na turma';
     }
   };
-
-  // ── Carrega as turmas do aluno e atualiza a UI ──
-  async function carregarMinhasTurmas() {
-    try {
-      const turmas = await dbGetMinhasTurmas();
-      const indicador = document.getElementById('indicadorTurmas');
-      const banner = document.getElementById('bannerEntrarTurma');
-
-      if (!turmas || turmas.length === 0) {
-        // Sem turmas: esconde indicador, mostra banner pra entrar
-        indicador.classList.add('hidden');
-        banner.classList.remove('hidden');
-        banner.style.display = '';
-      } else {
-        // Com turmas: mostra indicação, esconde banner
-        const principais = turmas.slice(0, 2).map(function(t) {
-          const escola = t.escolas && t.escolas.nome ? t.escolas.nome : '';
-          const prof = t.professor ? ' · ' + t.professor : '';
-          return '<span style="color:#c8c4d7;font-weight:600;">' + escapeHtmlSimples(t.nome) + '</span>' + (escola ? ' (' + escapeHtmlSimples(escola) + ')' : '') + prof;
-        }).join(' &nbsp;·&nbsp; ');
-        const mais = turmas.length > 2 ? ' &nbsp;<span style="color:#928ea0;">+' + (turmas.length - 2) + '</span>' : '';
-        indicador.innerHTML = '🏫 ' + principais + mais;
-        indicador.classList.remove('hidden');
-        banner.classList.add('hidden');
-        banner.style.display = 'none';
-      }
-    } catch (e) {
-      console.warn('Erro ao carregar turmas do aluno:', e);
-    }
-  }
-
-  function escapeHtmlSimples(s) {
-    if (s === null || s === undefined) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-
-  // Carrega ao entrar
-  carregarMinhasTurmas();
-
-  // ── Pausa do ticker (touch/hover) ──
-  (function() {
-    const cont = document.getElementById('tickerContainer');
-    if (!cont) return;
-    const track = document.getElementById('tickerTrack');
-    if (!track) return;
-
-    cont.addEventListener('mouseenter', function() { track.classList.add('paused'); });
-    cont.addEventListener('mouseleave', function() { track.classList.remove('paused'); });
-    cont.addEventListener('touchstart', function() { track.classList.add('paused'); }, { passive: true });
-    cont.addEventListener('touchend',   function() {
-      // Volta a animar 2s depois do toque (tempo pra ler com calma)
-      setTimeout(function(){ track.classList.remove('paused'); }, 2000);
-    }, { passive: true });
-  })();
 </script>
 </body>
 </html>

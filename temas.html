@@ -1,747 +1,399 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Biblioteca de Temas</title>
-<script>tailwind = { config: {} };</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<title>RedaON | Temas</title>
+<!-- RedaON · Portal do Aluno · Temas · v3-10 · sobre aluno-base-v6 -->
+<script>
+(function(){
+  var pref = 'auto';
+  try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+  var efetivo = pref;
+  if (pref === 'auto') {
+    var claroNoSistema = false;
+    try { claroNoSistema = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+    efetivo = claroNoSistema ? 'claro' : 'escuro';
+  }
+  document.documentElement.setAttribute('data-tema', efetivo);
+  document.documentElement.setAttribute('data-tema-pref', pref);
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "on-primary-fixed": "#160066", "on-error-container": "#ffdad6", "on-secondary": "#003737",
-          "inverse-on-surface": "#2e3037", "secondary-fixed": "#56f9f9", "surface-container": "#1d2026",
-          "tertiary-container": "#906c00", "tertiary": "#fabd00", "surface-container-lowest": "#0b0e14",
-          "surface-container-low": "#191c22", "background": "#10131a", "primary-fixed-dim": "#c6bfff",
-          "outline-variant": "#474554", "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
-          "on-primary": "#2900a0", "on-primary-container": "#faf6ff", "inverse-surface": "#e1e2eb",
-          "on-error": "#690005", "on-surface": "#e1e2eb", "secondary-fixed-dim": "#26dcdd",
-          "surface-container-highest": "#32353c", "primary": "#c6bfff", "outline": "#928ea0",
-          "on-background": "#e1e2eb", "surface-bright": "#363940", "error-container": "#93000a",
-          "surface-dim": "#10131a", "surface-variant": "#32353c", "error": "#ffb4ab",
-          "surface-container-high": "#272a31", "primary-fixed": "#e4dfff", "on-tertiary-container": "#fff6ec",
-          "secondary": "#45edee", "on-tertiary": "#3f2e00", "secondary-container": "#00d0d1",
-          "tertiary-fixed": "#ffdf9e", "surface": "#10131a", "inverse-primary": "#5847d2"
-        },
-        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
-        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-      },
-    },
-  }
-</script>
+<link href="aluno-base-v6.css" rel="stylesheet"/>
 <style>
-  body { font-family: 'Inter', sans-serif; background-color: #10131a; }
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  .glass-card { background: rgba(25,28,34,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  #sidebar-toggle:checked ~ aside { transform: translateX(0); }
-  #sidebar-toggle:checked ~ .content-overlay { display: block; }
+/* ===== Só o que é próprio de TEMAS ===== */
+.temaSemana{ margin-bottom:.875rem; background:linear-gradient(135deg,rgba(var(--cyanRGB),.10),rgba(var(--purpleRGB),.08)); border:1px solid var(--cyan); border-radius:14px; padding:13px 14px; }
+.tsTop{ display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+.tsBadge{ font-size:10px; font-weight:700; color:var(--cyan); letter-spacing:.04em; }
+.tsData{ font-size:10px; color:var(--muted); font-weight:600; }
+.tsTitulo{ margin:0 0 11px; font-size:14.5px; font-weight:700; color:var(--text); line-height:1.35; }
+.tsBtns{ display:flex; gap:8px; }
+.tsBtns .btn{ flex:1; }
 
-  .tab-btn { background: #1d2026; color: #c8c4d7; border: 1px solid rgba(255,255,255,0.05); transition: all .2s; }
-  .tab-btn.ativo { background: #6c5ce7 !important; color: #fff !important; border-color: #6c5ce7 !important; }
-  .tab-btn:hover:not(.ativo) { background: #272a31; color: #e1e2eb; }
-  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(0.7)} }
-  .card-compartilhado { border: 1px solid rgba(69,237,238,0.15); }
-  .card-compartilhado:hover { border-color: rgba(69,237,238,0.4) !important; }
-  .prazo-urgente { color: #ffb4ab; }
-  .prazo-ok { color: #4ade80; }
+#filtrosTopo{ display:none; }
+@media (min-width:1024px), (max-width:1023px) and (orientation:landscape){
+  #filtrosTopo{ display:flex; flex-direction:column; gap:.6rem; margin-bottom:.875rem; }
+  #filtrosTopo .linha2{ display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; }
+  #dockTemas{ display:none !important; }
+  .gv.atras{ z-index:47; padding-bottom:24px; }
+  .gvBg.atras{ z-index:46; }
+}
 
-  /* Modal sugestão */
-  #modalSugestao { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.75); align-items:center; justify-content:center; padding:1rem; }
-  #modalSugestao.aberto { display:flex; }
+.gridTemas { display:grid; grid-template-columns:1fr; gap:.7rem; }
+@media(min-width:641px){ .gridTemas{ grid-template-columns:repeat(2,1fr); } }
+@media(min-width:1024px){ .gridTemas{ grid-template-columns:repeat(3,1fr); } }
+.tCard { background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:13px; padding:12px 13px; display:flex; flex-direction:column; }
+.tCard .topo { display:flex; justify-content:space-between; align-items:center; gap:.5rem; }
+.tBadge { font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; }
+.tBadge.enem { color:var(--purpleSoft); background:rgba(var(--purpleRGB),.16); }
+.tBadge.redaon { color:var(--gold); background:rgba(var(--goldRGB),.14); }
+.tCard .dir { display:flex; align-items:center; gap:.4rem; }
+.tCard .cat { font-size:10.5px; color:var(--muted); font-weight:600; }
+.tPin { background:none; border:none; cursor:pointer; color:var(--muted); font-size:1rem; line-height:1; padding:.2rem; }
+.tPin.on { color:var(--gold); }
+.tCard .tit { margin:8px 0 10px; font-size:13.5px; font-weight:700; line-height:1.35; color:var(--text); flex:1; }
+.tCard .btns { display:flex; gap:8px; }
+.tCard .btns .btn{ flex:1; }
+.btnMais { width:100%; margin-top:.875rem; min-height:44px; border-radius:11px; background:var(--surface2); color:var(--purpleSoft); font-size:13px; font-weight:700; border:none; cursor:pointer; }
+.pillSugerir { display:flex; align-items:center; gap:.7rem; min-height:52px; padding:0 .875rem; border-radius:13px; background:var(--surface); border:1px dashed rgba(var(--purpleRGB),.45); color:var(--text); font-size:.85rem; font-weight:600; cursor:pointer; margin-top:.7rem; }
+.pillSugerir .fim { margin-left:auto; color:var(--muted); }
 
-  /* Toast */
-  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; white-space:nowrap; }
-  #toast.show { transform:translateX(-50%) translateY(0); }
+#dockBusca{ display:none; }
+#dockBusca.aberta{ display:flex; }
+.vazio{ grid-column:1/-1; text-align:center; color:var(--muted); font-size:.85rem; padding:2rem 0; line-height:1.6; }
+.spinner { width:38px; height:38px; border:3px solid var(--surface2); border-top-color:var(--cyan); border-radius:50%; animation:girar .8s linear infinite; margin:2rem auto; }
+@keyframes girar { to { transform:rotate(360deg); } }
 
-  .nivel-basico { color: #45edee; }
-  .nivel-intermediario { color: #fabd00; }
-  .nivel-avancado { color: #ffb4ab; }
-
-  .card-tema { transition: all 0.3s; }
-  .card-tema:hover { transform: translateY(-4px); border-color: rgba(108,92,231,0.3) !important; }
-  .card-tema.oculto { display: none; }
-
-  /* Painel categoria dropdown */
-  #painelCategoria { display:none; }
-  #painelCategoria.aberto { display:block; }
-
-  /* Hamburger sidebar */
-  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
-  #sidebar.open { transform: translateX(0); }
-  @media (min-width: 1024px) { #sidebar { transform: translateX(0); } #btnHamburger { display:none; } }
-  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:40; }
-  #overlay.show { display:block; }
-  .main-with-sidebar { width: 100%; }
-  @media (min-width: 1024px) { .main-with-sidebar { margin-left: 16rem; width: calc(100% - 16rem); } }
-
-  /* Aplicação badges */
-  .badge-aplicacao { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
-  .badge-regular         { background:rgba(108,92,231,.15); color:#c6bfff; }
-  .badge-ppl             { background:rgba(250,189,0,.12); color:#fabd00; }
-  .badge-segunda         { background:rgba(74,222,128,.12); color:#4ade80; }
-  .badge-digital         { background:rgba(69,237,238,.12); color:#45edee; }
-  .badge-cancelada       { background:rgba(255,180,171,.12); color:#ffb4ab; }
-
-  /* Loading spinner */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner-grande { width:48px; height:48px; border:3px solid #1e2330; border-top-color:#45edee; border-radius:50%; animation:spin .8s linear infinite; margin: 0 auto; }
+.areaSugestao textarea { width:100%; min-height:5rem; padding:.75rem .875rem; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.3); border-radius:.7rem; color:var(--text); font-size:.9rem; font-family:inherit; resize:vertical; }
+.areaSugestao textarea:focus { outline:none; border-color:rgba(var(--cyanRGB),.6); }
 </style>
-<script src="supabase-auth.js"></script>
 </head>
-<body class="bg-background text-on-surface antialiased overflow-x-hidden">
+<body>
 
-<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
-  <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
-</div>
+<div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
+  <div id="conteudo">
 
-<div id="toast"></div>
-
-<!-- MODAL SUGESTÃO -->
-<div id="modalSugestao">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,0.08);border-radius:1.25rem;width:100%;max-width:480px;padding:2rem;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-      <h3 style="font-weight:700;font-size:1.1rem;color:#e1e2eb;">💡 Sugerir um Tema</h3>
-      <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;font-size:1.2rem;">✕</button>
+    <!-- TEMA DA SEMANA (some se nenhum tema estiver marcado no banco) -->
+    <div class="temaSemana hidden" id="cardTemaSemana">
+      <div class="tsTop"><span class="tsBadge">&#11088; TEMA DA SEMANA</span><span class="tsData" id="tsData"></span></div>
+      <p class="tsTitulo" id="tsTitulo"></p>
+      <div class="tsBtns">
+        <button class="btn" onclick="escreverTemaSemana()">Escrever</button>
+        <button class="btn ghost" onclick="prepararTemaSemana()">Preparar</button>
+      </div>
     </div>
-    <div>
-      <div style="margin-bottom:1rem;">
-        <label style="display:block;font-size:0.75rem;font-weight:600;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Título do Tema</label>
-        <input id="sugestaoTitulo" type="text" placeholder="Ex: Impacto das fake news na democracia" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;box-sizing:border-box;"/>
+
+    <!-- FILTROS NO TOPO (tablet deitado + desktop) -->
+    <div id="filtrosTopo">
+      <div class="abasTrilho" id="abasTopo"></div>
+      <div class="linha2">
+        <button class="filtroBtn" id="fBtnTopo" onclick="toggleGvCategoria()"><span id="lblCatTopo">Todos os eixos</span><span class="seta">&#9662;</span></button>
+        <div class="busca"><span class="material-symbols-outlined">search</span><input id="buscaTopo" placeholder="Buscar tema, ano, categoria..." oninput="sincronizarBusca(this.value)"/></div>
+        <span id="contTopo" style="font-size:.75rem;color:var(--muted);white-space:nowrap;">&mdash;</span>
       </div>
-      <div style="margin-bottom:1rem;">
-        <label style="display:block;font-size:0.75rem;font-weight:600;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Categoria</label>
-        <select id="sugestaoCategoria" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;">
-          <option>Social</option>
-          <option>Direitos</option>
-          <option>Saúde</option>
-          <option>Tecnologia</option>
-          <option>Educação</option>
-          <option>Consumo</option>
-          <option>Meio Ambiente</option>
-          <option>Trabalho</option>
-          <option>Economia</option>
-          <option>Cultura</option>
-        </select>
-      </div>
-      <div style="margin-bottom:1.5rem;">
-        <label style="display:block;font-size:0.75rem;font-weight:600;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Justificativa</label>
-        <textarea id="sugestaoJustificativa" rows="3" placeholder="Por que este tema é relevante para o ENEM?" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;resize:none;box-sizing:border-box;"></textarea>
-      </div>
-      <button onclick="enviarSugestao()" style="width:100%;padding:.875rem;background:#6c5ce7;color:white;border:none;border-radius:.75rem;font-weight:700;font-size:.9rem;cursor:pointer;letter-spacing:.05em;">
-        Enviar Sugestão
-      </button>
     </div>
+
+    <div class="gridTemas" id="gridTemas"><div class="spinner" id="loadingTemas" style="grid-column:1/-1;"></div></div>
+
+    <button class="btnMais hidden" id="btnMais" onclick="mostrarMais()">Carregar mais</button>
+
+    <div class="pillSugerir" onclick="abrirGaveta('gvSugestao')">
+      <span style="font-size:1.1rem;">&#128161;</span> Sugerir um tema para a PROfa
+      <span class="fim">&#8250;</span>
+    </div>
+
   </div>
 </div>
 
-<input class="hidden peer" id="sidebar-toggle" type="checkbox"/>
-<button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden mr-2"><span class="material-symbols-outlined">menu</span></button>
-
-<div class="flex h-screen overflow-hidden relative z-10">
-
-  <!-- SIDEBAR -->
-  <div id="overlay" onclick="toggleSidebar()"></div>
-  <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50 transition-transform duration-300 -translate-x-full lg:translate-x-0 shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)]">
-    <div class="flex items-center px-2 mb-10">
-      <div class="flex items-baseline italic">
-        <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
-        <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
-      </div>
-    </div>
-    <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="inicio.html"><span class="material-symbols-outlined">home</span><span class="font-medium text-sm">Início</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span><span class="font-medium text-sm">Nova Redação</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span><span class="font-medium text-sm">Temas</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Minhas Redações</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span><span class="font-medium text-sm">Evolução</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html"><span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Elite <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
-    </nav>
-    <div class="mt-auto pt-6 border-t border-outline-variant/10">
-      <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
-        <img alt="usuario" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
-        <div class="flex flex-col"><span class="text-sm font-semibold text-on-surface" data-user-name>{{USUARIO}}</span><span class="text-xs text-on-surface-variant">Estudante</span></div>
-      </div>
-      <a onclick="authLogout()" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
-        <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
-      </a>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="flex-1 flex flex-col h-full relative bg-surface-container-lowest lg:ml-64 main-with-sidebar w-full">
-
-    <header class="h-20 flex items-center justify-between px-6 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5 w-full">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">library_books</span>
-          <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Temas</h2>
-        </div>
-      </div>
-      <div class="flex items-center gap-4 lg:gap-6">
-        <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
-          <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
-          <span class="text-xs font-bold text-on-surface" id="totalPontos">— pts</span>
-        </div>
-        <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
-        </button>
-      </div>
-    </header>
-
-    <div class="flex-1 overflow-y-auto custom-scrollbar">
-      <div class="p-10 max-w-7xl mx-auto space-y-10">
-
-        <!-- CABEÇALHO -->
-        <section>
-          <h2 class="text-4xl font-black text-white tracking-tight mb-2 italic">Biblioteca de Temas</h2>
-          <p class="text-[#c8c4d7] max-w-2xl text-lg font-light leading-relaxed">
-            Temas oficiais do ENEM (2009-2025). Todos cuidadosamente selecionados pra te levar à Nota 1.000.
-          </p>
-        </section>
-
-        <!-- ABAS -->
-        <section class="flex flex-col gap-6">
-          <div class="flex gap-3 overflow-x-auto pb-2 no-scrollbar flex-wrap">
-            <button onclick="mudarAba('recentes')"        id="tab-recentes"        class="tab-btn ativo px-5 py-2 text-sm font-bold rounded-lg whitespace-nowrap">Recentes (2020-2025)</button>
-            <button onclick="mudarAba('classicos')"       id="tab-classicos"       class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap">Clássicos (2009-2019)</button>
-            <button onclick="mudarAba('ppl')"             id="tab-ppl"             class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap">PPL e Reaplicações</button>
-            <button onclick="mudarAba('categoria')"       id="tab-categoria"       class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap">Por Categoria</button>
-            <button onclick="mudarAba('meus')"            id="tab-meus"            class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap">Meus Temas</button>
-            <button onclick="mudarAba('compartilhados')"  id="tab-compartilhados"  class="tab-btn px-5 py-2 text-sm rounded-lg whitespace-nowrap flex items-center gap-2">
-              <span style="display:inline-block;width:8px;height:8px;background:#45edee;border-radius:50%;animation:pulse-dot 1.5s infinite;"></span>
-              Compartilhados
-            </button>
-          </div>
-
-          <!-- BUSCA -->
-          <div class="flex items-center gap-3 bg-[#1d2026] border border-white/10 rounded-xl px-4 py-3 w-full max-w-2xl">
-            <span class="material-symbols-outlined text-[#6c5ce7]">search</span>
-            <input id="campoBusca" oninput="filtrarTemas()" class="bg-transparent border-none focus:ring-0 text-sm w-full text-white placeholder:text-white/20" placeholder="Buscar temas, anos, categorias..." type="text"/>
-            <button onclick="limparBusca()" class="text-white/20 hover:text-white/60 transition-colors">
-              <span class="material-symbols-outlined text-sm">close</span>
-            </button>
-          </div>
-
-          <!-- FILTRO DE CATEGORIA (aparece na aba Categoria) -->
-          <div id="painelCategoria" class="bg-[#1d2026] border border-white/10 rounded-2xl p-6">
-            <h3 class="text-lg font-bold text-white mb-4">Filtrar por Categoria</h3>
-            <div id="botoesCategoria" class="flex gap-2 flex-wrap">
-              <!-- preenchido por JS -->
-            </div>
-          </div>
-        </section>
-
-        <!-- HEADER DA SEÇÃO -->
-        <section class="flex items-center justify-between">
-          <h3 id="tituloSecao" class="text-2xl font-bold text-white">Recentes (2020-2025)</h3>
-          <span id="contagemTemas" class="text-sm text-[#928ea0]">— temas</span>
-        </section>
-
-        <!-- LOADING -->
-        <section id="loadingTemas" class="py-20">
-          <div class="spinner-grande"></div>
-          <p class="text-center text-[#928ea0] text-sm mt-4">Carregando temas...</p>
-        </section>
-
-        <!-- GRID DE TEMAS -->
-        <section id="gridTemas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style="display:none;">
-          <!-- preenchido por JS -->
-        </section>
-
-        <!-- VAZIO -->
-        <section id="vazioTemas" class="py-20 text-center" style="display:none;">
-          <div class="text-5xl mb-4 opacity-50">📚</div>
-          <p class="text-[#c8c4d7] text-lg font-medium" id="vazioTexto">Nenhum tema encontrado.</p>
-        </section>
-
-        <!-- BOTÃO SUGERIR (sempre visível abaixo) -->
-        <section class="modo-prof-sugestao">
-          <button onclick="abrirModal()" class="w-full max-w-md mx-auto block bg-gradient-to-r from-[#6c5ce7] to-[#45edee] text-white font-bold py-3 px-6 rounded-xl hover:opacity-90 transition-opacity">
-            <span class="flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined text-sm">lightbulb</span>
-              Sugerir um novo tema
-            </span>
-          </button>
-        </section>
-
-      </div>
-    </div>
-
-  </main>
+<!-- DOCK (celular + tablet em pé) -->
+<div class="dockPolegar on" id="dockTemas">
+  <div class="abasTrilho" id="abasDock"></div>
+  <div class="busca" id="dockBusca"><span class="material-symbols-outlined">search</span><input id="buscaDock" placeholder="Buscar tema, ano, categoria..." oninput="sincronizarBusca(this.value)"/></div>
+  <div style="display:flex;gap:.5rem;align-items:center;">
+    <button class="filtroBtn" id="fBtnDock" style="flex:1 1 0;" onclick="toggleGvCategoria()"><span id="lblCatDock">Todos os eixos</span><span class="seta">&#9662;</span></button>
+    <button class="filtroBtn" style="flex:1 1 0;justify-content:center;gap:.4rem;" onclick="toggleBuscaDock()">&#128269; Buscar</button>
+  </div>
 </div>
 
+<!-- GAVETA CANÔNICA: EIXO TEMÁTICO (sobe por trás da dock e da barra) -->
+<div class="gvBg atras" id="gvCategoriaBg" onclick="fecharGaveta('gvCategoria')"></div>
+<div class="gv atras" id="gvCategoria">
+  <div class="grip"></div>
+  <p class="tit">Eixo tem&aacute;tico</p>
+  <div id="gvCategoriaLista"></div>
+</div>
+
+<!-- GAVETA: SUGERIR TEMA -->
+<div class="gvBg" id="gvSugestaoBg" onclick="fecharGaveta('gvSugestao')"></div>
+<div class="gv" id="gvSugestao">
+  <div class="grip"></div>
+  <p class="tit">Sugerir um tema</p>
+  <p class="sub">Sua sugest&atilde;o vai para a PROfa avaliar. Se aprovada, entra na biblioteca.</p>
+  <div class="areaSugestao">
+    <textarea id="txtSugestao" placeholder="Ex.: Os impactos das apostas online entre os jovens brasileiros"></textarea>
+    <button class="btn" style="width:100%;margin-top:.7rem;min-height:44px;" onclick="enviarSugestao()">Enviar sugest&atilde;o</button>
+  </div>
+</div>
+
+<script src="supabase-auth.js"></script>
+<script src="aluno-base-v6.js"></script>
 <script>
-  // ============================================================
-  // ESTADO GLOBAL
-  // ============================================================
-  let TEMAS              = [];   // Carregado do banco
-  let TEMAS_PROFESSOR    = [];   // Compartilhados (será populado depois pelo professor)
-  let MEUS_TEMAS_IDS     = JSON.parse(localStorage.getItem('redaon_temas_salvos') || '[]'); // favoritos
-  let ABA_ATUAL          = 'recentes';
-  let CATEGORIA_ATUAL    = null;
-  let MODO_PROFESSOR     = false; // true se usuário logado for professor
+  if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-  // ============================================================
-  // INICIALIZAÇÃO
-  // ============================================================
-  (async function init() {
-    if (!authEstaLogado()) {
-      window.location.href = 'login.html';
-      return;
-    }
-
-    // Detecta perfil e adapta interface se for professor
-    MODO_PROFESSOR = (typeof authGetTipo === 'function' && authGetTipo() === 'professor');
-    if (MODO_PROFESSOR) {
-      adaptarInterfaceProfessor();
-    }
-
+  // Professor que abrir esta página vai para o portal dele (decisão 6A)
+  (function(){
     try {
-      await carregarTemas();
-      renderTemas();
-    } catch (err) {
-      console.error('[init] Erro carregando temas:', err);
-      document.getElementById('loadingTemas').style.display = 'none';
-      document.getElementById('vazioTemas').style.display = 'block';
-      document.getElementById('vazioTexto').textContent = 'Erro ao carregar temas. Recarregue a página.';
-    }
+      var perfil = (typeof authGetTipo === 'function') ? authGetTipo() : null;
+      if (perfil === 'professor') { window.location.href = 'professor-temas.html'; }
+    } catch(e) {}
   })();
 
-  // ============================================================
-  // ADAPTAÇÃO PARA PROFESSOR
-  // ============================================================
-  function adaptarInterfaceProfessor() {
-    // 1) Substitui sidebar de aluno pela sidebar de professor
-    const nav = document.querySelector('aside#sidebar nav');
-    if (nav) {
-      nav.innerHTML = `
-        <div style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin-bottom:.5rem;">Portal</div>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="professor.html"><span class="material-symbols-outlined">school</span><span class="font-medium text-sm">Dashboard</span></a>
-        <div style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin:.75rem 0 .5rem;">Gestão</div>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300 em-breve-link" onclick="mostrarEmBreveTemas('Gerenciar Alunos');return false;" style="cursor:pointer;opacity:.5;"><span class="material-symbols-outlined">group</span><span class="font-medium text-sm">Gerenciar Alunos</span><span class="badge-em-breve-mini">Em breve</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="professor-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Redações dos Alunos</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300 em-breve-link" onclick="mostrarEmBreveTemas('Relatórios');return false;" style="cursor:pointer;opacity:.5;"><span class="material-symbols-outlined">bar_chart</span><span class="font-medium text-sm">Relatórios</span><span class="badge-em-breve-mini">Em breve</span></a>
-        <div style="font-size:.65rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin:.75rem 0 .5rem;">Conteúdo</div>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300 em-breve-link" onclick="mostrarEmBreveTemas('PedagoIA');return false;" style="cursor:pointer;opacity:.5;"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">neurology</span><span class="font-medium text-sm">Pedago<span style="color:#45edee;font-weight:900;font-style:italic;">IA</span></span><span class="badge-em-breve-mini">Em breve</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span><span class="font-medium text-sm">Temas</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
-        <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
-      `;
-    }
-
-    // 2) Troca rótulo "Estudante" por "Professor(a)" no rodapé
-    const rotuloEl = document.querySelector('aside#sidebar .text-xs.text-on-surface-variant');
-    if (rotuloEl) rotuloEl.textContent = 'Professor(a)';
-
-    // 3) Esconde botão "Sugerir Tema" estilo aluno (manteremos visualização limpa)
-    // (intencionalmente preservado — pode ser útil para professor sugerir temas)
-
-    // 4) Ajusta título e descrição da página para contexto professor
-    const subtituloEl = document.querySelector('main p.text-on-surface-variant');
-    if (subtituloEl && subtituloEl.textContent.includes('Nota 1.000')) {
-      subtituloEl.innerHTML = 'Catálogo de temas oficiais do ENEM (2009-2025) disponíveis para sua turma estudar no RedaON.';
-    }
-
-    // 5) Injeta CSS dos badges + modal "Em breve"
-    const style = document.createElement('style');
-    style.textContent = `
-      .badge-em-breve-mini{display:inline-block;background:rgba(250,189,0,.15);border:1px solid rgba(250,189,0,.4);color:#fabd00;font-size:.5rem;font-weight:700;padding:.1rem .35rem;border-radius:.4rem;text-transform:uppercase;letter-spacing:.05em;line-height:1;margin-left:.4rem;vertical-align:middle;}
-      .em-breve-link:hover{background:transparent!important;color:inherit!important;}
-      /* Modo professor: esconde botão de salvar tema (push_pin) e aba "Meus Temas" */
-      .card-tema button[title*="meus temas"], .card-tema button[title*="Meus Temas"]{display:none!important;}
-      #tab-meus{display:none!important;}
-      /* "Sugerir Tema" mantido para professor — pode ser canal útil de feedback. Para esconder: descomente abaixo. */
-      /* .modo-prof-sugestao{display:none!important;} */
-      #modalEmBreveTemas{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem;}
-      #modalEmBreveTemas.aberto{display:flex;}
-      #modalEmBreveTemas .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:440px;width:100%;padding:2rem;text-align:center;}
-      #modalTemaProf{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:1rem;}
-      #modalTemaProf.aberto{display:flex;}
-      #modalTemaProf .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:560px;width:100%;padding:2rem;}
-    `;
-    document.head.appendChild(style);
-
-    // 6) Injeta modais "Em breve" e "Visualizar Tema"
-    const modais = document.createElement('div');
-    modais.innerHTML = `
-      <div id="modalEmBreveTemas" onclick="if(event.target===this)fecharEmBreveTemas()">
-        <div class="conteudo">
-          <div style="width:64px;height:64px;border-radius:50%;background:rgba(250,189,0,.12);border:1px solid rgba(250,189,0,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-            <span class="material-symbols-outlined" style="color:#fabd00;font-size:2rem;font-variation-settings:'FILL' 1;">construction</span>
-          </div>
-          <h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;text-align:center;">Em desenvolvimento</h2>
-          <p style="font-size:.85rem;color:#c8c4d7;line-height:1.6;margin-bottom:1.5rem;text-align:center;">A área <strong id="emBreveTemasTitulo" style="color:#45edee;">—</strong> será liberada em breve.</p>
-          <button onclick="fecharEmBreveTemas()" style="width:100%;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;">Entendi</button>
-        </div>
-      </div>
-      <div id="modalTemaProf" onclick="if(event.target===this)fecharModalTemaProf()">
-        <div class="conteudo">
-          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
-            <span class="material-symbols-outlined" style="color:#45edee;font-size:1.5rem;font-variation-settings:'FILL' 1;">description</span>
-            <h2 id="modalTemaTitulo" style="font-size:1.05rem;font-weight:800;color:#e1e2eb;line-height:1.3;flex:1;">—</h2>
-          </div>
-          <div id="modalTemaMeta" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem;font-size:.7rem;"></div>
-          <div id="modalTemaDesc" style="font-size:.875rem;color:#c8c4d7;line-height:1.65;margin-bottom:1.5rem;max-height:50vh;overflow-y:auto;"></div>
-          <button onclick="fecharModalTemaProf()" style="width:100%;padding:.875rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.875rem;cursor:pointer;">Fechar</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modais);
-  }
-
-  // Funções dos modais (escopo global para onclick funcionar)
-  window.mostrarEmBreveTemas = function(titulo) {
-    document.getElementById('emBreveTemasTitulo').textContent = titulo;
-    document.getElementById('modalEmBreveTemas').classList.add('aberto');
-  };
-  window.fecharEmBreveTemas = function() {
-    document.getElementById('modalEmBreveTemas').classList.remove('aberto');
-  };
-  window.fecharModalTemaProf = function() {
-    document.getElementById('modalTemaProf').classList.remove('aberto');
-  };
-  window.visualizarTemaProf = function(id) {
-    const tema = TEMAS.find(t => t.id === id) || TEMAS_PROFESSOR.find(t => t.id === id);
-    if (!tema) return;
-    document.getElementById('modalTemaTitulo').textContent = tema.titulo || '';
-    let meta = '';
-    if (tema.ano_enem) meta += `<span style="background:rgba(69,237,238,.12);color:#45edee;padding:.2rem .55rem;border-radius:.4rem;font-weight:700;">ENEM ${tema.ano_enem}${tema.aplicacao && tema.aplicacao !== 'Regular' ? ' · ' + tema.aplicacao : ''}</span>`;
-    if (tema.categoria) meta += `<span style="background:rgba(108,92,231,.12);color:#c6bfff;padding:.2rem .55rem;border-radius:.4rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${tema.categoria}</span>`;
-    if (tema.nivel) meta += `<span style="background:rgba(250,189,0,.12);color:#fabd00;padding:.2rem .55rem;border-radius:.4rem;font-weight:700;">${tema.nivel}</span>`;
-    document.getElementById('modalTemaMeta').innerHTML = meta;
-    document.getElementById('modalTemaDesc').innerHTML = tema.descricao
-      ? tema.descricao.replace(/\n/g, '<br>')
-      : '<em style="color:#928ea0;">Sem descrição disponível para este tema.</em>';
-    document.getElementById('modalTemaProf').classList.add('aberto');
-  };
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      ['modalEmBreveTemas', 'modalTemaProf'].forEach(id => {
-        const m = document.getElementById(id);
-        if (m) m.classList.remove('aberto');
-      });
-    }
+  montarEsqueleto({
+    ativo:  'temas',
+    titulo: 'Temas',
+    icone:  'library_books',
+    sino:   false,
+    versao: 'aluno \u00b7 temas \u00b7 v3-10'
   });
 
-  // ============================================================
-  // CARREGAMENTO DO BANCO
-  // ============================================================
+  // ─── Estado ───
+  var TEMAS = [];
+  var TEMA_SEMANA = null;
+  var MEUS_TEMAS_IDS = [];
+  try { MEUS_TEMAS_IDS = JSON.parse(localStorage.getItem('redaon_temas_salvos') || '[]'); } catch(e) {}
+  var ABAS = [
+    { id:'todos',     rotulo:'Todas' },
+    { id:'recentes',  rotulo:'Recentes' },
+    { id:'classicos', rotulo:'Cl\u00e1ssicos' },
+    { id:'ppl',       rotulo:'PPL' },
+    { id:'meus',      rotulo:'Meus Temas' },
+    { id:'turma',     rotulo:'Da turma' }
+  ];
+  var EIXOS = ['Todos os eixos'];
+  var abaAtiva = 'todos';
+  var eixoAtivo = 'Todos os eixos';
+  var textoBusca = '';
+  var LIMITE = 12, mostrando = 12;
+
+  // ─── Carga do banco (mesma consulta da produção + semana_de) ───
   async function carregarTemas() {
-    const url = `${SUPABASE_URL}/rest/v1/temas?select=id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,ativo&ativo=eq.true&order=ano_enem.desc.nullsfirst&order=aplicacao.asc`;
-    const res = await dbFetch(url, {});
-    if (!res.ok) throw new Error('Erro ao buscar temas: ' + res.status);
-    TEMAS = await res.json();
-    console.log(`[carregarTemas] ${TEMAS.length} temas carregados do banco.`);
+    try {
+      var url = SUPABASE_URL + '/rest/v1/temas?select=id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,ativo,semana_de&ativo=eq.true&order=ano_enem.desc.nullsfirst&order=aplicacao.asc';
+      var res = await dbFetch(url, {});
+      if (!res.ok) throw new Error('Erro ao buscar temas: ' + res.status);
+      TEMAS = await res.json();
+      // Eixos reais presentes no banco
+      var vistos = {};
+      TEMAS.forEach(function(t){ if (t.categoria) vistos[t.categoria] = true; });
+      EIXOS = ['Todos os eixos'].concat(Object.keys(vistos).sort());
+      // Tema da Semana: semana_de <= hoje < semana_de + 7
+      var hoje = new Date(); hoje.setHours(0,0,0,0);
+      TEMA_SEMANA = TEMAS.find(function(t){
+        if (!t.semana_de) return false;
+        var ini = new Date(t.semana_de + 'T00:00:00');
+        var fim = new Date(ini); fim.setDate(fim.getDate() + 7);
+        return hoje >= ini && hoje < fim;
+      }) || null;
+      montarTemaSemana();
+      renderGvCategoria();
+      renderTemas();
+    } catch(e) {
+      console.warn('Erro ao carregar temas:', e);
+      var g = document.getElementById('gridTemas');
+      if (g) g.innerHTML = '<p class="vazio">N\u00e3o consegui carregar os temas agora.<br>Verifique sua conex\u00e3o e recarregue.</p>';
+    }
   }
 
-  // ============================================================
-  // FILTRAGEM POR ABA
-  // ============================================================
-  function obterTemasFiltrados() {
-    const busca = (document.getElementById('campoBusca').value || '').toLowerCase().trim();
+  function montarTemaSemana() {
+    var card = document.getElementById('cardTemaSemana');
+    if (!card) return;
+    if (!TEMA_SEMANA) { card.classList.add('hidden'); return; }
+    document.getElementById('tsTitulo').textContent = TEMA_SEMANA.titulo;
+    var ini = new Date(TEMA_SEMANA.semana_de + 'T00:00:00');
+    var fim = new Date(ini); fim.setDate(fim.getDate() + 6);
+    var MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    document.getElementById('tsData').textContent =
+      ini.getDate() + '\u2013' + fim.getDate() + ' ' + MES[fim.getMonth()];
+    card.classList.remove('hidden');
+  }
+  function escreverTemaSemana(){ if (TEMA_SEMANA) { definirTemaSelecionado(TEMA_SEMANA); abrirMetodos(); } }
+  function prepararTemaSemana(){ if (TEMA_SEMANA) { definirTemaSelecionado(TEMA_SEMANA); window.location.href = 'hub-preparacao.html'; } }
 
-    let lista = [];
-    switch (ABA_ATUAL) {
-      case 'recentes':
-        lista = TEMAS.filter(t => t.ano_enem != null && t.ano_enem >= 2020);
-        break;
-      case 'classicos':
-        lista = TEMAS.filter(t => t.ano_enem != null && t.ano_enem < 2020);
-        break;
-      case 'ppl':
-        lista = TEMAS.filter(t => t.aplicacao && t.aplicacao !== 'regular');
-        break;
-      case 'categoria':
-        lista = CATEGORIA_ATUAL
-          ? TEMAS.filter(t => t.categoria === CATEGORIA_ATUAL)
-          : TEMAS;
-        break;
-      case 'meus':
-        lista = TEMAS.filter(t => MEUS_TEMAS_IDS.includes(t.id));
-        break;
-      case 'compartilhados':
-        lista = TEMAS_PROFESSOR;
-        break;
+  // ─── Abas ───
+  function renderAbas(){
+    var html = ABAS.map(function(a){
+      return '<button class="abaT' + (a.id === abaAtiva ? ' ativa' : '') + '" onclick="irAba(\'' + a.id + '\')">' + a.rotulo + '</button>';
+    }).join('');
+    document.getElementById('abasDock').innerHTML = html;
+    document.getElementById('abasTopo').innerHTML = html;
+  }
+  function irAba(a){ abaAtiva = a; mostrando = LIMITE; renderAbas(); renderGvCategoria(); renderTemas(); acordarDock(); }
+
+  // ─── Gaveta de eixo (canônica) ───
+  // Conta quantos temas cada eixo tem DENTRO da aba ativa (o número precisa ser verdadeiro)
+  function contarPorEixo(){
+    var base = obterFiltrados({ ignorarEixo:true, ignorarBusca:true });
+    var mapa = { 'Todos os eixos': base.length };
+    base.forEach(function(t){
+      var c = t.categoria || '—';
+      mapa[c] = (mapa[c] || 0) + 1;
+    });
+    return mapa;
+  }
+  function renderGvCategoria(){
+    var cont = contarPorEixo();
+    document.getElementById('gvCategoriaLista').innerHTML = EIXOS.map(function(e){
+      var sel = (e === eixoAtivo);
+      var n = cont[e] || 0;
+      var vazio = (n === 0 && !sel);
+      return '<a class="pill' + (sel ? ' sel' : '') + '"' + (vazio ? ' style="opacity:.45;"' : '') +
+        ' onclick="escolherEixo(\'' + e.replace(/'/g, "\\'") + '\')">' +
+        escapeHtmlSimples(e) +
+        '<span style="font-size:.72rem;font-weight:600;color:' + (sel ? 'var(--cyan)' : 'var(--muted)') + ';margin-left:.35rem;">(' + n + ')</span>' +
+        '<i class="fim"' + (sel ? '' : ' style="opacity:0;"') + '>&#10003;</i></a>';
+    }).join('');
+  }
+  function escolherEixo(e){
+    eixoAtivo = e;
+    mostrando = LIMITE;
+    document.getElementById('lblCatDock').textContent = e;
+    document.getElementById('lblCatTopo').textContent = e;
+    var ativo = (e !== 'Todos os eixos');
+    document.getElementById('fBtnDock').classList.toggle('ativo', ativo);
+    document.getElementById('fBtnTopo').classList.toggle('ativo', ativo);
+    renderGvCategoria();
+    fecharGaveta('gvCategoria');
+    renderTemas();
+    acordarDock();
+  }
+  function toggleGvCategoria(){ toggleGaveta('gvCategoria'); acordarDock(); }
+
+  // ─── Busca ───
+  function toggleBuscaDock(){
+    var b = document.getElementById('dockBusca');
+    b.classList.toggle('aberta');
+    if (b.classList.contains('aberta')) document.getElementById('buscaDock').focus();
+    acordarDock();
+  }
+  function sincronizarBusca(v){
+    textoBusca = (v || '').toLowerCase().trim();
+    mostrando = LIMITE;
+    var bd = document.getElementById('buscaDock'); if (bd && bd.value !== v) bd.value = v;
+    var bt = document.getElementById('buscaTopo'); if (bt && bt.value !== v) bt.value = v;
+    renderTemas();
+  }
+
+  // ─── Filtragem (mesmas regras da produção) ───
+  function obterFiltrados(op){
+    op = op || {};
+    var lista = [];
+    switch (abaAtiva) {
+      case 'todos':      lista = TEMAS.slice(); break;
+      case 'recentes':   lista = TEMAS.filter(function(t){ return t.ano_enem != null && t.ano_enem >= 2020; }); break;
+      case 'classicos':  lista = TEMAS.filter(function(t){ return t.ano_enem != null && t.ano_enem < 2020; }); break;
+      case 'ppl':        lista = TEMAS.filter(function(t){ return t.aplicacao && String(t.aplicacao).toLowerCase() !== 'regular'; }); break;
+      case 'meus':       lista = TEMAS.filter(function(t){ return MEUS_TEMAS_IDS.indexOf(t.id) >= 0; }); break;
+      case 'turma':      lista = []; break; /* temas compartilhados pelo professor: pendência de produto */
     }
-
-    if (busca) {
-      lista = lista.filter(t =>
-        (t.titulo    || '').toLowerCase().includes(busca) ||
-        (t.categoria || '').toLowerCase().includes(busca) ||
-        String(t.ano_enem || '').includes(busca) ||
-        (t.aplicacao || '').toLowerCase().includes(busca)
-      );
+    if (!op.ignorarEixo && eixoAtivo !== 'Todos os eixos') lista = lista.filter(function(t){ return t.categoria === eixoAtivo; });
+    if (textoBusca && !op.ignorarBusca) {
+      lista = lista.filter(function(t){
+        return (t.titulo || '').toLowerCase().indexOf(textoBusca) >= 0
+            || (t.categoria || '').toLowerCase().indexOf(textoBusca) >= 0
+            || String(t.ano_enem || '').indexOf(textoBusca) >= 0
+            || (t.aplicacao || '').toLowerCase().indexOf(textoBusca) >= 0;
+      });
     }
     return lista;
   }
 
-  // ============================================================
-  // RENDERIZAÇÃO
-  // ============================================================
-  function renderTemas() {
-    document.getElementById('loadingTemas').style.display = 'none';
-
-    const lista = obterTemasFiltrados();
-    const grid  = document.getElementById('gridTemas');
-    const vazio = document.getElementById('vazioTemas');
-
-    document.getElementById('contagemTemas').textContent =
-      lista.length === 1 ? '1 tema' : `${lista.length} temas`;
-
-    // Atualiza painel de categoria
-    document.getElementById('painelCategoria').className =
-      ABA_ATUAL === 'categoria' ? 'aberto bg-[#1d2026] border border-white/10 rounded-2xl p-6' : '';
-
+  // ─── Renderização ───
+  function renderTemas(){
+    var load = document.getElementById('loadingTemas');
+    if (load) load.remove();
+    var lista = obterFiltrados();
+    document.getElementById('contTopo').textContent = lista.length + (lista.length === 1 ? ' tema' : ' temas');
+    var grid = document.getElementById('gridTemas');
+    var btnMais = document.getElementById('btnMais');
     if (lista.length === 0) {
-      grid.style.display  = 'none';
-      vazio.style.display = 'block';
-      const msgs = {
-        recentes:       'Nenhum tema recente encontrado.',
-        classicos:      'Nenhum tema clássico encontrado.',
-        ppl:            'Nenhum tema PPL ou de reaplicação encontrado.',
-        categoria:      CATEGORIA_ATUAL ? `Nenhum tema na categoria "${CATEGORIA_ATUAL}".` : 'Selecione uma categoria acima.',
-        meus:           'Você ainda não salvou nenhum tema. Toque no 📌 dos cards para favoritar.',
-        compartilhados: 'Sua professora ainda não compartilhou nenhum tema.'
+      var msgs = {
+        meus: 'Voc\u00ea ainda n\u00e3o salvou nenhum tema.<br>Toque no \u{1F4CC} dos cards para favoritar.',
+        turma: 'Seu professor ainda n\u00e3o compartilhou nenhum tema com a turma.'
       };
-      document.getElementById('vazioTexto').textContent = msgs[ABA_ATUAL] || 'Nenhum tema encontrado.';
+      grid.innerHTML = '<p class="vazio">' + (msgs[abaAtiva] || 'Nenhum tema encontrado.<br>Tente outro filtro.') + '</p>';
+      btnMais.classList.add('hidden');
       return;
     }
-
-    vazio.style.display = 'none';
-    grid.style.display  = 'grid';
-
-    grid.innerHTML = lista.map(t => cardTemaHtml(t)).join('');
+    var visiveis = lista.slice(0, mostrando);
+    grid.innerHTML = visiveis.map(function(t){
+      var fonte = t.ano_enem ? ('ENEM ' + t.ano_enem + (t.aplicacao && String(t.aplicacao).toLowerCase() !== 'regular' ? ' \u00B7 ' + t.aplicacao : '')) : 'RedaON';
+      var tipo = t.ano_enem ? 'enem' : 'redaon';
+      var fav = MEUS_TEMAS_IDS.indexOf(t.id) >= 0;
+      return '<div class="tCard">'
+        + '<div class="topo"><span class="tBadge ' + tipo + '">' + escapeHtmlSimples(fonte) + '</span>'
+        + '<span class="dir"><span class="cat">' + escapeHtmlSimples(t.categoria || '') + '</span>'
+        + '<button class="tPin' + (fav ? ' on' : '') + '" onclick="alternarFavorito(\'' + t.id + '\', this)" title="Salvar nos Meus Temas">\u{1F4CC}</button></span></div>'
+        + '<p class="tit">' + escapeHtmlSimples(t.titulo) + '</p>'
+        + '<div class="btns">'
+        + '<button class="btn" onclick="escreverTema(\'' + t.id + '\')">Escrever</button>'
+        + '<button class="btn ghost" onclick="prepararTema(\'' + t.id + '\')">Preparar</button>'
+        + '</div></div>';
+    }).join('');
+    btnMais.classList.toggle('hidden', lista.length <= mostrando);
   }
+  function mostrarMais(){ mostrando += LIMITE; renderTemas(); }
 
-  function cardTemaHtml(t) {
-    const corCategoria = corDaCategoria(t.categoria);
-    const corNivel     = corDoNivel(t.nivel);
-    const isSalvo      = MEUS_TEMAS_IDS.includes(t.id);
-    const idEscapado   = String(t.id).replace(/'/g, "\\'");
-
-    // Badge de aplicação
-    let badgeAplic = '';
-    if (t.aplicacao && t.aplicacao !== 'regular') {
-      const labels = {
-        ppl:                'PPL',
-        digital:            'DIGITAL',
-        cancelada:          'CANCELADA',
-        segunda_aplicacao:  '2ª APLICAÇÃO'
-      };
-      const classes = {
-        ppl:                'badge-ppl',
-        digital:            'badge-digital',
-        cancelada:          'badge-cancelada',
-        segunda_aplicacao:  'badge-segunda'
-      };
-      badgeAplic = `<span class="badge-aplicacao ${classes[t.aplicacao] || 'badge-regular'}">${labels[t.aplicacao] || t.aplicacao.toUpperCase()}</span>`;
-    } else {
-      badgeAplic = `<span class="badge-aplicacao badge-regular">REGULAR</span>`;
-    }
-
-    const fonte = t.ano_enem ? `ENEM ${t.ano_enem}` : 'RedaON';
-
-    return `
-      <div class="card-tema rounded-2xl p-6 bg-gradient-to-br ${corCategoria} border border-white/5 cursor-pointer flex flex-col gap-4" onclick="escreverTema('${idEscapado}')">
-        <div class="flex items-start justify-between gap-2">
-          <div class="flex flex-col gap-2">
-            <span class="text-xs font-bold uppercase tracking-wider" style="color:${corDaCategoriaText(t.categoria)};">${escapeHtml(t.categoria || '')}</span>
-            ${badgeAplic}
-          </div>
-          <button onclick="event.stopPropagation();toggleSalvar('${idEscapado}', this)" class="text-[#928ea0] hover:text-[#fabd00] transition-colors" title="${isSalvo ? 'Remover dos meus temas' : 'Salvar nos meus temas'}">
-            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' ${isSalvo ? 1 : 0};">push_pin</span>
-          </button>
-        </div>
-        <h4 class="font-bold text-white text-base leading-snug flex-1">${escapeHtml(t.titulo)}</h4>
-        <div class="flex items-center justify-between text-xs">
-          <span class="text-[#928ea0]">${fonte}</span>
-          <span class="font-bold ${corNivel}">${escapeHtml(t.nivel || '')}</span>
-        </div>
-      </div>
-    `;
+  // ─── Ações (contrato de produção: sessionStorage tema_selecionado) ───
+  function acharTema(id){ return TEMAS.find(function(t){ return t.id === id; }); }
+  function escreverTema(id){
+    var t = acharTema(id);
+    if (!t) return;
+    definirTemaSelecionado(t);
+    abrirMetodos();
   }
-
-  function corDaCategoria(categoria) {
-    const map = {
-      'Social':         'from-[#6c5ce7]/15',
-      'Direitos':       'from-[#ffb4ab]/15',
-      'Saúde':          'from-[#45edee]/15',
-      'Tecnologia':     'from-[#c6bfff]/15',
-      'Educação':       'from-[#fabd00]/15',
-      'Consumo':        'from-[#fb923c]/15',
-      'Meio Ambiente':  'from-[#4ade80]/15',
-      'Trabalho':       'from-[#a78bfa]/15',
-      'Economia':       'from-[#22d3ee]/15',
-      'Cultura':        'from-[#f472b6]/15'
-    };
-    return map[categoria] || 'from-[#6c5ce7]/10';
-  }
-
-  function corDaCategoriaText(categoria) {
-    const map = {
-      'Social':         '#c6bfff',
-      'Direitos':       '#ffb4ab',
-      'Saúde':          '#45edee',
-      'Tecnologia':     '#c6bfff',
-      'Educação':       '#fabd00',
-      'Consumo':        '#fb923c',
-      'Meio Ambiente':  '#4ade80',
-      'Trabalho':       '#a78bfa',
-      'Economia':       '#22d3ee',
-      'Cultura':        '#f472b6'
-    };
-    return map[categoria] || '#c6bfff';
-  }
-
-  function corDoNivel(nivel) {
-    if (!nivel) return '';
-    const n = nivel.toLowerCase();
-    if (n.includes('básico') || n.includes('basico')) return 'nivel-basico';
-    if (n.includes('avançado') || n.includes('avancado')) return 'nivel-avancado';
-    return 'nivel-intermediario';
-  }
-
-  // ============================================================
-  // ABAS
-  // ============================================================
-  function mudarAba(aba) {
-    ABA_ATUAL = aba;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
-    const btn = document.getElementById('tab-' + aba);
-    if (btn) btn.classList.add('ativo');
-
-    const titulos = {
-      recentes:       'Recentes (2020-2025)',
-      classicos:      'Clássicos (2009-2019)',
-      ppl:            'PPL e Reaplicações',
-      categoria:      CATEGORIA_ATUAL ? `Categoria: ${CATEGORIA_ATUAL}` : 'Por Categoria',
-      meus:           'Meus Temas Salvos',
-      compartilhados: 'Compartilhados pela Professora'
-    };
-    document.getElementById('tituloSecao').textContent = titulos[aba] || 'Temas';
-
-    if (aba === 'categoria') {
-      renderBotoesCategoria();
-    }
-
-    renderTemas();
-  }
-
-  function renderBotoesCategoria() {
-    const categorias = [...new Set(TEMAS.map(t => t.categoria).filter(Boolean))].sort();
-    const container = document.getElementById('botoesCategoria');
-    container.innerHTML = `
-      <button onclick="filtrarPorCategoria(null)" class="tab-btn px-4 py-2 text-xs rounded-lg ${CATEGORIA_ATUAL === null ? 'ativo' : ''}">Todas</button>
-      ${categorias.map(c => `
-        <button onclick="filtrarPorCategoria('${c.replace(/'/g, "\\'")}')" class="tab-btn px-4 py-2 text-xs rounded-lg ${CATEGORIA_ATUAL === c ? 'ativo' : ''}">${escapeHtml(c)}</button>
-      `).join('')}
-    `;
-  }
-
-  function filtrarPorCategoria(cat) {
-    CATEGORIA_ATUAL = cat;
-    document.getElementById('tituloSecao').textContent = cat ? `Categoria: ${cat}` : 'Por Categoria';
-    renderBotoesCategoria();
-    renderTemas();
-  }
-
-  // ============================================================
-  // BUSCA
-  // ============================================================
-  function filtrarTemas() { renderTemas(); }
-  function limparBusca() {
-    document.getElementById('campoBusca').value = '';
-    renderTemas();
-  }
-
-  // ============================================================
-  // SALVAR / DESSALVAR (favoritos local)
-  // ============================================================
-  function toggleSalvar(id, btn) {
-    const idx = MEUS_TEMAS_IDS.indexOf(id);
-    if (idx >= 0) {
-      MEUS_TEMAS_IDS.splice(idx, 1);
-      toast('📌 Removido dos seus temas.');
-    } else {
-      MEUS_TEMAS_IDS.push(id);
-      toast('📌 Tema salvo nos seus favoritos!');
-    }
-    localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS));
-    renderTemas();
-  }
-
-  // ============================================================
-  // ESCREVER TEMA — vai pro hub de preparação com tema selecionado
-  // ============================================================
-  function escreverTema(id) {
-    // Modo professor: abre modal de visualização em vez de levar ao hub do aluno
-    if (MODO_PROFESSOR) {
-      window.visualizarTemaProf(id);
-      return;
-    }
-    const tema = TEMAS.find(t => t.id === id) || TEMAS_PROFESSOR.find(t => t.id === id);
-    if (!tema) {
-      toast('❌ Tema não encontrado.');
-      return;
-    }
-    sessionStorage.setItem('tema_selecionado', JSON.stringify(tema));
+  function prepararTema(id){
+    var t = acharTema(id);
+    if (!t) return;
+    definirTemaSelecionado(t);
     window.location.href = 'hub-preparacao.html';
   }
-
-  // ============================================================
-  // MODAL DE SUGESTÃO
-  // ============================================================
-  function abrirModal()   { document.getElementById('modalSugestao').classList.add('aberto'); }
-  function fecharModal()  { document.getElementById('modalSugestao').classList.remove('aberto'); }
-  function enviarSugestao() {
-    const titulo = document.getElementById('sugestaoTitulo').value.trim();
-    if (!titulo) { toast('⚠️ Informe o título do tema.'); return; }
-    // TODO: implementar envio pro banco numa próxima sessão
-    toast('💡 Sugestão recebida! Obrigada.');
-    document.getElementById('sugestaoTitulo').value = '';
-    document.getElementById('sugestaoJustificativa').value = '';
-    fecharModal();
+  function alternarFavorito(id, el){
+    var i = MEUS_TEMAS_IDS.indexOf(id);
+    if (i >= 0) { MEUS_TEMAS_IDS.splice(i, 1); if (el) el.classList.remove('on'); toast('Removido dos seus temas'); }
+    else { MEUS_TEMAS_IDS.push(id); if (el) el.classList.add('on'); toast('\u{1F4CC} Tema salvo nos seus favoritos!'); }
+    try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS)); } catch(e) {}
+    if (abaAtiva === 'meus') renderTemas();
   }
 
-  // ============================================================
-  // SIDEBAR MOBILE
-  // ============================================================
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('overlay').classList.toggle('show');
+  // ─── Sugerir tema ───
+  async function enviarSugestao(){
+    var txt = (document.getElementById('txtSugestao').value || '').trim();
+    if (txt.length < 10) { toast('Escreva a sugest\u00e3o com um pouco mais de detalhe.', 2400); return; }
+    try {
+      var url = SUPABASE_URL + '/rest/v1/sugestoes_temas';
+      var res = await dbFetch(url, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+        body: JSON.stringify({ texto: txt })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      document.getElementById('txtSugestao').value = '';
+      fecharGaveta('gvSugestao');
+      toast('\u{1F4A1} Sugest\u00e3o enviada para a PROfa!');
+    } catch(e) {
+      console.warn('Erro ao enviar sugest\u00e3o:', e);
+      toast('N\u00e3o consegui enviar agora. Tente de novo.', 2600);
+    }
   }
 
-  // ============================================================
-  // HELPERS
-  // ============================================================
-  function escapeHtml(s) {
-    if (s == null) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-  }
+  // ─── Dock ───
+  function acordarDock(){ if (window.mostrarDock_dockTemas) window.mostrarDock_dockTemas(); }
+  iniciarDock('dockTemas', { protegidaPor:['gvCategoria','gvSugestao'] });
 
-  let toastTimer;
-  function toast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
-  }
+  renderAbas();
+  carregarTemas();
 </script>
 </body>
 </html>

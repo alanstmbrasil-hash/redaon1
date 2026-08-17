@@ -1,2352 +1,490 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<script>tailwind = { config: {} };</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "surface-container": "#1d2026", "tertiary": "#fabd00",
-          "surface-container-lowest": "#0b0e14", "surface-container-low": "#191c22",
-          "background": "#10131a", "outline-variant": "#474554",
-          "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
-          "primary": "#c6bfff", "outline": "#928ea0",
-          "on-background": "#e1e2eb", "on-surface": "#e1e2eb",
-          "surface-container-highest": "#32353c",
-          "secondary": "#45edee", "surface": "#10131a", "error": "#ffb4ab",
-          "surface-container-high": "#272a31",
-        },
-        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
-        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-      },
-    },
-  }
-</script>
-<style>
-  body { font-family: 'Inter', sans-serif; background-color: #10131a; }
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-
-  /* ── Sidebar hambúrguer ── */
-  #sidebar {
-    position: fixed; left: 0; top: 0; height: 100%; width: 256px;
-    transform: translateX(-256px); transition: transform .3s ease; z-index: 50;
-  }
-  #sidebar.open { transform: translateX(0); }
-  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:45; }
-  #overlay.open { display:block; }
-  @media (min-width: 1024px) {
-    #sidebar { transform: translateX(0) !important; }
-    #overlay { display: none !important; }
-    #main-content { margin-left: 256px; }
-    #btnHamburger { display: none !important; }
-  }
-  @media (max-width: 1023px) {
-    #main-content { margin-left: 0 !important; }
-  }
-
-  /* ── Scrollbar sidebar ── */
-  #sidebar nav::-webkit-scrollbar { width: 4px; }
-  #sidebar nav::-webkit-scrollbar-track { background: transparent; }
-  #sidebar nav::-webkit-scrollbar-thumb { background: transparent; }
-  #sidebar nav:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
-  #sidebar nav { scrollbar-width: none; }
-
-  /* ── Folha de redação ── */
-  .folha {
-    background: #fdfdfb;
-    background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
-    background-size: 100% 2rem;
-    font-family: 'EB Garamond', serif;
-    font-size: 1.05rem;
-    line-height: 2rem;
-    color: #1f2937;
-    padding: 2rem 2.5rem 2rem 4rem;
-    min-height: 600px;
-    position: relative;
-  }
-  .folha::before {
-    content: '';
-    position: absolute; left: 3rem; top: 0; bottom: 0;
-    width: 1px; background: rgba(239,68,68,0.2);
-  }
-  .folha-elite {
-    background: #fdfdfb;
-    background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
-    background-size: 100% 2rem;
-    border-left: 3px solid rgba(108,92,231,0.3);
-  }
-
-  /* ── Abas ── */
-  .aba-btn {
-    flex: 1; padding: .75rem 1rem;
-    font-size: .75rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: .05em;
-    border-bottom: 2px solid transparent;
-    transition: all .2s; color: #928ea0;
-    display: flex; align-items: center; justify-content: center; gap: .4rem;
-    cursor: pointer; background: none; border-top: none; border-left: none; border-right: none;
-  }
-  .aba-btn.ativa { color: #45edee; border-bottom-color: #45edee; }
-  .aba-btn:hover:not(.ativa) { color: #c8c4d7; }
-  .aba-btn.aba-melhoria.ativa { color: #fa6e6e; border-bottom-color: #fa6e6e; }
-  .aba-btn.aba-elite.ativa { color: #6c5ce7; border-bottom-color: #6c5ce7; }
-  .aba-btn.aba-professora.ativa { color: #4ade80; border-bottom-color: #4ade80; }
-
-  /* ── Card redação ── */
-  .card-redacao { transition: all .2s; }
-  .card-redacao.selecionado { border-color: rgba(69,237,238,0.4) !important; background: #1d2026 !important; }
-
-  /* ── Erros sublinhados ── */
-  .erro-orto {
-    text-decoration: underline wavy #ef4444;
-    text-decoration-thickness: 2px;
-    cursor: help; background: rgba(239,68,68,0.08);
-    border-radius: 2px; padding: 0 1px;
-  }
-
-  /* ── Toast ── */
-  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; }
-  #toast.show { transform:translateX(-50%) translateY(0); }
-
-  /* ── Spinner ── */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner { width: 32px; height: 32px; border: 3px solid rgba(108,92,231,.2); border-top-color: #6c5ce7; border-radius: 50%; animation: spin 0.8s linear infinite; }
-
-  /* ── Barras competência ── */
-  .comp-barra-bg { background: #32353c; border-radius: 99px; height: 4px; }
-  .comp-barra-fill { height: 4px; border-radius: 99px; transition: width .8s ease; }
-
-  /* ── Modal LGPD ── */
-  #modalLgpd { display:none; position:fixed; inset:0; z-index:400; background:rgba(0,0,0,.85); align-items:center; justify-content:center; padding:1rem; }
-  #modalLgpd.aberto { display:flex; }
-
-  /* Mobile */
-  @media(max-width:1023px){
-    .layout-redacoes { flex-direction: column; }
-    .lista-col { width: 100% !important; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); max-height: 320px; }
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     FASE 3 — TELA CELEBRAÇÃO NOTA 1000 (v2 — layout corrigido)
-     ═══════════════════════════════════════════════════════════ */
-
-  /* Container principal */
-  .celebracao-1000 {
-    position: relative;
-    background: linear-gradient(135deg, #1a1530, #0f0c1d 60%, #2d1f4a);
-    border-radius: 1rem;
-    padding: 1.5rem 1rem;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.25rem;
-  }
-  /* Brilho de fundo difuso */
-  .celebracao-1000::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(201,162,39,0.15) 0%, transparent 60%);
-    pointer-events: none;
-    animation: pulsoOuro 3s ease-in-out infinite;
-  }
-  @keyframes pulsoOuro {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
-  }
-
-  /* "Lista de aprovados" rolante — container externo */
-  .lista-aprovados {
-    position: relative;
-    width: 100%;
-    max-width: 480px;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(201,162,39,0.3);
-    border-radius: .75rem;
-    padding: 1rem;
-    height: 400px;
-    overflow: hidden;
-    z-index: 1;
-  }
-  .lista-aprovados-titulo {
-    text-align: center;
-    color: #c9a227;
-    font-weight: 800;
-    font-size: .7rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: .75rem;
-    padding-bottom: .5rem;
-    border-bottom: 1px solid rgba(201,162,39,0.2);
-  }
-  .lista-aprovados-rolagem {
-    position: relative;
-    overflow: hidden;
-    height: calc(100% - 2.25rem);
-  }
-  .lista-aprovados-itens {
-    display: flex;
-    flex-direction: column;
-    gap: .35rem;
-    /* Animação: rola pra cima até o card do aluno ficar no topo da janela
-       visível. 30 placeholders × ~38px ≈ 1140px. Rolagem -1110px deixa
-       o card a ~30px do topo, com espaço abaixo para o carimbo cair. */
-    animation: rolarListaV2 4.5s cubic-bezier(.16,1,.3,1) forwards;
-  }
-  @keyframes rolarListaV2 {
-    0%   { transform: translateY(0); }
-    85%  { transform: translateY(-1110px); }
-    100% { transform: translateY(-1140px); }
-  }
-  .item-aprovado {
-    font-family: 'Courier New', monospace;
-    color: #b5b1c5;
-    font-size: .85rem;
-    padding: .35rem .5rem;
-    border-radius: .25rem;
-    line-height: 1.4;
-  }
-  /* Nome do aluno destacado — agora é um CARD de 3 linhas:
-     1. "🏆 PARABÉNS, NOME!"
-     2. "Você atingiu nota 1000/1000"
-     3. Linha-padrão da lista (★ 0053 NOME COMPLETO)
-     Substitui o item simples da lista, expandindo-se em altura. */
-  .item-aprovado.aluno-real {
-    background: linear-gradient(135deg, rgba(201,162,39,0.30), rgba(201,162,39,0.12));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(201,162,39,0.5);
-    border-left: 4px solid #c9a227;
-    border-radius: .5rem;
-    padding: 1rem .9rem;
-    box-shadow: 0 0 25px rgba(201,162,39,0.4), 0 4px 16px rgba(0,0,0,0.3);
-    /* Pulsa o card quando a animação para */
-    animation: destacarNome 0.6s ease 4.2s both;
-    position: relative;
-    z-index: 3;
-    color: #ffe98a;
-    font-family: 'Inter', sans-serif;
-    text-align: center;
-    margin: .35rem 0;
-  }
-  .card-parabens-titulo {
-    font-size: 1.05rem;
-    font-weight: 900;
-    background: linear-gradient(135deg, #c9a227, #ffe98a 50%, #c9a227);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: .35rem;
-    letter-spacing: 0.02em;
-  }
-  .card-parabens-badge {
-    display: inline-block;
-    background: rgba(201,162,39,0.18);
-    border: 1px solid rgba(201,162,39,0.45);
-    color: #ffe98a;
-    font-size: .72rem;
-    font-weight: 700;
-    padding: .25rem .7rem;
-    border-radius: 999px;
-    letter-spacing: 0.05em;
-    margin-bottom: .5rem;
-    text-transform: uppercase;
-  }
-  .card-parabens-nota {
-    font-size: .78rem;
-    color: #e1e2eb;
-    font-weight: 500;
-    margin-bottom: .55rem;
-    line-height: 1.4;
-  }
-  .card-parabens-linha {
-    font-family: 'Inter', sans-serif;
-    font-size: .9rem;
-    font-weight: 700;
-    color: #ffe98a;
-    padding-top: .5rem;
-    border-top: 1px solid rgba(201,162,39,0.25);
-    letter-spacing: 0.01em;
-  }
-  @keyframes destacarNome {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.04); box-shadow: 0 0 50px rgba(201,162,39,0.8), 0 4px 16px rgba(0,0,0,0.3); }
-    100% { transform: scale(1); }
-  }
-
-  /* Carimbo APROVADO — aparece DENTRO da lista, abaixo do card do aluno.
-     Posicionado absoluto dentro da .lista-aprovados-rolagem para sobrepor
-     os nomes fictícios que estão abaixo do nome real do aluno.
-     Top 65% = abaixo do card de 3 linhas (que ocupa ~25-35% da janela). */
-  .carimbo-container {
-    position: absolute;
-    top: 65%;
-    left: 50%;
-    transform: translateX(-50%);
-    pointer-events: none;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .carimbo-aprovado {
-    font-family: 'Impact', 'Arial Black', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 900;
-    color: #dc2626;
-    border: 6px solid #dc2626;
-    padding: .35rem 1.5rem;
-    border-radius: .4rem;
-    letter-spacing: 0.12em;
-    background: rgba(255,255,255,0.95);
-    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    opacity: 0;
-    transform: rotate(-15deg) scale(2) translateY(-300px);
-    animation: cairCarimbo 0.8s cubic-bezier(.5,1.8,.5,1) 5s forwards;
-  }
-  @keyframes cairCarimbo {
-    0% {
-      opacity: 0;
-      transform: rotate(-15deg) scale(2) translateY(-300px);
-    }
-    60% {
-      opacity: 1;
-      transform: rotate(-15deg) scale(1.25) translateY(0);
-    }
-    75% {
-      transform: rotate(-15deg) scale(0.92) translateY(0);
-    }
-    90% {
-      transform: rotate(-15deg) scale(1.04) translateY(0);
-    }
-    100% {
-      opacity: 1;
-      transform: rotate(-15deg) scale(1) translateY(0);
-    }
-  }
-  /* "Onda" da batida do carimbo */
-  .carimbo-onda {
-    position: absolute;
-    top: 65%;
-    left: 50%;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    border: 4px solid rgba(201,162,39,0.6);
-    transform: translate(-50%, -50%) scale(0);
-    pointer-events: none;
-    z-index: 1;
-    animation: ondaBatida 0.8s ease-out 5.6s forwards;
-  }
-  @keyframes ondaBatida {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
-  }
-
-  /* Botões finais — aparecem após a batida */
-  .botoes-1000 {
-    display: flex;
-    gap: .75rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    opacity: 0;
-    animation: fadeInBotoes 0.6s ease 6s forwards;
-    position: relative;
-    z-index: 4;
-  }
-  @keyframes fadeInBotoes {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .btn-celebracao {
-    padding: .75rem 1.25rem;
-    border-radius: .75rem;
-    font-weight: 700;
-    font-size: .85rem;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    transition: transform .15s ease;
-  }
-  .btn-celebracao:hover { transform: translateY(-2px); }
-  .btn-celebracao.primario {
-    background: linear-gradient(135deg, #c9a227, #ffe98a);
-    color: #1a0e00;
-  }
-  .btn-celebracao.secundario {
-    background: rgba(255,255,255,0.1);
-    color: #e1e2eb;
-    border: 1px solid rgba(255,255,255,0.2);
-  }
-
-  /* Confetes (gerados via JS, anexados ao document.body) */
-  .confete {
-    position: fixed;
-    width: 10px;
-    height: 16px;
-    pointer-events: none;
-    z-index: 9999;
-    top: 0;
-    animation: cairConfete linear forwards;
-  }
-  @keyframes cairConfete {
-    0%   { transform: translateY(-30px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-  }
-
-  @media(max-width:640px){
-    .carimbo-aprovado { font-size: 1.6rem; padding: .25rem 1rem; border-width: 4px; }
-    .lista-aprovados { height: 320px; }
-  }
-</style>
-<script src="supabase-auth.js"></script>
-</head>
-<body class="bg-background text-on-surface antialiased">
-
-<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
-  <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
-</div>
-
-<div id="toast"></div>
-
-<!-- MODAL LGPD -->
-<div id="modalLgpd">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,0.08);border-radius:1.25rem;width:100%;max-width:520px;padding:2rem;box-shadow:0 24px 64px rgba(0,0,0,.6);">
-    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem;">
-      <span class="material-symbols-outlined" style="color:#fabd00;font-size:1.5rem;" style="font-variation-settings:'FILL' 1;">shield</span>
-      <h3 style="font-weight:800;font-size:1rem;color:#e1e2eb;">Privacidade e uso dos dados — LGPD</h3>
-    </div>
-    <p style="font-size:.85rem;color:#c8c4d7;line-height:1.7;margin-bottom:1rem;">
-      Suas redações são armazenadas <strong style="color:#e1e2eb;">apenas neste dispositivo</strong> e utilizadas exclusivamente para gerar análises personalizadas pela IA.
-    </p>
-    <p style="font-size:.85rem;color:#c8c4d7;line-height:1.7;margin-bottom:1rem;">
-      Em caso de uso para fins educacionais ou de pesquisa, sua <strong style="color:#e1e2eb;">identidade será preservada e anonimizada</strong>, conforme a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).
-    </p>
-    <p style="font-size:.85rem;color:#c8c4d7;line-height:1.7;margin-bottom:1.5rem;">
-      Ao continuar, você <strong style="color:#45edee;">consente</strong> com o processamento dos dados para fins de correção e melhoria da sua escrita.
-    </p>
-    <div style="display:flex;gap:.75rem;">
-      <button onclick="aceitarLgpd()" style="flex:2;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:900;font-size:.85rem;cursor:pointer;">
-        Entendi e Aceito
-      </button>
-      <button onclick="document.getElementById('modalLgpd').classList.remove('aberto')" style="padding:.875rem 1.25rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.85rem;cursor:pointer;">
-        Fechar
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- OVERLAY -->
-<div id="overlay" onclick="toggleSidebar()"></div>
-
-<!-- SIDEBAR -->
-<aside id="sidebar" class="bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 shadow-xl">
-  <div class="flex items-center px-2 mb-10">
-    <div class="flex items-baseline italic">
-      <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
-      <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
-    </div>
-  </div>
-  <nav class="flex-1 space-y-2 overflow-y-auto">
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="inicio.html"><span class="material-symbols-outlined">home</span><span class="font-medium text-sm">Início</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span><span class="font-medium text-sm">Nova Redação</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="temas.html"><span class="material-symbols-outlined">description</span><span class="font-medium text-sm">Temas</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE]" href="minhas-redacoes.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">edit_note</span><span class="font-medium text-sm">Minhas Redações</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span><span class="font-medium text-sm">Evolução</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="plano.html"><span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Elite <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
-  </nav>
-  <div class="mt-auto pt-6 border-t border-outline-variant/10">
-    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container cursor-pointer">
-      <img alt="Usuário" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
-      <div class="flex flex-col">
-        <span id="nomeUsuarioSidebar" class="text-sm font-semibold text-on-surface">Estudante</span>
-        <span class="text-xs text-on-surface-variant">Estudante Premium</span>
-      </div>
-    </div>
-    <a onclick="authLogout()" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
-      <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
-    </a>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<div id="main-content" class="flex flex-col min-h-screen relative z-10">
-
-  <!-- TOP BAR -->
-  <header class="h-20 flex items-center justify-between px-4 lg:px-10 bg-surface/40 backdrop-blur-md sticky top-0 z-40 border-b border-white/5">
-    <div class="flex items-center gap-3">
-      <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
-        <span class="material-symbols-outlined">menu</span>
-      </button>
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">edit_note</span>
-        <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Minhas Redações</h2>
-      </div>
-    </div>
-    <div class="flex items-center gap-4">
-      <div class="hidden sm:flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
-        <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
-        <span class="text-xs font-bold text-on-surface">940 pts</span>
-      </div>
-      <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
-        <span class="material-symbols-outlined">notifications</span>
-        <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
-      </button>
-    </div>
-  </header>
-
-  <!-- LAYOUT PRINCIPAL -->
-  <div class="flex flex-1 overflow-hidden layout-redacoes">
-
-    <!-- LISTA DE REDAÇÕES -->
-    <div class="lista-col w-72 shrink-0 border-r border-white/5 bg-surface-container-lowest/30 flex flex-col overflow-hidden">
-      <div class="flex justify-between items-center px-5 py-4 border-b border-white/5">
-        <h3 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Recentes</h3>
-        <div class="flex gap-1">
-          <button class="p-1.5 text-on-surface-variant hover:text-secondary transition-colors"><span class="material-symbols-outlined text-xl">filter_list</span></button>
-          <button class="p-1.5 text-on-surface-variant hover:text-secondary transition-colors"><span class="material-symbols-outlined text-xl">search</span></button>
-        </div>
-      </div>
-      <div class="flex-1 overflow-y-auto p-3 space-y-3" id="listaRedacoes"></div>
-      <div class="p-4 border-t border-white/5">
-        <button onclick="window.location.href='nova-redacao.html'" class="w-full py-3 rounded-xl bg-primary-container text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95">
-          <span class="material-symbols-outlined text-lg">add_circle</span>
-          Escrever Nova Redação
-        </button>
-      </div>
-    </div>
-
-    <!-- PAINEL DIREITO -->
-    <div class="flex-1 flex flex-col overflow-hidden bg-[#0b0e14]">
-
-      <!-- Estado vazio -->
-      <div id="estadoVazio" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <div class="w-20 h-20 bg-surface-container-low rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/5">
-          <span class="material-symbols-outlined text-4xl text-primary-container" style="font-variation-settings:'FILL' 1;">auto_stories</span>
-        </div>
-        <h2 class="text-2xl font-black text-on-surface mb-3">Selecione uma redação</h2>
-        <p class="text-on-surface-variant text-base mb-8 max-w-sm">Clique em um dos seus textos para visualizar a análise completa.</p>
-        <button onclick="window.location.href='nova-redacao.html'" class="px-6 py-3 bg-primary-container text-white font-bold rounded-2xl hover:scale-[1.02] transition-all flex items-center gap-2 mx-auto">
-          <span class="material-symbols-outlined">add_circle</span> Enviar Novo Texto
-        </button>
-      </div>
-
-      <!-- Estado carregando -->
-      <div id="estadoCarregando" class="hidden flex-1 flex flex-col items-center justify-center gap-4">
-        <div class="spinner"></div>
-        <p class="text-on-surface-variant text-sm">PROfa gerando análise completa...</p>
-      </div>
-
-      <!-- Painel de análise -->
-      <div id="painelAnalise" class="hidden flex-1 flex flex-col overflow-hidden">
-
-        <!-- Header com título e nota -->
-        <div class="px-6 py-4 border-b border-white/5 flex items-start justify-between shrink-0 bg-[#0b0e14]">
-          <div class="flex-1 min-w-0 mr-4">
-            <h3 id="tituloEspelho" class="text-base font-bold text-white leading-tight mb-1 truncate"></h3>
-            <p id="metaEspelho" class="text-xs text-on-surface-variant"></p>
-          </div>
-          <div class="text-right shrink-0">
-            <p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Nota Final</p>
-            <p id="notaEspelho" class="text-3xl font-black text-secondary"></p>
-          </div>
-        </div>
-
-        <!-- Barras de competência -->
-        <div id="barrasComp" class="px-6 py-3 border-b border-white/5 flex gap-4 flex-wrap shrink-0 bg-[#0b0e14]/80"></div>
-
-        <!-- ABAS: Texto Original | Pontos de Melhoria | Elite da PROfa -->
-        <div class="flex border-b border-white/5 shrink-0 bg-[#10131a]">
-          <button class="aba-btn ativa" id="aba-original" onclick="mudarAba('original')">
-            <span class="material-symbols-outlined text-sm">article</span>
-            Texto Original
-          </button>
-          <button class="aba-btn aba-melhoria" id="aba-melhoria" onclick="mudarAba('melhoria')">
-            <span class="material-symbols-outlined text-sm">error</span>
-            Pontos de Melhoria
-          </button>
-          <button class="aba-btn aba-elite" id="aba-elite" onclick="mudarAba('elite')">
-            <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">psychology</span>
-            Elite da PROfa
-          </button>
-          <button class="aba-btn aba-professora hidden" id="aba-professora" onclick="mudarAba('professora')">
-            <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">verified</span>
-            Sua Professora
-          </button>
-        </div>
-
-        <!-- Conteúdo das abas — folha única rolável -->
-        <div class="flex-1 overflow-y-auto">
-
-          <!-- Aba 1: Texto Original -->
-          <div id="painel-original" class="h-full">
-            <div class="folha" id="colOriginal"></div>
-          </div>
-
-          <!-- Aba 2: Pontos de Melhoria -->
-          <div id="painel-melhoria" class="hidden h-full">
-            <div class="p-4 bg-red-500/5 border-b border-red-500/10 flex items-center gap-2" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(250,110,110,.08);">
-              <span class="material-symbols-outlined text-error text-sm">info</span>
-              <span id="badgeErros" class="text-xs text-error font-bold"></span>
-            </div>
-            <div class="folha" id="colCorrecoes"></div>
-          </div>
-
-          <!-- Aba 3: Elite da PROfa -->
-          <div id="painel-elite" class="hidden h-full">
-            <div class="p-4 bg-[#6c5ce7]/10 border-b border-[#6c5ce7]/20 flex items-center gap-2" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(108,92,231,.12);">
-              <span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings:'FILL' 1;">psychology</span>
-              <span class="text-xs text-secondary font-bold">Versão reescrita pela PROfa com nota 1000</span>
-              <button onclick="verPorQueElite()" class="ml-auto text-xs text-[#6c5ce7] font-bold border border-[#6c5ce7]/30 px-3 py-1 rounded-lg hover:bg-[#6c5ce7]/10 transition-all flex items-center gap-1">
-                <span class="material-symbols-outlined text-xs">help</span>
-                Por que Nota 1000?
-              </button>
-            </div>
-            <div class="folha folha-elite" id="colElite"></div>
-          </div>
-
-          <!-- Aba 4: Sua Professora -->
-          <div id="painel-professora" class="hidden h-full">
-            <div class="p-4 border-b flex items-center gap-2" style="position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(74,222,128,.10);border-color:rgba(74,222,128,.2);">
-              <span class="material-symbols-outlined text-sm" style="color:#4ade80;font-variation-settings:'FILL' 1;">verified</span>
-              <span class="text-xs font-bold" style="color:#4ade80;">Revisão da sua professora</span>
-            </div>
-            <div class="folha" id="colProfessora"></div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal análise completa / Por que Elite -->
-<div id="modalAnalise" class="hidden fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
-  <div class="bg-[#1d2026] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
-    <div class="flex items-center justify-between p-5 border-b border-white/5">
-      <h3 id="modalAnaliseTitle" class="font-bold text-white text-sm"></h3>
-      <button onclick="fecharModal()" class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined">close</span></button>
-    </div>
-    <div id="modalAnaliseTexto" class="flex-1 overflow-y-auto p-5 text-sm text-on-surface-variant leading-relaxed"></div>
-  </div>
-</div>
-
-<script type="module">
-  // Cenário B — Commit 3: esta tela não faz mais correção inicial via Gemini.
-  // Os dados da Chamada 1 (nota + diagnóstico) são lidos do banco via dbBuscarCorrecao.
-  //
-  // Cenário B — Commit 4: chamadas sob demanda à Gemini:
-  //   - Chamada 3 (PROMPT_REDACAO_NOTA_1000) — disparada no botão "Gerar agora"
-  //     da aba Elite da PROfa, quando redacao_nota_1000_* não está no banco.
-  //   - Chamada 4 (PROMPT_MELHORIAS)         — disparada ao clicar em "Por que
-  //     Nota 1000?", quando melhoria_c* não está no banco.
-  //     Depende da Chamada 3; se ausente, dispara ambas em sequência.
-
-  async function geminiGenerate(prompt) {
-    // Retry automático para erros transitórios do Gemini (503 Service
-    // Unavailable, 500, 429 rate limit). 3 tentativas com backoff crescente.
-    const TRANSITORIOS = [429, 500, 502, 503, 504];
-    let ultimoErro;
-    for (let tentativa = 1; tentativa <= 3; tentativa++) {
-      try {
-        const res = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          if (TRANSITORIOS.includes(res.status) && tentativa < 3) {
-            ultimoErro = new Error(data.error?.message || `Erro ${res.status}`);
-            console.warn(`[Minhas Redações] Gemini ${res.status} (tentativa ${tentativa}/3). Retry em ${tentativa}s...`);
-            await new Promise(r => setTimeout(r, tentativa * 1000)); // backoff: 1s, 2s
-            continue;
-          }
-          throw new Error(data.error?.message || `Erro Gemini (${res.status})`);
-        }
-        const data = await res.json();
-        return data.candidates[0].content.parts[0].text;
-      } catch (e) {
-        ultimoErro = e;
-        // Erro de rede (fetch falhou) também merece retry
-        if (tentativa < 3 && (e.message.includes('fetch') || e.message.includes('network'))) {
-          await new Promise(r => setTimeout(r, tentativa * 1000));
-          continue;
-        }
-        if (tentativa >= 3) throw ultimoErro;
-      }
-    }
-    throw ultimoErro || new Error('Erro Gemini');
-  }
-
-  // Parse seguro do JSON retornado pela Gemini (idempotente com o de nova-redacao.html).
-  function parseRespostaGemini(raw) {
-    const limpo = raw.trim().replace(/```json|```/g, '').trim();
-
-    // Estratégia 1: parse direto (caso mais comum, JSON bem formado)
-    try {
-      return JSON.parse(limpo);
-    } catch (_) { /* cai pra estratégia 2 */ }
-
-    // Estratégia 2: extrai APENAS o primeiro bloco JSON completo, balanceando chaves.
-    // Evita capturar lixo depois do JSON válido (ex: Gemini às vezes inclui texto
-    // extra após o objeto principal, causando "Unexpected non-whitespace character
-    // after JSON at position X").
-    const inicio = limpo.indexOf('{');
-    if (inicio >= 0) {
-      let profundidade = 0;
-      let dentroDeString = false;
-      let charAnterior = '';
-      for (let i = inicio; i < limpo.length; i++) {
-        const c = limpo[i];
-        if (dentroDeString) {
-          if (c === '"' && charAnterior !== '\\') dentroDeString = false;
-        } else {
-          if (c === '"') dentroDeString = true;
-          else if (c === '{') profundidade++;
-          else if (c === '}') {
-            profundidade--;
-            if (profundidade === 0) {
-              // Achou o fim do primeiro JSON balanceado
-              const candidato = limpo.slice(inicio, i + 1);
-              try { return JSON.parse(candidato); }
-              catch (_) { /* cai pra estratégia 3 */ break; }
-            }
-          }
-        }
-        charAnterior = c;
-      }
-    }
-
-    // Estratégia 3: fallback greedy (comportamento antigo) — pega tudo entre o
-    // primeiro { e o último }. Pior caso, mas às vezes funciona se o problema
-    // estiver só no final do texto.
-    const m = limpo.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error('JSON não encontrado na resposta da Gemini');
-    return JSON.parse(m[0]);
-  }
-
-  // Rubrica INEP compacta — usada como contexto nas chamadas 3 e 4.
-  const RUBRICA_INEP_COMPACTA = `
-CRITÉRIOS INEP (Cartilha 2025) — resumo:
-- C1 Domínio da língua formal (0-200): ortografia, acentuação, concordância, regência, pontuação.
-- C2 Compreensão do tema e repertório (0-200): repertório produtivo (contextualizado, retomado) vs. bolso (genérico). Tangenciamento limita C2/C3/C5 a 40.
-- C3 Organização e defesa do ponto de vista (0-200): tese clara, progressão sem saltos, argumentos com exemplos/dados.
-- C4 Coesão (0-200): operadores argumentativos diversificados, referenciação, articulação inter e intraparágrafo.
-- C5 Proposta de intervenção (0-200): 5 elementos (AÇÃO, AGENTE, MEIO, FINALIDADE, DETALHAMENTO) + articulação ao texto. Viola DH = nota 0.`;
-
-  // CHAMADA 2 — Análise Completa (preload em background no envio, sob demanda aqui).
-  //
-  // Prompt reescrito: antes usava um template rígido (5 tópicos por parágrafo)
-  // que gerava texto mecânico e repetitivo. Agora pede análise narrativa e
-  // estratégica, focada em padrões e no próximo passo de aprendizado.
-  const PROMPT_ANALISE_COMPLETA = `Você é a PROfa da RedaON — especialista em redação ENEM, com postura de mentora pedagógica contínua.
-Sua missão é produzir uma ANÁLISE ESTRATÉGICA da redação em 3 seções bem enxutas, focando no que realmente importa para o desenvolvimento deste aluno.
-${RUBRICA_INEP_COMPACTA}
-
-CONTEXTO IMPORTANTE:
-- Este aluno já recebeu feedbacks específicos por competência (Chamada 1).
-- Sua função aqui NÃO é repetir essas observações.
-- Seu papel é DAR SENTIDO ao conjunto — identificar padrões, hierarquizar problemas, e apontar um caminho.
-
-DIRETRIZES DE ESCRITA:
-- Fale DIRETAMENTE com o aluno (usando "você"), como uma mentora conversando.
-- NUNCA use fórmulas mecânicas como "Parágrafo 1 apresenta...", "Este parágrafo tem como função...", "Observa-se que...".
-- NUNCA liste os 5 tópicos padrão para cada parágrafo.
-- Seja concreta e específica: cite trechos reais da redação quando útil.
-- Evite repetir o mesmo tipo de análise em seções diferentes.
-- Tom: mentora competente, acolhedora e direta. Nem burocrática, nem puxa-saco.
-
-REGRAS CRÍTICAS DE SAÍDA:
-1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
-2. Dentro de strings, use \\n (escapado) para quebras de linha.
-3. NÃO inclua aspas duplas não-escapadas dentro dos valores de string.
-4. Mantenha COERÊNCIA com as notas já atribuídas.
-
-Formato EXATO da resposta:
-{
-  "analise_projeto_texto": "<1 a 2 parágrafos. Avalie o PROJETO DE TEXTO: tese clara? A progressão dos parágrafos constrói um caminho lógico ou a redação salta entre ideias? O aluno controla o texto ou o texto controla o aluno? Foque no ARCO argumentativo, não em comentar cada parágrafo.>",
-  "analise_padrao_dominante": "<1 parágrafo. Qual é o PADRÃO dominante que mais limita a nota DESTA redação especificamente? Escolha o padrão REAL desta redação — ele pode estar em QUALQUER competência (norma culta, repertório, projeto de texto, coesão ou proposta) — e NÃO assuma que é repertório por padrão. Atribua o padrão à competência a que ele pertence e NÃO diga que um mesmo defeito limita várias competências ao mesmo tempo (ex.: repertório fraco é assunto de C2, não de C3 nem C4; coesão é C4, não C3). Se a redação for forte e não houver padrão limitante grave, NÃO invente um defeito — aponte o refinamento mais fino que a levaria de excelente a impecável. UM padrão-chave, não vários problemas soltos.>",
-  "analise_proximo_passo": "<1 parágrafo. Qual é o PRÓXIMO PASSO concreto no percurso deste aluno? Uma recomendação específica e acionável para a próxima redação, não um checklist genérico. Ex: 'Antes de escrever a próxima redação, escolha 2 referências específicas sobre o tema e anote como cada uma se conecta à sua tese — esse exercício resolve o repertório de bolso.'>"
-}`;
-
-  // CHAMADA 3 — Gera a versão refinada da redação do aluno.
-  // NOVA LÓGICA (v2.2 da rubrica): reescreve APENAS os trechos onde há erro
-  // nas competências com nota < 200. Mantém intactos os trechos correspondentes
-  // a competências que já estão em 200 (preservando o trabalho do aluno).
-  const PROMPT_REDACAO_NOTA_1000 = `Você é a PROfa da RedaON — especialista em redação ENEM.
-
-CONTEXTO: O aluno já recebeu uma correção com notas por competência. Sua missão agora é REFINAR a redação dele, mas com uma regra pedagógica importante: você só pode reescrever trechos que correspondam às competências com nota MENOR que 200. As competências que já alcançaram 200 estão excelentes — você NÃO deve mexer no que está bom.
-
-REGRA PRINCIPAL — REESCRITA PARCIAL POR COMPETÊNCIA:
-• Você receberá no contexto as notas por competência (C1, C2, C3, C4, C5)
-• Para cada competência com nota 200: NÃO altere o que o aluno escreveu para atender essa competência. Mantenha as escolhas lexicais, estruturas e ideias originais que demonstram domínio desse critério.
-• Para cada competência com nota < 200: identifique os trechos problemáticos e reescreva APENAS esses trechos, no mesmo parágrafo onde estavam.
-• A redação final deve ser reconhecível como "a redação do aluno com correções pontuais" — não uma redação totalmente nova.
-
-EXEMPLOS DE APLICAÇÃO:
-• Aluno tem C2 = 200 e C1 = 160 → mantenha o repertório/tema do aluno intactos. Corrija apenas desvios da norma culta (concordância, ortografia, pontuação).
-• Aluno tem C4 = 180 e demais = 200 → mantenha a estrutura inteira. Apenas substitua conectivos repetidos por sinônimos no parágrafo onde apareceram.
-• Aluno tem C5 = 160 e demais = 200 → mantenha introdução, desenvolvimento intactos. Refine apenas a conclusão para completar os 5 elementos da proposta de intervenção.
-• Aluno tem todas competências < 200 → reescreva a redação amplamente, mantendo o ponto de vista e a tese original.
-
-${RUBRICA_INEP_COMPACTA}
-
-REGRAS CRÍTICAS DE SAÍDA:
-1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
-2. Dentro de strings, use \\n (escapado) para quebras de linha.
-3. MANTENHA o tema, o ponto de vista e a tese do aluno. SEMPRE.
-4. Para competências com nota 200, preserve as escolhas do aluno nos trechos que demonstram esse domínio.
-5. A conclusão DEVE conter os 5 elementos da proposta de intervenção (ação, agente, meio, finalidade e detalhamento) integrados em prosa fluida — mas se o aluno JÁ tem C5 = 200, mantenha a conclusão dele intacta.
-6. NÃO use marcadores, rótulos ou destaques como "(AÇÃO)", "**(AGENTE)**", "[MEIO]" no meio do texto. A redação deve fluir como prosa natural.
-7. NÃO use asteriscos, parênteses ou colchetes para marcar partes da redação. Escreva como uma redação real entregue ao corretor INEP.
-8. O campo "competencias_preservadas" deve listar as competências (C1-C5) com nota 200 que tiveram trechos do aluno mantidos. Se o aluno tem 1000 cravado, todos os 4 parágrafos devem ser idênticos ao original e competencias_preservadas deve listar todas.
-
-Formato EXATO da resposta:
-{
-  "redacao_nota_1000_intro": "<parágrafo de introdução, com trechos do aluno preservados onde apropriado e refinamentos onde necessário>",
-  "redacao_nota_1000_dev1": "<1º parágrafo de desenvolvimento, mesmo princípio>",
-  "redacao_nota_1000_dev2": "<2º parágrafo de desenvolvimento, mesmo princípio>",
-  "redacao_nota_1000_conclusao": "<parágrafo de conclusão, mesmo princípio>",
-  "competencias_preservadas": ["<lista de competências com nota 200 cujos trechos foram preservados, ex: C2, C5>"]
-}`;
-
-  // CHAMADA 4 — Explica o que foi melhorado em cada competência.
-  // Depende dos dados da Chamada 3 (redação reescrita) passados como contexto.
-  // NOVA LÓGICA (v2.2 da rubrica): para competências com nota 200, gera mensagem
-  // de parabéns curta. Para competências com nota < 200, gera comparação detalhada.
-  const PROMPT_MELHORIAS = `Você é a PROfa da RedaON — especialista em redação ENEM.
-
-CONTEXTO: Você receberá DUAS versões da redação:
-(A) a REDAÇÃO ORIGINAL do aluno;
-(B) a VERSÃO NOTA 1000 reescrita pela PROfa.
-Além das notas por competência. Sua tarefa é, para cada competência, fazer um CONTRASTE EXPLÍCITO entre o que o aluno escreveu e como ficou na versão 1000.
-
-REGRA DE OURO — NUNCA parabenize o aluno por algo que está APENAS na versão reescrita (B). O mérito do que foi melhorado na versão 1000 é da reescrita, não do aluno. Seja honesta sobre o que era da redação original dele.
-
-TRATAMENTO POR COMPETÊNCIA:
-• Competência com nota 200 (o aluno JÁ acertou): reconheça o que o ALUNO fez na redação ORIGINAL. Mensagem curta (2-3 frases), tom parabenizador. Comece com "✓ ".
-• Competência com nota < 200 (havia o que melhorar): avalie PRIMEIRO se houve mudança real nessa competência entre a versão A e a versão B.
-   — Se houve mudança real: faça o CONTRASTE em 3 partes, nesta ordem:
-      1. "Na sua redação:" — cite o trecho/abordagem REAL do aluno (da versão A) e o que limitou a nota.
-      2. "Na versão nota 1000:" — cite como o mesmo ponto foi reescrito (da versão B).
-      3. "Por que melhora:" — explique o ganho pedagógico da mudança.
-      Comece com "↗ ". 4-6 frases.
-   — Se NÃO houve mudança real (o trecho da versão B é idêntico ou quase idêntico ao da versão A): NÃO invente um erro que não existe. Explique objetivamente qual aspecto da competência limitou a nota nessa redação, sem forjar contraste entre as versões. Comece com "⚠️ ". 2-4 frases.
-
-ATENÇÃO CRÍTICA: É proibido inventar erros para criar contraste. Se a versão 1000 manteve um trecho igual ao do aluno, isso significa que o trecho JÁ ESTAVA CORRETO — diga isso. Nunca finja que havia um erro quando a reescrita não mudou nada.
-
-EXEMPLO de contraste correto (C5 com nota < 200, com mudança real):
-"↗ Na sua redação: a proposta listava 'metrô, BRT e ciclovias', mas não dizia POR MEIO DE QUE viabilizar o investimento — faltava o elemento Meio e o detalhamento. Na versão nota 1000: foi acrescentado 'por meio de um plano nacional de mobilidade com destinação de verbas específicas do orçamento federal'. Por que melhora: a proposta deixa de ser uma intenção genérica e ganha um mecanismo concreto de execução, completando os 5 elementos exigidos pela C5."
-
-EXEMPLO de ausência de mudança real (C1 com nota < 200, sem mudança nas construções):
-"⚠️ Nesta competência, a reescrita manteve a maior parte das construções originais, pois os desvios identificados eram pontuais e não estruturais. O que limitou a nota foi [explicar o desvio real encontrado na correção]. A versão nota 1000 não alterou esse trecho, pois a questão não estava na construção das frases mas em [razão real]."
-
-${RUBRICA_INEP_COMPACTA}
-
-REGRAS CRÍTICAS DE SAÍDA:
-1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
-2. Competência nota 200 → comece com "✓ " e fale do que o ALUNO fez.
-3. Competência nota < 200 com mudança real → comece com "↗ " e use a estrutura "Na sua redação / Na versão nota 1000 / Por que melhora".
-4. Competência nota < 200 SEM mudança real entre as versões → comece com "⚠️ " e explique o problema real SEM forjar contraste.
-5. Cite trechos REAIS de cada versão. Nunca atribua ao aluno o que foi escrito na reescrita. Nunca invente erro onde a reescrita não mudou nada.
-
-Formato EXATO da resposta:
-{
-  "melhoria_c1": "<contraste ou parabéns conforme a nota>",
-  "melhoria_c2": "<mesma lógica para C2>",
-  "melhoria_c3": "<mesma lógica para C3>",
-  "melhoria_c4": "<mesma lógica para C4>",
-  "melhoria_c5": "<mesma lógica para C5>"
-}`;
-
-  // ── NOME USUÁRIO ───────────────────────────────────
-  const NOME_USUARIO = authGetNome();
-  document.getElementById('nomeUsuarioSidebar').textContent = NOME_USUARIO;
-
-  // ── LGPD ──────────────────────────────────────────
-  if (!localStorage.getItem('lgpd_aceito')) {
-    document.getElementById('modalLgpd').classList.add('aberto');
-  }
-  window.aceitarLgpd = function() {
-    localStorage.setItem('lgpd_aceito', '1');
-    document.getElementById('modalLgpd').classList.remove('aberto');
-  };
-
-  // ── TOAST (exposto globalmente para uso fora do module) ────────────
-  window.toast = function(msg, dur = 3000) {
-    const el = document.getElementById('toast');
-    el.textContent = msg; el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), dur);
-  };
-  function toast(msg, dur) { window.toast(msg, dur); }
-
-  // ── SUPABASE: funções expostas globalmente (window) para escapar do module ──
-  window.REDACOES = [];
-
-  window.carregarRedacoesDoSupabase = async function() {
-    const lista = document.getElementById('listaRedacoes');
-    lista.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:2rem;color:#928ea0;font-size:.75rem;"><div class="spinner" style="width:18px;height:18px;border-width:2px;"></div><span>Carregando...</span></div>';
-    try {
-      const userId = (typeof authGetUserId === 'function') ? authGetUserId() : null;
-      if (!userId) { lista.innerHTML = '<p style="font-size:.75rem;color:#928ea0;text-align:center;padding:1.5rem;">Sessao invalida.</p>'; return; }
-      // dbFetch renova o token automaticamente se retornar 401 (JWT expirado) e
-      // repete a chamada uma vez. Evita o bug do 401 recorrente que obrigava o
-      // usuário a fazer logout/login manualmente após algumas horas de inatividade.
-      const res = await dbFetch(
-        SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + userId + '&order=created_at.desc&select=id,texto,tema_livre,status,nota_final,created_at'
-      );
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const rows = await res.json();
-      window.REDACOES = rows.map(r => {
-        const nota = r.nota_final || null;
-        const primeiraLinha = r.texto ? r.texto.trim().split('\n')[0] : '';
-        const titulo = (r.tema_livre && r.tema_livre.trim()) ? r.tema_livre
-          : (primeiraLinha ? primeiraLinha.substring(0, 80) + (primeiraLinha.length > 80 ? '\u2026' : '') : 'Redacao sem titulo');
-        const data = new Date(r.created_at).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
-        return { id: r.id, titulo, data, fonte: 'ENEM', nota, status: r.status || 'enviada', texto: r.texto || '' };
-      });
-      window.renderLista();
-    } catch(err) {
-      console.error('Erro:', err);
-      lista.innerHTML = '<div style="padding:1rem;text-align:center;"><p style="font-size:.75rem;color:#ffb4ab;margin-bottom:.5rem;">Erro ao carregar.</p><button onclick="carregarRedacoesDoSupabase()" style="font-size:.72rem;color:#45edee;background:none;border:none;cursor:pointer;text-decoration:underline;">Tentar novamente</button></div>';
-    }
-  };
-
-  window.renderLista = function() {
-    const lista = document.getElementById('listaRedacoes');
-    lista.innerHTML = '';
-    const RD = window.REDACOES;
-    if (RD.length === 0) {
-      lista.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:2.5rem 1rem;gap:.75rem;text-align:center;"><span class="material-symbols-outlined" style="font-size:2.5rem;color:rgba(200,196,215,.2);">edit_note</span><p style="font-size:.75rem;color:#928ea0;">Nenhuma redacao enviada ainda.</p><button onclick="location.href=\'nova-redacao.html\';" style="font-size:.72rem;color:#45edee;background:none;border:none;cursor:pointer;text-decoration:underline;">Escrever agora</button></div>';
-      return;
-    }
-    RD.forEach(r => {
-      const corrigida = r.status === 'corrigida';
-      const card = document.createElement('div');
-      card.className = 'card-redacao p-4 rounded-2xl bg-surface-container hover:bg-surface-container-high border border-white/5 transition-all cursor-pointer';
-      card.id = 'card-' + r.id;
-      const notaHtml = r.nota ? '<div class="text-right"><span class="text-xl font-black text-secondary">' + r.nota + '</span><span class="text-[9px] block text-on-surface-variant uppercase font-bold">Nota</span></div>' : '';
-      const statusLabel = corrigida ? 'Corrigida' : (r.status === 'enviada' ? 'Enviada' : 'Pendente');
-      const statusClass = corrigida ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20';
-      card.innerHTML = '<div class="flex justify-between items-start mb-2"><span class="px-2 py-0.5 ' + statusClass + ' text-[9px] font-bold rounded-full uppercase">' + statusLabel + '</span>' + notaHtml + '</div><h4 class="text-on-surface font-semibold text-sm leading-snug mb-3">' + r.titulo + '</h4><div class="flex items-center justify-between"><span class="text-[10px] text-on-surface-variant">' + r.data + ' &middot; ' + r.fonte + '</span><button onclick="selecionarRedacao(\'' + r.id + '\')" class="px-3 py-1 bg-surface-container-highest text-white text-[10px] font-bold rounded-lg hover:bg-primary-container transition-colors">Ver</button></div>';
-      card.addEventListener('click', () => window.selecionarRedacao(r.id));
-      lista.appendChild(card);
-    });
-  };
-
-  window.carregarRedacoesDoSupabase();
-
-  // ── HANDLER ?abrir=<id> ────────────────────────────
-  // Quando o aluno vem de nova-redacao.html via botão "Ver análise completa →",
-  // a URL chega como minhas-redacoes.html?abrir=<redacao_id>.
-  // Recarrega a lista pra garantir que a redação nova aparece, depois abre.
-  (function() {
-    const params = new URLSearchParams(window.location.search);
-    const abrirId = params.get('abrir');
-    if (!abrirId) return;
-
-    // Remove o parâmetro da URL imediatamente (fica mais limpo)
-    const url = new URL(window.location.href);
-    url.searchParams.delete('abrir');
-    window.history.replaceState({}, '', url.toString());
-
-    // Aguarda carregarRedacoesDoSupabase terminar, depois tenta abrir.
-    // carregarRedacoesDoSupabase já foi chamado acima — mas a redação nova
-    // pode ter sido salva depois que essa página carregou (aluno veio de
-    // nova-redacao.html). Por segurança, recarrega a lista uma vez.
-    const abrirAposCarregar = () => {
-      // Espera até REDACOES ser populado (carregarRedacoesDoSupabase é async)
-      let tentativas = 0;
-      const tentaAbrir = () => {
-        tentativas++;
-        const encontrou = window.REDACOES && window.REDACOES.find(r => r.id === abrirId);
-        if (encontrou) {
-          window.selecionarRedacao(abrirId);
-        } else if (tentativas < 30) {
-          setTimeout(tentaAbrir, 200);
-        } else {
-          window.toast('Redação não encontrada. Verifique Minhas Redações.');
-        }
-      };
-      tentaAbrir();
-    };
-
-    // Recarrega a lista pra incluir a redação recém-salva, depois abre
-    if (typeof window.carregarRedacoesDoSupabase === 'function') {
-      const originalRender = window.renderLista;
-      window.renderLista = function() {
-        originalRender && originalRender.call(this);
-        window.renderLista = originalRender; // restaura depois da primeira chamada
-        abrirAposCarregar();
-      };
-    } else {
-      // Fallback: espera 1s e tenta diretamente
-      setTimeout(abrirAposCarregar, 1000);
-    }
-  })();
-  window.mudarAba = function(aba) {
-    ['original','melhoria','elite','professora'].forEach(a => {
-      const painel = document.getElementById('painel-' + a);
-      const btn = document.getElementById('aba-' + a);
-      if (painel) painel.classList.toggle('hidden', a !== aba);
-      if (btn) btn.classList.toggle('ativa', a === aba);
-    });
-    // Se ativou a aba Elite e existe celebração 1000 pendente (ainda não tocou),
-    // dispara animação + confetes agora que o painel está visível.
-    if (aba === 'elite' && document.getElementById('cardAluno1000') && window._celebracaoPendente) {
-      window._celebracaoPendente = false;
-      setTimeout(() => {
-        ajustarAnimacao1000();
-        setTimeout(() => disparaConfetes(), 5500);
-      }, 50);
-    }
-  };
-
-  // ── SELECIONAR REDAÇÃO ─────────────────────────────
-  let dadosAtuais = null;
-
-  // Cenário B — lê dados do banco (correcao_json) em vez de chamar Gemini.
-  // A correção já foi salva em nova-redacao.html via dbSalvarCorrecaoIACompleta,
-  // e a Chamada 2 (analise_completa) é adicionada em background.
-  window.selecionarRedacao = async function(id) {
-    const redacao = window.REDACOES.find(r => r.id === id);
-    if (!redacao || !redacao.texto) { window.toast('Redação sem conteúdo disponível.'); return; }
-
-    document.querySelectorAll('.card-redacao').forEach(c => c.classList.remove('selecionado'));
-    document.getElementById('card-' + id)?.classList.add('selecionado');
-
-    document.getElementById('estadoVazio').classList.add('hidden');
-    document.getElementById('painelAnalise').classList.add('hidden');
-    document.getElementById('estadoCarregando').classList.remove('hidden');
-
-    document.getElementById('tituloEspelho').textContent = redacao.titulo;
-    document.getElementById('metaEspelho').textContent = `Enviada em ${redacao.data} · ${redacao.fonte}`;
-    document.getElementById('notaEspelho').textContent = redacao.nota || '—';
-
-    mudarAba('original');
-
-    try {
-      // 1. Busca correção completa no banco
-      if (typeof dbBuscarCorrecao !== 'function') {
-        throw new Error('dbBuscarCorrecao indisponível — atualize supabase-auth.js');
-      }
-      const correcao = await dbBuscarCorrecao(id);
-      if (!correcao || !correcao.correcao_json) {
-        throw new Error('Correção ainda não disponível — envie a redação novamente');
-      }
-
-      const dados = correcao.correcao_json;
-
-      // 2. Normaliza formato de competências.
-      //    IMPORTANTE: os 7 agentes salvam objetos {nota, feedback, para_200}.
-      //    NÃO destruímos esse array (isso apagava para_200/feedback e quebrava
-      //    o modal "Por que Nota 1000" e o bloco de repertório). Mantemos os
-      //    objetos em dados.competencias e expomos as notas puras em dados._notas.
-      if (Array.isArray(dados.competencias) && dados.competencias.length > 0 && typeof dados.competencias[0] === 'object') {
-        dados._competencias_objetos = dados.competencias;          // alias histórico
-        dados._notas = dados.competencias.map(c => (c && typeof c.nota !== 'undefined') ? c.nota : 0);
-        // dados.competencias PERMANECE como array de objetos (não sobrescreve!)
-      } else if (Array.isArray(dados.competencias)) {
-        // Registro legado: array de números puros. Cria _notas igual e
-        // empacota objetos mínimos pra manter a interface uniforme.
-        dados._notas = dados.competencias.slice();
-        dados._competencias_objetos = dados.competencias.map(n => ({ nota: n }));
-      }
-
-      // 3. Renderiza
-      dadosAtuais = dados;
-      window._redacaoAtual = redacao;
-      window._correcaoAtualId = correcao.id;
-      renderAnalise(redacao, dados);
-
-      // 4. Renderiza aba "Sua Professora" se tem revisão visível
-      renderRevisaoProfessor(correcao);
-
-    } catch(err) {
-      console.error('[Minhas Redações] Erro ao carregar correção:', err);
-      renderFallback(redacao);
-    } finally {
-      document.getElementById('estadoCarregando').classList.add('hidden');
-      document.getElementById('painelAnalise').classList.remove('hidden');
-    }
-  };
-
-  // ════════════════════════════════════════════════════════════
-  // FASE 3 — TELA DE CELEBRAÇÃO NOTA 1000
-  // ════════════════════════════════════════════════════════════
-  // Substitui a aba "Elite da PROfa" quando o aluno tira 1000.
-  // Em vez de mostrar versão reescrita (que seria idêntica), mostra
-  // animação celebrativa estilo "lista de aprovados de vestibular":
-  //  1. Lista fictícia de nomes rola descendo (4.5s)
-  //  2. Para quando o nome real do aluno aparece (destacado em dourado)
-  //  3. Carimbo "APROVADO" cai do alto com efeito de batida (5s)
-  //  4. Confetes caem do topo
-  //  5. Mensagem final + botão "Baixar PNG"
-
-  // Nomes fictícios brasileiros realistas (mistura de comuns + alguns mais raros)
-  // Não usamos nomes muito comuns como "João Silva" pra não parecer placeholder.
-  const NOMES_FICTICIOS_CELEBRACAO = [
-    'Ana Beatriz Santos', 'Lucas Ferreira Lima', 'Maria Eduarda Costa',
-    'Pedro Henrique Almeida', 'Júlia Ribeiro Souza', 'Gabriel Mendes Rocha',
-    'Isabella Carvalho Pereira', 'Matheus Oliveira Santos', 'Sofia Cardoso Silva',
-    'Rafael Barbosa Martins', 'Beatriz Nascimento Lopes', 'Enzo Vieira Gomes',
-    'Larissa Castro Araújo', 'Davi Pinto Cavalcanti', 'Helena Moreira Dias',
-    'Bernardo Tavares Freitas', 'Manuela Correia Rocha', 'Arthur Pacheco Nunes',
-    'Valentina Andrade Costa', 'Heitor Coelho Ramos', 'Yasmin Borges Teixeira',
-    'Theo Macedo Cunha', 'Alice Marinho Sales', 'Samuel Aguiar Brito',
-    'Lara Magalhães Pires', 'Bryan Falcão Antunes', 'Cecília Marques Drummond',
-    'Vinícius Esteves Camargo', 'Antonella Botelho Lacerda', 'Otávio Sandes Galvão',
-    'Lavínia Quintela Sampaio', 'Caio Veloso Boaventura', 'Esther Rebouças Toledo',
-    'Murilo Bittencourt Soares', 'Mariana Furtado Bezerra', 'Henrique Saldanha Cabral'
-  ];
-
-  /**
-   * Monta o HTML da tela de celebração nota 1000.
-   * @param {string} nomeAluno - Nome real do aluno (vai aparecer destacado)
-   * @param {string} tema - Tema da redação (para o PNG de download)
-   */
-  function montarCelebracao1000(nomeAluno, tema) {
-    // Estrutura da lista (sentimento "Você é RedaON #0001"):
-    //  - 30 placeholders antes (rolam pra fora — numerados 1001+)
-    //  - Card do aluno como #0001 (1º lugar)
-    //  - 25 nomes fictícios depois (#0002+, figurantes que o carimbo cobre)
-    const placeholdersAntes = embaralhar([...NOMES_FICTICIOS_CELEBRACAO]).slice(0, 30);
-    const nomesDepois = embaralhar([...NOMES_FICTICIOS_CELEBRACAO]).slice(0, 25);
-
-    // 1. Placeholders rolam pra fora — numeração 1001+ (não confunde com aprovados)
-    let itensHtml = placeholdersAntes.map((nome, i) =>
-      '<div class="item-aprovado item-placeholder">' + String(1001 + i).padStart(4, '0') + ' &nbsp;&nbsp; ' + escHtml(nome) + '</div>'
-    ).join('');
-
-    // 2. Card do aluno — #0001 (com id para medição dinâmica)
-    const primeiroNome = nomeAluno.split(' ')[0].toUpperCase();
-    itensHtml += '<div class="item-aprovado aluno-real" id="cardAluno1000">'
-              +   '<div class="card-parabens-titulo">🏆 PARABÉNS, ' + escHtml(primeiroNome) + '!</div>'
-              +   '<div class="card-parabens-badge">Você é RedaON #0001</div>'
-              +   '<div class="card-parabens-nota">Você atingiu a nota máxima — 1000/1000</div>'
-              +   '<div class="card-parabens-linha">★ 0001 &nbsp;&nbsp; ' + escHtml(nomeAluno.toUpperCase()) + '</div>'
-              + '</div>';
-
-    // 3. Demais aprovados (#0002, #0003...) — figurantes que o carimbo cobre
-    itensHtml += nomesDepois.map((nome, i) =>
-      '<div class="item-aprovado">' + String(i + 2).padStart(4, '0') + ' &nbsp;&nbsp; ' + escHtml(nome) + '</div>'
-    ).join('');
-
-    return ''
-      + '<div class="celebracao-1000" id="celebracaoConteudo">'
-      +   '<div class="lista-aprovados">'
-      +     '<div class="lista-aprovados-titulo">Resultado Final · ENEM Redação · 1000/1000</div>'
-      +     '<div class="lista-aprovados-rolagem">'
-      +       '<div class="lista-aprovados-itens" id="listaAprovadosItens">' + itensHtml + '</div>'
-      +       '<div class="carimbo-onda"></div>'
-      +       '<div class="carimbo-container">'
-      +         '<div class="carimbo-aprovado">APROVADO</div>'
-      +       '</div>'
-      +     '</div>'
-      +   '</div>'
-      +   '<div class="botoes-1000">'
-      +     '<button class="btn-celebracao primario" onclick="window.baixarConquistaPNG()">'
-      +       '<span class="material-symbols-outlined" style="font-size:18px;">download</span>'
-      +       'Baixar imagem'
-      +     '</button>'
-      +     '<button class="btn-celebracao secundario" onclick="window.repetirAnimacao1000()">'
-      +       '<span class="material-symbols-outlined" style="font-size:18px;">replay</span>'
-      +       'Repetir'
-      +     '</button>'
-      +   '</div>'
-      + '</div>';
-  }
-
-  /**
-   * Ajusta a animação CSS dinamicamente para garantir que o card do aluno
-   * PARE no topo da janela visível. Mede a posição real (em vez de chutar
-   * pixels). Aplica via JavaScript depois que o HTML é inserido no DOM.
-   *
-   * IMPORTANTE: aguarda até o elemento estar realmente visível (com altura > 0).
-   * Sem isso, na primeira execução o offsetTop retorna 0 porque a aba pode
-   * estar com display:none ou ainda não renderizada.
-   */
-  function ajustarAnimacao1000(tentativas) {
-    tentativas = tentativas || 0;
-    const card = document.getElementById('cardAluno1000');
-    const lista = document.getElementById('listaAprovadosItens');
-    if (!card || !lista) {
-      // Elementos ainda não no DOM — tenta de novo
-      if (tentativas < 20) {
-        return setTimeout(() => ajustarAnimacao1000(tentativas + 1), 50);
-      }
-      console.warn('[RedaON] Animação 1000: card/lista não encontrados após 20 tentativas');
-      return;
-    }
-    // Verifica se o elemento está realmente renderizado (offsetTop confiável)
-    // Se a aba Elite não estiver ativa, offsetTop volta 0 e a animação quebra.
-    if (card.offsetTop === 0 || card.offsetHeight === 0) {
-      if (tentativas < 20) {
-        // Aguarda 50ms e tenta de novo (até 20 tentativas = 1 segundo)
-        return setTimeout(() => ajustarAnimacao1000(tentativas + 1), 50);
-      }
-      console.warn('[RedaON] Animação 1000: card ainda invisível após 1s, usando fallback');
-      // Fallback: usa cálculo estimado baseado em CSS
-      aplicarAnimacao1000(1110); // valor médio razoável
-      return;
-    }
-
-    // offsetTop do card dentro da lista = quanto subir para deixar o card no topo
-    // Subtrai 20px para deixar uma margem suave acima do card.
-    const desloc = card.offsetTop - 20;
-    console.info('[RedaON] Animação 1000 ajustada: card está em', card.offsetTop, 'px — rolagem total:', desloc, 'px (tentativa', tentativas, ')');
-    aplicarAnimacao1000(desloc);
-  }
-
-  /**
-   * Cria/atualiza @keyframes CSS dinamicamente com o deslocamento calculado.
-   */
-  function aplicarAnimacao1000(desloc) {
-    const styleId = 'animacao-celebracao-dinamica';
-    let styleEl = document.getElementById(styleId);
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = styleId;
-      document.head.appendChild(styleEl);
-    }
-    // Para o card NÃO ficar engolido pela borda superior da janela visível,
-    // a rolagem deve parar com o card a ~20px do topo (já contabilizado em desloc).
-    styleEl.textContent = ''
-      + '@keyframes rolarListaDinamica { '
-      + '  0%   { transform: translateY(0); } '
-      + '  85%  { transform: translateY(-' + desloc + 'px); } '
-      + '  100% { transform: translateY(-' + desloc + 'px); } '  // mantém posição final (não passa do card)
-      + '} '
-      + '.lista-aprovados-itens { '
-      + '  animation: rolarListaDinamica 4.5s cubic-bezier(.16,1,.3,1) forwards !important; '
-      + '}';
-
-    // FORÇA REFLOW antes da animação aplicar.
-    // Sem isso, na primeira execução o navegador pode "atrasar" o registro
-    // dos elementos e a animação não dispara. Lê offsetHeight para forçar
-    // o browser a calcular o layout atual antes de pintar a próxima frame.
-    const lista = document.getElementById('listaAprovadosItens');
-    if (lista) {
-      // Trigger reflow lendo uma propriedade que requer recalculo de layout
-      // eslint-disable-next-line no-unused-expressions
-      void lista.offsetHeight;
-      // Remove e re-adiciona a animação para forçar restart (técnica padrão)
-      lista.style.animation = 'none';
-      void lista.offsetHeight; // segundo reflow
-      lista.style.animation = '';
-    }
-  }
-
-  /**
-   * Embaralha array (Fisher-Yates). Garante ordem aleatória dos nomes fictícios
-   * a cada vez que a celebração é exibida.
-   */
-  function embaralhar(arr) {
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
-
-  /**
-   * Dispara confetes coloridos caindo do topo. Chamado no momento da
-   * batida do carimbo (5.5s após início da animação), para reforçar
-   * visualmente o impacto da aprovação.
-   */
-  // Timeouts pendentes dos confetes — permite cancelar se a celebração for fechada
-  let _confetesTimeouts = [];
-
-  function disparaConfetes() {
-    requestAnimationFrame(() => {
-      // Verifica se ainda existe celebração na tela (caso aluno tenha trocado de redação)
-      const container = document.querySelector('.celebracao-1000');
-      if (!container) {
-        console.warn('[RedaON] Confetes: container não encontrado');
-        return;
-      }
-      console.info('[RedaON] Disparando confetes (anexados ao body)');
-      const cores = ['#c9a227', '#ffe98a', '#45edee', '#6c5ce7', '#4ade80', '#fa6e6e', '#ffffff'];
-      // Cancela timeouts pendentes de uma exibição anterior (caso ainda haja)
-      _confetesTimeouts.forEach(t => clearTimeout(t));
-      _confetesTimeouts = [];
-
-      const burstInicial = 50;
-      const caudaTotal = 60;
-
-      for (let i = 0; i < burstInicial; i++) {
-        _confetesTimeouts.push(setTimeout(() => criarConfete(cores), i * 16));
-      }
-      for (let i = 0; i < caudaTotal; i++) {
-        _confetesTimeouts.push(setTimeout(() => criarConfete(cores), 800 + i * 33));
-      }
-    });
-  }
-
-  function criarConfete(cores) {
-    // Anexa ao document.body para os confetes aparecerem em tela inteira
-    // (não cortados pelo overflow:hidden do .celebracao-1000)
-    const confete = document.createElement('div');
-    confete.className = 'confete';
-    confete.style.left = Math.random() * 100 + '%';
-    confete.style.background = cores[Math.floor(Math.random() * cores.length)];
-    confete.style.animationDuration = (2.5 + Math.random() * 2.5) + 's';
-    confete.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
-    // Variação de tamanho (algumas tiras maiores, mais visíveis)
-    if (Math.random() > 0.7) {
-      confete.style.width = '14px';
-      confete.style.height = '20px';
-    }
-    document.body.appendChild(confete);
-    setTimeout(() => confete.remove(), 6000);
-  }
-
-  /**
-   * Permite o aluno repetir a animação (re-renderiza a celebração).
-   */
-  window.repetirAnimacao1000 = function() {
-    const container = document.getElementById('celebracaoConteudo');
-    if (!container) return;
-    const nomeAluno = (typeof NOME_USUARIO !== 'undefined' && NOME_USUARIO) ? NOME_USUARIO : 'Aluno RedaON';
-    const colElite = document.getElementById('colElite');
-    if (!colElite) return;
-    // Remove animação anterior para forçar restart
-    const styleAntigo = document.getElementById('animacao-celebracao-dinamica');
-    if (styleAntigo) styleAntigo.remove();
-    // Re-renderiza
-    colElite.innerHTML = montarCelebracao1000(nomeAluno, '');
-    ajustarAnimacao1000();
-    // Confetes sincronizados com a batida (5.5s)
-    setTimeout(() => disparaConfetes(), 5500);
-  };
-
-  /**
-   * Gera PNG da conquista usando canvas. Inclui:
-   * - Cabeçalho "RedaON"
-   * - Nome do aluno
-   * - Nota 1000
-   * - Selo APROVADO
-   * - Data
-   * Resultado: imagem 1080x1080 (formato Instagram).
-   */
-  window.baixarConquistaPNG = async function() {
-    try {
-      const nomeAluno = (typeof NOME_USUARIO !== 'undefined' && NOME_USUARIO) ? NOME_USUARIO : 'Aluno RedaON';
-      const dataConquista = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-
-      const canvas = document.createElement('canvas');
-      canvas.width = 1080;
-      canvas.height = 1080;
-      const ctx = canvas.getContext('2d');
-
-      // Fundo gradiente
-      const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
-      grad.addColorStop(0, '#1a1530');
-      grad.addColorStop(0.6, '#0f0c1d');
-      grad.addColorStop(1, '#2d1f4a');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 1080, 1080);
-
-      // Brilho central dourado
-      const radial = ctx.createRadialGradient(540, 540, 0, 540, 540, 500);
-      radial.addColorStop(0, 'rgba(201, 162, 39, 0.25)');
-      radial.addColorStop(1, 'rgba(201, 162, 39, 0)');
-      ctx.fillStyle = radial;
-      ctx.fillRect(0, 0, 1080, 1080);
-
-      // Logo "RedaON" no topo
-      ctx.fillStyle = '#c9a227';
-      ctx.font = 'bold 36px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('RedaON', 540, 110);
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.font = '20px Inter, sans-serif';
-      ctx.fillText('Plataforma de correção ENEM', 540, 145);
-
-      // Badge "VOCÊ É REDAON #0001" (gênero-neutro, marketeiro, sem ambiguidades)
-      ctx.fillStyle = 'rgba(201, 162, 39, 0.15)';
-      const badgeW = 360, badgeH = 50, badgeX = 540 - badgeW/2, badgeY = 175;
-      // Retângulo arredondado (compatibilidade canvas)
-      ctx.beginPath();
-      ctx.moveTo(badgeX + 25, badgeY);
-      ctx.lineTo(badgeX + badgeW - 25, badgeY);
-      ctx.quadraticCurveTo(badgeX + badgeW, badgeY, badgeX + badgeW, badgeY + 25);
-      ctx.lineTo(badgeX + badgeW, badgeY + badgeH - 25);
-      ctx.quadraticCurveTo(badgeX + badgeW, badgeY + badgeH, badgeX + badgeW - 25, badgeY + badgeH);
-      ctx.lineTo(badgeX + 25, badgeY + badgeH);
-      ctx.quadraticCurveTo(badgeX, badgeY + badgeH, badgeX, badgeY + badgeH - 25);
-      ctx.lineTo(badgeX, badgeY + 25);
-      ctx.quadraticCurveTo(badgeX, badgeY, badgeX + 25, badgeY);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(201, 162, 39, 0.4)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.fillStyle = '#ffe98a';
-      ctx.font = 'bold 26px Inter, sans-serif';
-      ctx.fillText('★  VOCÊ É REDAON #0001  ★', 540, badgeY + 33);
-
-      // Carimbo APROVADO (rotacionado)
-      ctx.save();
-      ctx.translate(540, 420);
-      ctx.rotate(-15 * Math.PI / 180);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-      ctx.strokeStyle = '#dc2626';
-      ctx.lineWidth = 12;
-      const w = 480, h = 180;
-      ctx.fillRect(-w/2, -h/2, w, h);
-      ctx.strokeRect(-w/2, -h/2, w, h);
-      ctx.fillStyle = '#dc2626';
-      ctx.font = 'bold 100px Impact, Arial Black, sans-serif';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('APROVADO', 0, 5);
-      ctx.restore();
-
-      // Nota 1000
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillStyle = '#ffe98a';
-      ctx.font = 'bold 220px Inter, sans-serif';
-      ctx.fillText('1000', 540, 720);
-
-      ctx.fillStyle = '#c9a227';
-      ctx.font = '32px Inter, sans-serif';
-      ctx.fillText('/ 1000 pontos', 540, 770);
-
-      // Nome do aluno
-      ctx.fillStyle = '#e1e2eb';
-      ctx.font = 'bold 42px Inter, sans-serif';
-      ctx.fillText(nomeAluno, 540, 870);
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.font = '22px Inter, sans-serif';
-      ctx.fillText('atingiu a nota máxima na redação ENEM', 540, 910);
-
-      // Rodapé com data
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.font = '20px Inter, sans-serif';
-      ctx.fillText(dataConquista + ' · redaon.com', 540, 1010);
-
-      // Linha decorativa
-      ctx.strokeStyle = 'rgba(201, 162, 39, 0.3)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(380, 970);
-      ctx.lineTo(700, 970);
-      ctx.stroke();
-
-      // Converte para blob e faz download
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          window.toast && window.toast('Não consegui gerar a imagem. Tente de novo.');
-          return;
-        }
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'RedaON-Nota-1000-' + nomeAluno.replace(/\s+/g, '_') + '.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        window.toast && window.toast('✓ Imagem baixada!');
-      }, 'image/png');
-    } catch (err) {
-      console.error('[RedaON] Erro ao gerar PNG:', err);
-      window.toast && window.toast('Não consegui gerar a imagem.');
-    }
-  };
-
-  // ── RENDER ANÁLISE ─────────────────────────────────
-  function renderAnalise(redacao, dados) {
-    const nomes = ['C1','C2','C3','C4','C5'];
-    // Cores por competência — 5 cores distintas para evitar confusão visual.
-    // C2 roxo (tema), C3 verde (argumentação/solidez), C4 âmbar, C5 vermelho.
-    const cores = ['#45edee','#6c5ce7','#4ade80','#fabd00','#fa6e6e'];
-    const comp = dados._notas || (Array.isArray(dados.competencias) ? dados.competencias.map(c => (c && typeof c.nota !== 'undefined') ? c.nota : (typeof c === 'number' ? c : 0)) : [0,0,0,0,0]);
-    // Soma real das competências (para as barras e total interno)
-    const somaComp = comp.reduce((a,b)=>a+b,0);
-    // Nota exibida no cabeçalho: prioriza banco, senão JSON, senão soma
-    const notaCabecalho = redacao.nota || dados.nota_total || somaComp;
-    // Sincroniza o cabeçalho com a nota correta
-    document.getElementById('notaEspelho').textContent = notaCabecalho || '—';
-
-    // ── Barras de competência
-    document.getElementById('barrasComp').innerHTML = comp.map((v,i) => `
-      <div class="flex flex-col gap-1">
-        <div class="flex justify-between text-[9px] font-bold gap-2">
-          <span class="text-on-surface-variant">${nomes[i]}</span>
-          <span style="color:${cores[i]}">${v}/200</span>
-        </div>
-        <div class="comp-barra-bg w-16">
-          <div class="comp-barra-fill" style="width:${Math.round(v/200*100)}%;background:${cores[i]}"></div>
-        </div>
-      </div>`).join('') +
-      `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:9px;color:#928ea0;font-weight:700;text-transform:uppercase;">Total</span>
-        <span style="font-size:15px;font-weight:800;color:#e1e2eb;">${somaComp}<span style="font-size:9px;color:#928ea0;">/1000</span></span>
-      </div>`;
-
-    // ── Alertas C2: repertório de bolso e tangenciamento
-    //     Padrão "folha" — rótulo colorido pequeno + texto serifado sobre fundo bege,
-    //     consistente com Elite da PROfa. Sem cards escuros sobrepostos.
-    //     Função auxiliar que cria um bloco-folha (para reuso com Análise Completa abaixo):
-    const blocoFolha = (cor, rotulo, tagComp, conteudoHtml) => {
-      return '<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,.08);">'
-        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;">'
-        + '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:' + cor + ';">' + rotulo + '</span>'
-        + (tagComp ? '<span style="font-size:9px;color:rgba(0,0,0,.35);background:rgba(0,0,0,.06);padding:1px 6px;border-radius:3px;">' + tagComp + '</span>' : '')
-        + '</div>'
-        + conteudoHtml
-        + '</div>';
-    };
-    const paragrafoFolha = (texto) => {
-      return '<p style="text-align:justify;color:#1f2937;line-height:2rem;">' + escHtml(texto) + '</p>';
-    };
-
-    let alertasC2 = '';
-    if (dados.c2_tangenciamento) {
-      const conteudo = paragrafoFolha(dados.c2_tangenciamento_detalhe || 'O tema não foi desenvolvido em sua totalidade.')
-        + '<p style="font-size:.85rem;color:rgba(0,0,0,.5);margin-top:.5rem;font-style:italic;">Efeito: C2, C3 e C5 ficam limitadas a 40 pontos cada.</p>';
-      alertasC2 += blocoFolha('#dc2626', '⚠ Tangenciamento detectado', 'C2', conteudo);
-    }
-    // Fonte do texto de avaliação do repertório: prioriza c2_repertorio_avaliacao
-    // (ponte), mas cai para o feedback do agente C2 (competencias[1].feedback),
-    // que SEMPRE vem preenchido. Isso evita o bloco vazio quando a ponte não
-    // gravou o campo (descompasso de versão na geração).
-    const _objs = dados._competencias_objetos || (Array.isArray(dados.competencias) && typeof dados.competencias[0] === 'object' ? dados.competencias : null);
-    const _avaliacaoC2 = dados.c2_repertorio_avaliacao
-      || (_objs && _objs[1] && _objs[1].feedback)
-      || '';
-    if (dados.c2_repertorio_tipo === 'bolso') {
-      let conteudo = '';
-      if (dados.c2_repertorio_referencia) {
-        conteudo += '<p style="color:rgba(0,0,0,.55);font-size:.95rem;margin-bottom:.5rem;">Referência citada: <strong style="color:#1f2937;">' + escHtml(dados.c2_repertorio_referencia) + '</strong></p>';
-      }
-      conteudo += paragrafoFolha(_avaliacaoC2);
-      if (dados.c2_repertorio_sugestao) {
-        conteudo += '<p style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(0,0,0,.5);margin-top:1rem;margin-bottom:.25rem;">Como tornar produtivo</p>'
-          + paragrafoFolha(dados.c2_repertorio_sugestao);
-      }
-      alertasC2 += blocoFolha('#6c5ce7', 'Repertório de bolso', 'C2', conteudo);
-    } else if (dados.c2_repertorio_tipo === 'produtivo') {
-      alertasC2 += blocoFolha('#16a34a', '✓ Repertório produtivo', 'C2', paragrafoFolha(_avaliacaoC2));
-    }
-
-    // ── C5 — Proposta de intervenção (padrão folha)
-    //     Checklist dos 5 elementos + avisos sobre direitos humanos.
-    const c5itens = [
-      { label: 'Ação',         valor: dados.c5_acao },
-      { label: 'Agente',       valor: dados.c5_agente },
-      { label: 'Meio',         valor: dados.c5_meio },
-      { label: 'Finalidade',   valor: dados.c5_finalidade },
-      { label: 'Detalhamento', valor: dados.c5_detalhamento }
-    ];
-    const checklistC5 = c5itens.map(item => {
-      const ok = !!item.valor;
-      return '<div style="display:flex;align-items:flex-start;gap:12px;padding:.5rem 0;">'
-        + '<span style="color:' + (ok ? '#16a34a' : '#dc2626') + ';font-weight:900;min-width:18px;font-size:1.1rem;line-height:2rem;">' + (ok ? '✓' : '✗') + '</span>'
-        + '<div style="flex:1;">'
-        +   '<span style="font-size:9px;color:rgba(0,0,0,.5);font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:block;line-height:1.3;">' + item.label + '</span>'
-        +   '<span style="font-size:1rem;color:' + (ok ? '#1f2937' : '#dc2626') + ';line-height:1.7;font-style:' + (ok ? 'normal' : 'italic') + ';">' + (ok ? escHtml(item.valor) : 'Não identificado — inclua na conclusão') + '</span>'
-        + '</div>'
-        + '</div>';
-    }).join('');
-
-    const violaDH = dados.c5_direitos_humanos === true;
-    const c5dh = violaDH
-      ? '<div style="margin-top:1rem;padding:.75rem 1rem;background:rgba(220,38,38,.08);border-left:3px solid #dc2626;border-radius:0 6px 6px 0;">'
-        + '<p style="font-size:9px;font-weight:800;color:#dc2626;margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.06em;">⚠ Proposta viola direitos humanos → C5 = 0</p>'
-        + '<p style="font-size:.95rem;color:#1f2937;line-height:1.6;">No ENEM, viola direitos humanos qualquer proposta que sugira tortura, execução sem julgamento, "justiça com as próprias mãos", punições degradantes ou incitação ao ódio por raça, gênero ou religião. Reescreva sua conclusão propondo uma ação legal e respeitosa à dignidade humana.</p>'
-        + '</div>'
-      : '';
-    const c5faltantesHtml = (dados.c5_elementos_faltantes || []).length > 0
-      ? '<p style="font-size:.9rem;color:#b45309;font-weight:600;margin-top:.75rem;font-style:italic;">Faltam: ' + dados.c5_elementos_faltantes.join(', ') + '</p>'
-      : '<p style="font-size:.9rem;color:#16a34a;font-weight:600;margin-top:.75rem;">✓ Proposta completa</p>';
-
-    const cardC5 = blocoFolha('#dc2626', 'Proposta de intervenção', 'C5',
-      checklistC5 + c5faltantesHtml + c5dh);
-
-    // ── Painel de melhoria: alertas C2 + checklist C5 + erros
-    let textoCorrigido = escHtml(redacao.texto);
-    let qtd = 0;
-    if (dados.erros?.length) {
-      // Só marca trechos curtos (até 6 palavras) para evitar sublinhar frases inteiras
-      const errosFiltrados = dados.erros.filter(e => e.original && e.original.split(' ').length <= 6);
-      qtd = errosFiltrados.length;
-      errosFiltrados.forEach(e => {
-        const esc = escHtml(e.original);
-        const regex = new RegExp('(?<![\\w])'+ esc.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') +'(?![\\w])', 'g');
-        textoCorrigido = textoCorrigido.replace(
-          regex,
-          `<span class="erro-orto" title="Sugestão: ${escHtml(e.correto)}">${esc}</span>`
-        );
-      });
-    }
-
-    // Aba "Texto Original" mostra a redação com marcações de erros inline.
-    // Se não há erros identificados, mostra o texto cru (sem nenhum span extra).
-    // Os spans .erro-orto têm tooltip com a sugestão de correção.
-    document.getElementById('colOriginal').innerHTML =
-      `<p style="white-space:pre-line;text-align:justify;">${textoCorrigido}</p>`;
-
-    document.getElementById('badgeErros').textContent = `${qtd} marcação${qtd!==1?'ões':''}`;
-
-    // ── Versão Elite: parágrafos identificados por competência
-    //     Compatível com nomes novos (redacao_nota_1000_*) e antigos (versao_elite_*).
-    const secoesList = [
-      { keys: ['redacao_nota_1000_intro',     'versao_elite_intro'],     label: 'Introdução',        cor: '#45edee', comp: 'C1 + C2' },
-      { keys: ['redacao_nota_1000_dev1',      'versao_elite_dev1'],      label: 'Desenvolvimento 1', cor: '#6c5ce7', comp: 'C2 + C3' },
-      { keys: ['redacao_nota_1000_dev2',      'versao_elite_dev2'],      label: 'Desenvolvimento 2', cor: '#4ade80', comp: 'C3 + C4' },
-      { keys: ['redacao_nota_1000_conclusao', 'versao_elite_conclusao'], label: 'Conclusão — C5',    cor: '#fabd00', comp: 'C5' }
-    ];
-    const leCampo = (keys) => {
-      for (const k of keys) { if (dados[k]) return dados[k]; }
-      return null;
-    };
-    // Limpa marcadores tipo **(AÇÃO)**, [AGENTE], (MEIO), etc. que a IA pode
-    // inserir mesmo com prompt pedindo prosa fluida. Normaliza espaços.
-    const limparMarcadores = (txt) => (txt || '')
-      .replace(/\*\*\s*\(?\s*(AÇÃO|AGENTE|MEIO|FINALIDADE|DETALHAMENTO)\s*\)?\s*\*\*/gi, '')
-      .replace(/\[\s*(AÇÃO|AGENTE|MEIO|FINALIDADE|DETALHAMENTO)\s*\]/gi, '')
-      .replace(/\(\s*(AÇÃO|AGENTE|MEIO|FINALIDADE|DETALHAMENTO)\s*\)/gi, '')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
-    // Fallback: se vier versao_elite como string única, dividir em parágrafos
-    let eliteHtml = '';
-    const temSecoes = secoesList.some(s => leCampo(s.keys));
-    if (temSecoes) {
-      eliteHtml = secoesList.map(s => {
-        const texto = limparMarcadores(leCampo(s.keys));
-        if (!texto) return '';
-        return '<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,.08);">'
-          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;">'
-          + '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:' + s.cor + ';">' + s.label + '</span>'
-          + '<span style="font-size:9px;color:rgba(0,0,0,.35);background:rgba(0,0,0,.06);padding:1px 6px;border-radius:3px;">' + s.comp + '</span>'
-          + '</div>'
-          + '<p style="text-align:justify;color:#1f2937;line-height:2rem;">' + escHtml(texto) + '</p>'
-          + '</div>';
-      }).join('');
-    } else {
-      // Fallback: versao_elite como texto único dividido por \n (registros muito antigos)
-      const textoElite = dados.versao_elite || '';
-      const paragrafosElite = textoElite.split(/\\n|\n/).map(p => p.trim()).filter(p => p.length > 0);
-      const rotulosFallback = [
-        {label:'Introdução', cor:'#45edee', comp:'C1 + C2'},
-        {label:'Desenvolvimento 1', cor:'#6c5ce7', comp:'C2 + C3'},
-        {label:'Desenvolvimento 2', cor:'#4ade80', comp:'C3 + C4'},
-        {label:'Conclusão — C5', cor:'#fabd00', comp:'C5'}
-      ];
-      eliteHtml = paragrafosElite.map((p, i) => {
-        const r = rotulosFallback[i] || rotulosFallback[rotulosFallback.length - 1];
-        return '<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,.08);">'
-          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;">'
-          + '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:' + r.cor + ';">' + r.label + '</span>'
-          + '<span style="font-size:9px;color:rgba(0,0,0,.35);background:rgba(0,0,0,.06);padding:1px 6px;border-radius:3px;">' + r.comp + '</span>'
-          + '</div>'
-          + '<p style="text-align:justify;color:#1f2937;line-height:2rem;">' + escHtml(p) + '</p>'
-          + '</div>';
-      }).join('');
-    }
-    // Estado vazio amigável: a reescrita nota 1000 é gerada sob demanda (Chamada 3).
-    // Mostra botão "Gerar agora" que dispara a chamada Gemini e salva no banco.
-    if (!eliteHtml) {
-      const status = (dados.chamadas && dados.chamadas.redacao_nota_1000) || 'pendente';
-      if (status === 'pendente' || status === 'erro') {
-        eliteHtml = ''
-          + '<div style="text-align:center;padding:2.5rem 1.5rem;">'
-          +   '<div style="font-size:2.5rem;margin-bottom:.75rem;">✨</div>'
-          +   '<h3 style="color:#e1e2eb;font-weight:800;font-size:1rem;margin-bottom:.5rem;">Veja sua redação nota 1000</h3>'
-          +   '<p style="color:#928ea0;font-size:.85rem;line-height:1.6;max-width:420px;margin:0 auto 1.25rem;">A PROfa vai reescrever a sua redação mantendo seu tema e ponto de vista, mas elevando tudo ao nível da nota máxima. Leva cerca de 15 segundos.</p>'
-          +   '<button onclick="window.gerarRedacaoNota1000()" style="background:linear-gradient(135deg,#6c5ce7,#45edee);color:#002020;border:none;padding:.75rem 1.5rem;border-radius:.75rem;font-weight:800;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;">'
-          +     '<span>✨ Gerar agora</span>'
-          +   '</button>'
-          + '</div>';
-      } else {
-        eliteHtml = '<p style="color:#928ea0;text-align:center;padding:2rem;">Versão nota 1000 não disponível.</p>';
-      }
-    }
-    // ── DETECÇÃO NOTA 1000: substitui aba Elite pela tela de celebração ──
-    // Se a nota total for 1000, em vez de mostrar versão reescrita (que seria
-    // idêntica ao original), mostra animação celebrativa com carimbo APROVADO,
-    // lista de aprovados fictícia e botão de download em PNG.
-    if (notaCabecalho === 1000) {
-      const nomeAluno = (typeof NOME_USUARIO !== 'undefined' && NOME_USUARIO)
-        ? NOME_USUARIO
-        : 'Aluno RedaON';
-      const temaRedacao = redacao.titulo && redacao.titulo !== 'Redacao sem titulo'
-        ? redacao.titulo
-        : 'Redação ENEM';
-      document.getElementById('colElite').innerHTML = montarCelebracao1000(nomeAluno, temaRedacao);
-      // Marca como pendente para o mudarAba reativar caso a aba mude
-      window._celebracaoPendente = true;
-      // Verifica se a aba Elite está visível agora — se sim, dispara animação imediato.
-      // Se não (caso comum: usuário está na aba "Texto Original"), espera o clique.
-      const painelElite = document.getElementById('painel-elite');
-      if (painelElite && !painelElite.classList.contains('hidden')) {
-        ajustarAnimacao1000();
-        setTimeout(() => disparaConfetes(), 5500);
-      }
-    } else {
-      document.getElementById('colElite').innerHTML = eliteHtml;
-    }
-
-    // ── Por que Nota 1000: comparação por competência (original vs Elite)
-    //     FONTE PRIMÁRIA: melhoria_c* (Chamada 4 — compara a redação com a versão
-    //     nota 1000 reescrita). Requer a Elite gerada primeiro.
-    //     FALLBACK: para_200 do agente ("o que falta") quando a comparação ainda
-    //     não existe — assim a tela nunca fica totalmente vazia.
-    const porQueCompetencias = [
-      { idx: 0, keys: ['melhoria_c1', 'por_que_elite_c1'], label: 'C1 — Língua formal',     cor: '#45edee' },
-      { idx: 1, keys: ['melhoria_c2', 'por_que_elite_c2'], label: 'C2 — Tema e repertório', cor: '#6c5ce7' },
-      { idx: 2, keys: ['melhoria_c3', 'por_que_elite_c3'], label: 'C3 — Argumentação',      cor: '#4ade80' },
-      { idx: 3, keys: ['melhoria_c4', 'por_que_elite_c4'], label: 'C4 — Coesão',            cor: '#fabd00' },
-      { idx: 4, keys: ['melhoria_c5', 'por_que_elite_c5'], label: 'C5 — Intervenção',       cor: '#fa6e6e' }
-    ];
-    const _objsPQ = dados._competencias_objetos || (Array.isArray(dados.competencias) && typeof dados.competencias[0] === 'object' ? dados.competencias : null);
-    // Existe a comparação real da Chamada 4?
-    const temComparacaoReal = porQueCompetencias.some(c => leCampo(c.keys));
-    // Helper: comparação real (primária) ou para_200 (fallback)
-    const _textoPorQue = (c) => {
-      const real = leCampo(c.keys);
-      if (real) return real;
-      const comp = _objsPQ ? _objsPQ[c.idx] : null;
-      const nota = comp && typeof comp.nota !== 'undefined' ? comp.nota : null;
-      if (nota === 200) return 'Competência no nível máximo (200). Parabéns!';
-      if (comp && comp.para_200) return comp.para_200;
-      return '';
-    };
-    const temPorQueComp = porQueCompetencias.some(c => _textoPorQue(c));
-    if (temPorQueComp) {
-      const aviso = temComparacaoReal ? '' :
-        '<p style="font-size:11px;color:#fabd00;background:rgba(250,189,0,.08);padding:8px 12px;border-radius:8px;margin-bottom:12px;">Gere a "Elite da PROfa" (versão nota 1000) para ver a comparação detalhada. Abaixo, o que falta em cada competência:</p>';
-      window._porQueElite = aviso + porQueCompetencias.map(c => {
-        const texto = _textoPorQue(c);
-        if (!texto) return '';
-        return '<div style="margin-bottom:14px;padding:10px 14px;background:#1d2026;border-left:3px solid ' + c.cor + ';border-radius:0 8px 8px 0;">'
-          + '<p style="font-size:11px;font-weight:700;color:' + c.cor + ';margin-bottom:5px;">' + c.label + '</p>'
-          + '<p style="font-size:13px;color:#e1e2eb;line-height:1.6;">' + escHtml(texto) + '</p>'
-          + '</div>';
-      }).join('');
-    } else {
-      // Estado vazio amigável — texto único antigo (fallback histórico) ou placeholder.
-      if (dados.por_que_elite) {
-        window._porQueElite = '<p style="font-size:13px;color:#e1e2eb;line-height:1.7;white-space:pre-line;">' + escHtml(dados.por_que_elite) + '</p>';
-      } else {
-        const status = (dados.chamadas && dados.chamadas.melhorias_por_competencia) || 'pendente';
-        window._porQueElite = '<p style="color:#928ea0;text-align:center;padding:2rem;">'
-          + (status === 'pendente'
-              ? 'Análise por competência será gerada sob demanda (em breve disponível).'
-              : 'Análise por competência não disponível.')
-          + '</p>';
-      }
-    }
-
-    // ── Análise estratégica da PROfa — blocos-folha integrados com o fundo bege.
-    //     Padrão visual idêntico aos alertas C2/C5 (blocoFolha), para unificação total.
-    //     Conteúdo vem da Chamada 2 (prompt reescrito em 3 seções estratégicas).
-    //     Fallback: formato antigo (analise_completa único) é mostrado como bloco único.
-    const cardsAnalise = [];
-
-    // Projeto de texto (C3) — formato novo tem seção dedicada; antigo usa c3_projeto_texto
-    if (dados.analise_projeto_texto) {
-      cardsAnalise.push(blocoFolha('#16a34a', '🏗️ Projeto de texto', 'C3', paragrafoFolha(dados.analise_projeto_texto)));
-    } else if (dados.c3_projeto_texto) {
-      cardsAnalise.push(blocoFolha('#16a34a', '🏗️ Projeto de texto', 'C3', paragrafoFolha(dados.c3_projeto_texto)));
-    }
-
-    // Padrão dominante (só formato novo)
-    if (dados.analise_padrao_dominante) {
-      cardsAnalise.push(blocoFolha('#dc2626', '⚡ Padrão dominante', '', paragrafoFolha(dados.analise_padrao_dominante)));
-    }
-
-    // Problemas de coesão (C4) — vem da Chamada 1, lista itens.
-    // FILTRO: só exibe se C4 < 200 (caso contrário é contraditório com nota máxima).
-    // Também respeita flag _filtrar_pontos_c4 (vem de nova-redacao.html quando
-    // a salvaguarda forçou C4=200 mas a IA gerou pontos errados).
-    const notaC4Atual = (Array.isArray(dados.competencias) && dados.competencias[3]
-                        && typeof dados.competencias[3].nota !== 'undefined')
-                       ? dados.competencias[3].nota
-                       : (Array.isArray(dados.competencias) ? dados.competencias[3] : null);
-    const c4Eh200 = (notaC4Atual === 200 || dados._filtrar_pontos_c4 === true);
-    if (dados.c4_problemas?.length && !c4Eh200) {
-      const itensC4 = dados.c4_problemas.map(p =>
-        '<li style="margin-bottom:.4rem;color:#1f2937;">' + escHtml(p) + '</li>'
-      ).join('');
-      const listaC4 = '<ul style="list-style:disc;padding-left:1.25rem;line-height:1.8;">' + itensC4 + '</ul>';
-      cardsAnalise.push(blocoFolha('#b45309', '🔗 Coesão', 'C4', listaC4));
-    }
-
-    // Próximo passo (só formato novo)
-    if (dados.analise_proximo_passo) {
-      cardsAnalise.push(blocoFolha('#6c5ce7', '🎯 Próximo passo', '', paragrafoFolha(dados.analise_proximo_passo)));
-    }
-
-    // Feedback geral (Chamada 1)
-    if (dados.feedback_geral) {
-      cardsAnalise.push(blocoFolha('#0891b2', '💬 Feedback geral', '', paragrafoFolha(dados.feedback_geral)));
-    }
-
-    // Fallback: analise_completa em formato antigo (prompt anterior)
-    if (!dados.analise_projeto_texto && !dados.analise_padrao_dominante && !dados.analise_proximo_passo && dados.analise_completa) {
-      cardsAnalise.unshift(blocoFolha('#0891b2', '📖 Análise parágrafo a parágrafo', '', paragrafoFolha(dados.analise_completa)));
-    }
-
-    // HTML final: alertas C2 + card C5 + blocos de análise + placeholder ou texto original com erros
-    const temAlgumaAnalise = cardsAnalise.length > 0;
-    const temFormatoNovo = !!(dados.analise_projeto_texto || dados.analise_padrao_dominante || dados.analise_proximo_passo);
-    window._temAnaliseCompleta = !!(temFormatoNovo || dados.analise_completa);
-
-    // Se falta a análise estratégica (Chamada 2), mostra placeholder com botão "Gerar"
-    let secaoAnalise = '';
-    if (temAlgumaAnalise) {
-      secaoAnalise = cardsAnalise.join('');
-    } else if (!window._temAnaliseCompleta) {
-      secaoAnalise = '<div style="text-align:center;padding:1.5rem 1rem;margin:1.5rem 0;background:rgba(108,92,231,.05);border:1px dashed rgba(108,92,231,.25);border-radius:8px;">'
-        + '<p style="font-size:.95rem;color:#4b5563;margin-bottom:.75rem;">📖 A análise estratégica da PROfa ainda não foi gerada.</p>'
-        + '<button onclick="window.gerarAnaliseCompleta && window.gerarAnaliseCompleta()" style="background:#6c5ce7;color:white;border:none;padding:.5rem 1.25rem;border-radius:.5rem;font-weight:700;font-size:.85rem;cursor:pointer;">Gerar análise estratégica</button>'
-        + '</div>';
-    }
-
-    // Montagem final de colCorrecoes: alertas C2 + card C5 + análise estratégica.
-    // O texto original com erros marcados não aparece mais aqui (Opção C):
-    // as marcações foram movidas para a aba "Texto Original" — acabou a redundância.
-    document.getElementById('colCorrecoes').innerHTML =
-      alertasC2 + cardC5 + secaoAnalise;
-
-    // _porQueElite já foi definido acima (por competência ou fallback) — não sobrescrever aqui
-  }
-  // ── RENDER ABA "SUA PROFESSORA" (sub-etapa 3.6) ──
-  // Mostra a revisão pedagógica que a professora salvou (concorda/discorda
-  // por competência + comentário geral). Só aparece se visivel_aluno !== false.
-  function renderRevisaoProfessor(correcao) {
-    const abaBtn = document.getElementById('aba-professora');
-    const colProf = document.getElementById('colProfessora');
-    const rev = correcao && correcao.revisao_professor;
-
-    // Sem revisão OU oculta pelo professor: esconde a aba completamente
-    if (!rev || rev.visivel_aluno === false || !rev.competencias) {
-      if (abaBtn) abaBtn.classList.add('hidden');
-      return;
-    }
-
-    // Tem revisão visível: mostra a aba
-    if (abaBtn) abaBtn.classList.remove('hidden');
-
-    // Formata data
-    function fmtDataRev(iso) {
-      if (!iso) return '';
-      try {
-        const d = new Date(iso);
-        return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
-      } catch(e) { return ''; }
-    }
-
-    // Helper de escape
-    function escRev(s) {
-      if (s === null || s === undefined) return '';
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-    }
-
-    const labels = {
-      c1: 'C1 — Domínio da norma culta',
-      c2: 'C2 — Compreensão do tema',
-      c3: 'C3 — Argumentação',
-      c4: 'C4 — Coesão e coerência',
-      c5: 'C5 — Proposta de intervenção'
-    };
-
-    const comps = rev.competencias || {};
-    const algumDiscordou = ['c1','c2','c3','c4','c5'].some(function(k) {
-      return comps[k] && comps[k].concorda === false;
-    });
-
-    // Cabeçalho da seção
-    const cabecalho =
-      '<div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,.08);">' +
-        '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;">' +
-          '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#16a34a;">✓ Revisada pela sua professora</span>' +
-        '</div>' +
-        '<p style="font-size:.85rem;color:rgba(0,0,0,.55);line-height:1.6;">' +
-          'Sua professora ' + (rev.revisado_em ? 'revisou esta correção em <strong style="color:#1f2937;">' + escRev(fmtDataRev(rev.revisado_em)) + '</strong>. ' : 'analisou esta correção. ') +
-          'Aqui está a opinião dela sobre cada competência avaliada pela IA:' +
-        '</p>' +
-      '</div>';
-
-    // Cards das 5 competências
-    const cardsComps = ['c1','c2','c3','c4','c5'].map(function(k) {
-      const item = comps[k];
-      if (!item || typeof item.concorda !== 'boolean') {
-        // Sem decisão da professora nessa competência
-        return (
-          '<div style="display:flex;align-items:flex-start;gap:.75rem;padding:.875rem 0;border-bottom:1px solid rgba(0,0,0,.08);">' +
-            '<span style="color:rgba(0,0,0,.3);font-weight:900;min-width:20px;font-size:1.2rem;line-height:1.5rem;">—</span>' +
-            '<div style="flex:1;">' +
-              '<p style="font-size:1rem;color:#1f2937;font-weight:600;margin-bottom:.15rem;">' + labels[k] + '</p>' +
-              '<p style="font-size:.85rem;color:rgba(0,0,0,.5);font-style:italic;">Sem comentário da professora</p>' +
-            '</div>' +
-          '</div>'
-        );
-      }
-      const cor = item.concorda ? '#16a34a' : '#dc2626';
-      const icone = item.concorda ? '✓' : '✗';
-      const texto = item.concorda
-        ? 'Sua professora <strong>concordou</strong> com a correção da IA.'
-        : 'Sua professora <strong>discordou</strong> da correção da IA. <span style="font-style:italic;">Vamos analisar pra calibrar nossa IA.</span>';
-      return (
-        '<div style="display:flex;align-items:flex-start;gap:.75rem;padding:.875rem 0;border-bottom:1px solid rgba(0,0,0,.08);">' +
-          '<span style="color:' + cor + ';font-weight:900;min-width:20px;font-size:1.3rem;line-height:1.5rem;">' + icone + '</span>' +
-          '<div style="flex:1;">' +
-            '<p style="font-size:1rem;color:#1f2937;font-weight:600;margin-bottom:.2rem;">' + labels[k] + '</p>' +
-            '<p style="font-size:.9rem;color:rgba(0,0,0,.65);line-height:1.55;">' + texto + '</p>' +
-          '</div>' +
-        '</div>'
-      );
-    }).join('');
-
-    // Comentário geral (se existir)
-    let blocoComentario = '';
-    if (rev.comentario_geral && rev.comentario_geral.trim()) {
-      blocoComentario =
-        '<div style="margin-top:1.5rem;padding:1.25rem;background:rgba(108,92,231,.06);border:1px solid rgba(108,92,231,.2);border-radius:.75rem;">' +
-          '<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.6rem;">' +
-            '<span style="font-size:1rem;">💬</span>' +
-            '<span style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6c5ce7;">Mensagem da sua professora</span>' +
-          '</div>' +
-          '<p style="font-family:\'EB Garamond\',serif;font-size:1.05rem;line-height:1.75;color:#1f2937;white-space:pre-line;">' +
-            escRev(rev.comentario_geral) +
-          '</p>' +
-        '</div>';
-    }
-
-    // Resumo no final (se houve discordância)
-    let rodape = '';
-    if (algumDiscordou) {
-      rodape =
-        '<div style="margin-top:1.5rem;padding:.875rem 1rem;background:rgba(74,222,128,.06);border-left:3px solid #4ade80;border-radius:0 .5rem .5rem 0;">' +
-          '<p style="font-size:.85rem;color:rgba(0,0,0,.65);line-height:1.55;">' +
-            '<strong style="color:#16a34a;">Sua professora identificou pontos onde a correção da IA pode ser melhorada.</strong> ' +
-            'Esses feedbacks são analisados pela equipe RedaON pra calibrar nossa IA continuamente.' +
-          '</p>' +
-        '</div>';
-    } else {
-      rodape =
-        '<div style="margin-top:1.5rem;padding:.875rem 1rem;background:rgba(22,163,74,.06);border-left:3px solid #16a34a;border-radius:0 .5rem .5rem 0;">' +
-          '<p style="font-size:.85rem;color:rgba(0,0,0,.65);line-height:1.55;">' +
-            '<strong style="color:#16a34a;">✓ Sua professora concordou com toda a correção da IA.</strong> ' +
-            'Continue evoluindo!' +
-          '</p>' +
-        '</div>';
-    }
-
-    // Render final
-    if (colProf) {
-      colProf.innerHTML = cabecalho + cardsComps + blocoComentario + rodape;
-    }
-  }
-
-  function renderFallback(redacao) {
-    document.getElementById('barrasComp').innerHTML = '<p class="text-xs text-on-surface-variant">Análise indisponível.</p>';
-    document.getElementById('colOriginal').innerHTML = `<p style="white-space:pre-line;text-align:justify;">${escHtml(redacao.texto)}</p>`;
-    document.getElementById('colCorrecoes').innerHTML = '<p style="text-align:center;padding:2rem;color:#928ea0;font-size:.9rem;">Correção não disponível. Isso pode acontecer se a redação ainda está sendo processada ou se foi enviada antes da atualização do sistema. Envie a redação novamente.</p>';
-    document.getElementById('colElite').innerHTML = '<p style="text-align:center;padding:2rem;color:#928ea0;font-size:.9rem;">Correção não disponível.</p>';
-    document.getElementById('badgeErros').textContent = '—';
-    window.toast('Correção não encontrada no banco.');
-  }
-
-  function escHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // ── CHAMADA 2 (sob demanda) ─────────────────────────
-  // Gera a análise completa via Gemini e salva no banco. Geralmente a análise
-  // já foi preloada em background durante o envio da redação em nova-redacao.html,
-  // mas para redações antigas (anteriores ao fix da RLS) ou casos em que o
-  // preload falhou, esta função dispara a Chamada 2 sob demanda.
-  window.gerarAnaliseCompleta = async function() {
-    const redacao = window._redacaoAtual;
-    if (!redacao || !dadosAtuais) return false;
-
-    // Loading inline: substitui o placeholder pela animação de geração na própria aba.
-    const colCorrecoes = document.getElementById('colCorrecoes');
-    const loadingHtml = '<div style="text-align:center;padding:2rem 1rem;margin:1.5rem 0;background:rgba(108,92,231,.05);border:1px dashed rgba(108,92,231,.25);border-radius:8px;">'
-      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
-      + '<p style="font-size:.95rem;color:#4b5563;font-weight:600;margin-bottom:.375rem;">Gerando análise estratégica...</p>'
-      + '<p style="font-size:.8rem;color:rgba(0,0,0,.5);">A PROfa está analisando sua redação. Leva cerca de 15 segundos.</p>'
-      + '</div>';
-    // Localiza se já existe um placeholder pra substituir; senão, adiciona ao fim.
-    if (colCorrecoes) {
-      const placeholder = colCorrecoes.querySelector('[style*="dashed"]');
-      if (placeholder) placeholder.outerHTML = loadingHtml;
-      else colCorrecoes.insertAdjacentHTML('beforeend', loadingHtml);
-    }
-
-    try {
-      // Monta prompt com contexto das notas/feedbacks da Chamada 1 (pra consistência).
-      const _temaC2 = (redacao.titulo && redacao.titulo !== 'Redacao sem titulo')
-        ? redacao.titulo
-        : '(tema não informado pelo aluno — infira do texto da redação)';
-      const comps = dadosAtuais._competencias_objetos || [];
-      const contexto = '\n\nCONTEXTO — Análise já atribuída a esta redação:\n'
-        + 'Tema da redação: ' + _temaC2 + '\n'
-        + 'Nota total: ' + (dadosAtuais.nota_total || '—') + '/1000\n'
-        + 'Notas por competência: '
-        + (Array.isArray(dadosAtuais.competencias)
-            ? dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + ((v && typeof v.nota !== 'undefined') ? v.nota : v)).join(', ')
-            : '—')
-        + '\n'
-        + (comps.length > 0
-            ? 'Feedbacks: ' + comps.map((c, i) => 'C' + (i+1) + ': ' + (c.feedback || '')).join(' | ')
-            : '')
-        + '\n\nRedação:\n' + redacao.texto;
-
-      const raw = await geminiGenerate(PROMPT_ANALISE_COMPLETA + contexto);
-      const dados2 = parseRespostaGemini(raw);
-
-      // Prompt novo retorna 3 campos (projeto_texto, padrao_dominante, proximo_passo)
-      // Fallback: se vier no formato antigo (analise_completa único), aceita também
-      const temFormatoNovo = dados2.analise_projeto_texto || dados2.analise_padrao_dominante || dados2.analise_proximo_passo;
-      const temFormatoAntigo = dados2.analise_completa;
-      if (!temFormatoNovo && !temFormatoAntigo) {
-        throw new Error('Resposta da Gemini não contém análise esperada.');
-      }
-
-      const camposParaSalvar = { chamadas: { analise_completa: 'completa' } };
-      if (dados2.analise_projeto_texto)    camposParaSalvar.analise_projeto_texto    = dados2.analise_projeto_texto;
-      if (dados2.analise_padrao_dominante) camposParaSalvar.analise_padrao_dominante = dados2.analise_padrao_dominante;
-      if (dados2.analise_proximo_passo)    camposParaSalvar.analise_proximo_passo    = dados2.analise_proximo_passo;
-      if (dados2.analise_completa)         camposParaSalvar.analise_completa         = dados2.analise_completa;
-
-      if (typeof dbAtualizarCorrecaoJson === 'function') {
-        await dbAtualizarCorrecaoJson(redacao.id, camposParaSalvar);
-      }
-
-      Object.assign(dadosAtuais, camposParaSalvar);
-      dadosAtuais.chamadas = dadosAtuais.chamadas || {};
-      dadosAtuais.chamadas.analise_completa = 'completa';
-
-      // Re-renderiza pra atualizar o painel completo com os novos cards
-      renderAnalise(redacao, dadosAtuais);
-
-      return true;
-    } catch (err) {
-      console.error('[Minhas Redações] Falha ao gerar análise completa:', err);
-      // Reexibe o placeholder com opção de tentar de novo
-      if (colCorrecoes) {
-        const loading = colCorrecoes.querySelector('.spinner');
-        if (loading) {
-          loading.closest('div[style*="dashed"], div[style*="#6c5ce7"]').outerHTML =
-            '<div style="text-align:center;padding:1.5rem 1rem;margin:1.5rem 0;background:rgba(220,38,38,.05);border:1px dashed rgba(220,38,38,.25);border-radius:8px;">'
-            + '<p style="font-size:.95rem;color:#7f1d1d;margin-bottom:.75rem;">Não foi possível gerar a análise estratégica.</p>'
-            + '<button onclick="window.gerarAnaliseCompleta()" style="background:#dc2626;color:white;border:none;padding:.5rem 1.25rem;border-radius:.5rem;font-weight:700;font-size:.85rem;cursor:pointer;">Tentar novamente</button>'
-            + '</div>';
-        }
-      }
-      return false;
-    }
-  };
-
-  // window.verAnaliseCompleta foi removida nesta iteração — a análise agora
-  // é renderizada na própria aba "Pontos de Melhoria" via renderAnalise.
-
-  // ── CHAMADA 3 (sob demanda) ─────────────────────────
-  // Gera a redação nota 1000 via Gemini e salva no banco. Atualiza a UI.
-  window.gerarRedacaoNota1000 = async function() {
-    const redacao = window._redacaoAtual;
-    if (!redacao || !dadosAtuais) {
-      window.toast('Selecione uma redação primeiro.');
-      return;
-    }
-    const colElite = document.getElementById('colElite');
-
-    // ── SALVAGUARDA: redação antiga sem texto (legado pré-v2.2) ─────
-    // Algumas redações no banco têm texto = '[Arquivo enviado]' porque foram
-    // submetidas por foto antes da v2.2 (que faz OCR no upload). Sem texto real,
-    // a IA da Chamada 3 alucina. Bloqueamos com mensagem útil.
-    if (!redacao.texto || redacao.texto.trim() === '[Arquivo enviado]' || redacao.texto.trim().length < 50) {
-      colElite.innerHTML =
-        '<div style="text-align:center;padding:2.5rem 1.5rem;">'
-        + '<span class="material-symbols-outlined" style="font-size:2.5rem;color:#fabd00;margin-bottom:.5rem;">info</span>'
-        + '<p style="color:#e1e2eb;font-size:.95rem;font-weight:700;margin-bottom:.5rem;">Versão nota 1000 indisponível</p>'
-        + '<p style="color:#c8c4d7;font-size:.8rem;line-height:1.6;margin-bottom:1rem;">Esta redação foi enviada por foto antes da atualização que transcreve o texto automaticamente.</p>'
-        + '<p style="color:#928ea0;font-size:.75rem;line-height:1.55;">Para receber a versão nota 1000, envie uma nova redação digitando o texto ou usando uma foto recente — o sistema agora transcreve a imagem para você revisar antes de corrigir.</p>'
-        + '</div>';
-      return;
-    }
-
-    colElite.innerHTML =
-      '<div style="text-align:center;padding:2.5rem 1.5rem;">'
-      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
-      + '<p style="color:#c8c4d7;font-size:.9rem;font-weight:600;margin-bottom:.375rem;">Gerando versão nota 1000...</p>'
-      + '<p style="color:#928ea0;font-size:.75rem;">A PROfa está reescrevendo sua redação com rigor ENEM. Aguarde cerca de 15 segundos.</p>'
-      + '</div>';
-
-    try {
-      // Monta prompt com contexto da redação original + tema + notas já atribuídas
-      const _temaC3 = (redacao.titulo && redacao.titulo !== 'Redacao sem titulo')
-        ? redacao.titulo
-        : '(tema não informado pelo aluno — infira do texto da redação)';
-
-      // Identifica explicitamente quais competências estão em 200 (preservar)
-      // e quais estão < 200 (refinar). Isso ajuda a IA a aplicar a regra de
-      // reescrita parcial conforme v2.2 da rubrica.
-      let competenciasPreservar = '';
-      let competenciasRefinar = '';
-      if (Array.isArray(dadosAtuais.competencias)) {
-        const c200 = [];
-        const cMenos = [];
-        dadosAtuais.competencias.forEach((v, i) => {
-          // Formato 7-agentes: {nota,...}. Formato antigo: número direto.
-          const n = (v && typeof v.nota !== 'undefined') ? v.nota : parseInt(v, 10);
-          if (n === 200) c200.push('C' + (i+1));
-          else cMenos.push('C' + (i+1) + '=' + n);
-        });
-        if (c200.length > 0) competenciasPreservar = c200.join(', ');
-        if (cMenos.length > 0) competenciasRefinar = cMenos.join(', ');
-      }
-
-      // Monta diagnóstico DETALHADO por competência a partir dos campos que os
-      // 7 agentes salvaram no correcao_json. Isso diz à Chamada 3 EXATAMENTE o que
-      // corrigir (não só a nota). Ex.: C5=120 → "faltam Meio e Detalhamento".
-      let diagnosticoDetalhado = '\n\nDIAGNÓSTICO ESPECÍFICO (o que corrigir em cada competência abaixo de 200):\n';
-      const d = dadosAtuais;
-      const comps = Array.isArray(d.competencias) ? d.competencias : [];
-      const notaDe = (i) => {
-        const c = comps[i];
-        return (c && typeof c.nota !== 'undefined') ? c.nota : c;
-      };
-      const fbDe = (i) => (comps[i] && comps[i].feedback) ? comps[i].feedback : '';
-      const paraSubirDe = (i) => (comps[i] && comps[i].para_200) ? comps[i].para_200 : '';
-
-      if (notaDe(0) < 200) diagnosticoDetalhado += `• C1 (${notaDe(0)}): ${fbDe(0)} ${paraSubirDe(0)}\n`;
-      if (notaDe(1) < 200) {
-        diagnosticoDetalhado += `• C2 (${notaDe(1)}): ${fbDe(1)} ${paraSubirDe(1)}`;
-        if (d.c2_repertorio_tipo === 'bolso') diagnosticoDetalhado += ` ATENÇÃO: o repertório foi classificado como DE BOLSO (citado mas não desdobrado). Na reescrita, DESDOBRE a ideia da referência ao longo dos parágrafos de desenvolvimento, não apenas a cite na introdução.`;
-        diagnosticoDetalhado += '\n';
-      }
-      if (notaDe(2) < 200) diagnosticoDetalhado += `• C3 (${notaDe(2)}): ${fbDe(2)} ${paraSubirDe(2)}\n`;
-      if (notaDe(3) < 200) diagnosticoDetalhado += `• C4 (${notaDe(3)}): ${fbDe(3)} ${paraSubirDe(3)}\n`;
-      if (notaDe(4) < 200) {
-        diagnosticoDetalhado += `• C5 (${notaDe(4)}): ${fbDe(4)} ${paraSubirDe(4)}`;
-        const faltam = Array.isArray(d.c5_elementos_faltantes) ? d.c5_elementos_faltantes : [];
-        if (faltam.length > 0) {
-          diagnosticoDetalhado += ` ELEMENTOS FALTANTES NA PROPOSTA: ${faltam.join(', ')}. Na conclusão reescrita, INCLUA OBRIGATORIAMENTE esses elementos.`;
-          if (faltam.some(x => String(x).toLowerCase().includes('meio'))) {
-            diagnosticoDetalhado += ` Lembre: MEIO é o mecanismo de viabilização (ex: "por meio de parcerias público-privadas", "mediante destinação de verba do orçamento federal", "através de um programa nacional"), NÃO a lista do que será feito.`;
-          }
-          if (faltam.some(x => String(x).toLowerCase().includes('detalh'))) {
-            diagnosticoDetalhado += ` DETALHAMENTO: aprofunde concretamente ao menos um elemento, conectando-o aos argumentos discutidos no texto.`;
-          }
-        }
-        diagnosticoDetalhado += '\n';
-      }
-
-      const contexto = '\n\nCONTEXTO — Notas já atribuídas:\n'
-        + 'Tema da redação: ' + _temaC3 + '\n'
-        + (dadosAtuais.nota_total ? 'Nota total: ' + dadosAtuais.nota_total + '/1000\n' : '')
-        + (Array.isArray(dadosAtuais.competencias)
-            ? 'Notas por competência: ' + dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + (notaDe(i))).join(', ') + '\n'
-            : '')
-        + (competenciasPreservar ? 'COMPETÊNCIAS COM NOTA 200 (PRESERVAR trechos do aluno): ' + competenciasPreservar + '\n' : '')
-        + (competenciasRefinar ? 'COMPETÊNCIAS PARA REFINAR (nota < 200): ' + competenciasRefinar + '\n' : '')
-        + diagnosticoDetalhado
-        + '\nRedação original:\n' + redacao.texto;
-
-      const raw = await geminiGenerate(PROMPT_REDACAO_NOTA_1000 + contexto);
-      const dados3 = parseRespostaGemini(raw);
-
-      if (!dados3.redacao_nota_1000_intro && !dados3.redacao_nota_1000_dev1) {
-        throw new Error('Resposta da Gemini não contém os campos esperados.');
-      }
-
-      // Merge no banco
-      if (typeof dbAtualizarCorrecaoJson === 'function') {
-        await dbAtualizarCorrecaoJson(redacao.id, {
-          redacao_nota_1000_intro:     dados3.redacao_nota_1000_intro,
-          redacao_nota_1000_dev1:      dados3.redacao_nota_1000_dev1,
-          redacao_nota_1000_dev2:      dados3.redacao_nota_1000_dev2,
-          redacao_nota_1000_conclusao: dados3.redacao_nota_1000_conclusao,
-          chamadas: { redacao_nota_1000: 'completa' }
-        });
-      }
-
-      // Atualiza dadosAtuais localmente para re-render imediato
-      Object.assign(dadosAtuais, dados3);
-      dadosAtuais.chamadas = dadosAtuais.chamadas || {};
-      dadosAtuais.chamadas.redacao_nota_1000 = 'completa';
-
-      // Re-renderiza painel inteiro para refletir o novo estado
-      renderAnalise(redacao, dadosAtuais);
-      // Garante que a aba Elite da PROfa continue aberta
-      window.mudarAba('elite');
-      window.toast('✨ Versão nota 1000 gerada!');
-
-    } catch (err) {
-      console.error('[Minhas Redações] Falha ao gerar redação nota 1000:', err);
-      colElite.innerHTML =
-        '<div style="text-align:center;padding:2rem;">'
-        + '<p style="color:#ffb4ab;font-size:.85rem;margin-bottom:1rem;">Não foi possível gerar a versão nota 1000.</p>'
-        + '<button onclick="window.gerarRedacaoNota1000()" style="background:rgba(108,92,231,.15);color:#c6bfff;border:1px solid rgba(108,92,231,.3);padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.8rem;cursor:pointer;">Tentar novamente</button>'
-        + '</div>';
-    }
-  };
-
-  // ── CHAMADA 4 (sob demanda) ─────────────────────────
-  // Gera as melhorias por competência. Depende da redação nota 1000 existir
-  // (Chamada 3); se não existir, dispara as duas em sequência.
-  window.gerarMelhorias = async function() {
-    const redacao = window._redacaoAtual;
-    if (!redacao || !dadosAtuais) return;
-
-    // Se redação nota 1000 ainda não existe, precisa gerá-la primeiro
-    const temReescrita = dadosAtuais.redacao_nota_1000_intro || dadosAtuais.redacao_nota_1000_dev1;
-    if (!temReescrita) {
-      await window.gerarRedacaoNota1000();
-      // Se falhou lá em cima, aborta
-      if (!dadosAtuais.redacao_nota_1000_intro) return;
-    }
-
-    try {
-      const _temaC4 = (redacao.titulo && redacao.titulo !== 'Redacao sem titulo')
-        ? redacao.titulo
-        : '(tema não informado pelo aluno)';
-      // Notas por competência (pra Chamada 4 saber quais parabenizar vs contrastar)
-      const _notasC4 = Array.isArray(dadosAtuais.competencias)
-        ? dadosAtuais.competencias.map((v, i) => 'C' + (i+1) + '=' + ((v && typeof v.nota !== 'undefined') ? v.nota : v)).join(', ')
-        : '';
-      const contexto = '\n\nCONTEXTO:\n'
-        + 'TEMA DA REDAÇÃO: ' + _temaC4 + '\n'
-        + (_notasC4 ? 'NOTAS POR COMPETÊNCIA: ' + _notasC4 + '\n' : '')
-        + 'REDAÇÃO ORIGINAL (versão A — do aluno):\n' + redacao.texto
-        + '\n\nREDAÇÃO NOTA 1000 REESCRITA (versão B — da PROfa):\n'
-        + 'Introdução: '        + (dadosAtuais.redacao_nota_1000_intro     || '') + '\n'
-        + 'Desenvolvimento 1: ' + (dadosAtuais.redacao_nota_1000_dev1      || '') + '\n'
-        + 'Desenvolvimento 2: ' + (dadosAtuais.redacao_nota_1000_dev2      || '') + '\n'
-        + 'Conclusão: '         + (dadosAtuais.redacao_nota_1000_conclusao || '');
-
-      const raw = await geminiGenerate(PROMPT_MELHORIAS + contexto);
-      const dados4 = parseRespostaGemini(raw);
-
-      if (!dados4.melhoria_c1 && !dados4.melhoria_c2) {
-        throw new Error('Resposta da Gemini não contém as melhorias por competência.');
-      }
-
-      if (typeof dbAtualizarCorrecaoJson === 'function') {
-        await dbAtualizarCorrecaoJson(redacao.id, {
-          melhoria_c1: dados4.melhoria_c1,
-          melhoria_c2: dados4.melhoria_c2,
-          melhoria_c3: dados4.melhoria_c3,
-          melhoria_c4: dados4.melhoria_c4,
-          melhoria_c5: dados4.melhoria_c5,
-          chamadas: { melhorias_por_competencia: 'completa' }
-        });
-      }
-
-      Object.assign(dadosAtuais, dados4);
-      dadosAtuais.chamadas = dadosAtuais.chamadas || {};
-      dadosAtuais.chamadas.melhorias_por_competencia = 'completa';
-
-      // Re-renderiza pra atualizar _porQueElite com o conteúdo novo
-      renderAnalise(redacao, dadosAtuais);
-
-      return true;
-    } catch (err) {
-      console.error('[Minhas Redações] Falha ao gerar melhorias:', err);
-      return false;
-    }
-  };
-
-  window.verPorQueElite = async function() {
-    document.getElementById('modalAnaliseTitle').textContent = 'Por que Nota 1000?';
-    document.getElementById('modalAnalise').classList.remove('hidden');
-
-    // Já existe a comparação real (Chamada 4) montada em _porQueElite? Exibe.
-    const jaTemComparacao = window._porQueElite
-      && !window._porQueElite.includes('em breve disponível')
-      && !window._porQueElite.includes('não disponível')
-      && !window._porQueElite.includes('o que falta em cada competência'); // não é só o fallback
-
-    if (jaTemComparacao) {
-      const conteudo = window._porQueElite;
-      document.getElementById('modalAnaliseTexto').innerHTML =
-        conteudo.trim().startsWith('<') ? conteudo
-        : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
-      return;
-    }
-
-    // Não tem comparação ainda → precisa da Elite (Chamada 3) gerada primeiro.
-    const temElite = dadosAtuais && (dadosAtuais.redacao_nota_1000_intro || dadosAtuais.versao_elite_intro);
-    if (!temElite) {
-      document.getElementById('modalAnaliseTexto').innerHTML =
-        '<div style="text-align:center;padding:2rem;">'
-        + '<p style="color:#e1e2eb;font-size:.9rem;margin-bottom:.75rem;">Para ver a comparação competência por competência, primeiro gere a <strong>Versão Nota 1000</strong> na aba "Elite da PROfa".</p>'
-        + '<p style="color:#928ea0;font-size:.8rem;">Enquanto isso, abaixo está o que falta em cada competência:</p>'
-        + (window._porQueElite || '') + '</div>';
-      return;
-    }
-
-    // Tem Elite mas não tem comparação → dispara Chamada 4 (gerarMelhorias).
-    document.getElementById('modalAnaliseTexto').innerHTML =
-      '<div style="text-align:center;padding:2.5rem 1.5rem;">'
-      + '<div class="spinner" style="margin:0 auto 1rem;"></div>'
-      + '<p style="color:#c8c4d7;font-size:.9rem;font-weight:600;">Comparando sua redação com a versão nota 1000...</p>'
-      + '</div>';
-    const ok = await window.gerarMelhorias();
-    const conteudo = (ok && window._porQueElite) ? window._porQueElite
-      : '<div style="text-align:center;padding:2rem;"><p style="color:#ffb4ab;font-size:.85rem;margin-bottom:1rem;">Não foi possível gerar a comparação (instabilidade momentânea).</p>'
-        + '<button onclick="window.verPorQueElite()" style="background:rgba(108,92,231,.15);color:#c6bfff;border:1px solid rgba(108,92,231,.3);padding:.5rem 1rem;border-radius:.5rem;font-weight:600;font-size:.8rem;cursor:pointer;">Tentar novamente</button></div>';
-    document.getElementById('modalAnaliseTexto').innerHTML =
-      conteudo.trim().startsWith('<') ? conteudo
-      : `<p style="white-space:pre-line;color:#e1e2eb;line-height:1.7;">${escHtml(conteudo)}</p>`;
-  };
-  window.fecharModal = function() {
-    document.getElementById('modalAnalise').classList.add('hidden');
-  };
-  document.getElementById('modalAnalise').addEventListener('click', function(e) {
-    if (e.target === this) window.fecharModal();
-  });
-</script>
-
+<!-- RedaON · Portal do Aluno · Minhas Redações · v3-5 · sobre aluno-base-v6 -->
 <script>
+(function(){
+  var pref='auto';
+  try{ pref=localStorage.getItem('redaon-tema')||'auto'; }catch(e){}
+  var ef=pref;
+  if(pref==='auto'){ var c=false; try{ c=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} ef=c?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',ef);
+  document.documentElement.setAttribute('data-tema-pref',pref);
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="aluno-base-v6.css" rel="stylesheet"/>
+<style>
+/* ===== Só o que é próprio de MINHAS REDAÇÕES ===== */
+.abaBtn{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem .5rem;border:none;border-radius:.65rem;background:transparent;color:var(--muted);font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.abaBtn .ic{font-size:.95rem;line-height:1;font-style:normal;}
+.abaBtn.ativa{background:var(--cyan);color:var(--onCyan);}
+.abaBtnM{flex:1 1 0;min-width:0;padding:.55rem .2rem;border:none;border-radius:.65rem;background:transparent;color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:inherit;text-align:center;}
+.abaBtnM.ativa{background:var(--cyan);color:var(--onCyan);}
+@media(max-width:359px){.abaBtnM{font-size:.66rem;padding:.5rem .1rem;}}
 
-  // Logout universal
-  window.authLogout = window.authLogout || function() {
-    if (confirm('Deseja sair da sua conta?')) {
-      localStorage.clear();
-      window.location.href = 'login.html';
-    }
-  };
-  window.sair = window.authLogout;
-  authGuard('aluno');
+/* LISTA */
+.gridLista{display:grid;grid-template-columns:1fr;gap:.7rem;}
+@media(min-width:641px){.gridLista{grid-template-columns:repeat(2,1fr);}}
+@media(min-width:1024px){.gridLista{grid-template-columns:repeat(3,1fr);}}
+.rCard{background:var(--surface);border:1px solid rgba(var(--borderRGB),.18);border-radius:14px;padding:.85rem .95rem;cursor:pointer;display:flex;flex-direction:column;transition:border-color .2s;}
+.rCard:hover{border-color:rgba(var(--cyanRGB),.4);}
+.rCard.destaque{border-color:rgba(var(--cyanRGB),.45);}
+.rCard .topo{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.5rem;}
+.selo{font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:.25rem .55rem;border-radius:99px;white-space:nowrap;}
+.selo.validada{color:var(--green);background:rgba(var(--greenRGB),.12);border:1px solid rgba(var(--greenRGB),.3);}
+.selo.corrigida{color:var(--gold);background:rgba(var(--goldRGB),.12);border:1px solid rgba(var(--goldRGB),.3);}
+.selo.analise{color:var(--muted);background:rgba(var(--borderRGB),.12);border:1px solid rgba(var(--borderRGB),.25);}
+.rNota{text-align:right;flex:0 0 auto;}
+.rNota .v{font-size:1.35rem;font-weight:800;line-height:1;color:var(--cyan);}
+.rNota .l{font-size:8.5px;text-transform:uppercase;font-weight:700;color:var(--muted);display:block;margin-top:1px;}
+.rCard .tit{font-size:13.5px;font-weight:700;line-height:1.35;color:var(--text);flex:1;margin-bottom:.6rem;}
+.rCard .pe{display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.rCard .data{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.miniComp{display:flex;gap:3px;flex:0 0 auto;}
+.miniComp span{width:14px;height:4px;border-radius:99px;background:var(--surface2);}
+.vazio{grid-column:1/-1;text-align:center;color:var(--muted);font-size:.85rem;padding:2.5rem 0;line-height:1.6;}
+.spinner{width:38px;height:38px;border:3px solid var(--surface2);border-top-color:var(--cyan);border-radius:50%;animation:girar .8s linear infinite;margin:2rem auto;}
+@keyframes girar{to{transform:rotate(360deg);}}
 
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('overlay').classList.toggle('open');
+/* CORREÇÃO */
+.fichaTopo{background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:1rem;padding:.9rem 1.1rem;margin-bottom:1rem;}
+.fichaLinha{display:flex;align-items:center;gap:.75rem;}
+.fichaLinha .rot{font-size:.64rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.fichaLinha .nota{font-size:1.9rem;font-weight:800;color:var(--cyan);line-height:1.05;}
+.seloValid{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;padding:.28rem .65rem;border-radius:99px;white-space:nowrap;max-width:45vw;overflow:hidden;text-overflow:ellipsis;}
+.seloValid.sim{color:var(--green);background:rgba(var(--greenRGB),.14);}
+.seloValid.nao{color:var(--gold);background:rgba(var(--goldRGB),.14);}
+@media(max-width:359px){.seloValid{font-size:.62rem;padding:.25rem .5rem;}}
+.chipsRow{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.8rem;}
+.chipComp{font-size:.72rem;font-weight:700;padding:.3rem .6rem;border-radius:.5rem;white-space:nowrap;cursor:pointer;border:none;font-family:inherit;}
+@media(max-width:1023px){.chipsRow{gap:.3rem;flex-wrap:nowrap;}.chipComp{flex:1;text-align:center;font-size:.68rem;padding:.32rem .2rem;}}
+.caGrid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;align-items:start;}
+.caGrid>*{min-width:0;}
+.caBox{background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:1rem;padding:1.1rem 1.25rem;}
+.caHeader{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;}
+.caHeader .trilho{flex:1 1 auto;width:100%;}
+.trilho{display:flex;gap:.3rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:.8rem;padding:.25rem;overflow-x:auto;scrollbar-width:none;}
+.trilho::-webkit-scrollbar{display:none;}
+.folha{font-family:Georgia,serif;font-size:.92rem;line-height:1.9;color:var(--text2);text-align:justify;white-space:pre-wrap;}
+.compItem{background:var(--sunken);border:1px solid rgba(var(--borderRGB),.18);border-radius:.8rem;padding:.7rem .85rem;margin-bottom:.6rem;}
+.compItem .cab{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-bottom:.35rem;}
+.compItem .nm{font-size:.78rem;font-weight:700;color:var(--text);}
+.compItem .vl{font-size:.8rem;font-weight:800;}
+.compItem .tx{font-size:.78rem;color:var(--text2);line-height:1.5;}
+.barraBg{height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:.35rem 0 .5rem;}
+.barraFill{height:100%;border-radius:99px;}
+.profBox{border:1px solid rgba(var(--greenRGB),.35);background:rgba(var(--greenRGB),.06);border-radius:.8rem;padding:.85rem;margin-bottom:.7rem;}
+.profBox .quem{display:flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:700;color:var(--green);margin-bottom:.4rem;}
+.profBox .txt{font-size:.85rem;color:var(--text2);line-height:1.6;font-style:italic;white-space:pre-wrap;}
+@media(min-width:1024px){
+  .caGrid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);}
+  .caBox.rolavel{max-height:calc(100vh - 20rem);min-height:20rem;overflow-y:auto;}
+}
+@media(max-width:1023px){.caColDireita{display:none;}}
+@media(max-width:1023px) and (orientation:portrait){
+  #caHeaderLeitura{display:none;}
+  #filtrosTopoLista{display:none;}
+}
+@media(min-width:1024px), (max-width:1023px) and (orientation:landscape){
+  #dockLista{display:none!important;}
+  #dockCorrecao{display:none!important;}
+}
+
+/* COMPARAR */
+.cmpBarra{display:flex;align-items:center;justify-content:center;gap:1.25rem;padding:1rem;margin-bottom:1.1rem;background:linear-gradient(135deg,rgba(var(--cyanRGB),.06),rgba(var(--greenRGB),.06));border:1px solid rgba(var(--greenRGB),.2);border-radius:.875rem;flex-wrap:wrap;}
+.cmpCx{text-align:center;min-width:0;}
+.cmpLbl{font-size:.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;}
+.cmpVal{font-size:1.75rem;font-weight:900;line-height:1;}
+.cmpValTxt{font-size:.78rem;font-weight:700;color:var(--green);line-height:1.3;}
+.cmpSeta{color:var(--muted);font-size:1.4rem;flex:0 0 auto;}
+.cmpIntro{font-family:Georgia,serif;font-size:1rem;line-height:1.6;color:var(--text2);margin-bottom:1.2rem;text-align:center;font-style:italic;}
+.cmpBloco{margin-bottom:1rem;padding:1rem 1.15rem;background:var(--bg);border-left:4px solid var(--cyan);border-radius:0 .75rem .75rem 0;}
+.cmpCab{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;}
+.cmpTit{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;}
+.cmpPill{font-size:.68rem;font-weight:800;padding:.15rem .5rem;border-radius:.4rem;white-space:nowrap;}
+.cmpTxt{font-family:Georgia,serif;font-size:1.02rem;line-height:1.75;color:var(--text);}
+.cmpAviso{font-size:.72rem;color:var(--muted);text-align:center;margin-top:1rem;padding-top:.8rem;border-top:1px solid rgba(var(--borderRGB),.15);}
+</style>
+</head>
+<body>
+
+<div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
+  <div id="conteudo">
+
+    <!-- VISÃO 1: LISTA -->
+    <div id="viewLista">
+      <div id="filtrosTopoLista">
+        <div class="trilho" style="overflow:visible;margin-bottom:.7rem;" id="trilhoFiltrosTopo"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem;">
+        <span style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);">Suas reda&ccedil;&otilde;es</span>
+        <span id="contagem" style="font-size:.72rem;color:var(--muted);"></span>
+      </div>
+      <div class="gridLista" id="gridLista"><div class="spinner" style="grid-column:1/-1;"></div></div>
+    </div>
+
+    <!-- VISÃO 2: CORREÇÃO -->
+    <div id="viewCorrecao" style="display:none;">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
+        <button onclick="voltarLista()" style="width:2.5rem;height:2.5rem;border-radius:.75rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.25);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <div style="flex:1;min-width:0;">
+          <h1 id="coTitulo" style="font-size:1.1rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></h1>
+          <p id="coCtx" style="font-size:.74rem;color:var(--muted);"></p>
+        </div>
+      </div>
+
+      <div class="fichaTopo">
+        <div class="fichaLinha">
+          <div style="flex:0 0 auto;">
+            <p class="rot">Nota RedaON</p>
+            <p class="nota" id="coNota">&mdash;</p>
+          </div>
+          <span class="seloValid nao" id="coSelo"></span>
+        </div>
+        <div class="chipsRow" id="coChips"></div>
+      </div>
+
+      <div class="caGrid">
+        <div>
+          <div class="caHeader" id="caHeaderLeitura">
+            <div class="trilho" id="trilhoAbas" style="overflow:visible;">
+              <button class="abaBtn ativa" data-aba="original" onclick="trocarAba('original')"><i class="ic">&#128196;</i>Original</button>
+              <button class="abaBtn" data-aba="analise" onclick="trocarAba('analise')"><i class="ic">&#128202;</i>An&aacute;lise</button>
+              <button class="abaBtn" data-aba="reescrita" onclick="trocarAba('reescrita')"><i class="ic">&#10024;</i>Reescrita</button>
+              <button class="abaBtn" data-aba="comparar" onclick="trocarAba('comparar')"><i class="ic">&#8644;</i>Comparar</button>
+            </div>
+          </div>
+          <div class="caBox rolavel" id="abaConteudo"></div>
+        </div>
+        <div class="caColDireita">
+          <div class="caHeader">
+            <p style="flex:1;font-size:.78rem;color:var(--text2);line-height:1.3;">Sua nota, crit&eacute;rio a crit&eacute;rio, com o que fazer para subir.</p>
+          </div>
+          <div class="caBox rolavel" id="painelDireita"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DOCK LISTA -->
+<div class="dockPolegar on" id="dockLista">
+  <div class="trilho" id="trilhoFiltros" style="overflow:visible;"></div>
+</div>
+
+<!-- DOCK CORREÇÃO -->
+<div class="dockPolegar" id="dockCorrecao">
+  <div style="display:flex;gap:.5rem;">
+    <button class="filtroBtn" id="btnRedacaoM" style="flex:1 1 0;" onclick="alternarGvExc('gvRedacao')">&#128196; Reda&ccedil;&atilde;o<span class="seta" style="font-size:.6rem;opacity:.7;">&#9662;</span></button>
+    <button class="filtroBtn" id="btnNotaM" style="flex:1 1 0;" onclick="alternarGvExc('gvNota')">&#128202; Sua nota</button>
+  </div>
+</div>
+
+<!-- GAVETA: REDAÇÃO (seletor de modo) -->
+<div class="gvBg atras" id="gvRedacaoBg" onclick="fecharGaveta('gvRedacao');marcarBtnDock();"></div>
+<div class="gv atras" id="gvRedacao">
+  <div class="grip"></div>
+  <p class="tit">Ver sua reda&ccedil;&atilde;o</p>
+  <p class="sub">Escolha como quer visualizar. O conte&uacute;do aparece na tela.</p>
+  <div id="listaModos"></div>
+</div>
+
+<!-- GAVETA: SUA NOTA -->
+<div class="gvBg atras" id="gvNotaBg" onclick="fecharGaveta('gvNota');marcarBtnDock();"></div>
+<div class="gv atras" id="gvNota">
+  <div class="grip"></div>
+  <p class="tit">Sua nota</p>
+  <div id="gvNotaConteudo"></div>
+</div>
+
+<script src="supabase-auth.js"></script>
+<script src="aluno-base-v6.js"></script>
+<script>
+  if (typeof authGuard === 'function') { authGuard('aluno'); }
+
+  montarEsqueleto({
+    ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-5'
+  });
+
+  var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
+  var FILTROS=[{id:'todas',r:'Todas'},{id:'corrigidas',r:'Corrigidas'},{id:'validadas',r:'Validadas'}];
+  var MODOS=[
+   {id:'original', ico:'\u{1F4C4}', r:'Original',  d:'Seu texto, como voc\u00ea escreveu'},
+   {id:'analise',  ico:'\u{1F4CA}', r:'An\u00e1lise',   d:'Pontos fortes e o que d\u00e1 pra subir'},
+   {id:'reescrita',ico:'\u2728',    r:'Reescrita', d:'Sua reda\u00e7\u00e3o buscando a nota mil'},
+   {id:'comparar', ico:'\u21c4',    r:'Comparar',  d:'O que mudaria, compet\u00eancia a compet\u00eancia'}
+  ];
+  var REDACOES=[], atual=null, correcaoAtual=null, filtroAtivo='todas', abaAtual='original';
+
+  function corComp(v){ return v>=160?'var(--green)':(v>=120?'var(--gold)':'var(--red)'); }
+  function alternarGvExc(id){
+    var g=document.getElementById(id);
+    if(g && g.classList.contains('open')){ fecharGaveta(id); marcarBtnDock(); return; }
+    ['gvRedacao','gvNota'].forEach(function(o){ if(o!==id) fecharGaveta(o); });
+    abrirGaveta(id); marcarBtnDock();
   }
+  function marcarBtnDock(){
+    var r=document.getElementById('gvRedacao'), n=document.getElementById('gvNota');
+    var br=document.getElementById('btnRedacaoM'), bn=document.getElementById('btnNotaM');
+    if(br) br.classList.toggle('ativo', !!(r && r.classList.contains('open')));
+    if(bn) bn.classList.toggle('ativo', !!(n && n.classList.contains('open')));
+  }
+
+  // ─── Carga da lista (mesma consulta da produção) ───
+  async function carregarRedacoes(){
+    var grid=document.getElementById('gridLista');
+    try{
+      var userId=(typeof authGetUserId==='function')?authGetUserId():null;
+      if(!userId){ grid.innerHTML='<p class="vazio">Sess\u00e3o inv\u00e1lida. Entre novamente.</p>'; return; }
+      var url=SUPABASE_URL+'/rest/v1/redacoes?aluno_id=eq.'+userId+'&order=created_at.desc'
+        +'&select=id,texto,tema_livre,status,nota_final,created_at,temas(titulo),'
+        +'correcoes(c1,c2,c3,c4,c5,nota_total,feedback_geral,feedback_c1,feedback_c2,feedback_c3,feedback_c4,feedback_c5,pontos_fortes,pontos_melhorar,revisao_professor,correcao_json)';
+      var res=await dbFetch(url,{});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      var rows=await res.json();
+      REDACOES=rows.map(mapearRedacao);
+      renderLista();
+      abrirPorParametro();
+    }catch(e){
+      console.warn('Erro ao carregar reda\u00e7\u00f5es:',e);
+      grid.innerHTML='<p class="vazio">N\u00e3o consegui carregar suas reda\u00e7\u00f5es agora.<br><button onclick="carregarRedacoes()" style="color:var(--cyan);background:none;border:none;cursor:pointer;text-decoration:underline;font-size:.8rem;margin-top:.4rem;">Tentar de novo</button></p>';
+    }
+  }
+
+  function mapearRedacao(r){
+    var c=(r.correcoes && r.correcoes.length)?r.correcoes[0]:(r.correcoes||{});
+    var j=c.correcao_json||{};
+    var primeira=r.texto?String(r.texto).trim().split('\n')[0]:'';
+    var titulo=(r.tema_livre&&r.tema_livre.trim())?r.tema_livre
+      :((r.temas&&r.temas.titulo)?r.temas.titulo
+      :(primeira?primeira.substring(0,80)+(primeira.length>80?'\u2026':''):'Reda\u00e7\u00e3o sem t\u00edtulo'));
+    var comp=null;
+    if(typeof c.c1==='number'){ comp=[c.c1,c.c2,c.c3,c.c4,c.c5].map(function(x){ return typeof x==='number'?x:0; }); }
+    var nota=r.nota_final||c.nota_total||null;
+    var rev=c.revisao_professor||null;
+    var validada=!!(rev && rev.visivel_aluno!==false);
+    // Reescrita: 4 partes no correcao_json
+    var partes=[j.redacao_nota_1000_intro,j.redacao_nota_1000_dev1,j.redacao_nota_1000_dev2,j.redacao_nota_1000_conclusao]
+      .filter(function(p){ return p && String(p).trim().length>20; });
+    // Comparar: melhoria_c1..c5
+    var cmp={};
+    ['c1','c2','c3','c4','c5'].forEach(function(k,i){
+      var m=j['melhoria_'+k];
+      if(m && String(m).trim().length>5) cmp[i]=String(m).trim();
+    });
+    return {
+      id:r.id, titulo:titulo,
+      data:new Date(r.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}),
+      texto:r.texto||'', nota:nota, comp:comp,
+      status:(nota&&comp)?(validada?'validada':'corrigida'):'corrigindo',
+      feedbackGeral:c.feedback_geral||null,
+      feedbackComp:[c.feedback_c1,c.feedback_c2,c.feedback_c3,c.feedback_c4,c.feedback_c5],
+      pontosFortes:c.pontos_fortes||'', pontosMelhorar:c.pontos_melhorar||'',
+      reescrita:partes.length?partes.join('\n\n'):null,
+      comparar:cmp, rev:validada?rev:null
+    };
+  }
+
+  // ─── Lista ───
+  function renderFiltros(){
+    var html=FILTROS.map(function(f){
+      return '<button class="abaBtnM'+(f.id===filtroAtivo?' ativa':'')+'" onclick="setFiltro(\''+f.id+'\')">'+f.r+'</button>';
+    }).join('');
+    var a=document.getElementById('trilhoFiltros');     if(a) a.innerHTML=html;
+    var b=document.getElementById('trilhoFiltrosTopo'); if(b) b.innerHTML=html;
+  }
+  function setFiltro(f){ filtroAtivo=f; renderFiltros(); renderLista(); acordarDock(); }
+  function renderLista(){
+    var lista=REDACOES.filter(function(r){
+      if(filtroAtivo==='validadas') return r.status==='validada';
+      if(filtroAtivo==='corrigidas') return r.status==='corrigida';
+      return true;
+    });
+    document.getElementById('contagem').textContent=lista.length+(lista.length===1?' reda\u00e7\u00e3o':' reda\u00e7\u00f5es');
+    var g=document.getElementById('gridLista');
+    if(!lista.length){
+      g.innerHTML='<p class="vazio">'+(REDACOES.length?'Nenhuma reda\u00e7\u00e3o nesse filtro.':'Voc\u00ea ainda n\u00e3o enviou nenhuma reda\u00e7\u00e3o.<br>Toque em \u270F\uFE0F Escrever para come\u00e7ar.')+'</p>';
+      return;
+    }
+    g.innerHTML=lista.map(function(r,i){
+      var selo=r.status==='validada'?'<span class="selo validada">\u2713 Validada</span>'
+              :r.status==='corrigida'?'<span class="selo corrigida">\u23f3 Corrigida</span>'
+              :'<span class="selo analise">\u2699 Corrigindo\u2026</span>';
+      var nota=r.nota?'<div class="rNota"><span class="v">'+r.nota+'</span><span class="l">nota</span></div>':'';
+      var mini=r.comp?'<div class="miniComp">'+r.comp.map(function(v){return '<span style="background:'+corComp(v)+';"></span>';}).join('')+'</div>'
+                     :'<span style="font-size:10px;color:var(--muted);">a IA est\u00e1 corrigindo</span>';
+      var clique=(r.nota&&r.comp)?' onclick="abrirCorrecao(\''+r.id+'\')"'
+        :' onclick="toast(\'Sua corre\\u00e7\\u00e3o fica pronta em segundos \\u2014 j\\u00e1 volta\')" style="opacity:.65;"';
+      return '<div class="rCard'+(i===0&&r.nota?' destaque':'')+'"'+clique+'>'
+        +'<div class="topo">'+selo+nota+'</div>'
+        +'<p class="tit">'+escapeHtmlSimples(r.titulo)+'</p>'
+        +'<div class="pe"><span class="data">'+r.data+'</span>'+mini+'</div></div>';
+    }).join('');
+  }
+
+  // ─── Correção ───
+  function abrirCorrecao(id){
+    atual=REDACOES.filter(function(r){return r.id===id;})[0];
+    if(!atual) return;
+    document.getElementById('viewLista').style.display='none';
+    document.getElementById('viewCorrecao').style.display='block';
+    document.getElementById('dockLista').classList.remove('on');
+    document.getElementById('dockCorrecao').classList.add('on');
+    document.getElementById('coTitulo').textContent=atual.titulo;
+    document.getElementById('coCtx').textContent='Enviada em '+atual.data;
+    document.getElementById('coNota').textContent=atual.nota||'\u2014';
+    var s=document.getElementById('coSelo');
+    if(atual.status==='validada'){ s.className='seloValid sim'; s.textContent='\u2713 Validada'; }
+    else{ s.className='seloValid nao'; s.textContent='\u23f3 Corrigida'; }
+    document.getElementById('coChips').innerHTML=(atual.comp||[]).map(function(v,i){
+      return '<button class="chipComp" style="color:'+corComp(v)+';background:rgba(var(--borderRGB),.12);" onclick="toast(\''+NOMES[i].replace(/'/g,'')+': '+v+'/200\')">C'+(i+1)+' '+v+'</button>';
+    }).join('');
+    renderPainel(); renderModos(); trocarAba('original');
+    window.scrollTo(0,0);
+  }
+  function voltarLista(){
+    document.getElementById('viewCorrecao').style.display='none';
+    document.getElementById('viewLista').style.display='block';
+    document.getElementById('dockCorrecao').classList.remove('on');
+    document.getElementById('dockLista').classList.add('on');
+    ['gvRedacao','gvNota'].forEach(fecharGaveta); marcarBtnDock();
+    window.scrollTo(0,0);
+  }
+
+  function linhas(txt){
+    return String(txt||'').split(/\r?\n/)
+      .map(function(l){ return l.replace(/^[\u2022\-\*]\s*/,'').trim(); })
+      .filter(function(l){ return l.length>2; });
+  }
+  function htmlProfessor(){
+    if(!atual.rev) return '<p style="font-size:.74rem;color:var(--muted);line-height:1.5;margin-bottom:.8rem;padding-bottom:.7rem;border-bottom:1px solid rgba(var(--borderRGB),.15);">\u{1F4AC} Seu professor ainda n\u00e3o comentou esta reda\u00e7\u00e3o.</p>';
+    var rev=atual.rev;
+    var texto=rev.comentario_geral||'';
+    if(!texto.trim()) return '<p style="font-size:.74rem;color:var(--green);line-height:1.5;margin-bottom:.8rem;padding-bottom:.7rem;border-bottom:1px solid rgba(var(--greenRGB),.25);">\u2713 Seu professor revisou esta corre\u00e7\u00e3o.</p>';
+    var quando='';
+    if(rev.data||rev.revisado_em){
+      try{ quando=new Date(rev.data||rev.revisado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}); }catch(e){}
+    }
+    var nome=rev.professor_nome||'Seu professor';
+    return '<div class="profBox"><div class="quem"><span class="material-symbols-outlined" style="font-size:1.1rem;font-variation-settings:\'FILL\' 1;">verified</span>'+escapeHtmlSimples(nome)+'</div>'
+      +'<p class="txt">\u201c'+escapeHtmlSimples(texto)+'\u201d</p>'
+      +(quando?'<p style="font-size:.68rem;color:var(--muted);margin-top:.5rem;">Comentada em '+quando+'</p>':'')+'</div>';
+  }
+  function htmlCompetencias(){
+    if(!atual.comp) return '';
+    return atual.comp.map(function(v,i){
+      var fb=atual.feedbackComp[i]||'';
+      return '<div class="compItem"><div class="cab"><span class="nm">'+NOMES[i]+'</span><span class="vl" style="color:'+corComp(v)+'">'+v+'/200</span></div>'
+        +'<div class="barraBg"><div class="barraFill" style="width:'+(v/200*100)+'%;background:'+corComp(v)+'"></div></div>'
+        +(fb?'<p class="tx">'+escapeHtmlSimples(fb)+'</p>':'')+'</div>';
+    }).join('');
+  }
+  function renderPainel(){
+    var c=htmlProfessor()+htmlCompetencias();
+    var a=document.getElementById('painelDireita');   if(a) a.innerHTML=c;
+    var b=document.getElementById('gvNotaConteudo');  if(b) b.innerHTML=c;
+  }
+  function renderModos(){
+    var lm=document.getElementById('listaModos');
+    if(!lm) return;
+    lm.innerHTML=MODOS.map(function(m){
+      var sel=(m.id===abaAtual);
+      return '<a class="pill'+(sel?' sel':'')+'" onclick="escolherModo(\''+m.id+'\')">'
+        +'<span style="font-size:1.15rem;">'+m.ico+'</span>'
+        +'<span style="min-width:0;"><span style="display:block;">'+m.r+'</span>'
+        +'<span style="display:block;font-size:.68rem;font-weight:400;color:var(--muted);">'+m.d+'</span></span>'
+        +'<i class="fim"'+(sel?'':' style="opacity:0;"')+'>\u2713</i></a>';
+    }).join('');
+  }
+  function escolherModo(id){ trocarAba(id); fecharGaveta('gvRedacao'); marcarBtnDock(); }
+
+  function rotulo(t){ return '<p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;">'+t+'</p>'; }
+  function montarComparar(){
+    var barra='<div class="cmpBarra">'
+      +'<div class="cmpCx"><p class="cmpLbl">Vers\u00e3o Original</p><p class="cmpVal" style="color:'+corComp(atual.nota/5)+';">'+atual.nota+'</p></div>'
+      +'<span class="cmpSeta">\u2192</span>'
+      +'<div class="cmpCx"><p class="cmpLbl">Vers\u00e3o Reescrita</p><p class="cmpValTxt">crit\u00e9rios do INEP aplicados</p></div></div>';
+    var temAlgum=Object.keys(atual.comparar||{}).length>0;
+    if(!temAlgum) return barra+'<p style="font-size:.85rem;color:var(--muted);text-align:center;padding:1.5rem 0;">A compara\u00e7\u00e3o compet\u00eancia a compet\u00eancia ainda n\u00e3o est\u00e1 dispon\u00edvel para esta reda\u00e7\u00e3o.</p>';
+    var intro='<p class="cmpIntro">Veja o que mudaria na sua reda\u00e7\u00e3o \u2014 compet\u00eancia por compet\u00eancia:</p>';
+    var noTeto=[];
+    var blocos=atual.comp.map(function(v,i){
+      if(v>=200){ noTeto.push('C'+(i+1)); return ''; }
+      var txt=atual.comparar[i];
+      if(!txt) return '';
+      var cor=corComp(v);
+      return '<div class="cmpBloco" style="border-left-color:'+cor+';">'
+        +'<div class="cmpCab"><span class="cmpTit" style="color:'+cor+';">'+NOMES[i]+'</span>'
+        +'<span class="cmpPill" style="background:rgba(var(--borderRGB),.14);color:'+cor+';">'+v+' de 200</span></div>'
+        +'<p class="cmpTxt">'+escapeHtmlSimples(txt)+'</p></div>';
+    }).join('');
+    if(!blocos) blocos='<p style="font-size:.85rem;color:var(--green);text-align:center;padding:1.5rem 0;">\u2713 Todas as compet\u00eancias j\u00e1 est\u00e3o no teto.</p>';
+    else if(noTeto.length) blocos+='<p style="font-size:.76rem;color:var(--muted);text-align:center;margin-top:.4rem;">'+noTeto.join(' e ')+' j\u00e1 '+(noTeto.length>1?'est\u00e3o':'est\u00e1')+' no teto.</p>';
+    return barra+intro+blocos+'<p class="cmpAviso">A reescrita aplica os crit\u00e9rios do INEP. A nota final depende da avalia\u00e7\u00e3o da banca.</p>';
+  }
+
+  function trocarAba(a){
+    abaAtual=a;
+    document.querySelectorAll('#trilhoAbas .abaBtn').forEach(function(b){ b.classList.toggle('ativa',b.dataset.aba===a); });
+    renderModos();
+    var c=document.getElementById('abaConteudo');
+    if(a==='original'){
+      c.innerHTML=rotulo('Sua reda\u00e7\u00e3o')+'<p class="folha">'+escapeHtmlSimples(atual.texto||'Texto n\u00e3o dispon\u00edvel.')+'</p>';
+    } else if(a==='analise'){
+      var fortes=linhas(atual.pontosFortes), melhorar=linhas(atual.pontosMelhorar);
+      var html=rotulo('Pontos fortes e a melhorar');
+      if(atual.feedbackGeral) html+='<p style="font-size:.86rem;line-height:1.65;color:var(--text2);background:rgba(var(--cyanRGB),.07);border:1px solid rgba(var(--cyanRGB),.22);border-radius:.7rem;padding:.7rem .85rem;margin-bottom:.9rem;">'+escapeHtmlSimples(atual.feedbackGeral)+'</p>';
+      if(!fortes.length&&!melhorar.length&&!atual.feedbackGeral){
+        html+='<p style="font-size:.85rem;color:var(--muted);text-align:center;padding:1.5rem 0;">A an\u00e1lise detalhada ainda n\u00e3o est\u00e1 dispon\u00edvel para esta reda\u00e7\u00e3o.</p>';
+      }
+      html+=fortes.map(function(t){
+        return '<div style="border-left:2px solid var(--green);padding-left:.7rem;margin-bottom:.7rem;">'
+          +'<p style="font-size:.74rem;font-weight:700;color:var(--green);margin-bottom:.1rem;">\u2713 Ponto forte</p>'
+          +'<p style="font-size:.85rem;color:var(--text2);line-height:1.55;">'+escapeHtmlSimples(t)+'</p></div>';
+      }).join('');
+      html+=melhorar.map(function(t){
+        return '<div style="border-left:2px solid var(--gold);padding-left:.7rem;margin-bottom:.7rem;">'
+          +'<p style="font-size:.74rem;font-weight:700;color:var(--gold);margin-bottom:.1rem;">\u2197 A melhorar</p>'
+          +'<p style="font-size:.85rem;color:var(--text2);line-height:1.55;">'+escapeHtmlSimples(t)+'</p></div>';
+      }).join('');
+      c.innerHTML=html;
+    } else if(a==='reescrita'){
+      c.innerHTML=rotulo('Reescrita')
+        +(atual.reescrita
+          ? '<p style="font-size:.78rem;color:var(--text2);background:rgba(var(--cyanRGB),.08);border:1px solid rgba(var(--cyanRGB),.25);border-radius:.7rem;padding:.6rem .8rem;margin-bottom:.9rem;">\u2728 Esta \u00e9 a sua reda\u00e7\u00e3o <b>reescrita buscando a nota mil</b> \u2014 mantendo as suas ideias, mas aplicando os crit\u00e9rios do INEP em cada uma das cinco compet\u00eancias.</p><p class="folha">'+escapeHtmlSimples(atual.reescrita)+'</p>'
+          : '<p style="font-size:.85rem;color:var(--muted);text-align:center;padding:1.5rem 0;">A reescrita ainda n\u00e3o est\u00e1 dispon\u00edvel para esta reda\u00e7\u00e3o.</p>');
+    } else {
+      c.innerHTML=montarComparar();
+    }
+  }
+
+  // ─── ?abrir=<id> vindo da nova-redacao ───
+  function abrirPorParametro(){
+    try{
+      var p=new URLSearchParams(window.location.search);
+      var id=p.get('abrir');
+      if(!id) return;
+      var url=new URL(window.location.href);
+      url.searchParams.delete('abrir');
+      window.history.replaceState({},'',url.toString());
+      var alvo=REDACOES.filter(function(r){return r.id===id;})[0];
+      if(alvo && alvo.nota && alvo.comp) abrirCorrecao(id);
+    }catch(e){}
+  }
+
+  function acordarDock(){ if(window.mostrarDock_dockLista) window.mostrarDock_dockLista(); }
+  iniciarDock('dockLista',{ protegidaPor:['gvRedacao','gvNota'] });
+  renderFiltros();
+  carregarRedacoes();
 </script>
 </body>
 </html>
