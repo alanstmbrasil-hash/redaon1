@@ -1,589 +1,526 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Evolução</title>
-<script>tailwind = { config: {} };</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<title>RedaON | Evolução v1-1</title>
+<!-- RedaON · Portal do Aluno · TELA Evolução · v1-1 · sobre aluno-base-v6 -->
+<!-- Aprovado 17/08/2026 (prévia v1-11): duplas no desktop ≥760px (Seções 1-3) · títulos em caixa centralizados · Meu progresso · chips Média/Última · dourado segue o foco (Média) e a menor nota (Última) · gaveta de foco com selo adaptativo e coluna de médias à direita · botões Reforçar CX / Reforçar outra competência · barra Brasil --muted · MEDIA_AM oculta até fonte -->
+<!-- Decisões aprovadas 17/08/2026: B1=INEP (Brasil oficial; AM oculto até fonte) · B2=sparkline SVG (radar/Elite fora) · B3=tendência local+foco · B4=envios 30 dias · B5=CTA plano.html · B6=convite único no vazio -->
+<script>
+(function(){
+  var pref = 'auto';
+  try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+  var efetivo = pref;
+  if (pref === 'auto') {
+    var claroNoSistema = false;
+    try { claroNoSistema = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+    efetivo = claroNoSistema ? 'claro' : 'escuro';
+  }
+  document.documentElement.setAttribute('data-tema', efetivo);
+  document.documentElement.setAttribute('data-tema-pref', pref);
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "on-primary-fixed": "#160066", "on-error-container": "#ffdad6", "on-secondary": "#003737",
-          "inverse-on-surface": "#2e3037", "secondary-fixed": "#56f9f9", "surface-container": "#1d2026",
-          "tertiary-container": "#906c00", "tertiary": "#fabd00", "surface-container-lowest": "#0b0e14",
-          "surface-container-low": "#191c22", "background": "#10131a", "primary-fixed-dim": "#c6bfff",
-          "outline-variant": "#474554", "on-surface-variant": "#c8c4d7", "primary-container": "#6c5ce7",
-          "on-primary": "#2900a0", "on-primary-container": "#faf6ff", "inverse-surface": "#e1e2eb",
-          "on-error": "#690005", "on-surface": "#e1e2eb", "secondary-fixed-dim": "#26dcdd",
-          "surface-container-highest": "#32353c", "primary": "#c6bfff", "outline": "#928ea0",
-          "on-background": "#e1e2eb", "surface-bright": "#363940", "error-container": "#93000a",
-          "surface-dim": "#10131a", "surface-variant": "#32353c", "error": "#ffb4ab",
-          "surface-container-high": "#272a31", "primary-fixed": "#e4dfff", "on-tertiary-container": "#fff6ec",
-          "secondary": "#45edee", "on-tertiary": "#3f2e00", "secondary-container": "#00d0d1",
-          "tertiary-fixed": "#ffdf9e", "surface": "#10131a", "inverse-primary": "#5847d2"
-        },
-        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
-        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-      },
-    },
-  }
-</script>
+<link href="aluno-base-v6.css" rel="stylesheet"/>
 <style>
-  body { font-family: 'Inter', sans-serif; background-color: #10131a; }
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  .glass-card { background: rgba(25,28,34,0.8); backdrop-filter: blur(12px); }
-  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background: #32353c; border-radius: 10px; }
+/* ===== Só o que é próprio da EVOLUÇÃO ===== */
+.evoCabeca { margin-bottom:.875rem; }
+.evoCabeca h1 { font-size:1.35rem; font-weight:800; color:var(--text); }
+.evoCabeca p { font-size:.85rem; color:var(--muted); margin-top:.15rem; }
+@media(max-width:640px){ .evoCabeca h1{ font-size:1.15rem; } }
 
-  /* Animações conquistas */
-  @keyframes unlockPulse { 0%,100%{box-shadow:0 0 0 0 rgba(250,189,0,0.4)} 50%{box-shadow:0 0 0 12px rgba(250,189,0,0)} }
-  .conquista-desbloqueada:hover { animation: unlockPulse 1.5s infinite; }
+/* Títulos de seção em caixa, centralizados */
+.secCaixa { margin:1.25rem 0 .75rem; padding:.55rem .75rem; display:flex; align-items:center; justify-content:center; gap:8px; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--text2); }
+.secCaixa .bar { width:16px; height:3px; background:var(--cyan); border-radius:99px; }
 
-  /* Barra de XP animada */
-  @keyframes fillXP { from{width:0} to{width:72%} }
-  .xp-bar { animation: fillXP 1.5s ease forwards; }
+/* Seção 1 — Onde estou */
+.cardMedia { border-color:rgba(var(--cyanRGB),.35); }
+.cardMedia .rotulo { font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+.cardMedia .linhaNota { display:flex; align-items:flex-end; gap:.5rem; margin-top:.2rem; }
+.cardMedia .notaGrande { font-size:2.1rem; font-weight:800; color:var(--cyan); line-height:1; }
+.cardMedia .variacao { font-size:.75rem; font-weight:700; margin-bottom:.3rem; }
 
-  /* Toast */
-  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; }
-  #toast.show { transform:translateX(-50%) translateY(0); }
+.duplaOndeEstou { display:grid; grid-template-columns:1fr; gap:.6rem; }
+@media(min-width:760px){
+  .duplaOndeEstou { grid-template-columns:1fr 1fr; gap:.75rem; align-items:stretch; }
+  .cardMedia { display:flex; flex-direction:column; justify-content:center; }
+  .cardMedia .notaGrande { font-size:2.6rem; }
+}
+.cardComparacao { margin-top:0; }
+.cardComparacao .rotulo { font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-bottom:.6rem; }
+.linhaBarra { display:flex; align-items:center; gap:.5rem; margin-bottom:.45rem; }
+.linhaBarra .quem { width:74px; font-size:.72rem; color:var(--text2); flex:0 0 auto; }
+.linhaBarra .trilho { flex:1; height:8px; background:rgba(var(--borderRGB),.25); border-radius:99px; overflow:hidden; }
+.linhaBarra .trilho span { display:block; height:100%; border-radius:99px; width:0; transition:width .6s ease; }
+.linhaBarra .valor { width:36px; text-align:right; font-size:.76rem; font-weight:700; flex:0 0 auto; }
+.fraseComparacao { font-size:.74rem; margin-top:.55rem; font-weight:600; }
+.fonteComparacao { font-size:.62rem; color:var(--muted); margin-top:.3rem; }
 
-  /* Tooltip conquista */
-  .conquista-tooltip { display:none; position:absolute; bottom:110%; left:50%; transform:translateX(-50%); background:#1d2026; border:1px solid rgba(255,255,255,0.1); color:#c8c4d7; font-size:.7rem; padding:.6rem .9rem; border-radius:.75rem; width:160px; text-align:center; z-index:50; white-space:normal; box-shadow:0 8px 24px rgba(0,0,0,.4); pointer-events:none; }
-  .conquista-card:hover .conquista-tooltip { display:block; }
+/* Seção 2 — Meu progresso: dupla no desktop; gráfico com altura simétrica à coluna de notas */
+.duplaProgresso { display:grid; grid-template-columns:1fr; gap:.6rem; }
+@media(min-width:760px){ .duplaProgresso { grid-template-columns:1fr 1fr; gap:.75rem; align-items:stretch; } }
+.colNotas { display:flex; flex-direction:column; gap:.6rem; }
+.cardGrafico { display:flex; flex-direction:column; }
+.cardGrafico svg { width:100%; flex:1; min-height:96px; display:block; }
+.legGrafico { font-size:.66rem; color:var(--muted); text-align:right; margin-top:.2rem; }
 
-  /* ── Hamburger sidebar ─────────────────────────────── */
-  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
-  #sidebar.open { transform: translateX(0); }
-  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:44; }
-  #overlay.open { display:block; }
-  @media(min-width:1024px){
-    #sidebar { transform: translateX(0) !important; }
-    #overlay { display:none !important; }
-    .main-with-sidebar { margin-left:256px; }
-  }
-  @media(max-width:1023px){
-    .main-with-sidebar { margin-left:0 !important; }
-  }
+.gridComp { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+.celComp .cn { font-size:.66rem; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--muted); }
+.celComp .cv { font-size:1.25rem; font-weight:800; color:var(--purpleSoft); line-height:1.15; margin-top:.15rem; }
+.celComp .cd { font-size:.7rem; color:var(--text2); margin-top:.1rem; }
+.celComp.pior { border-color:rgba(var(--goldRGB),.45); }
+.celComp.pior .cv { color:var(--gold); }
+.celComp.pior .cd { color:var(--gold); font-weight:700; }
+.tSubindo { color:var(--green); }
+.tCaiu { color:var(--orange); }
 
-  /* ── Scrollbar sidebar invisível no desktop ── */
-  #sidebar nav::-webkit-scrollbar { width: 4px; }
-  #sidebar nav::-webkit-scrollbar-track { background: transparent; }
-  #sidebar nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 10px; }
-  #sidebar nav:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
-  #sidebar nav { scrollbar-width: none; }
-  #sidebar nav:hover { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
+/* Seção 3 — O que fazer agora: dupla no desktop, altura casada às caixas de nota */
+.duplaAcao { display:grid; grid-template-columns:1fr; gap:.6rem; }
+.btnPlano { width:100%; text-decoration:none; min-height:46px; font-size:.82rem; }
+@media(min-width:760px){
+  .duplaAcao { grid-template-columns:1fr 1fr; gap:.75rem; }
+  .duplaAcao .btnPlano, .duplaAcao .btnOutraComp { min-height:74px; font-size:.88rem; }
+}
 
-  @media(min-width:1024px){ #btnHamburger { display:none !important; } }
-  
-  /* Gráfico responsivo mobile */
-  @media(max-width:1023px){
-    .grafico-header { flex-direction: column; align-items: flex-start; gap: .75rem; }
-    .grafico-legenda { flex-wrap: wrap; gap: .5rem; }
-    .legenda-item span { font-size: .7rem; white-space: nowrap; }
-  }
+/* E2: chips de visão do grid */
+.chipsVisao { display:flex; gap:.4rem; justify-content:center; }
+/* E1: link discreto sob o botão do plano */
+.btnOutraComp { width:100%; min-height:42px; font-size:.78rem; }
+#pillsFoco .pill .nomePill { flex:1; min-width:0; display:flex; align-items:center; gap:.45rem; }
+#pillsFoco .pill .mediaPill { flex:0 0 52px; text-align:right; font-size:.78rem; font-weight:800; color:var(--muted); font-variant-numeric:tabular-nums; }
+#pillsFoco .pill.focoPill .mediaPill { color:var(--gold); }
+#pillsFoco .pill .fim { margin-left:.35rem; }
+/* Selo "recomendado" adaptativo: escuro = cápsula dourada sólida com texto #1a1400
+   (contraste >12:1) · claro = cápsula preta com texto branco (padrão rascunho) */
+#pillsFoco .pill .recom { font-size:.62rem; font-weight:700; background:var(--gold); color:#1a1400; padding:2px 9px; border-radius:999px; white-space:nowrap; box-shadow:0 2px 8px rgba(0,0,0,.22); }
+html[data-tema="claro"] #pillsFoco .pill .recom { background:#17181c; color:#fff; border:1px solid rgba(255,255,255,.14); }
+.alinhaTeste { display:flex; align-items:center; gap:.4rem; margin:0 0 .6rem; }
+.alinhaTeste .rot { font-size:.62rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-right:.2rem; }
+
+/* Estados */
+.estadoCartao { text-align:center; padding:2rem 1.25rem; }
+.estadoCartao .emo { font-size:2.2rem; }
+.estadoCartao h3 { font-size:1rem; font-weight:800; color:var(--text); margin-top:.6rem; }
+.estadoCartao p { font-size:.8rem; color:var(--text2); margin:.4rem auto .9rem; max-width:34ch; line-height:1.5; }
+.estadoCartao .btn { margin:0 auto; padding:0 1.25rem; }
 </style>
-<script src="supabase-auth.js"></script>
 </head>
-<body class="bg-background text-on-surface antialiased">
+<body>
 
-<div class="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
-  <div class="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px]"></div>
+<div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
+  <div id="conteudo">
+
+    <div class="evoCabeca">
+      <h1>Evolu&ccedil;&atilde;o</h1>
+      <p>Sua trajet&oacute;ria de aprendizado</p>
+    </div>
+
+    <!-- Carregando -->
+    <div class="card estadoCartao" id="estadoCarregando">
+      <p style="margin:0;">Carregando sua trajet&oacute;ria&hellip;</p>
+    </div>
+
+    <!-- Estado vazio (B6-A): convite único -->
+    <div class="card estadoCartao hidden" id="estadoVazio">
+      <div class="emo">&#127793;</div>
+      <h3>Sua evolu&ccedil;&atilde;o come&ccedil;a na primeira reda&ccedil;&atilde;o</h3>
+      <p>Assim que a sua primeira reda&ccedil;&atilde;o for corrigida, este espa&ccedil;o mostra sua m&eacute;dia, seu gr&aacute;fico e o que fazer pra subir de nota.</p>
+      <button class="btn" onclick="abrirMetodos()">&#9997;&#65039; Escrever agora</button>
+    </div>
+
+    <!-- Erro de carregamento -->
+    <div class="card estadoCartao hidden" id="estadoErro">
+      <div class="emo">&#128268;</div>
+      <h3>N&atilde;o consegui carregar seus dados</h3>
+      <p>Pode ser a conex&atilde;o. Respira, e tenta de novo.</p>
+      <button class="btn" onclick="carregarEvolucao()">Tentar de novo</button>
+    </div>
+
+    <!-- Conteúdo principal -->
+    <div class="hidden" id="conteudoEvolucao">
+
+      <!-- ===== SEÇÃO 1 · ONDE ESTOU ===== -->
+      <div class="card secCaixa" style="margin-top:.25rem;"><span class="bar"></span>Onde estou</div>
+
+      <div class="duplaOndeEstou">
+      <div class="card cardMedia">
+        <span class="rotulo">Sua m&eacute;dia atual</span>
+        <div class="linhaNota">
+          <span class="notaGrande" id="mediaAtual">&mdash;</span>
+          <span class="variacao hidden" id="variacaoMedia"></span>
+        </div>
+      </div>
+
+      <div class="card cardComparacao">
+        <p class="rotulo">Compara&ccedil;&atilde;o com o ENEM</p>
+        <div class="linhaBarra">
+          <span class="quem">Voc&ecirc;</span>
+          <div class="trilho"><span id="barraVoce" style="background:var(--cyan);"></span></div>
+          <span class="valor" style="color:var(--cyan);" id="valorVoce">&mdash;</span>
+        </div>
+        <div class="linhaBarra hidden" id="linhaAM">
+          <span class="quem">Amazonas</span>
+          <div class="trilho"><span id="barraAM" style="background:var(--purple);"></span></div>
+          <span class="valor" style="color:var(--purpleSoft);" id="valorAM">&mdash;</span>
+        </div>
+        <div class="linhaBarra" style="margin-bottom:0;">
+          <span class="quem">Brasil</span>
+          <div class="trilho"><span id="barraBrasil" style="background:var(--muted);"></span></div>
+          <span class="valor" style="color:var(--muted);" id="valorBrasil">&mdash;</span>
+        </div>
+        <p class="fraseComparacao" id="fraseComparacao"></p>
+        <p class="fonteComparacao" id="fonteComparacao"></p>
+      </div>
+      </div>
+
+      <!-- ===== SEÇÃO 2 · COMO CHEGUEI ===== -->
+      <div class="card secCaixa"><span class="bar"></span>Meu progresso</div>
+
+      <div class="duplaProgresso">
+      <div class="card cardGrafico">
+        <svg viewBox="0 0 320 96" id="graficoEvolucao" aria-label="Gr&aacute;fico das suas &uacute;ltimas notas"></svg>
+        <p class="legGrafico" id="legendaGrafico">&uacute;ltimas reda&ccedil;&otilde;es</p>
+      </div>
+      <div class="colNotas">
+      <div class="chipsVisao hidden" id="chipsVisao">
+        <button class="chip on" id="chipMedia" onclick="setVisaoGrid('media')">M&eacute;dia &middot; &uacute;ltimas 8</button>
+        <button class="chip" id="chipUltima" onclick="setVisaoGrid('ultima')">&Uacute;ltima reda&ccedil;&atilde;o</button>
+      </div>
+      <div class="gridComp" id="gridComp"></div>
+      </div>
+      </div>
+
+      <!-- ===== SEÇÃO 3 · O QUE FAZER AGORA ===== -->
+      <div class="card secCaixa"><span class="bar"></span>O que fazer agora</div>
+      <div class="duplaAcao">
+        <a class="btn btnPlano" id="btnPlano" href="plano.html">Refor&ccedil;ar compet&ecirc;ncia</a>
+        <button class="btn ghost btnOutraComp" onclick="abrirGaveta('gavetaFoco')">Refor&ccedil;ar outra compet&ecirc;ncia</button>
+      </div>
+
+    </div>
+
+  </div>
 </div>
 
-<div id="toast"></div>
-
-<div class="flex h-screen overflow-hidden relative z-10">
-
-  <!-- SIDEBAR -->
-  <div id="overlay" onclick="toggleSidebar()"></div>
-<aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-[#10131a] shadow-[0px_24px_48px_-12px_rgba(108,92,231,0.12)] flex flex-col py-6 px-4 z-50 border-r border-outline-variant/10">
-    <div class="flex items-center px-2 mb-10">
-      <div class="flex items-baseline italic">
-        <span class="text-3xl font-black text-white tracking-tighter">Reda</span>
-        <span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span>
-      </div>
-    </div>
-    <nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="inicio.html"><span class="material-symbols-outlined">home</span><span class="font-medium text-sm">Início</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span><span class="font-medium text-sm">Nova Redação</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="temas.html"><span class="material-symbols-outlined">description</span><span class="font-medium text-sm">Temas</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span><span class="font-medium text-sm">Minhas Redações</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] transition-all duration-300" href="evolucao.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">trending_up</span><span class="font-medium text-sm">Evolução</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="plano.html"><span class="material-symbols-outlined">menu_book</span><span class="font-medium text-sm">Plano de Estudo</span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Elite <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span class="font-medium text-sm">Ranking</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span class="font-medium text-sm">Configurações</span></a>
-    </nav>
-    <div class="mt-auto pt-6 border-t border-outline-variant/10">
-      <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container transition-colors cursor-pointer group">
-        <img alt="{{USUARIO}}" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
-        <div class="flex flex-col"><span class="text-sm font-semibold text-on-surface">{{USUARIO}}</span><span class="text-xs text-on-surface-variant">Estudante Premium</span></div>
-      </div>
-      <a onclick="authLogout()" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
-        <span class="material-symbols-outlined text-sm">logout</span><span class="font-medium text-sm">Sair</span>
-      </a>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="flex-1 main-with-sidebar flex flex-col min-h-screen relative bg-surface-container-lowest">
-
-    <!-- TOP BAR -->
-    <header class="h-20 flex items-center justify-between px-10 bg-surface/40 backdrop-blur-md sticky top-0 z-40 border-b border-white/5">
-      <div class="flex items-center gap-3">
-        <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden">
-          <span class="material-symbols-outlined">menu</span>
-        </button>
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">trending_up</span>
-          <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Evolução</h2>
-        </div>
-      </div>
-      <div class="flex items-center gap-6">
-        <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full">
-          <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
-          <span class="text-xs font-bold text-on-surface">940 pts</span>
-        </div>
-        <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
-        </button>
-      </div>
-    </header>
-
-    <!-- CONTEÚDO -->
-    <div class="flex-1 overflow-y-auto p-10 custom-scrollbar">
-      <div class="space-y-8 max-w-7xl mx-auto">
-
-        <!-- MÉTRICAS -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <!-- Nível -->
-          <div class="bg-[#191c22] p-6 rounded-2xl border border-white/5 flex flex-col gap-1">
-            <span class="text-[10px] font-bold text-[#c8c4d7] uppercase tracking-wider">Nível Atual</span>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-black text-[#45edee]">Nível 14</span>
-            </div>
-            <span class="text-xs text-[#c8c4d7]/60 italic">Top 5% da plataforma</span>
-          </div>
-          <!-- Média -->
-          <div class="bg-[#191c22] p-6 rounded-2xl border border-white/5 flex flex-col gap-1">
-            <span class="text-[10px] font-bold text-[#c8c4d7] uppercase tracking-wider">Média Geral</span>
-            <div class="flex items-baseline gap-1">
-              <span id="mediaAtual" class="text-3xl font-black text-white">840</span>
-              <span class="text-sm font-medium text-[#c8c4d7]">/1000</span>
-            </div>
-            <span class="text-xs text-[#45edee]">+20 pts vs mês anterior</span>
-          </div>
-          <!-- Redações -->
-          <div class="bg-[#191c22] p-6 rounded-2xl border border-white/5 flex flex-col gap-1">
-            <span class="text-[10px] font-bold text-[#c8c4d7] uppercase tracking-wider">Redações Enviadas</span>
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-black text-white">24</span>
-            </div>
-            <span class="text-xs text-[#c8c4d7]/60 italic">8 este mês</span>
-          </div>
-          <!-- Próxima meta -->
-          <div class="bg-[#191c22] p-6 rounded-2xl border border-white/5 flex flex-col gap-2">
-            <span class="text-[10px] font-bold text-[#c8c4d7] uppercase tracking-wider">Próxima Meta</span>
-            <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-[#6c5ce7] to-[#45edee] xp-bar"></div>
-            </div>
-            <span class="text-xs text-white/80 font-medium">920 pts (Mestre) — <span class="text-[#45edee]">80 pts faltam</span></span>
-          </div>
-        </div>
-
-        <!-- GRÁFICOS -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          <!-- Gráfico de Evolução de Notas -->
-          <div class="lg:col-span-2 bg-[#191c22] p-8 rounded-3xl border border-white/5">
-            <div class="mb-6 grafico-header flex items-start justify-between">
-              <h3 class="text-xl font-bold text-white">Evolução de Notas</h3>
-              <div class="flex flex-wrap gap-3">
-                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-[#6c5ce7] shrink-0"></div><span class="text-[10px] text-[#c8c4d7]">Sua Nota</span></div>
-                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-[#fabd00] shrink-0"></div><span class="text-[10px] text-[#c8c4d7]">Sua Meta</span></div>
-                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-white/30 shrink-0"></div><span class="text-[10px] text-[#c8c4d7]">Média BR</span></div>
-              </div>
-            </div>
-            <div style="height:260px;position:relative;">
-              <canvas id="graficoEvolucao"></canvas>
-            </div>
-          </div>
-
-          <!-- Radar C1-C5 -->
-          <div class="bg-[#191c22] p-8 rounded-3xl border border-white/5">
-            <h3 class="text-xl font-bold text-white mb-4">Equilíbrio C1-C5</h3>
-            <div style="height:220px;position:relative;">
-              <canvas id="graficoRadar"></canvas>
-            </div>
-            <p class="text-[11px] text-[#c8c4d7]/60 text-center italic mt-3" id="pontoForte">Ponto forte: Proposta de Intervenção (C5)</p>
-          </div>
-        </div>
-
-        <!-- CONQUISTAS -->
-        <div class="space-y-6">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-[#FABD00]" style="font-variation-settings:'FILL' 1;">workspace_premium</span>
-            <h3 class="text-xl font-bold text-white">Suas Conquistas de Elite</h3>
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="gridConquistas"></div>
-        </div>
-
-        <!-- CARDS DESTAQUE -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
-
-          <!-- Destaque do Repertório -->
-          <div class="bg-gradient-to-br from-[#1d2026] to-[#14171d] p-8 rounded-3xl border border-white/5 hover:border-[#6c5ce7]/30 transition-all group">
-            <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 rounded-2xl bg-[#6c5ce7]/10 flex items-center justify-center text-[#6c5ce7]">
-                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
-              </div>
-              <h4 class="text-lg font-bold text-white italic">Destaque do Repertório</h4>
-            </div>
-            <p class="text-[#c8c4d7] text-sm leading-relaxed mb-6">
-              "A persistência das desigualdades estruturais no Brasil contemporâneo reflete, conforme o sociólogo Jessé Souza, uma 'ralé' produzida para manter privilégios..."
-            </p>
-            <div class="flex items-center gap-2 text-[#45edee] text-xs font-bold uppercase tracking-widest">
-              <span>Excelente uso de autoridade</span>
-              <span class="material-symbols-outlined text-sm">trending_up</span>
-            </div>
-          </div>
-
-          <!-- Plano de Ação -->
-          <div class="bg-gradient-to-br from-[#1d2026] to-[#14171d] p-8 rounded-3xl border border-white/5 hover:border-[#fabd00]/30 transition-all group">
-            <div class="flex items-center justify-between mb-6">
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-[#fabd00]/10 flex items-center justify-center text-[#fabd00]">
-                  <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">assignment_turned_in</span>
-                </div>
-                <h4 class="text-lg font-bold text-white italic">Plano de Ação</h4>
-              </div>
-              <button onclick="toast('Plano exportado! 📋')" class="w-10 h-10 rounded-xl bg-[#45edee] flex items-center justify-center hover:scale-110 transition-all">
-                <span class="material-symbols-outlined text-[#002020] text-lg" style="font-variation-settings:'FILL' 1;">edit</span>
-              </button>
-            </div>
-            <ul class="space-y-3" id="listaPlano"></ul>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </main>
-
-  <!-- FAB -->
-  <button onclick="window.location.href='nova-redacao.html'" class="fixed bottom-10 right-10 w-16 h-16 rounded-2xl bg-secondary text-on-secondary shadow-lg shadow-secondary/20 flex items-center justify-center transform hover:scale-110 hover:rotate-12 transition-all active:scale-90 z-50">
-    <span class="material-symbols-outlined text-3xl" style="font-variation-settings:'FILL' 1;">edit</span>
-  </button>
+<!-- E1: gaveta de escolha de competência (padrão universal de seleção) -->
+<div class="gvBg atrasBarra" id="gavetaFocoBg" onclick="fecharGaveta('gavetaFoco')"></div>
+<div class="gv atrasBarra" id="gavetaFoco">
+  <div class="grip"></div>
+  <p class="tit">Refor&ccedil;ar qual compet&ecirc;ncia?</p>
+  <p class="sub">O plano abre j&aacute; com foco na sua escolha.</p>
+  <div id="pillsFoco"></div>
 </div>
 
+<script src="supabase-auth.js"></script>
+<script src="aluno-base-v6.js"></script>
 <script>
+  if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-  // Logout universal
-  window.authLogout = window.authLogout || function() {
-    if (confirm('Deseja sair da sua conta?')) {
-      localStorage.clear();
-      window.location.href = 'login.html';
+  montarEsqueleto({
+    ativo:  '',
+    titulo: 'Evolu\u00e7\u00e3o',
+    icone:  'monitoring',
+    sino:   true,
+    versao: 'aluno \u00b7 evolu\u00e7\u00e3o \u00b7 v1-1'
+  });
+
+  /* ─── B1: referências oficiais (constantes de edição anual) ───
+     MEDIA_BRASIL: média nacional de redação anunciada pelo MEC/INEP na
+     coletiva de resultados. ENEM 2024 = 660 (13/01/2025; em 2023 foi 645).
+     Atualizar quando a média do ENEM mais recente for divulgada.
+     MEDIA_AM: o INEP NÃO publica média oficial de redação por estado.
+     Deixar null oculta a barra do Amazonas; preencher (com fonte sólida
+     anotada aqui) faz a barra aparecer sozinha, sem mexer em mais nada. */
+  var MEDIA_BRASIL = 660;
+  var FONTE_BRASIL = 'M\u00e9dia oficial de reda\u00e7\u00e3o \u00b7 ENEM 2024 (MEC/INEP)';
+  var MEDIA_AM = null;
+
+  var NOME_COMP = { C1:'Norma culta', C2:'Repert\u00f3rio', C3:'Argumenta\u00e7\u00e3o', C4:'Coes\u00e3o', C5:'Interven\u00e7\u00e3o' };
+  var FOCO_COMP = { C1:'Foco: norma culta', C2:'Foco: repert\u00f3rio', C3:'Foco: argumenta\u00e7\u00e3o', C4:'Foco: conectivos', C5:'Foco: detalhar agentes' };
+
+  function mostrarEstado(id) {
+    ['estadoCarregando','estadoVazio','estadoErro','conteudoEvolucao'].forEach(function(k){
+      var el = document.getElementById(k);
+      if (el) el.classList.toggle('hidden', k !== id);
+    });
+  }
+
+  /* ─── Gráfico (B2: sparkline SVG, sem dependência externa) ───
+     Recebe notas em ordem cronológica (antiga → recente). */
+  function desenharGrafico(notas) {
+    var svg = document.getElementById('graficoEvolucao');
+    if (!svg) return;
+    var W = 320, H = 96, padX = 12, padY = 18;
+    /* Altura simétrica: a proporção do desenho segue o espaço real do card (desktop),
+       sem distorcer traço nem números. No mobile cai no 320x96 de sempre. */
+    try {
+      var box = svg.getBoundingClientRect();
+      if (box.width > 0 && box.height > 0) H = Math.max(96, Math.round(W * box.height / box.width));
+    } catch(e) {}
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    var ns = 'http://www.w3.org/2000/svg';
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    if (notas.length === 1) {
+      var c1 = document.createElementNS(ns, 'circle');
+      c1.setAttribute('cx', W / 2); c1.setAttribute('cy', H / 2); c1.setAttribute('r', 5);
+      c1.setAttribute('fill', 'var(--cyan)');
+      svg.appendChild(c1);
+      var t1 = document.createElementNS(ns, 'text');
+      t1.setAttribute('x', W / 2); t1.setAttribute('y', H / 2 - 12);
+      t1.setAttribute('text-anchor', 'middle'); t1.setAttribute('font-size', '13');
+      t1.setAttribute('font-weight', '800'); t1.setAttribute('fill', 'var(--cyan)');
+      t1.textContent = notas[0];
+      svg.appendChild(t1);
+      var t2 = document.createElementNS(ns, 'text');
+      t2.setAttribute('x', W / 2); t2.setAttribute('y', H / 2 + 24);
+      t2.setAttribute('text-anchor', 'middle'); t2.setAttribute('font-size', '10');
+      t2.setAttribute('fill', 'var(--muted)');
+      t2.textContent = 'primeiro ponto da sua trajet\u00f3ria';
+      svg.appendChild(t2);
+      return;
     }
-  };
-  window.sair = window.authLogout;
-  authGuard('aluno');
 
-// ── TOAST ──────────────────────────────────────────
-function toast(msg, dur=3000) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), dur);
-}
+    var min = Math.min.apply(null, notas), max = Math.max.apply(null, notas);
+    var faixa = (max - min) || 1;
+    var pontos = notas.map(function(n, i){
+      var x = padX + i * ((W - 2 * padX) / (notas.length - 1));
+      var y = (H - padY) - ((n - min) / faixa) * (H - 2 * padY);
+      return { x: Math.round(x), y: Math.round(y), n: n };
+    });
+    var poly = document.createElementNS(ns, 'polyline');
+    poly.setAttribute('points', pontos.map(function(p){ return p.x + ',' + p.y; }).join(' '));
+    poly.setAttribute('fill', 'none');
+    poly.setAttribute('stroke', 'var(--cyan)');
+    poly.setAttribute('stroke-width', '2.5');
+    poly.setAttribute('stroke-linecap', 'round');
+    poly.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(poly);
+    var ult = pontos[pontos.length - 1];
+    var ponto = document.createElementNS(ns, 'circle');
+    ponto.setAttribute('cx', ult.x); ponto.setAttribute('cy', ult.y); ponto.setAttribute('r', 4);
+    ponto.setAttribute('fill', 'var(--cyan)');
+    svg.appendChild(ponto);
+    var rot = document.createElementNS(ns, 'text');
+    var rx = Math.min(ult.x, W - 16);
+    var ry = (ult.y < 16) ? ult.y + 18 : ult.y - 9;
+    rot.setAttribute('x', rx); rot.setAttribute('y', ry);
+    rot.setAttribute('text-anchor', 'end'); rot.setAttribute('font-size', '11');
+    rot.setAttribute('font-weight', '800'); rot.setAttribute('fill', 'var(--cyan)');
+    rot.textContent = ult.n;
+    svg.appendChild(rot);
+  }
 
-// ── DADOS ──────────────────────────────────────────
-const HISTORICO = [
-  { label:'RED 01', nota:720, data:'Jan/23' },
-  { label:'RED 02', nota:740, data:'Fev/23' },
-  { label:'RED 03', nota:780, data:'Mar/23' },
-  { label:'RED 04', nota:800, data:'Abr/23' },
-  { label:'RED 05', nota:760, data:'Mai/23' },
-  { label:'RED 06', nota:820, data:'Jun/23' },
-  { label:'RED 07', nota:800, data:'Jul/23' },
-  { label:'RED 08', nota:840, data:'Ago/23' },
-  { label:'ATUAL',  nota:840, data:'Set/23' },
-];
+  /* Redesenho do gráfico quando a janela muda (girar tablet, redimensionar) */
+  var _notasGrafico = null;
+  window.addEventListener('resize', function(){ if (_notasGrafico) desenharGrafico(_notasGrafico); });
 
-const META = 920;
-const MEDIA_BRASIL = 680;
+  /* ─── E2: alternância Média × Última (dados já carregados; zero consulta) ─── */
+  var _cron = null, _envios30 = 0, _visaoGrid = 'media';
+  var _pior = null;      /* diagnóstico pela média (selo recomendado) */
+  var _foco = null;      /* escolha do aluno; null = segue o diagnóstico */
+  function setVisaoGrid(v) {
+    _visaoGrid = v;
+    var cm = document.getElementById('chipMedia'), cu = document.getElementById('chipUltima');
+    if (cm) cm.classList.toggle('on', v === 'media');
+    if (cu) cu.classList.toggle('on', v === 'ultima');
+    renderGrid();
+  }
 
-const COMPETENCIAS = {
-  C1: 170, // Domínio da língua
-  C2: 160, // Compreensão do tema
-  C3: 160, // Seleção e organização
-  C4: 150, // Mecanismos linguísticos
-  C5: 180, // Proposta de intervenção
-};
+  /* ─── B3: tendência calculada localmente, sem chamada extra ───
+     Cronológica (antiga → recente). Compara o trecho recente com o anterior. */
+  function tendenciaComp(valoresCron) {
+    if (valoresCron.length < 2) return { txt: 'Primeira medi\u00e7\u00e3o', classe: '' };
+    var meta = Math.max(1, Math.floor(valoresCron.length / 2));
+    var recentes = valoresCron.slice(-meta);
+    var anteriores = valoresCron.slice(0, valoresCron.length - meta);
+    function media(a){ return a.reduce(function(x, y){ return x + y; }, 0) / a.length; }
+    var dif = media(recentes) - media(anteriores);
+    if (dif >= 15) return { txt: 'Subindo', classe: 'tSubindo' };
+    if (dif <= -15) return { txt: 'Aten\u00e7\u00e3o: caiu', classe: 'tCaiu' };
+    return { txt: 'Est\u00e1vel', classe: '' };
+  }
 
-// ── GRÁFICO DE EVOLUÇÃO ────────────────────────────
-const ctxEvolucao = document.getElementById('graficoEvolucao').getContext('2d');
+  function calcMedias(cron) {
+    var medias = {};
+    ['c1','c2','c3','c4','c5'].forEach(function(k){
+      var soma = 0;
+      cron.forEach(function(r){ soma += (r[k] || 0); });
+      medias[k] = Math.round(soma / cron.length);
+    });
+    return medias;
+  }
 
-const gradientFill = ctxEvolucao.createLinearGradient(0, 0, 0, 260);
-gradientFill.addColorStop(0, 'rgba(108,92,231,0.3)');
-gradientFill.addColorStop(1, 'rgba(108,92,231,0)');
-
-new Chart(ctxEvolucao, {
-  type: 'bar',
-  data: {
-    labels: HISTORICO.map(h => h.label),
-    datasets: [
-      {
-        label: 'Sua Nota',
-        data: HISTORICO.map(h => h.nota),
-        backgroundColor: HISTORICO.map((h, i) =>
-          i === HISTORICO.length - 1 ? '#6c5ce7' : 'rgba(108,92,231,0.25)'
-        ),
-        borderColor: HISTORICO.map((h, i) =>
-          i === HISTORICO.length - 1 ? '#6c5ce7' : 'rgba(108,92,231,0.4)'
-        ),
-        borderWidth: 1,
-        borderRadius: 6,
-        hoverBackgroundColor: '#6c5ce7',
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#1d2026',
-        borderColor: 'rgba(255,255,255,0.1)',
-        borderWidth: 1,
-        titleColor: '#e1e2eb',
-        bodyColor: '#c8c4d7',
-        padding: 12,
-        callbacks: {
-          label: ctx => ` Nota: ${ctx.parsed.y}/1000`,
-          afterLabel: () => `Meta: ${META} | MédBR: ${MEDIA_BRASIL}`
+  function renderGrid() {
+    var grid = document.getElementById('gridComp');
+    if (!grid || !_cron) return null;
+    var chaves = ['c1','c2','c3','c4','c5'];
+    var medias = calcMedias(_cron);
+    var pior = chaves.slice().sort(function(a, b){ return medias[a] - medias[b]; })[0];
+    var foco = _foco || pior;
+    var ultima = _cron[_cron.length - 1];
+    /* Visão Última: dourado na menor nota DAQUELA redação (pode diferir da pior da média) */
+    var piorUltima = chaves.slice().sort(function(a, b){ return (ultima[a] || 0) - (ultima[b] || 0); })[0];
+    var html = '';
+    chaves.forEach(function(k){
+      var K = k.toUpperCase();
+      var valor, dica, classeDica = '', ehPior = false;
+      if (_visaoGrid === 'media') {
+        /* Quem eu sou: média, dourado no diagnóstico */
+        valor = medias[k];
+        ehPior = (k === foco);
+        if (ehPior) { dica = FOCO_COMP[K]; }
+        else {
+          var t = tendenciaComp(_cron.map(function(r){ return r[k] || 0; }));
+          dica = t.txt; classeDica = t.classe;
         }
+      } else {
+        /* Como foi o dia: última redação vs a própria média; dourado na menor nota do dia */
+        valor = ultima[k] || 0;
+        ehPior = (k === piorUltima);
+        var dif = valor - medias[k];
+        if (dif > 0) { dica = '\u2191 +' + dif + ' vs sua m\u00e9dia'; classeDica = 'tSubindo'; }
+        else if (dif < 0) { dica = '\u2193 ' + dif + ' vs sua m\u00e9dia'; classeDica = 'tCaiu'; }
+        else { dica = 'Na sua m\u00e9dia'; }
       }
-    },
-    scales: {
-      x: {
-        grid: { color: 'rgba(255,255,255,0.04)' },
-        ticks: { color: '#928ea0', font: { size: 10, family: 'Inter' } },
-        border: { display: false }
-      },
-      y: {
-        min: 500,
-        max: 1000,
-        grid: { color: 'rgba(255,255,255,0.04)' },
-        ticks: { color: '#928ea0', font: { size: 10, family: 'Inter' }, stepSize: 100 },
-        border: { display: false }
-      }
-    },
-    // Linhas de referência via plugin
-    plugins: {
-      legend: { display: false },
-      annotation: undefined,
-      tooltip: {
-        backgroundColor: '#1d2026',
-        borderColor: 'rgba(255,255,255,0.08)',
-        borderWidth: 1,
-        titleColor: '#e1e2eb',
-        bodyColor: '#c8c4d7',
-        padding: 12,
+      html += '<div class="card celComp' + (ehPior ? ' pior' : '') + '">' +
+        '<p class="cn">' + K + ' \u00b7 ' + NOME_COMP[K] + '</p>' +
+        '<p class="cv">' + valor + '</p>' +
+        '<p class="cd ' + classeDica + '">' + dica + '</p>' +
+      '</div>';
+    });
+    /* B4-A: 6ª célula fixa nas duas visões (é da rotina, não da redação) */
+    var ritmo = _envios30 >= 4 ? 'Ritmo \u00f3timo' : _envios30 >= 2 ? 'Ritmo bom' : _envios30 === 1 ? 'Vamos acelerar' : 'Hora de voltar';
+    html += '<div class="card celComp">' +
+      '<p class="cn">Envios \u00b7 30 dias</p>' +
+      '<p class="cv" style="color:var(--cyan);">' + (_envios30 >= 8 ? '8+' : _envios30) + '</p>' +
+      '<p class="cd">' + ritmo + '</p>' +
+    '</div>';
+    grid.innerHTML = html;
+    return pior;
+  }
+
+  /* ─── E1: pills da gaveta de foco (pior recebe selo "recomendado") ─── */
+  function montarPillsFoco() {
+    var alvo = document.getElementById('pillsFoco');
+    if (!alvo || !_cron) return;
+    var medias = calcMedias(_cron);
+    var foco = _foco || _pior;
+    var html = '';
+    ['c1','c2','c3','c4','c5'].forEach(function(k){
+      var K = k.toUpperCase();
+      html += '<a class="pill' + (k === foco ? ' focoPill' : '') + '" onclick="escolherFoco(\'' + K + '\')">' +
+        '<i class="pemoji">\u{1F3AF}</i>' +
+        '<span class="nomePill">' + K + ' \u00b7 ' + NOME_COMP[K] +
+        (k === _pior ? '<span class="recom">recomendado</span>' : '') + '</span>' +
+        '<span class="mediaPill">' + medias[k] + '</span><i class="fim">\u203A</i></a>';
+    });
+    alvo.innerHTML = html;
+  }
+  /* Escolha do aluno: o destaque dourado migra (grid + gaveta + botão);
+     o selo "recomendado" permanece no diagnóstico. Sessão apenas: recarregou, volta ao diagnóstico. */
+  function escolherFoco(K) {
+    _foco = K.toLowerCase();
+    fecharGaveta('gavetaFoco');
+    renderGrid();
+    montarPillsFoco();
+    atualizarBotaoPlano();
+    toast('Foco de refor\u00e7o: ' + K + ' \u00b7 ' + NOME_COMP[K], 2200);
+  }
+  function atualizarBotaoPlano() {
+    var btn = document.getElementById('btnPlano');
+    var alvo = _foco || _pior;
+    if (!btn || !alvo) return;
+    var K = alvo.toUpperCase();
+    btn.textContent = 'Refor\u00e7ar ' + K + ' (' + NOME_COMP[K] + ')';
+    btn.setAttribute('href', 'plano.html?foco=' + K);
+  }
+
+  function preencherComparacao(mediaAluno) {
+    function largura(v){ return Math.max(4, Math.min(100, (v / 1000) * 100)) + '%'; }
+    var bv = document.getElementById('barraVoce');
+    var bb = document.getElementById('barraBrasil');
+    if (bv) bv.style.width = largura(mediaAluno);
+    if (bb) bb.style.width = largura(MEDIA_BRASIL);
+    var vv = document.getElementById('valorVoce');
+    var vb = document.getElementById('valorBrasil');
+    if (vv) vv.textContent = mediaAluno;
+    if (vb) vb.textContent = MEDIA_BRASIL;
+    if (MEDIA_AM !== null) {
+      var la = document.getElementById('linhaAM');
+      var ba = document.getElementById('barraAM');
+      var va = document.getElementById('valorAM');
+      if (la) la.classList.remove('hidden');
+      if (ba) ba.style.width = largura(MEDIA_AM);
+      if (va) va.textContent = MEDIA_AM;
+    }
+    var frase = document.getElementById('fraseComparacao');
+    if (frase) {
+      var dif = mediaAluno - MEDIA_BRASIL;
+      if (dif >= 0) {
+        frase.textContent = '+' + dif + ' acima da m\u00e9dia nacional do ENEM \u{1F4AA}';
+        frase.style.color = 'var(--green)';
+      } else {
+        frase.textContent = 'A ' + Math.abs(dif) + ' pontos da m\u00e9dia nacional \u2014 continue escrevendo';
+        frase.style.color = 'var(--gold)';
       }
     }
-  },
-  plugins: [{
-    id: 'referenceLines',
-    afterDraw(chart) {
-      const { ctx, chartArea: { left, right }, scales: { y } } = chart;
-      // Linha Meta
-      const yMeta = y.getPixelForValue(META);
-      ctx.save();
-      ctx.setLineDash([6, 4]);
-      ctx.strokeStyle = 'rgba(250,189,0,0.5)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(left, yMeta);
-      ctx.lineTo(right, yMeta);
-      ctx.stroke();
-      ctx.fillStyle = 'rgba(250,189,0,0.8)';
-      ctx.font = '9px Inter';
-      ctx.fillText('Meta: ' + META, right - 60, yMeta - 4);
-      // Linha Média BR
-      const yBr = y.getPixelForValue(MEDIA_BRASIL);
-      ctx.setLineDash([3, 3]);
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(left, yBr);
-      ctx.lineTo(right, yBr);
-      ctx.stroke();
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.fillText('Méd.BR: ' + MEDIA_BRASIL, right - 75, yBr - 4);
-      ctx.restore();
-    }
-  }]
-});
+    var fonte = document.getElementById('fonteComparacao');
+    if (fonte) fonte.textContent = FONTE_BRASIL;
+  }
 
-// ── GRÁFICO RADAR C1-C5 ────────────────────────────
-const ctxRadar = document.getElementById('graficoRadar').getContext('2d');
-const valoresComp = Object.values(COMPETENCIAS);
-const maxComp = 200;
+  /* ─── Carga principal: 1 única consulta ao banco ─── */
+  async function carregarEvolucao() {
+    mostrarEstado('estadoCarregando');
+    try {
+      if (typeof dbGetHistoricoRedacoes !== 'function') { mostrarEstado('estadoErro'); return; }
+      var historico = await dbGetHistoricoRedacoes(8); /* recente → antiga */
+      if (!historico || historico.length === 0) { mostrarEstado('estadoVazio'); return; }
 
-new Chart(ctxRadar, {
-  type: 'radar',
-  data: {
-    labels: ['C1\nLíngua', 'C2\nTema', 'C3\nOrganiz.', 'C4\nLing.', 'C5\nProposta'],
-    datasets: [{
-      label: 'Suas Competências',
-      data: valoresComp,
-      backgroundColor: 'rgba(69,237,238,0.15)',
-      borderColor: '#45edee',
-      borderWidth: 2,
-      pointBackgroundColor: '#45edee',
-      pointBorderColor: '#0b0e14',
-      pointBorderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 6,
-    }, {
-      label: 'Máximo',
-      data: [200,200,200,200,200],
-      backgroundColor: 'transparent',
-      borderColor: 'rgba(255,255,255,0.06)',
-      borderWidth: 1,
-      pointRadius: 0,
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#1d2026',
-        borderColor: 'rgba(255,255,255,0.1)',
-        borderWidth: 1,
-        titleColor: '#45edee',
-        bodyColor: '#c8c4d7',
-        padding: 10,
-        callbacks: { label: ctx => ` ${ctx.parsed.r}/200` }
+      var cron = historico.slice().reverse(); /* antiga → recente */
+      var notas = cron.map(function(r){ return r.total; });
+      var media = Math.round(notas.reduce(function(a, b){ return a + b; }, 0) / notas.length);
+
+      var el = document.getElementById('mediaAtual');
+      if (el) el.textContent = media;
+
+      var variacao = document.getElementById('variacaoMedia');
+      if (variacao && notas.length >= 2) {
+        var dif = notas[notas.length - 1] - notas[notas.length - 2];
+        variacao.textContent = (dif >= 0 ? '\u2191 +' + dif : '\u2193 ' + dif) + ' na \u00faltima';
+        variacao.style.color = dif > 0 ? 'var(--green)' : (dif < 0 ? 'var(--red2)' : 'var(--muted)');
+        variacao.classList.remove('hidden');
       }
-    },
-    scales: {
-      r: {
-        min: 0, max: 200,
-        ticks: { display: false, stepSize: 50 },
-        grid: { color: 'rgba(255,255,255,0.06)' },
-        angleLines: { color: 'rgba(255,255,255,0.06)' },
-        pointLabels: {
-          color: '#928ea0',
-          font: { size: 9, family: 'Inter', weight: 'bold' }
-        }
-      }
+
+      preencherComparacao(media);
+      _notasGrafico = notas;
+      desenharGrafico(notas);
+      var legenda = document.getElementById('legendaGrafico');
+      if (legenda) legenda.textContent = notas.length === 1 ? 'sua primeira reda\u00e7\u00e3o corrigida' : '\u00faltimas ' + notas.length + ' reda\u00e7\u00f5es';
+
+      var limite30 = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      _envios30 = cron.filter(function(r){
+        var t = Date.parse(r.data);
+        return !isNaN(t) && t >= limite30;
+      }).length;
+      _cron = cron;
+
+      var chips = document.getElementById('chipsVisao');
+      if (chips) chips.classList.toggle('hidden', cron.length < 2);
+
+      _pior = renderGrid();
+      montarPillsFoco();
+      atualizarBotaoPlano();
+
+      mostrarEstado('conteudoEvolucao');
+    } catch(e) {
+      console.warn('Erro ao carregar a Evolu\u00e7\u00e3o:', e);
+      mostrarEstado('estadoErro');
     }
   }
-});
-
-// Identificar ponto forte e fraco
-const nomes = ['Domínio da Língua (C1)','Compreensão do Tema (C2)','Organização (C3)','Mecanismos Linguísticos (C4)','Proposta de Intervenção (C5)'];
-const maxIdx = valoresComp.indexOf(Math.max(...valoresComp));
-const minIdx = valoresComp.indexOf(Math.min(...valoresComp));
-document.getElementById('pontoForte').textContent =
-  `✦ Forte: ${nomes[maxIdx]} · Melhorar: ${nomes[minIdx].split(' ')[0]}`;
-
-// ── CONQUISTAS ─────────────────────────────────────
-const CONQUISTAS = [
-  { nome:'Lenda do 900', icon:'military_tech', cor:'#FABD00', desbloqueada:true, progresso:100, tooltip:'Obteve nota acima de 900 em uma redação!' },
-  { nome:'Escritor Veloz', icon:'rocket_launch', cor:'#45EDEE', desbloqueada:true, progresso:85, tooltip:'Enviou 5 redações em menos de 7 dias.' },
-  { nome:'Repertório Ouro', icon:'auto_awesome', cor:'#FABD00', desbloqueada:true, progresso:60, tooltip:'Usou repertórios filosóficos em 3 redações.' },
-  { nome:'Mestre Argumentador', icon:'emoji_events', cor:'#928ea0', desbloqueada:false, progresso:30, tooltip:'Obtenha C3 ≥ 180 em 5 redações consecutivas.' },
-  { nome:'Crítico Analítico', icon:'workspace_premium', cor:'#928ea0', desbloqueada:false, progresso:10, tooltip:'Alcance nota 960 ou mais.' },
-];
-
-const grid = document.getElementById('gridConquistas');
-CONQUISTAS.forEach(c => {
-  const card = document.createElement('div');
-  card.className = `conquista-card glass-card p-4 rounded-2xl border border-white/5 flex flex-col items-center gap-3 transition-all duration-300 relative cursor-pointer ${c.desbloqueada ? 'conquista-desbloqueada' : 'opacity-60'}`;
-  card.innerHTML = `
-    <div class="relative flex items-center justify-center">
-      <div class="absolute inset-0 rounded-full blur-xl transition-transform duration-500 scale-0 group-hover:scale-100" style="background:${c.cor}30"></div>
-      <span class="material-symbols-outlined text-4xl drop-shadow-lg" style="color:${c.desbloqueada ? c.cor : '#32353c'};font-variation-settings:'FILL' 1;">${c.icon}</span>
-      ${!c.desbloqueada ? '<span class="material-symbols-outlined absolute text-xs text-white/40 bg-black/40 p-0.5 rounded-full" style="bottom:-4px;right:-4px;">lock</span>' : ''}
-    </div>
-    <div class="flex flex-col items-center gap-1.5 w-full">
-      <span class="text-[11px] font-bold ${c.desbloqueada ? 'text-white' : 'text-[#c8c4d7]/60'} tracking-wide text-center">${c.nome}</span>
-      <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-        <div class="h-full rounded-full transition-all" style="width:${c.progresso}%;background:${c.desbloqueada ? c.cor : 'rgba(200,196,215,0.2)'}"></div>
-      </div>
-      <span class="text-[9px] ${c.desbloqueada ? 'text-on-surface-variant' : 'text-white/20'}">${c.progresso}%</span>
-    </div>
-    <div class="conquista-tooltip">${c.tooltip}</div>`;
-  card.addEventListener('click', () => {
-    if (c.desbloqueada) toast(`🏆 ${c.nome} — Conquista desbloqueada!`);
-    else toast(`🔒 ${c.nome}: ${c.tooltip}`);
-  });
-  grid.appendChild(card);
-});
-
-// ── PLANO DE AÇÃO ──────────────────────────────────
-const PLANO = [
-  { texto:'Revisar conectivos de conclusão para C4.', feito:true },
-  { texto:'Praticar 2 temas sobre Meio Ambiente.', feito:true },
-  { texto:"Aprofundar conceito de 'Modernidade Líquida'.", feito:false },
-  { texto:'Estudar estrutura argumentativa da C3.', feito:false },
-];
-
-const listaPlano = document.getElementById('listaPlano');
-PLANO.forEach((p, i) => {
-  const li = document.createElement('li');
-  li.className = 'flex items-start gap-3 text-sm text-[#c8c4d7] cursor-pointer group';
-  li.innerHTML = `
-    <span class="material-symbols-outlined text-sm mt-0.5 transition-colors ${p.feito ? 'text-[#45edee]' : 'text-white/20 group-hover:text-white/40'}" style="font-variation-settings:'FILL' 1;">${p.feito ? 'check_circle' : 'radio_button_unchecked'}</span>
-    <span class="${p.feito ? '' : 'opacity-60'}">${p.texto}</span>`;
-  li.addEventListener('click', () => {
-    p.feito = !p.feito;
-    listaPlano.innerHTML = '';
-    PLANO.forEach((pp, ii) => listaPlano.appendChild(criarItemPlano(pp, ii)));
-    toast(p.feito ? '✓ Tarefa concluída!' : 'Tarefa reaberta.');
-  });
-  listaPlano.appendChild(li);
-});
-
-function criarItemPlano(p) {
-  const li = document.createElement('li');
-  li.className = 'flex items-start gap-3 text-sm text-[#c8c4d7] cursor-pointer group';
-  li.innerHTML = `
-    <span class="material-symbols-outlined text-sm mt-0.5 transition-colors ${p.feito ? 'text-[#45edee]' : 'text-white/20 group-hover:text-white/40'}" style="font-variation-settings:'FILL' 1;">${p.feito ? 'check_circle' : 'radio_button_unchecked'}</span>
-    <span class="${p.feito ? '' : 'opacity-60'}">${p.texto}</span>`;
-  li.addEventListener('click', () => {
-    p.feito = !p.feito;
-    listaPlano.innerHTML = '';
-    PLANO.forEach(pp => listaPlano.appendChild(criarItemPlano(pp)));
-    toast(p.feito ? '✓ Tarefa concluída!' : 'Tarefa reaberta.');
-  });
-  return li;
-}
-</script>
-<script>
-  // ── Sidebar hambúrguer ──────────────────────────────
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('overlay').classList.toggle('open');
-  }
-  document.getElementById('overlay').addEventListener('click', function(){
-    document.getElementById('sidebar').classList.remove('open');
-    this.classList.remove('open');
-  });
+  carregarEvolucao();
 </script>
 </body>
 </html>

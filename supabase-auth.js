@@ -792,7 +792,7 @@ async function dbSincronizarUsuarioAtual() {
 async function dbGetHistoricoRedacoes(limite = 5) {
   const userId = authGetUserId();
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/redacoes?aluno_id=eq.${userId}&status=eq.corrigida&order=created_at.desc&limit=${limite}&select=id,nota_final,tema_livre,created_at,correcoes(c1,c2,c3,c4,c5,feedback_geral,pdca_pareto,pdca_causa_raiz,pdca_tendencia)`,
+    `${SUPABASE_URL}/rest/v1/redacoes?aluno_id=eq.${userId}&status=in.(corrigida,validada)&order=created_at.desc&limit=${limite}&select=id,nota_final,tema_livre,created_at,correcoes(c1,c2,c3,c4,c5,feedback_geral,pdca_pareto,pdca_causa_raiz,pdca_tendencia)`,
     { headers: dbHeaders() }
   );
   const data = await res.json();
