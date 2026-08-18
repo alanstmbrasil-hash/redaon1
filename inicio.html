@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início</title>
-<!-- RedaON · Portal do Aluno · Início · v3-10 · sobre aluno-base-v6 -->
+<title>RedaON | Início v3-11</title>
+<!-- RedaON · Portal do Aluno · Início · v3-11 · sobre aluno-base-v6 -->
+<!-- v3-11 (18/08/2026): capa e foto de perfil por REST direto do Storage (dbFetch autenticado) — o cliente supabase-js nunca existiu na página; upload/leitura estavam mortos desde o v3-10 -->
 <script>
 (function(){
   var pref = 'auto';
@@ -246,7 +247,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-10'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-11'
   });
 
   // Sauda\u00e7\u00e3o
@@ -292,24 +293,32 @@
 
   // ─── Foto de capa (bucket privado: avatares-alunos/<id>/capa.jpg) ───
   var _BUCKET_AVATAR = 'avatares-alunos';
-  function clienteSupabase(){
-    if (window.supabaseClient) return window.supabaseClient;
-    if (window.supabase && window.supabase.storage) return window.supabase;
-    if (window._supabase) return window._supabase;
-    return null;
+  /* v3-11: Storage por REST direto (sem supabase-js). dbFetch cuida de token e refresh. */
+  async function baixarImagemPrivada(caminho) {
+    try {
+      var res = await dbFetch(SUPABASE_URL + '/storage/v1/object/authenticated/' + caminho);
+      if (!res || !res.ok) return null;
+      var blob = await res.blob();
+      return URL.createObjectURL(blob);
+    } catch(e) { return null; }
+  }
+  async function enviarImagemPrivada(caminho, blob) {
+    var res = await dbFetch(SUPABASE_URL + '/storage/v1/object/' + caminho, {
+      method: 'POST',
+      headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'true' },
+      body: blob
+    });
+    return !!(res && res.ok);
   }
   async function carregarFotoCapa() {
-    var sb = clienteSupabase();
-    if (!sb || !sb.storage) return;
     try {
-      var r = await sb.auth.getUser();
-      var user = r && r.data ? r.data.user : null;
-      if (!user) return;
-      var s = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/capa.jpg', 3600);
-      if (s && s.data && s.data.signedUrl) aplicarFotoCapa(s.data.signedUrl);
+      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+      if (!uid) return;
+      var capa = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg');
+      if (capa) aplicarFotoCapa(capa);
       // Foto de perfil da conta (definida em Configura\u00e7\u00f5es) \u2014 usada na bolinha
-      var p = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/perfil.jpg', 3600);
-      if (p && p.data && p.data.signedUrl) aplicarFotoPerfil(p.data.signedUrl);
+      var perfil = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
+      if (perfil) aplicarFotoPerfil(perfil);
     } catch(e) { /* sem foto \u2014 mant\u00e9m o degrad\u00ea */ }
   }
   var _urlCapa = null, _posCapa = 50;
@@ -414,22 +423,15 @@
   });
   async function enviarFotoPerfil(arquivo) {
     if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0) { toast('Use JPG, PNG ou WebP.', 3000); return; }
-    var sb = clienteSupabase();
-    if (!sb || !sb.storage) {
-      try { var b = await comprimirImagem(arquivo); aplicarFotoPerfil(URL.createObjectURL(b)); toast('Foto de perfil aplicada (pr\u00e9via)', 2600); }
-      catch(e) { toast('N\u00e3o consegui ler a imagem.', 2600); }
-      return;
-    }
     toast('Enviando foto\u2026', 4000);
     try {
-      var r = await sb.auth.getUser();
-      var user = r && r.data ? r.data.user : null;
-      if (!user) { toast('Sua sess\u00e3o expirou.', 3200); return; }
+      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+      if (!uid) { toast('Sua sess\u00e3o expirou.', 3200); return; }
       var blob = await comprimirImagem(arquivo);
-      var up = await sb.storage.from(_BUCKET_AVATAR).upload(user.id + '/perfil.jpg', blob, { cacheControl:'3600', upsert:true, contentType:'image/jpeg' });
-      if (up.error) throw up.error;
-      var s = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/perfil.jpg', 3600);
-      if (s && s.data && s.data.signedUrl) aplicarFotoPerfil(s.data.signedUrl + '&t=' + Date.now());
+      var ok = await enviarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg', blob);
+      if (!ok) throw new Error('upload recusado');
+      var url = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
+      if (url) aplicarFotoPerfil(url);
       toast('\u2705 Foto de perfil atualizada!');
     } catch(e) { console.warn(e); toast('N\u00e3o consegui enviar a foto.', 3200); }
   }
@@ -461,21 +463,16 @@
       toast('Formato n\u00e3o aceito. Use JPG, PNG ou WebP.', 3000);
       return;
     }
-    var sb = clienteSupabase();
-    if (!sb || !sb.storage) { toast('Sem conex\u00e3o com o armazenamento agora.', 3000); return; }
     toast('Enviando foto\u2026', 4000);
     try {
-      var r = await sb.auth.getUser();
-      var user = r && r.data ? r.data.user : null;
-      if (!user) { toast('Sua sess\u00e3o expirou. Entre novamente.', 3200); return; }
+      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+      if (!uid) { toast('Sua sess\u00e3o expirou. Entre novamente.', 3200); return; }
       var blob = await comprimirImagem(arquivo);
       if (blob.size > 5 * 1024 * 1024) { toast('Imagem muito grande mesmo comprimida.', 3200); return; }
-      var up = await sb.storage.from(_BUCKET_AVATAR).upload(user.id + '/capa.jpg', blob, {
-        cacheControl:'3600', upsert:true, contentType:'image/jpeg'
-      });
-      if (up.error) throw up.error;
-      var s = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/capa.jpg', 3600);
-      if (s && s.data && s.data.signedUrl) aplicarFotoCapa(s.data.signedUrl + '&t=' + Date.now());
+      var ok = await enviarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg', blob);
+      if (!ok) throw new Error('upload recusado');
+      var url = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg');
+      if (url) aplicarFotoCapa(url);
       toast('\u2705 Foto de capa atualizada!');
     } catch(e) {
       console.warn('Erro ao enviar foto:', e);
