@@ -1,704 +1,932 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Hub de Preparação</title>
-<script>tailwind = { config: {} };</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode:"class",
-    theme:{extend:{colors:{
-      "primary-container":"#6c5ce7","on-surface":"#e1e2eb","surface-container":"#1d2026",
-      "tertiary":"#fabd00","surface-container-lowest":"#0b0e14","surface-container-low":"#191c22",
-      "background":"#10131a","outline-variant":"#474554","on-surface-variant":"#c8c4d7",
-      "primary":"#c6bfff","outline":"#928ea0","error":"#ffb4ab",
-      "surface-container-high":"#272a31","secondary":"#45edee","surface":"#10131a",
-      "surface-container-highest":"#32353c",
-    },fontFamily:{"body":["Inter"]},
-    borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"}}},
-  }
-</script>
-<style>
-  body{font-family:'Inter',sans-serif;background:#0b0e14;}
-  .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
-  .scrollbar::-webkit-scrollbar{width:5px;}
-  .scrollbar::-webkit-scrollbar-thumb{background:#32353c;border-radius:10px;}
-  .rep-card{background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:1rem;transition:all .25s;}
-  .rep-card:hover{border-color:rgba(108,92,231,.4);}
-  @keyframes pulseBorder{0%,100%{box-shadow:0 0 0 0 rgba(69,237,238,.3)}50%{box-shadow:0 0 0 6px rgba(69,237,238,0)}}
-  .rep-card.carregando{border-color:#45edee;animation:pulseBorder 1.5s infinite;}
-  .rep-card.pronto{border-color:rgba(74,222,128,.4);}
-  .rep-body{max-height:0;overflow:hidden;transition:max-height .45s ease,opacity .3s ease;opacity:0;}
-  .rep-body.aberto{max-height:1200px;opacity:1;}
-  .rep-chevron{transition:transform .3s;}
-  .rep-chevron.aberto{transform:rotate(180deg);}
-  .saida-card{background:#191c22;border:1px solid rgba(71,69,84,.25);border-radius:1rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
-  .saida-card:hover{border-color:rgba(108,92,231,.5);background:#1d2026;transform:translateY(-3px);box-shadow:0 10px 28px rgba(108,92,231,.15);}
-  .saida-card .shine{position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%);transform:translateX(-100%);transition:transform .6s;}
-  .saida-card:hover .shine{transform:translateX(100%);}
-  /* ── Formato bloqueado (em desenvolvimento) ─────── */
-  .saida-card.bloqueado{opacity:.55;}
-  .saida-card.bloqueado:hover{border-color:rgba(71,69,84,.25);background:#191c22;transform:none;box-shadow:none;}
-  .saida-card.bloqueado:hover .shine{transform:translateX(-100%);}
-  .badge-em-breve{position:absolute;top:.5rem;right:.5rem;background:rgba(250,189,0,.15);border:1px solid rgba(250,189,0,.4);color:#fabd00;font-size:.55rem;font-weight:700;padding:.15rem .45rem;border-radius:.5rem;text-transform:uppercase;letter-spacing:.05em;}
-  /* ── Modal "Em breve" ─────────────────────────────── */
-  #modalEmBreve{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem;}
-  #modalEmBreve.aberto{display:flex;}
-  #modalEmBreve .conteudo{background:#191c22;border:1px solid rgba(108,92,231,.25);border-radius:1.25rem;max-width:440px;width:100%;padding:2rem;text-align:center;animation:fadeUp .3s ease;}
-  #modalEmBreve .icone-grande{width:64px;height:64px;border-radius:50%;background:rgba(250,189,0,.12);border:1px solid rgba(250,189,0,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
-  /* ── Resumo estruturado (cards do JSON) ───────────── */
-  .resumo-secao{margin-bottom:1.25rem;padding:1rem 1.25rem;background:rgba(255,255,255,.02);border-left:3px solid #45edee;border-radius:.5rem;}
-  .resumo-secao.causas{border-left-color:#fabd00;}
-  .resumo-secao.consequencias{border-left-color:#ffb4ab;}
-  .resumo-secao.dados{border-left-color:#c6bfff;}
-  .resumo-secao.solucoes{border-left-color:#4ade80;}
-  .resumo-secao h3{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#928ea0;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem;}
-  .resumo-secao p{font-size:.875rem;color:#c8c4d7;line-height:1.6;}
-  .resumo-secao ul{margin:0;padding:0;list-style:none;}
-  .resumo-secao li{font-size:.875rem;color:#c8c4d7;line-height:1.55;padding:.3rem 0 .3rem 1rem;position:relative;}
-  .resumo-secao li::before{content:'•';position:absolute;left:0;color:#45edee;font-weight:700;}
-  #modalResultado{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
-  #modalResultado.aberto{display:flex;}
-  #toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(5rem);background:#272a31;border:1px solid rgba(255,255,255,.1);color:#e1e2eb;padding:.75rem 1.5rem;border-radius:.75rem;font-size:.85rem;z-index:300;transition:transform .3s;pointer-events:none;white-space:nowrap;}
-  #toast.show{transform:translateX(-50%) translateY(0);}
-  @keyframes typing{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
-  .dot{width:6px;height:6px;background:#45edee;border-radius:50%;animation:typing 1.2s infinite;display:inline-block;margin:0 2px;}
-  .dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-  .fade-up{animation:fadeUp .4s ease forwards;}
-  .fade-up-2{animation:fadeUp .4s .1s ease both;}
-  .fade-up-3{animation:fadeUp .4s .2s ease both;}
-  .secao-titulo{font-size:.65rem;font-weight:800;color:#928ea0;text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:.75rem;}
-  .secao-titulo::after{content:'';flex:1;height:1px;background:rgba(71,69,84,.25);}
-  .flashcard{perspective:800px;cursor:pointer;}
-  .flashcard-inner{position:relative;width:100%;height:130px;transform-style:preserve-3d;transition:transform .5s;}
-  .flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
-  .flashcard-front,.flashcard-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:.875rem;display:flex;align-items:center;justify-content:center;padding:1rem;text-align:center;}
-  .flashcard-front{background:#1d2026;border:1px solid rgba(69,237,238,.2);}
-  .flashcard-back{background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);transform:rotateY(180deg);}
-  .step-check{width:22px;height:22px;border-radius:50%;border:2px solid rgba(71,69,84,.4);display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;}
-  .step-check.feito{background:#4ade80;border-color:#4ade80;}
-
-  /* ── Hamburger sidebar ─────────────────────────────── */
-  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
-  #sidebar.open { transform: translateX(0); }
-  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:44; }
-  #overlay.open { display:block; }
-  @media(min-width:1024px){
-    #sidebar { transform: translateX(0) !important; }
-    #overlay { display:none !important; }
-    .main-with-sidebar { margin-left:256px; }
-  }
-  @media(max-width:1023px){
-    .main-with-sidebar { margin-left:0 !important; }
-  }
-</style>
-<!-- toggleSidebar em escopo global — fora do type="module" -->
+<title>RedaON | Preparação</title>
+<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-7 (da prévia v1-6 aprovada) · sobre aluno-base-v6 -->
 <script>
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('overlay').classList.toggle('open');
-}
+(function(){
+  var pref = 'auto';
+  try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+  var efetivo = pref;
+  if (pref === 'auto') {
+    var claroNoSistema = false;
+    try { claroNoSistema = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+    efetivo = claroNoSistema ? 'claro' : 'escuro';
+  }
+  document.documentElement.setAttribute('data-tema', efetivo);
+  document.documentElement.setAttribute('data-tema-pref', pref);
+})();
 </script>
-<script src="supabase-auth.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="aluno-base-v6.css" rel="stylesheet"/>
+
+<style>
+
+/* ═══ TELA · Hub de Preparação · v1-7 (produção) ═══ */
+#conteudo{ max-width:680px; margin:0 auto; width:100%; padding:0 .9rem 2rem; }
+.rotuloTopo{ font-size:.66rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:.9rem .1rem .25rem; }
+.tituloTema{ font-family:Georgia,serif; font-size:1.22rem; font-weight:700; line-height:1.3; margin:0 .1rem .45rem; }
+.linhaTema{ display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:.35rem; }
+.tagTema{ font-size:.64rem; font-weight:700; padding:.2rem .55rem; border-radius:99px; background:rgba(var(--purpleRGB),.14); color:var(--purpleSoft); }
+.trocarTema{ font-size:.7rem; font-weight:700; color:var(--muted); background:none; border:none; cursor:pointer; padding:.25rem .35rem; font-family:inherit; text-decoration:underline; text-underline-offset:3px; }
+
+/* Progresso 4 passos */
+.cardProgresso .topoP{ display:flex; align-items:center; gap:.6rem; }
+.cardProgresso .rotP{ font-size:.7rem; font-weight:700; color:var(--muted); flex:1; }
+.cardProgresso .numP{ font-size:.95rem; font-weight:800; font-variant-numeric:tabular-nums; }
+/* Ouro de conquista: mesmo tom vivo do escuro nos dois temas (preenchimentos/linhas/brilhos).
+   Texto dourado permanece em var(--gold), adaptativo por tema, para legibilidade. */
+:root{ --ouro:#fabd00; --ouroRGB:250,189,0; }
+/* Estrada (decisões: S1 + L1 + conquista) */
+.estrada{ display:flex; align-items:flex-start; }
+.no{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:.24rem; font-size:.58rem; font-weight:700; color:var(--muted); text-align:center; width:60px; position:relative; z-index:1; }
+.no .ic{ width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.85rem; background:var(--surface2); border:2px solid rgba(var(--borderRGB),.4); font-style:normal; transition:all .4s; }
+.no.ouro .ic{ background:var(--ouro); border-color:var(--ouro); color:#1a1400; }
+.no.ouro{ color:var(--gold); font-weight:800; }
+.no.pulsa .ic{ animation:pulsoOuro 1.1s ease-in-out 2; }
+.no.destino .ic{ border-style:dashed; }
+.no.destino.ouro .ic{ border-style:solid; }
+.segT{ flex:1; height:4px; background:rgba(var(--borderRGB),.35); border-radius:99px; margin:14px -15px 0; overflow:hidden; min-width:12px; }
+.segT i{ display:block; height:100%; width:0%; background:var(--ouro); border-radius:99px; transition:width .55s ease; }
+@keyframes pulsoOuro{
+  0%,100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(var(--ouroRGB),.55); }
+  50%{ transform:scale(1.14); box-shadow:0 0 0 10px rgba(var(--ouroRGB),0); }
+}
+.cardProgresso{ transition:border-color .5s, box-shadow .5s, background .5s; }
+.cardProgresso.ouro{ border-color:rgba(var(--ouroRGB),.75); box-shadow:0 0 0 1px rgba(var(--ouroRGB),.4), 0 4px 18px rgba(var(--ouroRGB),.18); background:linear-gradient(180deg, rgba(var(--ouroRGB),.06), transparent 55%), var(--surface); }
+.cardProgresso.ouro .rotP{ color:var(--gold); }
+.cardProgresso.ouro .numP{ color:var(--gold); }
+.btnEscrever{ transition:all .45s; }
+.btnEscrever.ouro{ background:var(--ouro); color:#1a1400; }
+/* Conquista central */
+.veu{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:opacity .35s; z-index:120; }
+html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
+.veu.show{ opacity:1; pointer-events:auto; }
+.conquista{ display:flex; flex-direction:column; align-items:center; gap:1rem; transform:scale(.8) translateY(10px); transition:transform .4s cubic-bezier(.2,.9,.3,1.2); }
+.veu.show .conquista{ transform:scale(1) translateY(0); }
+.circulao{ width:96px; height:96px; border-radius:50%; background:var(--ouro); color:#1a1400; display:flex; align-items:center; justify-content:center; font-size:2.4rem; font-style:normal; animation:pulsoOuro 1.2s ease-in-out 3; box-shadow:0 8px 30px rgba(var(--ouroRGB),.35); }
+.rotConq{ font-size:.8rem; font-weight:800; color:#fff; letter-spacing:.03em; text-shadow:0 1px 8px rgba(0,0,0,.5); }
+.btnConq{ min-height:52px; padding:0 1.6rem; border-radius:13px; background:var(--ouro); color:#1a1400; border:none; font-family:inherit; font-size:.92rem; font-weight:800; cursor:pointer; box-shadow:0 6px 22px rgba(var(--ouroRGB),.3); }
+.dicaFechar{ font-size:.64rem; color:rgba(255,255,255,.78); text-shadow:0 1px 6px rgba(0,0,0,.5); }
+/* Mini-conquista: trilha sobe ao centro, atualiza e some (não bloqueia toques) */
+.miniVeu{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:110; }
+.miniCard{ background:var(--surface); border:1px solid rgba(var(--ouroRGB),.7); border-radius:16px; padding:1rem 1.1rem .85rem; box-shadow:0 14px 40px rgba(0,0,0,.45); width:min(92vw, 380px); opacity:0; transform:translateY(16px) scale(.92); transition:all .35s cubic-bezier(.2,.9,.3,1.2); }
+.miniVeu.show .miniCard{ opacity:1; transform:translateY(0) scale(1); }
+.miniVeu.saindo .miniCard{ opacity:0; transform:translateY(-14px) scale(.95); transition:all .3s ease; }
+.miniRot{ font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); text-align:center; margin-bottom:.75rem; }
+
+/* Títulos de seção em caixa (gabarito Evolução) */
+.secCaixa{ margin:1.15rem 0 .7rem; padding:.55rem .75rem; display:flex; align-items:center; justify-content:center; gap:8px; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--text2); }
+.secCaixa .bar{ width:16px; height:3px; background:var(--cyan); border-radius:99px; }
+
+/* Sanfona (padrão aprovado da Tela 4) */
+.eixoItem{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:13px; margin-bottom:.5rem; overflow:hidden; }
+.eixoItem .cabeca{ display:flex; align-items:center; gap:.7rem; width:100%; min-height:50px; padding:.35rem .875rem; background:none; border:none; cursor:pointer; font-family:inherit; text-align:left; color:var(--text); }
+.eixoItem .pemoji{ font-size:1.1rem; font-style:normal; flex:0 0 auto; }
+.eixoItem .nome{ flex:1; min-width:0; font-size:.83rem; font-weight:700; }
+.eixoItem .estado{ flex:0 0 auto; font-size:.6rem; font-weight:800; padding:.18rem .5rem; border-radius:99px; background:rgba(var(--greenRGB),.12); color:var(--green); display:none; }
+.eixoItem .estado.ok{ display:inline-block; }
+.eixoItem .seta{ flex:0 0 auto; color:var(--muted); font-size:1rem; transition:transform .25s; font-style:normal; }
+.eixoItem.aberto .seta{ transform:rotate(90deg); }
+.eixoItem .corpo{ max-height:0; overflow:hidden; transition:max-height .35s ease; }
+.eixoItem.aberto .corpo{ max-height:420px; overflow-y:auto; }
+.eixoItem .corpoIn{ padding:.25rem .875rem .875rem; border-top:1px solid rgba(var(--borderRGB),.12); font-size:.78rem; color:var(--text2); line-height:1.6; user-select:text; -webkit-user-select:text; }
+.eixoItem .corpoIn h4{ font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--cyan); margin:.55rem 0 .15rem; }
+.eixoItem .corpoIn p{ margin:.25rem 0; }
+.gerando{ display:flex; align-items:center; gap:.5rem; padding:.6rem 0; color:var(--muted); font-size:.74rem; }
+.btnConcluir{ display:block; width:100%; min-height:44px; margin-top:.65rem; border-radius:10px; background:rgba(var(--ouroRGB),.12); border:1px solid rgba(var(--ouroRGB),.55); color:var(--gold); font-family:inherit; font-size:.78rem; font-weight:800; cursor:pointer; }
+.btnConcluir.feito{ opacity:.65; cursor:default; background:rgba(var(--ouroRGB),.18); }
+.giro{ width:14px; height:14px; border:2px solid rgba(var(--cyanRGB),.25); border-top-color:var(--cyan); border-radius:50%; animation:giroAnim .8s linear infinite; flex:0 0 auto; }
+@keyframes giroAnim{ to{ transform:rotate(360deg); } }
+.eixoItem.entender{ border-color:rgba(var(--cyanRGB),.35); }
+.eixoItem.entender .nome{ color:var(--cyan); }
+.rotuloCurado{ font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:.55rem .25rem .5rem; }
+.btnVerTodos{ width:100%; min-height:44px; border-radius:13px; background:var(--surface); border:1px dashed rgba(var(--borderRGB),.4); color:var(--muted); font-family:inherit; font-size:.78rem; font-weight:700; cursor:pointer; margin-bottom:.5rem; }
+.btnGerarTudo{ width:100%; min-height:48px; border-radius:13px; background:rgba(var(--purpleRGB),.12); border:1px solid rgba(var(--purpleRGB),.3); color:var(--purpleSoft); font-family:inherit; font-size:.8rem; font-weight:800; cursor:pointer; margin:.15rem 0 .5rem; }
+.btnGerarTudo:disabled{ opacity:.6; cursor:default; }
+.btnGerarTudo.completo{ background:rgba(var(--greenRGB),.12); border-color:rgba(var(--greenRGB),.55); color:var(--green); opacity:1; }
+
+/* Estúdio */
+.matItem{ display:flex; align-items:center; gap:.7rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:13px; padding:.55rem .875rem; margin-bottom:.5rem; }
+.matItem .memoji{ font-size:1.1rem; font-style:normal; }
+.matItem .info{ flex:1; min-width:0; }
+.matItem .nm{ font-size:.8rem; font-weight:700; }
+.matItem .ds{ font-size:.68rem; color:var(--muted); margin-top:.1rem; }
+.selo{ font-size:.58rem; font-weight:800; padding:.18rem .5rem; border-radius:99px; letter-spacing:.03em; }
+.selo.validado{ background:rgba(var(--goldRGB),.14); color:var(--gold); }
+.selo.ia{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.btnAbrir{ flex:0 0 auto; min-height:36px; padding:0 .9rem; border-radius:10px; background:rgba(var(--cyanRGB),.12); border:1px solid rgba(var(--cyanRGB),.35); color:var(--cyan); font-family:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
+.painelMat{ display:none; border-top:1px solid rgba(var(--borderRGB),.12); margin-top:.1rem; }
+.matWrap.aberto .painelMat{ display:block; }
+.matWrap{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:13px; margin-bottom:.5rem; overflow:hidden; }
+.matWrap .matItem{ border:none; border-radius:0; margin:0; }
+.painelIn{ padding:.35rem .875rem .875rem; font-size:.78rem; color:var(--text2); line-height:1.6; }
+.atalhoEstudio{ display:flex; align-items:center; justify-content:center; gap:.45rem; width:100%; min-height:44px; border-radius:13px; background:none; border:1px dashed rgba(var(--borderRGB),.4); color:var(--muted); font-family:inherit; font-size:.76rem; font-weight:700; cursor:pointer; margin-top:.15rem; }
+
+/* Flashcards / quiz demo */
+.fcGrid{ display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.4rem; }
+.fc{ min-height:86px; border-radius:10px; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.25); padding:.55rem; font-size:.72rem; display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer; }
+.fc.virado{ background:rgba(var(--cyanRGB),.08); border-color:rgba(var(--cyanRGB),.35); }
+.qOpc{ display:block; width:100%; text-align:left; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.25); border-radius:10px; padding:.5rem .65rem; margin:.3rem 0; font-family:inherit; font-size:.75rem; color:var(--text2); cursor:pointer; }
+.qOpc.certa{ border-color:rgba(var(--greenRGB),.6); color:var(--green); }
+.qOpc.errada{ border-color:rgba(var(--redRGB),.6); color:var(--red); }
+
+/* CTA final */
+.cardCTA{ text-align:center; padding:1.1rem .9rem; margin-top:1rem; border-color:rgba(var(--cyanRGB),.3); }
+.cardCTA .t{ font-size:.95rem; font-weight:800; margin-bottom:.2rem; }
+.cardCTA .s{ font-size:.74rem; color:var(--muted); margin-bottom:.75rem; }
+.btnEscrever{ min-height:50px; width:100%; border-radius:13px; background:var(--cyan); color:var(--onCyan); border:none; font-family:inherit; font-size:.9rem; font-weight:800; cursor:pointer; }
+
+/* Duplas desktop (gabarito Evolução) */
+.duplaTopo, .duplaEstudio{ display:grid; grid-template-columns:1fr; gap:.5rem; }
+@media(min-width:760px){
+  #conteudo{ max-width:860px; }
+  .duplaTopo{ grid-template-columns:1.2fr 1fr; gap:.75rem; align-items:stretch; }
+  .duplaTopo .cardProgresso{ display:flex; flex-direction:column; justify-content:center; }
+  .duplaEstudio{ grid-template-columns:1fr 1fr; gap:.75rem; align-items:start; }
+}
+
+
+/* ── Adições de produção: estados de rede, trava de segurança, convite ── */
+.painelIn h4{ font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--cyan); margin:.55rem 0 .15rem; }
+.mdli{ padding-left:1rem; margin:.2rem 0; }
+.erroGerar{ font-size:.74rem; color:var(--red); padding:.4rem 0; }
+.avisoBloqueio{ padding:1rem; background:rgba(var(--redRGB),.08); border:1px solid rgba(var(--redRGB),.25); border-radius:10px; }
+.avisoBloqueio .tb{ font-size:.78rem; color:var(--red); font-weight:700; margin-bottom:.4rem; }
+.avisoBloqueio .sb{ font-size:.72rem; color:var(--text2); line-height:1.5; margin-top:.35rem; }
+.avisoBloqueio a{ color:var(--cyan); text-decoration:underline; }
+#conteudo.modoConvite > :not(#conviteTema){ display:none; }
+</style>
+
 </head>
-<body class="text-on-surface min-h-screen">
-<div class="fixed inset-0 pointer-events-none -z-10">
-  <div class="absolute top-0 right-0 w-[45%] h-[45%] bg-primary-container/6 rounded-full blur-[150px]"></div>
-  <div class="absolute bottom-0 left-0 w-[35%] h-[35%] bg-secondary/5 rounded-full blur-[120px]"></div>
+<body>
+
+
+<div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
+<div id="conteudo">
+
+  <!-- CONVITE (A7 degrau 5): sem tema em nenhum degrau da cascata -->
+  <div class="card cardCTA hidden" id="conviteTema" style="margin-top:1.1rem;">
+    <p class="t">Escolha um tema para se preparar 🎯</p>
+    <p class="s">A preparação acontece em cima de um tema. Vá à biblioteca e escolha o seu.</p>
+    <button class="btnEscrever" onclick="window.location.href='temas.html'">Escolher um tema</button>
+  </div>
+
+  <!-- CABEÇALHO + PROGRESSO -->
+  <div class="duplaTopo">
+    <div>
+      <p class="rotuloTopo">Preparação para o tema</p>
+      <p class="tituloTema" id="tituloTema"></p>
+      <div class="linhaTema">
+        <span class="tagTema" id="tagTema"></span>
+        <span class="tagTema" style="background:rgba(var(--cyanRGB),.1);color:var(--cyan);" id="tagFonte"></span>
+        <button class="trocarTema" onclick="trocarTemaHub()">Trocar tema</button>
+      </div>
+    </div>
+    <div class="card cardProgresso">
+      <div class="topoP" style="margin-bottom:.85rem;"><span class="rotP">SUA PREPARAÇÃO</span><span class="numP"><span id="pFeitos">0</span>/3</span></div>
+      <div class="estrada">
+        <div class="no" id="no-entender"><i class="ic">💡</i>Entender</div>
+        <div class="segT"><i id="segT1"></i></div>
+        <div class="no" id="no-repertorio"><i class="ic">📚</i>Repertório</div>
+        <div class="segT"><i id="segT2"></i></div>
+        <div class="no" id="no-estudio"><i class="ic">🧠</i>Estúdio</div>
+        <div class="segT"><i id="segT3"></i></div>
+        <div class="no destino" id="no-escrever"><i class="ic">✏️</i>Escrever</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1 · ENTENDER O TEMA -->
+  <div class="card secCaixa"><span class="bar"></span>Entender o tema</div>
+  <div class="eixoItem entender" id="eixo-entender">
+    <button class="cabeca" onclick="toggleEixo('entender')">
+      <i class="pemoji">💡</i><span class="nome">Recorte · o que a banca espera · armadilhas</span>
+      <span class="estado" id="estado-entender">pronto</span><i class="seta">›</i>
+    </button>
+    <div class="corpo"><div class="corpoIn" id="corpo-entender"></div></div>
+  </div>
+
+  <!-- 2 · REPERTÓRIO -->
+  <div class="card secCaixa"><span class="bar"></span>Repertório</div>
+  <button class="btnGerarTudo" id="btnGerarTudo" onclick="gerarTudo()">⚡ Gerar todo o repertório</button>
+  <p class="rotuloCurado">Relevantes para este tema · IA sugere, equipe valida</p>
+  <div id="listaRelevantes"></div>
+  <button class="btnVerTodos" id="btnVerTodos" onclick="verTodos()">Ver todos os eixos</button>
+  <div id="listaOutros" class="hidden"></div>
+
+  <!-- 3 · ESTÚDIO -->
+  <div class="card secCaixa"><span class="bar"></span>Estúdio</div>
+  <div id="blocoDisponibilizados">
+    <p class="rotuloCurado" style="margin-top:.1rem;">Disponibilizados para você</p>
+    <div id="listaDisponibilizados"></div>
+  </div>
+  <p class="rotuloCurado">Acervo do tema</p>
+  <div class="duplaEstudio">
+    <div>
+      <div class="matWrap" id="mat-resumo">
+        <div class="matItem"><i class="memoji">📄</i><div class="info"><p class="nm">Resumo do tema</p><p class="ds">Síntese para revisar antes de escrever</p></div><button class="btnAbrir" onclick="abrirMat('resumo')">Abrir</button></div>
+        <div class="painelMat"><div class="painelIn" id="painel-resumo"></div></div>
+      </div>
+      <div class="matWrap" id="mat-flash">
+        <div class="matItem"><i class="memoji">🃏</i><div class="info"><p class="nm">Flashcards</p><p class="ds">Cartões de revisão — toque para virar</p></div><button class="btnAbrir" onclick="abrirMat('flash')">Abrir</button></div>
+        <div class="painelMat"><div class="painelIn" id="painel-flash"></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="matWrap" id="mat-quiz">
+        <div class="matItem"><i class="memoji">❓</i><div class="info"><p class="nm">Quiz do tema</p><p class="ds">Questões estilo ENEM</p></div><button class="btnAbrir" onclick="abrirMat('quiz')">Abrir</button></div>
+        <div class="painelMat"><div class="painelIn" id="painel-quiz"></div></div>
+      </div>
+      <button class="atalhoEstudio" onclick="mostrarEmBreve('Mais formatos do Estúdio')">✨ Mais formatos no IA Estúdio →</button>
+    </div>
+  </div>
+
+  <!-- 4 · CTA -->
+  <div class="card cardCTA">
+    <p class="t">Pronto para escrever? ✍️</p>
+    <p class="s">Você explorou o tema. Hora de colocar em prática.</p>
+    <button class="btnEscrever" id="ctaEscrever" onclick="abrirMetodos()">Estou pronto — Escrever</button>
+  </div>
+
 </div>
-<div id="toast"></div>
-<!-- MODAL -->
-<div id="modalResultado">
-  <div style="background:#1d2026;border:1px solid rgba(71,69,84,.3);border-radius:1.25rem;width:100%;max-width:780px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 32px 64px rgba(0,0,0,.6);">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid rgba(71,69,84,.2);flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:.75rem;">
-        <span id="modalIcon" class="material-symbols-outlined" style="color:#45edee;font-variation-settings:'FILL' 1;font-size:1.4rem;"></span>
-        <div><p id="modalTitulo" style="font-weight:700;font-size:.95rem;color:#e1e2eb;"></p>
-        <p style="font-size:.7rem;color:#928ea0;">Gerado pela PROfa · Gemini 2.0 Flash</p></div>
-      </div>
-      <div style="display:flex;gap:.5rem;">
-        <button onclick="copiarResultado()" style="background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);border-radius:.625rem;padding:.5rem .875rem;color:#c8c4d7;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.375rem;"><span class="material-symbols-outlined" style="font-size:1rem;">content_copy</span>Copiar</button>
-        <button onclick="fecharModal()" style="background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">close</span></button>
-      </div>
-    </div>
-    <div id="modalConteudo" class="scrollbar" style="flex:1;overflow-y:auto;padding:1.5rem;font-size:.9rem;line-height:1.85;color:#c8c4d7;"></div>
-    <div style="padding:1rem 1.5rem;border-top:1px solid rgba(71,69,84,.2);display:flex;gap:.75rem;flex-shrink:0;">
-      <button onclick="irEscrever()" style="flex:2;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:900;font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;"><span class="material-symbols-outlined" style="font-size:1rem;">edit</span>Escrever Redação Agora</button>
-      <button onclick="fecharModal()" style="padding:.875rem 1.25rem;background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.4);color:#c8c4d7;border-radius:.75rem;font-weight:600;font-size:.875rem;cursor:pointer;">Fechar</button>
+</div>
+
+<!-- Mini-conquista (sobe ao centro a cada etapa, atualiza a trilha e some) -->
+<div class="miniVeu" id="miniVeu">
+  <div class="miniCard">
+    <p class="miniRot" id="miniRot">Etapa concluída!</p>
+    <div class="estrada">
+      <div class="no" id="m-entender"><i class="ic">💡</i>Entender</div>
+      <div class="segT"><i id="mSeg1"></i></div>
+      <div class="no" id="m-repertorio"><i class="ic">📚</i>Repertório</div>
+      <div class="segT"><i id="mSeg2"></i></div>
+      <div class="no" id="m-estudio"><i class="ic">🧠</i>Estúdio</div>
+      <div class="segT"><i id="mSeg3"></i></div>
+      <div class="no destino" id="m-escrever"><i class="ic">✏️</i>Escrever</div>
     </div>
   </div>
 </div>
 
-<!-- Modal "Em breve" — formatos ainda não implementados -->
-<div id="modalEmBreve" onclick="if(event.target===this)fecharEmBreve()">
-  <div class="conteudo">
-    <div class="icone-grande">
-      <span class="material-symbols-outlined" style="color:#fabd00;font-size:2rem;font-variation-settings:'FILL' 1;">construction</span>
-    </div>
-    <h2 style="font-size:1.1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;">Em desenvolvimento</h2>
-    <p style="font-size:.85rem;color:#c8c4d7;line-height:1.6;margin-bottom:.4rem;">O formato <strong id="emBreveTitulo" style="color:#45edee;">—</strong> está sendo refinado pela nossa equipe pedagógica e será liberado em breve.</p>
-    <p style="font-size:.8rem;color:#928ea0;line-height:1.55;margin-bottom:1.5rem;">Por enquanto, você pode estudar este tema usando <strong style="color:#4ade80;">Resumo em Texto</strong>, <strong style="color:#4ade80;">Cartões de Memória</strong> ou <strong style="color:#4ade80;">Quiz</strong> — todos validados pela Profa. Blanche.</p>
-    <button onclick="fecharEmBreve()" style="width:100%;padding:.875rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#002020;border:none;border-radius:.75rem;font-weight:800;font-size:.875rem;cursor:pointer;">Entendi</button>
+<!-- Conquista central (sobe ao completar 3/3) -->
+<div class="veu" id="veuConquista" onclick="if(event.target.id==='veuConquista')this.classList.remove('show')">
+  <div class="conquista">
+    <i class="circulao">✏️</i>
+    <span class="rotConq">Preparação completa!</span>
+    <button class="btnConq" onclick="event.stopPropagation();document.getElementById('veuConquista').classList.remove('show');abrirMetodos();">Estou pronto — Escrever</button>
+    <span class="dicaFechar">toque fora para continuar na página</span>
   </div>
 </div>
-<!-- SIDEBAR -->
-<div id="overlay" onclick="toggleSidebar()"></div>
-<aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-[#10131a] border-r border-outline-variant/10 flex flex-col py-6 px-4 z-50">
-  <div class="flex items-baseline italic px-2 mb-10"><span class="text-3xl font-black text-white tracking-tighter">Reda</span><span class="text-3xl font-black text-[#45EDEE] tracking-tighter">ON</span></div>
-  <nav class="flex-1 space-y-1 overflow-y-auto scrollbar">
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="inicio.html"><span class="material-symbols-outlined">home</span>Início</a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="nova-redacao.html"><span class="material-symbols-outlined">add_circle</span>Nova Redação</a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] text-sm font-bold" href="temas.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span>Temas</a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="minhas-redacoes.html"><span class="material-symbols-outlined">edit_note</span>Minhas Redações</a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span>Evolução</a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="plano.html"><span class="material-symbols-outlined">menu_book</span>Plano de Estudo</a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Elite <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span>Ranking</a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:bg-[#1d2026] text-sm font-medium transition-all" href="configuracoes.html"><span class="material-symbols-outlined">settings</span>Configurações</a>
-  </nav>
-  <div class="mt-auto pt-6 border-t border-outline-variant/10">
-    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-surface-container cursor-pointer">
-      <img alt="Alan" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL"/>
-      <div><p class="text-xs font-bold text-on-surface">{{USUARIO}}</p><p class="text-[10px] text-on-surface-variant">Estudante Premium</p></div>
-    </div>
-    <a onclick="authLogout()" class="mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 cursor-pointer text-sm transition-all"><span class="material-symbols-outlined text-sm">logout</span>Sair</a>
-  </div>
-</aside>
-<!-- MAIN -->
-<main class="ml-64 main-with-sidebar min-h-screen pb-20">
-  <header class="h-16 sticky top-0 z-40 flex items-center px-4 md:px-8 bg-[#0b0e14]/80 backdrop-blur-xl border-b border-outline-variant/10 gap-3">
-    <!-- Hambúrguer (mobile) -->
-    <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden shrink-0"><span class="material-symbols-outlined">menu</span></button>
-    <!-- Seta voltar -->
-    <a href="temas.html" class="flex items-center text-on-surface-variant hover:text-white transition-colors shrink-0">
-      <span class="material-symbols-outlined text-lg">arrow_back</span>
-    </a>
-    <!-- Breadcrumb -->
-    <span class="text-on-surface-variant text-sm shrink-0">Temas</span>
-    <span class="text-outline-variant/40 shrink-0">/</span>
-    <!-- Ícone hub ciano + nome Preparação -->
-    <div class="flex items-center gap-1.5 shrink-0">
-      <span class="material-symbols-outlined text-sm shrink-0" style="color:#45edee;font-variation-settings:'FILL' 1;">hub</span>
-      <span class="text-sm font-bold text-white">Preparação</span>
-    </div>
-  </header>
-  <div class="max-w-4xl mx-auto px-8 pt-10 space-y-12">
 
-    <!-- 1. CABEÇALHO -->
-    <section class="fade-up">
-      <h1 id="tituloPagina" class="text-3xl font-black text-white leading-tight mb-3"></h1>
-      <p id="descPagina" class="text-on-surface-variant text-base leading-relaxed mb-5"></p>
-      <div class="flex flex-wrap gap-2" id="tagsTema"></div>
-    </section>
+<script src="supabase-auth.js"></script>
+<script src="aluno-base-v6.js"></script>
+<script>
+/* ═══ RedaON · Hub de Preparação · produção v1-7 (da prévia v1-6 aprovada) ═══ */
+if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-    <!-- 2. BARRA DE PROGRESSO -->
-    <section class="fade-up-2">
-      <div class="p-5 rounded-2xl" style="background:#1d2026;border:1px solid rgba(71,69,84,.25);">
-        <!-- Título -->
-        <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4">Sua preparação</p>
+montarEsqueleto({
+  ativo:  '',
+  titulo: 'Preparação',
+  icone:  'auto_stories',
+  sino:   true,
+  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-7'
+});
 
-        <!-- Mobile: empilhado vertical | Desktop: linha horizontal -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-3 mb-4">
+/* ───────────────────────────────────────────────────────────────
+   ESTADO GLOBAL DA TELA
+   ─────────────────────────────────────────────────────────────── */
+var TEMA = null;          /* objeto do tema resolvido pela cascata A7 */
+var TEMA_ID = null;       /* uuid quando tema oficial (habilita cache + preparacoes) */
+var TITULO = '';
+var TEMA_EH_SEMANA = false;
+var PREPARACAO = null;    /* linha de `preparacoes` deste aluno×tema, se existir */
 
-          <!-- Passo 1: Repertório -->
-          <div class="flex items-center gap-3 flex-1">
-            <div class="step-check shrink-0" id="check-repertorio">
-              <span class="material-symbols-outlined text-xs text-[#002020] hidden" id="icoRep" style="font-variation-settings:'FILL' 1;">check</span>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-on-surface">Repertório</p>
-              <p class="text-[10px] text-on-surface-variant">Legislação, história, especialistas</p>
-            </div>
-          </div>
+var ORDEM_PASSOS = ['entender','repertorio','estudio'];
+var passosFeitos = { entender:false, repertorio:false, estudio:false };
+var ROTULOS_MINI = { entender:'Voc\u00ea entendeu o tema! \uD83D\uDCA1', repertorio:'Repert\u00f3rio no bolso! \uD83D\uDCDA', estudio:'Est\u00fadio explorado! \uD83E\uDDE0' };
 
-          <!-- Conector (só desktop) -->
-          <div class="hidden sm:block w-8 h-px bg-outline-variant/30 shrink-0"></div>
-          <!-- Separador (só mobile) -->
-          <div class="block sm:hidden h-px w-full bg-outline-variant/15"></div>
+/* Declaração explícita: o ALUNO marca a conclusão no fim do conteúdo.
+   O dourado é declaração dele, nunca chancela nossa. Flashcards/quiz seguem por interação real. */
+var ROTULO_CONCLUIR = { entender:'Entendi o tema', repertorio:'Repert\u00f3rio anotado', estudio:'Revis\u00e3o feita' };
+function htmlConcluir(passo, rotulo){
+  if (passosFeitos[passo]) return '';
+  return '<button class="btnConcluir" data-passo="'+passo+'" onclick="concluirEtapa(\''+passo+'\')">\u2713 '+(rotulo||ROTULO_CONCLUIR[passo])+'</button>';
+}
+function concluirEtapa(passo){ marcarPassoHub(passo); }
 
-          <!-- Passo 2: Material de Estudo -->
-          <div class="flex items-center gap-3 flex-1">
-            <div class="step-check shrink-0" id="check-estudio">
-              <span class="material-symbols-outlined text-xs text-[#002020] hidden" id="icoEst" style="font-variation-settings:'FILL' 1;">check</span>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-on-surface">Material de Estudo</p>
-              <p class="text-[10px] text-on-surface-variant">Resumos, flashcards, quiz</p>
-            </div>
-          </div>
+/* ───────────────────────────────────────────────────────────────
+   ESTRADA — S1 (corre até a porta) + L1 (avanço contíguo) + mini-conquista
+   (lógica idêntica à prévia v1-6 aprovada)
+   ─────────────────────────────────────────────────────────────── */
+function _fronteira(){
+  var k = 0;
+  while (k < 3 && passosFeitos[ORDEM_PASSOS[k]]) k++;
+  return k;
+}
+function _pintarTrilha(prefixo, atrasoBase){
+  var k = _fronteira(), atraso = atrasoBase || 350;
+  for (var i = 1; i <= k; i++){
+    (function(seg, quando){
+      if (seg && seg.style.width !== '100%') setTimeout(function(){ seg.style.width = '100%'; }, quando);
+    })(document.getElementById(prefixo+i), atraso);
+    atraso += 300;
+  }
+  return atraso;
+}
+function marcarPassoHub(p){
+  if (passosFeitos[p] === undefined || passosFeitos[p]) return;
+  passosFeitos[p] = true;
+  var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
+  gravarDeclaracao(p, n === 3);
+  /* card fixo do topo: sempre em dia, pra consulta a qualquer momento */
+  var no = document.getElementById('no-'+p);
+  no.classList.add('ouro','pulsa');
+  setTimeout(function(){ no.classList.remove('pulsa'); }, 1300);
+  document.getElementById('pFeitos').textContent = n;
+  _pintarTrilha('segT');
+  /* botões de conclusão desta etapa viram estado feito */
+  document.querySelectorAll('.btnConcluir[data-passo="'+p+'"]').forEach(function(b){
+    b.disabled = true; b.classList.add('feito'); b.textContent = '\u2713 Conclu\u00eddo';
+  });
+  /* mini-conquista central: a recompensa vai até o aluno, onde ele estiver */
+  mostrarMini(p, n === 3);
+}
+var _miniTimer = null;
+function mostrarMini(p, completo){
+  var veu = document.getElementById('miniVeu');
+  clearTimeout(_miniTimer);
+  veu.classList.remove('saindo');
+  veu.classList.add('show');
+  document.getElementById('miniRot').textContent = ROTULOS_MINI[p];
+  ORDEM_PASSOS.forEach(function(k){
+    if (passosFeitos[k] && k !== p) document.getElementById('m-'+k).classList.add('ouro');
+  });
+  setTimeout(function(){
+    var no = document.getElementById('m-'+p);
+    no.classList.add('ouro','pulsa');
+    setTimeout(function(){ no.classList.remove('pulsa'); }, 1300);
+  }, 300);
+  var fim = _pintarTrilha('mSeg', 700);
+  if (completo){
+    setTimeout(function(){
+      document.getElementById('m-escrever').classList.add('ouro','pulsa');
+    }, fim + 300);
+    _miniTimer = setTimeout(function(){
+      esconderMini();
+      conquistaPreparacao(0);
+    }, fim + 1500);
+  } else {
+    _miniTimer = setTimeout(esconderMini, fim + 1500);
+  }
+}
+function esconderMini(){
+  var veu = document.getElementById('miniVeu');
+  veu.classList.add('saindo');
+  setTimeout(function(){ veu.classList.remove('show','saindo'); }, 320);
+}
+function conquistaPreparacao(atraso){
+  setTimeout(function(){
+    var d = document.getElementById('no-escrever');
+    d.classList.add('ouro','pulsa');
+    setTimeout(function(){ d.classList.remove('pulsa'); }, 1500);
+    var card = document.querySelector('.cardProgresso');
+    if (card) card.classList.add('ouro');
+    var cta = document.getElementById('ctaEscrever');
+    if (cta) cta.classList.add('ouro');
+    setTimeout(function(){
+      document.getElementById('veuConquista').classList.add('show');
+    }, 600);
+  }, atraso);
+}
 
-          <!-- Conector (só desktop) -->
-          <div class="hidden sm:block w-8 h-px bg-outline-variant/30 shrink-0"></div>
-          <!-- Separador (só mobile) -->
-          <div class="block sm:hidden h-px w-full bg-outline-variant/15"></div>
+/* ───────────────────────────────────────────────────────────────
+   PREPARACOES — memória do Hub (re-hidratação + gravação por declaração)
+   ─────────────────────────────────────────────────────────────── */
+async function carregarPreparacao(){
+  if (!TEMA_ID) return;
+  try {
+    var uid = authGetUserId();
+    if (!uid) return;
+    var url = SUPABASE_URL + '/rest/v1/preparacoes?select=entender_em,repertorio_em,estudio_em,concluida_em&aluno_id=eq.' + uid + '&tema_id=eq.' + TEMA_ID + '&limit=1';
+    var res = await dbFetch(url, {});
+    if (!res.ok) return;
+    var rows = await res.json();
+    if (rows && rows.length) { PREPARACAO = rows[0]; aplicarPreparacaoSalva(PREPARACAO); }
+  } catch(e){ console.warn('[preparacoes] carga:', e); }
+}
+/* Re-hidrata a trilha SEM animação nem conquistas: estado conferível, não festa repetida */
+function aplicarPreparacaoSalva(r){
+  ORDEM_PASSOS.forEach(function(p){
+    if (r[p+'_em']) {
+      passosFeitos[p] = true;
+      var no = document.getElementById('no-'+p);
+      if (no) no.classList.add('ouro');
+    }
+  });
+  var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
+  document.getElementById('pFeitos').textContent = n;
+  var k = _fronteira();
+  for (var i = 1; i <= k; i++){
+    var seg = document.getElementById('segT'+i);
+    if (seg){ seg.style.transition = 'none'; seg.style.width = '100%'; }
+  }
+  if (n === 3){
+    var d = document.getElementById('no-escrever');
+    if (d) d.classList.add('ouro');
+    var seg3 = document.getElementById('segT3');
+    if (seg3){ seg3.style.transition = 'none'; seg3.style.width = '100%'; }
+    var card = document.querySelector('.cardProgresso');
+    if (card) card.classList.add('ouro');
+    var cta = document.getElementById('ctaEscrever');
+    if (cta) cta.classList.add('ouro');
+  }
+}
+function gravarDeclaracao(passo, completou){
+  if (!TEMA_ID) return; /* tema livre: sem memória no banco */
+  try {
+    var uid = authGetUserId();
+    if (!uid) return;
+    var agora = new Date().toISOString();
+    var body = { aluno_id: uid, tema_id: TEMA_ID };
+    body[passo + '_em'] = agora;
+    if (completou) body.concluida_em = agora;
+    dbFetch(SUPABASE_URL + '/rest/v1/preparacoes?on_conflict=aluno_id,tema_id', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(body)
+    }).catch(function(e){ console.warn('[preparacoes] upsert:', e); });
+  } catch(e){ console.warn('[preparacoes] upsert:', e); }
+}
 
-          <!-- Passo 3: Escrever -->
-          <div class="flex items-center gap-3 flex-1">
-            <div class="step-check shrink-0" style="border-color:rgba(69,237,238,.3);">
-              <span class="material-symbols-outlined text-xs text-secondary" style="font-variation-settings:'FILL' 1;">edit</span>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-secondary">Escrever</p>
-              <p class="text-[10px] text-on-surface-variant">Hora de colocar em prática</p>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Pular e escrever — largura total -->
-        <button onclick="irEscrever()" class="w-full py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:text-white transition-all text-center" style="background:rgba(255,255,255,.05);border:1px solid rgba(71,69,84,.3);">Pular e escrever →</button>
-      </div>
-    </section>
-
-    <!-- 3. REPERTÓRIO SOCIOCULTURAL -->
-    <section class="fade-up-2 space-y-5">
-      <div class="secao-titulo"><span class="material-symbols-outlined text-sm" style="color:#c6bfff;font-variation-settings:'FILL' 1;">library_books</span>Repertório Sociocultural</div>
-      <p class="text-sm text-on-surface-variant">Clique em cada bloco para expandir. A PROfa gera o conteúdo com base no tema escolhido.</p>
-      <button onclick="carregarTudo()" id="btnGerarTudo" class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02] active:scale-95" style="background:rgba(108,92,231,.12);border:1px solid rgba(108,92,231,.25);color:#c6bfff;">
-        <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1;">bolt</span>Gerar Todo o Repertório de Uma Vez
-      </button>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="rep-card" id="card-legislacao">
-          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('legislacao')">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(250,189,0,.12);"><span class="material-symbols-outlined text-tertiary" style="font-variation-settings:'FILL' 1;">gavel</span></div>
-            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Legislação</p><p class="text-[10px] text-on-surface-variant">Constituição Federal e leis específicas</p></div>
-            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-legislacao">expand_more</span>
-          </button>
-          <div class="rep-body px-5 pb-5" id="body-legislacao"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-legislacao"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando legislação...</span></div></div></div>
-        </div>
-        <div class="rep-card" id="card-historia">
-          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('historia')">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(198,191,255,.1);"><span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">history_edu</span></div>
-            <div class="flex-1"><p class="text-sm font-bold text-on-surface">História</p><p class="text-[10px] text-on-surface-variant">Contexto histórico e marcos temporais</p></div>
-            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-historia">expand_more</span>
-          </button>
-          <div class="rep-body px-5 pb-5" id="body-historia"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-historia"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando contexto histórico...</span></div></div></div>
-        </div>
-        <div class="rep-card" id="card-especialistas">
-          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('especialistas')">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(69,237,238,.1);"><span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">groups</span></div>
-            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Especialistas</p><p class="text-[10px] text-on-surface-variant">Filósofos, sociólogos e autores</p></div>
-            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-especialistas">expand_more</span>
-          </button>
-          <div class="rep-body px-5 pb-5" id="body-especialistas"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-especialistas"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando especialistas...</span></div></div></div>
-        </div>
-        <div class="rep-card" id="card-atualidades">
-          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('atualidades')">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(255,180,171,.1);"><span class="material-symbols-outlined text-error" style="font-variation-settings:'FILL' 1;">newspaper</span></div>
-            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Atualidades</p><p class="text-[10px] text-on-surface-variant">Dados recentes e estatísticas</p></div>
-            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-atualidades">expand_more</span>
-          </button>
-          <div class="rep-body px-5 pb-5" id="body-atualidades"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-atualidades"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando atualidades...</span></div></div></div>
-        </div>
-        <div class="rep-card" id="card-literatura">
-          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('literatura')">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(244,114,182,.1);"><span class="material-symbols-outlined" style="color:#f472b6;font-variation-settings:'FILL' 1;">menu_book</span></div>
-            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Literatura</p><p class="text-[10px] text-on-surface-variant">Obras literárias e autores</p></div>
-            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-literatura">expand_more</span>
-          </button>
-          <div class="rep-body px-5 pb-5" id="body-literatura"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-literatura"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando obras literárias...</span></div></div></div>
-        </div>
-        <div class="rep-card" id="card-filosofia">
-          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('filosofia')">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(167,139,250,.1);"><span class="material-symbols-outlined" style="color:#a78bfa;font-variation-settings:'FILL' 1;">psychology</span></div>
-            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Filosofia</p><p class="text-[10px] text-on-surface-variant">Pensadores e correntes filosóficas</p></div>
-            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-filosofia">expand_more</span>
-          </button>
-          <div class="rep-body px-5 pb-5" id="body-filosofia"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-filosofia"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando filósofos...</span></div></div></div>
-        </div>
-        <div class="rep-card" id="card-cinema">
-          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('cinema')">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(251,146,60,.1);"><span class="material-symbols-outlined" style="color:#fb923c;font-variation-settings:'FILL' 1;">movie</span></div>
-            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Cinema</p><p class="text-[10px] text-on-surface-variant">Filmes, séries e documentários</p></div>
-            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-cinema">expand_more</span>
-          </button>
-          <div class="rep-body px-5 pb-5" id="body-cinema"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-cinema"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando obras audiovisuais...</span></div></div></div>
-        </div>
-        <div class="rep-card" id="card-ciencia">
-          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('ciencia')">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(34,211,238,.1);"><span class="material-symbols-outlined" style="color:#22d3ee;font-variation-settings:'FILL' 1;">science</span></div>
-            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Ciência</p><p class="text-[10px] text-on-surface-variant">Pesquisas, descobertas e cientistas</p></div>
-            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-ciencia">expand_more</span>
-          </button>
-          <div class="rep-body px-5 pb-5" id="body-ciencia"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-ciencia"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando pesquisas científicas...</span></div></div></div>
-        </div>
-        <div class="rep-card" id="card-culturapop">
-          <button class="w-full p-5 flex items-center gap-3 text-left" onclick="toggleRep('culturapop')">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(232,121,249,.1);"><span class="material-symbols-outlined" style="color:#e879f9;font-variation-settings:'FILL' 1;">music_note</span></div>
-            <div class="flex-1"><p class="text-sm font-bold text-on-surface">Cultura Pop</p><p class="text-[10px] text-on-surface-variant">Música, séries e fenômenos culturais</p></div>
-            <span class="material-symbols-outlined text-on-surface-variant rep-chevron" id="chevron-culturapop">expand_more</span>
-          </button>
-          <div class="rep-body px-5 pb-5" id="body-culturapop"><div class="pt-4 border-t border-outline-variant/15" id="conteudo-culturapop"><div class="flex items-center gap-2 py-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="text-xs text-on-surface-variant ml-1">Buscando referências culturais...</span></div></div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- DIVISOR -->
-    <div class="flex items-center gap-4">
-      <div class="flex-1 h-px" style="background:linear-gradient(90deg,transparent,rgba(71,69,84,.4))"></div>
-      <div class="flex items-center gap-2 px-4 py-1.5 rounded-full" style="background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.2);">
-        <span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
-        <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Elite PRO</span>
-      </div>
-      <div class="flex-1 h-px" style="background:linear-gradient(90deg,rgba(71,69,84,.4),transparent)"></div>
-    </div>
-
-    <!-- 4. ESTÚDIO -->
-    <section class="fade-up-3 space-y-5">
-      <div class="secao-titulo"><span class="material-symbols-outlined text-sm" style="color:#45edee;font-variation-settings:'FILL' 1;">psychology</span>Materiais de Estudo — Gerados pela PROfa</div>
-      <p class="text-sm text-on-surface-variant">Escolha o formato que melhor se adapta ao seu jeito de estudar.</p>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div class="saida-card p-5" onclick="gerarSaida('resumo','article','Resumo em Texto')"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-primary mb-3 block" style="font-variation-settings:'FILL' 1;">article</span><p class="text-sm font-bold text-on-surface">Resumo em Texto</p><p class="text-[10px] text-on-surface-variant mt-1">Síntese completa do tema</p></div>
-        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Resumo em Áudio')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl text-secondary mb-3 block" style="font-variation-settings:'FILL' 1;">spatial_audio</span><p class="text-sm font-bold text-on-surface">Resumo em Áudio</p><p class="text-[10px] text-on-surface-variant mt-1">Roteiro de podcast de estudo</p></div>
-        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Roteiro de Vídeo')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl text-error mb-3 block" style="font-variation-settings:'FILL' 1;">smart_display</span><p class="text-sm font-bold text-on-surface">Roteiro de Vídeo</p><p class="text-[10px] text-on-surface-variant mt-1">Script de vídeo-aula</p></div>
-        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Mapa Mental')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl text-tertiary mb-3 block" style="font-variation-settings:'FILL' 1;">account_tree</span><p class="text-sm font-bold text-on-surface">Mapa Mental</p><p class="text-[10px] text-on-surface-variant mt-1">Estrutura visual dos argumentos</p></div>
-        <div class="saida-card p-5" onclick="gerarFlashcards()"><div class="shine"></div><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#4ade80;font-variation-settings:'FILL' 1;">style</span><p class="text-sm font-bold text-on-surface">Cartões de Memória</p><p class="text-[10px] text-on-surface-variant mt-1">Flashcards — clique para virar</p></div>
-        <div class="saida-card p-5" onclick="gerarQuiz()"><div class="shine"></div><span class="material-symbols-outlined text-2xl text-primary mb-3 block" style="font-variation-settings:'FILL' 1;">quiz</span><p class="text-sm font-bold text-on-surface">Teste / Quiz</p><p class="text-[10px] text-on-surface-variant mt-1">Questões estilo ENEM</p></div>
-        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Infográfico')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl mb-3 block" style="color:#c6bfff;font-variation-settings:'FILL' 1;">bar_chart</span><p class="text-sm font-bold text-on-surface">Infográfico</p><p class="text-[10px] text-on-surface-variant mt-1">Dados e números do tema</p></div>
-        <div class="saida-card bloqueado p-5" onclick="mostrarEmBreve('Relatório Completo')"><div class="shine"></div><span class="badge-em-breve">Em breve</span><span class="material-symbols-outlined text-2xl text-secondary mb-3 block" style="font-variation-settings:'FILL' 1;">assessment</span><p class="text-sm font-bold text-on-surface">Relatório</p><p class="text-[10px] text-on-surface-variant mt-1">Análise acadêmica aprofundada</p></div>
-      </div>
-      <!-- Flashcards inline -->
-      <div id="areaFlashcards" class="hidden pt-2">
-        <div class="flex items-center justify-between mb-4">
-          <p class="text-sm font-bold text-on-surface flex items-center gap-2"><span class="material-symbols-outlined" style="color:#4ade80;font-variation-settings:'FILL' 1;">style</span>Cartões de Memória</p>
-          <div class="flex items-center gap-3"><span class="text-[10px] text-on-surface-variant" id="labelFlashcard"></span><button onclick="document.getElementById('areaFlashcards').classList.add('hidden')" class="text-xs text-on-surface-variant hover:text-white transition-colors">Fechar</button></div>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="gridFlashcards"></div>
-      </div>
-      <!-- Quiz inline -->
-      <div id="areaQuiz" class="hidden pt-2">
-        <div class="flex items-center justify-between mb-4">
-          <p class="text-sm font-bold text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">quiz</span>Teste Rápido</p>
-          <button onclick="document.getElementById('areaQuiz').classList.add('hidden')" class="text-xs text-on-surface-variant hover:text-white transition-colors">Fechar</button>
-        </div>
-        <div id="containerQuiz" class="space-y-4"></div>
-      </div>
-    </section>
-
-    <!-- 5. CTA FINAL -->
-    <section class="py-8 border-t border-outline-variant/15 flex flex-col md:flex-row items-center justify-between gap-6">
-      <div><p class="text-xl font-black text-white mb-1">Pronto para escrever? ✍️</p><p class="text-sm text-on-surface-variant">Você explorou o tema. Hora de colocar tudo em prática.</p></div>
-      <button onclick="irEscrever()" class="px-10 py-4 rounded-2xl font-black text-[#002020] flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap" style="background:linear-gradient(135deg,#45edee,#6c5ce7);box-shadow:0 0 28px rgba(69,237,238,.3);font-size:1rem;">
-        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">edit</span>Escrever Redação Agora →
-      </button>
-    </section>
-  </div>
-</main>
-<script type="module">
-// Chama Gemini via rota serverless protegida (mesma do nova-redacao.html)
+/* ───────────────────────────────────────────────────────────────
+   MOTOR GEMINI (transplantado da produção antiga — INTOCADO na essência)
+   ─────────────────────────────────────────────────────────────── */
 async function geminiGenerate(prompt) {
-  const res = await fetch('/api/gemini', {
+  var res = await fetch('/api/gemini', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || 'Erro Gemini');
+  var data = await res.json();
+  if (!res.ok) throw new Error((data.error && data.error.message) || 'Erro Gemini');
   return data.candidates[0].content.parts[0].text;
 }
-window.toast = function(msg,dur=3000){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),dur);};
-const temaRaw=sessionStorage.getItem('tema_selecionado');
-let tema=null;try{if(temaRaw)tema=JSON.parse(temaRaw);}catch(e){}
-if(!tema)tema={titulo:'Desafios para a valorização de comunidades e povos tradicionais no Brasil',eixo:'ENEM 2022',fonte:'ENEM 2022',nivel:'avancado'};
-const TITULO=tema.titulo;
-document.getElementById('tituloPagina').textContent=TITULO;
-const _breadcrumbEl = document.getElementById('breadcrumb');
-if(_breadcrumbEl) _breadcrumbEl.textContent = TITULO.length>40?TITULO.substring(0,40)+'...':TITULO;
-document.getElementById('descPagina').textContent=`Tema ${tema.fonte?'oficial do '+tema.fonte:'selecionado'}. Explore o repertório e escolha os materiais de estudo antes de escrever para garantir a nota máxima.`;
-const COR_NIVEL={avancado:'#ffb4ab',intermediario:'#fabd00',basico:'#45edee'};
-const nivel=tema.nivel||'avancado';
-document.getElementById('tagsTema').innerHTML=[{label:tema.fonte||'Tema',cor:'#6c5ce7'},{label:tema.eixo||'Eixo Social',cor:'#45edee'},{label:nivel.charAt(0).toUpperCase()+nivel.slice(1),cor:COR_NIVEL[nivel]||'#fabd00'}].map(t=>`<span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider" style="background:${t.cor}18;border:1px solid ${t.cor}35;color:${t.cor}">${t.label}</span>`).join('');
-let repFeito=false,estFeito=false;
-function marcarPasso(p){const c=document.getElementById('check-'+p);const i=document.getElementById(p==='repertorio'?'icoRep':'icoEst');if(c)c.classList.add('feito');if(i)i.classList.remove('hidden');}
-const gerado={legislacao:false,historia:false,especialistas:false,atualidades:false,literatura:false,filosofia:false,cinema:false,ciencia:false,culturapop:false};
-const quizRepR={};
-const LABELS={legislacao:'Legislação',historia:'História',especialistas:'Especialistas',atualidades:'Atualidades',literatura:'Literatura',filosofia:'Filosofia',cinema:'Cinema',ciencia:'Ciência',culturapop:'Cultura Pop'};
-const PR={
-  legislacao:`Liste os 5 principais artigos da Constituição Federal e leis relevantes para o tema: "${TITULO}". Para cada: número, nome e aplicação ao tema em 1 frase. Use marcadores.`,
-  historia:`Explique o contexto histórico de "${TITULO}" com 5 marcos temporais numerados. Cada: data/período, fato e relevância para o Brasil.`,
-  especialistas:`Liste 5 especialistas (filósofos/sociólogos) relevantes para "${TITULO}". Para cada: nome, área, obra principal e 1 ideia aplicável ao ENEM.`,
-  atualidades:`Liste 5 dados estatísticos recentes (IBGE, OMS, ONU) sobre "${TITULO}". Para cada: fonte, dado numérico e como usar como argumento.`,
-  literatura:`Liste 5 obras literárias (brasileiras e mundiais) que dialogam com o tema "${TITULO}". Para cada: título, autor, breve descrição e como usar como repertório no ENEM.`,
-  filosofia:`Liste 5 pensadores ou correntes filosóficas relevantes para "${TITULO}". Para cada: nome do pensador/corrente, conceito-chave e como aplicar ao tema de forma articulada (sem repertório de bolso).`,
-  cinema:`Liste 5 filmes, documentários ou séries que abordam "${TITULO}". Para cada: título, ano, breve sinopse e como usar como repertório argumentativo.`,
-  ciencia:`Liste 5 pesquisas, descobertas científicas ou cientistas relevantes para "${TITULO}". Para cada: pesquisa/cientista, conclusão principal e aplicação ao tema.`,
-  culturapop:`Liste 5 referências de cultura pop brasileira (músicas, artistas, fenômenos sociais, séries nacionais) ligadas a "${TITULO}". Para cada: referência, contexto e como articular como repertório no ENEM.`
-};
 
-// ─────────────────────────────────────────────────────────────
-// TRAVA DE SEGURANÇA — palavras/frases bloqueadas
-// ─────────────────────────────────────────────────────────────
-const FRASES_BLOQUEADAS_HUB = [
+/* Trava de segurança — palavras/frases bloqueadas (transplantada) */
+var FRASES_BLOQUEADAS_HUB = [
   'apologia ao nazismo','apologia ao fascismo','apologia ao racismo',
-  'genocídio','extermínio de',
+  'genoc\u00eddio','exterm\u00ednio de',
   'pornografia infantil','pedofilia','abuso sexual infantil',
-  'incentivo ao suicídio','apologia ao suicídio',
-  'raça superior','raça inferior',
+  'incentivo ao suic\u00eddio','apologia ao suic\u00eddio',
+  'ra\u00e7a superior','ra\u00e7a inferior',
   'matar pessoas','eliminar grupo','inferiorizar',
-  'discurso de ódio','estupro como solução','tortura como solução'
+  'discurso de \u00f3dio','estupro como solu\u00e7\u00e3o','tortura como solu\u00e7\u00e3o'
 ];
 function checarTemaSensivelHub(t){
   if(!t)return null;
-  const lower=t.toLowerCase();
-  for(const f of FRASES_BLOQUEADAS_HUB){if(lower.includes(f.toLowerCase()))return f;}
+  var lower=t.toLowerCase();
+  for(var i=0;i<FRASES_BLOQUEADAS_HUB.length;i++){ if(lower.indexOf(FRASES_BLOQUEADAS_HUB[i].toLowerCase())>=0) return FRASES_BLOQUEADAS_HUB[i]; }
   return null;
 }
+function htmlTemaBloqueado(){
+  return '<div class="avisoBloqueio">' +
+    '<p class="tb">\uD83D\uDEE1\uFE0F Tema n\u00e3o p\u00f4de ser processado</p>' +
+    '<p class="sb">Identificamos termos sens\u00edveis no tema. A RedaON foca em temas que respeitam direitos humanos, dignidade e diversidade \u2014 alinhados com as compet\u00eancias oficiais do ENEM (especialmente C5).</p>' +
+    '<p class="sb">Volte \u00e0 <a href="temas.html">Biblioteca de Temas</a> e escolha um tema oficial.</p></div>';
+}
 
-// ─────────────────────────────────────────────────────────────
-// CACHE — busca/salva material no banco RedaON
-// Só funciona se TEMA_ID existir (tema oficial da biblioteca)
-// ─────────────────────────────────────────────────────────────
-const TEMA_ID_HUB = (function(){
-  try { const s = sessionStorage.getItem('tema_selecionado'); return s ? (JSON.parse(s).id || null) : null; } catch(e){ return null; }
-})();
-
+/* Cache RAG por tema — RPCs buscar/salvar_material_apoio (transplantado).
+   Só opera quando TEMA_ID existe (tema oficial da biblioteca). */
 async function _hubBuscarMaterial(eixo){
-  if(!TEMA_ID_HUB)return null;
+  if(!TEMA_ID)return null;
   try{
-    const url=`${SUPABASE_URL}/rest/v1/rpc/buscar_material_apoio`;
-    const res=await dbFetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID_HUB,p_eixo:eixo})});
+    var res=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/buscar_material_apoio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID,p_eixo:eixo})});
     if(!res.ok)return null;
-    const data=await res.json();
+    var data=await res.json();
     return (typeof data==='string'&&data.length>30)?data:null;
   }catch(e){console.warn('[hub buscar]',e);return null;}
 }
 async function _hubSalvarMaterial(eixo,conteudo){
-  if(!TEMA_ID_HUB||!conteudo)return;
+  if(!TEMA_ID||!conteudo)return;
   try{
-    const url=`${SUPABASE_URL}/rest/v1/rpc/salvar_material_apoio`;
-    await dbFetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID_HUB,p_eixo:eixo,p_conteudo:conteudo})});
+    await dbFetch(SUPABASE_URL+'/rest/v1/rpc/salvar_material_apoio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID,p_eixo:eixo,p_conteudo:conteudo})});
   }catch(e){console.warn('[hub salvar]',e);}
 }
 
-window.toggleRep=async function(tipo){
-  const body=document.getElementById('body-'+tipo);
-  const chevron=document.getElementById('chevron-'+tipo);
-  const card=document.getElementById('card-'+tipo);
-  if(body.classList.contains('aberto')){body.classList.remove('aberto');chevron.classList.remove('aberto');return;}
-  body.classList.add('aberto');chevron.classList.add('aberto');
-  if(gerado[tipo])return;
-
-  // 1. Trava de segurança
-  const fraseBloqueada = checarTemaSensivelHub(TITULO);
-  if(fraseBloqueada){
-    document.getElementById('conteudo-'+tipo).innerHTML=`<div style="padding:1rem;background:rgba(255,180,171,.08);border:1px solid rgba(255,180,171,.25);border-radius:.625rem;">
-      <p style="font-size:.78rem;color:#ffb4ab;font-weight:700;margin-bottom:.4rem;">🛡️ Tema não pôde ser processado</p>
-      <p style="font-size:.72rem;color:#c8c4d7;line-height:1.5;">Identificamos termos sensíveis no tema. A RedaON foca em temas que respeitam direitos humanos, dignidade e diversidade — alinhados com as competências oficiais do ENEM (especialmente C5).</p>
-      <p style="font-size:.72rem;color:#c8c4d7;line-height:1.5;margin-top:.5rem;">Volte à <a href="temas.html" style="color:#45edee;text-decoration:underline;">Biblioteca de Temas</a> e escolha um tema oficial.</p>
-    </div>`;
-    return;
-  }
-
-  gerado[tipo]=true;card.classList.add('carregando');
-  try{
-    let texto = null;
-    let veioDoBanco = false;
-
-    // 2. Tema oficial (UUID) → tenta cache primeiro
-    if(TEMA_ID_HUB){
-      texto = await _hubBuscarMaterial(tipo);
-      if(texto){
-        veioDoBanco = true;
-        console.log(`[hub material] '${tipo}' veio do banco (cache hit) — custo zero.`);
-      }
-    }
-
-    // 3. Cache miss ou tema livre → chama Gemini
-    if(!texto){
-      texto = await geminiGenerate(PR[tipo]+'\n\nUse markdown leve. Português.');
-
-      // 4. Tema oficial → salva pra próximos alunos (fire-and-forget)
-      if(TEMA_ID_HUB && texto){
-        _hubSalvarMaterial(tipo, texto);
-        console.log(`[hub material] '${tipo}' gerado pelo Gemini e salvo no banco.`);
-      }
-    }
-
-    card.classList.remove('carregando');card.classList.add('pronto');
-
-    // 5. Selo "tema oficial" se aplicável
-    let selo = '';
-    if(TEMA_ID_HUB){
-      selo = `<div style="display:flex;align-items:center;gap:.375rem;margin-bottom:.625rem;padding:.3rem .6rem;background:rgba(69,237,238,.08);border:1px solid rgba(69,237,238,.2);border-radius:.5rem;font-size:.7rem;color:#45edee;font-weight:600;width:fit-content;">
-        <span class="material-symbols-outlined" style="font-size:.85rem;">verified</span>
-        Tema oficial ENEM ${veioDoBanco ? '· do banco RedaON' : '· novo no banco'}
-      </div>`;
-    }
-
-    document.getElementById('conteudo-'+tipo).innerHTML=
-      selo + md(texto)+
-      `<div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(71,69,84,.2);">
-        <button onclick="gerarQuizRep('${tipo}')" id="btnQuizRep-${tipo}"
-          style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:rgba(69,237,238,.08);border:1px solid rgba(69,237,238,.2);border-radius:.75rem;font-size:.75rem;font-weight:700;color:#45edee;cursor:pointer;transition:all .2s;"
-          onmouseover="this.style.background='rgba(69,237,238,.15)'" onmouseout="this.style.background='rgba(69,237,238,.08)'">
-          <span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:'FILL' 1;">quiz</span>
-          Testar meu conhecimento sobre ${LABELS[tipo]}
-        </button>
-        <div id="quizRep-${tipo}" style="display:none;margin-top:1rem;"></div>
-      </div>`;
-    if(!repFeito){repFeito=true;marcarPasso('repertorio');}
-  }catch(err){
-    console.error('[toggleRep] erro:',err);
-    card.classList.remove('carregando');
-    document.getElementById('conteudo-'+tipo).innerHTML='<p class="text-xs text-error">Erro. Tente novamente.</p>';
-    gerado[tipo]=false;
-  }
+/* Prompts de repertório (transplantados; agora funções do título, resolvido em runtime) */
+var PR = {
+  legislacao: function(t){ return 'Liste os 5 principais artigos da Constitui\u00e7\u00e3o Federal e leis relevantes para o tema: "'+t+'". Para cada: n\u00famero, nome e aplica\u00e7\u00e3o ao tema em 1 frase. Use marcadores.'; },
+  historia: function(t){ return 'Explique o contexto hist\u00f3rico de "'+t+'" com 5 marcos temporais numerados. Cada: data/per\u00edodo, fato e relev\u00e2ncia para o Brasil.'; },
+  especialistas: function(t){ return 'Liste 5 especialistas (fil\u00f3sofos/soci\u00f3logos) relevantes para "'+t+'". Para cada: nome, \u00e1rea, obra principal e 1 ideia aplic\u00e1vel ao ENEM.'; },
+  atualidades: function(t){ return 'Liste 5 dados estat\u00edsticos recentes (IBGE, OMS, ONU) sobre "'+t+'". Para cada: fonte, dado num\u00e9rico e como usar como argumento.'; },
+  literatura: function(t){ return 'Liste 5 obras liter\u00e1rias (brasileiras e mundiais) que dialogam com o tema "'+t+'". Para cada: t\u00edtulo, autor, breve descri\u00e7\u00e3o e como usar como repert\u00f3rio no ENEM.'; },
+  filosofia: function(t){ return 'Liste 5 pensadores ou correntes filos\u00f3ficas relevantes para "'+t+'". Para cada: nome do pensador/corrente, conceito-chave e como aplicar ao tema de forma articulada (sem repert\u00f3rio de bolso).'; },
+  cinema: function(t){ return 'Liste 5 filmes, document\u00e1rios ou s\u00e9ries que abordam "'+t+'". Para cada: t\u00edtulo, ano, breve sinopse e como usar como repert\u00f3rio argumentativo.'; },
+  ciencia: function(t){ return 'Liste 5 pesquisas, descobertas cient\u00edficas ou cientistas relevantes para "'+t+'". Para cada: pesquisa/cientista, conclus\u00e3o principal e aplica\u00e7\u00e3o ao tema.'; },
+  culturapop: function(t){ return 'Liste 5 refer\u00eancias de cultura pop brasileira (m\u00fasicas, artistas, fen\u00f4menos sociais, s\u00e9ries nacionais) ligadas a "'+t+'". Para cada: refer\u00eancia, contexto e como articular como repert\u00f3rio no ENEM.'; }
 };
-
-window.gerarQuizRep=async function(tipo){
-  const btn=document.getElementById('btnQuizRep-'+tipo);
-  const area=document.getElementById('quizRep-'+tipo);
-  btn.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:.5rem;">Gerando quiz...</span>';
-  btn.disabled=true;
-  const subTema={
-    legislacao:`legislação e leis relacionadas ao tema "${TITULO}"`,
-    historia:`contexto histórico e marcos temporais do tema "${TITULO}"`,
-    especialistas:`especialistas, filósofos e sociólogos relevantes ao tema "${TITULO}"`,
-    atualidades:`dados estatísticos e atualidades sobre o tema "${TITULO}"`,
-    literatura:`obras literárias e autores relacionados ao tema "${TITULO}"`,
-    filosofia:`filósofos e correntes filosóficas aplicáveis ao tema "${TITULO}"`,
-    cinema:`filmes, documentários e séries que abordam o tema "${TITULO}"`,
-    ciencia:`pesquisas científicas e cientistas relevantes ao tema "${TITULO}"`,
-    culturapop:`referências de cultura pop relacionadas ao tema "${TITULO}"`
-  };
-  const prompt=`Crie 3 questões objetivas sobre ${subTema[tipo]}, no estilo ENEM. APENAS JSON, sem mais nada: [{"pergunta":"...","alternativas":["A) ...","B) ...","C) ...","D) ...","E) ..."],"correta":0,"explicacao":"..."}]`;
-  try{
-    const _txt=await geminiGenerate(prompt);
-    const qs=JSON.parse(_txt.replace(/```json|```/g,'').trim());
-    if(!quizRepR[tipo])quizRepR[tipo]={};
-    area.style.display='block';
-    area.innerHTML=`<p style="font-size:.7rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;">Quiz — ${LABELS[tipo]}</p>`+
-      qs.map((q,qi)=>`
-        <div style="background:#0b0e14;border:1px solid rgba(71,69,84,.25);border-radius:.875rem;padding:1rem;margin-bottom:.75rem;">
-          <p style="font-size:.75rem;font-weight:700;color:#928ea0;margin-bottom:.5rem;">Questão ${qi+1} / ${qs.length}</p>
-          <p style="font-size:.85rem;font-weight:700;color:#e1e2eb;margin-bottom:.75rem;">${q.pergunta}</p>
-          <div id="altRep-${tipo}-${qi}" style="display:flex;flex-direction:column;gap:.375rem;">
-            ${q.alternativas.map((a,ai)=>`<button onclick="respRep('${tipo}',${qi},${ai},${q.correta},'${q.explicacao.replace(/'/g,"\\'")}',this)"
-              style="text-align:left;padding:.6rem .875rem;border-radius:.625rem;border:1px solid rgba(71,69,84,.3);background:#1d2026;color:#c8c4d7;font-size:.8rem;cursor:pointer;transition:all .2s;"
-              onmouseover="this.style.borderColor='rgba(69,237,238,.3)'" onmouseout="if(!this.disabled)this.style.borderColor='rgba(71,69,84,.3)'">${a}</button>`).join('')}
-          </div>
-          <div id="expRep-${tipo}-${qi}" style="display:none;margin-top:.625rem;padding:.625rem;border-radius:.625rem;font-size:.75rem;line-height:1.6;"></div>
-        </div>`).join('');
-    btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:\'FILL\' 1;">check_circle</span><span style="margin-left:.375rem;">Quiz gerado!</span>';
-    btn.style.background='rgba(74,222,128,.08)';btn.style.borderColor='rgba(74,222,128,.25)';btn.style.color='#4ade80';
-    area.scrollIntoView({behavior:'smooth',block:'nearest'});
-  }catch(err){
-    btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;">quiz</span><span style="margin-left:.375rem;">Testar meu conhecimento sobre ${LABELS[tipo]}</span>';
-    btn.disabled=false;
-    toast('Erro ao gerar quiz. Tente novamente.');
-  }
-};
-
-window.respRep=function(tipo,qi,ai,correta,explicacao){
-  if(quizRepR[tipo]&&quizRepR[tipo][qi]!==undefined)return;
-  if(!quizRepR[tipo])quizRepR[tipo]={};
-  quizRepR[tipo][qi]=ai;
-  document.getElementById('altRep-'+tipo+'-'+qi).querySelectorAll('button').forEach((b,i)=>{
-    b.disabled=true;b.onmouseover=null;b.onmouseout=null;
-    if(i===correta){b.style.borderColor='#4ade80';b.style.color='#4ade80';b.style.background='rgba(74,222,128,.08)';}
-    else if(i===ai&&ai!==correta){b.style.borderColor='#ffb4ab';b.style.color='#ffb4ab';b.style.background='rgba(255,180,171,.08)';}
-  });
-  const e=document.getElementById('expRep-'+tipo+'-'+qi);
-  e.textContent=(ai===correta?'✓ Correto! ':'✗ Errado. ')+explicacao;
-  e.style.display='block';
-  e.style.cssText+=`background:${ai===correta?'rgba(74,222,128,.06)':'rgba(255,180,171,.06)'};border:1px solid ${ai===correta?'rgba(74,222,128,.2)':'rgba(255,180,171,.2)'};color:${ai===correta?'#4ade80':'#ffb4ab'};`;
-};
-window.carregarTudo=async function(){const btn=document.getElementById('btnGerarTudo');btn.disabled=true;btn.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ml-2">PROfa gerando tudo...</span>';for(const tipo of['legislacao','historia','especialistas','atualidades','literatura','filosofia','cinema','ciencia','culturapop']){document.getElementById('body-'+tipo).classList.add('aberto');document.getElementById('chevron-'+tipo).classList.add('aberto');if(!gerado[tipo])await window.toggleRep(tipo);}btn.innerHTML='<span class="material-symbols-outlined" style="font-size:1rem;font-variation-settings:\'FILL\' 1;">check_circle</span><span>Repertório completo!</span>';btn.style.cssText='background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:#4ade80;';};
-let resultadoAtual='';
-const PS={resumo:`Crie um RESUMO DIDÁTICO de "${TITULO}" para redação ENEM.
-Retorne APENAS um JSON válido, sem markdown e sem texto adicional, no formato:
-{
-  "titulo": "${TITULO}",
-  "resumo_didatico": {
-    "problema": "<1-2 frases descrevendo o problema central>",
-    "causas": ["<causa 1>", "<causa 2>", "<causa 3>"],
-    "consequencias": ["<consequência 1>", "<consequência 2>", "<consequência 3>", "<consequência 4>"],
-    "dados_relevantes": ["<dado 1 com fonte se possível>", "<dado 2>", "<dado 3>"],
-    "solucoes_propostas": ["<solução 1>", "<solução 2>", "<solução 3>", "<solução 4>"]
-  }
+/* "Entender o tema" — mesmo briefing/pipeline da Tela 4 (cache compartilhado, chave 'entender') */
+function PROMPT_ENTENDER(t){
+  return 'Voc\u00ea \u00e9 a PROfa da RedaON. Para o tema de reda\u00e7\u00e3o ENEM "' + t + '", produza um briefing curto em 3 blocos, em texto simples com **negrito** nos r\u00f3tulos:\n' +
+    '**Recorte**: qual \u00e9 exatamente o recorte do tema (o que ele pede e o que N\u00c3O pede), em 2-3 frases.\n' +
+    '**O que a banca espera**: diagn\u00f3stico com causas e consequ\u00eancias + proposta de interven\u00e7\u00e3o completa (agente, a\u00e7\u00e3o, meio, finalidade, detalhamento), em 2-3 frases.\n' +
+    '**Armadilhas**: 2-3 erros comuns que fazem o candidato tangenciar ou perder pontos neste tema.\n' +
+    'M\u00e1ximo de 130 palavras no total. Sem introdu\u00e7\u00e3o nem despedida.';
 }
-Cada item deve ter 1-2 frases completas, em português brasileiro. Não use markdown dentro dos campos.`,audio:`ROTEIRO DE PODCAST sobre "${TITULO}". Tom conversacional, com [pausa]. ~8 minutos.`,video:`ROTEIRO DE VÍDEO-AULA sobre "${TITULO}" em cenas numeradas. Fala + recurso visual sugerido. ~10 minutos.`,mapa:`MAPA MENTAL hierárquico de "${TITULO}" com →. Ramos: Causas, Consequências, Legislação, Especialistas, Dados, Soluções.`,infografico:`CONTEÚDO DE INFOGRÁFICO sobre "${TITULO}": título, seções, dados, comparações, timeline e curiosidades.`,relatorio:`RELATÓRIO ACADÊMICO sobre "${TITULO}": Resumo, Introdução, Contexto, Análise, Legislação, Especialistas, Dados, Perspectivas, Conclusão.`,redacao_modelo:`REDAÇÃO NOTA 1000 sobre "${TITULO}". Introdução com repertório + 2 parágrafos + conclusão com proposta de intervenção completa. 28-30 linhas. Linguagem formal.`};
-window.gerarSaida=async function(tipo,icone,titulo){
-  document.getElementById('modalResultado').classList.add('aberto');
-  document.getElementById('modalTitulo').textContent=titulo;
-  document.getElementById('modalIcon').textContent=icone;
-  document.getElementById('modalConteudo').innerHTML='<div style="display:flex;align-items:center;gap:.75rem;padding:1rem 0;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="color:#928ea0;font-size:.85rem;">PROfa gerando...</span></div>';
-  try{
-    resultadoAtual=await geminiGenerate(PS[tipo]);
-    document.getElementById('modalConteudo').innerHTML=renderResumoSaida(resultadoAtual);
-    if(!estFeito){estFeito=true;marcarPasso('estudio');}
-  }catch(err){
-    document.getElementById('modalConteudo').innerHTML='<p style="color:#ffb4ab">Erro. Tente novamente.</p>';
-  }
-};
-// Funções de controle do modal "Em breve" (formatos não implementados)
-window.mostrarEmBreve=function(titulo){
-  document.getElementById('emBreveTitulo').textContent=titulo;
-  document.getElementById('modalEmBreve').classList.add('aberto');
-};
-window.fecharEmBreve=function(){
-  document.getElementById('modalEmBreve').classList.remove('aberto');
-};
-// ESC fecha qualquer modal aberto
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){
-    document.getElementById('modalEmBreve').classList.remove('aberto');
-    document.getElementById('modalResultado').classList.remove('aberto');
-  }
-});
-window.gerarFlashcards=async function(){toast('🃏 Gerando cartões...');const prompt=`Crie 8 flashcards sobre "${TITULO}" para o ENEM. APENAS JSON: [{"frente":"...","verso":"..."}]`;try{const _txt=await geminiGenerate(prompt);const cards=JSON.parse(_txt.replace(/```json|```/g,'').trim());const area=document.getElementById('areaFlashcards');area.classList.remove('hidden');document.getElementById('areaQuiz').classList.add('hidden');document.getElementById('labelFlashcard').textContent=cards.length+' cartões · clique para virar';const grid=document.getElementById('gridFlashcards');grid.innerHTML='';cards.forEach(c=>{const div=document.createElement('div');div.className='flashcard';div.onclick=()=>div.classList.toggle('flipped');div.innerHTML=`<div class="flashcard-inner"><div class="flashcard-front"><div><p class="text-[9px] text-secondary font-bold uppercase tracking-widest mb-2">Frente</p><p class="text-sm font-bold text-on-surface">${c.frente}</p></div></div><div class="flashcard-back"><div><p class="text-[9px] text-primary font-bold uppercase tracking-widest mb-2">Verso</p><p class="text-xs text-on-surface leading-relaxed">${c.verso}</p></div></div></div>`;grid.appendChild(div);});area.scrollIntoView({behavior:'smooth',block:'start'});if(!estFeito){estFeito=true;marcarPasso('estudio');}toast('✓ '+cards.length+' cartões gerados!');}catch(err){toast('Erro ao gerar flashcards.');}};
-let quizR={};
-window.gerarQuiz=async function(){toast('🧪 Gerando quiz...');const prompt=`5 questões ENEM sobre "${TITULO}". APENAS JSON: [{"pergunta":"...","alternativas":["A)...","B)...","C)...","D)...","E)..."],"correta":0,"explicacao":"..."}]`;try{const _txt=await geminiGenerate(prompt);const qs=JSON.parse(_txt.replace(/```json|```/g,'').trim());quizR={};const area=document.getElementById('areaQuiz');area.classList.remove('hidden');document.getElementById('areaFlashcards').classList.add('hidden');const cont=document.getElementById('containerQuiz');cont.innerHTML='';qs.forEach((q,qi)=>{const div=document.createElement('div');div.className='p-5 rounded-2xl';div.style.cssText='background:#191c22;border:1px solid rgba(71,69,84,.25);';div.innerHTML=`<p class="text-xs font-bold text-on-surface-variant mb-3">Questão ${qi+1} / ${qs.length}</p><p class="text-sm font-bold text-on-surface mb-4">${q.pergunta}</p><div class="space-y-2" id="alt${qi}">${q.alternativas.map((a,ai)=>`<button onclick="resp(${qi},${ai},${q.correta},'${q.explicacao.replace(/'/g,"\'")}',this)" class="w-full text-left px-4 py-3 rounded-xl border text-sm transition-all hover:border-secondary/40" style="background:#0b0e14;border-color:rgba(71,69,84,.3);color:#c8c4d7;">${a}</button>`).join('')}</div><div id="exp${qi}" class="hidden mt-3 p-3 rounded-xl text-xs leading-relaxed"></div>`;cont.appendChild(div);});area.scrollIntoView({behavior:'smooth',block:'start'});if(!estFeito){estFeito=true;marcarPasso('estudio');}toast('✓ Quiz gerado!');}catch(err){toast('Erro ao gerar quiz.');}};
-window.resp=function(qi,ai,correta,explicacao){if(quizR[qi]!==undefined)return;quizR[qi]=ai;document.getElementById('alt'+qi).querySelectorAll('button').forEach((b,i)=>{b.disabled=true;if(i===correta){b.style.borderColor='#4ade80';b.style.color='#4ade80';b.style.background='rgba(74,222,128,.08)';}else if(i===ai&&ai!==correta){b.style.borderColor='#ffb4ab';b.style.color='#ffb4ab';b.style.background='rgba(255,180,171,.08)';}});const e=document.getElementById('exp'+qi);e.textContent=(ai===correta?'✓ Correto! ':'✗ Errado. ')+explicacao;e.classList.remove('hidden');e.style.cssText=`border-radius:.625rem;padding:.75rem;font-size:.75rem;background:${ai===correta?'rgba(74,222,128,.06)':'rgba(255,180,171,.06)'};border:1px solid ${ai===correta?'rgba(74,222,128,.2)':'rgba(255,180,171,.2)'};color:${ai===correta?'#4ade80':'#ffb4ab'};`;};
-window.fecharModal=function(){document.getElementById('modalResultado').classList.remove('aberto');};
-document.getElementById('modalResultado').addEventListener('click',function(e){if(e.target===this)window.fecharModal();});
-window.copiarResultado=function(){navigator.clipboard.writeText(resultadoAtual).then(()=>toast('✓ Copiado!'));};
-window.irEscrever=function(){window.location.href='nova-redacao.html';};
-function renderResumoSaida(raw){
-  // Tenta detectar JSON estruturado (formato atual do Gemini com responseMimeType=json)
-  const limpo=(raw||'').trim().replace(/^```json|```$|^```/g,'').trim();
-  let dados=null;
-  try{
-    if(limpo.startsWith('{')){
-      dados=JSON.parse(limpo);
-    }
-  }catch(e){/* não é JSON, segue para markdown */}
+/* Resumo didático (transplantado; JSON estruturado) */
+function PROMPT_RESUMO(t){
+  return 'Crie um RESUMO DID\u00c1TICO de "'+t+'" para reda\u00e7\u00e3o ENEM.\n' +
+'Retorne APENAS um JSON v\u00e1lido, sem markdown e sem texto adicional, no formato:\n' +
+'{\n' +
+'  "titulo": "'+t+'",\n' +
+'  "resumo_didatico": {\n' +
+'    "problema": "<1-2 frases descrevendo o problema central>",\n' +
+'    "causas": ["<causa 1>", "<causa 2>", "<causa 3>"],\n' +
+'    "consequencias": ["<consequ\u00eancia 1>", "<consequ\u00eancia 2>", "<consequ\u00eancia 3>", "<consequ\u00eancia 4>"],\n' +
+'    "dados_relevantes": ["<dado 1 com fonte se poss\u00edvel>", "<dado 2>", "<dado 3>"],\n' +
+'    "solucoes_propostas": ["<solu\u00e7\u00e3o 1>", "<solu\u00e7\u00e3o 2>", "<solu\u00e7\u00e3o 3>", "<solu\u00e7\u00e3o 4>"]\n' +
+'  }\n' +
+'}\n' +
+'Cada item deve ter 1-2 frases completas, em portugu\u00eas brasileiro. N\u00e3o use markdown dentro dos campos.';
+}
+function PROMPT_FLASH(t){ return 'Crie 8 flashcards sobre "'+t+'" para o ENEM. APENAS JSON: [{"frente":"...","verso":"..."}]'; }
+function PROMPT_QUIZ(t){ return '5 quest\u00f5es ENEM sobre "'+t+'". APENAS JSON: [{"pergunta":"...","alternativas":["A)...","B)...","C)...","D)...","E)..."],"correta":0,"explicacao":"..."}]'; }
+/* M1 — eixos relevantes ao tema (chamada pequena, cacheada como novo tipo no mesmo cache) */
+function PROMPT_EIXOS(t){
+  return 'Para o tema de reda\u00e7\u00e3o ENEM "'+t+'", quais destes eixos de repert\u00f3rio s\u00e3o os MAIS relevantes (escolha exatamente 3): legislacao, historia, especialistas, atualidades, literatura, filosofia, cinema, ciencia, culturapop. Responda APENAS um array JSON com os ids, ex.: ["legislacao","atualidades","filosofia"]';
+}
 
-  // Se for JSON com a estrutura de resumo didático, renderiza em seções visuais
+/* Renderização de texto (transplantada — cores por variável CSS onde a base permite) */
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function md(t){return String(t)
+  .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+  .replace(/^### (.*)/gm,'<h4>$1</h4>')
+  .replace(/^## (.*)/gm,'<h4>$1</h4>')
+  .replace(/^# (.*)/gm,'<h4>$1</h4>')
+  .replace(/^[-\u2014\u2022] (.*)/gm,'<p class="mdli">\u2022 $1</p>')
+  .replace(/^(\d+)\. (.*)/gm,'<p class="mdli"><strong>$1.</strong> $2</p>')
+  .replace(/\n\n/g,'<br/><br/>')
+  .replace(/\n/g,'<br/>');}
+function renderResumo(raw){
+  var limpo=(raw||'').trim().replace(/^```json|```$|^```/g,'').trim();
+  var dados=null;
+  try{ if(limpo.charAt(0)==='{') dados=JSON.parse(limpo); }catch(e){}
   if(dados && (dados.resumo_didatico || dados.problema || dados.causas)){
-    const r=dados.resumo_didatico||dados;
-    const titulo=dados.titulo||'';
-    let html='';
-    if(titulo){
-      html+=`<p style="font-size:1.05rem;font-weight:800;color:#45edee;margin-bottom:1.25rem;line-height:1.4;">${escapeHTML(titulo)}</p>`;
-    }
-    if(r.problema){
-      html+=`<div class="resumo-secao"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#45edee;">lightbulb</span>Problema</h3><p>${escapeHTML(r.problema)}</p></div>`;
-    }
-    if(Array.isArray(r.causas)&&r.causas.length){
-      html+=`<div class="resumo-secao causas"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#fabd00;">flag</span>Causas</h3><ul>${r.causas.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul></div>`;
-    }
-    if(Array.isArray(r.consequencias)&&r.consequencias.length){
-      html+=`<div class="resumo-secao consequencias"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#ffb4ab;">trending_down</span>Consequências</h3><ul>${r.consequencias.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul></div>`;
-    }
-    if(Array.isArray(r.dados_relevantes)&&r.dados_relevantes.length){
-      html+=`<div class="resumo-secao dados"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#c6bfff;">analytics</span>Dados relevantes</h3><ul>${r.dados_relevantes.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul></div>`;
-    }
-    if(Array.isArray(r.solucoes_propostas)&&r.solucoes_propostas.length){
-      html+=`<div class="resumo-secao solucoes"><h3><span class="material-symbols-outlined" style="font-size:1rem;color:#4ade80;">construction</span>Soluções propostas</h3><ul>${r.solucoes_propostas.map(c=>`<li>${escapeHTML(c)}</li>`).join('')}</ul></div>`;
-    }
+    var r=dados.resumo_didatico||dados, html='';
+    if(r.problema) html+='<h4>\uD83D\uDCA1 Problema</h4><p>'+escapeHTML(r.problema)+'</p>';
+    function bloco(tt,arr){ if(Array.isArray(arr)&&arr.length){ html+='<h4>'+tt+'</h4>'+arr.map(function(c){return '<p class="mdli">\u2022 '+escapeHTML(c)+'</p>';}).join(''); } }
+    bloco('\uD83D\uDEA9 Causas', r.causas);
+    bloco('\uD83D\uDCC9 Consequ\u00eancias', r.consequencias);
+    bloco('\uD83D\uDCCA Dados relevantes', r.dados_relevantes);
+    bloco('\uD83D\uDEE0\uFE0F Solu\u00e7\u00f5es propostas', r.solucoes_propostas);
     return html||md(limpo);
   }
-  // Fallback: trata como markdown ou texto puro
   return md(limpo);
 }
-function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);}
-function md(t){return t.replace(/\*\*(.*?)\*\*/g,'<strong style="color:#e1e2eb">$1</strong>').replace(/^### (.*)/gm,'<p style="font-size:.875rem;font-weight:700;color:#45edee;margin:.75rem 0 .25rem">$1</p>').replace(/^## (.*)/gm,'<p style="font-size:1rem;font-weight:700;color:#e1e2eb;margin:.875rem 0 .3rem">$1</p>').replace(/^# (.*)/gm,'<p style="font-size:1.1rem;font-weight:800;color:#45edee;margin:1rem 0 .4rem">$1</p>').replace(/^[-—•] (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0;color:#c8c4d7">• $1</p>').replace(/^(\d+)\. (.*)/gm,'<p style="padding-left:1rem;margin:.2rem 0"><strong style="color:#45edee">$1.</strong> $2</p>').replace(/\[pausa\]/gi,'<span style="color:#fabd00;font-style:italic">[pausa]</span>').replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>');}
+
+/* ───────────────────────────────────────────────────────────────
+   EIXOS — M1 (relevantes por tema) + sanfona + geração com cache
+   ─────────────────────────────────────────────────────────────── */
+var EIXOS_META = [
+  { id:'atualidades',   emoji:'\uD83D\uDCCA', nome:'Atualidades e dados' },
+  { id:'legislacao',    emoji:'\u2696\uFE0F',  nome:'Legisla\u00e7\u00e3o' },
+  { id:'filosofia',     emoji:'\uD83E\uDDE0', nome:'Filosofia' },
+  { id:'historia',      emoji:'\uD83D\uDCDC', nome:'Hist\u00f3ria' },
+  { id:'especialistas', emoji:'\uD83C\uDF93', nome:'Especialistas' },
+  { id:'literatura',    emoji:'\uD83D\uDCD6', nome:'Literatura' },
+  { id:'cinema',        emoji:'\uD83C\uDFAC', nome:'Cinema' },
+  { id:'ciencia',       emoji:'\uD83D\uDD2C', nome:'Ci\u00eancia' },
+  { id:'culturapop',    emoji:'\uD83C\uDFA7', nome:'Cultura Pop' }
+];
+var FALLBACK_RELEVANTES = ['legislacao','atualidades','filosofia']; /* curados fixos da Tela 4 */
+var RELEVANTES = FALLBACK_RELEVANTES.slice();
+var gerado = {};   /* conteúdo já na tela, por eixo/material */
+
+async function carregarEixosRelevantes(){
+  /* M2 (futuro): curadoria da equipe no banco VENCE a IA quando existir */
+  try{
+    var bruto = await _hubBuscarMaterial('eixos_relevantes');
+    if(!bruto){
+      var txt = await geminiGenerate(PROMPT_EIXOS(TITULO));
+      bruto = txt.replace(/```json|```/g,'').trim();
+      var m = bruto.match(/\[[\s\S]*\]/); if(m) bruto = m[0];
+      JSON.parse(bruto); /* valida antes de salvar */
+      _hubSalvarMaterial('eixos_relevantes', bruto);
+    }
+    var ids = JSON.parse(String(bruto).replace(/```json|```/g,'').trim());
+    var validos = ids.filter(function(id){ return EIXOS_META.some(function(e){ return e.id===id; }); });
+    if(validos.length >= 2) RELEVANTES = validos.slice(0,4);
+  }catch(e){ console.warn('[M1 eixos] fallback curado:', e); RELEVANTES = FALLBACK_RELEVANTES.slice(); }
+}
+function renderEixos(){
+  var rel='', out='';
+  EIXOS_META.forEach(function(e){
+    var html =
+      '<div class="eixoItem" id="eixo-'+e.id+'">' +
+        '<button class="cabeca" onclick="toggleEixo(\''+e.id+'\')">' +
+          '<i class="pemoji">'+e.emoji+'</i><span class="nome">'+e.nome+'</span>' +
+          '<span class="estado" id="estado-'+e.id+'">pronto</span><i class="seta">\u203a</i>' +
+        '</button>' +
+        '<div class="corpo"><div class="corpoIn" id="corpo-'+e.id+'"></div></div>' +
+      '</div>';
+    if (RELEVANTES.indexOf(e.id) >= 0) rel += html; else out += html;
+  });
+  document.getElementById('listaRelevantes').innerHTML = rel;
+  document.getElementById('listaOutros').innerHTML = '<p class="rotuloCurado">Outros eixos</p>' + out;
+  var btn = document.getElementById('btnVerTodos');
+  btn.textContent = 'Ver todos os eixos (+' + (EIXOS_META.length - RELEVANTES.length) + ')';
+}
+function verTodos(){
+  document.getElementById('listaOutros').classList.remove('hidden');
+  document.getElementById('btnVerTodos').classList.add('hidden');
+}
+
+var gerando = {};
+function toggleEixo(id){
+  var item = document.getElementById('eixo-'+id);
+  if (item.classList.contains('aberto')) { item.classList.remove('aberto'); return; }
+  item.classList.add('aberto');
+  if (gerado[id] || gerando[id]) return;
+  gerarEixo(id);
+}
+async function gerarEixo(id, aoTerminar){
+  var passo = (id === 'entender') ? 'entender' : 'repertorio';
+  var box = document.getElementById('corpo-'+id);
+  /* Trava de segurança primeiro — sem gasto de token em tema bloqueado */
+  if (checarTemaSensivelHub(TITULO)) { box.innerHTML = htmlTemaBloqueado(); if(aoTerminar)aoTerminar(); return; }
+  gerando[id] = true;
+  box.innerHTML = '<div class="gerando"><span class="giro"></span>A PROfa est\u00e1 preparando\u2026</div>';
+  try{
+    var texto = await _hubBuscarMaterial(id);
+    if (!texto){
+      var prompt = (id === 'entender') ? PROMPT_ENTENDER(TITULO) : (PR[id](TITULO) + '\n\nUse markdown leve. Portugu\u00eas.');
+      texto = await geminiGenerate(prompt);
+      if (TEMA_ID && texto) _hubSalvarMaterial(id, texto);
+    }
+    box.innerHTML = md(texto) + htmlConcluir(passo);
+    gerado[id] = true;
+    var s = document.getElementById('estado-'+id);
+    if (s) s.classList.add('ok');
+    if (id !== 'entender') _checarRepertorioCompleto();
+  }catch(err){
+    console.warn('[gerarEixo]', id, err);
+    box.innerHTML = '<p class="erroGerar">N\u00e3o consegui preparar agora. Toque para tentar de novo.</p>';
+    var it = document.getElementById('eixo-'+id);
+    if (it) it.classList.remove('aberto');
+  }
+  gerando[id] = false;
+  if (aoTerminar) aoTerminar();
+}
+/* Todos os 9 eixos gerados (por qualquer caminho) → botão vira verde de concluído */
+function _checarRepertorioCompleto(){
+  var todos = EIXOS_META.every(function(e){ return gerado[e.id]; });
+  if (!todos) return;
+  var btn = document.getElementById('btnGerarTudo');
+  btn.textContent = '\u2713 Repert\u00f3rio completo';
+  btn.disabled = true;
+  btn.classList.add('completo');
+}
+function gerarTudo(){
+  if (checarTemaSensivelHub(TITULO)) { toast('Tema com termos sens\u00edveis \u2014 escolha um tema oficial.'); return; }
+  var btn = document.getElementById('btnGerarTudo');
+  btn.disabled = true;
+  var fila = EIXOS_META.filter(function(e){ return !gerado[e.id]; });
+  var total = fila.length, i = 0;
+  (function proxima(){
+    if (i >= total) { _checarRepertorioCompleto(); if(!btn.classList.contains('completo')) btn.disabled = false; return; }
+    var e = fila[i]; i++;
+    btn.textContent = '\u26A1 Gerando\u2026 ' + i + ' de ' + total;
+    var item = document.getElementById('eixo-'+e.id);
+    if (item) item.classList.add('aberto');
+    if (gerado[e.id] || gerando[e.id]) { proxima(); return; }
+    gerarEixo(e.id, proxima);
+  })();
+}
+
+/* "Entender o tema" usa a mesma sanfona (id fixo no HTML) */
+
+/* ───────────────────────────────────────────────────────────────
+   ESTÚDIO · prateleira 1 — Disponibilizados para você (tabela `materiais`)
+   RLS decide o acesso (redaon global OU professor→turma ativa do aluno)
+   ─────────────────────────────────────────────────────────────── */
+var DISPONIVEIS = [];
+var EMOJI_TIPO = { pdf:'\uD83D\uDCCE', exercicio:'\u270F\uFE0F', resumo:'\uD83D\uDCC4', repertorio:'\uD83D\uDCA1' };
+async function carregarDisponibilizados(){
+  var bloco = document.getElementById('blocoDisponibilizados');
+  if (!TEMA_ID) { bloco.classList.add('hidden'); return; }
+  try{
+    var url = SUPABASE_URL + '/rest/v1/materiais?select=id,nome,tipo,conteudo,arquivo_url,origem,selo,criado_em&tema_id=eq.' + TEMA_ID + '&publicado=eq.true&order=criado_em.desc';
+    var res = await dbFetch(url, {});
+    if (!res.ok) throw new Error('materiais ' + res.status);
+    DISPONIVEIS = await res.json();
+  }catch(e){ console.warn('[materiais]', e); DISPONIVEIS = []; }
+  if (!DISPONIVEIS.length) { bloco.classList.add('hidden'); return; }
+  bloco.classList.remove('hidden');
+  document.getElementById('listaDisponibilizados').innerHTML = DISPONIVEIS.map(function(m, i){
+    var emoji = EMOJI_TIPO[(m.tipo||'').toLowerCase()] || '\uD83D\uDCC4';
+    var quem = (m.origem === 'redaon') ? 'Equipe RedaON' : 'Da sua professora';
+    var dt = m.criado_em ? new Date(m.criado_em) : null;
+    var ds = quem + (dt ? ' \u00b7 ' + dt.getDate() + '/' + (dt.getMonth()+1) : '');
+    var selo = (m.selo === 'validado') ? '<span class="selo validado">\u2713 validado</span>' : (m.selo === 'ia' ? '<span class="selo ia">IA</span>' : '');
+    return '<div class="matWrap" id="disp-'+i+'">' +
+      '<div class="matItem"><i class="memoji">'+emoji+'</i>' +
+      '<div class="info"><p class="nm">'+escapeHTML(m.nome)+' '+selo+'</p><p class="ds">'+escapeHTML(ds)+'</p></div>' +
+      '<button class="btnAbrir" onclick="abrirDisp('+i+')">Abrir</button></div>' +
+      '<div class="painelMat"><div class="painelIn" id="painel-disp-'+i+'"></div></div></div>';
+  }).join('');
+}
+function abrirDisp(i){
+  var w = document.getElementById('disp-'+i);
+  w.classList.toggle('aberto');
+  if (!w.classList.contains('aberto')) return;
+  var painel = document.getElementById('painel-disp-'+i);
+  if (!painel.innerHTML){
+    var m = DISPONIVEIS[i];
+    var html = m.conteudo ? md(m.conteudo)
+      : (m.arquivo_url ? '<a class="btnAbrir" style="display:inline-block;text-decoration:none;" href="'+escapeHTML(m.arquivo_url)+'" target="_blank" rel="noopener">Abrir arquivo \u2197</a>'
+      : '<p>Material sem conte\u00fado dispon\u00edvel.</p>');
+    painel.innerHTML = html;
+  }
+  if (!painel.querySelector('.btnConcluir') && !passosFeitos.estudio){
+    painel.insertAdjacentHTML('beforeend', htmlConcluir('estudio', 'Material lido'));
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   ESTÚDIO · prateleira 2 — Acervo do tema (cache por tema; 1º toque
+   materializa em silêncio: o aluno nunca "gera", a PROfa "preparou")
+   ─────────────────────────────────────────────────────────────── */
+var acervoPronto = {};
+var CHAVE_ACERVO = { resumo:'resumo', flash:'flashcards', quiz:'quiz' };
+function abrirMat(id){
+  var w = document.getElementById('mat-'+id);
+  if (w.classList.contains('aberto')) { w.classList.remove('aberto'); return; }
+  w.classList.add('aberto');
+  if (acervoPronto[id] || gerando['mat-'+id]) return;
+  materializarAcervo(id);
+}
+async function materializarAcervo(id){
+  var painel = document.getElementById('painel-'+id);
+  if (checarTemaSensivelHub(TITULO)) { painel.innerHTML = htmlTemaBloqueado(); return; }
+  gerando['mat-'+id] = true;
+  painel.innerHTML = '<div class="gerando"><span class="giro"></span>A PROfa est\u00e1 preparando\u2026</div>';
+  try{
+    var chave = CHAVE_ACERVO[id];
+    var bruto = await _hubBuscarMaterial(chave);
+    if (!bruto){
+      var prompt = (id==='resumo') ? PROMPT_RESUMO(TITULO) : (id==='flash') ? PROMPT_FLASH(TITULO) : PROMPT_QUIZ(TITULO);
+      bruto = await geminiGenerate(prompt);
+      if (TEMA_ID && bruto) _hubSalvarMaterial(chave, bruto);
+    }
+    if (id === 'resumo'){
+      painel.innerHTML = renderResumo(bruto) + htmlConcluir('estudio', 'Revis\u00e3o feita');
+    } else if (id === 'flash'){
+      painel.innerHTML = renderFlash(bruto);
+    } else {
+      painel.innerHTML = renderQuiz(bruto);
+    }
+    acervoPronto[id] = true;
+  }catch(err){
+    console.warn('[acervo]', id, err);
+    painel.innerHTML = '<p class="erroGerar">N\u00e3o consegui preparar agora. Feche e tente de novo.</p>';
+    var wx = document.getElementById('mat-'+id);
+    if (wx) wx.classList.remove('aberto');
+  }
+  gerando['mat-'+id] = false;
+}
+function _parseJsonIA(bruto){
+  var limpo = String(bruto).replace(/```json|```/g,'').trim();
+  var m = limpo.match(/\[[\s\S]*\]/); if(m) limpo = m[0];
+  return JSON.parse(limpo);
+}
+function renderFlash(bruto){
+  var cards = _parseJsonIA(bruto);
+  return '<div class="fcGrid">' + cards.map(function(c){
+    return '<div class="fc" onclick="virarFc(this)" data-v="'+escapeHTML(c.verso)+'">'+escapeHTML(c.frente)+'</div>';
+  }).join('') + '</div>';
+}
+function renderQuiz(bruto){
+  var qs = _parseJsonIA(bruto);
+  return qs.map(function(q, qi){
+    return '<p style="font-weight:700;">'+(qi+1)+'. '+escapeHTML(q.pergunta)+'</p>' +
+      q.alternativas.map(function(a, ai){
+        return '<button class="qOpc" onclick="respQuiz(this,'+(ai===q.correta)+')">'+escapeHTML(a)+'</button>';
+      }).join('');
+  }).join('');
+}
+function virarFc(el){
+  var v = el.getAttribute('data-v');
+  el.setAttribute('data-v', el.textContent);
+  el.textContent = v;
+  el.classList.toggle('virado');
+  marcarPassoHub('estudio'); /* interação real */
+}
+function respQuiz(btn, certa){
+  btn.classList.add(certa ? 'certa' : 'errada');
+  toast(certa ? '\u2713 Correto!' : 'Quase \u2014 revise o repert\u00f3rio e tente a pr\u00f3xima');
+  marcarPassoHub('estudio'); /* interação real */
+}
+
+/* ───────────────────────────────────────────────────────────────
+   HANDOFF Hub → escrita: grava o tema ANTES de abrir Métodos
+   (a Tela 4 v9 lê sessionStorage['tema_selecionado'] e pré-preenche)
+   ─────────────────────────────────────────────────────────────── */
+function irEscreverHub(){
+  if (TEMA) definirTemaSelecionado(TEMA);
+  var veu = document.getElementById('veuConquista');
+  if (veu) veu.classList.remove('show');
+  abrirMetodos();
+}
+function trocarTemaHub(){
+  try{ sessionStorage.removeItem('tema_selecionado'); }catch(e){}
+  window.location.href = 'temas.html';
+}
+
+/* ───────────────────────────────────────────────────────────────
+   CASCATA A7 — resolução do tema de entrada (NUNCA hardcode)
+   (1) indicação da professora quando existir [futuro — sem fonte no banco ainda]
+   (2) ?tema=<id> na URL  (3) sessionStorage  (4) Tema da Semana  (5) convite
+   ─────────────────────────────────────────────────────────────── */
+var SEL_TEMA = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de';
+async function temaPorId(id){
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=' + SEL_TEMA + '&id=eq.' + encodeURIComponent(id) + '&ativo=eq.true&limit=1', {});
+    if(!res.ok) return null;
+    var rows = await res.json();
+    return (rows && rows.length) ? rows[0] : null;
+  }catch(e){ console.warn('[tema por id]', e); return null; }
+}
+async function temaDaSemana(){
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=' + SEL_TEMA + '&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=8', {});
+    if(!res.ok) return null;
+    var rows = await res.json();
+    var hoje = new Date(); hoje.setHours(0,0,0,0);
+    for (var i=0;i<rows.length;i++){
+      var t = rows[i];
+      var ini = new Date(t.semana_de + 'T00:00:00');
+      var fim = new Date(ini); fim.setDate(fim.getDate() + 7);
+      if (hoje >= ini && hoje < fim) return t;
+    }
+    return null;
+  }catch(e){ console.warn('[tema da semana]', e); return null; }
+}
+async function resolverTema(){
+  /* (1) indicação da professora — sem fonte no banco por enquanto */
+  /* (2) URL ?tema=<id> */
+  var params = null;
+  try{ params = new URLSearchParams(window.location.search); }catch(e){}
+  var idUrl = params ? params.get('tema') : null;
+  if (idUrl){
+    var t2 = await temaPorId(idUrl);
+    if (t2) return t2;
+  }
+  /* (3) sessionStorage['tema_selecionado'] */
+  try{
+    var s = sessionStorage.getItem('tema_selecionado');
+    if (s){
+      var t3 = JSON.parse(s);
+      if (t3 && t3.titulo) return t3;
+    }
+  }catch(e){}
+  /* (4) Tema da Semana */
+  var t4 = await temaDaSemana();
+  if (t4){ TEMA_EH_SEMANA = true; return t4; }
+  /* (5) convite */
+  return null;
+}
+function preencherCabecalho(){
+  document.getElementById('tituloTema').textContent = TITULO;
+  var tag = document.getElementById('tagTema');
+  tag.textContent = TEMA.categoria || 'Tema';
+  var fonte = document.getElementById('tagFonte');
+  fonte.textContent = TEMA_EH_SEMANA ? 'Tema da Semana' : (TEMA.ano_enem ? 'ENEM ' + TEMA.ano_enem : 'RedaON');
+}
+function modoConvite(){
+  document.getElementById('conviteTema').classList.remove('hidden');
+  document.getElementById('conteudo').classList.add('modoConvite');
+}
+
+/* ───────────────────────────────────────────────────────────────
+   INÍCIO
+   ─────────────────────────────────────────────────────────────── */
+async function iniciarHub(){
+  TEMA = await resolverTema();
+  if (!TEMA){ modoConvite(); return; }
+  TEMA_ID = TEMA.id || null;
+  TITULO = TEMA.titulo || '';
+  preencherCabecalho();
+  document.getElementById('listaRelevantes').innerHTML = '<div class="gerando"><span class="giro"></span>A PROfa est\u00e1 organizando os eixos\u2026</div>';
+  await carregarPreparacao();          /* re-hidrata a trilha antes de qualquer conteúdo */
+  carregarDisponibilizados();          /* prateleira 1 em paralelo */
+  await carregarEixosRelevantes();     /* M1 (cache/fallback) */
+  renderEixos();
+}
+iniciarHub();
+
 </script>
 </body>
 </html>
