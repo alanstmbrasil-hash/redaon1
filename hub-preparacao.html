@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparação</title>
-<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-7 (da prévia v1-6 aprovada) · sobre aluno-base-v6 -->
+<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-8 (lote M-1/M-2/M-4) · sobre aluno-base-v6 -->
 <script>
 (function(){
   var pref = 'auto';
@@ -25,7 +25,7 @@
 
 <style>
 
-/* ═══ TELA · Hub de Preparação · v1-7 (produção) ═══ */
+/* ═══ TELA · Hub de Preparação · v1-8 (produção) ═══ */
 #conteudo{ max-width:680px; margin:0 auto; width:100%; padding:0 .9rem 2rem; }
 .rotuloTopo{ font-size:.66rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:.9rem .1rem .25rem; }
 .tituloTema{ font-family:Georgia,serif; font-size:1.22rem; font-weight:700; line-height:1.3; margin:0 .1rem .45rem; }
@@ -115,7 +115,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .matItem .info{ flex:1; min-width:0; }
 .matItem .nm{ font-size:.8rem; font-weight:700; }
 .matItem .ds{ font-size:.68rem; color:var(--muted); margin-top:.1rem; }
-.selo{ font-size:.58rem; font-weight:800; padding:.18rem .5rem; border-radius:99px; letter-spacing:.03em; }
+.selo{ font-size:.58rem; font-weight:800; padding:.18rem .5rem; border-radius:99px; letter-spacing:.03em; white-space:nowrap; display:inline-block; }
 .selo.validado{ background:rgba(var(--goldRGB),.14); color:var(--gold); }
 .selo.ia{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 .btnAbrir{ flex:0 0 auto; min-height:36px; padding:0 .9rem; border-radius:10px; background:rgba(var(--cyanRGB),.12); border:1px solid rgba(var(--cyanRGB),.35); color:var(--cyan); font-family:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
@@ -159,6 +159,15 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .avisoBloqueio .sb{ font-size:.72rem; color:var(--text2); line-height:1.5; margin-top:.35rem; }
 .avisoBloqueio a{ color:var(--cyan); text-decoration:underline; }
 #conteudo.modoConvite > :not(#conviteTema){ display:none; }
+
+/* ── M-1 · Ficha de repertório (decisão C3: zona tingida) ── */
+.repItem{ padding:.65rem .7rem; margin:.55rem 0; background:var(--surface2); border-left:3px solid rgba(var(--cyanRGB),.55); border-radius:0 10px 10px 0; overflow:hidden; }
+.repFonte{ font-size:.66rem; font-weight:800; color:var(--cyan); letter-spacing:.02em; margin-bottom:.25rem; }
+.repDado{ font-size:.79rem; font-weight:600; color:var(--text); line-height:1.55; }
+.repUsoZona{ margin:.55rem -.7rem -.65rem; padding:.5rem .7rem .65rem; background:rgba(var(--cyanRGB),.06); }
+.repUsoRot{ display:flex; align-items:center; gap:.35rem; font-size:.72rem; font-weight:600; color:var(--text2); margin-bottom:.15rem; }
+.repUsoRot .lapis{ font-size:1rem; font-style:normal; }
+.repUsoTxt{ font-size:.73rem; color:var(--text2); line-height:1.55; }
 </style>
 
 </head>
@@ -284,7 +293,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
-/* ═══ RedaON · Hub de Preparação · produção v1-7 (da prévia v1-6 aprovada) ═══ */
+/* ═══ RedaON · Hub de Preparação · produção v1-8 (lote M-1/M-2/M-4) ═══ */
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
 montarEsqueleto({
@@ -292,7 +301,7 @@ montarEsqueleto({
   titulo: 'Preparação',
   icone:  'auto_stories',
   sino:   true,
-  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-7'
+  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-8'
 });
 
 /* ───────────────────────────────────────────────────────────────
@@ -587,6 +596,80 @@ function renderResumo(raw){
   return md(limpo);
 }
 
+/* ── M-1 · Render dos eixos: JSON da IA → fichas C3; markdown antigo → md() ──
+   Os 9 prompts PR variam de campos; mapeamos os equivalentes para as três
+   camadas da ficha: cabecinha (fonte) · destaque (dado) · zona "Como usar". */
+var CAMPOS_FICHA = {
+  cabeca:   ['fonte','artigo','lei','marco','data','periodo','nome','pensador','corrente','titulo','obra','filme','referencia','pesquisa','cientista','especialista'],
+  destaque: ['dado_numerico','dado','texto','descricao','sinopse','conceito','conceito_chave','conclusao','conclusao_principal','ideia','fato','contexto','resumo'],
+  uso:      ['argumento','aplicacao','como_usar','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem']
+};
+function _campo(obj, lista){
+  for (var i=0;i<lista.length;i++){ var v = obj[lista[i]]; if (typeof v==='string' && v.trim()) return v.trim(); }
+  return '';
+}
+function _extras(obj){
+  var usados = CAMPOS_FICHA.cabeca.concat(CAMPOS_FICHA.destaque, CAMPOS_FICHA.uso);
+  var partes = [];
+  Object.keys(obj).forEach(function(k){
+    if (usados.indexOf(k)>=0) return;
+    var v = obj[k];
+    if (typeof v==='string' && v.trim()) partes.push(v.trim());
+  });
+  return partes.join(' \u00b7 ');
+}
+function fichaHTML(item){
+  if (typeof item === 'string') return '<div class="repItem"><p class="repDado">'+escapeHTML(item)+'</p></div>';
+  var cab = _campo(item, CAMPOS_FICHA.cabeca);
+  var dado = _campo(item, CAMPOS_FICHA.destaque);
+  var uso = _campo(item, CAMPOS_FICHA.uso);
+  var extra = _extras(item);
+  if (!dado && extra){ dado = extra; extra = ''; }
+  var h = '<div class="repItem">';
+  if (cab)  h += '<p class="repFonte">'+escapeHTML(cab)+(extra?' \u00b7 '+escapeHTML(extra):'')+'</p>';
+  if (dado) h += '<p class="repDado">'+escapeHTML(dado)+'</p>';
+  if (uso)  h += '<div class="repUsoZona"><p class="repUsoRot"><i class="lapis">\u270F\uFE0F</i>Como usar na reda\u00e7\u00e3o</p><p class="repUsoTxt">'+escapeHTML(uso)+'</p></div>';
+  h += '</div>';
+  return h;
+}
+function _achaLista(x){
+  if (Array.isArray(x)) return x;
+  if (x && typeof x==='object'){
+    var ks = Object.keys(x);
+    for (var i=0;i<ks.length;i++){ if (Array.isArray(x[ks[i]])) return x[ks[i]]; }
+  }
+  return null;
+}
+function renderEixoConteudo(bruto){
+  var limpo = String(bruto).replace(/```json|```/g,'').trim();
+  if (limpo.charAt(0)==='[' || limpo.charAt(0)==='{'){
+    try{
+      var lista = _achaLista(JSON.parse(limpo));
+      if (lista && lista.length) return lista.map(fichaHTML).join('');
+    }catch(e){}
+    var m = limpo.match(/\[[\s\S]*\]/);
+    if (m){ try{ var l2 = JSON.parse(m[0]); if (Array.isArray(l2) && l2.length) return l2.map(fichaHTML).join(''); }catch(e2){} }
+  }
+  return md(limpo);
+}
+/* Briefing do Entender: JSON {briefing:[{rotulo,texto}]} → h4 + parágrafo; markdown → md() */
+function renderEntender(bruto){
+  var limpo = String(bruto).replace(/```json|```/g,'').trim();
+  if (limpo.charAt(0)==='{' || limpo.charAt(0)==='['){
+    try{
+      var lista = _achaLista(JSON.parse(limpo));
+      if (lista && lista.length){
+        return lista.map(function(b){
+          var rot = (b.rotulo||b.titulo||'').replace(/\*\*/g,'');
+          var txt = b.texto||b.conteudo||'';
+          return (rot?'<h4>'+escapeHTML(rot)+'</h4>':'') + (txt?'<p>'+escapeHTML(txt)+'</p>':'');
+        }).join('');
+      }
+    }catch(e){}
+  }
+  return md(limpo);
+}
+
 /* ───────────────────────────────────────────────────────────────
    EIXOS — M1 (relevantes por tema) + sanfona + geração com cache
    ─────────────────────────────────────────────────────────────── */
@@ -666,7 +749,7 @@ async function gerarEixo(id, aoTerminar){
       texto = await geminiGenerate(prompt);
       if (TEMA_ID && texto) _hubSalvarMaterial(id, texto);
     }
-    box.innerHTML = md(texto) + htmlConcluir(passo);
+    box.innerHTML = (id === 'entender' ? renderEntender(texto) : renderEixoConteudo(texto)) + htmlConcluir(passo);
     gerado[id] = true;
     var s = document.getElementById('estado-'+id);
     if (s) s.classList.add('ok');
@@ -699,8 +782,6 @@ function gerarTudo(){
     if (i >= total) { _checarRepertorioCompleto(); if(!btn.classList.contains('completo')) btn.disabled = false; return; }
     var e = fila[i]; i++;
     btn.textContent = '\u26A1 Gerando\u2026 ' + i + ' de ' + total;
-    var item = document.getElementById('eixo-'+e.id);
-    if (item) item.classList.add('aberto');
     if (gerado[e.id] || gerando[e.id]) { proxima(); return; }
     gerarEixo(e.id, proxima);
   })();
