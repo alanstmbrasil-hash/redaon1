@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v3-5 · sobre aluno-base-v6 -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v3-6 · sobre aluno-base-v6 -->
 <script>
 (function(){
   var pref='auto';
@@ -212,7 +212,7 @@
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-5'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-6'
   });
 
   var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
@@ -408,6 +408,13 @@
   function escolherModo(id){ trocarAba(id); fecharGaveta('gvRedacao'); marcarBtnDock(); }
 
   function rotulo(t){ return '<p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;">'+t+'</p>'; }
+  /* Convenção de nomenclatura: "Reescrita" é o nome do recurso (× Original).
+     Corrige na leitura os textos antigos da IA que dizem "redação nota 1000". */
+  function nomearReescrita(t){
+    return String(t)
+      .replace(/(reda\u00e7\u00e3o|vers\u00e3o)\s+(reescrita\s+)?nota\s+(1000|mil)/gi,'Reescrita')
+      .replace(/nota\s+1000/gi,'nota m\u00e1xima');
+  }
   function montarComparar(){
     var barra='<div class="cmpBarra">'
       +'<div class="cmpCx"><p class="cmpLbl">Vers\u00e3o Original</p><p class="cmpVal" style="color:'+corComp(atual.nota/5)+';">'+atual.nota+'</p></div>'
@@ -425,7 +432,7 @@
       return '<div class="cmpBloco" style="border-left-color:'+cor+';">'
         +'<div class="cmpCab"><span class="cmpTit" style="color:'+cor+';">'+NOMES[i]+'</span>'
         +'<span class="cmpPill" style="background:rgba(var(--borderRGB),.14);color:'+cor+';">'+v+' de 200</span></div>'
-        +'<p class="cmpTxt">'+escapeHtmlSimples(txt)+'</p></div>';
+        +'<p class="cmpTxt">'+escapeHtmlSimples(nomearReescrita(txt))+'</p></div>';
     }).join('');
     if(!blocos) blocos='<p style="font-size:.85rem;color:var(--green);text-align:center;padding:1.5rem 0;">\u2713 Todas as compet\u00eancias j\u00e1 est\u00e3o no teto.</p>';
     else if(noTeto.length) blocos+='<p style="font-size:.76rem;color:var(--muted);text-align:center;margin-top:.4rem;">'+noTeto.join(' e ')+' j\u00e1 '+(noTeto.length>1?'est\u00e3o':'est\u00e1')+' no teto.</p>';
