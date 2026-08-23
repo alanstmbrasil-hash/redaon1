@@ -1,755 +1,391 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Plano de Estudo</title>
-<script>tailwind = { config: {} };</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "on-surface": "#e1e2eb", "error-container": "#93000a", "on-primary-container": "#faf6ff",
-          "surface": "#10131a", "secondary-container": "#00d0d1", "primary-container": "#6c5ce7",
-          "surface-container-highest": "#32353c", "inverse-on-surface": "#2e3037",
-          "surface-bright": "#363940", "tertiary": "#fabd00", "on-secondary": "#003737",
-          "surface-container-low": "#191c22", "on-surface-variant": "#c8c4d7",
-          "surface-dim": "#10131a", "surface-container-high": "#272a31",
-          "primary-fixed-dim": "#c6bfff", "on-tertiary-fixed": "#261a00",
-          "on-tertiary-container": "#fff6ec", "secondary-fixed": "#56f9f9",
-          "on-tertiary": "#3f2e00", "on-secondary-fixed-variant": "#004f50",
-          "primary-fixed": "#e4dfff", "on-error": "#690005", "background": "#0b0e14",
-          "surface-tint": "#c6bfff", "tertiary-fixed-dim": "#fabd00",
-          "on-secondary-container": "#005455", "inverse-surface": "#e1e2eb",
-          "on-error-container": "#ffdad6", "tertiary-fixed": "#ffdf9e",
-          "outline-variant": "#474554", "outline": "#928ea0", "secondary": "#45edee",
-          "on-tertiary-fixed-variant": "#5b4300", "surface-container-lowest": "#0b0e14",
-          "surface-container": "#1d2026", "on-background": "#e1e2eb",
-          "inverse-primary": "#5847d2", "on-secondary-fixed": "#002020",
-          "on-primary-fixed-variant": "#4029ba", "error": "#ffb4ab",
-          "on-primary-fixed": "#160066", "secondary-fixed-dim": "#26dcdd",
-          "tertiary-container": "#906c00", "on-primary": "#2900a0",
-          "surface-variant": "#32353c", "primary": "#c6bfff"
-        },
-        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-      },
-    },
+<title>RedaON | Plano de estudos</title>
+<!-- RedaON · Portal do Aluno · Plano de estudos · produção v1 (quadro P0–P7) · sobre aluno-base-v6 -->
+<script>
+(function(){
+  var pref = 'auto';
+  try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+  var efetivo = pref;
+  if (pref === 'auto') {
+    var claroNoSistema = false;
+    try { claroNoSistema = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+    efetivo = claroNoSistema ? 'claro' : 'escuro';
   }
+  document.documentElement.setAttribute('data-tema', efetivo);
+  document.documentElement.setAttribute('data-tema-pref', pref);
+})();
 </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="aluno-base-v6.css" rel="stylesheet"/>
+
 <style>
-  body { word-break: normal; overflow-wrap: break-word; font-family: 'Inter', sans-serif; background-color: #0b0e14; }
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  .glass-card { background: rgba(29,32,38,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(71,69,84,0.2); }
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .neon-text-cyan { color: #45EDEE; text-shadow: 0 0 10px rgba(69,237,238,0.3); }
+/* ═══ TELA · Plano de estudos · v1 (produção) ═══ */
+#conteudo{ max-width:680px; margin:0 auto; width:100%; padding:0 .9rem 3rem; }
+.rotuloTopo{ font-size:.66rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:.9rem .1rem .25rem; }
+.tituloTela{ font-family:Georgia,serif; font-size:1.22rem; font-weight:700; line-height:1.3; margin:0 .1rem .3rem; }
+.porque{ font-size:.78rem; color:var(--text2); line-height:1.55; margin:0 .1rem .9rem; }
+.porque b{ color:var(--cyan); font-weight:800; }
 
-  /* Calendário */
-  .dia-hoje { ring: 2px; ring-color: rgba(69,237,238,0.5); }
-  .dia-evento:hover { border-color: rgba(108,92,231,0.4) !important; background: rgba(108,92,231,0.05) !important; cursor: pointer; }
-  .dia-inativo { opacity: 0.3; }
+/* Ouro de conquista: mesmo tom vivo nos dois temas (padrão do Hub) */
+:root, html[data-tema="claro"]{ --ouro:#fabd00; --ouroRGB:250,189,0; }
 
-  /* Foco do dia checkbox */
-  .foco-item { transition: all 0.2s; }
-  .foco-item:hover .foco-check { background: rgba(108,92,231,0.2); }
-  .foco-item.feito .foco-label { text-decoration: line-through; color: #928ea0; }
-  .foco-item.feito .foco-check { background: #6c5ce7; border-color: #6c5ce7; }
+/* Progresso da semana */
+.cardProg{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.22); border-radius:1rem; padding:.85rem .95rem; margin-bottom:.9rem; display:flex; align-items:center; gap:.75rem; }
+.cardProg .rotP{ font-size:.7rem; font-weight:700; color:var(--muted); }
+.cardProg .trilho{ flex:1; height:8px; border-radius:99px; background:rgba(var(--borderRGB),.25); overflow:hidden; }
+.cardProg .trilho i{ display:block; height:100%; border-radius:99px; background:var(--ouro); transition:width .4s; width:0; }
+.cardProg .numP{ font-size:.95rem; font-weight:800; font-variant-numeric:tabular-nums; }
 
-  /* XP bar */
-  @keyframes fillXP { from{width:0} to{width:85%} }
-  .xp-fill { animation: fillXP 1.2s ease forwards; }
+/* Cards de dia */
+.dia{ display:flex; align-items:center; gap:.75rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.22); border-radius:1rem; padding:.8rem .9rem; margin-bottom:.55rem; min-height:60px; }
+.dia.navegavel{ cursor:pointer; }
+.dia .icd{ flex:0 0 auto; width:2rem; height:2rem; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; background:var(--surface2); }
+.dia .txts{ flex:1; min-width:0; }
+.dia .rotDia{ display:block; font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+.dia .tarefa{ display:block; font-size:.85rem; font-weight:600; color:var(--text); margin-top:.1rem; }
+.dia .onde{ display:block; font-size:.68rem; color:var(--muted); margin-top:.15rem; }
+.dia .fimD{ flex:0 0 auto; font-size:.72rem; color:var(--muted); }
+.dia.feito{ opacity:.62; }
+.dia.feito .icd{ background:rgba(var(--greenRGB),.14); }
+.dia.feito .tarefa{ text-decoration:line-through; text-decoration-thickness:1px; }
+.dia.feito .fimD{ color:var(--green); font-weight:800; }
+.dia.hoje{ border-color:rgba(var(--cyanRGB),.5); }
+.dia.hoje .rotDia{ color:var(--cyan); }
+.dia.hoje .icd{ background:rgba(var(--cyanRGB),.14); }
+.dia.descanso .icd{ background:rgba(var(--greenRGB),.1); }
 
-  /* Trilha acordeão */
-  .trilha-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-  .trilha-body.aberto { max-height: 800px; }
-  .chevron-icon { transition: transform 0.3s ease; }
-  .chevron-icon.aberto { transform: rotate(180deg); }
+.btnFeito{ flex:0 0 auto; min-height:40px; padding:0 .8rem; border-radius:10px; border:1px solid rgba(var(--cyanRGB),.45); background:transparent; color:var(--cyan); font-size:.72rem; font-weight:800; cursor:pointer; font-family:inherit; white-space:nowrap; }
 
-  /* Toast */
-  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; white-space:nowrap; }
-  #toast.show { transform:translateX(-50%) translateY(0); }
+/* Rodapé de transparência */
+.comoMontado{ background:var(--surface2); border:1px solid rgba(var(--borderRGB),.18); border-radius:1rem; padding:.8rem .95rem; margin-top:1rem; }
+.comoMontado .t{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:.35rem; }
+.comoMontado p{ font-size:.74rem; color:var(--text2); line-height:1.55; }
+.comoMontado p b{ color:var(--text); }
 
-  /* Evento no calendário */
-  .evento-dot { width:6px; height:6px; border-radius:50%; display:inline-block; }
+/* Estados */
+.estado{ text-align:center; padding:2.2rem 1rem; color:var(--muted); font-size:.82rem; line-height:1.6; }
+.estado .em{ font-size:1.8rem; display:block; margin-bottom:.5rem; }
+.hidden{ display:none !important; }
 
-  /* Modal vídeo */
-  #modalVideo { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; padding:1rem; }
-  #modalVideo.aberto { display:flex; }
-
-  /* Botão Iniciar Estudo pulse */
-  @keyframes pulseBtn { 0%,100%{box-shadow:0 0 0 0 rgba(108,92,231,0.4)} 50%{box-shadow:0 0 0 12px rgba(108,92,231,0)} }
-  .btn-iniciar { animation: pulseBtn 2s infinite; }
-
-  /* ── Hamburger sidebar ─────────────────────────────── */
-  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
-  #sidebar.open { transform: translateX(0); }
-  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:44; }
-  #overlay.open { display:block; }
-  @media(min-width:1024px){
-    #sidebar { transform: translateX(0) !important; }
-    #overlay { display:none !important; }
-    .main-with-sidebar { margin-left:256px; }
-  }
-  @media(max-width:1023px){
-    .main-with-sidebar { margin-left:0 !important; }
-  }
-  @media(min-width:1024px){
-    #btnHamburger { display: none !important; }
-    #main-header { padding-left: calc(256px + 1.5rem) !important; padding-right: 2rem !important; }
-  }
-
-  /* Calendário mobile */
-  @media(max-width:640px){
-    .cal-day-name { font-size: .6rem !important; letter-spacing: 0 !important; white-space: nowrap !important; overflow: hidden; }
-    .cal-cell { min-width: 0 !important; padding: .2rem !important; font-size: .75rem !important; }
-    .cal-grid { gap: .1rem !important; }
-  }
-  /* Garantir que células do calendário não quebrem */
-  [class*="grid-cols-7"] > * { min-width: 0; overflow: hidden; }
-  [class*="grid-cols-7"] span, [class*="grid-cols-7"] button { 
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: clip;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  /* Fix texto quebrando letra por letra no mobile */
-  h1, h2, h3, h4, p, span, a, button, div {
-    word-break: normal !important;
-    overflow-wrap: break-word;
-    hyphens: none !important;
-  }
-  /* Garantir que textos grandes não quebrem letra a letra */
-  .text-3xl, .text-2xl, .text-xl { word-break: keep-all; overflow-wrap: normal; }
-
-  .glass-card p, .glass-card span, .glass-card h3, .glass-card h4 { word-break: normal; overflow-wrap: break-word; }
-  @media(max-width:640px){ .glass-card { padding:1rem; } }
-
-  /* ── Scrollbar sidebar invisível no desktop ── */
-  #sidebar nav::-webkit-scrollbar { width: 4px; }
-  #sidebar nav::-webkit-scrollbar-track { background: transparent; }
-  #sidebar nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 10px; }
-  #sidebar nav:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
-  #sidebar nav { scrollbar-width: none; }
-  #sidebar nav:hover { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
+/* Conquista 5/5 (padrão ouro do produto) */
+.veuPlano{ position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:120; display:none; align-items:center; justify-content:center; padding:1.5rem; }
+.veuPlano.show{ display:flex; }
+.conqPlano{ background:var(--top); border:1px solid rgba(var(--ouroRGB),.4); border-radius:1.25rem; padding:1.5rem 1.25rem; text-align:center; max-width:20rem; }
+.conqPlano .circ{ width:3.4rem; height:3.4rem; border-radius:50%; background:rgba(var(--ouroRGB),.16); display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin:0 auto .7rem; }
+.conqPlano .r{ font-size:.95rem; font-weight:800; color:var(--ouro); }
+.conqPlano .s{ font-size:.74rem; color:var(--text2); margin-top:.35rem; line-height:1.5; }
 </style>
-<script src="supabase-auth.js"></script>
 </head>
-<body class="bg-surface-container-lowest text-on-surface min-h-screen overflow-x-hidden">
+<body>
 
-<!-- MODAL VÍDEO -->
-<div id="modalVideo">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,0.08);border-radius:1.25rem;width:100%;max-width:800px;box-shadow:0 24px 64px rgba(0,0,0,0.8);">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);">
-      <div>
-        <p style="font-size:.7rem;font-weight:700;color:#45edee;text-transform:uppercase;letter-spacing:.08em;">C2 — Compreender a Proposta</p>
-        <h3 id="tituloVideo" style="font-weight:700;font-size:1rem;color:#e1e2eb;margin-top:.25rem;">Aula 05: Estrutura Dissertativa-Argumentativa</h3>
-      </div>
-      <button onclick="fecharVideo()" style="background:none;border:none;color:#928ea0;cursor:pointer;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'"><span class="material-symbols-outlined">close</span></button>
+<div id="conteudo">
+  <div class="estado" id="estadoCarregando"><span class="em">📅</span>Montando sua semana…</div>
+  <div class="estado hidden" id="estadoErro"><span class="em">😕</span>Não consegui carregar seu plano agora.<br/>Confira a internet e recarregue a página.</div>
+
+  <div class="hidden" id="telaPlano">
+    <p class="rotuloTopo" id="rotSemana">Semana</p>
+    <p class="tituloTela">Plano da semana</p>
+    <p class="porque" id="fraseFoco"></p>
+
+    <div class="cardProg">
+      <span class="rotP">Progresso</span>
+      <div class="trilho"><i id="barraProg"></i></div>
+      <span class="numP" id="numProg">0/5</span>
     </div>
-    <div style="background:#000;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border-radius:0 0 .5rem .5rem;position:relative;overflow:hidden;">
-      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzZZR4voNnJpsf9o9CqhhjGf2OXH4nh0Y5HIUR1bhSMWVv_Y9EnNgZGOOxbMYwwAyFNGvRYM5dPPKL84-gyzsWjYFDC0Akq6-3BqF0wRo9oTDSnV09W1q8FWOos_WMyT-CcYjhKmJi4xhpeUKyLnjLoPoARrqXQ_0kLLGw2-bjXt-1ENsNS0i8Vdemf0efIVQxt_232wWxpqbwfzjm97tBS08llzTeFsMRFcf6p_9rBQmN9Z5wZ05vyg0aPXKqfmLGlChs8O7RD3u1" alt="Aula" style="width:100%;height:100%;object-fit:cover;opacity:.5;position:absolute;"/>
-      <div style="position:relative;z-index:1;text-align:center;">
-        <div style="width:80px;height:80px;background:#45edee;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 0 40px rgba(69,237,238,0.5);cursor:pointer;" onclick="toast('▶ Simulando reprodução... Em produção, o vídeo real será carregado aqui.')">
-          <span class="material-symbols-outlined" style="font-size:2.5rem;color:#002020;font-variation-settings:'FILL' 1;">play_arrow</span>
-        </div>
-        <p style="color:white;font-size:.9rem;font-weight:600;">Clique para assistir</p>
-        <p style="color:rgba(255,255,255,.5);font-size:.75rem;margin-top:.25rem;">Duração: 18 min</p>
-      </div>
-    </div>
-    <div style="padding:1.25rem 1.5rem;display:flex;gap:1rem;">
-      <button onclick="toast('📥 Baixando Material PDF...')" style="flex:1;padding:.75rem;background:#272a31;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;color:#e1e2eb;font-weight:700;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;">
-        <span class="material-symbols-outlined" style="font-size:1rem;">download</span> Material PDF
-      </button>
-      <button onclick="toast('✓ Aula marcada como concluída! +150 XP');fecharVideo()" style="flex:2;padding:.75rem;background:#45edee;color:#002020;border:none;border-radius:.75rem;font-weight:900;font-size:.85rem;cursor:pointer;">
-        Marcar como Concluída
-      </button>
+
+    <div id="listaDias"></div>
+
+    <div class="comoMontado">
+      <p class="t">Como este plano foi montado</p>
+      <p id="txtComoMontado"></p>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div id="toast"></div>
-
-<!-- SIDEBAR -->
-<div id="overlay" onclick="toggleSidebar()"></div>
-<aside id="sidebar" class="fixed left-0 top-0 h-screen w-64 border-r border-[#ffffff05] bg-[#10131a] flex flex-col py-8 px-4 z-50 shadow-[24px_0px_48px_-12px_rgba(108,92,231,0.08)]">
-  <div class="flex items-center gap-3 px-4 mb-10">
-    <h1 class="text-3xl font-bold tracking-tighter italic">
-      <span class="text-white">Reda</span><span class="neon-text-cyan">ON</span>
-    </h1>
+<div class="veuPlano" id="veuSemana" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="conqPlano">
+    <div class="circ">🏁</div>
+    <p class="r">Semana completa!</p>
+    <p class="s">Você fechou as 5 tarefas. A próxima semana chega segunda-feira, já calibrada pela sua Evolução.</p>
   </div>
-  <nav class="flex-1 space-y-1 overflow-y-auto no-scrollbar">
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="inicio.html"><span class="material-symbols-outlined">home</span><span>Início</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="nova-redacao.html"><span class="material-symbols-outlined">edit_note</span><span>Nova Redação</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="temas.html"><span class="material-symbols-outlined">topic</span><span>Temas</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="minhas-redacoes.html"><span class="material-symbols-outlined">history_edu</span><span>Minhas Redações</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="evolucao.html"><span class="material-symbols-outlined">trending_up</span><span>Evolução</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 bg-[#1d2026] text-[#45EDEE] border-r-4 border-[#45EDEE] text-sm font-medium" href="plano.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">calendar_today</span><span>Plano de Estudo</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#C8C4D7] hover:text-[#E1E2EB] hover:bg-[#1d2026] transition-all duration-300" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span><span class="font-medium text-sm">Elite <span style="color:#45edee;font-weight:900;font-style:italic;">PRO</span></span></a>
-      <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span><span>Ranking</span></a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#191c22] text-[#C8C4D7] hover:text-[#E1E2EB] text-sm font-medium" href="configuracoes.html"><span class="material-symbols-outlined">settings</span><span>Configurações</span></a>
-  </nav>
-  <div class="mt-auto pt-6 border-t border-outline-variant/10 space-y-4">
-    <div class="flex items-center gap-3 px-2">
-      <img alt="{{USUARIO}}" class="w-10 h-10 rounded-xl object-cover ring-2 ring-primary-container/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAN4tXdr_PfH7PbRRrAHtyG_f7DdWEDLuw0xBbquImBKqQGVxgcbBgqlqKHoh_izQpHyo3c_rNqKV7WbAAoW7zblYpskKslm-mKVPxZ9rqBaJkRI2Zbk8QeZSb_Uc0PFycbCNjCemmM7ORacZrPhbq_U132tkl-zBpuFUMErz2HCL3rUpjZYJ6jn_vHojwaShCgT8rm5qvqhK1pgXooF3MURjffDx7SkJhP0y-5ARPNYV5cVmdu3ykbPlEijNFHUZ9e2XNarLCtoBSj"/>
-      <div class="flex-1 min-w-0">
-        <p class="text-xs font-bold text-on-surface truncate leading-tight">{{USUARIO}}</p>
-        <p class="text-[10px] text-secondary font-medium uppercase tracking-tighter">Elite Member</p>
-      </div>
-    </div>
-    <button onclick="authLogout()" class="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-error-container/10 transition-colors text-[#FF8B8B]">
-      <span class="material-symbols-outlined text-xl">logout</span>
-      <span class="text-sm font-semibold">Sair</span>
-    </button>
-  </div>
-</aside>
+</div>
 
-<!-- TOP BAR -->
-<header class="fixed top-0 left-0 right-0 h-20 z-40 bg-[#0B0E14]/80 backdrop-blur-xl flex items-center justify-between px-4 w-full border-b border-white/5" id="main-header" style="padding-left:1rem;">
-  <div class="flex items-center gap-3">
-    <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden">
-      <span class="material-symbols-outlined">menu</span>
-    </button>
-    <div class="flex items-center gap-2">
-      <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">calendar_today</span>
-      <h2 class="text-xl font-extrabold text-on-surface tracking-tight">Plano de Estudo</h2>
-    </div>
-  </div>
-  <div class="flex items-center gap-4">
-    <div class="hidden sm:flex px-4 py-2 bg-surface-container rounded-full items-center gap-2 border border-outline-variant/20">
-      <span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings:'FILL' 1;">stars</span>
-      <span class="text-sm font-bold text-on-surface">940 pts</span>
-    </div>
-    <button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-secondary transition-colors relative">
-      <span class="material-symbols-outlined">notifications</span>
-      <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
-    </button>
-  </div>
-</header>
-
-<!-- MAIN -->
-<main class="pt-20 min-h-screen main-with-sidebar" id="main-content">
-  <div class="p-8 max-w-[1600px] mx-auto">
-
-    <!-- SAUDAÇÃO -->
-    <section class="mb-10">
-      <h1 class="text-3xl font-black text-on-surface tracking-tight mb-2" id="saudacaoPlano">Olá, Estudante.</h1>
-      <p class="text-on-surface-variant text-lg max-w-2xl">
-        Seu cronograma para a <span class="text-secondary font-semibold">Competência 2</span> está aguardando você hoje. Faltam apenas <span id="topicosRestantes" class="font-bold text-white">3</span> tópicos para o próximo nível.
-      </p>
-    </section>
-
-    <!-- GRID PRINCIPAL -->
-    <div class="grid grid-cols-12 gap-6">
-
-      <!-- COLUNA ESQUERDA: CALENDÁRIO (8 cols) -->
-      <div class="col-span-12 lg:col-span-8 space-y-6">
-        <div class="glass-card rounded-2xl p-4" style="overflow:hidden;">
-
-          <!-- Header do calendário -->
-          <div class="flex items-center justify-between mb-6">
-            <h3 id="mesAno" class="text-xl font-bold text-on-surface"></h3>
-            <div class="flex gap-2">
-              <button onclick="navegarMes(-1)" class="p-2 hover:bg-surface-container-highest rounded-lg text-on-surface-variant transition-colors">
-                <span class="material-symbols-outlined">chevron_left</span>
-              </button>
-              <button onclick="navegarMes(1)" class="p-2 hover:bg-surface-container-highest rounded-lg text-on-surface-variant transition-colors">
-                <span class="material-symbols-outlined">chevron_right</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Grid do calendário -->
-          <!-- Calendário: wrapper com grid fixo -->
-          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.2rem;width:100%;overflow:hidden;" id="gridCalendario">
-            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">D</div>
-            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">S</div>
-            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">T</div>
-            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">Q</div>
-            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">Q</div>
-            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">S</div>
-            <div style="text-align:center;font-size:.7rem;font-weight:700;color:#928ea0;padding:.3rem 0;">S</div>
-          </div>
-          <div id="diasCalendario" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.2rem;width:100%;margin-top:.15rem;overflow:hidden;"></div>
-
-          <!-- Legenda + Sincronizar -->
-          <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex flex-wrap gap-4">
-              <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-primary-container"></div><span class="text-xs text-on-surface-variant font-medium">C1</span></div>
-              <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-secondary"></div><span class="text-xs text-on-surface-variant font-medium">C2</span></div>
-              <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-tertiary"></div><span class="text-xs text-on-surface-variant font-medium">C3</span></div>
-              <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-error"></div><span class="text-xs text-on-surface-variant font-medium">C4</span></div>
-              <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-on-surface"></div><span class="text-xs text-on-surface-variant font-medium">C5</span></div>
-            </div>
-            <button onclick="toast('📅 Sincronizando com Google Agenda...')" class="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface hover:bg-surface-container transition-all">
-              <span class="material-symbols-outlined text-sm">sync</span>
-              <span class="text-sm font-semibold">Sincronizar com Agenda</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- COLUNA DIREITA: FOCO + STATUS (4 cols) -->
-      <div class="col-span-12 lg:col-span-4 space-y-6">
-
-        <!-- FOCO DO DIA -->
-        <div class="glass-card rounded-2xl p-6 border border-primary-container/40 relative overflow-hidden">
-          <div class="absolute top-0 right-0 p-6 opacity-5">
-            <span class="material-symbols-outlined text-8xl text-primary">target</span>
-          </div>
-          <h3 class="text-xl font-extrabold text-on-surface mb-6">Foco do Dia</h3>
-          <div class="space-y-4 mb-8" id="listaFoco"></div>
-          <button onclick="iniciarEstudo()" class="btn-iniciar w-full py-4 rounded-xl bg-gradient-to-r from-primary-container to-primary text-white font-black text-lg shadow-lg shadow-primary-container/20 hover:scale-[0.98] active:opacity-80 transition-all">
-            Iniciar Estudo
-          </button>
-        </div>
-
-        <!-- XP / NÍVEL -->
-        <div class="glass-card rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-sm font-bold text-on-surface-variant uppercase tracking-widest">Nível 14</span>
-            <span class="text-xs text-secondary font-bold">4.250 / 5.000 XP</span>
-          </div>
-          <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
-            <div class="h-full bg-secondary xp-fill rounded-full"></div>
-          </div>
-          <div class="flex justify-between mt-2">
-            <span class="text-[10px] text-on-surface-variant">Nível 14</span>
-            <span class="text-[10px] text-on-surface-variant">750 XP para Nível 15</span>
-          </div>
-        </div>
-
-        <!-- TEMPO DE ESTUDO -->
-        <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-tertiary" style="font-variation-settings:'FILL' 1;">schedule</span>
-          </div>
-          <div>
-            <p class="text-xs text-on-surface-variant font-medium">Tempo de Estudo (Semana)</p>
-            <p class="text-xl font-black text-on-surface" id="tempoEstudo">12.5h</p>
-          </div>
-          <div class="ml-auto text-right">
-            <p class="text-[10px] text-on-surface-variant">Meta semanal</p>
-            <p class="text-xs font-bold text-[#45edee]">15h</p>
-          </div>
-        </div>
-
-        <!-- STREAK -->
-        <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-[#ff6b35]/10 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[#ff6b35] text-2xl" style="font-variation-settings:'FILL' 1;">local_fire_department</span>
-          </div>
-          <div>
-            <p class="text-xs text-on-surface-variant font-medium">Sequência de Estudos</p>
-            <p class="text-xl font-black text-on-surface">7 dias 🔥</p>
-          </div>
-          <div class="ml-auto flex flex-col items-end gap-1">
-            <div class="flex gap-0.5">
-              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Seg"></div>
-              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Ter"></div>
-              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Qua"></div>
-              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Qui"></div>
-              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Sex"></div>
-              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Sab"></div>
-              <div class="w-3 h-3 rounded-sm bg-[#ff6b35]" title="Dom"></div>
-            </div>
-            <p class="text-[9px] text-on-surface-variant">última semana</p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- TRILHAS DE COMPETÊNCIA -->
-    <div class="mt-12 space-y-4">
-      <h3 class="text-2xl font-black text-on-surface flex items-center gap-3 mb-6">
-        <span class="material-symbols-outlined text-primary-container text-3xl" style="font-variation-settings:'FILL' 1;">route</span>
-        Trilhas de Competência
-      </h3>
-
-      <!-- C1: Concluído -->
-      <div class="glass-card rounded-2xl overflow-hidden" id="trilhaC1">
-        <div onclick="toggleTrilha('C1')" class="p-4 flex items-center justify-between cursor-pointer hover:bg-surface-container-high transition-colors">
-          <div class="flex items-center gap-3 flex-1 min-w-0">
-            <div class="w-9 h-9 rounded-full border-2 border-primary-container/30 flex items-center justify-center text-primary-container font-black text-sm shrink-0">C1</div>
-            <div>
-              <h4 class="font-bold text-on-surface">Domínio da Norma Culta</h4>
-              <p class="text-xs text-on-surface-variant">Concluído em 15 de Set • 100%</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-4">
-            <span class="material-symbols-outlined text-[#4ADE80]" style="font-variation-settings:'FILL' 1;">check_circle</span>
-            <span class="material-symbols-outlined text-on-surface-variant chevron-icon" id="chevron-C1">expand_more</span>
-          </div>
-        </div>
-        <div class="trilha-body" id="body-C1">
-          <div class="p-5 border-t border-outline-variant/10 space-y-3">
-            <p class="text-sm text-on-surface-variant">✓ Todas as 6 aulas concluídas · Nota média: <span class="text-[#4ADE80] font-bold">170/200</span></p>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {['Ortografia e Acentuação','Concordância Verbal','Concordância Nominal','Regência','Pontuação','Crase'].map((a,i) =>
-                `<div class="bg-surface-container rounded-xl p-3 flex items-center gap-2"><span class="material-symbols-outlined text-[#4ADE80] text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span><span class="text-xs text-on-surface-variant">${a}</span></div>`
-              ).join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- C2: Em andamento (FOCO DA SEMANA) -->
-      <div class="glass-card rounded-2xl overflow-hidden border-2 border-secondary/40 shadow-[0_0_30px_rgba(69,237,238,0.05)]" id="trilhaC2">
-        <div onclick="toggleTrilha('C2')" class="p-4 bg-secondary/10 flex items-center justify-between border-b border-outline-variant/10 cursor-pointer hover:bg-secondary/15 transition-colors">
-          <div class="flex items-center gap-3 flex-1 min-w-0">
-            <div class="w-9 h-9 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-black text-sm shadow-lg shadow-secondary/20 shrink-0">C2</div>
-            <div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <h4 class="font-extrabold text-on-surface">Compreender a Proposta</h4>
-                <span class="px-2 py-0.5 bg-secondary/20 text-secondary text-[10px] rounded uppercase font-bold tracking-widest border border-secondary/30">Foco da Semana</span>
-              </div>
-              <div class="flex items-center gap-3 mt-1">
-                <p class="text-xs text-on-surface-variant">4 de 7 aulas assistidas • 57%</p>
-                <div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
-                  <div class="h-full bg-secondary rounded-full" style="width:57%"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <span class="material-symbols-outlined text-secondary chevron-icon aberto" id="chevron-C2">expand_more</span>
-        </div>
-
-        <!-- Corpo C2 expandido -->
-        <div class="trilha-body aberto" id="body-C2">
-          <div class="p-6 bg-[#10131a]/40">
-
-            <!-- Aula em destaque -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-              <div class="rounded-2xl overflow-hidden border border-outline-variant/20 cursor-pointer" onclick="abrirVideo('Aula 05: Estrutura Dissertativa-Argumentativa')">
-                <div class="relative group aspect-video overflow-hidden">
-                  <img alt="Video thumbnail" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzZZR4voNnJpsf9o9CqhhjGf2OXH4nh0Y5HIUR1bhSMWVv_Y9EnNgZGOOxbMYwwAyFNGvRYM5dPPKL84-gyzsWjYFDC0Akq6-3BqF0wRo9oTDSnV09W1q8FWOos_WMyT-CcYjhKmJi4xhpeUKyLnjLoPoARrqXQ_0kLLGw2-bjXt-1ENsNS0i8Vdemf0efIVQxt_232wWxpqbwfzjm97tBS08llzTeFsMRFcf6p_9rBQmN9Z5wZ05vyg0aPXKqfmLGlChs8O7RD3u1"/>
-                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center shadow-2xl shadow-secondary/50 transform transition-transform group-hover:scale-110">
-                      <span class="material-symbols-outlined text-on-secondary text-3xl" style="font-variation-settings:'FILL' 1;">play_arrow</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-3 bg-surface-container">
-                  <p class="text-sm font-bold text-on-surface">Aula 05: Estrutura Dissertativa-Argumentativa</p>
-                  <p class="text-xs text-on-surface-variant mt-0.5">Clique para assistir</p>
-                </div>
-              </div>
-
-              <div class="flex flex-col justify-center">
-                <h5 class="text-lg font-bold text-on-surface mb-3">Interpretação de Comando e Repertório</h5>
-                <p class="text-sm text-on-surface-variant leading-relaxed mb-6">Aprenda a interpretar os comandos da redação e como aplicar o repertório sociocultural de forma produtiva para garantir a pontuação máxima na Competência 2.</p>
-                <div class="flex flex-wrap gap-4">
-                  <button onclick="toast('📥 Baixando Material PDF — Interpretação de Comando...')" class="px-6 py-3 rounded-xl bg-surface-container-highest text-on-surface font-bold text-sm flex items-center justify-center gap-2 hover:bg-surface-bright transition-all">
-                    <span class="material-symbols-outlined text-sm">download</span> Material PDF
-                  </button>
-                  <button onclick="abrirVideo('Aula 05: Estrutura Dissertativa-Argumentativa')" class="flex-1 px-6 py-3 rounded-xl bg-secondary text-on-secondary font-black text-sm flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-lg shadow-secondary/20">
-                    Assistir Agora
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Lista de todas as aulas da C2 -->
-            <div class="border-t border-outline-variant/10 pt-4">
-              <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Todas as Aulas</p>
-              <div class="space-y-2" id="listaAulasC2"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- C3: Bloqueado -->
-      <div class="glass-card rounded-2xl overflow-hidden opacity-60">
-        <div class="p-5 flex items-center justify-between cursor-not-allowed">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full border-2 border-tertiary/20 flex items-center justify-center text-tertiary font-black">C3</div>
-            <div>
-              <h4 class="font-bold text-on-surface">Seleção e Organização</h4>
-              <p class="text-xs text-on-surface-variant">Desbloqueado ao concluir C2</p>
-            </div>
-          </div>
-          <span class="material-symbols-outlined text-on-surface-variant/50">lock</span>
-        </div>
-      </div>
-
-      <!-- C4: Bloqueado -->
-      <div class="glass-card rounded-2xl overflow-hidden opacity-60">
-        <div class="p-5 flex items-center justify-between cursor-not-allowed">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full border-2 border-error/20 flex items-center justify-center text-error font-black">C4</div>
-            <div>
-              <h4 class="font-bold text-on-surface">Coesão Textual</h4>
-              <p class="text-xs text-on-surface-variant">Desbloqueado ao concluir C3</p>
-            </div>
-          </div>
-          <span class="material-symbols-outlined text-on-surface-variant/50">lock</span>
-        </div>
-      </div>
-
-      <!-- C5: Bloqueado -->
-      <div class="glass-card rounded-2xl overflow-hidden opacity-60 mb-10">
-        <div class="p-5 flex items-center justify-between cursor-not-allowed">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full border-2 border-on-surface/20 flex items-center justify-center text-on-surface font-black">C5</div>
-            <div>
-              <h4 class="font-bold text-on-surface">Proposta de Intervenção</h4>
-              <p class="text-xs text-on-surface-variant">Desbloqueado ao concluir C4</p>
-            </div>
-          </div>
-          <span class="material-symbols-outlined text-on-surface-variant/50">lock</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</main>
-
+<script src="supabase-auth.js"></script>
+<script src="aluno-base-v6.js"></script>
 <script>
+/* ═══ RedaON · Plano de estudos · produção v1 ═══
+   Regra determinística (P1a, custo zero de IA):
+   foco = ?foco=CX da Evolução > pior competência das últimas 8 > nenhum.
+   5 tarefas seg–sex; sáb+dom descanso por natureza (P7);
+   nenhuma tarefa presa ao dia — ✓ aceito a qualquer momento. */
+if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-  // Logout universal
-  window.authLogout = window.authLogout || function() {
-    if (confirm('Deseja sair da sua conta?')) {
-      localStorage.clear();
-      window.location.href = 'login.html';
-    }
-  };
-  window.sair = window.authLogout;
-  authGuard('aluno');
-
-// ═══════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════
-function toast(msg, dur=3000) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), dur);
-}
-
-// ═══════════════════════════════════════════════
-// CALENDÁRIO INTERATIVO
-// ═══════════════════════════════════════════════
-const EVENTOS = {
-  // formato: 'YYYY-M-D': [{comp, cor, desc}]
-  '2026-3-10': [{ comp:'C2', cor:'#45edee', desc:'Assistir Aula 05' }],
-  '2026-3-12': [{ comp:'C2', cor:'#45edee', desc:'Exercícios C2' }, { comp:'C3', cor:'#fabd00', desc:'Prévia C3' }],
-  '2026-3-15': [{ comp:'C2', cor:'#45edee', desc:'Prova Simulada' }],
-  '2026-3-17': [{ comp:'C1', cor:'#6c5ce7', desc:'Revisão C1' }],
-  '2026-3-20': [{ comp:'C2', cor:'#45edee', desc:'Redação Prática' }],
-  '2026-3-24': [{ comp:'C3', cor:'#fabd00', desc:'Início C3' }],
-  '2026-3-28': [{ comp:'C4', cor:'#ffb4ab', desc:'Prévia C4' }],
-};
-
-let mesAtual = new Date().getMonth();
-let anoAtual = new Date().getFullYear();
-const hoje = new Date();
-
-const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
-function renderCalendario() {
-  document.getElementById('mesAno').textContent = MESES[mesAtual] + ' ' + anoAtual;
-  const container = document.getElementById('diasCalendario');
-  container.innerHTML = '';
-
-  const primeiroDia = new Date(anoAtual, mesAtual, 1).getDay();
-  const totalDias = new Date(anoAtual, mesAtual + 1, 0).getDate();
-  const diasMesAnterior = new Date(anoAtual, mesAtual, 0).getDate();
-
-  // Estilo base das células — sem altura fixa, número sempre em linha única
-  const estiloBase = 'display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:.4rem .1rem;border-radius:.375rem;min-width:0;box-sizing:border-box;overflow:hidden;';
-
-  // Dias do mês anterior (inativos)
-  for (let i = primeiroDia - 1; i >= 0; i--) {
-    const d = document.createElement('div');
-    d.style.cssText = estiloBase + 'background:rgba(13,16,22,0.3);opacity:.35;';
-    d.innerHTML = `<span style="font-size:.7rem;font-weight:500;color:#928ea0;white-space:nowrap;">${diasMesAnterior - i}</span>`;
-    container.appendChild(d);
-  }
-
-  // Dias do mês atual
-  for (let dia = 1; dia <= totalDias; dia++) {
-    const ehHoje = dia === hoje.getDate() && mesAtual === hoje.getMonth() && anoAtual === hoje.getFullYear();
-    const chave = `${anoAtual}-${mesAtual+1}-${dia}`;
-    const eventos = EVENTOS[chave] || [];
-
-    const d = document.createElement('div');
-    const bgHoje = ehHoje ? 'background:rgba(69,237,238,0.08);border:1px solid rgba(69,237,238,0.4);' : 'background:rgba(25,28,34,0.6);border:1px solid rgba(71,69,84,0.15);';
-    d.style.cssText = estiloBase + bgHoje + 'cursor:pointer;transition:all .2s;';
-
-    const corNum = ehHoje ? '#45edee' : '#c8c4d7';
-    const pesoNum = ehHoje ? '800' : '500';
-
-    d.innerHTML = `<span style="font-size:.7rem;font-weight:${pesoNum};color:${corNum};white-space:nowrap;line-height:1.4;">${dia}</span>
-      ${eventos.length ? `<div style="display:flex;gap:2px;margin-top:2px;flex-wrap:wrap;justify-content:center;">
-        ${eventos.map(e => `<div style="width:5px;height:5px;border-radius:50%;background:${e.cor};flex-shrink:0;"></div>`).join('')}
-      </div>` : ''}`;
-
-    if (eventos.length) {
-      d.addEventListener('click', () => {
-        toast(`📅 ${dia}/${mesAtual+1}: ${eventos[0].desc}${eventos.length > 1 ? ' e mais...' : ''}`);
-      });
-    }
-    container.appendChild(d);
-  }
-
-  // Completar com dias do próximo mês
-  const totalCelulas = primeiroDia + totalDias;
-  const diasExtras = totalCelulas % 7 === 0 ? 0 : 7 - (totalCelulas % 7);
-  for (let i = 1; i <= diasExtras; i++) {
-    const d = document.createElement('div');
-    d.style.cssText = estiloBase + 'background:rgba(13,16,22,0.3);opacity:.35;';
-    d.innerHTML = `<span style="font-size:.7rem;font-weight:500;color:#928ea0;white-space:nowrap;">${i}</span>`;
-    container.appendChild(d);
-  }
-}
-
-window.navegarMes = function(dir) {
-  mesAtual += dir;
-  if (mesAtual > 11) { mesAtual = 0; anoAtual++; }
-  if (mesAtual < 0) { mesAtual = 11; anoAtual--; }
-  renderCalendario();
-};
-
-// ═══════════════════════════════════════════════
-// FOCO DO DIA
-// ═══════════════════════════════════════════════
-const FOCO = [
-  { texto: 'Assistir aula de C2', feito: false },
-  { texto: 'Revisar conectivos de C4', feito: true },
-  { texto: 'Ler guia PDF (Repertórios)', feito: false },
-];
-
-function renderFoco() {
-  const lista = document.getElementById('listaFoco');
-  lista.innerHTML = '';
-  FOCO.forEach((item, i) => {
-    const div = document.createElement('div');
-    div.className = `foco-item flex items-center gap-3 cursor-pointer rounded-lg px-2 py-1.5 transition-all ${item.feito ? 'feito' : ''}`;
-    div.innerHTML = `
-      <div class="foco-check w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${item.feito ? 'bg-primary-container border-primary-container' : 'border-primary-container/30'}" style="border-color:${item.feito ? '#6c5ce7':'rgba(108,92,231,0.3)'}">
-        <span class="material-symbols-outlined text-lg ${item.feito ? 'text-white' : 'text-primary opacity-0 group-hover:opacity-100'}" style="font-variation-settings:'FILL' 1;">check</span>
-      </div>
-      <span class="foco-label text-on-surface font-medium">${item.texto}</span>`;
-    div.addEventListener('click', () => {
-      item.feito = !item.feito;
-      renderFoco();
-      atualizarTopicos();
-      toast(item.feito ? `✓ "${item.texto}" concluído! +50 XP` : `↩ "${item.texto}" reaberto.`);
-    });
-    lista.appendChild(div);
-  });
-}
-
-function atualizarTopicos() {
-  const pendentes = FOCO.filter(f => !f.feito).length;
-  document.getElementById('topicosRestantes').textContent = pendentes + 2;
-}
-
-window.iniciarEstudo = function() {
-  const proximoItem = FOCO.find(f => !f.feito);
-  if (!proximoItem) {
-    toast('🎉 Todos os itens do dia concluídos! Incrível!');
-    return;
-  }
-  toast(`▶ Iniciando: "${proximoItem.texto}"`);
-  if (proximoItem.texto.includes('aula')) {
-    setTimeout(() => abrirVideo('Aula 05: Estrutura Dissertativa-Argumentativa'), 800);
-  }
-};
-
-// ═══════════════════════════════════════════════
-// TRILHAS — ACORDEÃO
-// ═══════════════════════════════════════════════
-window.toggleTrilha = function(comp) {
-  const body = document.getElementById('body-' + comp);
-  const chevron = document.getElementById('chevron-' + comp);
-  const aberto = body.classList.contains('aberto');
-  body.classList.toggle('aberto', !aberto);
-  chevron.classList.toggle('aberto', !aberto);
-};
-
-// ═══════════════════════════════════════════════
-// AULAS C2
-// ═══════════════════════════════════════════════
-const AULAS_C2 = [
-  { num:1, titulo:'Leitura de Texto de Apoio', concluida:true },
-  { num:2, titulo:'Identificando o Tema Central', concluida:true },
-  { num:3, titulo:'Recorte Temático e Delimitação', concluida:true },
-  { num:4, titulo:'Repertório Sociocultural — Parte 1', concluida:true },
-  { num:5, titulo:'Estrutura Dissertativa-Argumentativa', concluida:false, atual:true },
-  { num:6, titulo:'Repertório Sociocultural — Parte 2', concluida:false },
-  { num:7, titulo:'Simulado C2 — Avaliação Final', concluida:false },
-];
-
-function renderAulasC2() {
-  const lista = document.getElementById('listaAulasC2');
-  if (!lista) return;
-  lista.innerHTML = AULAS_C2.map(a => `
-    <div class="flex items-center gap-3 p-3 rounded-xl ${a.atual ? 'bg-secondary/10 border border-secondary/20' : 'hover:bg-surface-container transition-colors'} cursor-pointer" onclick="${a.atual ? `abrirVideo('Aula 0${a.num}: ${a.titulo}')` : `toast('${a.concluida ? '✓ Aula já concluída!' : '🔒 Conclua a aula anterior primeiro.'}')`}">
-      <span class="material-symbols-outlined text-sm ${a.concluida ? 'text-[#4ade80]' : a.atual ? 'text-secondary' : 'text-on-surface-variant/40'}" style="font-variation-settings:'FILL' 1;">${a.concluida ? 'check_circle' : a.atual ? 'play_circle' : 'radio_button_unchecked'}</span>
-      <span class="text-xs ${a.atual ? 'text-secondary font-bold' : a.concluida ? 'text-on-surface-variant line-through' : 'text-on-surface-variant/60'}">Aula 0${a.num}: ${a.titulo}</span>
-      ${a.atual ? '<span class="ml-auto px-2 py-0.5 bg-secondary/20 text-secondary text-[9px] font-bold rounded-full border border-secondary/20 uppercase">Próxima</span>' : ''}
-    </div>`).join('');
-}
-
-// ═══════════════════════════════════════════════
-// MODAL VÍDEO
-// ═══════════════════════════════════════════════
-window.abrirVideo = function(titulo) {
-  document.getElementById('tituloVideo').textContent = titulo;
-  document.getElementById('modalVideo').classList.add('aberto');
-};
-
-window.fecharVideo = function() {
-  document.getElementById('modalVideo').classList.remove('aberto');
-};
-
-document.getElementById('modalVideo').addEventListener('click', function(e) {
-  if (e.target === this) fecharVideo();
+montarEsqueleto({
+  ativo:  '',
+  titulo: 'Plano de estudos',
+  icone:  'calendar_month',
+  sino:   true,
+  versao: 'aluno \u00b7 plano \u00b7 v1'
 });
 
-// ═══════════════════════════════════════════════
-// C1 body — lista de aulas concluídas
-// ═══════════════════════════════════════════════
-function renderAulasC1() {
-  const body = document.getElementById('body-C1');
-  const div = body.querySelector('.p-5');
-  if (!div) return;
-  const grid = div.querySelector('.grid');
-  if (!grid) return;
-  const aulas = ['Ortografia e Acentuação','Concordância Verbal','Concordância Nominal','Regência','Pontuação','Crase'];
-  grid.innerHTML = aulas.map(a => `
-    <div class="bg-surface-container rounded-xl p-3 flex items-center gap-2">
-      <span class="material-symbols-outlined text-[#4ADE80] text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span>
-      <span class="text-xs text-on-surface-variant">${a}</span>
-    </div>`).join('');
+var NOME_COMP = { C1:'Norma culta', C2:'Tema e repert\u00f3rio', C3:'Argumenta\u00e7\u00e3o', C4:'Coes\u00e3o', C5:'Interven\u00e7\u00e3o' };
+var DIAS_ROT = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex' };
+var ICONE_TIPO = { repertorio:'\uD83D\uDCDA', redacao:'\u270F\uFE0F', revisao:'\uD83D\uDD0D', exercicio:'\uD83C\uDFAF', flashcards:'\uD83C\uDFB4' };
+
+var ITENS = [];        /* linhas de plano_itens desta semana */
+var SEMANA_DE = null;  /* 'YYYY-MM-DD' da segunda-feira */
+var FOCO = null;       /* 'C1'..'C5' ou null */
+var ORIGEM_FOCO = '';  /* 'evolucao' | 'diagnostico' | '' */
+var TEMA = null;       /* tema da semana, se houver */
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function pad2(n){ return (n<10?'0':'')+n; }
+function dataISO(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function segundaDaSemana(){
+  var d = new Date(); d.setHours(0,0,0,0);
+  var dow = d.getDay();                 /* 0=dom..6=sáb */
+  var recuo = (dow === 0) ? 6 : dow-1;  /* volta até a segunda */
+  d.setDate(d.getDate()-recuo);
+  return d;
+}
+function diaHoje(){ var g=new Date().getDay(); return (g>=1 && g<=5) ? g : 0; } /* 0 = fim de semana */
+
+/* ── Tema da Semana (mesmo padrão do Hub) ── */
+var SEL_TEMA = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de';
+async function temaDaSemana(){
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=' + SEL_TEMA + '&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=8', {});
+    if(!res.ok) return null;
+    var rows = await res.json();
+    var hoje = new Date(); hoje.setHours(0,0,0,0);
+    for (var i=0;i<rows.length;i++){
+      var t = rows[i];
+      var ini = new Date(t.semana_de + 'T00:00:00');
+      var fim = new Date(ini); fim.setDate(fim.getDate() + 7);
+      if (hoje >= ini && hoje < fim) return t;
+    }
+    return null;
+  }catch(e){ console.warn('[tema da semana]', e); return null; }
 }
 
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-renderCalendario();
-renderFoco();
-renderAulasC2();
-renderAulasC1();
-</script>
-<script>
-  const NOME_USUARIO = authGetNome();
-  const el = document.getElementById('saudacaoPlano');
-  if (el) el.textContent = 'Olá, ' + NOME_USUARIO + '.';
-</script>
-<script>
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('overlay').classList.toggle('open');
+/* ── Foco: ?foco=CX da Evolução > diagnóstico (pior média das últimas 8) ── */
+function focoDaURL(){
+  try{
+    var m = (location.search||'').match(/[?&]foco=(C[1-5])/i);
+    return m ? m[1].toUpperCase() : null;
+  }catch(e){ return null; }
 }
+async function focoDoDiagnostico(){
+  try{
+    if (typeof dbGetHistoricoRedacoes !== 'function') return null;
+    var hist = await dbGetHistoricoRedacoes(8);
+    if (!hist || !hist.length) return null;
+    var soma = {c1:0,c2:0,c3:0,c4:0,c5:0}, chaves=['c1','c2','c3','c4','c5'];
+    hist.forEach(function(r){ chaves.forEach(function(k){ soma[k] += (r[k]||0); }); });
+    var pior = chaves.slice().sort(function(a,b){ return soma[a]-soma[b]; })[0];
+    return pior.toUpperCase();
+  }catch(e){ console.warn('[diagnostico]', e); return null; }
+}
+
+/* ── Regra determinística: monta as 5 tarefas da semana ── */
+function montarTarefas(){
+  var destinoHub = TEMA ? ('hub-preparacao.html?tema=' + encodeURIComponent(TEMA.id)) : 'hub-preparacao.html';
+  var rotRep  = TEMA ? ('Repert\u00f3rio do Tema da Semana') : 'Repert\u00f3rio para sua pr\u00f3xima reda\u00e7\u00e3o';
+  var rotExe  = FOCO ? ('Refor\u00e7o de ' + FOCO + ' \u00b7 ' + NOME_COMP[FOCO]) : 'Refor\u00e7o da sua compet\u00eancia mais fraca';
+  return [
+    { dia:1, tipo:'repertorio', rotulo:rotRep, destino:destinoHub, competencia:null },
+    { dia:2, tipo:'redacao',    rotulo:'Escrever e enviar uma reda\u00e7\u00e3o', destino:'nova-redacao.html?metodo=digitar', competencia:null },
+    { dia:3, tipo:'revisao',    rotulo:'Revisar a corre\u00e7\u00e3o da PROfa', destino:'minhas-redacoes.html', competencia:null },
+    { dia:4, tipo:'exercicio',  rotulo:rotExe, destino:destinoHub, competencia:FOCO },
+    { dia:5, tipo:'flashcards', rotulo:'Flashcards de repert\u00f3rio', destino:destinoHub, competencia:null }
+  ];
+}
+
+/* ── Banco ── */
+async function carregarItens(uid){
+  var url = SUPABASE_URL + '/rest/v1/plano_itens?aluno_id=eq.'+uid+'&semana_de=eq.'+SEMANA_DE+'&order=dia.asc'
+    + '&select=id,dia,tipo,rotulo,destino,competencia,feito_em';
+  var res = await dbFetch(url, {});
+  if (!res.ok) throw new Error('plano_itens ' + res.status);
+  return await res.json();
+}
+async function criarSemana(uid){
+  var corpo = montarTarefas().map(function(t){
+    return { aluno_id:uid, semana_de:SEMANA_DE, dia:t.dia, tipo:t.tipo, rotulo:t.rotulo, destino:t.destino, competencia:t.competencia };
+  });
+  var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_itens', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Prefer':'return=representation' },
+    body: JSON.stringify(corpo)
+  });
+  if (!res.ok) throw new Error('criar plano ' + res.status);
+  return await res.json();
+}
+async function marcarFeitoBanco(id){
+  var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_itens?id=eq.'+id, {
+    method:'PATCH',
+    headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+    body: JSON.stringify({ feito_em: new Date().toISOString() })
+  });
+  return res.ok;
+}
+/* Foco novo vindo da Evolução atualiza o item de exercício da semana corrente */
+async function atualizarFocoExistente(){
+  var exe = ITENS.filter(function(i){ return i.tipo==='exercicio'; })[0];
+  if (!exe || !FOCO || exe.competencia === FOCO || exe.feito_em) return;
+  var rotNovo = 'Refor\u00e7o de ' + FOCO + ' \u00b7 ' + NOME_COMP[FOCO];
+  var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_itens?id=eq.'+exe.id, {
+    method:'PATCH',
+    headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+    body: JSON.stringify({ competencia: FOCO, rotulo: rotNovo })
+  });
+  if (res.ok){ exe.competencia = FOCO; exe.rotulo = rotNovo; toast('Foco de refor\u00e7o atualizado: ' + FOCO); }
+}
+/* Redação da semana marca sozinha (P3): existe redação enviada desde segunda? */
+async function autoMarcarRedacao(uid){
+  var item = ITENS.filter(function(i){ return i.tipo==='redacao' && !i.feito_em; })[0];
+  if (!item) return;
+  try{
+    var url = SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.'+uid+'&created_at=gte.'+SEMANA_DE+'T00:00:00&select=id&limit=1';
+    var res = await dbFetch(url, {});
+    if (!res.ok) return;
+    var rows = await res.json();
+    if (rows.length){
+      var ok = await marcarFeitoBanco(item.id);
+      if (ok) item.feito_em = new Date().toISOString();
+    }
+  }catch(e){ console.warn('[auto redacao]', e); }
+}
+
+/* ── Render ── */
+function ondeAcontece(item){
+  if (item.tipo==='redacao') return 'marcada sozinha quando voc\u00ea envia';
+  if (item.tipo==='revisao') return 'em Minhas Reda\u00e7\u00f5es \u00b7 An\u00e1lise e Reescrita';
+  if (item.tipo==='exercicio') return TEMA ? ('no Hub \u00b7 ' + esc(TEMA.titulo)) : 'no Hub de Prepara\u00e7\u00e3o';
+  return TEMA ? ('no Hub de Prepara\u00e7\u00e3o \u00b7 ' + esc(TEMA.titulo)) : 'no Hub de Prepara\u00e7\u00e3o';
+}
+function renderPlano(){
+  var hoje = diaHoje();
+  var feitos = ITENS.filter(function(i){ return !!i.feito_em; }).length;
+  document.getElementById('numProg').textContent = feitos + '/5';
+  document.getElementById('barraProg').style.width = Math.round(feitos/5*100) + '%';
+
+  var h = ITENS.map(function(item){
+    var feito = !!item.feito_em;
+    var ehHoje = (!feito && item.dia === hoje);
+    var cls = 'dia' + (feito ? ' feito' : '') + (ehHoje ? ' hoje' : '') + (feito ? '' : ' navegavel');
+    var rot = (ehHoje ? 'Hoje \u00b7 ' : '') + DIAS_ROT[item.dia];
+    var fim;
+    if (feito) fim = '<span class="fimD">\u2713</span>';
+    else if (item.tipo === 'redacao') fim = '<span class="fimD">\u203A</span>';
+    else fim = '<button class="btnFeito" onclick="event.stopPropagation();marcarFeito(\'' + item.id + '\', this)">Marcar feito</button>';
+    var nav = feito ? '' : ' onclick="irPara(\'' + esc(item.destino||'') + '\')"';
+    return '<div class="' + cls + '"' + nav + '>'
+      + '<span class="icd">' + (ICONE_TIPO[item.tipo]||'\uD83D\uDCCC') + '</span>'
+      + '<span class="txts">'
+      +   '<span class="rotDia">' + rot + '</span>'
+      +   '<span class="tarefa">' + esc(item.rotulo) + '</span>'
+      +   '<span class="onde">' + ondeAcontece(item) + '</span>'
+      + '</span>' + fim + '</div>';
+  });
+
+  /* Fim de semana: descanso por natureza (P7) — sem tarefa, sem prescrição */
+  var fdsHoje = (diaHoje() === 0);
+  h.push('<div class="dia descanso' + (fdsHoje ? ' hoje' : '') + '">'
+    + '<span class="icd">\uD83C\uDF3F</span>'
+    + '<span class="txts">'
+    +   '<span class="rotDia">' + (fdsHoje ? 'Hoje \u00b7 ' : '') + 's\u00e1b \u00b7 dom</span>'
+    +   '<span class="tarefa">Fim de semana livre</span>'
+    +   '<span class="onde">se quiser adiantar, as tarefas aceitam \u2713 em qualquer dia</span>'
+    + '</span><span class="fimD">\u263A</span></div>');
+
+  document.getElementById('listaDias').innerHTML = h.join('');
+}
+function renderCabecalho(){
+  var ini = new Date(SEMANA_DE + 'T00:00:00');
+  var fim = new Date(ini); fim.setDate(fim.getDate()+6);
+  var MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var rot = 'Semana de ' + ini.getDate() + ' a ' + fim.getDate() + ' de ' + MES[fim.getMonth()];
+  document.getElementById('rotSemana').textContent = rot;
+
+  var fr = document.getElementById('fraseFoco');
+  if (FOCO) {
+    var motivo = (ORIGEM_FOCO === 'evolucao')
+      ? 'foi voc\u00ea que escolheu na Evolu\u00e7\u00e3o'
+      : '\u00e9 onde sua Evolu\u00e7\u00e3o mostra mais espa\u00e7o para crescer';
+    fr.innerHTML = 'Semana com foco em <b>' + FOCO + ' \u00b7 ' + NOME_COMP[FOCO] + '</b> \u2014 ' + motivo + '.';
+  } else {
+    fr.innerHTML = 'Sua primeira semana de ritmo. Depois da primeira reda\u00e7\u00e3o corrigida, o plano passa a mirar a sua compet\u00eancia mais fraca.';
+  }
+
+  var partes = [];
+  partes.push(FOCO ? ('do seu foco em <b>' + FOCO + '</b>' + (ORIGEM_FOCO==='evolucao' ? ' (escolhido por voc\u00ea na Evolu\u00e7\u00e3o)' : ' (sua <b>Evolu\u00e7\u00e3o</b>)')) : 'do seu come\u00e7o na RedaON');
+  if (TEMA) partes.push('do <b>Tema da Semana</b> (' + esc(TEMA.titulo) + ')');
+  partes.push('do ritmo de <b>1 reda\u00e7\u00e3o por semana</b>');
+  document.getElementById('txtComoMontado').innerHTML =
+    'A RedaON montou sua semana a partir ' + partes.join(', ') + '. Toda segunda-feira, uma semana nova. Nenhuma tarefa \u00e9 presa ao dia \u2014 o ritmo \u00e9 sugest\u00e3o, a ordem \u00e9 sua.';
+}
+
+/* ── Interações ── */
+window.irPara = function(destino){ if (destino) window.location.href = destino; };
+window.marcarFeito = async function(id, btn){
+  var item = ITENS.filter(function(i){ return String(i.id)===String(id); })[0];
+  if (!item || item.feito_em) return;
+  if (btn){ btn.disabled = true; btn.textContent = '\u2026'; }
+  var ok = await marcarFeitoBanco(id);
+  if (!ok){
+    if (btn){ btn.disabled = false; btn.textContent = 'Marcar feito'; }
+    toast('N\u00e3o consegui salvar. Tente de novo.');
+    return;
+  }
+  item.feito_em = new Date().toISOString();
+  renderPlano();
+  var feitos = ITENS.filter(function(i){ return !!i.feito_em; }).length;
+  if (feitos >= 5) document.getElementById('veuSemana').classList.add('show');
+  else toast('\u2713 Tarefa conclu\u00edda');
+};
+
+/* ── Carga ── */
+function mostrarEstado(id){
+  ['estadoCarregando','estadoErro','telaPlano'].forEach(function(k){
+    document.getElementById(k).classList.toggle('hidden', k !== id);
+  });
+}
+(async function init(){
+  try{
+    var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+    if (!uid) { mostrarEstado('estadoErro'); return; }
+    SEMANA_DE = dataISO(segundaDaSemana());
+
+    var focoURL = focoDaURL();
+    TEMA = await temaDaSemana();
+    ITENS = await carregarItens(uid);
+
+    if (ITENS.length) {
+      /* semana já montada: foco da URL atualiza o exercício pendente */
+      if (focoURL) { FOCO = focoURL; ORIGEM_FOCO = 'evolucao'; await atualizarFocoExistente(); }
+      var exe = ITENS.filter(function(i){ return i.tipo==='exercicio'; })[0];
+      if (!FOCO && exe && exe.competencia) { FOCO = exe.competencia; ORIGEM_FOCO = 'diagnostico'; }
+    } else {
+      if (focoURL) { FOCO = focoURL; ORIGEM_FOCO = 'evolucao'; }
+      else { FOCO = await focoDoDiagnostico(); ORIGEM_FOCO = FOCO ? 'diagnostico' : ''; }
+      ITENS = await criarSemana(uid);
+    }
+
+    await autoMarcarRedacao(uid);
+    renderCabecalho();
+    renderPlano();
+    mostrarEstado('telaPlano');
+  }catch(e){
+    console.warn('[plano]', e);
+    mostrarEstado('estadoErro');
+  }
+})();
 </script>
 </body>
 </html>
