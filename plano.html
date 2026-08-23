@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Plano de estudos</title>
-<!-- RedaON · Portal do Aluno · Plano de estudos · produção v1-1 (v1 + main-content da base: correção da sobreposição com a barra) -->
+<!-- RedaON · Portal do Aluno · Plano de estudos · produção v1-2 · rotina prepara→fixa→aplica→reflete→trata · dias sugeridos deslizantes · gaveta de descanso (plano_config) -->
 <script>
 (function(){
   var pref = 'auto';
@@ -72,6 +72,23 @@
 .estado .em{ font-size:1.8rem; display:block; margin-bottom:.5rem; }
 .hidden{ display:none !important; }
 
+/* Gaveta: dias de descanso */
+.gvDiasBg{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:110; }
+.gvDiasBg.open{ display:block; }
+.gvDias{ display:none; position:fixed; left:0; right:0; bottom:0; z-index:111; background:var(--top);
+  border-top:1px solid rgba(var(--borderRGB),.2); border-radius:20px 20px 0 0;
+  padding:10px 16px 20px; max-width:34rem; margin:0 auto; }
+.gvDias.open{ display:block; }
+.gvGrip{ width:38px; height:4px; border-radius:99px; background:rgba(var(--borderRGB),.45); margin:0 auto 12px; }
+.gvTit{ font-size:1rem; font-weight:800; color:var(--text); margin-bottom:.3rem; }
+.gvSub{ font-size:.72rem; color:var(--muted); line-height:1.5; margin-bottom:.8rem; }
+.optDia{ display:flex; align-items:center; justify-content:space-between; gap:.7rem; min-height:52px; padding:0 .875rem;
+  border-radius:13px; background:var(--surface); color:var(--text); font-size:.85rem; font-weight:600; cursor:pointer;
+  margin-bottom:.5rem; border:1px solid transparent; }
+.optDia .ck{ color:var(--cyan); font-size:1.05rem; font-weight:900; opacity:0; }
+.optDia.sel{ background:rgba(var(--cyanRGB),.13); color:var(--cyan); border-color:rgba(var(--cyanRGB),.4); }
+.optDia.sel .ck{ opacity:1; }
+
 /* Conquista 5/5 (padrão ouro do produto) */
 .veuPlano{ position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:120; display:none; align-items:center; justify-content:center; padding:1.5rem; }
 .veuPlano.show{ display:flex; }
@@ -109,6 +126,18 @@
 </div>
 </div>
 
+<!-- Gaveta: dias de descanso (padrão do produto) -->
+<div class="gvDiasBg" id="gvDiasBg" onclick="fecharGavetaDias()"></div>
+<div class="gvDias" id="gvDias">
+  <div class="gvGrip"></div>
+  <p class="gvTit">Quais são seus dias de descanso?</p>
+  <p class="gvSub">O plano sugere os dias das etapas respeitando o seu ritmo. Você pode trocar quando quiser.</p>
+  <div class="optDia sel" data-v="sab_dom" onclick="escolherDescanso(this)"><span>Sábado e domingo</span><span class="ck">✓</span></div>
+  <div class="optDia" data-v="sab" onclick="escolherDescanso(this)"><span>Só sábado</span><span class="ck">✓</span></div>
+  <div class="optDia" data-v="dom" onclick="escolherDescanso(this)"><span>Só domingo</span><span class="ck">✓</span></div>
+  <div class="optDia" data-v="nenhum" onclick="escolherDescanso(this)"><span>Nenhum — estudo todos os dias</span><span class="ck">✓</span></div>
+</div>
+
 <div class="veuPlano" id="veuSemana" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="conqPlano">
     <div class="circ">🏁</div>
@@ -120,7 +149,7 @@
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
-/* ═══ RedaON · Plano de estudos · produção v1 ═══
+/* ═══ RedaON · Plano de estudos · produção v1-2 (rotina prepara→fixa→aplica→reflete→trata; dia = ORDEM; dias sugeridos deslizantes; plano_config) ═══
    Regra determinística (P1a, custo zero de IA):
    foco = ?foco=CX da Evolução > pior competência das últimas 8 > nenhum.
    5 tarefas seg–sex; sáb+dom descanso por natureza (P7);
@@ -132,11 +161,13 @@ montarEsqueleto({
   titulo: 'Plano de estudos',
   icone:  'calendar_month',
   sino:   true,
-  versao: 'aluno \u00b7 plano \u00b7 v1-1'
+  versao: 'aluno \u00b7 plano \u00b7 v1-2'
 });
 
 var NOME_COMP = { C1:'Norma culta', C2:'Tema e repert\u00f3rio', C3:'Argumenta\u00e7\u00e3o', C4:'Coes\u00e3o', C5:'Interven\u00e7\u00e3o' };
-var DIAS_ROT = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex' };
+var NOME_DIA = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex', 6:'s\u00e1b', 7:'dom' };
+var ETAPA_ROT = { repertorio:'prepara', flashcards:'fixa', redacao:'aplica', revisao:'reflete', exercicio:'trata' };
+var DESCANSO = 'sab_dom'; /* preferencia do aluno (plano_config) */
 var ICONE_TIPO = { repertorio:'\uD83D\uDCDA', redacao:'\u270F\uFE0F', revisao:'\uD83D\uDD0D', exercicio:'\uD83C\uDFAF', flashcards:'\uD83C\uDFB4' };
 
 var ITENS = [];        /* linhas de plano_itens desta semana */
@@ -155,7 +186,28 @@ function segundaDaSemana(){
   d.setDate(d.getDate()-recuo);
   return d;
 }
-function diaHoje(){ var g=new Date().getDay(); return (g>=1 && g<=5) ? g : 0; } /* 0 = fim de semana */
+function diaHojeSemana(){ var g=new Date().getDay(); return (g===0) ? 7 : g; } /* 1=seg .. 7=dom */
+function diasDeDescanso(){
+  if (DESCANSO==='sab') return [6];
+  if (DESCANSO==='dom') return [7];
+  if (DESCANSO==='nenhum') return [];
+  return [6,7];
+}
+/* Dias sugeridos deslizantes: distribui as etapas pendentes, em ordem,
+   pelos dias restantes da semana (de hoje em diante), pulando o descanso. */
+function sugerirDias(itens){
+  var hoje = diaHojeSemana();
+  var descanso = diasDeDescanso();
+  var livres = [];
+  for (var d=hoje; d<=7; d++){ if (descanso.indexOf(d)===-1) livres.push(d); }
+  var mapa = {}; var i=0;
+  itens.forEach(function(item){
+    if (item.feito_em) return;
+    mapa[item.id] = (i < livres.length) ? livres[i] : null;
+    i++;
+  });
+  return mapa;
+}
 
 /* ── Tema da Semana (mesmo padrão do Hub) ── */
 var SEL_TEMA = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de';
@@ -197,15 +249,36 @@ async function focoDoDiagnostico(){
 /* ── Regra determinística: monta as 5 tarefas da semana ── */
 function montarTarefas(){
   var destinoHub = TEMA ? ('hub-preparacao.html?tema=' + encodeURIComponent(TEMA.id)) : 'hub-preparacao.html';
+  var destinoEscr = 'nova-redacao.html?metodo=digitar' + (TEMA ? ('&tema=' + encodeURIComponent(TEMA.id)) : '');
   var rotRep  = TEMA ? ('Repert\u00f3rio do Tema da Semana') : 'Repert\u00f3rio para sua pr\u00f3xima reda\u00e7\u00e3o';
   var rotExe  = FOCO ? ('Refor\u00e7o de ' + FOCO + ' \u00b7 ' + NOME_COMP[FOCO]) : 'Refor\u00e7o da sua compet\u00eancia mais fraca';
+  /* Rotina aprovada: prepara \u2192 fixa \u2192 aplica \u2192 reflete \u2192 trata (dia = ORDEM da etapa) */
   return [
     { dia:1, tipo:'repertorio', rotulo:rotRep, destino:destinoHub, competencia:null },
-    { dia:2, tipo:'redacao',    rotulo:'Escrever e enviar uma reda\u00e7\u00e3o', destino:'nova-redacao.html?metodo=digitar', competencia:null },
-    { dia:3, tipo:'revisao',    rotulo:'Revisar a corre\u00e7\u00e3o da PROfa', destino:'minhas-redacoes.html', competencia:null },
-    { dia:4, tipo:'exercicio',  rotulo:rotExe, destino:destinoHub, competencia:FOCO },
-    { dia:5, tipo:'flashcards', rotulo:'Flashcards de repert\u00f3rio', destino:destinoHub, competencia:null }
+    { dia:2, tipo:'flashcards', rotulo:'Flashcards de repert\u00f3rio', destino:destinoHub, competencia:null },
+    { dia:3, tipo:'redacao',    rotulo:'Escrever e enviar uma reda\u00e7\u00e3o', destino:destinoEscr, competencia:null },
+    { dia:4, tipo:'revisao',    rotulo:'Revisar a corre\u00e7\u00e3o da PROfa', destino:'minhas-redacoes.html', competencia:null },
+    { dia:5, tipo:'exercicio',  rotulo:rotExe, destino:destinoHub, competencia:FOCO }
   ];
+}
+/* \u2500\u2500 Config do descanso (plano_config) \u2500\u2500 */
+async function carregarConfig(uid){
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?aluno_id=eq.'+uid+'&select=descanso', {});
+    if (!res.ok) return null;
+    var rows = await res.json();
+    return rows.length ? rows[0].descanso : null;
+  }catch(e){ return null; }
+}
+async function salvarConfig(uid, valor){
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?on_conflict=aluno_id', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ aluno_id: uid, descanso: valor, atualizado_em: new Date().toISOString() })
+    });
+    return res.ok;
+  }catch(e){ return false; }
 }
 
 /* ── Banco ── */
@@ -272,16 +345,24 @@ function ondeAcontece(item){
   return TEMA ? ('no Hub de Prepara\u00e7\u00e3o \u00b7 ' + esc(TEMA.titulo)) : 'no Hub de Prepara\u00e7\u00e3o';
 }
 function renderPlano(){
-  var hoje = diaHoje();
+  var hoje = diaHojeSemana();
   var feitos = ITENS.filter(function(i){ return !!i.feito_em; }).length;
   document.getElementById('numProg').textContent = feitos + '/5';
   document.getElementById('barraProg').style.width = Math.round(feitos/5*100) + '%';
 
+  var sugestao = sugerirDias(ITENS);
+
   var h = ITENS.map(function(item){
     var feito = !!item.feito_em;
-    var ehHoje = (!feito && item.dia === hoje);
+    var diaSug = feito ? null : sugestao[item.id];
+    var ehHoje = (!feito && diaSug === hoje);
     var cls = 'dia' + (feito ? ' feito' : '') + (ehHoje ? ' hoje' : '') + (feito ? '' : ' navegavel');
-    var rot = (ehHoje ? 'Hoje \u00b7 ' : '') + DIAS_ROT[item.dia];
+    var etapa = ETAPA_ROT[item.tipo] || '';
+    var rot;
+    if (feito) rot = etapa + ' \u00b7 \u2713';
+    else if (ehHoje) rot = etapa + ' \u00b7 Hoje';
+    else if (diaSug) rot = etapa + ' \u00b7 sug. ' + NOME_DIA[diaSug];
+    else rot = etapa + ' \u00b7 no seu ritmo';
     var fim;
     if (feito) fim = '<span class="fimD">\u2713</span>';
     else if (item.tipo === 'redacao') fim = '<span class="fimD">\u203A</span>';
@@ -296,15 +377,20 @@ function renderPlano(){
       + '</span>' + fim + '</div>';
   });
 
-  /* Fim de semana: descanso por natureza (P7) — sem tarefa, sem prescrição */
-  var fdsHoje = (diaHoje() === 0);
-  h.push('<div class="dia descanso' + (fdsHoje ? ' hoje' : '') + '">'
-    + '<span class="icd">\uD83C\uDF3F</span>'
-    + '<span class="txts">'
-    +   '<span class="rotDia">' + (fdsHoje ? 'Hoje \u00b7 ' : '') + 's\u00e1b \u00b7 dom</span>'
-    +   '<span class="tarefa">Fim de semana livre</span>'
-    +   '<span class="onde">se quiser adiantar, as tarefas aceitam \u2713 em qualquer dia</span>'
-    + '</span><span class="fimD">\u263A</span></div>');
+  /* Descanso conforme a escolha do aluno (plano_config); nenhuma tarefa presa ao dia */
+  var descanso = diasDeDescanso();
+  if (descanso.length){
+    var rotD = descanso.map(function(d){ return NOME_DIA[d]; }).join(' \u00b7 ');
+    var tituloD = (descanso.length===2) ? 'Fim de semana livre' : 'Dia livre';
+    var descansoHoje = (descanso.indexOf(hoje) !== -1);
+    h.push('<div class="dia descanso' + (descansoHoje ? ' hoje' : '') + '">'
+      + '<span class="icd">\uD83C\uDF3F</span>'
+      + '<span class="txts">'
+      +   '<span class="rotDia">' + (descansoHoje ? 'Hoje \u00b7 ' : '') + rotD + '</span>'
+      +   '<span class="tarefa">' + tituloD + '</span>'
+      +   '<span class="onde">se quiser adiantar, as tarefas aceitam \u2713 em qualquer dia</span>'
+      + '</span><span class="fimD">\u263A</span></div>');
+  }
 
   document.getElementById('listaDias').innerHTML = h.join('');
 }
@@ -330,8 +416,32 @@ function renderCabecalho(){
   if (TEMA) partes.push('do <b>Tema da Semana</b> (' + esc(TEMA.titulo) + ')');
   partes.push('do ritmo de <b>1 reda\u00e7\u00e3o por semana</b>');
   document.getElementById('txtComoMontado').innerHTML =
-    'A RedaON montou sua semana a partir ' + partes.join(', ') + '. Toda segunda-feira, uma semana nova. Nenhuma tarefa \u00e9 presa ao dia \u2014 o ritmo \u00e9 sugest\u00e3o, a ordem \u00e9 sua.';
+    'A RedaON montou sua semana a partir ' + partes.join(', ') + ', na rotina <b>prepara \u2192 fixa \u2192 aplica \u2192 reflete \u2192 trata</b>. Toda segunda-feira, uma semana nova. Nenhuma tarefa \u00e9 presa ao dia \u2014 o ritmo \u00e9 sugest\u00e3o, a ordem \u00e9 sua. '
+    + '<u style="cursor:pointer;color:var(--cyan);text-decoration:none;border-bottom:1px dotted;" onclick="abrirGavetaDias()">ajustar meus dias de descanso</u>';
 }
+
+/* ── Gaveta: dias de descanso ── */
+window.abrirGavetaDias = function(){
+  document.querySelectorAll('.optDia').forEach(function(o){
+    o.classList.toggle('sel', o.getAttribute('data-v') === DESCANSO);
+  });
+  document.getElementById('gvDiasBg').classList.add('open');
+  document.getElementById('gvDias').classList.add('open');
+};
+window.fecharGavetaDias = function(){
+  document.getElementById('gvDiasBg').classList.remove('open');
+  document.getElementById('gvDias').classList.remove('open');
+};
+window.escolherDescanso = async function(el){
+  var v = el.getAttribute('data-v');
+  document.querySelectorAll('.optDia').forEach(function(o){ o.classList.remove('sel'); });
+  el.classList.add('sel');
+  DESCANSO = v;
+  var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+  if (uid) salvarConfig(uid, v); /* grava em segundo plano */
+  renderPlano();
+  setTimeout(fecharGavetaDias, 180);
+};
 
 /* ── Interações ── */
 window.irPara = function(destino){ if (destino) window.location.href = destino; };
@@ -365,6 +475,9 @@ function mostrarEstado(id){
     SEMANA_DE = dataISO(segundaDaSemana());
 
     var focoURL = focoDaURL();
+    var cfg = await carregarConfig(uid);
+    var primeiraVisita = (cfg === null);
+    if (cfg) DESCANSO = cfg;
     TEMA = await temaDaSemana();
     ITENS = await carregarItens(uid);
 
@@ -383,6 +496,7 @@ function mostrarEstado(id){
     renderCabecalho();
     renderPlano();
     mostrarEstado('telaPlano');
+    if (primeiraVisita) setTimeout(abrirGavetaDias, 350);
   }catch(e){
     console.warn('[plano]', e);
     mostrarEstado('estadoErro');

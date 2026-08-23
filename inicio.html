@@ -69,6 +69,8 @@
 .avisoIco{ font-size:22px; line-height:1; flex:0 0 auto; }
 .avisoTit{ font-size:11px; font-weight:700; color:var(--cyan); margin:0 0 2px; }
 .avisoTxt{ font-size:12.5px; color:var(--text2); margin:0; line-height:1.35; }
+.avisoSlide.acao{ cursor:pointer; }
+.avisoGo{ margin-left:auto; flex:0 0 auto; font-size:15px; font-weight:900; color:var(--cyan); opacity:.85; }
 .avisoTxt b{ color:var(--text); }
 .avisoDots{ display:flex; justify-content:center; gap:5px; padding:0 0 10px; }
 .avisoDots span{ width:6px; height:6px; border-radius:50%; background:var(--muted); opacity:.4; transition:opacity .2s,width .2s; }
@@ -247,7 +249,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-11'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-12'
   });
 
   // Sauda\u00e7\u00e3o
@@ -487,17 +489,25 @@
     if (!itens || itens.length === 0) {
       itens = [
         { ico:'\u{1F44B}', tit:'Bem-vindo(a)', txt:'Este \u00e9 o seu espa\u00e7o de escrita no RedaON' },
-        { ico:'\u270D\uFE0F', tit:'Primeiro passo', txt:'Envie sua primeira reda\u00e7\u00e3o para ver seus dados aqui' },
-        { ico:'\u{1F680}', tit:'Rumo \u00e0 nota 1000', txt:'Cada reda\u00e7\u00e3o \u00e9 um passo na sua evolu\u00e7\u00e3o' }
+        { ico:'\u{1F58B}\uFE0F', tit:'Primeiro passo', txt:'Envie sua primeira reda\u00e7\u00e3o para ver seus dados aqui', url:'nova-redacao.html?metodo=digitar' },
+        { ico:'\u{1F331}', tit:'Rumo \u00e0 nota 1000', txt:'Cada reda\u00e7\u00e3o \u00e9 um passo na sua evolu\u00e7\u00e3o' }
       ];
     }
+    window._ultimosAvisos = itens;
+    if (window._cardPlano) itens = [window._cardPlano].concat(itens);
+    window._avisosRender = itens;
     var track = document.getElementById('avisoTrack');
     var dotsBox = document.getElementById('avisoDots');
     if (!track || !dotsBox) return;
-    track.innerHTML = itens.map(function(it){
-      return '<div class="avisoSlide"><span class="avisoIco">' + it.ico + '</span><div>' +
-        '<p class="avisoTit">' + it.tit + '</p>' +
-        '<p class="avisoTxt">' + it.txt + '</p></div></div>';
+    track.innerHTML = itens.map(function(it, i){
+      var clicavel = !!it.url;
+      return '<div class="avisoSlide' + (clicavel ? ' acao' : '') + '"'
+        + (clicavel ? ' onclick="irAviso(' + i + ')"' : '') + '>'
+        + '<span class="avisoIco">' + it.ico + '</span><div>'
+        + '<p class="avisoTit">' + it.tit + '</p>'
+        + '<p class="avisoTxt">' + it.txt + '</p></div>'
+        + (clicavel ? '<span class="avisoGo">\u203A</span>' : '')
+        + '</div>';
     }).join('');
     dotsBox.innerHTML = '';
     for (var i = 0; i < itens.length; i++) {
@@ -561,6 +571,55 @@
     reiniciarRelogio();
   }
 
+  window.irAviso = function(i){
+    var it = (window._avisosRender || [])[i];
+    if (it && it.url) window.location.href = it.url;
+  };
+
+  /* ── Manchete viva: primeiro card do carrossel vem do Plano de estudos ── */
+  var _bioSemana = null, _bioSemJornada = false;
+  function pad2i(n){ return (n<10?'0':'')+n; }
+  function segundaISO(){
+    var d = new Date(); d.setHours(0,0,0,0);
+    var g = d.getDay(); d.setDate(d.getDate() - ((g===0)?6:g-1));
+    return d.getFullYear()+'-'+pad2i(d.getMonth()+1)+'-'+pad2i(d.getDate());
+  }
+  async function prepararCardPlano(){
+    try{
+      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+      if (!uid || typeof dbFetch !== 'function' || typeof SUPABASE_URL === 'undefined') { _bioSemJornada = true; atualizarBio(); return; }
+      var url = SUPABASE_URL + '/rest/v1/plano_itens?aluno_id=eq.'+uid+'&semana_de=eq.'+segundaISO()+'&order=dia.asc&select=id,dia,tipo,rotulo,destino,feito_em';
+      var res = await dbFetch(url, {});
+      if (!res.ok) return;
+      var itens = await res.json();
+      if (!itens.length){
+        _bioSemJornada = true;
+        window._cardPlano = { ico:'\u{1F680}', tit:'Comece por aqui', txt:'Monte sua primeira semana \u2014 <b>10 a 15 min por dia</b> para ficar fera em reda\u00e7\u00e3o', url:'plano.html' };
+      } else {
+        var feitos = itens.filter(function(i){ return !!i.feito_em; }).length;
+        _bioSemana = 'semana ' + feitos + '/5';
+        var pend = itens.filter(function(i){ return !i.feito_em; })[0];
+        if (!pend){
+          window._cardPlano = { ico:'\u{1F3C1}', tit:'Semana completa!', txt:'Voc\u00ea fechou as 5 etapas \u2014 quer ir al\u00e9m?', url:'plano.html' };
+        } else {
+          window._cardPlano = { ico:'\u{1F9ED}', tit:'Seu pr\u00f3ximo passo \u00b7 ' + feitos + '/5', txt: escapeHtmlSimples(pend.rotulo) + ' \u2014 toque para come\u00e7ar', url: (pend.destino || 'plano.html') };
+        }
+      }
+      montarAvisos(window._ultimosAvisos || null);
+      atualizarBio();
+    }catch(e){ console.warn('[card plano]', e); }
+  }
+  function atualizarBio(){
+    var sub = document.getElementById('subCard');
+    if (!sub) return;
+    var partes = [];
+    if (_bioSemana) partes.push(_bioSemana);
+    if (window._bioTrend) partes.push(window._bioTrend);
+    if (partes.length) sub.textContent = partes.join(' \u00b7 ');
+    else if (_bioSemJornada) sub.textContent = 'sua jornada come\u00e7a hoje \u2728';
+  }
+  prepararCardPlano();
+
   montarAvisos(null);
 
   // ─── Sparkline ───
@@ -593,6 +652,7 @@
       var evolStr = evolucao >= 0 ? '+' + evolucao : '' + evolucao;
       var totalRedacoes = historico.length;
       var melhorNota = Math.max.apply(null, notas);
+      window._bioTrend = (evolucao > 0) ? 'm\u00e9dia subindo \u2b06\ufe0f' : (evolucao < 0 ? 'hora de reagir \u{1F4AA}' : 'm\u00e9dia est\u00e1vel');
       var el;
       el = document.getElementById('mMedia');    if (el) el.textContent = fmtNum(media);
       el = document.getElementById('mRedacoes'); if (el) el.textContent = fmtNum(totalRedacoes);
@@ -613,13 +673,14 @@
       try { if (typeof dbGetCompetenciasConsolidadas === 'function') consolidadas = await dbGetCompetenciasConsolidadas(); } catch(e) {}
 
       var avisos = [];
-      avisos.push({ ico:'\u{1F31F}', tit:'\u00DAltima nota', txt:'Voc\u00ea fez <b>' + ultima + '</b> na \u00faltima reda\u00e7\u00e3o' });
-      if (melhorNota > ultima) avisos.push({ ico:'\u{1F3C6}', tit:'Sua melhor nota', txt:'<b>' + melhorNota + '</b> \u2014 d\u00e1 pra alcan\u00e7ar de novo' });
-      if (pareto) avisos.push({ ico:'\u{1F3AF}', tit:'Foco agora', txt: escapeHtmlSimples(pareto) });
-      if (consolidadas && consolidadas.length > 0) avisos.push({ ico:'\u2705', tit:'Conquistas', txt: escapeHtmlSimples(consolidadas.join(' \u00B7 ')) });
-      if (evolucao > 0) avisos.push({ ico:'\u{1F4C8}', tit:'Evolu\u00e7\u00e3o', txt:'Voc\u00ea subiu <b>' + evolucao + ' pontos</b> na \u00faltima reda\u00e7\u00e3o' });
-      else if (evolucao < 0) avisos.push({ ico:'\u{1F4AA}', tit:'Bora', txt:'Pr\u00f3xima reda\u00e7\u00e3o voc\u00ea sobe \u2014 vamos juntos' });
+      avisos.push({ ico:'\u{1F31F}', tit:'\u00DAltima nota', txt:'Voc\u00ea fez <b>' + ultima + '</b> \u2014 reveja a corre\u00e7\u00e3o e entenda o porqu\u00ea', url:'minhas-redacoes.html' });
+      if (melhorNota > ultima) avisos.push({ ico:'\u{1F3C6}', tit:'Sua melhor nota', txt:'<b>' + melhorNota + '</b> \u2014 d\u00e1 pra alcan\u00e7ar de novo', url:'evolucao.html' });
+      if (pareto) avisos.push({ ico:'\u{1F3AF}', tit:'Foco agora', txt: escapeHtmlSimples(pareto), url:'evolucao.html' });
+      if (consolidadas && consolidadas.length > 0) avisos.push({ ico:'\u2705', tit:'Conquistas', txt: escapeHtmlSimples(consolidadas.join(' \u00B7 ')), url:'evolucao.html' });
+      if (evolucao > 0) avisos.push({ ico:'\u2B06\uFE0F', tit:'Evolu\u00e7\u00e3o', txt:'Voc\u00ea subiu <b>' + evolucao + ' pontos</b> \u2014 veja o que funcionou', url:'evolucao.html' });
+      else if (evolucao < 0) avisos.push({ ico:'\u{1F4AA}', tit:'Bora', txt:'Pr\u00f3xima reda\u00e7\u00e3o voc\u00ea sobe \u2014 vamos juntos', url:'nova-redacao.html?metodo=digitar' });
       montarAvisos(avisos.slice(0, 5));
+      atualizarBio();
     } catch(e) {
       console.warn('Erro ao carregar dados do aluno:', e);
     }
@@ -649,8 +710,7 @@
         if (indicador) { indicador.innerHTML = htmlTurmas; indicador.classList.remove('hidden'); }
         if (indicadorM) { indicadorM.innerHTML = htmlTurmas; indicadorM.classList.remove('hidden'); }
         if (banner) banner.classList.add('hidden');
-        var sub = document.getElementById('subCard');
-        if (sub && turmas[0] && turmas[0].nome) sub.textContent = turmas[0].nome;
+        /* v3-12: a bio viva assume o subCard; as turmas seguem no indicador acima */
       }
     } catch(e) {
       console.warn('Erro ao carregar turmas do aluno:', e);
