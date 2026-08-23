@@ -93,6 +93,10 @@
 .aCard .ic{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:19px; margin-bottom:9px; }
 .aCard h4{ margin:0 0 4px; font-size:13.5px; font-weight:700; color:var(--text); }
 .aCard p{ margin:0; font-size:11px; color:var(--muted); line-height:1.4; }
+.aCard .et{ position:absolute; top:9px; right:9px; font-size:9px; font-weight:900; padding:2px 6px; border-radius:6px; letter-spacing:.03em; }
+.aCard .et.val{ background:rgba(var(--greenRGB),.12); color:var(--green); }
+.aCard .et.ia{ background:rgba(var(--goldRGB),.14); color:var(--gold); }
+.aCard .et.tm{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 .vCard{ position:relative; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:15px; overflow:hidden; cursor:pointer; display:flex; flex-direction:column; min-height:150px; }
 .vThumb{ flex:1; min-height:112px; position:relative; display:flex; flex-direction:column; align-items:flex-start; padding:9px; }
 .vTitle{ margin-top:auto; font-size:12px; font-weight:700; line-height:1.3; color:#fff; padding:18px 4px 4px; width:100%; background:linear-gradient(0deg,rgba(8,12,18,.85) 0%,rgba(8,12,18,.45) 55%,transparent 100%); text-shadow:0 1px 3px rgba(0,0,0,.5); border-radius:0 0 8px 8px; }
@@ -170,19 +174,21 @@
       <button class="btnTurma" onclick="abrirModalEntrarTurma()">Entrar</button>
     </div>
 
-    <div class="sec"><span class="secL"><span class="bar"></span>Potencialize sua Escrita</span><button class="verT" onclick="mostrarEmBreve('Aulas')">Ver Todos</button></div>
-    <div class="carrA">
-      <div class="aCard" onclick="mostrarEmBreve('Sugest&atilde;o da PROfa')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">&#129504;</div><h4>Sugest&atilde;o da PROfa</h4><p>Repert&oacute;rios cr&iacute;ticos e an&aacute;lises personalizadas.</p></div>
-      <div class="aCard" onclick="mostrarEmBreve('Projeto de Texto')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">&#128208;</div><h4>Projeto de Texto</h4><p>Estrutura&ccedil;&atilde;o l&oacute;gica para a nota m&aacute;xima na C3.</p></div>
-      <div class="aCard" onclick="mostrarEmBreve('Proposta Premium')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">&#11088;</div><h4>Proposta Premium</h4><p>O segredo dos 200 pontos na Compet&ecirc;ncia 5.</p></div>
-      <div class="aCard" onclick="mostrarEmBreve('Gram&aacute;tica &Aacute;gil')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">&#9997;&#65039;</div><h4>Gram&aacute;tica &Aacute;gil</h4><p>Erros comuns que tiram pontos na C1.</p></div>
+    <div class="sec"><span class="secL"><span class="bar"></span>Para a sua melhoria</span></div>
+    <p id="subMelhoria" style="font-size:.62rem;color:var(--muted);margin:-.3rem 0 .55rem .55rem;">muda conforme voc\u00ea evolui</p>
+    <div class="carrA" id="gradeMelhoria">
+      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">\uD83D\uDCDA</div><h4>Repert\u00f3rio da semana</h4><p>no Hub de Prepara\u00e7\u00e3o</p></div>
+      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">\uD83C\uDFAF</div><h4>Teste r\u00e1pido</h4><p>quiz no Hub de Prepara\u00e7\u00e3o</p></div>
+      <div class="aCard" onclick="window.location.href='minhas-redacoes.html'"><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">\uD83D\uDCDD</div><h4>Estude sua Reescrita</h4><p>sua \u00faltima reda\u00e7\u00e3o, buscando a nota mil</p></div>
+      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">\uD83E\uDDD1\u200D\uD83C\uDFEB</div><h4>Material da professora</h4><p>o mais recente enviado \u00e0 sua turma</p></div>
     </div>
 
-    <div class="sec"><span class="secL"><span class="bar"></span>Explore e Inspire-se</span></div>
+    <div class="sec"><span class="secL"><span class="bar"></span>Aprenda com a RedaON</span></div>
     <div class="carrV" style="margin-bottom:1rem;">
-      <div class="vCard" onclick="mostrarEmBreve('V&iacute;deos')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#9a7a10,#6b540a);"><span class="vBadge">Aposta da Semana</span><div class="vTitle">O impacto do etarismo</div></div></div>
-      <div class="vCard" onclick="mostrarEmBreve('V&iacute;deos')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#0a8c8d,#0c6b6c);"><span class="vBadge">Rota 1.000</span><div class="vTitle">Repert&oacute;rios de Filosofia</div></div></div>
-      <div class="vCard" onclick="mostrarEmBreve('V&iacute;deos')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#6c5ce7,#4a3fb0);"><span class="vBadge">Corre&ccedil;&atilde;o Guiada</span><div class="vTitle">Como estruturar a tese</div></div></div>
+      <div class="vCard" onclick="mostrarEmBreve('A estrutura da reda\u00e7\u00e3o ENEM')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#2d6a4f,#1b4332);"><span class="vBadge">Base</span><div class="vTitle">A estrutura da reda\u00e7\u00e3o ENEM</div></div></div>
+      <div class="vCard" onclick="mostrarEmBreve('Corre\u00e7\u00e3o Guiada')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#6c5ce7,#4a3fb0);"><span class="vBadge">Corre\u00e7\u00e3o Guiada</span><div class="vTitle">O que o corretor considera em cada compet\u00eancia</div></div></div>
+      <div class="vCard" onclick="mostrarEmBreve('Aposta da Semana')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#9a7a10,#6b540a);"><span class="vBadge">Aposta da Semana</span><div class="vTitle">Por que este tema pode cair \u2014 o briefing</div></div></div>
+      <div class="vCard" onclick="mostrarEmBreve('Rota 1.000')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#0a8c8d,#0c6b6c);"><span class="vBadge">Rota 1.000</span><div class="vTitle">O caminho de quem chegou l\u00e1</div></div></div>
     </div>
 
   </div>
@@ -249,7 +255,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-12'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-14'
   });
 
   // Sauda\u00e7\u00e3o
@@ -618,6 +624,72 @@
     if (partes.length) sub.textContent = partes.join(' \u00b7 ');
     else if (_bioSemJornada) sub.textContent = 'sua jornada come\u00e7a hoje \u2728';
   }
+  /* \u2500\u2500 Grade "Para a sua melhoria": bebe das fontes reais \u2500\u2500 */
+  async function temaDaSemanaInicio(){
+    try{
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=8', {});
+      if (!res.ok) return null;
+      var rows = await res.json();
+      var hoje = new Date(); hoje.setHours(0,0,0,0);
+      for (var i2=0;i2<rows.length;i2++){
+        var t = rows[i2];
+        var ini = new Date(t.semana_de + 'T00:00:00');
+        var fim = new Date(ini); fim.setDate(fim.getDate()+7);
+        if (hoje >= ini && hoje < fim) return t;
+      }
+      return null;
+    }catch(e){ return null; }
+  }
+  function focoDoHistorico(hist){
+    if (!hist || !hist.length) return null;
+    var soma={c1:0,c2:0,c3:0,c4:0,c5:0}, ch=['c1','c2','c3','c4','c5'];
+    hist.forEach(function(r){ ch.forEach(function(k){ soma[k]+=(r[k]||0); }); });
+    return ch.slice().sort(function(a,b){ return soma[a]-soma[b]; })[0].toUpperCase();
+  }
+  var NOME_COMP_INI = { C1:'Norma culta', C2:'Tema e repert\u00f3rio', C3:'Argumenta\u00e7\u00e3o', C4:'Coes\u00e3o', C5:'Interven\u00e7\u00e3o' };
+  async function preencherGrade(hist){
+    try{
+      var grade = document.getElementById('gradeMelhoria');
+      if (!grade || typeof dbFetch !== 'function' || typeof SUPABASE_URL === 'undefined') return;
+      var foco = focoDoHistorico(hist);
+      var sub = document.getElementById('subMelhoria');
+      if (sub && foco) sub.innerHTML = 'muda conforme voc\u00ea evolui \u00b7 hoje mirando <b style="color:var(--cyan);">' + foco + ' \u00b7 ' + NOME_COMP_INI[foco] + '</b>';
+      var tema = await temaDaSemanaInicio();
+      var destinoHub = tema ? ('hub-preparacao.html?tema=' + encodeURIComponent(tema.id)) : 'hub-preparacao.html';
+      /* Cascata B2C aprovada: material da professora \u2192 acervo da PROfa (IA mentora) \u2192 convite */
+      var mat = null, matFonte = 'professor';
+      try{
+        var rm = await dbFetch(SUPABASE_URL + '/rest/v1/materiais?select=id,nome,tema_id,selo&origem=eq.professor&publicado=eq.true&order=criado_em.desc&limit=1', {});
+        if (rm.ok){ var rows = await rm.json(); mat = rows[0] || null; }
+        if (!mat){
+          var rr = await dbFetch(SUPABASE_URL + '/rest/v1/materiais?select=id,nome,tema_id,selo&origem=eq.redaon&publicado=eq.true&order=criado_em.desc&limit=1', {});
+          if (rr.ok){ var rows2 = await rr.json(); mat = rows2[0] || null; matFonte = 'redaon'; }
+        }
+      }catch(e){}
+      var temRedacao = !!(hist && hist.length);
+      var cards = [];
+      if (mat){
+        var dMat = mat.tema_id ? ('hub-preparacao.html?tema=' + encodeURIComponent(mat.tema_id)) : 'hub-preparacao.html';
+        var selo = (mat.selo === 'validado') ? '<span class="et val">\u2713 validado</span>' : '<span class="et ia">IA</span>';
+        var fonteTxt = (matFonte === 'redaon') ? 'da PROfa, sua mentora' : 'da sua professora';
+        var fonteIco = (matFonte === 'redaon') ? '\u2728' : '\uD83E\uDDD1\u200D\uD83C\uDFEB';
+        cards.push('<div class="aCard" onclick="window.location.href=\'' + dMat + '\'">' + selo + '<div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">' + fonteIco + '</div><h4>' + escapeHtmlSimples(mat.nome) + '</h4><p>' + fonteTxt + '</p></div>');
+      }
+      cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><span class="et tm">tema</span><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">\uD83D\uDCDA</div><h4>Repert\u00f3rio da semana</h4><p>' + (tema ? escapeHtmlSimples(tema.titulo) : 'no Hub de Prepara\u00e7\u00e3o') + '</p></div>');
+      cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><span class="et ia">quiz</span><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">\uD83C\uDFAF</div><h4>Teste r\u00e1pido' + (foco ? ' de ' + foco : '') + '</h4><p>no Hub de Prepara\u00e7\u00e3o</p></div>');
+      if (temRedacao){
+        cards.push('<div class="aCard" onclick="window.location.href=\'minhas-redacoes.html\'"><span class="et tm">sua</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">\uD83D\uDCDD</div><h4>Estude sua Reescrita</h4><p>sua \u00faltima reda\u00e7\u00e3o, buscando a nota mil</p></div>');
+      } else {
+        cards.push('<div class="aCard" onclick="window.location.href=\'nova-redacao.html?metodo=digitar\'"><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">\uD83D\uDD8B\uFE0F</div><h4>Sua primeira reda\u00e7\u00e3o</h4><p>escreva para destravar a Reescrita</p></div>');
+      }
+      if (!mat){
+        cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">\u2728</div><h4>Materiais para voc\u00ea</h4><p>da sua professora ou da PROfa \u2014 aparecem aqui</p></div>');
+      }
+      grade.innerHTML = cards.slice(0,4).join('');
+    }catch(e){ console.warn('[grade melhoria]', e); }
+  }
+  preencherGrade(null);
+
   prepararCardPlano();
 
   montarAvisos(null);
@@ -681,6 +753,7 @@
       else if (evolucao < 0) avisos.push({ ico:'\u{1F4AA}', tit:'Bora', txt:'Pr\u00f3xima reda\u00e7\u00e3o voc\u00ea sobe \u2014 vamos juntos', url:'nova-redacao.html?metodo=digitar' });
       montarAvisos(avisos.slice(0, 5));
       atualizarBio();
+      preencherGrade(historico);
     } catch(e) {
       console.warn('Erro ao carregar dados do aluno:', e);
     }
