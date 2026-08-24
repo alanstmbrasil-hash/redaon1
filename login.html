@@ -3,369 +3,613 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RedaON — Login</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="supabase-auth.js"></script>
+<title>RedaON — Entrar</title>
+<!-- v2-1: links de Termos/Privacidade/Planos e botão Google em modo "em breve" — ver LINKS_PENDENTES abaixo -->
+<meta name="theme-color" content="#0a8c8d">
+<!-- RedaON · login.html · PRODUÇÃO v2-1 · 23/08/2026 · a partir do mockup v2-3 validado -->
+<!-- Sem Tailwind. CSS próprio com os tokens do sistema (claro "folha da PROfa" / escuro). -->
+<script>
+  // Tema: cascata da base v6 (salvo > auto pelo aparelho) — antes de pintar
+  (function(){
+    var pref = 'auto';
+    try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+    var efetivo = pref;
+    if (pref === 'auto') {
+      var claro = false;
+      try { claro = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+      efetivo = claro ? 'claro' : 'escuro';
+    }
+    document.documentElement.setAttribute('data-tema', efetivo);
+  })();
+  // Sessão válida (e sem retorno OAuth no hash): vai direto, sem ver a tela
+  (function(){
+    var h = window.location.hash || '';
+    if (h.indexOf('access_token=') !== -1 || h.indexOf('error') !== -1) return;
+    var tk = null, tipo = 'aluno';
+    try { tk = localStorage.getItem('redaon_token'); tipo = localStorage.getItem('redaon_tipo') || 'aluno'; } catch(e) {}
+    if (!tk) return;
+    var rotas = { aluno: 'inicio.html', professor: 'professor.html', admin: 'admin-professores.html' };
+    window.location.replace(rotas[tipo] || 'inicio.html');
+  })();
+</script>
+<script src="supabase-auth.js?v=2-0"></script>
 <style>
-  *{word-break:normal!important;overflow-wrap:break-word}
-  body{background:#0b0e14;font-family:'Segoe UI',sans-serif}
-  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#0b0e14}::-webkit-scrollbar-thumb{background:#45edee44;border-radius:2px}
-  scrollbar-width:thin;scrollbar-color:#45edee44 #0b0e14;
+  *{margin:0;padding:0;box-sizing:border-box;word-break:normal;overflow-wrap:break-word}
 
-  .input-field{
-    background:#13161f;
-    border:1.5px solid #1e2330;
-    color:#fff;
-    border-radius:10px;
-    padding:14px 16px;
-    width:100%;
-    font-size:15px;
-    transition:border-color .2s;
-    outline:none;
+  html[data-tema="escuro"]{--bg:#10131a;--bgRGB:16,19,26;--surface:#1d2026;--surface2:#272a31;--text:#e1e2eb;--text2:#c8c4d7;--muted:#928ea0;--muted2:#474554;--cyan:#45edee;--cyanRGB:69,237,238;--onCyan:#002020;--purple:#6c5ce7;--purpleRGB:108,92,231;--gold:#fabd00;--green:#4ade80;--red:#ff8b8b;--borderRGB:71,69,84;--sombra:0 4px 16px rgba(0,0,0,.25)}
+  html[data-tema="claro"]{--bg:#fdfbf4;--bgRGB:253,251,244;--surface:#ffffff;--surface2:#f6f2e6;--text:#0a4a4b;--text2:#3a5556;--muted:#8a8576;--muted2:#b9b3a2;--cyan:#0a8c8d;--cyanRGB:10,140,141;--onCyan:#ffffff;--purple:#5a4fc4;--purpleRGB:90,79,196;--gold:#9a7a10;--green:#0f8a4d;--red:#c0473b;--borderRGB:10,74,75;--sombra:0 4px 16px rgba(10,74,75,.10)}
+
+  body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;}
+
+  /* ── Palco geral ── */
+  #palco{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:2.2rem 1.1rem 1.4rem;max-width:26rem;margin:0 auto;position:relative;}
+
+  /* ── Marca ── */
+  .lgLinha{display:flex;align-items:center;gap:.55rem;justify-content:center;}
+  .lgQuad{width:36px;height:36px;border-radius:10px;background:var(--cyan);color:var(--onCyan);display:flex;align-items:center;justify-content:center;font-weight:900;font-style:italic;font-size:1.05rem;flex:0 0 auto;}
+  .lgNome{font-size:1.6rem;font-weight:900;font-style:italic;letter-spacing:-.04em;color:var(--text);}
+  .lgNome i{color:var(--cyan);font-style:italic;}
+  .slogan{font-size:1.02rem;color:var(--text);text-align:center;font-weight:800;margin-top:.4rem;line-height:1.35;}
+
+  /* ── Vitrine (bullets da abertura, mobile) ── */
+  #vitrine{margin-top:1.35rem;display:flex;flex-direction:column;gap:.6rem;align-items:flex-start;align-self:center;}
+  #btnIntroEntrar{align-self:center;width:12.5rem;margin-top:1.7rem;}
+  #colEsq{position:relative;width:100%;}
+  .bItem{display:flex;gap:.5rem;align-items:flex-start;font-size:.92rem;color:var(--text);font-weight:800;line-height:1.45;}
+  .bItem b{color:var(--cyan);font-weight:900;flex:0 0 auto;}
+
+  /* ── Cápsulas (estado final mobile) ── */
+  #capsulas{display:flex;gap:.4rem;justify-content:center;margin-top:.8rem;}
+  .cap{font-size:.68rem;font-weight:800;color:var(--cyan);background:rgba(var(--cyanRGB),.12);border:1px solid rgba(var(--cyanRGB),.35);border-radius:99px;padding:.26rem .6rem;white-space:nowrap;}
+
+  /* ── Cartão / formulários ── */
+  #cartao{width:100%;background:var(--surface);border:1px solid rgba(var(--borderRGB),.18);border-radius:16px;padding:1.15rem 1rem 1.05rem;margin-top:1.1rem;box-shadow:var(--sombra);}
+  .lbl{font-size:.7rem;color:var(--muted);font-weight:600;display:block;margin-bottom:.3rem;}
+  .campo{width:100%;background:var(--surface2);border:1.5px solid rgba(var(--borderRGB),.22);color:var(--text);border-radius:10px;padding:.75rem .85rem;font-size:16px;font-family:inherit;margin-bottom:.75rem;outline:none;transition:border-color .18s;}
+  .campo:focus{border-color:var(--cyan);}
+  .campo::placeholder{color:var(--muted2);}
+  .campoWrap{position:relative;}
+  .olho{position:absolute;right:.35rem;top:.2rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.5rem;}
+  .esqueci{display:block;text-align:right;font-size:.7rem;color:var(--cyan);font-weight:700;margin:-.25rem 0 .85rem;cursor:pointer;text-decoration:none;}
+  .btnP{width:100%;min-height:46px;border-radius:11px;background:var(--cyan);color:var(--onCyan);font-weight:800;font-size:.88rem;border:none;cursor:pointer;font-family:inherit;transition:opacity .18s,transform .1s;}
+  .btnP:active{transform:scale(.985);}
+  .btnP:disabled{opacity:.55;}
+  .btnG{width:100%;min-height:46px;border-radius:11px;background:var(--surface2);color:var(--text);font-weight:700;font-size:.8rem;border:1px solid rgba(var(--borderRGB),.28);display:flex;align-items:center;justify-content:center;gap:.5rem;cursor:pointer;font-family:inherit;margin-top:.1rem;}
+  .gIco{width:17px;height:17px;border-radius:50%;background:conic-gradient(#ea4335 0 25%,#fbbc05 25% 50%,#34a853 50% 75%,#4285f4 75% 100%);flex:0 0 auto;}
+  .ou{display:flex;align-items:center;gap:.6rem;margin:.75rem 0;}
+  .ou::before,.ou::after{content:'';flex:1;height:1px;background:rgba(var(--borderRGB),.2);}
+  .ou span{font-size:.62rem;color:var(--muted2);font-weight:700;}
+  .rodapeLk{font-size:.72rem;color:var(--muted);text-align:center;margin-top:.95rem;}
+  .rodapeLk b{color:var(--cyan);font-weight:800;cursor:pointer;}
+  .adminLk{font-size:.62rem;color:var(--muted2);text-align:center;margin-top:1.1rem;cursor:pointer;}
+
+  .msgErro{background:rgba(var(--borderRGB),.06);border:1px solid var(--red);color:var(--red);border-radius:9px;padding:.6rem .75rem;font-size:.74rem;line-height:1.4;margin-bottom:.75rem;display:none;}
+  .msgOk{background:rgba(var(--cyanRGB),.1);border:1px solid rgba(var(--cyanRGB),.4);color:var(--cyan);border-radius:9px;padding:.6rem .75rem;font-size:.74rem;line-height:1.4;margin-bottom:.75rem;display:none;}
+  .aviso{width:100%;background:rgba(var(--cyanRGB),.1);border:1px solid rgba(var(--cyanRGB),.35);color:var(--text2);border-radius:10px;padding:.6rem .75rem;font-size:.72rem;line-height:1.45;margin-top:1rem;display:none;}
+
+  /* Abas Aluno/Professor (só no Criar conta) */
+  .abasPerfil{display:flex;gap:.4rem;background:var(--bg);border:1px solid rgba(var(--borderRGB),.18);border-radius:11px;padding:.25rem;margin-bottom:1rem;}
+  .abaP{flex:1;text-align:center;font-size:.76rem;font-weight:800;padding:.55rem 0;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;}
+  .abaP.on{background:var(--cyan);color:var(--onCyan);}
+
+  .chkLinha{display:flex;gap:.55rem;align-items:flex-start;margin:.15rem 0 .85rem;cursor:pointer;}
+  .chkLinha input{margin-top:.15rem;width:1rem;height:1rem;accent-color:var(--cyan);flex:0 0 auto;}
+  .chkLinha span{font-size:.7rem;color:var(--muted);line-height:1.45;}
+  .chkLinha span b{color:var(--cyan);}
+
+  .tituloForm{font-size:1rem;font-weight:900;color:var(--text);margin-bottom:.2rem;}
+  .subForm{font-size:.74rem;color:var(--muted);margin-bottom:1rem;line-height:1.45;}
+  .voltar{font-size:.72rem;color:var(--muted);font-weight:700;cursor:pointer;margin-bottom:.8rem;display:inline-block;}
+  .voltar b{color:var(--cyan);}
+
+  .spinner{width:16px;height:16px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:gira .6s linear infinite;display:inline-block;vertical-align:-3px;margin-right:.4rem;}
+  @keyframes gira{to{transform:rotate(360deg)}}
+
+  /* ── Sequência de abertura (só mobile, 1ª visita) ── */
+  .anima #marca,.anima #vitrine{opacity:0;transform:translateY(10px);}
+  .anima.f1 #marca{opacity:1;transform:none;transition:opacity .35s ease,transform .35s ease;}
+  .anima.f1 #vitrine{opacity:1;transform:none;transition:opacity .4s ease .25s,transform .4s ease .25s;}
+  .anima #capsulas{opacity:0;display:flex;}
+  .anima #cartao{transform:translateY(120%);opacity:0;}
+  .anima.f2 #vitrine{opacity:0;transform:translateY(-8px);transition:opacity .5s ease,transform .5s ease;position:absolute;pointer-events:none;left:0;right:0;top:5rem;}
+  .anima.f2 #capsulas{opacity:1;transition:opacity .6s ease .45s;}
+  .anima.f2 #cartao{transform:none;opacity:1;transition:transform 1.15s cubic-bezier(.18,.62,.24,1) .05s,opacity .8s ease .1s;}
+  .pronto #vitrine{display:none;}
+  .pronto #capsulas{display:flex;}
+  .modo-entrar-off #capsulas{display:none;}
+
+  /* ── Desktop (Opção B) ── */
+  #painelDesk{display:none;}
+  @media(min-width:880px){
+    body.pronto #palco,body.anima #palco{flex-direction:row;max-width:64rem;align-items:flex-start;gap:3rem;padding-top:clamp(3rem,14vh,7rem);}
+    #colEsq{flex:1.1;display:flex;flex-direction:column;gap:1rem;}
+    #colDir{flex:1;max-width:24rem;}
+    #marca .lgLinha{justify-content:flex-start;}
+    .slogan{text-align:left;font-size:1.25rem;}
+    #capsulas{display:none!important;}
+    #painelDesk{display:flex;flex-direction:column;gap:.95rem;margin-top:1.3rem;}
+    #painelDesk .bItem{font-size:1rem;font-weight:800;color:var(--text);max-width:24rem;}
+    .anima #cartao{transform:none;opacity:1;}
+    .anima #marca,.anima #vitrine{opacity:1;transform:none;}
+    #vitrine{display:none!important;}
+    #cartao{margin-top:0;}
   }
-  .input-field:focus{border-color:#45edee}
-  .input-field::placeholder{color:#4a5568}
+  @media(max-width:879px){ #colEsq,#colDir{width:100%;} }
 
-  .btn-primary{
-    background:linear-gradient(135deg,#45edee,#6c5ce7);
-    color:#0b0e14;
-    font-weight:700;
-    border-radius:10px;
-    padding:14px;
-    width:100%;
-    font-size:16px;
-    border:none;
-    cursor:pointer;
-    transition:opacity .2s,transform .1s;
-  }
-  .btn-primary:hover{opacity:.9}
-  .btn-primary:active{transform:scale(.98)}
-  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
 
-  .card{
-    background:#13161f;
-    border:1px solid #1e2330;
-    border-radius:16px;
-  }
+  /* ── Toast ── */
+  #toast{position:fixed;left:50%;bottom:5.2rem;transform:translateX(-50%) translateY(20px);background:var(--surface);color:var(--text);border:1px solid rgba(var(--borderRGB),.3);border-radius:99px;padding:.55rem 1rem;font-size:.74rem;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:300;box-shadow:var(--sombra);max-width:88vw;text-align:center;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-  .logo-text{font-style:italic;font-weight:800;font-size:2rem;letter-spacing:-1px}
-  .logo-on{color:#45edee}
-
-  .tab-btn{
-    flex:1;padding:10px;border-radius:8px;font-weight:600;font-size:14px;
-    transition:all .2s;cursor:pointer;border:none;
-  }
-  .tab-btn.active{background:linear-gradient(135deg,#45edee22,#6c5ce722);color:#45edee;border:1px solid #45edee44}
-  .tab-btn.inactive{background:transparent;color:#6b7280;border:1px solid transparent}
-
-  .error-msg{background:#e74c3c22;border:1px solid #e74c3c44;color:#f87171;border-radius:8px;padding:12px 14px;font-size:14px;display:none}
-  .success-msg{background:#45edee22;border:1px solid #45edee44;color:#45edee;border-radius:8px;padding:12px 14px;font-size:14px;display:none}
-
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .spinner{width:20px;height:20px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
-
-  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-  .fade-in{animation:fadeIn .35s ease-out}
 </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="anima">
 
-<!-- Background decorativo -->
-<div style="position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0">
-  <div style="position:absolute;top:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,#45edee08 0%,transparent 70%);border-radius:50%"></div>
-  <div style="position:absolute;bottom:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,#6c5ce708 0%,transparent 70%);border-radius:50%"></div>
-</div>
+<div id="palco">
 
-<div class="w-full max-w-sm fade-in" style="position:relative;z-index:1">
+  <div id="colEsq">
+    <div id="marca">
+      <div class="lgLinha"><div class="lgQuad">R</div><div class="lgNome">Reda<i>ON</i></div></div>
+      <p class="slogan">Sua redação mais perto da nota mil!</p>
+    </div>
 
-  <!-- Logo -->
-  <div class="text-center mb-8">
-    <div class="logo-text text-white">Reda<span class="logo-on">ON</span></div>
-    <p style="color:#6b7280;font-size:14px;margin-top:4px">Plataforma de redação para o ENEM</p>
+    <!-- Vitrine da abertura (mobile) -->
+    <div id="vitrine">
+      <div class="bItem"><b>✓</b>Correção em 30s</div>
+      <div class="bItem"><b>✓</b>5 competências do ENEM</div>
+      <div class="bItem"><b>✓</b>Melhoria contínua guiada pela IA + Professor</div>
+      <button class="btnP" id="btnIntroEntrar" onclick="iniciarEntrada()">Entrar</button>
+    </div>
+
+    <!-- Painel desktop (Opção B) -->
+    <div id="painelDesk">
+      <div class="bItem"><b>✓</b>Correção em 30s</div>
+      <div class="bItem"><b>✓</b>5 competências do ENEM</div>
+      <div class="bItem"><b>✓</b>Melhoria contínua guiada pela IA + Professor</div>
+    </div>
+
+    <!-- Cápsulas (estado final mobile) -->
+    <div id="capsulas"><span class="cap">30s</span><span class="cap">5C - ENEM</span><span class="cap">IA + Professor</span></div>
   </div>
 
-  <!-- Card principal -->
-  <div class="card p-6">
+  <div id="colDir">
+    <div id="cartao">
 
-    <!-- Tabs Aluno / Professor -->
-    <div class="flex gap-2 mb-6 p-1" style="background:#0b0e14;border-radius:10px">
-      <button class="tab-btn active" id="tab-aluno" onclick="setTab('aluno')">👨‍🎓 Aluno</button>
-      <button class="tab-btn inactive" id="tab-professor" onclick="setTab('professor')">👩‍🏫 Professor</button>
-    </div>
-
-    <!-- Sub-tabs: Entrar / Cadastrar -->
-    <div class="flex gap-4 mb-6" style="border-bottom:1px solid #1e2330">
-      <div id="sub-login" onclick="setSubTab('login')"
-        style="padding-bottom:10px;font-size:15px;font-weight:600;color:#45edee;border-bottom:2px solid #45edee;margin-bottom:-1px;cursor:pointer;transition:all .2s">
-        Entrar
-      </div>
-      <div id="sub-cadastro" onclick="setSubTab('cadastro')"
-        style="padding-bottom:10px;font-size:15px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:all .2s">
-        Criar conta
-      </div>
-    </div>
-
-    <!-- FORM: LOGIN -->
-    <div id="form-login">
-      <div class="mb-4">
-        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">E-mail</label>
-        <input id="login-email" type="email" class="input-field" placeholder="seu@email.com" autocomplete="email">
-      </div>
-      <div class="mb-2">
-        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Senha</label>
-        <div style="position:relative">
-          <input id="login-senha" type="password" class="input-field" placeholder="••••••••" autocomplete="current-password" style="padding-right:48px">
-          <button onclick="toggleSenha('login-senha',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#6b7280;cursor:pointer;font-size:18px">👁</button>
+      <!-- ══ VISTA: ENTRAR ══ -->
+      <div id="vEntrar">
+        <div class="aviso" id="avisoSessao" style="margin-top:0;margin-bottom:.8rem;"></div>
+        <span class="lbl">E-mail</span>
+        <input class="campo" id="loginEmail" type="email" placeholder="seu@email.com" autocomplete="email">
+        <span class="lbl">Senha</span>
+        <div class="campoWrap">
+          <input class="campo" id="loginSenha" type="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:2.9rem;">
+          <button class="olho" onclick="alternarOlho('loginSenha',this)">👁</button>
         </div>
-      </div>
-      <div class="text-right mb-5">
-        <a href="recuperar-senha.html" style="color:#45edee;font-size:13px;text-decoration:none">Esqueci minha senha</a>
+        <a class="esqueci" onclick="irVista('recuperar')">Esqueci minha senha</a>
+        <div class="msgErro" id="loginErro"></div>
+        <button class="btnP" id="btnEntrar" onclick="fazerLogin()">Entrar</button>
+        <div class="ou"><span>ou</span></div>
+        <button class="btnG" onclick="entrarComGoogle()" id="btnGoogle"><span class="gIco"></span>Entrar com Google</button>
+        <p class="rodapeLk">Não tem conta? <b onclick="irVista('cadastro')">Criar agora</b></p>
       </div>
 
-      <div class="error-msg mb-4" id="login-error"></div>
-      <div class="success-msg mb-4" id="login-success"></div>
-
-      <button class="btn-primary" id="btn-login" onclick="fazerLogin()">Entrar</button>
-
-      <p style="text-align:center;color:#6b7280;font-size:13px;margin-top:16px">
-        Não tem conta? <span onclick="setSubTab('cadastro')" style="color:#45edee;cursor:pointer;font-size:13px">Criar agora</span>
-      </p>
-    </div>
-
-    <!-- FORM: CADASTRO -->
-    <div id="form-cadastro" style="display:none">
-      <div class="mb-4">
-        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Nome completo</label>
-        <input id="cad-nome" type="text" class="input-field" placeholder="Seu nome" autocomplete="name">
-      </div>
-      <div class="mb-4">
-        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">E-mail</label>
-        <input id="cad-email" type="email" class="input-field" placeholder="seu@email.com" autocomplete="email">
-      </div>
-      <div class="mb-4">
-        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Senha</label>
-        <div style="position:relative">
-          <input id="cad-senha" type="password" class="input-field" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="padding-right:48px">
-          <button onclick="toggleSenha('cad-senha',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#6b7280;cursor:pointer;font-size:18px">👁</button>
+      <!-- ══ VISTA: CRIAR CONTA ══ -->
+      <div id="vCadastro" style="display:none;">
+        <span class="voltar" onclick="irVista('entrar')"><b>‹</b> Voltar para Entrar</span>
+        <p class="tituloForm">Criar conta</p>
+        <div class="abasPerfil">
+          <button class="abaP on" id="abaAluno" onclick="setPerfil('aluno')">👨‍🎓 Aluno</button>
+          <button class="abaP" id="abaProf" onclick="setPerfil('professor')">👩‍🏫 Professor</button>
         </div>
+        <span class="lbl">Nome completo</span>
+        <input class="campo" id="cadNome" type="text" placeholder="Seu nome" autocomplete="name">
+        <span class="lbl">E-mail</span>
+        <input class="campo" id="cadEmail" type="email" placeholder="seu@email.com" autocomplete="email">
+        <span class="lbl">Senha</span>
+        <div class="campoWrap">
+          <input class="campo" id="cadSenha" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="padding-right:2.9rem;">
+          <button class="olho" onclick="alternarOlho('cadSenha',this)">👁</button>
+        </div>
+        <div id="campoEscola" style="display:none;">
+          <span class="lbl">Escola onde leciona</span>
+          <input class="campo" id="cadEscola" type="text" placeholder="Nome da escola">
+        </div>
+        <span class="lbl" id="lblCodigo">Código da turma</span>
+        <input class="campo" id="cadCodigo" type="text" placeholder="ex: redaon-bravo-jaguar-84" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <label class="chkLinha"><input type="checkbox" id="chkTermos"><span>Li e aceito os <b id="lkTermos">Termos de Uso</b> e a <b id="lkPrivacidade">Política de Privacidade</b> da RedaON.</span></label>
+        <div class="msgErro" id="cadErro"></div>
+        <div class="msgOk" id="cadOk"></div>
+        <button class="btnP" id="btnCadastro" onclick="fazerCadastro()">Criar conta</button>
+        <p class="rodapeLk" id="linkPlanos">Não tem código? <b class="lkPlanos">Conheça os planos</b></p>
       </div>
 
-      <!-- Campo extra para professor -->
-      <div id="campo-escola" style="display:none" class="mb-4">
-        <label style="color:#9ca3af;font-size:13px;display:block;margin-bottom:6px">Escola onde leciona</label>
-        <input id="cad-escola" type="text" class="input-field" placeholder="Nome da escola">
+      <!-- ══ VISTA: RECUPERAR SENHA ══ -->
+      <div id="vRecuperar" style="display:none;">
+        <span class="voltar" onclick="irVista('entrar')"><b>‹</b> Voltar para Entrar</span>
+        <p class="tituloForm">Recuperar senha</p>
+        <p class="subForm">Digite o e-mail da sua conta. Vamos te enviar um link para criar uma senha nova.</p>
+        <span class="lbl">E-mail</span>
+        <input class="campo" id="recEmail" type="email" placeholder="seu@email.com" autocomplete="email">
+        <div class="msgErro" id="recErro"></div>
+        <div class="msgOk" id="recOk"></div>
+        <button class="btnP" id="btnRec" onclick="fazerRecuperar()">Enviar link de recuperação</button>
       </div>
 
-      <div class="error-msg mb-4" id="cad-error"></div>
-      <div class="success-msg mb-4" id="cad-success"></div>
-
-      <button class="btn-primary" id="btn-cadastro" onclick="fazerCadastro()">Criar conta</button>
-
-      <!-- Aviso para professor -->
-      <div id="aviso-professor" style="display:none;background:#6c5ce722;border:1px solid #6c5ce744;border-radius:8px;padding:12px;margin-top:16px">
-        <p style="color:#9ca3af;font-size:13px;text-align:center">
-          ⚠️ Contas de professor passam por <strong style="color:#fff">aprovação manual</strong>.<br>
-          Você receberá um e-mail em até 48h.
-        </p>
+      <!-- ══ VISTA: CÓDIGO (1º acesso com Google, cadastro fechado) ══ -->
+      <div id="vCodigo" style="display:none;">
+        <p class="tituloForm">Falta só o código</p>
+        <p class="subForm" id="codigoOla">Sua conta Google entrou. Para liberar a RedaON, informe o código que você recebeu.</p>
+        <div class="abasPerfil">
+          <button class="abaP on" id="abaAlunoCod" onclick="setPerfilCodigo('aluno')">👨‍🎓 Aluno</button>
+          <button class="abaP" id="abaProfCod" onclick="setPerfilCodigo('professor')">👩‍🏫 Professor</button>
+        </div>
+        <div id="campoEscolaCod" style="display:none;">
+          <span class="lbl">Escola onde leciona</span>
+          <input class="campo" id="codEscola" type="text" placeholder="Nome da escola">
+        </div>
+        <span class="lbl" id="lblCodigoCod">Código da turma</span>
+        <input class="campo" id="codCodigo" type="text" placeholder="ex: redaon-bravo-jaguar-84" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <div class="msgErro" id="codErro"></div>
+        <button class="btnP" id="btnCodigo" onclick="confirmarCodigo()">Confirmar</button>
+        <p class="rodapeLk">Não tem código? <b class="lkPlanos">Conheça os planos</b></p>
+        <p class="rodapeLk" style="margin-top:.6rem;"><b onclick="sairDoCodigo()">Sair desta conta</b></p>
       </div>
 
-      <p style="text-align:center;color:#6b7280;font-size:13px;margin-top:16px">
-        Já tem conta? <span onclick="setSubTab('login')" style="color:#45edee;cursor:pointer;font-size:13px">Entrar</span>
-      </p>
     </div>
-
+    <a class="adminLk" href="admin-professores.html" style="display:block;text-decoration:none;">Acesso Admin</a>
   </div>
 
-  <!-- Link admin -->
-  <p style="text-align:center;margin-top:20px">
-    <a href="admin-professores.html" style="color:#374151;font-size:12px;text-decoration:none">Acesso Admin</a>
-  </p>
-
 </div>
+
+
+<div id="toast"></div>
+
 
 <script>
-  // ── Estado ──────────────────────────────────
-  let tabAtual = 'aluno';
-  let subTabAtual = 'login';
+  // ─── Toast ───
+  var _tT;
+  function toast(m){
+    var t = document.getElementById('toast');
+    t.textContent = m; t.classList.add('show');
+    clearTimeout(_tT);
+    _tT = setTimeout(function(){ t.classList.remove('show'); }, 2100);
+  }
 
-  // ── Redirecionar se já logado ───────────────
-  window.addEventListener('DOMContentLoaded', () => {
-    if (authEstaLogado()) {
-      const tipo = authGetTipo();
-      const rotas = { aluno: 'inicio.html', professor: 'professor.html', admin: 'admin-professores.html' };
-      window.location.href = rotas[tipo] || 'inicio.html';
+  // ─── Abertura (1ª visita): texto centralizado + botão; flutuação suave ───
+  var CHAVE_INTRO = 'redaon_login_intro_v1';
+  var introRodando = false, esperando = false, _t1, _t2;
+  function estadoFinal(){
+    clearTimeout(_t1); clearTimeout(_t2);
+    var esq = document.getElementById('colEsq'), dir = document.getElementById('colDir');
+    if (esq) esq.style.cssText = '';
+    if (dir) dir.style.cssText = '';
+    document.body.classList.remove('anima','f1','f2');
+    document.body.classList.add('pronto');
+    introRodando = false; esperando = false;
+    document.removeEventListener('pointerdown', toquePalco);
+    document.removeEventListener('pointerdown', pularIntroDesk);
+  }
+  function toquePalco(){
+    if (esperando) { iniciarEntrada(); }        // qualquer toque também inicia
+    else if (introRodando) { estadoFinal(); }   // toque durante a flutuação conclui na hora
+  }
+  function iniciarEntrada(){
+    if (!esperando) return;
+    esperando = false; introRodando = true;
+    try { localStorage.setItem(CHAVE_INTRO, '1'); } catch(e) {}
+    var esq = document.getElementById('colEsq');
+    esq.style.transition = 'transform 1s cubic-bezier(.18,.62,.24,1)';
+    esq.style.transform = 'translateY(0)';      // texto flutua do centro para o topo
+    document.body.classList.add('f2');          // cartão flutua de baixo; bullets viram cápsulas
+    _t2 = setTimeout(estadoFinal, 1400);
+  }
+  function estadoFinalDesk(){
+    clearTimeout(_t1); clearTimeout(_t2);
+    var esq = document.getElementById('colEsq'), dir = document.getElementById('colDir');
+    esq.style.cssText = ''; dir.style.cssText = '';
+    document.body.classList.remove('anima','f1','f2');
+    document.body.classList.add('pronto');
+    introRodando = false;
+    document.removeEventListener('pointerdown', pularIntroDesk);
+  }
+  function pularIntroDesk(){ if (introRodando) estadoFinalDesk(); }
+  function rodarIntroDesk(){
+    var esq = document.getElementById('colEsq'), dir = document.getElementById('colDir');
+    var palco = document.getElementById('palco');
+    introRodando = true;
+    document.addEventListener('pointerdown', pularIntroDesk);
+    document.body.classList.remove('anima');
+    document.body.classList.add('pronto');
+    requestAnimationFrame(function(){
+      if (!introRodando) return;               // abertura cancelada (aviso/OAuth) antes do 1º frame
+      var p = palco.getBoundingClientRect(), e = esq.getBoundingClientRect();
+      var dx = (p.left + p.width / 2) - (e.left + e.width / 2);
+      esq.style.transition = 'none';
+      esq.style.transform = 'translateX(' + dx + 'px)';
+      esq.style.opacity = '0';
+      dir.style.transition = 'none';
+      dir.style.transform = 'translateX(-3.5rem)';
+      dir.style.opacity = '0';
+      requestAnimationFrame(function(){
+        esq.style.transition = 'opacity .45s ease';
+        esq.style.opacity = '1';
+        _t1 = setTimeout(function(){
+          esq.style.transition = 'transform .75s cubic-bezier(.25,.8,.35,1)';
+          esq.style.transform = 'translateX(0)';
+          dir.style.transition = 'transform .75s cubic-bezier(.25,.8,.35,1) .18s,opacity .55s ease .18s';
+          dir.style.transform = 'translateX(0)';
+          dir.style.opacity = '1';
+        }, 950);
+        _t2 = setTimeout(estadoFinalDesk, 2000);
+      });
+    });
+  }
+  function rodarIntro(){
+    var desk = window.matchMedia('(min-width: 880px)').matches;
+    var jaViu = false;
+    try { jaViu = !!localStorage.getItem(CHAVE_INTRO); } catch(e) {}
+    if (jaViu) { estadoFinal(); return; }
+    if (desk) {
+      try { localStorage.setItem(CHAVE_INTRO, '1'); } catch(e) {}
+      rodarIntroDesk(); return;
     }
-  });
-
-  // ── Tabs ─────────────────────────────────────
-  window.setTab = function setTab(tab) {
-    tabAtual = tab;
-    document.getElementById('tab-aluno').className = 'tab-btn ' + (tab === 'aluno' ? 'active' : 'inactive');
-    document.getElementById('tab-professor').className = 'tab-btn ' + (tab === 'professor' ? 'active' : 'inactive');
-    document.getElementById('campo-escola').style.display = tab === 'professor' ? 'block' : 'none';
-    document.getElementById('aviso-professor').style.display = (tab === 'professor' && subTabAtual === 'cadastro') ? 'block' : 'none';
-    limparMensagens();
+    // Mobile: texto centralizado na tela, esperando o aluno ler e tocar em Entrar
+    esperando = true;
+    document.addEventListener('pointerdown', toquePalco);
+    var esq = document.getElementById('colEsq');
+    requestAnimationFrame(function(){
+      if (!esperando) return;                  // abertura cancelada antes do 1º frame
+      var r = esq.getBoundingClientRect();
+      var dy = (window.innerHeight / 2) - (r.top + r.height / 2);
+      if (dy > 0) { esq.style.transition = 'none'; esq.style.transform = 'translateY(' + dy + 'px)'; }
+      requestAnimationFrame(function(){ document.body.classList.add('f1'); });
+    });
   }
+  rodarIntro();
 
-  window.setSubTab = function setSubTab(sub) {
-    subTabAtual = sub;
-    document.getElementById('form-login').style.display = sub === 'login' ? 'block' : 'none';
-    document.getElementById('form-cadastro').style.display = sub === 'cadastro' ? 'block' : 'none';
-
-    const btnLogin = document.getElementById('sub-login');
-    const btnCad = document.getElementById('sub-cadastro');
-    if (sub === 'login') {
-      btnLogin.style.cssText = 'padding-bottom:10px;font-size:15px;font-weight:600;color:#45edee;border-bottom:2px solid #45edee;margin-bottom:-1px;cursor:pointer;transition:all .2s';
-      btnCad.style.cssText = 'padding-bottom:10px;font-size:15px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:all .2s';
-    } else {
-      btnCad.style.cssText = 'padding-bottom:10px;font-size:15px;font-weight:600;color:#45edee;border-bottom:2px solid #45edee;margin-bottom:-1px;cursor:pointer;transition:all .2s';
-      btnLogin.style.cssText = 'padding-bottom:10px;font-size:15px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:all .2s';
-    }
-
-    document.getElementById('aviso-professor').style.display = (tabAtual === 'professor' && sub === 'cadastro') ? 'block' : 'none';
-    limparMensagens();
+  // ─── Navegação entre vistas ───
+  var vistaAtual = 'entrar';
+  function irVista(v){
+    vistaAtual = v;
+    ['vEntrar','vCadastro','vRecuperar','vCodigo'].forEach(function(id){
+      document.getElementById(id).style.display = 'none';
+    });
+    var mapa = { entrar:'vEntrar', cadastro:'vCadastro', recuperar:'vRecuperar', codigo:'vCodigo' };
+    document.getElementById(mapa[v] || 'vEntrar').style.display = 'block';
+    document.body.classList.toggle('modo-entrar-off', v !== 'entrar');
+    limparMsgs();
   }
-
-  // ── Mostrar/ocultar senha ────────────────────
-  window.toggleSenha = function toggleSenha(id, btn) {
-    const input = document.getElementById(id);
-    if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
-    else { input.type = 'password'; btn.textContent = '👁'; }
-  }
-
-  // ── Mensagens ────────────────────────────────
-  function limparMensagens() {
-    ['login-error','login-success','cad-error','cad-success'].forEach(id => {
-      const el = document.getElementById(id);
+  function limparMsgs(){
+    ['loginErro','cadErro','cadOk','recErro','recOk','codErro'].forEach(function(id){
+      var el = document.getElementById(id);
       if (el) { el.style.display = 'none'; el.textContent = ''; }
     });
   }
-
-  function mostrarErro(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.style.display = 'block';
+  function alternarOlho(id, btn){
+    var i = document.getElementById(id);
+    if (i.type === 'password') { i.type = 'text'; btn.textContent = '🙈'; }
+    else { i.type = 'password'; btn.textContent = '👁'; }
   }
-
-  function mostrarSucesso(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.style.display = 'block';
+  function mErro(id, m){ var el = document.getElementById(id); el.textContent = m; el.style.display = 'block'; }
+  function mOk(id, m){ var el = document.getElementById(id); el.textContent = m; el.style.display = 'block'; }
+  function btnCarregando(id, sim, texto){
+    var b = document.getElementById(id);
+    b.disabled = sim;
+    b.innerHTML = sim ? '<span class="spinner"></span>Aguarde...' : texto;
   }
+  var ROTAS = { aluno: 'inicio.html', professor: 'professor.html', admin: 'admin-professores.html' };
+  function irParaCasa(tipo){ window.location.replace(ROTAS[tipo] || 'inicio.html'); }
 
-  function setBtnLoading(id, loading, textoNormal) {
-    const btn = document.getElementById(id);
-    btn.disabled = loading;
-    btn.innerHTML = loading ? '<span class="spinner"></span> Aguardando...' : textoNormal;
-  }
-
-  // ── LOGIN ────────────────────────────────────
-  window.fazerLogin = async function fazerLogin() {
-    limparMensagens();
-    const email = document.getElementById('login-email').value.trim();
-    const senha = document.getElementById('login-senha').value;
-
-    if (!email || !senha) { mostrarErro('login-error', 'Preencha e-mail e senha.'); return; }
-
-    setBtnLoading('btn-login', true, 'Entrar');
-    try {
-      const { perfil } = await authLogin(email, senha);
-      
-      // Verificar se professor está aprovado
-      if (perfil?.perfil === 'professor') {
-        // Buscar status no banco
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/professores?id=eq.${perfil.id}&select=status`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${authGetToken()}` }
-        });
-        const dados = await res.json();
-        const status = dados[0]?.status;
-        if (status === 'pendente') {
-          mostrarErro('login-error', '⏳ Sua conta está aguardando aprovação. Você receberá um e-mail em breve.');
-          authLogout();
-          setBtnLoading('btn-login', false, 'Entrar');
-          return;
-        }
-        if (status === 'rejeitado') {
-          mostrarErro('login-error', '❌ Seu acesso foi negado. Entre em contato pelo suporte.');
-          authLogout();
-          setBtnLoading('btn-login', false, 'Entrar');
-          return;
-        }
-      }
-
-      // Redirecionar pelo perfil
-      const rotas = { aluno: 'inicio.html', professor: 'professor.html', admin: 'admin-professores.html' };
-      window.location.href = rotas[perfil?.perfil] || 'inicio.html';
-
-    } catch (err) {
-      setBtnLoading('btn-login', false, 'Entrar');
-      const msg = traduzirErroAuth(err.message);
-      mostrarErro('login-error', msg);
-    }
-  }
-
-  // ── CADASTRO ─────────────────────────────────
-  window.fazerCadastro = async function fazerCadastro() {
-    limparMensagens();
-    const nome = document.getElementById('cad-nome').value.trim();
-    const email = document.getElementById('cad-email').value.trim();
-    const senha = document.getElementById('cad-senha').value;
-    const escola = document.getElementById('cad-escola').value.trim();
-
-    if (!nome) { mostrarErro('cad-error', 'Informe seu nome completo.'); return; }
-    if (!email) { mostrarErro('cad-error', 'Informe seu e-mail.'); return; }
-    if (!senha || senha.length < 6) { mostrarErro('cad-error', 'Senha deve ter pelo menos 6 caracteres.'); return; }
-    if (tabAtual === 'professor' && !escola) { mostrarErro('cad-error', 'Informe a escola onde leciona.'); return; }
-
-    setBtnLoading('btn-cadastro', true, 'Criar conta');
-    try {
-      await authCadastro({
-        nome,
-        email,
-        senha,
-        perfil: tabAtual,
-        escola: escola || null
-      });
-
-      if (tabAtual === 'professor') {
-        mostrarSucesso('cad-success', '✅ Cadastro enviado! Aguarde a aprovação por e-mail (até 48h).');
-      } else {
-        mostrarSucesso('cad-success', '✅ Conta criada! Verifique seu e-mail para confirmar e depois faça login.');
-      }
-      
-      // Limpar campos
-      document.getElementById('cad-nome').value = '';
-      document.getElementById('cad-email').value = '';
-      document.getElementById('cad-senha').value = '';
-      document.getElementById('cad-escola').value = '';
-
-    } catch (err) {
-      const msg = traduzirErroAuth(err.message);
-      mostrarErro('cad-error', msg);
-    } finally {
-      setBtnLoading('btn-cadastro', false, 'Criar conta');
-    }
-  }
-
-  // ── Traduzir erros do Supabase ───────────────
+  // ─── Erros do Supabase em português ───
   function traduzirErroAuth(msg) {
-    if (!msg) return 'Erro desconhecido. Tente novamente.';
-    if (msg.includes('Invalid login credentials')) return '❌ E-mail ou senha incorretos.';
-    if (msg.includes('Email not confirmed')) return '📧 Confirme seu e-mail antes de entrar.';
-    if (msg.includes('User already registered')) return '📧 E-mail já cadastrado. Faça login.';
-    if (msg.includes('Password should be')) return '🔒 Senha deve ter pelo menos 6 caracteres.';
-    if (msg.includes('Unable to validate')) return '❌ Credenciais inválidas.';
-    if (msg.includes('rate limit')) return '⏳ Muitas tentativas. Aguarde alguns minutos.';
+    if (!msg) return 'Algo deu errado. Tente novamente.';
+    if (msg.indexOf('Invalid login credentials') !== -1) return 'E-mail ou senha incorretos.';
+    if (msg.indexOf('Email not confirmed') !== -1) return 'Confirme seu e-mail antes de entrar. Olhe também o spam.';
+    if (msg.indexOf('User already registered') !== -1 || msg.indexOf('already been registered') !== -1) return 'Este e-mail já tem conta. Volte para Entrar.';
+    if (msg.indexOf('Password should be') !== -1) return 'A senha precisa ter pelo menos 6 caracteres.';
+    if (msg.indexOf('Unable to validate') !== -1 || msg.indexOf('invalid format') !== -1) return 'E-mail inválido. Confira e tente de novo.';
+    if (msg.indexOf('rate limit') !== -1 || msg.indexOf('Too many') !== -1) return 'Muitas tentativas. Aguarde alguns minutos e tente de novo.';
+    if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) return 'Sem conexão. Verifique sua internet e tente de novo.';
     return msg;
   }
 
-  // ── Enter para submeter ──────────────────────
-  document.addEventListener('keydown', e => {
+  // ─── Criar conta: perfil ───
+  var perfilAtual = 'aluno';
+  function setPerfil(p){
+    perfilAtual = p;
+    document.getElementById('abaAluno').classList.toggle('on', p === 'aluno');
+    document.getElementById('abaProf').classList.toggle('on', p === 'professor');
+    document.getElementById('campoEscola').style.display = p === 'professor' ? 'block' : 'none';
+    document.getElementById('lblCodigo').textContent = p === 'professor' ? 'Código de professor' : 'Código da turma';
+    document.getElementById('cadCodigo').placeholder = p === 'professor' ? 'ex: prof-A1B2-C3D4' : 'ex: redaon-bravo-jaguar-84';
+    limparMsgs();
+  }
+  var MSG_COD_ALUNO = 'Código de turma não encontrado. Confira com seu professor.';
+  var MSG_COD_PROF  = 'Código de professor inválido ou já utilizado. Confira com quem te enviou.';
+
+  // ─── ENTRAR ───
+  async function fazerLogin(){
+    limparMsgs();
+    var e = document.getElementById('loginEmail').value.trim();
+    var s = document.getElementById('loginSenha').value;
+    if (!e || !s) { mErro('loginErro', 'Preencha e-mail e senha.'); return; }
+    btnCarregando('btnEntrar', true, 'Entrar');
+    try {
+      var r = await authLogin(e, s);
+      await processarCodigoPendente();
+      irParaCasa(r.perfil && r.perfil.perfil);
+    } catch (err) {
+      btnCarregando('btnEntrar', false, 'Entrar');
+      mErro('loginErro', traduzirErroAuth(err.message));
+    }
+  }
+
+  // ─── LINKS PENDENTES (preencher quando as páginas existirem; vazio = só texto) ───
+  var LINKS_PENDENTES = {
+    termos:      '',   // ex: 'termos.html'
+    privacidade: '',   // ex: 'privacidade.html'
+    planos:      ''    // ex: 'planos.html' ou 'https://wa.me/55...'
+  };
+  var GOOGLE_ATIVO = false;   // trocar para true após ativar o provider no Supabase
+  (function(){
+    function ligar(el, url){
+      if (!el) return;
+      if (!url) { el.style.cursor = 'default'; return; }
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function(){ window.open(url, '_blank', 'noopener'); });
+    }
+    ligar(document.getElementById('lkTermos'), LINKS_PENDENTES.termos);
+    ligar(document.getElementById('lkPrivacidade'), LINKS_PENDENTES.privacidade);
+    document.querySelectorAll('.lkPlanos').forEach(function(el){ ligar(el, LINKS_PENDENTES.planos); });
+  })();
+
+  // ─── GOOGLE ───
+  function entrarComGoogle(){
+    if (!GOOGLE_ATIVO) { toast('Entrar com Google chega em breve'); return; }
+    authLoginGoogle();
+  }
+  async function tratarRetornoGoogle(){
+    var h = authLerHashAuth();
+    if (!h) return false;
+    estadoFinal();
+    btnCarregando('btnEntrar', true, 'Entrar');
+    try {
+      var r = await authProcessarRetornoOAuth();
+      if (!r) { btnCarregando('btnEntrar', false, 'Entrar'); return false; }
+      await processarCodigoPendente();
+      var tipo = (r.perfil && r.perfil.perfil) || 'aluno';
+      if (tipo !== 'aluno') { irParaCasa(tipo); return true; }
+      if (await dbAlunoTemTurma()) { irParaCasa('aluno'); return true; }
+      // Cadastro fechado: 1º acesso com Google sem turma → pede o código
+      btnCarregando('btnEntrar', false, 'Entrar');
+      var nome = authGetNome();
+      document.getElementById('codigoOla').textContent = 'Olá, ' + nome.split(' ')[0] + '! Sua conta Google entrou. Para liberar a RedaON, informe o código que você recebeu.';
+      irVista('codigo');
+      return true;
+    } catch (err) {
+      btnCarregando('btnEntrar', false, 'Entrar');
+      mErro('loginErro', 'Não foi possível entrar com o Google. ' + traduzirErroAuth(err.message));
+      try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+      return false;
+    }
+  }
+  var perfilCodigo = 'aluno';
+  function setPerfilCodigo(p){
+    perfilCodigo = p;
+    document.getElementById('abaAlunoCod').classList.toggle('on', p === 'aluno');
+    document.getElementById('abaProfCod').classList.toggle('on', p === 'professor');
+    document.getElementById('campoEscolaCod').style.display = p === 'professor' ? 'block' : 'none';
+    document.getElementById('lblCodigoCod').textContent = p === 'professor' ? 'Código de professor' : 'Código da turma';
+    document.getElementById('codCodigo').placeholder = p === 'professor' ? 'ex: prof-A1B2-C3D4' : 'ex: redaon-bravo-jaguar-84';
+    limparMsgs();
+  }
+  async function confirmarCodigo(){
+    limparMsgs();
+    var codigo = document.getElementById('codCodigo').value.trim();
+    var escola = document.getElementById('codEscola').value.trim();
+    if (perfilCodigo === 'professor' && !escola) { mErro('codErro', 'Informe a escola onde leciona.'); return; }
+    if (!codigo) { mErro('codErro', perfilCodigo === 'professor' ? 'Informe seu código de professor.' : 'Informe o código da turma que seu professor passou.'); return; }
+    btnCarregando('btnCodigo', true, 'Confirmar');
+    try {
+      if (perfilCodigo === 'professor') {
+        var okP = await dbValidarCodigoProfessor(codigo);
+        if (okP) okP = await dbConsumirCodigoProfessor(codigo);
+        if (!okP) { mErro('codErro', MSG_COD_PROF); btnCarregando('btnCodigo', false, 'Confirmar'); return; }
+        try { await dbUpdatePerfil({ perfil: 'professor', escola: escola }); } catch (e2) { console.warn('[login] perfil professor não atualizado:', e2.message); }
+        localStorage.setItem('redaon_tipo', 'professor');
+        irParaCasa('professor');
+      } else {
+        var okA = await dbValidarCodigoTurma(codigo);
+        if (okA) okA = await dbVincularAlunoTurmaPosCadastro(codigo);
+        if (!okA) { mErro('codErro', MSG_COD_ALUNO); btnCarregando('btnCodigo', false, 'Confirmar'); return; }
+        irParaCasa('aluno');
+      }
+    } catch (err) {
+      btnCarregando('btnCodigo', false, 'Confirmar');
+      mErro('codErro', traduzirErroAuth(err.message));
+    }
+  }
+  function sairDoCodigo(){ authLogoutAgora(); }
+
+  // ─── CRIAR CONTA (fechado por código) ───
+  async function fazerCadastro(){
+    limparMsgs();
+    var nome = document.getElementById('cadNome').value.trim();
+    var email = document.getElementById('cadEmail').value.trim();
+    var senha = document.getElementById('cadSenha').value;
+    var escola = document.getElementById('cadEscola').value.trim();
+    var codigo = document.getElementById('cadCodigo').value.trim();
+    var termos = document.getElementById('chkTermos').checked;
+    if (!nome) { mErro('cadErro', 'Informe seu nome completo.'); return; }
+    if (!email) { mErro('cadErro', 'Informe seu e-mail.'); return; }
+    if (!senha || senha.length < 6) { mErro('cadErro', 'A senha precisa ter pelo menos 6 caracteres.'); return; }
+    if (perfilAtual === 'professor' && !escola) { mErro('cadErro', 'Informe a escola onde leciona.'); return; }
+    if (!codigo) { mErro('cadErro', perfilAtual === 'professor' ? 'Informe seu código de professor.' : 'Informe o código da turma que seu professor passou.'); return; }
+    if (!termos) { mErro('cadErro', 'Para criar a conta, aceite os Termos de Uso e a Política de Privacidade.'); return; }
+    btnCarregando('btnCadastro', true, 'Criar conta');
+    try {
+      var r = await authCadastroFechado({
+        nome: nome, email: email, senha: senha,
+        perfil: perfilAtual, codigo: codigo,
+        escola: perfilAtual === 'professor' ? escola : null
+      });
+      if (r && r.logado) {
+        // Sem confirmação de e-mail exigida: já entrou e o código foi aplicado
+        mOk('cadOk', perfilAtual === 'professor' ? '✓ Conta criada! Entrando...' : '✓ Conta criada e você já está na sua turma! Entrando...');
+        setTimeout(function(){ irParaCasa(perfilAtual); }, 900);
+        return;
+      }
+      btnCarregando('btnCadastro', false, 'Criar conta');
+      mOk('cadOk', perfilAtual === 'professor'
+        ? '✓ Conta criada! Confirme seu e-mail e entre — seu código já fica reservado.'
+        : '✓ Conta criada e você já está na sua turma! Confirme seu e-mail e entre.');
+      document.getElementById('cadSenha').value = '';
+    } catch (err) {
+      btnCarregando('btnCadastro', false, 'Criar conta');
+      if (err.message === 'CODIGO_INVALIDO') { mErro('cadErro', perfilAtual === 'professor' ? MSG_COD_PROF : MSG_COD_ALUNO); return; }
+      mErro('cadErro', traduzirErroAuth(err.message));
+    }
+  }
+
+  // ─── RECUPERAR SENHA ───
+  async function fazerRecuperar(){
+    limparMsgs();
+    var e = document.getElementById('recEmail').value.trim();
+    if (!e) { mErro('recErro', 'Informe o e-mail da sua conta.'); return; }
+    btnCarregando('btnRec', true, 'Enviar link de recuperação');
+    try {
+      await authRecuperarSenha(e);
+      mOk('recOk', '✓ Se este e-mail tiver conta na RedaON, o link de recuperação chega em instantes. Olhe também o spam.');
+    } catch (err) {
+      mErro('recErro', traduzirErroAuth(err.message));
+    } finally {
+      btnCarregando('btnRec', false, 'Enviar link de recuperação');
+    }
+  }
+
+  // ─── Enter submete a vista atual ───
+  document.addEventListener('keydown', function(e){
     if (e.key !== 'Enter') return;
-    if (subTabAtual === 'login') fazerLogin();
-    else fazerCadastro();
+    if (e.target && e.target.tagName === 'BUTTON') return;
+    if (vistaAtual === 'entrar') fazerLogin();
+    else if (vistaAtual === 'cadastro') fazerCadastro();
+    else if (vistaAtual === 'recuperar') fazerRecuperar();
+    else if (vistaAtual === 'codigo') confirmarCodigo();
   });
 
+  // ─── Carga: aviso de sessão + retorno do Google ───
+  (function(){
+    var aviso = null;
+    try { aviso = sessionStorage.getItem('redaon_aviso_login'); sessionStorage.removeItem('redaon_aviso_login'); } catch(e) {}
+    var q = new URLSearchParams(window.location.search);
+    if (q.get('aviso') === 'senha') aviso = 'Senha alterada! Entre com a senha nova.';
+    if (aviso) {
+      var a = document.getElementById('avisoSessao');
+      a.textContent = aviso; a.style.display = 'block';
+      estadoFinal();
+    }
+    tratarRetornoGoogle();
+  })();
 </script>
 </body>
 </html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RedaON — Recuperar senha</title>
+<meta name="theme-color" content="#0a8c8d">
+<!-- RedaON · recuperar-senha.html · PRODUÇÃO v1-0 · 23/08/2026 · mesma base visual do login v2-0 -->
+<!-- Dois modos na mesma página: (a) sem hash → pedir link por e-mail; (b) #access_token&type=recovery → criar senha nova -->
+<script>
+  (function(){
+    var pref = 'auto';
+    try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+    var efetivo = pref;
+    if (pref === 'auto') {
+      var claro = false;
+      try { claro = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+      efetivo = claro ? 'claro' : 'escuro';
+    }
+    document.documentElement.setAttribute('data-tema', efetivo);
+  })();
+</script>
+<script src="supabase-auth.js?v=2-0"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;word-break:normal;overflow-wrap:break-word}
+
+  html[data-tema="escuro"]{--bg:#10131a;--bgRGB:16,19,26;--surface:#1d2026;--surface2:#272a31;--text:#e1e2eb;--text2:#c8c4d7;--muted:#928ea0;--muted2:#474554;--cyan:#45edee;--cyanRGB:69,237,238;--onCyan:#002020;--purple:#6c5ce7;--purpleRGB:108,92,231;--gold:#fabd00;--green:#4ade80;--red:#ff8b8b;--borderRGB:71,69,84;--sombra:0 4px 16px rgba(0,0,0,.25)}
+  html[data-tema="claro"]{--bg:#fdfbf4;--bgRGB:253,251,244;--surface:#ffffff;--surface2:#f6f2e6;--text:#0a4a4b;--text2:#3a5556;--muted:#8a8576;--muted2:#b9b3a2;--cyan:#0a8c8d;--cyanRGB:10,140,141;--onCyan:#ffffff;--purple:#5a4fc4;--purpleRGB:90,79,196;--gold:#9a7a10;--green:#0f8a4d;--red:#c0473b;--borderRGB:10,74,75;--sombra:0 4px 16px rgba(10,74,75,.10)}
+
+  body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;}
+
+  /* ── Palco geral ── */
+  #palco{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:2.2rem 1.1rem 1.4rem;max-width:26rem;margin:0 auto;position:relative;}
+
+  /* ── Marca ── */
+  .lgLinha{display:flex;align-items:center;gap:.55rem;justify-content:center;}
+  .lgQuad{width:36px;height:36px;border-radius:10px;background:var(--cyan);color:var(--onCyan);display:flex;align-items:center;justify-content:center;font-weight:900;font-style:italic;font-size:1.05rem;flex:0 0 auto;}
+  .lgNome{font-size:1.6rem;font-weight:900;font-style:italic;letter-spacing:-.04em;color:var(--text);}
+  .lgNome i{color:var(--cyan);font-style:italic;}
+  .slogan{font-size:1.02rem;color:var(--text);text-align:center;font-weight:800;margin-top:.4rem;line-height:1.35;}
+
+  /* ── Vitrine (bullets da abertura, mobile) ── */
+  #vitrine{margin-top:1.35rem;display:flex;flex-direction:column;gap:.6rem;align-items:flex-start;align-self:center;}
+  #btnIntroEntrar{align-self:center;width:12.5rem;margin-top:1.7rem;}
+  #colEsq{position:relative;width:100%;}
+  .bItem{display:flex;gap:.5rem;align-items:flex-start;font-size:.92rem;color:var(--text);font-weight:800;line-height:1.45;}
+  .bItem b{color:var(--cyan);font-weight:900;flex:0 0 auto;}
+
+  /* ── Cápsulas (estado final mobile) ── */
+  #capsulas{display:flex;gap:.4rem;justify-content:center;margin-top:.8rem;}
+  .cap{font-size:.68rem;font-weight:800;color:var(--cyan);background:rgba(var(--cyanRGB),.12);border:1px solid rgba(var(--cyanRGB),.35);border-radius:99px;padding:.26rem .6rem;white-space:nowrap;}
+
+  /* ── Cartão / formulários ── */
+  #cartao{width:100%;background:var(--surface);border:1px solid rgba(var(--borderRGB),.18);border-radius:16px;padding:1.15rem 1rem 1.05rem;margin-top:1.1rem;box-shadow:var(--sombra);}
+  .lbl{font-size:.7rem;color:var(--muted);font-weight:600;display:block;margin-bottom:.3rem;}
+  .campo{width:100%;background:var(--surface2);border:1.5px solid rgba(var(--borderRGB),.22);color:var(--text);border-radius:10px;padding:.75rem .85rem;font-size:16px;font-family:inherit;margin-bottom:.75rem;outline:none;transition:border-color .18s;}
+  .campo:focus{border-color:var(--cyan);}
+  .campo::placeholder{color:var(--muted2);}
+  .campoWrap{position:relative;}
+  .olho{position:absolute;right:.35rem;top:.2rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:.5rem;}
+  .esqueci{display:block;text-align:right;font-size:.7rem;color:var(--cyan);font-weight:700;margin:-.25rem 0 .85rem;cursor:pointer;text-decoration:none;}
+  .btnP{width:100%;min-height:46px;border-radius:11px;background:var(--cyan);color:var(--onCyan);font-weight:800;font-size:.88rem;border:none;cursor:pointer;font-family:inherit;transition:opacity .18s,transform .1s;}
+  .btnP:active{transform:scale(.985);}
+  .btnP:disabled{opacity:.55;}
+  .btnG{width:100%;min-height:46px;border-radius:11px;background:var(--surface2);color:var(--text);font-weight:700;font-size:.8rem;border:1px solid rgba(var(--borderRGB),.28);display:flex;align-items:center;justify-content:center;gap:.5rem;cursor:pointer;font-family:inherit;margin-top:.1rem;}
+  .gIco{width:17px;height:17px;border-radius:50%;background:conic-gradient(#ea4335 0 25%,#fbbc05 25% 50%,#34a853 50% 75%,#4285f4 75% 100%);flex:0 0 auto;}
+  .ou{display:flex;align-items:center;gap:.6rem;margin:.75rem 0;}
+  .ou::before,.ou::after{content:'';flex:1;height:1px;background:rgba(var(--borderRGB),.2);}
+  .ou span{font-size:.62rem;color:var(--muted2);font-weight:700;}
+  .rodapeLk{font-size:.72rem;color:var(--muted);text-align:center;margin-top:.95rem;}
+  .rodapeLk b{color:var(--cyan);font-weight:800;cursor:pointer;}
+  .adminLk{font-size:.62rem;color:var(--muted2);text-align:center;margin-top:1.1rem;cursor:pointer;}
+
+  .msgErro{background:rgba(var(--borderRGB),.06);border:1px solid var(--red);color:var(--red);border-radius:9px;padding:.6rem .75rem;font-size:.74rem;line-height:1.4;margin-bottom:.75rem;display:none;}
+  .msgOk{background:rgba(var(--cyanRGB),.1);border:1px solid rgba(var(--cyanRGB),.4);color:var(--cyan);border-radius:9px;padding:.6rem .75rem;font-size:.74rem;line-height:1.4;margin-bottom:.75rem;display:none;}
+  .aviso{width:100%;background:rgba(var(--cyanRGB),.1);border:1px solid rgba(var(--cyanRGB),.35);color:var(--text2);border-radius:10px;padding:.6rem .75rem;font-size:.72rem;line-height:1.45;margin-top:1rem;display:none;}
+
+  /* Abas Aluno/Professor (só no Criar conta) */
+  .abasPerfil{display:flex;gap:.4rem;background:var(--bg);border:1px solid rgba(var(--borderRGB),.18);border-radius:11px;padding:.25rem;margin-bottom:1rem;}
+  .abaP{flex:1;text-align:center;font-size:.76rem;font-weight:800;padding:.55rem 0;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;}
+  .abaP.on{background:var(--cyan);color:var(--onCyan);}
+
+  .chkLinha{display:flex;gap:.55rem;align-items:flex-start;margin:.15rem 0 .85rem;cursor:pointer;}
+  .chkLinha input{margin-top:.15rem;width:1rem;height:1rem;accent-color:var(--cyan);flex:0 0 auto;}
+  .chkLinha span{font-size:.7rem;color:var(--muted);line-height:1.45;}
+  .chkLinha span b{color:var(--cyan);}
+
+  .tituloForm{font-size:1rem;font-weight:900;color:var(--text);margin-bottom:.2rem;}
+  .subForm{font-size:.74rem;color:var(--muted);margin-bottom:1rem;line-height:1.45;}
+  .voltar{font-size:.72rem;color:var(--muted);font-weight:700;cursor:pointer;margin-bottom:.8rem;display:inline-block;}
+  .voltar b{color:var(--cyan);}
+
+  .spinner{width:16px;height:16px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:gira .6s linear infinite;display:inline-block;vertical-align:-3px;margin-right:.4rem;}
+  @keyframes gira{to{transform:rotate(360deg)}}
+
+  /* ── Sequência de abertura (só mobile, 1ª visita) ── */
+  .anima #marca,.anima #vitrine{opacity:0;transform:translateY(10px);}
+  .anima.f1 #marca{opacity:1;transform:none;transition:opacity .35s ease,transform .35s ease;}
+  .anima.f1 #vitrine{opacity:1;transform:none;transition:opacity .4s ease .25s,transform .4s ease .25s;}
+  .anima #capsulas{opacity:0;display:flex;}
+  .anima #cartao{transform:translateY(120%);opacity:0;}
+  .anima.f2 #vitrine{opacity:0;transform:translateY(-8px);transition:opacity .5s ease,transform .5s ease;position:absolute;pointer-events:none;left:0;right:0;top:5rem;}
+  .anima.f2 #capsulas{opacity:1;transition:opacity .6s ease .45s;}
+  .anima.f2 #cartao{transform:none;opacity:1;transition:transform 1.15s cubic-bezier(.18,.62,.24,1) .05s,opacity .8s ease .1s;}
+  .pronto #vitrine{display:none;}
+  .pronto #capsulas{display:flex;}
+  .modo-entrar-off #capsulas{display:none;}
+
+  /* ── Desktop (Opção B) ── */
+  #painelDesk{display:none;}
+  @media(min-width:880px){
+    body.pronto #palco,body.anima #palco{flex-direction:row;max-width:64rem;align-items:flex-start;gap:3rem;padding-top:clamp(3rem,14vh,7rem);}
+    #colEsq{flex:1.1;display:flex;flex-direction:column;gap:1rem;}
+    #colDir{flex:1;max-width:24rem;}
+    #marca .lgLinha{justify-content:flex-start;}
+    .slogan{text-align:left;font-size:1.25rem;}
+    #capsulas{display:none!important;}
+    #painelDesk{display:flex;flex-direction:column;gap:.95rem;margin-top:1.3rem;}
+    #painelDesk .bItem{font-size:1rem;font-weight:800;color:var(--text);max-width:24rem;}
+    .anima #cartao{transform:none;opacity:1;}
+    .anima #marca,.anima #vitrine{opacity:1;transform:none;}
+    #vitrine{display:none!important;}
+    #cartao{margin-top:0;}
+  }
+  @media(max-width:879px){ #colEsq,#colDir{width:100%;} }
+
+
+  /* ── Toast ── */
+  #toast{position:fixed;left:50%;bottom:5.2rem;transform:translateX(-50%) translateY(20px);background:var(--surface);color:var(--text);border:1px solid rgba(var(--borderRGB),.3);border-radius:99px;padding:.55rem 1rem;font-size:.74rem;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:300;box-shadow:var(--sombra);max-width:88vw;text-align:center;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+</style>
+</head>
+<body class="pronto modo-entrar-off">
+
+<div id="palco">
+
+  <div id="colEsq">
+    <div id="marca">
+      <div class="lgLinha"><div class="lgQuad">R</div><div class="lgNome">Reda<i>ON</i></div></div>
+      <p class="slogan">Sua redação mais perto da nota mil!</p>
+    </div>
+    <div id="painelDesk">
+      <div class="bItem"><b>✓</b>Correção em 30s</div>
+      <div class="bItem"><b>✓</b>5 competências do ENEM</div>
+      <div class="bItem"><b>✓</b>Melhoria contínua guiada pela IA + Professor</div>
+    </div>
+  </div>
+
+  <div id="colDir">
+    <div id="cartao">
+
+      <!-- ══ MODO A: pedir link ══ -->
+      <div id="vPedir">
+        <a class="voltar" href="login.html" style="text-decoration:none;"><b>‹</b> Voltar para Entrar</a>
+        <p class="tituloForm">Recuperar senha</p>
+        <p class="subForm">Digite o e-mail da sua conta. Vamos te enviar um link para criar uma senha nova.</p>
+        <span class="lbl">E-mail</span>
+        <input class="campo" id="recEmail" type="email" placeholder="seu@email.com" autocomplete="email">
+        <div class="msgErro" id="recErro"></div>
+        <div class="msgOk" id="recOk"></div>
+        <button class="btnP" id="btnRec" onclick="fazerRecuperar()">Enviar link de recuperação</button>
+      </div>
+
+      <!-- ══ MODO B: criar senha nova (veio do e-mail) ══ -->
+      <div id="vNova" style="display:none;">
+        <p class="tituloForm">Criar senha nova</p>
+        <p class="subForm">Escolha uma senha nova com pelo menos 6 caracteres.</p>
+        <span class="lbl">Senha nova</span>
+        <div class="campoWrap">
+          <input class="campo" id="novaSenha" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="padding-right:2.9rem;">
+          <button class="olho" onclick="alternarOlho('novaSenha',this)">👁</button>
+        </div>
+        <span class="lbl">Repita a senha nova</span>
+        <input class="campo" id="novaSenha2" type="password" placeholder="••••••••" autocomplete="new-password">
+        <div class="msgErro" id="novaErro"></div>
+        <div class="msgOk" id="novaOk"></div>
+        <button class="btnP" id="btnNova" onclick="salvarSenhaNova()">Salvar senha nova</button>
+      </div>
+
+      <!-- ══ MODO C: link inválido/expirado ══ -->
+      <div id="vInvalido" style="display:none;">
+        <p class="tituloForm">Link inválido ou expirado</p>
+        <p class="subForm">O link de recuperação vale por pouco tempo e só pode ser usado uma vez. Peça um novo abaixo.</p>
+        <button class="btnP" onclick="irPedir()">Pedir novo link</button>
+        <p class="rodapeLk"><a href="login.html" style="color:var(--cyan);font-weight:800;text-decoration:none;">Voltar para Entrar</a></p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var tokenRecuperacao = null;
+
+  function mErro(id, m){ var el = document.getElementById(id); el.textContent = m; el.style.display = 'block'; }
+  function mOk(id, m){ var el = document.getElementById(id); el.textContent = m; el.style.display = 'block'; }
+  function limparMsgs(){
+    ['recErro','recOk','novaErro','novaOk'].forEach(function(id){
+      var el = document.getElementById(id); el.style.display = 'none'; el.textContent = '';
+    });
+  }
+  function btnCarregando(id, sim, texto){
+    var b = document.getElementById(id);
+    b.disabled = sim;
+    b.innerHTML = sim ? '<span class="spinner"></span>Aguarde...' : texto;
+  }
+  function alternarOlho(id, btn){
+    var i = document.getElementById(id);
+    if (i.type === 'password') { i.type = 'text'; btn.textContent = '🙈'; }
+    else { i.type = 'password'; btn.textContent = '👁'; }
+  }
+  function traduzirErroAuth(msg) {
+    if (!msg) return 'Algo deu errado. Tente novamente.';
+    if (msg.indexOf('Password should be') !== -1) return 'A senha precisa ter pelo menos 6 caracteres.';
+    if (msg.indexOf('same_password') !== -1 || msg.indexOf('different from the old') !== -1) return 'A senha nova precisa ser diferente da anterior.';
+    if (msg.indexOf('rate limit') !== -1 || msg.indexOf('Too many') !== -1) return 'Muitas tentativas. Aguarde alguns minutos e tente de novo.';
+    if (msg.indexOf('Unable to validate') !== -1 || msg.indexOf('invalid format') !== -1) return 'E-mail inválido. Confira e tente de novo.';
+    if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) return 'Sem conexão. Verifique sua internet e tente de novo.';
+    if (msg.indexOf('expired') !== -1 || msg.indexOf('invalid') !== -1 || msg.indexOf('JWT') !== -1) return 'Link inválido ou expirado. Peça um novo.';
+    return msg;
+  }
+  var vistaAtual = 'pedir';
+  function mostrar(id){
+    ['vPedir','vNova','vInvalido'].forEach(function(v){ document.getElementById(v).style.display = v === id ? 'block' : 'none'; });
+    vistaAtual = id === 'vNova' ? 'nova' : 'pedir';
+  }
+  function irPedir(){ limparMsgs(); mostrar('vPedir'); }
+
+  async function fazerRecuperar(){
+    limparMsgs();
+    var e = document.getElementById('recEmail').value.trim();
+    if (!e) { mErro('recErro', 'Informe o e-mail da sua conta.'); return; }
+    btnCarregando('btnRec', true, 'Enviar link de recuperação');
+    try {
+      await authRecuperarSenha(e);
+      mOk('recOk', '✓ Se este e-mail tiver conta na RedaON, o link de recuperação chega em instantes. Olhe também o spam.');
+    } catch (err) {
+      mErro('recErro', traduzirErroAuth(err.message));
+    } finally {
+      btnCarregando('btnRec', false, 'Enviar link de recuperação');
+    }
+  }
+
+  async function salvarSenhaNova(){
+    limparMsgs();
+    var s1 = document.getElementById('novaSenha').value;
+    var s2 = document.getElementById('novaSenha2').value;
+    if (!s1 || s1.length < 6) { mErro('novaErro', 'A senha precisa ter pelo menos 6 caracteres.'); return; }
+    if (s1 !== s2) { mErro('novaErro', 'As duas senhas não são iguais.'); return; }
+    btnCarregando('btnNova', true, 'Salvar senha nova');
+    try {
+      await authRedefinirSenha(tokenRecuperacao, s1);
+      mOk('novaOk', '✓ Senha alterada! Levando você para entrar...');
+      setTimeout(function(){ window.location.replace('login.html?aviso=senha'); }, 1200);
+    } catch (err) {
+      btnCarregando('btnNova', false, 'Salvar senha nova');
+      mErro('novaErro', traduzirErroAuth(err.message));
+    }
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter') return;
+    if (e.target && e.target.tagName === 'BUTTON') return;
+    if (vistaAtual === 'nova') salvarSenhaNova(); else fazerRecuperar();
+  });
+
+  // ─── Carga: decide o modo pelo hash ───
+  (function(){
+    var h = authLerHashAuth();
+    if (!h) { mostrar('vPedir'); return; }
+    if (h.error || !h.access_token) { mostrar('vInvalido'); return; }
+    tokenRecuperacao = h.access_token;
+    try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
+    mostrar('vNova');
+  })();
+</script>
+</body>
+</html>
