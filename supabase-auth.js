@@ -3,7 +3,7 @@
  * Biblioteca global de autenticação e acesso ao banco.
  * Incluir via <script src="supabase-auth.js"></script> em todas as telas.
  * NÃO usa type="module" — funciona com fetch direto.
- * Atualizado em 23/08/2026 — Login v2: gaveta Sair, recuperar senha, Google OAuth.
+ * Atualizado em 24/08/2026 — Login v2 + Configurações v1 (reativação de vínculo em dbAlunoEntrarComCodigo).
  */
 
 // ─────────────────────────────────────────────
@@ -466,6 +466,17 @@ async function dbAlunoEntrarComCodigo(codigo) {
   );
   const existentes = await resExiste.json();
   if (Array.isArray(existentes) && existentes.length > 0) {
+    // v1-0 Configurações: vínculo inativo (aluno saiu antes) é REATIVADO,
+    // preservando o histórico — antes, reentrar numa turma abandonada não fazia nada.
+    if (existentes[0].status !== 'ativo') {
+      const resReativa = await dbFetch(
+        `${SUPABASE_URL}/rest/v1/alunos_turma?turma_id=eq.${turma.id}&aluno_id=eq.${userId}`,
+        { method: 'PATCH', body: JSON.stringify({ status: 'ativo' }) }
+      );
+      const reativado = await resReativa.json();
+      if (!resReativa.ok) throw new Error(JSON.stringify(reativado));
+      return { turma, vinculo: reativado[0], jaEstava: false, reativado: true };
+    }
     return { turma, vinculo: existentes[0], jaEstava: true };
   }
 

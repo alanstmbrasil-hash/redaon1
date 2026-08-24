@@ -1,5 +1,8 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-1 (24/08/2026)
+   v6-1: Aparência sai do menu Mais e da sidebar (decisão A6 — tema em
+   dois lugares: sol/lua do topo + tela Configurações). Ícones/textos
+   de tema remanescentes atualizam só se existirem no DOM.
    Injeta o esqueleto (sidebar, header, barra, gavetas, toast)
    e concentra tema, navegação e utilidades.
    Cada tela chama: montarEsqueleto({ ativo, titulo, icone, versao, sino })
@@ -178,7 +181,6 @@ function montarEsqueleto(cfg) {
         '<a class="nav-item" href="plano.html" title="Plano de estudos"><i class="em">\u{1F4C5}</i><span class="tx">Plano de estudos</span></a>' +
         '<a class="nav-item" href="estudio-profa.html" title="IA Est\u00fadio"><i class="em">\u2728</i><span class="tx">IA Est\u00fadio</span></a>' +
         '<p class="nav-section-label"><span>Conta</span></p>' +
-        '<a class="nav-item" onclick="alternarTema()" style="cursor:pointer;" title="Apar\u00eancia"><i class="em" id="iconeTemaSide">\u2600\uFE0F</i><span class="tx" id="txtTemaSide">Apar\u00eancia</span></a>' +
         '<a class="nav-item" href="configuracoes.html" title="Configura\u00e7\u00f5es"><i class="em">\u2699\uFE0F</i><span class="tx">Configura\u00e7\u00f5es</span></a>' +
         '<a class="nav-item" onclick="authLogout()" style="cursor:pointer;color:var(--red);margin-top:.3rem;" title="Sair"><i class="em">\u{1F6AA}</i><span class="tx">Sair</span></a>' +
       '</nav>' +
@@ -223,7 +225,6 @@ function montarEsqueleto(cfg) {
       '<a class="pill" href="evolucao.html"><i class="pemoji">\u{1F4C8}</i>Evolu\u00e7\u00e3o<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="plano.html"><i class="pemoji">\u{1F4C5}</i>Plano de estudos<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="estudio-profa.html"><i class="pemoji">\u2728</i>IA Est\u00fadio<i class="fim">\u203A</i></a>' +
-      '<a class="pill" onclick="alternarTema()"><i class="pemoji" id="iconeTemaMais">\u2600\uFE0F</i><span id="txtTemaMais">Apar\u00eancia</span></a>' +
       '<a class="pill" href="configuracoes.html"><i class="pemoji">\u2699\uFE0F</i>Configura\u00e7\u00f5es<i class="fim">\u203A</i></a>' +
       '<a class="pill" style="color:var(--red);" onclick="authLogout()"><i class="pemoji">\u{1F6AA}</i>Sair</a>' +
     '</div>' +

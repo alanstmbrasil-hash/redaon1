@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v3-11</title>
-<!-- RedaON · Portal do Aluno · Início · v3-11 · sobre aluno-base-v6 -->
+<title>RedaON | Início v3-16</title>
+<!-- RedaON · Portal do Aluno · Início · v3-16 · sobre aluno-base-v6 -->
+<!-- v3-16 (24/08/2026): A2 — enquadramento da capa persiste no banco (usuarios.capa_pos) e não se perde mais no extremo 0%; ?personalizar=1 abre a gaveta do cartão (porta vinda de Configurações) -->
 <!-- v3-11 (18/08/2026): capa e foto de perfil por REST direto do Storage (dbFetch autenticado) — o cliente supabase-js nunca existiu na página; upload/leitura estavam mortos desde o v3-10 -->
 <script>
 (function(){
@@ -258,7 +259,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-15'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-16'
   });
 
   // Sauda\u00e7\u00e3o
@@ -275,6 +276,17 @@
   (function(){
     var p = document.getElementById('perfilAluno');
     if (p) p.onclick = function(){ abrirGaveta('gavetaCard'); };
+  })();
+
+  // v3-16: porta vinda de Configura\u00e7\u00f5es — ?personalizar=1 abre a gaveta do cart\u00e3o
+  (function(){
+    try {
+      var q = new URLSearchParams(window.location.search);
+      if (q.get('personalizar') === '1') {
+        setTimeout(function(){ abrirGaveta('gavetaCard'); }, 250);
+        history.replaceState(null, '', window.location.pathname);
+      }
+    } catch(e) {}
   })();
 
   // ─── Tamanho do cart\u00e3o ───
@@ -325,6 +337,15 @@
     try {
       var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
       if (!uid) return;
+      /* v3-16: enquadramento vem do banco (vale em qualquer aparelho); localStorage vira cache */
+      try {
+        var resPos = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid + '&select=capa_pos');
+        var dPos = await resPos.json();
+        if (resPos.ok && Array.isArray(dPos) && dPos[0] && dPos[0].capa_pos !== null && dPos[0].capa_pos !== undefined) {
+          _posCapa = Math.max(0, Math.min(100, dPos[0].capa_pos));
+          try { localStorage.setItem('redaon-capa-pos', String(_posCapa)); } catch(e2) {}
+        }
+      } catch(ePos) { /* segue com o cache local */ }
       var capa = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg');
       if (capa) aplicarFotoCapa(capa);
       // Foto de perfil da conta (definida em Configura\u00e7\u00f5es) \u2014 usada na bolinha
@@ -333,7 +354,11 @@
     } catch(e) { /* sem foto \u2014 mant\u00e9m o degrad\u00ea */ }
   }
   var _urlCapa = null, _posCapa = 50;
-  try { _posCapa = parseFloat(localStorage.getItem('redaon-capa-pos')) || 50; } catch(e) {}
+  /* v3-16: parse seguro — 0% é válido (o antigo `|| 50` descartava o extremo do topo) */
+  try {
+    var _pSalva = parseFloat(localStorage.getItem('redaon-capa-pos'));
+    if (!isNaN(_pSalva)) _posCapa = Math.max(0, Math.min(100, _pSalva));
+  } catch(e) {}
   function aplicarFotoCapa(url) {
     _urlCapa = url;
     var capa = document.getElementById('fcCover');
@@ -390,6 +415,17 @@
   function salvarEnquadre(){
     _posCapa = _enqPos;
     try { localStorage.setItem('redaon-capa-pos', String(_posCapa)); } catch(e) {}
+    /* v3-16: persiste no banco — o ajuste não se perde ao trocar de aparelho ou limpar o navegador */
+    (async function(){
+      try {
+        var uid = authGetUserId();
+        if (!uid) return;
+        await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid, {
+          method: 'PATCH',
+          body: JSON.stringify({ capa_pos: Math.round(_posCapa) })
+        });
+      } catch(e){ console.warn('[inicio] capa_pos n\u00e3o salvo no banco:', e); }
+    })();
     var capa = document.getElementById('fcCover');
     if (capa) capa.style.setProperty('--posCapa', _posCapa + '%');
     fecharEnquadre();
