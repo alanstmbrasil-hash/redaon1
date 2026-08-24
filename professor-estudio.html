@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Portal Professor</title>
+<!-- professor-estudio v5 · Salvar em Materiais real (quadro A1a·A2b·A3·A5·A6, padrão A) -->
 <script>
 /* Tema RedaON — aplicado antes da pintura, evita piscada.
    Preferência salva em localStorage; se indisponível, cai no escuro. */
@@ -390,6 +391,63 @@
   #sidebar{scrollbar-width:thin;scrollbar-color:var(--scroll) transparent;}
 </style>
 <script src="supabase-auth.js"></script>
+<style>
+/* ═══ v5 · Gaveta Salvar em Materiais (padrão A) + visualizador ═══ */
+.svGrip{width:38px;height:4px;border-radius:99px;background:rgba(var(--borderRGB),.45);margin:0 auto 12px;}
+.svTit{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:.9rem;}
+.svRot{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem;}
+.svRot .opc{font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted2);}
+.svCampo{width:100%;min-height:52px;padding:.75rem .9rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.3);border-radius:13px;color:var(--text);font-size:.875rem;font-weight:600;font-family:inherit;margin-bottom:.9rem;}
+.svCampo:focus{outline:none;border-color:var(--cyan);}
+.svCampoBtn{display:flex;align-items:center;justify-content:space-between;gap:.6rem;width:100%;min-height:52px;padding:0 .9rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.3);border-radius:13px;color:var(--text);font-size:.875rem;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:.35rem;text-align:left;}
+.svCampoBtn .seta{font-size:.6rem;opacity:.7;flex:0 0 auto;color:var(--muted);}
+.svCampoBtn.pend span:first-child{color:var(--muted);}
+.svCampoFixo{display:flex;align-items:center;gap:.6rem;min-height:52px;padding:0 .9rem;background:var(--surface2);border:1px solid rgba(var(--borderRGB),.18);border-radius:13px;color:var(--text2);font-size:.875rem;font-weight:600;margin-bottom:.9rem;}
+.svCampoFixo .tag{margin-left:auto;font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.svAviso{display:flex;gap:.5rem;align-items:flex-start;font-size:.72rem;color:var(--muted);background:rgba(var(--goldRGB),.08);border:1px solid rgba(var(--goldRGB),.25);border-radius:10px;padding:.6rem .7rem;margin-bottom:.9rem;line-height:1.45;}
+.svAviso.ok{background:rgba(var(--greenRGB),.08);border-color:rgba(var(--greenRGB),.3);color:var(--text2);}
+.svLinhaSw{display:flex;align-items:center;gap:.7rem;min-height:52px;padding:0 .9rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.3);border-radius:13px;cursor:pointer;margin-bottom:.5rem;user-select:none;}
+.svLinhaSw .txts{flex:1;min-width:0;}
+.svLinhaSw .l1{display:block;font-size:.85rem;font-weight:700;color:var(--text);}
+.svLinhaSw .l2{display:block;font-size:.68rem;color:var(--muted);margin-top:.1rem;}
+.svSw{flex:0 0 auto;width:44px;height:26px;border-radius:99px;background:rgba(var(--borderRGB),.4);position:relative;transition:background .2s;}
+.svSw::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--bg);transition:left .2s;}
+.svLinhaSw.on{border-color:rgba(var(--cyanRGB),.4);}
+.svLinhaSw.on .svSw{background:var(--cyan);}
+.svLinhaSw.on .svSw::after{left:21px;}
+.svLinhaSw.valida.on{border-color:rgba(var(--greenRGB),.45);background:rgba(var(--greenRGB),.07);}
+.svLinhaSw.valida.on .svSw{background:var(--green);}
+.svLinhaSw.valida.on .l1{color:var(--green);}
+.svPrevia{display:flex;align-items:center;gap:.6rem;font-size:.72rem;color:var(--muted);padding:.55rem .2rem .9rem;line-height:1.4;}
+.svSelo{flex:0 0 auto;font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:.5rem;white-space:nowrap;}
+.svSelo.ia{color:var(--gold);background:rgba(var(--goldRGB),.12);border:1px solid rgba(var(--goldRGB),.35);}
+.svSelo.val{color:var(--green);background:rgba(var(--greenRGB),.12);border:1px solid rgba(var(--greenRGB),.35);}
+.svBtnSalvar{width:100%;min-height:52px;border:none;border-radius:13px;background:var(--cyan);color:var(--onCyan);font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;margin-top:.3rem;}
+.svBtnSalvar:disabled{opacity:.45;cursor:not-allowed;}
+#gvSalvarBg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:210;}
+#gvSalvarBg.open{display:block;}
+#gvSalvar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:211;background:var(--top);border-top:1px solid rgba(var(--borderRGB),.2);border-radius:20px 20px 0 0;padding:10px 16px 20px;max-width:34rem;margin:0 auto;max-height:88vh;overflow-y:auto;}
+#gvSalvar.open{display:block;}
+#gvTemasSalvarBg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:216;}
+#gvTemasSalvarBg.open{display:block;}
+#gvTemasSalvar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:217;background:var(--top);border-top:1px solid rgba(var(--borderRGB),.2);border-radius:20px 20px 0 0;padding:10px 16px 20px;max-width:34rem;margin:0 auto;max-height:70vh;overflow-y:auto;}
+#gvTemasSalvar.open{display:block;}
+.optTemaSv{display:flex;align-items:center;gap:.7rem;min-height:52px;padding:.4rem .875rem;border-radius:13px;background:var(--surface);color:var(--text);font-size:.85rem;font-weight:600;cursor:pointer;margin-bottom:.5rem;border:1px solid transparent;}
+.optTemaSv .em{font-size:1.05rem;flex:0 0 auto;}
+.optTemaSv .ck{margin-left:auto;color:var(--cyan);font-size:1.05rem;opacity:0;font-weight:900;}
+.optTemaSv.sel{background:rgba(var(--cyanRGB),.13);color:var(--cyan);border-color:rgba(var(--cyanRGB),.4);}
+.optTemaSv.sel .ck{opacity:1;}
+.optTemaSv .sub{display:block;font-size:.66rem;color:var(--muted);font-weight:500;margin-top:.1rem;}
+#gvVerMatBg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:212;}
+#gvVerMatBg.open{display:block;}
+#gvVerMat{display:none;position:fixed;left:0;right:0;bottom:0;z-index:213;background:var(--top);border-top:1px solid rgba(var(--borderRGB),.2);border-radius:20px 20px 0 0;padding:10px 16px 20px;max-width:40rem;margin:0 auto;max-height:88vh;overflow-y:auto;}
+#gvVerMat.open{display:block;}
+.vmMeta{font-size:.72rem;color:var(--muted);margin:-0.5rem 0 .7rem;}
+#vmConteudo{font-size:.85rem;line-height:1.7;color:var(--text2);white-space:pre-wrap;background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:13px;padding:.9rem;max-height:46vh;overflow-y:auto;margin-bottom:.8rem;}
+.vmAcoes{display:flex;gap:.6rem;flex-wrap:wrap;}
+.vmBtn{flex:1;min-width:9rem;min-height:48px;border-radius:13px;border:1px solid rgba(var(--borderRGB),.3);background:var(--surface);color:var(--text);font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;}
+.vmBtn.perigo{color:var(--red);border-color:rgba(var(--borderRGB),.3);}
+</style>
 </head>
 
 <script>
@@ -498,6 +556,40 @@
     var j = await res.json();
     return Array.isArray(j) ? j[0] : j;
   };
+
+  // ═══ v5 · Materiais do IA Estúdio (tabela materiais) ═══
+  window.dbGetMateriais = async function(){
+    return await _get('materiais?select=id,professor_id,turma_id,nome,tipo,conteudo,arquivo_url,origem,selo,publicado,criado_em,tema_id,temas(titulo)&order=criado_em.desc');
+  };
+  window.dbSalvarMaterial = async function(dados){
+    var id = _meuId(); if (!id) return null;
+    try {
+      var res = await dbFetch(_url('materiais'), {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Prefer':'return=representation' },
+        body: JSON.stringify(Object.assign({ professor_id:id }, dados||{}))
+      });
+      if (!res.ok) { console.error('salvar material', res.status); return null; }
+      var j = await res.json();
+      return Array.isArray(j) ? j[0] : j;
+    } catch(e){ console.error('salvar material', e); return null; }
+  };
+  window.dbAtualizarMaterial = async function(id, campos){
+    try {
+      var res = await dbFetch(_url('materiais?id=eq.'+id), {
+        method:'PATCH',
+        headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+        body: JSON.stringify(campos||{})
+      });
+      return res.ok;
+    } catch(e){ console.error('atualizar material', e); return false; }
+  };
+  window.dbExcluirMaterial = async function(id){
+    try {
+      var res = await dbFetch(_url('materiais?id=eq.'+id), { method:'DELETE' });
+      return res.ok;
+    } catch(e){ console.error('excluir material', e); return false; }
+  };
 })();
 </script>
 
@@ -547,7 +639,7 @@
       <span style="font-size:.65rem;color:var(--purple);font-weight:700;letter-spacing:.04em;">&#11088; PORTAL PRO</span>
     </span>
   </div>
-  <p class="sideVersao">IA Estúdio · produção · v4</p>
+  <p class="sideVersao">IA Estúdio · produção · v5</p>
 </aside>
 
 <!-- MAIN -->
@@ -898,6 +990,86 @@
   <div id="gvSelOpts" style="display:flex;flex-direction:column;gap:.45rem;"></div>
 </div>
 
+<!-- ═══ v5 · GAVETA SALVAR EM MATERIAIS (padrão A aprovado) ═══ -->
+<div id="gvSalvarBg" onclick="fecharGavetaSalvar()"></div>
+<div id="gvSalvar">
+  <div class="svGrip"></div>
+  <p class="svTit">💾 Salvar em Materiais</p>
+
+  <p class="svRot">Nome do material</p>
+  <input class="svCampo" id="svNome" type="text"/>
+
+  <div id="svBlocoMaterial">
+    <p class="svRot">Tema vinculado <span class="opc">— endereço de entrega para o aluno</span></p>
+    <button class="svCampoBtn pend" id="svBtnTema" onclick="abrirTemasSalvar()">
+      <span id="svLblTema">Vincular a um tema…</span><span class="seta">▾</span>
+    </button>
+    <div class="svAviso" id="svAvisoTema">
+      <span>⚠️</span>
+      <span>Sem tema vinculado, o material fica só no seu acervo — <strong>não aparece para o aluno</strong>.</span>
+    </div>
+
+    <p class="svRot">Turma</p>
+    <div class="svCampoFixo"><span id="svLblTurma">—</span><span class="tag">selecionada no estúdio</span></div>
+
+    <div class="svLinhaSw on" id="svSwEnviar" onclick="svToggleEnviar(this)">
+      <div class="txts">
+        <span class="l1">Enviar à turma agora</span>
+        <span class="l2">Desligado = fica guardado como rascunho no seu acervo</span>
+      </div>
+      <div class="svSw"></div>
+    </div>
+
+    <div class="svLinhaSw valida" id="svSwValida" onclick="svToggleValida(this)">
+      <div class="txts">
+        <span class="l1">Validar material</span>
+        <span class="l2">Sua chancela pedagógica — o aluno verá o selo "validado"</span>
+      </div>
+      <div class="svSw"></div>
+    </div>
+
+    <div class="svPrevia">
+      <span>O aluno verá:</span>
+      <span class="svSelo ia" id="svPreviaSelo">IA</span>
+      <span id="svPreviaTxt">material gerado, ainda sem chancela do professor</span>
+    </div>
+  </div>
+
+  <div id="svBlocoPrompt" style="display:none;">
+    <div class="svAviso ok" style="margin-top:.2rem;">
+      <span>🗂️</span>
+      <span>Prompts ficam <strong>só no seu acervo</strong>, para reutilizar depois — nunca são enviados ao aluno.</span>
+    </div>
+  </div>
+
+  <button class="svBtnSalvar" id="svBtnConfirmar" onclick="confirmarSalvar()">💾 Salvar</button>
+</div>
+
+<!-- v5 · sub-gaveta de temas (empilha por cima — padrão A) -->
+<div id="gvTemasSalvarBg" onclick="fecharTemasSalvar()"></div>
+<div id="gvTemasSalvar">
+  <div class="svGrip"></div>
+  <p class="svTit" style="font-size:.95rem;">Vincular a um tema</p>
+  <div id="svListaTemas"></div>
+</div>
+
+<!-- v5 · visualizador de material -->
+<div id="gvVerMatBg" onclick="fecharVerMat()"></div>
+<div id="gvVerMat">
+  <div class="svGrip"></div>
+  <p class="svTit" id="vmTitulo">Material</p>
+  <p class="vmMeta" id="vmMeta"></p>
+  <div class="svAviso" id="vmAvisoTema" style="display:none;">
+    <span>⚠️</span>
+    <span>Sem tema vinculado — <strong>não aparece para o aluno</strong>. Salve uma nova versão vinculada a um tema para publicar de verdade.</span>
+  </div>
+  <div id="vmConteudo"></div>
+  <div class="vmAcoes" id="vmAcoes">
+    <button class="vmBtn" id="vmBtnPub" onclick="alternarPublicado()">📣 Enviar à turma</button>
+    <button class="vmBtn perigo" id="vmBtnExc" onclick="excluirMaterial(this)">🗑️ Excluir</button>
+  </div>
+</div>
+
 <div id="gavetaBg" onclick="fecharMais()"></div>
 <div id="gavetaMais">
   <div class="grip"></div>
@@ -963,7 +1135,7 @@
     {id:'rubrica', ic:'📏', nm:'Rubrica',             ds:'critérios de avaliação'},
     {id:'reper',   ic:'💡', nm:'Repertório',          ds:'referências por eixo'},
     {id:'flash',   ic:'🃏', nm:'Flashcards',          ds:'cartões de revisão'},
-    {id:'notamil', ic:'⭐', nm:'Redação nota mil',    ds:'modelo comentado do tema'}
+    {id:'notamil', ic:'⭐', nm:'Redação modelo',      ds:'exemplar comentado buscando a nota mil'}
   ];
   var FMT_PROMPTS = [
     {id:'slides',  ic:'🖼️', nm:'Slides',   ds:'prompt para Gamma ou Canva'},
@@ -1007,7 +1179,7 @@
     renderSugestao();
     renderFontesInternas();
     renderListaFontes();
-    renderMateriais();
+    carregarMateriais();
   }
   function renderizarDashboard(){ /* não usado */ }
 
@@ -1337,6 +1509,7 @@
     if(_origem==='tema' && !assunto){ toast('Escreva o tema primeiro'); return; }
     if(_origem==='competencia' && !_comp){ toast('Escolha a competência primeiro'); return; }
 
+    window._resultado = null;
     var area=document.getElementById('areaResultado');
     var tit=document.getElementById('resTitulo');
     var con=document.getElementById('resConteudo');
@@ -1364,6 +1537,9 @@
       }
       con.style.color = 'var(--text2)';
       con.textContent = dados.texto || 'A IA não retornou conteúdo. Tente reformular.';
+      window._resultado = dados.texto
+        ? { fmtId:fmtId, nm:f.nm, ic:f.ic, ehPrompt:ehPrompt, assunto:assunto, texto:dados.texto }
+        : null;
 
       // Fontes consultadas na web
       if (fnt && dados.fontes && dados.fontes.length) {
@@ -1385,36 +1561,236 @@
     try{ document.execCommand('copy'); toast('📋 Copiado'); }catch(e){ toast('Não consegui copiar'); }
     document.body.removeChild(ta);
   };
-  window.salvarResultado = function(){ toast('💾 Salvo em Materiais (prévia)'); };
+  // ═══ v5 · Salvar em Materiais (quadro A1a·A2b·A3·A5, padrão A) ═══
+  var _sv = { temaId:null, temaTitulo:null, enviar:true, validar:false };
+  var _temasCache = null;
 
-  // ─── Materiais ───
-  function materiaisDemo(){
-    return [
-      {id:'m1', ic:'✏️', nm:'Exercícios de conectivos (C4)', ds:'Acervo · validado pela Profa. Blanche', tipo:'acervo', selo:'validado'},
-      {id:'m2', ic:'💡', nm:'Repertório — mobilidade urbana', ds:'Acervo · 9 categorias', tipo:'acervo', selo:'validado'},
-      {id:'m3', ic:'📘', nm:'Plano de aula — proposta de intervenção', ds:'Seu material · gerado em 26/07', tipo:'meus', selo:'ia'},
-      {id:'m4', ic:'📏', nm:'Rubrica de correção C1–C5', ds:'Acervo · validado pela Profa. Blanche', tipo:'acervo', selo:'validado'},
-      {id:'m5', ic:'🃏', nm:'Flashcards — crise hídrica', ds:'Seu material · gerado em 24/07', tipo:'meus', selo:'ia'}
-    ];
+  window.salvarResultado = function(){
+    var r = window._resultado;
+    if (!r || !r.texto) { toast('Gere um material primeiro'); return; }
+    if (!_turmaSel) { toast('Escolha uma turma primeiro'); return; }
+    _sv = { temaId:null, temaTitulo:null, enviar:true, validar:false };
+    var n = document.getElementById('svNome');
+    if (n) n.value = r.nm + ' — ' + r.assunto;
+    document.getElementById('svBlocoMaterial').style.display = r.ehPrompt ? 'none' : 'block';
+    document.getElementById('svBlocoPrompt').style.display  = r.ehPrompt ? 'block' : 'none';
+    var tl = document.getElementById('svLblTurma');
+    if (tl) tl.textContent = '🏫 ' + _turmaSel.nome;
+    svResetTema();
+    svSetSw('svSwEnviar', true);
+    svSetSw('svSwValida', false);
+    svPreviaSelo();
+    var b = document.getElementById('svBtnConfirmar');
+    if (b) { b.disabled = false; b.textContent = '💾 Salvar'; }
+    document.getElementById('gvSalvarBg').classList.add('open');
+    document.getElementById('gvSalvar').classList.add('open');
+  };
+  window.fecharGavetaSalvar = function(){
+    document.getElementById('gvSalvarBg').classList.remove('open');
+    document.getElementById('gvSalvar').classList.remove('open');
+    fecharTemasSalvar();
+  };
+  function svSetSw(id, on){
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('on', !!on);
+  }
+  window.svToggleEnviar = function(el){
+    el.classList.toggle('on');
+    _sv.enviar = el.classList.contains('on');
+  };
+  window.svToggleValida = function(el){
+    el.classList.toggle('on');
+    _sv.validar = el.classList.contains('on');
+    svPreviaSelo();
+  };
+  function svPreviaSelo(){
+    var se = document.getElementById('svPreviaSelo'), tx = document.getElementById('svPreviaTxt');
+    if (!se) return;
+    if (_sv.validar) {
+      se.className = 'svSelo val'; se.textContent = '✓ validado';
+      tx.textContent = 'validado por você — chancela pedagógica';
+    } else {
+      se.className = 'svSelo ia'; se.textContent = 'IA';
+      tx.textContent = 'material gerado, ainda sem chancela do professor';
+    }
+  }
+  function svResetTema(){
+    _sv.temaId = null; _sv.temaTitulo = null;
+    var b = document.getElementById('svBtnTema'), l = document.getElementById('svLblTema'), a = document.getElementById('svAvisoTema');
+    if (l) l.textContent = 'Vincular a um tema…';
+    if (b) b.classList.add('pend');
+    if (a) {
+      a.classList.remove('ok');
+      a.innerHTML = '<span>⚠️</span><span>Sem tema vinculado, o material fica só no seu acervo — <strong>não aparece para o aluno</strong>.</span>';
+    }
+  }
+  window.abrirTemasSalvar = async function(){
+    document.getElementById('gvTemasSalvarBg').classList.add('open');
+    document.getElementById('gvTemasSalvar').classList.add('open');
+    var box = document.getElementById('svListaTemas');
+    if (!_temasCache) {
+      box.innerHTML = '<p style="font-size:.8rem;color:var(--muted);text-align:center;padding:1rem 0;">Carregando temas…</p>';
+      try { _temasCache = (typeof dbGetTemas === 'function') ? (await dbGetTemas() || []) : []; }
+      catch(e){ console.error(e); _temasCache = []; }
+    }
+    var h = (_temasCache || []).map(function(t){
+      var sub = [t.ano_enem ? ('ENEM ' + t.ano_enem) : (t.aplicacao || 'Inédito'), t.categoria].filter(Boolean).join(' · ');
+      var sel = (String(_sv.temaId) === String(t.id)) ? ' sel' : '';
+      return '<div class="optTemaSv' + sel + '" data-id="' + t.id + '" data-titulo="' + escapeHtml(t.titulo || '') + '" onclick="escolherTemaSalvar(this)">'
+        + '<span>' + escapeHtml(t.titulo || 'Tema') + (sub ? '<span class="sub">' + escapeHtml(sub) + '</span>' : '') + '</span>'
+        + '<span class="ck">✓</span></div>';
+    });
+    h.push('<div class="optTemaSv' + (_sv.temaId ? '' : ' sel') + '" data-id="" data-titulo="" onclick="escolherTemaSalvar(this)">'
+      + '<span class="em">📂</span><span>Sem tema — só no meu acervo</span><span class="ck">✓</span></div>');
+    box.innerHTML = h.join('');
+  };
+  window.fecharTemasSalvar = function(){
+    document.getElementById('gvTemasSalvarBg').classList.remove('open');
+    document.getElementById('gvTemasSalvar').classList.remove('open');
+  };
+  window.escolherTemaSalvar = function(el){
+    var id = el.getAttribute('data-id') || null;
+    var titulo = el.getAttribute('data-titulo') || null;
+    document.querySelectorAll('.optTemaSv').forEach(function(o){ o.classList.remove('sel'); });
+    el.classList.add('sel');
+    var b = document.getElementById('svBtnTema'), l = document.getElementById('svLblTema'), a = document.getElementById('svAvisoTema');
+    if (id) {
+      _sv.temaId = id; _sv.temaTitulo = titulo;
+      if (l) l.textContent = titulo;
+      if (b) b.classList.remove('pend');
+      if (a) {
+        a.classList.add('ok');
+        a.innerHTML = '<span>📚</span><span>Vai aparecer na preparação deste tema, para os alunos da turma.</span>';
+      }
+    } else {
+      svResetTema();
+    }
+    setTimeout(fecharTemasSalvar, 180);
+  };
+  window.confirmarSalvar = async function(){
+    var r = window._resultado;
+    if (!r || !_turmaSel) { fecharGavetaSalvar(); return; }
+    var nome = ((document.getElementById('svNome') || {}).value || '').trim() || (r.nm + ' — ' + r.assunto);
+    var payload = {
+      turma_id: _turmaSel.id,
+      nome: nome,
+      tipo: r.fmtId,
+      conteudo: r.texto,
+      origem: 'professor',
+      tema_id: r.ehPrompt ? null : (_sv.temaId || null),
+      selo: (!r.ehPrompt && _sv.validar) ? 'validado' : 'ia',
+      publicado: r.ehPrompt ? false : !!_sv.enviar
+    };
+    var b = document.getElementById('svBtnConfirmar');
+    if (b) { b.disabled = true; b.textContent = 'Salvando…'; }
+    var salvo = (typeof dbSalvarMaterial === 'function') ? await dbSalvarMaterial(payload) : null;
+    if (!salvo) {
+      if (b) { b.disabled = false; b.textContent = '💾 Salvar'; }
+      toast('Não consegui salvar. Verifique a internet e tente de novo.');
+      return;
+    }
+    fecharGavetaSalvar();
+    toast(r.ehPrompt ? '🗂️ Prompt guardado no seu acervo'
+      : (payload.publicado ? '💾 Salvo e enviado à turma' : '💾 Salvo como rascunho'));
+    carregarMateriais();
+  };
+
+  // ─── Materiais (v5 — dados reais da tabela materiais) ───
+  var _materiais = [];
+  var _ICONE_TIPO = { plano:'📘', exerc:'✏️', sequen:'🗓️', rubrica:'📏', reper:'💡', flash:'🃏', notamil:'⭐', slides:'🖼️', video:'🎬', podcast:'🎙️' };
+  async function carregarMateriais(){
+    try { _materiais = (typeof dbGetMateriais === 'function') ? (await dbGetMateriais() || []) : []; }
+    catch(e){ console.error(e); _materiais = []; }
+    renderMateriais();
+  }
+  function ehMeu(m){ return m && m.origem === 'professor'; }
+  function dataCurta(iso){
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}); }
+    catch(e){ return ''; }
   }
   function renderMateriais(){
     var box=document.getElementById('listaMateriais'); if(!box) return;
-    var todos = materiaisDemo();
-    var lista = (_filtroAcervo==='todos') ? todos : todos.filter(function(m){ return m.tipo===_filtroAcervo; });
+    var lista = (_materiais||[]).filter(function(m){
+      if (_filtroAcervo==='meus')   return ehMeu(m);
+      if (_filtroAcervo==='acervo') return m.origem === 'redaon';
+      return true;
+    });
     var c=document.getElementById('contMateriais');
     if(c) c.textContent = lista.length + ' material' + (lista.length===1?'':'is');
-    if(!lista.length){ box.innerHTML='<p style="font-size:.8rem;color:var(--muted);text-align:center;padding:1.2rem 0;">Nada por aqui ainda.</p>'; return; }
+    if(!lista.length){
+      box.innerHTML='<p style="font-size:.8rem;color:var(--muted);text-align:center;padding:1.2rem 0;">Nada por aqui ainda. Gere um material na aba ✨ Criar e toque em 💾 Salvar.</p>';
+      return;
+    }
     box.innerHTML = lista.map(function(m){
+      var ic = _ICONE_TIPO[m.tipo] || '📄';
+      var partes = [ ehMeu(m) ? 'Seu material' : 'Acervo RedaON' ];
+      if (m.temas && m.temas.titulo) partes.push(m.temas.titulo);
+      var dt = dataCurta(m.criado_em); if (dt) partes.push(dt);
+      if (ehMeu(m) && !m.publicado) partes.push('rascunho');
       var selo = (m.selo==='validado')
         ? '<span style="flex:0 0 auto;font-size:.7rem;font-weight:700;color:var(--green);">✓ validado</span>'
         : '<span style="flex:0 0 auto;font-size:.7rem;font-weight:700;color:var(--gold);">IA</span>';
-      return '<div class="matItem" onclick="toast(\'Abrir material — em breve\')">'
-        + '<span style="font-size:1.3rem;flex:0 0 auto;">'+m.ic+'</span>'
-        + '<span style="min-width:0;flex:1;"><span style="display:block;font-size:.85rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+m.nm+'</span>'
-        + '<span style="display:block;font-size:.72rem;color:var(--muted);">'+m.ds+'</span></span>'
+      return '<div class="matItem" onclick="abrirMaterial(\''+m.id+'\')">'
+        + '<span style="font-size:1.3rem;flex:0 0 auto;">'+ic+'</span>'
+        + '<span style="min-width:0;flex:1;"><span style="display:block;font-size:.85rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escapeHtml(m.nome||'Material')+'</span>'
+        + '<span style="display:block;font-size:.72rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escapeHtml(partes.join(' · '))+'</span></span>'
         + selo + '</div>';
     }).join('');
   }
+  // ─── Visualizador (v5) ───
+  var _matAberto = null, _vmConfExc = false;
+  window.abrirMaterial = function(id){
+    var m = (_materiais||[]).filter(function(x){ return String(x.id)===String(id); })[0];
+    if (!m) return;
+    _matAberto = m; _vmConfExc = false;
+    var ic = _ICONE_TIPO[m.tipo] || '📄';
+    document.getElementById('vmTitulo').textContent = ic + ' ' + (m.nome || 'Material');
+    var partes = [ ehMeu(m) ? 'Seu material' : 'Acervo RedaON' ];
+    partes.push(m.selo==='validado' ? '✓ validado' : 'selo IA');
+    if (m.temas && m.temas.titulo) partes.push(m.temas.titulo);
+    var dt = dataCurta(m.criado_em); if (dt) partes.push(dt);
+    if (ehMeu(m)) partes.push(m.publicado ? 'enviado à turma' : 'rascunho');
+    document.getElementById('vmMeta').textContent = partes.join(' · ');
+    document.getElementById('vmConteudo').textContent = m.conteudo || '(sem conteúdo de texto)';
+    var aviso = document.getElementById('vmAvisoTema');
+    if (aviso) aviso.style.display = (ehMeu(m) && m.publicado && !m.tema_id) ? 'flex' : 'none';
+    var acoes = document.getElementById('vmAcoes');
+    if (acoes) acoes.style.display = ehMeu(m) ? 'flex' : 'none';
+    var bp = document.getElementById('vmBtnPub');
+    if (bp) bp.textContent = m.publicado ? '📤 Despublicar' : '📣 Enviar à turma';
+    var be = document.getElementById('vmBtnExc');
+    if (be) be.textContent = '🗑️ Excluir';
+    document.getElementById('gvVerMatBg').classList.add('open');
+    document.getElementById('gvVerMat').classList.add('open');
+  };
+  window.fecharVerMat = function(){
+    document.getElementById('gvVerMatBg').classList.remove('open');
+    document.getElementById('gvVerMat').classList.remove('open');
+    _matAberto = null;
+  };
+  window.alternarPublicado = async function(){
+    if (!_matAberto || !ehMeu(_matAberto)) return;
+    var novo = !_matAberto.publicado;
+    var ok = (typeof dbAtualizarMaterial === 'function') ? await dbAtualizarMaterial(_matAberto.id, { publicado: novo }) : false;
+    if (!ok) { toast('Não consegui atualizar. Tente de novo.'); return; }
+    _matAberto.publicado = novo;
+    toast(novo ? '📣 Enviado à turma' : '📤 Despublicado — virou rascunho');
+    var bp = document.getElementById('vmBtnPub');
+    if (bp) bp.textContent = novo ? '📤 Despublicar' : '📣 Enviar à turma';
+    var aviso = document.getElementById('vmAvisoTema');
+    if (aviso) aviso.style.display = (novo && !_matAberto.tema_id) ? 'flex' : 'none';
+    renderMateriais();
+  };
+  window.excluirMaterial = async function(btn){
+    if (!_matAberto || !ehMeu(_matAberto)) return;
+    if (!_vmConfExc) { _vmConfExc = true; if (btn) btn.textContent = 'Confirmar exclusão?'; return; }
+    var ok = (typeof dbExcluirMaterial === 'function') ? await dbExcluirMaterial(_matAberto.id) : false;
+    if (!ok) { toast('Não consegui excluir. Tente de novo.'); return; }
+    toast('🗑️ Material excluído');
+    fecharVerMat();
+    carregarMateriais();
+  };
 
   // ─── Gaveta de seleção (padrão do produto) ───
   window.abrirGaveta = function(qual){
