@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início</title>
-<!-- RedaON · Portal do Aluno · Início · v3-10 · sobre aluno-base-v6 -->
+<title>RedaON | Início v3-16</title>
+<!-- RedaON · Portal do Aluno · Início · v3-16 · sobre aluno-base-v6 -->
+<!-- v3-16 (24/08/2026): A2 — enquadramento da capa persiste no banco (usuarios.capa_pos) e não se perde mais no extremo 0%; ?personalizar=1 abre a gaveta do cartão (porta vinda de Configurações) -->
+<!-- v3-11 (18/08/2026): capa e foto de perfil por REST direto do Storage (dbFetch autenticado) — o cliente supabase-js nunca existiu na página; upload/leitura estavam mortos desde o v3-10 -->
 <script>
 (function(){
   var pref = 'auto';
@@ -68,6 +70,8 @@
 .avisoIco{ font-size:22px; line-height:1; flex:0 0 auto; }
 .avisoTit{ font-size:11px; font-weight:700; color:var(--cyan); margin:0 0 2px; }
 .avisoTxt{ font-size:12.5px; color:var(--text2); margin:0; line-height:1.35; }
+.avisoSlide.acao{ cursor:pointer; }
+.avisoGo{ margin-left:auto; flex:0 0 auto; font-size:15px; font-weight:900; color:var(--cyan); opacity:.85; }
 .avisoTxt b{ color:var(--text); }
 .avisoDots{ display:flex; justify-content:center; gap:5px; padding:0 0 10px; }
 .avisoDots span{ width:6px; height:6px; border-radius:50%; background:var(--muted); opacity:.4; transition:opacity .2s,width .2s; }
@@ -90,6 +94,13 @@
 .aCard .ic{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:19px; margin-bottom:9px; }
 .aCard h4{ margin:0 0 4px; font-size:13.5px; font-weight:700; color:var(--text); }
 .aCard p{ margin:0; font-size:11px; color:var(--muted); line-height:1.4; }
+.aCard .et{ position:absolute; top:9px; right:9px; font-size:9px; font-weight:900; padding:2px 6px; border-radius:6px; letter-spacing:.03em; }
+.aCard .et.val{ background:rgba(var(--greenRGB),.12); color:var(--green); }
+.aCard .et.ia{ background:rgba(var(--goldRGB),.14); color:var(--gold); }
+.aCard .et.tm{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.carrVit{ display:flex; gap:.75rem; overflow-x:auto; padding-bottom:.4rem; scroll-snap-type:x proximity; }
+.carrVit .vCard{ flex:0 0 72%; max-width:300px; scroll-snap-align:start; }
+@media(min-width:900px){ .carrVit{ display:grid; grid-template-columns:repeat(4,1fr); overflow:visible; } .carrVit .vCard{ max-width:none; } }
 .vCard{ position:relative; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:15px; overflow:hidden; cursor:pointer; display:flex; flex-direction:column; min-height:150px; }
 .vThumb{ flex:1; min-height:112px; position:relative; display:flex; flex-direction:column; align-items:flex-start; padding:9px; }
 .vTitle{ margin-top:auto; font-size:12px; font-weight:700; line-height:1.3; color:#fff; padding:18px 4px 4px; width:100%; background:linear-gradient(0deg,rgba(8,12,18,.85) 0%,rgba(8,12,18,.45) 55%,transparent 100%); text-shadow:0 1px 3px rgba(0,0,0,.5); border-radius:0 0 8px 8px; }
@@ -167,19 +178,21 @@
       <button class="btnTurma" onclick="abrirModalEntrarTurma()">Entrar</button>
     </div>
 
-    <div class="sec"><span class="secL"><span class="bar"></span>Potencialize sua Escrita</span><button class="verT" onclick="mostrarEmBreve('Aulas')">Ver Todos</button></div>
-    <div class="carrA">
-      <div class="aCard" onclick="mostrarEmBreve('Sugest&atilde;o da PROfa')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">&#129504;</div><h4>Sugest&atilde;o da PROfa</h4><p>Repert&oacute;rios cr&iacute;ticos e an&aacute;lises personalizadas.</p></div>
-      <div class="aCard" onclick="mostrarEmBreve('Projeto de Texto')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">&#128208;</div><h4>Projeto de Texto</h4><p>Estrutura&ccedil;&atilde;o l&oacute;gica para a nota m&aacute;xima na C3.</p></div>
-      <div class="aCard" onclick="mostrarEmBreve('Proposta Premium')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">&#11088;</div><h4>Proposta Premium</h4><p>O segredo dos 200 pontos na Compet&ecirc;ncia 5.</p></div>
-      <div class="aCard" onclick="mostrarEmBreve('Gram&aacute;tica &Aacute;gil')"><span class="emBreve">EM BREVE</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">&#9997;&#65039;</div><h4>Gram&aacute;tica &Aacute;gil</h4><p>Erros comuns que tiram pontos na C1.</p></div>
+    <div class="sec"><span class="secL"><span class="bar"></span>Para a sua melhoria</span></div>
+    <p id="subMelhoria" style="font-size:.62rem;color:var(--muted);margin:-.3rem 0 .55rem .55rem;">muda conforme você evolui</p>
+    <div class="carrA" id="gradeMelhoria">
+      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">📚</div><h4>Repertório da semana</h4><p>no Hub de Preparação</p></div>
+      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">🎯</div><h4>Teste rápido</h4><p>quiz no Hub de Preparação</p></div>
+      <div class="aCard" onclick="window.location.href='minhas-redacoes.html'"><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">📝</div><h4>Estude sua Reescrita</h4><p>sua última redação, buscando a nota mil</p></div>
+      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">✨</div><h4>Materiais para você</h4><p>da sua professora ou da PROfa</p></div>
     </div>
 
-    <div class="sec"><span class="secL"><span class="bar"></span>Explore e Inspire-se</span></div>
-    <div class="carrV" style="margin-bottom:1rem;">
-      <div class="vCard" onclick="mostrarEmBreve('V&iacute;deos')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#9a7a10,#6b540a);"><span class="vBadge">Aposta da Semana</span><div class="vTitle">O impacto do etarismo</div></div></div>
-      <div class="vCard" onclick="mostrarEmBreve('V&iacute;deos')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#0a8c8d,#0c6b6c);"><span class="vBadge">Rota 1.000</span><div class="vTitle">Repert&oacute;rios de Filosofia</div></div></div>
-      <div class="vCard" onclick="mostrarEmBreve('V&iacute;deos')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#6c5ce7,#4a3fb0);"><span class="vBadge">Corre&ccedil;&atilde;o Guiada</span><div class="vTitle">Como estruturar a tese</div></div></div>
+    <div class="sec"><span class="secL"><span class="bar"></span>Aprenda com a RedaON</span></div>
+    <div class="carrVit" style="margin-bottom:1rem;">
+      <div class="vCard" onclick="mostrarEmBreve('A estrutura da redação ENEM')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#2d6a4f,#1b4332);"><span class="vBadge">Base</span><div class="vTitle">A estrutura da redação ENEM</div></div></div>
+      <div class="vCard" onclick="mostrarEmBreve('Correção Guiada')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#6c5ce7,#4a3fb0);"><span class="vBadge">Correção Guiada</span><div class="vTitle">O que o corretor considera em cada competência</div></div></div>
+      <div class="vCard" onclick="mostrarEmBreve('Aposta da Semana')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#9a7a10,#6b540a);"><span class="vBadge">Aposta da Semana</span><div class="vTitle">Por que este tema pode cair — o briefing</div></div></div>
+      <div class="vCard" onclick="mostrarEmBreve('Rota 1.000')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#0a8c8d,#0c6b6c);"><span class="vBadge">Rota 1.000</span><div class="vTitle">O caminho de quem chegou lá</div></div></div>
     </div>
 
   </div>
@@ -246,7 +259,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-10'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-16'
   });
 
   // Sauda\u00e7\u00e3o
@@ -263,6 +276,17 @@
   (function(){
     var p = document.getElementById('perfilAluno');
     if (p) p.onclick = function(){ abrirGaveta('gavetaCard'); };
+  })();
+
+  // v3-16: porta vinda de Configura\u00e7\u00f5es — ?personalizar=1 abre a gaveta do cart\u00e3o
+  (function(){
+    try {
+      var q = new URLSearchParams(window.location.search);
+      if (q.get('personalizar') === '1') {
+        setTimeout(function(){ abrirGaveta('gavetaCard'); }, 250);
+        history.replaceState(null, '', window.location.pathname);
+      }
+    } catch(e) {}
   })();
 
   // ─── Tamanho do cart\u00e3o ───
@@ -292,28 +316,49 @@
 
   // ─── Foto de capa (bucket privado: avatares-alunos/<id>/capa.jpg) ───
   var _BUCKET_AVATAR = 'avatares-alunos';
-  function clienteSupabase(){
-    if (window.supabaseClient) return window.supabaseClient;
-    if (window.supabase && window.supabase.storage) return window.supabase;
-    if (window._supabase) return window._supabase;
-    return null;
+  /* v3-11: Storage por REST direto (sem supabase-js). dbFetch cuida de token e refresh. */
+  async function baixarImagemPrivada(caminho) {
+    try {
+      var res = await dbFetch(SUPABASE_URL + '/storage/v1/object/authenticated/' + caminho);
+      if (!res || !res.ok) return null;
+      var blob = await res.blob();
+      return URL.createObjectURL(blob);
+    } catch(e) { return null; }
+  }
+  async function enviarImagemPrivada(caminho, blob) {
+    var res = await dbFetch(SUPABASE_URL + '/storage/v1/object/' + caminho, {
+      method: 'POST',
+      headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'true' },
+      body: blob
+    });
+    return !!(res && res.ok);
   }
   async function carregarFotoCapa() {
-    var sb = clienteSupabase();
-    if (!sb || !sb.storage) return;
     try {
-      var r = await sb.auth.getUser();
-      var user = r && r.data ? r.data.user : null;
-      if (!user) return;
-      var s = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/capa.jpg', 3600);
-      if (s && s.data && s.data.signedUrl) aplicarFotoCapa(s.data.signedUrl);
+      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+      if (!uid) return;
+      /* v3-16: enquadramento vem do banco (vale em qualquer aparelho); localStorage vira cache */
+      try {
+        var resPos = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid + '&select=capa_pos');
+        var dPos = await resPos.json();
+        if (resPos.ok && Array.isArray(dPos) && dPos[0] && dPos[0].capa_pos !== null && dPos[0].capa_pos !== undefined) {
+          _posCapa = Math.max(0, Math.min(100, dPos[0].capa_pos));
+          try { localStorage.setItem('redaon-capa-pos', String(_posCapa)); } catch(e2) {}
+        }
+      } catch(ePos) { /* segue com o cache local */ }
+      var capa = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg');
+      if (capa) aplicarFotoCapa(capa);
       // Foto de perfil da conta (definida em Configura\u00e7\u00f5es) \u2014 usada na bolinha
-      var p = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/perfil.jpg', 3600);
-      if (p && p.data && p.data.signedUrl) aplicarFotoPerfil(p.data.signedUrl);
+      var perfil = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
+      if (perfil) aplicarFotoPerfil(perfil);
     } catch(e) { /* sem foto \u2014 mant\u00e9m o degrad\u00ea */ }
   }
   var _urlCapa = null, _posCapa = 50;
-  try { _posCapa = parseFloat(localStorage.getItem('redaon-capa-pos')) || 50; } catch(e) {}
+  /* v3-16: parse seguro — 0% é válido (o antigo `|| 50` descartava o extremo do topo) */
+  try {
+    var _pSalva = parseFloat(localStorage.getItem('redaon-capa-pos'));
+    if (!isNaN(_pSalva)) _posCapa = Math.max(0, Math.min(100, _pSalva));
+  } catch(e) {}
   function aplicarFotoCapa(url) {
     _urlCapa = url;
     var capa = document.getElementById('fcCover');
@@ -370,6 +415,17 @@
   function salvarEnquadre(){
     _posCapa = _enqPos;
     try { localStorage.setItem('redaon-capa-pos', String(_posCapa)); } catch(e) {}
+    /* v3-16: persiste no banco — o ajuste não se perde ao trocar de aparelho ou limpar o navegador */
+    (async function(){
+      try {
+        var uid = authGetUserId();
+        if (!uid) return;
+        await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid, {
+          method: 'PATCH',
+          body: JSON.stringify({ capa_pos: Math.round(_posCapa) })
+        });
+      } catch(e){ console.warn('[inicio] capa_pos n\u00e3o salvo no banco:', e); }
+    })();
     var capa = document.getElementById('fcCover');
     if (capa) capa.style.setProperty('--posCapa', _posCapa + '%');
     fecharEnquadre();
@@ -414,22 +470,15 @@
   });
   async function enviarFotoPerfil(arquivo) {
     if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0) { toast('Use JPG, PNG ou WebP.', 3000); return; }
-    var sb = clienteSupabase();
-    if (!sb || !sb.storage) {
-      try { var b = await comprimirImagem(arquivo); aplicarFotoPerfil(URL.createObjectURL(b)); toast('Foto de perfil aplicada (pr\u00e9via)', 2600); }
-      catch(e) { toast('N\u00e3o consegui ler a imagem.', 2600); }
-      return;
-    }
     toast('Enviando foto\u2026', 4000);
     try {
-      var r = await sb.auth.getUser();
-      var user = r && r.data ? r.data.user : null;
-      if (!user) { toast('Sua sess\u00e3o expirou.', 3200); return; }
+      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+      if (!uid) { toast('Sua sess\u00e3o expirou.', 3200); return; }
       var blob = await comprimirImagem(arquivo);
-      var up = await sb.storage.from(_BUCKET_AVATAR).upload(user.id + '/perfil.jpg', blob, { cacheControl:'3600', upsert:true, contentType:'image/jpeg' });
-      if (up.error) throw up.error;
-      var s = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/perfil.jpg', 3600);
-      if (s && s.data && s.data.signedUrl) aplicarFotoPerfil(s.data.signedUrl + '&t=' + Date.now());
+      var ok = await enviarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg', blob);
+      if (!ok) throw new Error('upload recusado');
+      var url = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
+      if (url) aplicarFotoPerfil(url);
       toast('\u2705 Foto de perfil atualizada!');
     } catch(e) { console.warn(e); toast('N\u00e3o consegui enviar a foto.', 3200); }
   }
@@ -461,21 +510,16 @@
       toast('Formato n\u00e3o aceito. Use JPG, PNG ou WebP.', 3000);
       return;
     }
-    var sb = clienteSupabase();
-    if (!sb || !sb.storage) { toast('Sem conex\u00e3o com o armazenamento agora.', 3000); return; }
     toast('Enviando foto\u2026', 4000);
     try {
-      var r = await sb.auth.getUser();
-      var user = r && r.data ? r.data.user : null;
-      if (!user) { toast('Sua sess\u00e3o expirou. Entre novamente.', 3200); return; }
+      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+      if (!uid) { toast('Sua sess\u00e3o expirou. Entre novamente.', 3200); return; }
       var blob = await comprimirImagem(arquivo);
       if (blob.size > 5 * 1024 * 1024) { toast('Imagem muito grande mesmo comprimida.', 3200); return; }
-      var up = await sb.storage.from(_BUCKET_AVATAR).upload(user.id + '/capa.jpg', blob, {
-        cacheControl:'3600', upsert:true, contentType:'image/jpeg'
-      });
-      if (up.error) throw up.error;
-      var s = await sb.storage.from(_BUCKET_AVATAR).createSignedUrl(user.id + '/capa.jpg', 3600);
-      if (s && s.data && s.data.signedUrl) aplicarFotoCapa(s.data.signedUrl + '&t=' + Date.now());
+      var ok = await enviarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg', blob);
+      if (!ok) throw new Error('upload recusado');
+      var url = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg');
+      if (url) aplicarFotoCapa(url);
       toast('\u2705 Foto de capa atualizada!');
     } catch(e) {
       console.warn('Erro ao enviar foto:', e);
@@ -490,17 +534,25 @@
     if (!itens || itens.length === 0) {
       itens = [
         { ico:'\u{1F44B}', tit:'Bem-vindo(a)', txt:'Este \u00e9 o seu espa\u00e7o de escrita no RedaON' },
-        { ico:'\u270D\uFE0F', tit:'Primeiro passo', txt:'Envie sua primeira reda\u00e7\u00e3o para ver seus dados aqui' },
-        { ico:'\u{1F680}', tit:'Rumo \u00e0 nota 1000', txt:'Cada reda\u00e7\u00e3o \u00e9 um passo na sua evolu\u00e7\u00e3o' }
+        { ico:'\u{1F58B}\uFE0F', tit:'Primeiro passo', txt:'Envie sua primeira reda\u00e7\u00e3o para ver seus dados aqui', url:'nova-redacao.html?metodo=digitar' },
+        { ico:'\u{1F331}', tit:'Rumo \u00e0 nota 1000', txt:'Cada reda\u00e7\u00e3o \u00e9 um passo na sua evolu\u00e7\u00e3o' }
       ];
     }
+    window._ultimosAvisos = itens;
+    if (window._cardPlano) itens = [window._cardPlano].concat(itens);
+    window._avisosRender = itens;
     var track = document.getElementById('avisoTrack');
     var dotsBox = document.getElementById('avisoDots');
     if (!track || !dotsBox) return;
-    track.innerHTML = itens.map(function(it){
-      return '<div class="avisoSlide"><span class="avisoIco">' + it.ico + '</span><div>' +
-        '<p class="avisoTit">' + it.tit + '</p>' +
-        '<p class="avisoTxt">' + it.txt + '</p></div></div>';
+    track.innerHTML = itens.map(function(it, i){
+      var clicavel = !!it.url;
+      return '<div class="avisoSlide' + (clicavel ? ' acao' : '') + '"'
+        + (clicavel ? ' onclick="irAviso(' + i + ')"' : '') + '>'
+        + '<span class="avisoIco">' + it.ico + '</span><div>'
+        + '<p class="avisoTit">' + it.tit + '</p>'
+        + '<p class="avisoTxt">' + it.txt + '</p></div>'
+        + (clicavel ? '<span class="avisoGo">\u203A</span>' : '')
+        + '</div>';
     }).join('');
     dotsBox.innerHTML = '';
     for (var i = 0; i < itens.length; i++) {
@@ -564,6 +616,121 @@
     reiniciarRelogio();
   }
 
+  window.irAviso = function(i){
+    var it = (window._avisosRender || [])[i];
+    if (it && it.url) window.location.href = it.url;
+  };
+
+  /* ── Manchete viva: primeiro card do carrossel vem do Plano de estudos ── */
+  var _bioSemana = null, _bioSemJornada = false;
+  function pad2i(n){ return (n<10?'0':'')+n; }
+  function segundaISO(){
+    var d = new Date(); d.setHours(0,0,0,0);
+    var g = d.getDay(); d.setDate(d.getDate() - ((g===0)?6:g-1));
+    return d.getFullYear()+'-'+pad2i(d.getMonth()+1)+'-'+pad2i(d.getDate());
+  }
+  async function prepararCardPlano(){
+    try{
+      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+      if (!uid || typeof dbFetch !== 'function' || typeof SUPABASE_URL === 'undefined') { _bioSemJornada = true; atualizarBio(); return; }
+      var url = SUPABASE_URL + '/rest/v1/plano_itens?aluno_id=eq.'+uid+'&semana_de=eq.'+segundaISO()+'&order=dia.asc&select=id,dia,tipo,rotulo,destino,feito_em';
+      var res = await dbFetch(url, {});
+      if (!res.ok) return;
+      var itens = await res.json();
+      if (!itens.length){
+        _bioSemJornada = true;
+        window._cardPlano = { ico:'\u{1F680}', tit:'Comece por aqui', txt:'Monte sua primeira semana \u2014 <b>10 a 15 min por dia</b> para ficar fera em reda\u00e7\u00e3o', url:'plano.html' };
+      } else {
+        var feitos = itens.filter(function(i){ return !!i.feito_em; }).length;
+        _bioSemana = 'semana ' + feitos + '/5';
+        var pend = itens.filter(function(i){ return !i.feito_em; })[0];
+        if (!pend){
+          window._cardPlano = { ico:'\u{1F3C1}', tit:'Semana completa!', txt:'Voc\u00ea fechou as 5 etapas \u2014 quer ir al\u00e9m?', url:'plano.html' };
+        } else {
+          window._cardPlano = { ico:'\u{1F9ED}', tit:'Seu pr\u00f3ximo passo \u00b7 ' + feitos + '/5', txt: escapeHtmlSimples(pend.rotulo) + ' \u2014 toque para come\u00e7ar', url: (pend.destino || 'plano.html') };
+        }
+      }
+      montarAvisos(window._ultimosAvisos || null);
+      atualizarBio();
+    }catch(e){ console.warn('[card plano]', e); }
+  }
+  function atualizarBio(){
+    var sub = document.getElementById('subCard');
+    if (!sub) return;
+    var partes = [];
+    if (_bioSemana) partes.push(_bioSemana);
+    if (window._bioTrend) partes.push(window._bioTrend);
+    if (partes.length) sub.textContent = partes.join(' \u00b7 ');
+    else if (_bioSemJornada) sub.textContent = 'sua jornada come\u00e7a hoje \u2728';
+  }
+  /* \u2500\u2500 Grade "Para a sua melhoria": bebe das fontes reais \u2500\u2500 */
+  async function temaDaSemanaInicio(){
+    try{
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=8', {});
+      if (!res.ok) return null;
+      var rows = await res.json();
+      var hoje = new Date(); hoje.setHours(0,0,0,0);
+      for (var i2=0;i2<rows.length;i2++){
+        var t = rows[i2];
+        var ini = new Date(t.semana_de + 'T00:00:00');
+        var fim = new Date(ini); fim.setDate(fim.getDate()+7);
+        if (hoje >= ini && hoje < fim) return t;
+      }
+      return null;
+    }catch(e){ return null; }
+  }
+  function focoDoHistorico(hist){
+    if (!hist || !hist.length) return null;
+    var soma={c1:0,c2:0,c3:0,c4:0,c5:0}, ch=['c1','c2','c3','c4','c5'];
+    hist.forEach(function(r){ ch.forEach(function(k){ soma[k]+=(r[k]||0); }); });
+    return ch.slice().sort(function(a,b){ return soma[a]-soma[b]; })[0].toUpperCase();
+  }
+  var NOME_COMP_INI = { C1:'Norma culta', C2:'Tema e repert\u00f3rio', C3:'Argumenta\u00e7\u00e3o', C4:'Coes\u00e3o', C5:'Interven\u00e7\u00e3o' };
+  async function preencherGrade(hist){
+    try{
+      var grade = document.getElementById('gradeMelhoria');
+      if (!grade || typeof dbFetch !== 'function' || typeof SUPABASE_URL === 'undefined') return;
+      var foco = focoDoHistorico(hist);
+      var sub = document.getElementById('subMelhoria');
+      if (sub && foco) sub.innerHTML = 'muda conforme voc\u00ea evolui \u00b7 hoje mirando <b style="color:var(--cyan);">' + foco + ' \u00b7 ' + NOME_COMP_INI[foco] + '</b>';
+      var tema = await temaDaSemanaInicio();
+      var destinoHub = tema ? ('hub-preparacao.html?tema=' + encodeURIComponent(tema.id)) : 'hub-preparacao.html';
+      /* Cascata B2C aprovada: material da professora \u2192 acervo da PROfa (IA mentora) \u2192 convite */
+      var mat = null, matFonte = 'professor';
+      try{
+        var rm = await dbFetch(SUPABASE_URL + '/rest/v1/materiais?select=id,nome,tema_id,selo&origem=eq.professor&publicado=eq.true&order=criado_em.desc&limit=1', {});
+        if (rm.ok){ var rows = await rm.json(); mat = rows[0] || null; }
+        if (!mat){
+          var rr = await dbFetch(SUPABASE_URL + '/rest/v1/materiais?select=id,nome,tema_id,selo&origem=eq.redaon&publicado=eq.true&order=criado_em.desc&limit=1', {});
+          if (rr.ok){ var rows2 = await rr.json(); mat = rows2[0] || null; matFonte = 'redaon'; }
+        }
+      }catch(e){}
+      var temRedacao = !!(hist && hist.length);
+      var cards = [];
+      if (mat){
+        var dMat = mat.tema_id ? ('hub-preparacao.html?tema=' + encodeURIComponent(mat.tema_id)) : 'hub-preparacao.html';
+        var selo = (mat.selo === 'validado') ? '<span class="et val">\u2713 validado</span>' : '<span class="et ia">IA</span>';
+        var fonteTxt = (matFonte === 'redaon') ? 'da PROfa, sua mentora' : 'da sua professora';
+        var fonteIco = (matFonte === 'redaon') ? '\u2728' : '\uD83E\uDDD1\u200D\uD83C\uDFEB';
+        cards.push('<div class="aCard" onclick="window.location.href=\'' + dMat + '\'">' + selo + '<div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">' + fonteIco + '</div><h4>' + escapeHtmlSimples(mat.nome) + '</h4><p>' + fonteTxt + '</p></div>');
+      }
+      cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><span class="et tm">tema</span><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">\uD83D\uDCDA</div><h4>Repert\u00f3rio da semana</h4><p>' + (tema ? escapeHtmlSimples(tema.titulo) : 'no Hub de Prepara\u00e7\u00e3o') + '</p></div>');
+      cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><span class="et ia">quiz</span><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">\uD83C\uDFAF</div><h4>Teste r\u00e1pido' + (foco ? ' de ' + foco : '') + '</h4><p>no Hub de Prepara\u00e7\u00e3o</p></div>');
+      if (temRedacao){
+        cards.push('<div class="aCard" onclick="window.location.href=\'minhas-redacoes.html\'"><span class="et tm">sua</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">\uD83D\uDCDD</div><h4>Estude sua Reescrita</h4><p>sua \u00faltima reda\u00e7\u00e3o, buscando a nota mil</p></div>');
+      } else {
+        cards.push('<div class="aCard" onclick="window.location.href=\'nova-redacao.html?metodo=digitar\'"><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">\uD83D\uDD8B\uFE0F</div><h4>Sua primeira reda\u00e7\u00e3o</h4><p>escreva para destravar a Reescrita</p></div>');
+      }
+      if (!mat){
+        cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">\u2728</div><h4>Materiais para voc\u00ea</h4><p>da sua professora ou da PROfa \u2014 aparecem aqui</p></div>');
+      }
+      grade.innerHTML = cards.slice(0,4).join('');
+    }catch(e){ console.warn('[grade melhoria]', e); }
+  }
+  preencherGrade(null);
+
+  prepararCardPlano();
+
   montarAvisos(null);
 
   // ─── Sparkline ───
@@ -596,6 +763,7 @@
       var evolStr = evolucao >= 0 ? '+' + evolucao : '' + evolucao;
       var totalRedacoes = historico.length;
       var melhorNota = Math.max.apply(null, notas);
+      window._bioTrend = (evolucao > 0) ? 'm\u00e9dia subindo \u2b06\ufe0f' : (evolucao < 0 ? 'hora de reagir \u{1F4AA}' : 'm\u00e9dia est\u00e1vel');
       var el;
       el = document.getElementById('mMedia');    if (el) el.textContent = fmtNum(media);
       el = document.getElementById('mRedacoes'); if (el) el.textContent = fmtNum(totalRedacoes);
@@ -616,13 +784,15 @@
       try { if (typeof dbGetCompetenciasConsolidadas === 'function') consolidadas = await dbGetCompetenciasConsolidadas(); } catch(e) {}
 
       var avisos = [];
-      avisos.push({ ico:'\u{1F31F}', tit:'\u00DAltima nota', txt:'Voc\u00ea fez <b>' + ultima + '</b> na \u00faltima reda\u00e7\u00e3o' });
-      if (melhorNota > ultima) avisos.push({ ico:'\u{1F3C6}', tit:'Sua melhor nota', txt:'<b>' + melhorNota + '</b> \u2014 d\u00e1 pra alcan\u00e7ar de novo' });
-      if (pareto) avisos.push({ ico:'\u{1F3AF}', tit:'Foco agora', txt: escapeHtmlSimples(pareto) });
-      if (consolidadas && consolidadas.length > 0) avisos.push({ ico:'\u2705', tit:'Conquistas', txt: escapeHtmlSimples(consolidadas.join(' \u00B7 ')) });
-      if (evolucao > 0) avisos.push({ ico:'\u{1F4C8}', tit:'Evolu\u00e7\u00e3o', txt:'Voc\u00ea subiu <b>' + evolucao + ' pontos</b> na \u00faltima reda\u00e7\u00e3o' });
-      else if (evolucao < 0) avisos.push({ ico:'\u{1F4AA}', tit:'Bora', txt:'Pr\u00f3xima reda\u00e7\u00e3o voc\u00ea sobe \u2014 vamos juntos' });
+      avisos.push({ ico:'\u{1F31F}', tit:'\u00DAltima nota', txt:'Voc\u00ea fez <b>' + ultima + '</b> \u2014 reveja a corre\u00e7\u00e3o e entenda o porqu\u00ea', url:'minhas-redacoes.html' });
+      if (melhorNota > ultima) avisos.push({ ico:'\u{1F3C6}', tit:'Sua melhor nota', txt:'<b>' + melhorNota + '</b> \u2014 d\u00e1 pra alcan\u00e7ar de novo', url:'evolucao.html' });
+      if (pareto) avisos.push({ ico:'\u{1F3AF}', tit:'Foco agora', txt: escapeHtmlSimples(pareto), url:'evolucao.html' });
+      if (consolidadas && consolidadas.length > 0) avisos.push({ ico:'\u2705', tit:'Conquistas', txt: escapeHtmlSimples(consolidadas.join(' \u00B7 ')), url:'evolucao.html' });
+      if (evolucao > 0) avisos.push({ ico:'\u2B06\uFE0F', tit:'Evolu\u00e7\u00e3o', txt:'Voc\u00ea subiu <b>' + evolucao + ' pontos</b> \u2014 veja o que funcionou', url:'evolucao.html' });
+      else if (evolucao < 0) avisos.push({ ico:'\u{1F4AA}', tit:'Bora', txt:'Pr\u00f3xima reda\u00e7\u00e3o voc\u00ea sobe \u2014 vamos juntos', url:'nova-redacao.html?metodo=digitar' });
       montarAvisos(avisos.slice(0, 5));
+      atualizarBio();
+      preencherGrade(historico);
     } catch(e) {
       console.warn('Erro ao carregar dados do aluno:', e);
     }
@@ -652,8 +822,7 @@
         if (indicador) { indicador.innerHTML = htmlTurmas; indicador.classList.remove('hidden'); }
         if (indicadorM) { indicadorM.innerHTML = htmlTurmas; indicadorM.classList.remove('hidden'); }
         if (banner) banner.classList.add('hidden');
-        var sub = document.getElementById('subCard');
-        if (sub && turmas[0] && turmas[0].nome) sub.textContent = turmas[0].nome;
+        /* v3-12: a bio viva assume o subCard; as turmas seguem no indicador acima */
       }
     } catch(e) {
       console.warn('Erro ao carregar turmas do aluno:', e);

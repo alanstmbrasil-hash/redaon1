@@ -1,1051 +1,502 @@
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR" id="htmlRoot">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Configurações</title>
-<script>tailwind = { config: {} };</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<!-- RedaON · Portal do Aluno · Configurações · produção v1-0 · 24/08/2026 -->
+<!-- Do mockup v1-1 aprovado: mini-cartão (porta p/ personalização no Início) · perfil (nome+série em usuarios) · conta (senha via e-mail de recuperação) · turmas em gaveta (sair/entrar) · tema claro/escuro/auto · plano informativo · sair da conta (gaveta do auth) -->
+<script>
+(function(){
+  var pref = 'auto';
+  try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+  var efetivo = pref;
+  if (pref === 'auto') {
+    var claroNoSistema = false;
+    try { claroNoSistema = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+    efetivo = claroNoSistema ? 'claro' : 'escuro';
+  }
+  document.documentElement.setAttribute('data-tema', efetivo);
+  document.documentElement.setAttribute('data-tema-pref', pref);
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "primary-container": "#6c5ce7", "on-primary": "#2900a0", "on-surface": "#e1e2eb",
-          "inverse-on-surface": "#2e3037", "tertiary-fixed": "#ffdf9e", "error-container": "#93000a",
-          "secondary-container": "#00d0d1", "primary": "#c6bfff", "on-primary-container": "#faf6ff",
-          "tertiary-fixed-dim": "#fabd00", "on-secondary-container": "#005455", "error": "#ffb4ab",
-          "surface-container-high": "#272a31", "secondary-fixed": "#56f9f9", "primary-fixed": "#e4dfff",
-          "inverse-surface": "#e1e2eb", "on-primary-fixed": "#160066", "surface-container": "#1d2026",
-          "on-tertiary-fixed-variant": "#5b4300", "on-tertiary-container": "#fff6ec",
-          "on-tertiary": "#3f2e00", "surface-bright": "#363940", "secondary": "#45edee",
-          "tertiary-container": "#906c00", "on-error": "#690005", "tertiary": "#fabd00",
-          "on-secondary-fixed-variant": "#004f50", "surface-container-lowest": "#0b0e14",
-          "on-secondary": "#003737", "background": "#10131a", "outline": "#928ea0",
-          "surface-tint": "#c6bfff", "surface-container-highest": "#32353c",
-          "secondary-fixed-dim": "#26dcdd", "on-surface-variant": "#c8c4d7",
-          "primary-fixed-dim": "#c6bfff", "outline-variant": "#474554",
-          "on-secondary-fixed": "#002020", "surface-variant": "#32353c",
-          "surface-container-low": "#191c22", "on-error-container": "#ffdad6",
-          "inverse-primary": "#5847d2", "surface-dim": "#10131a", "surface": "#10131a",
-          "on-tertiary-fixed": "#261a00", "on-primary-fixed-variant": "#4029ba",
-          "on-background": "#e1e2eb"
-        },
-        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
-        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-      },
-    },
-  }
-</script>
+<link href="aluno-base-v6.css" rel="stylesheet"/>
+
 <style>
-  body { font-family: 'Inter', sans-serif; transition: background 0.3s, color 0.3s; }
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  .glass-card { background: rgba(25,28,34,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(71,69,84,0.2); }
-  .glow-cyan { box-shadow: 0 0 20px rgba(69,237,238,0.3); }
-  .glow-cyan:hover { box-shadow: 0 0 30px rgba(69,237,238,0.5); }
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* ═══ TELA · Configurações · v1-0 (produção) ═══ */
+#conteudo{ max-width:680px; margin:0 auto; width:100%; padding:0 .9rem 2rem; }
+.secCfg{ font-size:.66rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin:1.2rem .1rem .45rem; }
+.cardCfg{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.22); border-radius:1rem; overflow:hidden; }
+.itemCfg{ display:flex; align-items:center; gap:.8rem; min-height:56px; padding:.7rem 1rem; border:0; border-bottom:1px solid rgba(var(--borderRGB),.18); cursor:pointer; background:none; width:100%; text-align:left; color:var(--text); font-family:inherit; font-size:.9rem; }
+.itemCfg:last-child{ border-bottom:0; }
+.itemCfg.semAcao{ cursor:default; }
+.itemCfg .ic{ font-size:1.15rem; width:1.6rem; text-align:center; flex:none; }
+.itemCfg .tx{ flex:1; min-width:0; }
+.itemCfg .t1{ font-weight:700; font-size:.9rem; }
+.itemCfg .t2{ font-size:.75rem; color:var(--muted); margin-top:.1rem; line-height:1.35; word-break:break-word; }
+.itemCfg .seta{ color:var(--muted); font-weight:800; flex:none; }
+.itemCfg.vermelho .t1, .itemCfg.vermelho .ic{ color:var(--red); }
 
-  /* Light mode overrides */
-  html.light body { background-color: #f4f5fb; color: #1a1c23; }
-  html.light .glass-card { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.08); }
-  html.light aside { background: #ffffff !important; border-right: 1px solid rgba(0,0,0,0.08); }
-  html.light aside a { color: #1a1c23 !important; }
-  html.light aside a:hover { background: #f0f1f8 !important; color: #1a1c23 !important; }
-  html.light aside .text-\[\#45EDEE\] { color: #0099a8 !important; }
-  html.light aside .text-\[\#C8C4D7\] { color: #4a4c5a !important; }
-  html.light aside span { color: inherit !important; }
-  html.light #topbar { background: #ffffff !important; }
-  html.light #topbar h2 { color: #1a1c23 !important; }
-  html.light #topbar span { color: #4a4c5a !important; }
-  html.light header { background: #ffffff !important; border-bottom: 1px solid rgba(0,0,0,0.06); }
-  html.light .bg-\[\#10131a\] { background: #ffffff; }
-  html.light .text-on-surface { color: #1a1c23; }
-  html.light .text-on-surface-variant { color: #5a5c6a; }
-  html.light .bg-surface-container-lowest { background: #f4f5fb; }
-  html.light .bg-surface-container { background: #ecedf5; }
-  html.light input, html.light select { background: #f0f1f8 !important; color: #1a1c23 !important; }
-  
-  html.light .text-outline { color: #5a5c6a !important; }
-  html.light .text-on-surface-variant { color: #4a4c5a !important; }
-  html.light h1,html.light h2,html.light h3,html.light h4,html.light p,html.light span,html.light label,html.light a { color: #1a1c23; }
-  html.light .text-\[\#45edee\] { color: #0099a8 !important; }
-  html.light .text-primary { color: #5847d2 !important; }
-  html.light .text-secondary { color: #0099a8 !important; }
-  html.light .bg-surface-container-highest { background: #e0e1ea !important; }
-  html.light .border-outline-variant\/10 { border-color: rgba(0,0,0,0.1) !important; }
-  html.light nav a, html.light .text-on-surface { color: #1a1c23 !important; }
-  html.light .glass-card { color: #1a1c23; }
-  html.light .preview-card { background: #ecedf5 !important; border-color: rgba(0,0,0,0.1) !important; }
-  html.light .sua-redaon-section { background: linear-gradient(135deg, #e8eaf6, #e0f7fa) !important; }
-  html.light .sua-redaon-section h4 { color: #1a1c23 !important; }
-  html.light .sua-redaon-section p { color: #3a3c4a !important; }
-  html.light .sua-redaon-section .text-on-surface-variant { color: #4a4c5a !important; }
+/* Mini-cartão (A1) */
+.miniCartao{ display:flex; gap:.9rem; align-items:center; padding:1rem; }
+.miniFoto{ width:58px; height:58px; border-radius:50%; flex:none; background:linear-gradient(135deg,var(--cyan),var(--purpleSoft)); display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800; color:var(--onCyan); border:2px solid var(--cyan); background-size:cover; background-position:center; }
+.miniNome{ font-weight:800; font-size:.95rem; }
+.miniSub{ font-size:.75rem; color:var(--muted); margin-top:.15rem; }
+.btnLargoCfg{ display:block; width:calc(100% - 2rem); margin:.1rem auto 1rem; min-height:48px; border-radius:12px; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.3); color:var(--text); font-weight:800; font-size:.85rem; cursor:pointer; font-family:inherit; }
 
-  /* Toggle switch */
-  .toggle-bg { transition: background 0.2s; }
-  .toggle-dot { transition: transform 0.2s; }
+/* Campos (A3) */
+.lblCfg{ display:block; font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:.9rem 1rem .35rem; }
+.campoCfg{ display:block; width:calc(100% - 2rem); margin:0 auto; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.3); border-radius:12px; min-height:48px; padding:.7rem .9rem; color:var(--text); font-size:16px; font-family:inherit; outline:none; box-sizing:border-box; }
+.campoCfg:focus{ border-color:var(--cyan); }
+.campoSelect{ text-align:left; cursor:pointer; display:flex; align-items:center; }
+.campoSelect .setaB{ margin-left:auto; color:var(--muted); font-weight:800; }
+.btnSalvarCfg{ display:block; width:calc(100% - 2rem); margin:1rem auto; min-height:48px; border-radius:12px; background:var(--cyan); border:none; color:var(--onCyan); font-weight:800; font-size:.9rem; cursor:pointer; font-family:inherit; }
+.btnSalvarCfg:disabled{ opacity:.6; }
 
-  /* Toast */
-  #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(5rem); background:#272a31; border:1px solid rgba(255,255,255,.1); color:#e1e2eb; padding:.75rem 1.5rem; border-radius:.75rem; font-size:.85rem; z-index:300; transition:transform .3s ease; pointer-events:none; white-space:nowrap; }
-  #toast.show { transform:translateX(-50%) translateY(0); }
+/* Botões de gaveta */
+.bGvVermelho{ width:100%; min-height:48px; border-radius:12px; background:var(--red); color:#fff; border:none; font-weight:800; font-size:.85rem; cursor:pointer; font-family:inherit; margin-top:.3rem; }
+.bGvNeutro{ width:100%; min-height:48px; border-radius:12px; background:var(--surface2); color:var(--text); border:1px solid rgba(var(--borderRGB),.3); font-weight:800; font-size:.85rem; cursor:pointer; font-family:inherit; margin-top:.5rem; }
+.bGvCiano{ width:100%; min-height:48px; border-radius:12px; background:var(--cyan); color:var(--onCyan); border:none; font-weight:800; font-size:.85rem; cursor:pointer; font-family:inherit; margin-top:.3rem; }
+.bGvVermelho:disabled, .bGvCiano:disabled{ opacity:.6; }
+.gvMsgErro{ display:none; margin-top:.6rem; padding:.5rem .75rem; background:rgba(var(--redRGB),.1); border:1px solid rgba(var(--redRGB),.3); border-radius:.5rem; color:var(--red2); font-size:.78rem; line-height:1.4; }
+#gvTurmaInfo{ white-space:pre-line; }
+.gvMsgOk{ display:none; margin-top:.6rem; padding:.5rem .75rem; background:rgba(var(--greenRGB),.1); border:1px solid rgba(var(--greenRGB),.3); border-radius:.5rem; color:var(--green); font-size:.78rem; line-height:1.4; }
+.pill .ckSel{ margin-left:auto; color:var(--cyan); font-weight:800; visibility:hidden; }
+.pill.selecionada{ border-color:var(--cyan); background:rgba(var(--cyanRGB),.1); }
+.pill.selecionada .ckSel{ visibility:visible; }
+.pill .duas{ display:flex; flex-direction:column; }
+.pill .duas .d2{ font-size:.72rem; color:var(--muted); font-weight:600; margin-top:.1rem; }
 
-  /* Modal */
-  .modal { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.8); align-items:center; justify-content:center; padding:1rem; }
-  .modal.aberto { display:flex; }
+/* Estados */
+.estadoCfg{ display:flex; align-items:center; gap:.6rem; padding:1rem; font-size:.85rem; color:var(--muted); }
+.estadoCfg .em{ font-size:1.2rem; }
+.hidden{ display:none !important; }
 
-  /* Tema card selecionado */
-  .tema-btn.selecionado { border-color: #45edee !important; box-shadow: 0 0 0 2px rgba(69,237,238,0.3); }
-
-  /* Preview card animado */
-  @keyframes previewPulse { 0%,100%{opacity:1} 50%{opacity:.6} }
-  .preview-update { animation: previewPulse 0.5s ease; }
-
-  /* Input focus */
-  input:focus, select:focus { outline: none; ring: 1px solid rgba(108,92,231,0.4); }
-
-  /* ── Hamburger sidebar ─────────────────────────────── */
-  #sidebar { transform: translateX(-256px); transition: transform .3s ease; }
-  #sidebar.open { transform: translateX(0); }
-  #overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:44; }
-  #overlay.open { display:block; }
-  @media(min-width:1024px){
-    #sidebar { transform: translateX(0) !important; }
-    #overlay { display:none !important; }
-    .main-with-sidebar { margin-left:256px; }
-  }
-  @media(max-width:1023px){
-    .main-with-sidebar { margin-left:0 !important; }
-  }
-
-  /* ── Scrollbar sidebar invisível no desktop ── */
-  #sidebar nav::-webkit-scrollbar { width: 4px; }
-  #sidebar nav::-webkit-scrollbar-track { background: transparent; }
-  #sidebar nav::-webkit-scrollbar-thumb { background: transparent; border-radius: 10px; }
-  #sidebar nav:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
-  #sidebar nav { scrollbar-width: none; }
-  #sidebar nav:hover { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
-  @media(min-width:1024px){ #btnHamburger { display:none !important; } }
-
-  /* ── Minhas Turmas (3.4) ── */
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .turma-item {
-    display:flex; align-items:flex-start; gap:.75rem;
-    padding:1rem; background:#10131a;
-    border:1px solid rgba(71,69,84,.2);
-    border-radius:.75rem; margin-bottom:.625rem; transition:all .2s;
-  }
-  .turma-item:hover { border-color:rgba(108,92,231,.3); }
-  .turma-item:last-child { margin-bottom:0; }
-
-  .btn-sair-turma {
-    background:transparent; border:1px solid rgba(255,180,171,.3);
-    color:#ffb4ab; padding:.4rem .75rem; border-radius:.5rem;
-    font-size:.7rem; font-weight:700; cursor:pointer;
-    flex-shrink:0; transition:all .15s;
-    display:inline-flex; align-items:center; gap:.3rem;
-  }
-  .btn-sair-turma:hover {
-    background:rgba(255,180,171,.1); border-color:rgba(255,180,171,.5);
-  }
-
-  /* ── Modal Entrar em Turma (mesmo padrão do inicio.html) ── */
-  #modalEntrarTurmaConfig, #modalConfirmarSair {
-    display:none; position:fixed; inset:0; z-index:200;
-    background:rgba(0,0,0,.85);
-    align-items:center; justify-content:center; padding:1rem;
-  }
-  #modalEntrarTurmaConfig.aberto, #modalConfirmarSair.aberto { display:flex; }
-  .input-codigo-config {
-    width:100%; background:#10131a; border:1px solid rgba(71,69,84,.4);
-    border-radius:.625rem; padding:.75rem 1rem; color:#e1e2eb;
-    font-size:.95rem; font-family:'Inter',monospace; letter-spacing:.02em;
-    outline:none;
-  }
-  .input-codigo-config:focus { border-color:#45edee; box-shadow:0 0 0 3px rgba(69,237,238,.15); }
+/* Desktop: duas colunas alinhadas pelo topo */
+@media(min-width:900px){
+  #conteudo{ max-width:1000px; display:grid; grid-template-columns:1fr 1fr; column-gap:1.6rem; align-items:start; }
+  .colCfgA, .colCfgB{ min-width:0; }
+}
 </style>
-<script src="supabase-auth.js"></script>
 </head>
-<body class="bg-surface-container-lowest text-on-surface no-scrollbar overflow-x-hidden" id="bodyRoot">
+<body>
 
-<!-- BARRA MODO PROFESSOR — visível quando professor navega como aluno -->
-<div id="barraModoProf" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(135deg,#6c5ce7,#45edee);padding:.5rem 1rem;display:none;align-items:center;justify-content:space-between;gap:.5rem;">
-  <div style="display:flex;align-items:center;gap:.5rem;">
-    <span class="material-symbols-outlined" style="font-size:1rem;color:white;font-variation-settings:'FILL' 1;">visibility</span>
-    <span style="font-size:.78rem;font-weight:700;color:white;">Modo Visualização — você está navegando como aluno</span>
-  </div>
-  <a href="configuracoes.html" style="display:flex;align-items:center;gap:.375rem;padding:.3rem .75rem;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:.625rem;color:white;font-size:.75rem;font-weight:700;text-decoration:none;white-space:nowrap;">
-    <span class="material-symbols-outlined" style="font-size:.85rem;">swap_horiz</span>
-    Voltar ao Portal
-  </a>
-</div>
+<div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
 
-<!-- TOAST -->
-<div id="toast"></div>
+<div id="conteudo">
 
-<!-- MODAL: ALTERAR SENHA -->
-<div class="modal" id="modalSenha">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,0.08);border-radius:1.25rem;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);">
-      <h3 style="font-weight:700;font-size:1rem;color:#e1e2eb;display:flex;align-items:center;gap:.5rem;">
-        <span class="material-symbols-outlined" style="color:#ffb4ab;font-size:1.2rem;">lock</span>
-        Alterar Senha de Acesso
-      </h3>
-      <button onclick="fecharModal('modalSenha')" style="background:none;border:none;color:#928ea0;cursor:pointer;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'"><span class="material-symbols-outlined">close</span></button>
-    </div>
-    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-      <div>
-        <label style="display:block;font-size:.7rem;font-weight:700;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Senha Atual</label>
-        <input id="senhaAtual" type="password" placeholder="••••••••" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
-      </div>
-      <div>
-        <label style="display:block;font-size:.7rem;font-weight:700;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Nova Senha</label>
-        <input id="senhaNova" type="password" placeholder="mínimo 8 caracteres" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
-      </div>
-      <div>
-        <label style="display:block;font-size:.7rem;font-weight:700;color:#c8c4d7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">Confirmar Nova Senha</label>
-        <input id="senhaConfirm" type="password" placeholder="repita a nova senha" style="width:100%;background:#0b0e14;border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;padding:.75rem 1rem;color:#e1e2eb;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#45edee'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"/>
-      </div>
-      <div id="senhaErro" style="font-size:.75rem;color:#ffb4ab;display:none;padding:.5rem .75rem;background:rgba(255,180,171,0.1);border-radius:.5rem;border:1px solid rgba(255,180,171,0.2);"></div>
-      <button onclick="salvarSenha()" style="width:100%;padding:1rem;background:#6c5ce7;color:white;border:none;border-radius:.75rem;font-weight:700;font-size:.9rem;cursor:pointer;transition:opacity .2s;" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
-        Confirmar Alteração
-      </button>
-    </div>
-  </div>
-</div>
+  <div class="colCfgA">
 
-<!-- MODAL: MUDAR PLANO -->
-<div class="modal" id="modalPlano">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,0.08);border-radius:1.25rem;width:100%;max-width:560px;box-shadow:0 24px 64px rgba(0,0,0,0.6);">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.06);">
-      <h3 style="font-weight:700;font-size:1rem;color:#e1e2eb;">Escolher Plano</h3>
-      <button onclick="fecharModal('modalPlano')" style="background:none;border:none;color:#928ea0;cursor:pointer;"><span class="material-symbols-outlined">close</span></button>
-    </div>
-    <div style="padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-      <!-- Free -->
-      <div style="border:1px solid rgba(255,255,255,0.1);border-radius:1rem;padding:1.25rem;">
-        <p style="font-size:.7rem;font-weight:700;color:#928ea0;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;">Gratuito</p>
-        <p style="font-size:1.75rem;font-weight:900;color:#e1e2eb;margin-bottom:.25rem;">R$ 0</p>
-        <p style="font-size:.75rem;color:#928ea0;margin-bottom:1rem;">/mês</p>
-        <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.8rem;color:#c8c4d7;margin-bottom:1rem;">
-          <p>✓ 3 correções/mês</p>
-          <p>✓ Temas públicos</p>
-          <p style="color:#474554;">✕ Mentoria IA</p>
-          <p style="color:#474554;">✕ Elite da PROfa</p>
-        </div>
-        <button onclick="toast('Plano alterado para Gratuito.');fecharModal('modalPlano')" style="width:100%;padding:.625rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:.75rem;color:#c8c4d7;font-size:.8rem;font-weight:600;cursor:pointer;">Selecionar</button>
-      </div>
-      <!-- Pro -->
-      <div style="border:2px solid #45edee;border-radius:1rem;padding:1.25rem;background:rgba(69,237,238,0.04);position:relative;">
-        <div style="position:absolute;top:-10px;right:12px;background:#45edee;color:#002020;font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:99px;text-transform:uppercase;">ATIVO</div>
-        <p style="font-size:.7rem;font-weight:700;color:#45edee;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;">Pro</p>
-        <p style="font-size:1.75rem;font-weight:900;color:#e1e2eb;margin-bottom:.25rem;">R$ 39,90</p>
-        <p style="font-size:.75rem;color:#928ea0;margin-bottom:1rem;">/mês</p>
-        <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.8rem;color:#c8c4d7;margin-bottom:1rem;">
-          <p>✓ Correções ilimitadas</p>
-          <p>✓ Elite da PROfa</p>
-          <p>✓ Mentoria IA em tempo real</p>
-          <p>✓ Temas INEP exclusivos</p>
-        </div>
-        <button style="width:100%;padding:.625rem;background:#6c5ce7;border:none;border-radius:.75rem;color:white;font-size:.8rem;font-weight:700;cursor:default;opacity:.7;">Plano atual</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: ENTRAR EM TURMA (config) -->
-<div id="modalEntrarTurmaConfig" onclick="if(event.target===this)fecharModalEntrarTurmaConfig()">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:1rem;width:100%;max-width:28rem;box-shadow:0 24px 64px rgba(0,0,0,.5);">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;border-bottom:1px solid rgba(255,255,255,.05);">
-      <div style="display:flex;align-items:center;gap:.5rem;">
-        <span class="material-symbols-outlined" style="color:#c6bfff;font-size:1.25rem;font-variation-settings:'FILL' 1;">school</span>
-        <h3 style="font-weight:800;color:#e1e2eb;font-size:.95rem;">Entrar em uma turma</h3>
-      </div>
-      <button onclick="fecharModalEntrarTurmaConfig()" style="background:none;border:none;color:#928ea0;cursor:pointer;display:flex;" onmouseover="this.style.color='#e1e2eb'" onmouseout="this.style.color='#928ea0'">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-    <div style="padding:1.25rem;">
-      <p style="font-size:.85rem;color:#c8c4d7;margin-bottom:1rem;line-height:1.5;">
-        Cole abaixo o <strong style="color:#e1e2eb;">código da turma</strong> que sua professora passou pra você.
-      </p>
-      <input type="text" id="codigoTurmaConfigInput" class="input-codigo-config" placeholder="ex: redaon-bravo-jaguar-84" autocomplete="off" />
-      <div id="erroEntrarTurmaConfig" style="display:none;margin-top:.6rem;padding:.5rem .75rem;background:rgba(255,180,171,.1);border:1px solid rgba(255,180,171,.3);border-radius:.5rem;color:#ffb4ab;font-size:.78rem;"></div>
-      <div id="sucessoEntrarTurmaConfig" style="display:none;margin-top:.6rem;padding:.5rem .75rem;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:.5rem;color:#4ade80;font-size:.78rem;"></div>
-      <button onclick="confirmarEntrarTurmaConfig()" id="btnEntrarTurmaConfig" style="width:100%;margin-top:1rem;padding:.75rem;background:linear-gradient(135deg,#45edee,#6c5ce7);color:#0b0e14;font-weight:800;border:none;border-radius:.75rem;font-size:.875rem;cursor:pointer;transition:all .2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
-        Entrar na turma
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: CONFIRMAR SAIR DA TURMA -->
-<div id="modalConfirmarSair" onclick="if(event.target===this)fecharModalConfirmarSair()">
-  <div style="background:#1d2026;border:1px solid rgba(255,255,255,.1);border-radius:1rem;width:100%;max-width:28rem;box-shadow:0 24px 64px rgba(0,0,0,.5);">
-    <div style="padding:1.5rem;text-align:center;">
-      <div style="width:3.5rem;height:3.5rem;border-radius:50%;background:rgba(255,180,171,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-        <span class="material-symbols-outlined" style="color:#ffb4ab;font-size:1.75rem;">logout</span>
-      </div>
-      <h3 style="font-size:1rem;font-weight:800;color:#e1e2eb;margin-bottom:.5rem;">Sair da turma?</h3>
-      <p id="textoConfirmarSair" style="font-size:.85rem;color:#c8c4d7;line-height:1.55;margin-bottom:1rem;">
-        Tem certeza que deseja sair desta turma?
-      </p>
-      <p style="font-size:.78rem;color:#928ea0;line-height:1.5;margin-bottom:1.25rem;font-style:italic;">
-        Você não verá mais novas redações ou atividades, mas seu histórico anterior fica preservado.
-      </p>
-      <div style="display:flex;gap:.625rem;">
-        <button onclick="fecharModalConfirmarSair()" style="flex:1;padding:.75rem;background:rgba(71,69,84,.2);border:1px solid rgba(71,69,84,.4);border-radius:.625rem;color:#c8c4d7;font-size:.85rem;font-weight:700;cursor:pointer;">
-          Cancelar
-        </button>
-        <button onclick="confirmarSairTurma()" id="btnConfirmarSair" style="flex:1;padding:.75rem;background:rgba(255,180,171,.15);border:1px solid rgba(255,180,171,.4);border-radius:.625rem;color:#ffb4ab;font-size:.85rem;font-weight:700;cursor:pointer;">
-          Sim, sair
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FUNDO -->
-<div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-20">
-  <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-primary blur-[160px]"></div>
-  <div class="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-secondary blur-[140px]"></div>
-</div>
-
-<!-- SIDEBAR -->
-<div id="overlay" onclick="toggleSidebar()"></div>
-<aside class="fixed left-0 top-0 h-full w-64 bg-[#10131a] flex flex-col py-8 shadow-[24px_0_48px_-12px_rgba(108,92,231,0.08)] border-r border-[#272A31]/20 z-50" id="sidebar">
-  <div class="px-8 mb-10">
-    <h1 class="text-2xl font-extrabold italic tracking-tight">
-      <span class="text-white">Reda</span><span class="text-[#45EDEE]">ON</span>
-    </h1>
-  </div>
-  <nav class="flex-1 px-4 space-y-1">
-    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="inicio.html"><span class="material-symbols-outlined">home</span> Início</a>
-    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="nova-redacao.html"><span class="material-symbols-outlined">edit_note</span> Nova Redação</a>
-    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="temas.html"><span class="material-symbols-outlined">topic</span> Temas</a>
-    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="minhas-redacoes.html"><span class="material-symbols-outlined">history_edu</span> Minhas Redações</a>
-    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="evolucao.html"><span class="material-symbols-outlined">insights</span> Evolução</a>
-    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="plano.html"><span class="material-symbols-outlined">auto_stories</span> Plano de Estudo</a>
-    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="estudio-profa.html"><span class="material-symbols-outlined">neurology</span> Elite PRO</a>
-    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-[#1d2026] hover:text-[#C6BFFF] transition-all rounded-lg text-sm font-medium" href="ranking.html"><span class="material-symbols-outlined">leaderboard</span> Ranking</a>
-    <a class="flex items-center gap-3 px-4 py-3 bg-[#1d2026] text-[#45EDEE] rounded-lg border-l-4 border-[#45EDEE] text-sm font-bold" href="configuracoes.html"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">settings</span> Configurações</a>
-  </nav>
-  <div class="px-4 mt-auto space-y-2">
-    <div class="p-4 bg-surface-container/40 rounded-xl mb-2">
-      <div class="flex items-center gap-3">
-        <img class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMp63C69DfjS6_sdQxZxZhmL_jtIgMrfgNWeUHB1L2JJq3jrwGhBpeEL-onKTCGPk4J8Hg1Wr8dQBQjzD8NXxLSI_-cmi0a_nY4-vIhkG76gQQG49Wamj5_sGj17cJevQtmM_aqnPOezlFfGIiavVP1qkuCcG8VnfOOowL40czpVFN7_O9oxo6p0s-kZuWbwO43GXA3jVPYi5Oj_1KSzOsqCTvu7YlNuIiuADJSmjCQoGw5zWvtv9TO8X6T5ufmr3NheO7fda6r1xL" alt="{{USUARIO}}"/>
+    <!-- A1 · Seu cartão -->
+    <div class="secCfg">Seu cartão</div>
+    <div class="cardCfg">
+      <div class="miniCartao">
+        <div class="miniFoto" id="miniFoto">&#129333;&#8205;&#127891;</div>
         <div>
-          <p class="text-sm font-bold text-on-surface" id="sidebarNome">{{USUARIO}}</p>
-          <p class="text-[10px] text-on-surface-variant">Estudante Premium</p>
+          <p class="miniNome" id="miniNome">Estudante</p>
+          <p class="miniSub" id="miniSub">&nbsp;</p>
         </div>
       </div>
+      <button class="btnLargoCfg" onclick="irPersonalizar()">&#127912; Personalizar cartão</button>
     </div>
-    <a onclick="authLogout()" class="flex items-center gap-3 px-4 py-3 text-[#FF8B8B] hover:bg-error-container/10 transition-all rounded-lg text-sm font-medium cursor-pointer">
-      <span class="material-symbols-outlined">logout</span> Sair
-    </a>
-  </div>
-</aside>
 
-<!-- MAIN -->
-<main class="ml-64 main-with-sidebar min-h-screen">
-
-  <!-- TOP BAR -->
-  <header class="h-16 flex justify-between items-center w-full px-4 lg:px-8 bg-[#10131a] fixed top-0 right-0 left-0 lg:left-64 z-40 border-b border-white/5" id="topbar">
-    <div class="flex items-center gap-3">
-      <button id="btnHamburger" onclick="toggleSidebar()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container lg:hidden">
-        <span class="material-symbols-outlined">menu</span>
-      </button>
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">settings</span>
-        <h2 class="text-xl font-bold text-[#E1E2EB] tracking-tight">Configurações</h2>
-      </div>
+    <!-- A3 · Perfil -->
+    <div class="secCfg">Perfil</div>
+    <div class="cardCfg" style="padding-bottom:.1rem;">
+      <span class="lblCfg">Nome completo</span>
+      <input class="campoCfg" id="inpNome" autocomplete="name" maxlength="80"/>
+      <span class="lblCfg">Série</span>
+      <button class="campoCfg campoSelect" onclick="abrirGaveta('gavetaSerie')"><span id="serieAtualTx">Escolher…</span><span class="setaB">&#9662;</span></button>
+      <button class="btnSalvarCfg" id="btnSalvarPerfil" onclick="salvarPerfil()">Salvar</button>
     </div>
-    <div class="flex items-center gap-4">
-      <div class="hidden sm:flex bg-surface-container px-4 py-1.5 rounded-full items-center gap-2 border border-outline-variant/20">
-        <span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings:'FILL' 1;">stars</span>
-        <span class="text-sm font-bold text-on-surface">940 pts</span>
+
+    <!-- A4 · Conta -->
+    <div class="secCfg">Conta</div>
+    <div class="cardCfg">
+      <div class="itemCfg semAcao">
+        <span class="ic">&#9993;&#65039;</span>
+        <div class="tx"><p class="t1">E-mail</p><p class="t2" id="emailTx">—</p></div>
       </div>
-      <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors relative">
-        <span class="material-symbols-outlined">notifications</span>
-        <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full border-2 border-surface"></span>
+      <button class="itemCfg" id="btnSenha" onclick="alterarSenha()">
+        <span class="ic">&#128273;</span>
+        <div class="tx"><p class="t1">Alterar senha</p><p class="t2">Enviamos um link seguro para seu e-mail</p></div>
+        <span class="seta">&#8250;</span>
       </button>
     </div>
-  </header>
 
-  <!-- CONTEÚDO -->
-  <div class="pt-24 pb-12 px-8 max-w-[1400px] mx-auto">
-    <div class="grid grid-cols-12 gap-6">
+  </div><div class="colCfgB">
 
-      <!-- COLUNA ESQUERDA (8 cols) -->
-      <div class="col-span-12 lg:col-span-8 space-y-6">
-
-        <!-- PERFIL DO ALUNO -->
-        <div class="glass-card p-6 rounded-xl">
-          <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">person</span>
-            Perfil do Aluno
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label class="text-xs text-on-surface-variant font-medium ml-1">Nome Completo</label>
-              <input id="inputNome" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface focus:ring-1 focus:ring-primary/40 text-sm" type="text" value="{{USUARIO}}" oninput="atualizarPreview()"/>
-            </div>
-            <div class="space-y-1.5">
-              <label class="text-xs text-on-surface-variant font-medium ml-1">E-mail de Acesso</label>
-              <input id="inputEmail" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface text-sm" style="opacity:.6;cursor:not-allowed;" type="email" value="" readonly title="Para alterar seu e-mail, entre em contato com o suporte."/>
-            </div>
-            <div class="space-y-1.5">
-              <label class="text-xs text-on-surface-variant font-medium ml-1">Série / Ano</label>
-              <select id="inputSerie" class="w-full bg-surface-container-lowest border-none rounded-lg px-4 py-3 text-on-surface focus:ring-1 focus:ring-primary/40 text-sm" onchange="atualizarPreview()">
-                <option>3º Ano do Ensino Médio</option>
-                <option>2º Ano do Ensino Médio</option>
-                <option>1º Ano do Ensino Médio</option>
-                <option>Cursinho Pré-Vestibular</option>
-                <option>Treineiro</option>
-              </select>
-            </div>
-            <div class="flex items-end">
-              <button onclick="salvarPerfil()" class="w-full h-[46px] bg-primary-container text-white rounded-lg font-bold text-sm hover:opacity-90 active:scale-95 transition-all">
-                Salvar Alterações
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- IDENTIDADE VISUAL + SEGURANÇA (grid 2 colunas) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          <!-- IDENTIDADE VISUAL -->
-          <div class="glass-card p-6 rounded-xl">
-            <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
-              <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">palette</span>
-              Identidade Visual
-            </h3>
-            <div class="grid grid-cols-2 gap-4">
-              <!-- Dark Mode -->
-              <button id="btnDark" onclick="setTema('dark')" class="tema-btn selecionado flex flex-col items-center justify-center gap-3 p-5 bg-surface-container-highest border-2 border-secondary rounded-xl transition-all hover:scale-[1.02]">
-                <span class="material-symbols-outlined text-3xl text-secondary" style="font-variation-settings:'FILL' 1;">dark_mode</span>
-                <span class="text-sm font-bold text-on-surface">Dark Mode</span>
-              </button>
-              <!-- Light Mode — Em breve -->
-              <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;padding:1.25rem 1rem;background:#1d2026;border:2px dashed rgba(71,69,84,.3);border-radius:.875rem;opacity:.5;cursor:not-allowed;user-select:none;">
-                <span class="material-symbols-outlined text-3xl" style="color:#928ea0;font-variation-settings:'FILL' 1;">light_mode</span>
-                <span class="text-sm font-bold" style="color:#928ea0;">Light Mode</span>
-                <span style="position:absolute;top:.4rem;right:.4rem;font-size:.6rem;font-weight:800;color:#6c5ce7;background:rgba(108,92,231,.15);padding:.15rem .5rem;border-radius:9999px;text-transform:uppercase;letter-spacing:.06em;">Em breve</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- SEGURANÇA & NOTIFICAÇÕES -->
-          <div class="glass-card p-6 rounded-xl">
-            <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
-              <span class="material-symbols-outlined text-error" style="font-variation-settings:'FILL' 1;">security</span>
-              Segurança &amp; Notificações
-            </h3>
-            <div class="space-y-4">
-              <!-- Alterar senha -->
-              <button onclick="abrirModal('modalSenha')" class="w-full flex items-center justify-between p-3 bg-surface-container-lowest rounded-lg text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all">
-                <span class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-sm">lock</span>
-                  Alterar Senha de Acesso
-                </span>
-                <span class="material-symbols-outlined text-sm">chevron_right</span>
-              </button>
-              <!-- Toggle notificações -->
-              <div class="flex items-center justify-between p-3">
-                <div>
-                  <p class="text-sm font-medium text-on-surface">Notificações Push</p>
-                  <p class="text-[10px] text-on-surface-variant mt-0.5">Receba alertas de temas e resultados</p>
-                </div>
-                <button id="toggleNotif" onclick="toggleNotificacoes()" class="relative inline-flex h-6 w-11 items-center rounded-full toggle-bg bg-secondary transition-colors" aria-checked="true">
-                  <span id="toggleDot" class="inline-block h-4 w-4 translate-x-6 rounded-full bg-white transition-transform toggle-dot"></span>
-                </button>
-              </div>
-              <!-- Toggle e-mail semanal -->
-              <div class="flex items-center justify-between p-3">
-                <div>
-                  <p class="text-sm font-medium text-on-surface">Resumo Semanal por E-mail</p>
-                  <p class="text-[10px] text-on-surface-variant mt-0.5">Relatório de evolução toda segunda</p>
-                </div>
-                <button id="toggleEmail" onclick="toggleEmailSemanal()" class="relative inline-flex h-6 w-11 items-center rounded-full toggle-bg bg-surface-container-highest transition-colors">
-                  <span id="toggleEmailDot" class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white/40 transition-transform toggle-dot"></span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MINHAS TURMAS — vínculo do aluno com turmas -->
-        <div class="glass-card p-6 rounded-xl">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">school</span>
-              Minhas Turmas
-            </h3>
-            <button onclick="abrirModalEntrarTurmaConfig()" class="text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all" style="background:rgba(69,237,238,.1);color:#45edee;border:1px solid rgba(69,237,238,.3);">
-              <span class="material-symbols-outlined" style="font-size:1rem;">add</span>
-              Entrar em turma
-            </button>
-          </div>
-          <p class="text-xs text-on-surface-variant mb-4">Turmas onde você está vinculado(a). Você pode sair a qualquer momento sem perder seu histórico de redações.</p>
-          <div id="listaMinhasTurmas">
-            <!-- Loading inicial -->
-            <div style="text-align:center;padding:1.5rem;color:#928ea0;font-size:.85rem;">
-              <span class="material-symbols-outlined" style="animation:spin 1s linear infinite;color:#6c5ce7;">progress_activity</span>
-              <p style="margin-top:.4rem;">Carregando turmas...</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- PLANO -->
-        <div class="glass-card p-8 rounded-xl relative overflow-hidden">
-          <div class="absolute -right-20 -top-20 w-64 h-64 bg-primary/10 rounded-full blur-[80px]"></div>
-          <div class="absolute -left-10 -bottom-10 w-48 h-48 bg-secondary/10 rounded-full blur-[60px]"></div>
-          <div class="relative flex flex-col md:flex-row items-center justify-between gap-8">
-            <div class="space-y-4 text-center md:text-left">
-              <div class="inline-flex items-center gap-2 px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
-                <span class="w-1.5 h-1.5 rounded-full bg-secondary inline-block"></span>
-                Ativo
-              </div>
-              <h3 class="text-3xl font-black text-on-surface tracking-tight">Plano Pro</h3>
-              <p class="text-on-surface-variant max-w-sm text-sm leading-relaxed">Acesso ilimitado às correções elite, mentoria IA e temas exclusivos do INEP.</p>
-              <div class="flex items-center gap-2 text-sm">
-                <span class="material-symbols-outlined text-primary text-sm">calendar_today</span>
-                <span class="text-on-surface-variant">Próxima renovação: <b class="text-on-surface">15 de Outubro, 2024</b></span>
-              </div>
-            </div>
-            <div class="flex-shrink-0">
-              <button onclick="abrirModal('modalPlano')" class="px-8 py-4 bg-secondary text-on-secondary font-black rounded-xl glow-cyan hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest text-sm">
-                Mudar de Plano
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- CONTA E ACESSO — visível apenas para professores -->
-        <div class="glass-card p-6 rounded-xl" id="secaoContaAcesso" style="display:none;">
-          <h3 class="text-lg font-bold mb-2 flex items-center gap-2">
-            <span class="material-symbols-outlined text-tertiary" style="font-variation-settings:'FILL' 1;">school</span>
-            Conta e Acesso
-          </h3>
-          <p class="text-xs text-on-surface-variant mb-6">Disponível apenas para professores com portal PRO ativo.</p>
-          <div class="space-y-4">
-            <!-- Toggle perfil ativo -->
-            <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-xl border border-outline-variant/20">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;" id="iconeModoAtual">school</span>
-                </div>
-                <div>
-                  <p class="text-sm font-bold text-on-surface">Perfil ativo</p>
-                  <p class="text-xs text-on-surface-variant mt-0.5" id="labelModoAtual">Você está como <strong class="text-secondary">Professor</strong></p>
-                </div>
-              </div>
-              <button id="btnAlternarModo" onclick="alternarModoAcessoProf()" class="px-4 py-2 rounded-xl text-sm font-bold border transition-all" style="background:rgba(69,237,238,.1);border-color:rgba(69,237,238,.3);color:#45edee;">
-                Ver como aluno
-              </button>
-            </div>
-            <!-- Info -->
-            <div class="flex items-start gap-3 p-3 rounded-lg" style="background:rgba(250,189,0,.06);border:1px solid rgba(250,189,0,.15);">
-              <span class="material-symbols-outlined text-tertiary text-sm mt-0.5 shrink-0">info</span>
-              <p class="text-xs text-on-surface-variant leading-relaxed">Ao alternar para o modo Aluno, você poderá navegar pelo RedaON como seus alunos. Uma barra de aviso ficará visível em todas as telas para que você possa retornar ao portal do professor a qualquer momento.</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-      <div class="col-span-12 lg:col-span-4 h-full">
-        <div class="glass-card h-full min-h-[600px] rounded-xl overflow-hidden flex flex-col border-secondary/20 relative">
-          <!-- Background decorativo -->
-          <div class="absolute inset-0 z-0">
-            <img class="w-full h-full object-cover opacity-20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADYJz1n2Cq5nGwPMfOZlh8XOZEE5Ezzrb0eMs8b6o9HlL5_uH3817e7hxnGdI1G9NzVgWA2dPqw_hscdTaIu0997sVWKB5H_68b0zaQZ_wEvKtz_Cjw6ICVf0cU-3fOHggJepzp1tkFBMccmPShq0xL4wdVBX8OOQLvVQF-OHjb6TBAiBxhKdTjcn3bNrC9yAPVlpqO-ohx6BIOI0IjTFLAz7611zQlnMNXlH4n6FXkE8o2gRLeWlMKyKejbWGKvs938BytYFgNOYt" alt=""/>
-            <div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent"></div>
-          </div>
-
-          <div class="relative z-10 p-8 flex flex-col h-full">
-            <!-- Ícone central -->
-            <div class="flex-1 flex flex-col justify-center items-center text-center space-y-6">
-              <div class="w-20 h-20 rounded-full bg-secondary/10 flex items-center justify-center border border-secondary/30" style="box-shadow:0 0 30px rgba(69,237,238,0.15)">
-                <span class="material-symbols-outlined text-4xl text-secondary" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
-              </div>
-              <h4 class="text-2xl font-black text-on-surface leading-tight px-4 sua-redaon-section">
-                Sua RedaON,<br/>do seu jeito.
-              </h4>
-              <p class="text-on-surface-variant text-sm max-w-[240px] leading-relaxed">
-                A configuração do seu ambiente reflete a clareza do seu pensamento. Personalize cada detalhe.
-              </p>
-            </div>
-
-            <!-- Card de preview -->
-            <div class="mt-auto space-y-4">
-              <div class="p-4 bg-surface-container/60 rounded-xl border border-outline-variant/20 backdrop-blur-sm preview-card" id="previewCard">
-                <div class="flex items-center gap-3 mb-3">
-                  <div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-xs font-black text-white" id="previewAvatar">AA</div>
-                  <div class="flex-1">
-                    <div class="h-2 rounded-full bg-surface-container-highest mb-1.5" id="previewNomeBar" style="width:60%"></div>
-                    <div class="h-1.5 rounded-full bg-surface-container-highest" style="width:40%"></div>
-                  </div>
-                </div>
-                <div class="space-y-2">
-                  <div class="h-1.5 w-full bg-surface-container-highest rounded-full"></div>
-                  <div class="h-1.5 w-4/5 bg-surface-container-highest rounded-full"></div>
-                  <div class="h-1.5 w-2/3 bg-surface-container-highest rounded-full"></div>
-                </div>
-                <!-- Preview nome real -->
-                <div class="mt-3 pt-3 border-t border-outline-variant/20">
-                  <p class="text-[10px] text-on-surface-variant">Logado como:</p>
-                  <p class="text-xs font-bold text-secondary" id="previewNomeTexto">{{USUARIO}}</p>
-                  <p class="text-[10px] text-on-surface-variant" id="previewSerieTexto">3º Ano do Ensino Médio</p>
-                </div>
-              </div>
-              <p class="text-[10px] text-center text-on-surface-variant font-medium tracking-widest uppercase">Visualização em Tempo Real</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <!-- A5 · Minhas turmas -->
+    <div class="secCfg">Minhas turmas</div>
+    <div class="cardCfg">
+      <div class="estadoCfg" id="turmasCarregando"><span class="em">&#127979;</span>Carregando suas turmas…</div>
+      <div id="listaTurmas"></div>
+      <div class="estadoCfg hidden" id="turmasVazio"><span class="em">&#127891;</span>Você ainda não está em nenhuma turma.</div>
+      <button class="itemCfg" onclick="abrirGavetaCodigo()">
+        <span class="ic">&#10133;</span>
+        <div class="tx"><p class="t1">Entrar em uma turma</p><p class="t2">Com o código que seu professor passou</p></div>
+        <span class="seta">&#8250;</span>
+      </button>
     </div>
+
+    <!-- A6 · Aparência -->
+    <div class="secCfg">Aparência</div>
+    <div class="cardCfg">
+      <button class="itemCfg" onclick="abrirGavetaTema()">
+        <span class="ic">&#127912;</span>
+        <div class="tx"><p class="t1">Tema</p><p class="t2" id="temaAtualTx">—</p></div>
+        <span class="seta">&#8250;</span>
+      </button>
+    </div>
+
+    <!-- A7 · Plano -->
+    <div class="secCfg">Plano</div>
+    <div class="cardCfg">
+      <div class="itemCfg semAcao">
+        <span class="ic">&#11088;</span>
+        <div class="tx"><p class="t1" id="planoNome">—</p><p class="t2" id="planoDesc">Correção nos critérios do INEP, validada por professor</p></div>
+      </div>
+      <button class="itemCfg hidden" id="btnFalarPlanos" onclick="falarComRedaON()">
+        <span class="ic">&#128172;</span>
+        <div class="tx"><p class="t1">Falar com a RedaON</p><p class="t2">Para mudar de plano ou tirar dúvidas</p></div>
+        <span class="seta">&#8250;</span>
+      </button>
+    </div>
+
+    <!-- A8 · Sair -->
+    <div class="secCfg">Conta neste aparelho</div>
+    <div class="cardCfg" style="margin-bottom:1.2rem;">
+      <button class="itemCfg vermelho" onclick="authLogout()">
+        <span class="ic">&#128682;</span>
+        <div class="tx"><p class="t1">Sair da conta</p></div>
+        <span class="seta">&#8250;</span>
+      </button>
+    </div>
+
   </div>
-</main>
 
+</div>
+</div>
+
+<!-- ══ GAVETA: Série (A3) ══ -->
+<div class="gvBg atrasBarra" id="gavetaSerieBg" onclick="fecharGaveta('gavetaSerie')"></div>
+<div class="gv atrasBarra" id="gavetaSerie">
+  <div class="grip"></div>
+  <p class="tit">Sua série</p>
+  <p class="sub">Ajuda a Profa. e a IA a calibrarem seu plano.</p>
+  <a class="pill" onclick="escolherSerie('1º ano do Ensino Médio')">1º ano do Ensino Médio<span class="ckSel">&#10003;</span></a>
+  <a class="pill" onclick="escolherSerie('2º ano do Ensino Médio')">2º ano do Ensino Médio<span class="ckSel">&#10003;</span></a>
+  <a class="pill" onclick="escolherSerie('3º ano do Ensino Médio')">3º ano do Ensino Médio<span class="ckSel">&#10003;</span></a>
+  <a class="pill" onclick="escolherSerie('Cursinho / já concluí')">Cursinho / já concluí<span class="ckSel">&#10003;</span></a>
+</div>
+
+<!-- ══ GAVETA: Turma (A5) ══ -->
+<div class="gvBg atrasBarra" id="gavetaTurmaBg" onclick="fecharGaveta('gavetaTurma')"></div>
+<div class="gv atrasBarra" id="gavetaTurma">
+  <div class="grip"></div>
+  <p class="tit" id="gvTurmaNome">Turma</p>
+  <p class="sub" id="gvTurmaInfo"></p>
+  <div id="gvTurmaAcoes">
+    <button class="bGvVermelho" onclick="pedirConfirmaSaida()">Sair desta turma</button>
+    <button class="bGvNeutro" onclick="fecharGaveta('gavetaTurma')">Fechar</button>
+  </div>
+  <div id="gvTurmaConfirma" class="hidden">
+    <p class="sub" style="color:var(--red2);font-weight:700;">Tem certeza? Você vai parar de receber os temas e materiais desta turma.</p>
+    <div class="gvMsgErro" id="gvTurmaErro"></div>
+    <button class="bGvVermelho" id="btnConfirmaSaida" onclick="confirmarSaidaTurma()">Sim, sair da turma</button>
+    <button class="bGvNeutro" onclick="voltarAcoesTurma()">Ficar na turma</button>
+  </div>
+</div>
+
+<!-- ══ GAVETA: Entrar em turma (A5) ══ -->
+<div class="gvBg atrasBarra" id="gavetaCodigoBg" onclick="fecharGaveta('gavetaCodigo')"></div>
+<div class="gv atrasBarra" id="gavetaCodigo">
+  <div class="grip"></div>
+  <p class="tit">Entrar em uma turma</p>
+  <p class="sub">Cole o código que seu professor passou.</p>
+  <input class="campoCfg" style="width:100%;" id="inpCodigoTurma" placeholder="ex: redaon-bravo-jaguar-84" autocomplete="off" autocapitalize="none" spellcheck="false"/>
+  <div class="gvMsgErro" id="gvCodigoErro"></div>
+  <div class="gvMsgOk" id="gvCodigoOk"></div>
+  <button class="bGvCiano" style="margin-top:.8rem;" id="btnEntrarTurma" onclick="confirmarEntrarTurma()">Entrar na turma</button>
+</div>
+
+<!-- ══ GAVETA: Tema (A6) ══ -->
+<div class="gvBg atrasBarra" id="gavetaTemaBg" onclick="fecharGaveta('gavetaTema')"></div>
+<div class="gv atrasBarra" id="gavetaTema">
+  <div class="grip"></div>
+  <p class="tit">Tema</p>
+  <p class="sub">O Automático segue a configuração do seu aparelho.</p>
+  <a class="pill" id="pillTema-claro" onclick="escolherTema('claro')">&#9728;&#65039;&nbsp; Claro<span class="ckSel">&#10003;</span></a>
+  <a class="pill" id="pillTema-escuro" onclick="escolherTema('escuro')">&#127769;&nbsp; Escuro<span class="ckSel">&#10003;</span></a>
+  <a class="pill" id="pillTema-auto" onclick="escolherTema('auto')"><span class="duas">&#127765;&nbsp; Automático<span class="d2">Segue o aparelho</span></span><span class="ckSel">&#10003;</span></a>
+</div>
+
+<script src="supabase-auth.js?v=2-0"></script>
+<script src="aluno-base-v6.js?v=6-1"></script>
 <script>
+  if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-  // Logout universal
-  window.authLogout = window.authLogout || function() {
-    if (confirm('Deseja sair da sua conta?')) {
-      localStorage.clear();
-      window.location.href = 'login.html';
-    }
-  };
-  window.sair = window.authLogout;
-  authGuard('aluno');
-
-// ── TOAST ──────────────────────────────────────
-function toast(msg, dur=3000) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), dur);
-}
-
-// ── MODAIS ─────────────────────────────────────
-function abrirModal(id) { document.getElementById(id).classList.add('aberto'); }
-function fecharModal(id) { document.getElementById(id).classList.remove('aberto'); }
-window.fecharModal = fecharModal;
-
-document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', function(e) {
-  if (e.target === this) this.classList.remove('aberto');
-}));
-
-// ── TEMA DARK / LIGHT ──────────────────────────
-let temaAtual = 'dark';
-
-window.setTema = function(tema) {
-  temaAtual = tema;
-  const html = document.getElementById('htmlRoot');
-
-  if (tema === 'light') {
-    html.classList.remove('dark');
-    html.classList.add('light');
-  } else {
-    html.classList.remove('light');
-    html.classList.add('dark');
-  }
-
-  document.getElementById('btnDark').classList.toggle('selecionado', tema === 'dark');
-  document.getElementById('btnDark').style.borderColor = tema === 'dark' ? '#45edee' : 'transparent';
-  toast(tema === 'dark' ? '🌙 Dark Mode ativado!' : '☀️ Light Mode ativado!');
-};
-
-// Init borda do botão dark
-document.getElementById('btnDark').style.borderColor = '#45edee';
-
-// ── NOTIFICAÇÕES ───────────────────────────────
-let notifAtiva = true;
-let emailAtivo = false;
-
-window.toggleNotificacoes = function() {
-  notifAtiva = !notifAtiva;
-  const btn = document.getElementById('toggleNotif');
-  const dot = document.getElementById('toggleDot');
-  btn.style.background = notifAtiva ? '#45edee' : '#32353c';
-  dot.style.transform = notifAtiva ? 'translateX(1.5rem)' : 'translateX(0.25rem)';
-  dot.style.opacity = notifAtiva ? '1' : '0.4';
-  toast(notifAtiva ? '🔔 Notificações ativadas!' : '🔕 Notificações desativadas.');
-};
-
-window.toggleEmailSemanal = function() {
-  emailAtivo = !emailAtivo;
-  const btn = document.getElementById('toggleEmail');
-  const dot = document.getElementById('toggleEmailDot');
-  btn.style.background = emailAtivo ? '#45edee' : '#32353c';
-  dot.style.transform = emailAtivo ? 'translateX(1.5rem)' : 'translateX(0.25rem)';
-  dot.style.opacity = emailAtivo ? '1' : '0.4';
-  toast(emailAtivo ? '📧 Resumo semanal ativado!' : '📧 Resumo semanal desativado.');
-};
-
-// ── CARREGAR PERFIL DO BANCO (na entrada) ──────
-async function carregarPerfilNaEntrada() {
-  // Primeiro: aplica o que tem no localStorage (rápido)
-  try {
-    const nomeLS = (typeof authGetNome === 'function') ? authGetNome() : '';
-    if (nomeLS) {
-      const inpNome = document.getElementById('inputNome');
-      const sidebarNome = document.getElementById('sidebarNome');
-      const previewNome = document.getElementById('previewNomeTexto');
-      if (inpNome) inpNome.value = nomeLS;
-      if (sidebarNome) sidebarNome.textContent = nomeLS;
-      if (previewNome) previewNome.textContent = nomeLS;
-    }
-    if (typeof atualizarPreview === 'function') atualizarPreview();
-  } catch (e) {
-    console.warn('Erro inicial ao carregar perfil:', e);
-  }
-
-  // Em paralelo: busca dados reais do banco e ATUALIZA tudo
-  // Isso corrige desincronia entre localStorage antigo e banco atual
-  try {
-    if (typeof dbSincronizarUsuarioAtual === 'function') {
-      const u = await dbSincronizarUsuarioAtual();
-      if (u && u.nome) {
-        const inpNome = document.getElementById('inputNome');
-        const sidebarNome = document.getElementById('sidebarNome');
-        if (inpNome) inpNome.value = u.nome;
-        if (sidebarNome) sidebarNome.textContent = u.nome;
-      }
-      if (u && u.email) {
-        const inpEmail = document.getElementById('inputEmail');
-        if (inpEmail) inpEmail.value = u.email;
-      }
-      if (u && u.serie) {
-        const inpSerie = document.getElementById('inputSerie');
-        if (inpSerie) {
-          // Tenta encontrar a opção que corresponde
-          for (let i = 0; i < inpSerie.options.length; i++) {
-            if (inpSerie.options[i].text === u.serie || inpSerie.options[i].value === u.serie) {
-              inpSerie.selectedIndex = i;
-              break;
-            }
-          }
-        }
-      }
-      atualizarPreview();
-    }
-  } catch (e) {
-    console.warn('Erro ao sincronizar com banco:', e);
-  }
-}
-
-// ── SALVAR PERFIL ──────────────────────────────
-window.salvarPerfil = async function() {
-  const nome = document.getElementById('inputNome').value.trim();
-  const serie = document.getElementById('inputSerie').value;
-  if (!nome) { toast('⚠️ O nome não pode estar vazio!'); return; }
-
-  try {
-    await dbAtualizarPerfilUsuario({ nome: nome, serie: serie });
-    document.getElementById('sidebarNome').textContent = nome;
-    atualizarPreview();
-    toast('✅ Perfil salvo com sucesso!');
-  } catch (e) {
-    console.error('Erro ao salvar perfil:', e);
-    toast('❌ Não foi possível salvar. Tente novamente.');
-  }
-};
-
-// ── PREVIEW EM TEMPO REAL ──────────────────────
-function atualizarPreview() {
-  const nome = document.getElementById('inputNome').value.trim() || 'Aluno';
-  const serie = document.getElementById('inputSerie').value;
-  const iniciais = nome.split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
-
-  document.getElementById('previewAvatar').textContent = iniciais;
-  document.getElementById('previewNomeTexto').textContent = nome;
-  document.getElementById('previewSerieTexto').textContent = serie;
-
-  // Animação sutil no card
-  const card = document.getElementById('previewCard');
-  card.classList.add('preview-update');
-  setTimeout(() => card.classList.remove('preview-update'), 500);
-}
-
-// ── ALTERAR SENHA ──────────────────────────────
-window.salvarSenha = function() {
-  const atual = document.getElementById('senhaAtual').value;
-  const nova = document.getElementById('senhaNova').value;
-  const confirm = document.getElementById('senhaConfirm').value;
-  const erroEl = document.getElementById('senhaErro');
-
-  erroEl.style.display = 'none';
-
-  if (!atual) { mostrarErroSenha('Digite a senha atual.'); return; }
-  if (nova.length < 8) { mostrarErroSenha('A nova senha deve ter mínimo 8 caracteres.'); return; }
-  if (nova !== confirm) { mostrarErroSenha('As senhas não coincidem.'); return; }
-
-  fecharModal('modalSenha');
-  document.getElementById('senhaAtual').value = '';
-  document.getElementById('senhaNova').value = '';
-  document.getElementById('senhaConfirm').value = '';
-  toast('🔐 Senha alterada com sucesso!');
-};
-
-function mostrarErroSenha(msg) {
-  const el = document.getElementById('senhaErro');
-  el.textContent = msg;
-  el.style.display = 'block';
-}
-
-// ── MODO PROFESSOR / ALUNO ─────────────────────
-// No protótipo, força visualização como professor para demonstração
-// Em produção: verificar perfil via backend
-const ehProfessor = localStorage.getItem('modo_professor_ativo') === '1' || true; // força true no protótipo
-const modoAtualProf = localStorage.getItem('perfil_modo') || 'professor';
-
-// Mostra seção apenas para professores
-if (ehProfessor) {
-  document.getElementById('secaoContaAcesso').style.display = 'block';
-  atualizarUIModoProfessor();
-}
-
-// Barra de aviso nas telas do aluno
-if (ehProfessor && modoAtualProf === 'aluno') {
-  const barra = document.getElementById('barraModoProf');
-  if (barra) {
-    barra.style.display = 'flex';
-    // Compensa a barra no conteúdo
-    document.body.style.paddingTop = '2.5rem';
-  }
-}
-
-function atualizarUIModoProfessor() {
-  const icone = document.getElementById('iconeModoAtual');
-  const label = document.getElementById('labelModoAtual');
-  const btn   = document.getElementById('btnAlternarModo');
-  if (!icone) return;
-
-  if (modoAtualProf === 'professor') {
-    icone.textContent = 'school';
-    label.innerHTML = 'Você está como <strong style="color:#45edee">Professor</strong>';
-    btn.textContent = 'Ver como aluno';
-    btn.style.background = 'rgba(69,237,238,.1)';
-    btn.style.borderColor = 'rgba(69,237,238,.3)';
-    btn.style.color = '#45edee';
-  } else {
-    icone.textContent = 'face';
-    label.innerHTML = 'Você está como <strong style="color:#c6bfff">Aluno</strong>';
-    btn.textContent = 'Voltar ao portal';
-    btn.style.background = 'rgba(108,92,231,.15)';
-    btn.style.borderColor = 'rgba(108,92,231,.4)';
-    btn.style.color = '#c6bfff';
-  }
-}
-
-window.alternarModoAcessoProf = function() {
-  if (modoAtualProf === 'professor') {
-    // Muda para aluno — abre em nova aba
-    localStorage.setItem('perfil_modo', 'aluno');
-    toast('Abrindo modo aluno em nova aba...');
-    setTimeout(() => window.open('inicio.html', '_blank'), 800);
-  } else {
-    // Volta para professor
-    localStorage.setItem('perfil_modo', 'professor');
-    atualizarUIModoProfessor();
-    toast('✓ Modo Professor ativado!');
-    setTimeout(() => window.location.href = 'professor.html', 1000);
-  }
-};
-
-// ── INIT ───────────────────────────────────────
-carregarPerfilNaEntrada();
-atualizarPreview();
-</script>
-<script>
-  // ── Sidebar hambúrguer ──────────────────────────────
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('overlay').classList.toggle('open');
-  }
-  document.getElementById('overlay').addEventListener('click', function(){
-    document.getElementById('sidebar').classList.remove('open');
-    this.classList.remove('open');
+  montarEsqueleto({
+    ativo:  'configuracoes',
+    titulo: 'Configura\u00e7\u00f5es',
+    icone:  'settings',
+    sino:   false,
+    versao: 'aluno \u00b7 configura\u00e7\u00f5es \u00b7 v1-0'
   });
-</script>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MINHAS TURMAS — Sub-etapa 3.4 parte 2
-     ═══════════════════════════════════════════════════════════════ -->
-<script>
-  // ── Estado ──
-  let _turmaParaSair = null;  // guarda turma selecionada pra sair (após confirmação)
+  /* ─── LINKS PENDENTES (mesmo padrão do login v2-1) ─── */
+  var LINKS_PENDENTES = {
+    planos: ''   // ex: 'https://wa.me/55...' ou 'planos.html'
+  };
 
-  // ── Helpers ──
-  function escTurma(s) {
-    if (s === null || s === undefined) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-  function fmtData(iso) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-  }
+  var _serieEscolhida = null;
+  var _turmas = [];
+  var _turmaAberta = null;
 
-  // ── Carregar e renderizar lista de turmas ──
-  async function carregarMinhasTurmasConfig() {
-    const lista = document.getElementById('listaMinhasTurmas');
-    if (!lista) return;
+  /* ─── A1 · Mini-cartão ─── */
+  function irPersonalizar(){ window.location.href = 'inicio.html?personalizar=1'; }
+  var _BUCKET_AVATAR = 'avatares-alunos';
+  async function carregarFotoMini(){
     try {
-      const turmas = await dbGetMinhasTurmas();
-      if (!turmas || turmas.length === 0) {
-        lista.innerHTML =
-          '<div style="padding:2rem 1rem;text-align:center;color:#928ea0;background:#10131a;border:1px dashed rgba(71,69,84,.3);border-radius:.75rem;">' +
-            '<span class="material-symbols-outlined" style="font-size:2rem;color:#474554;display:block;margin-bottom:.5rem;">school</span>' +
-            '<p style="font-size:.85rem;font-weight:600;color:#c8c4d7;margin-bottom:.3rem;">Você ainda não está em nenhuma turma</p>' +
-            '<p style="font-size:.75rem;color:#928ea0;">Use o botão "Entrar em turma" acima para começar</p>' +
-          '</div>';
-        return;
-      }
-
-      lista.innerHTML = turmas.map(function(t) {
-        const escola = (t.escolas && t.escolas.nome) ? t.escolas.nome : 'Escola não informada';
-        const local = (t.escolas && t.escolas.cidade && t.escolas.estado)
-          ? t.escolas.cidade + '/' + t.escolas.estado : '';
-        const prof = t.professor || 'Professor(a)';
-        const serie = t.serie ? t.serie + (t.ano_letivo ? ' · ' + t.ano_letivo : '') : '';
-
-        return (
-          '<div class="turma-item">' +
-            '<div style="width:2.25rem;height:2.25rem;border-radius:.625rem;background:rgba(108,92,231,.15);border:1px solid rgba(108,92,231,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
-              '<span class="material-symbols-outlined" style="color:#c6bfff;font-size:1.1rem;font-variation-settings:\'FILL\' 1;">school</span>' +
-            '</div>' +
-            '<div style="flex:1;min-width:0;">' +
-              '<p style="font-size:.9rem;font-weight:700;color:#e1e2eb;margin-bottom:.15rem;">' + escTurma(t.nome) + '</p>' +
-              '<p style="font-size:.75rem;color:#c8c4d7;margin-bottom:.15rem;">' + escTurma(escola) + (local ? ' · ' + escTurma(local) : '') + '</p>' +
-              '<p style="font-size:.7rem;color:#928ea0;">' +
-                'Profa(o). ' + escTurma(prof) +
-                (serie ? ' · ' + escTurma(serie) : '') +
-                (t.entrou_em ? ' · entrou em ' + fmtData(t.entrou_em) : '') +
-              '</p>' +
-            '</div>' +
-            '<button class="btn-sair-turma" onclick="abrirConfirmarSair(\'' + t.id + '\', \'' + escTurma(t.nome).replace(/'/g, '\\\'') + '\')">' +
-              '<span class="material-symbols-outlined" style="font-size:.9rem;">logout</span>Sair' +
-            '</button>' +
-          '</div>'
-        );
-      }).join('');
-    } catch (e) {
-      console.error('Erro ao carregar turmas:', e);
-      lista.innerHTML =
-        '<div style="padding:1.5rem;text-align:center;color:#ffb4ab;font-size:.8rem;">' +
-          '<span class="material-symbols-outlined" style="display:block;margin-bottom:.4rem;">error</span>' +
-          'Não foi possível carregar suas turmas. Recarregue a página.' +
-        '</div>';
-    }
+      var uid = authGetUserId();
+      if (!uid) return;
+      var res = await dbFetch(SUPABASE_URL + '/storage/v1/object/authenticated/' + _BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
+      if (!res.ok) return;
+      var blob = await res.blob();
+      var url = URL.createObjectURL(blob);
+      var f = document.getElementById('miniFoto');
+      f.style.backgroundImage = 'url("' + url + '")';
+      f.textContent = '';
+    } catch(e) { /* sem foto — mantém o degradê */ }
   }
 
-  // ── Modal Confirmar Sair ──
-  window.abrirConfirmarSair = function(turmaId, nomeTurma) {
-    _turmaParaSair = { id: turmaId, nome: nomeTurma };
-    const txt = document.getElementById('textoConfirmarSair');
-    if (txt) txt.innerHTML = 'Tem certeza que deseja sair de <strong style="color:#e1e2eb;">' + escTurma(nomeTurma) + '</strong>?';
-    document.getElementById('modalConfirmarSair').classList.add('aberto');
-  };
-  window.fecharModalConfirmarSair = function() {
-    document.getElementById('modalConfirmarSair').classList.remove('aberto');
-    _turmaParaSair = null;
-  };
-  window.confirmarSairTurma = async function() {
-    if (!_turmaParaSair) return;
-    const btn = document.getElementById('btnConfirmarSair');
-    btn.disabled = true;
-    btn.textContent = 'Saindo...';
-    try {
-      await dbAlunoSairDaTurma(_turmaParaSair.id);
-      toast('Você saiu de ' + _turmaParaSair.nome);
-      fecharModalConfirmarSair();
-      await carregarMinhasTurmasConfig();
-    } catch (e) {
-      console.error('Erro ao sair da turma:', e);
-      toast('Erro ao sair. Tente novamente.');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Sim, sair';
-    }
-  };
-
-  // ── Modal Entrar em Turma (mesmo do inicio.html, adaptado) ──
-  window.abrirModalEntrarTurmaConfig = function() {
-    document.getElementById('codigoTurmaConfigInput').value = '';
-    document.getElementById('erroEntrarTurmaConfig').style.display = 'none';
-    document.getElementById('sucessoEntrarTurmaConfig').style.display = 'none';
-    document.getElementById('modalEntrarTurmaConfig').classList.add('aberto');
-    setTimeout(function(){
-      const inp = document.getElementById('codigoTurmaConfigInput');
-      if (inp) inp.focus();
-    }, 150);
-  };
-  window.fecharModalEntrarTurmaConfig = function() {
-    document.getElementById('modalEntrarTurmaConfig').classList.remove('aberto');
-  };
-
-  // Enter no input dispara confirmação
-  const inpCfg = document.getElementById('codigoTurmaConfigInput');
-  if (inpCfg) {
-    inpCfg.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') confirmarEntrarTurmaConfig();
+  /* ─── A3 · Perfil ─── */
+  function escolherSerie(v){
+    _serieEscolhida = v;
+    document.getElementById('serieAtualTx').textContent = v;
+    marcarSerie();
+    setTimeout(function(){ fecharGaveta('gavetaSerie'); }, 160);
+  }
+  function marcarSerie(){
+    document.querySelectorAll('#gavetaSerie .pill').forEach(function(p){
+      p.classList.toggle('selecionada', p.textContent.replace('\u2713','').trim() === _serieEscolhida);
     });
   }
-
-  window.confirmarEntrarTurmaConfig = async function() {
-    const codigo = document.getElementById('codigoTurmaConfigInput').value.trim();
-    const elErro = document.getElementById('erroEntrarTurmaConfig');
-    const elSucesso = document.getElementById('sucessoEntrarTurmaConfig');
-    const btn = document.getElementById('btnEntrarTurmaConfig');
-
-    elErro.style.display = 'none';
-    elSucesso.style.display = 'none';
-
-    if (!codigo) {
-      elErro.textContent = 'Digite o código da turma.';
-      elErro.style.display = 'block';
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'Entrando...';
-
+  async function salvarPerfil(){
+    var nome = document.getElementById('inpNome').value.trim();
+    if (!nome) { toast('Escreva seu nome completo.'); return; }
+    var b = document.getElementById('btnSalvarPerfil');
+    b.disabled = true; b.textContent = 'Salvando…';
     try {
-      const r = await dbAlunoEntrarComCodigo(codigo);
-      const nomeTurma = r.turma.nome;
-      const nomeEscola = r.turma.escolas && r.turma.escolas.nome ? r.turma.escolas.nome : '';
-      const local = nomeEscola ? (nomeEscola + ' · ' + nomeTurma) : nomeTurma;
-
-      if (r.jaEstava) {
-        elSucesso.textContent = '✓ Você já está nessa turma: ' + local;
-      } else {
-        elSucesso.textContent = '✓ Bem-vindo(a) à turma ' + local + '!';
-      }
-      elSucesso.style.display = 'block';
-
-      setTimeout(function() {
-        fecharModalEntrarTurmaConfig();
-        carregarMinhasTurmasConfig();
-      }, 1200);
-    } catch (e) {
-      console.error('Erro ao entrar em turma:', e);
-      elErro.textContent = e.message || 'Não foi possível entrar na turma. Verifique o código.';
-      elErro.style.display = 'block';
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Entrar na turma';
+      var dados = { nome: nome };
+      if (_serieEscolhida) dados.serie = _serieEscolhida;
+      await dbAtualizarPerfilUsuario(dados);
+      atualizarMini();
+      toast('\u2705 Perfil salvo');
+    } catch(e) {
+      console.error('[config] salvarPerfil:', e);
+      toast('N\u00e3o consegui salvar agora. Confira a internet e tente de novo.', 3000);
     }
-  };
+    b.disabled = false; b.textContent = 'Salvar';
+  }
+  function atualizarMini(){
+    var nome = authGetNome() || 'Estudante';
+    document.getElementById('miniNome').textContent = nome;
+    document.getElementById('miniSub').textContent = _serieEscolhida || '\u00a0';
+  }
 
-  // ── Init ──
-  carregarMinhasTurmasConfig();
+  /* ─── A4 · Conta ─── */
+  async function alterarSenha(){
+    var email = null;
+    try { email = localStorage.getItem('redaon_user_email'); } catch(e) {}
+    if (!email) { toast('N\u00e3o encontrei seu e-mail. Entre de novo e tente.', 3000); return; }
+    var b = document.getElementById('btnSenha');
+    b.disabled = true;
+    try {
+      await authRecuperarSenha(email);
+      toast('\u2705 Link para criar senha nova enviado ao seu e-mail', 3200);
+    } catch(e) {
+      console.error('[config] alterarSenha:', e);
+      toast('N\u00e3o consegui enviar agora. Tente de novo em instantes.', 3000);
+    }
+    b.disabled = false;
+  }
+
+  /* ─── A5 · Turmas ─── */
+  function escC(s){ return escapeHtmlSimples(s); }
+  function fmtDataBr(iso){
+    if (!iso) return '';
+    try {
+      var d = new Date(iso);
+      return d.toLocaleDateString('pt-BR');
+    } catch(e) { return ''; }
+  }
+  async function carregarTurmas(){
+    var carreg = document.getElementById('turmasCarregando');
+    var vazio = document.getElementById('turmasVazio');
+    var lista = document.getElementById('listaTurmas');
+    carreg.classList.remove('hidden');
+    vazio.classList.add('hidden');
+    lista.innerHTML = '';
+    try {
+      _turmas = await dbGetMinhasTurmas();
+    } catch(e) {
+      console.error('[config] turmas:', e);
+      _turmas = [];
+    }
+    carreg.classList.add('hidden');
+    if (!_turmas.length) { vazio.classList.remove('hidden'); return; }
+    var html = '';
+    _turmas.forEach(function(t, i){
+      var prof = t.professor ? 'Prof. ' + escC(t.professor) : '';
+      var ano = t.ano_letivo ? String(t.ano_letivo) : '';
+      var sub = [prof, ano].filter(Boolean).join(' \u00b7 ');
+      html += '<button class="itemCfg" onclick="abrirGavetaTurma(' + i + ')">' +
+        '<span class="ic">\u{1F3EB}</span>' +
+        '<div class="tx"><p class="t1">' + escC(t.nome || 'Turma') + '</p><p class="t2">' + (sub || '\u00a0') + '</p></div>' +
+        '<span class="seta">\u203A</span></button>';
+    });
+    lista.innerHTML = html;
+  }
+  function abrirGavetaTurma(i){
+    var t = _turmas[i];
+    if (!t) return;
+    _turmaAberta = t;
+    document.getElementById('gvTurmaNome').textContent = t.nome || 'Turma';
+    var partes = [];
+    if (t.professor) partes.push('Prof. ' + t.professor);
+    if (t.escolas && t.escolas.nome) partes.push(t.escolas.nome);
+    if (t.serie) partes.push(t.serie);
+    var linha1 = partes.join(' \u00b7 ');
+    var linha2 = t.entrou_em ? 'Voc\u00ea entrou nesta turma em ' + fmtDataBr(t.entrou_em) + '.' : '';
+    document.getElementById('gvTurmaInfo').textContent = linha1 + (linha1 && linha2 ? '\n' : '') + linha2;
+    voltarAcoesTurma();
+    abrirGaveta('gavetaTurma');
+  }
+  function pedirConfirmaSaida(){
+    document.getElementById('gvTurmaAcoes').classList.add('hidden');
+    document.getElementById('gvTurmaConfirma').classList.remove('hidden');
+  }
+  function voltarAcoesTurma(){
+    document.getElementById('gvTurmaAcoes').classList.remove('hidden');
+    document.getElementById('gvTurmaConfirma').classList.add('hidden');
+    var e = document.getElementById('gvTurmaErro');
+    e.style.display = 'none'; e.textContent = '';
+  }
+  async function confirmarSaidaTurma(){
+    if (!_turmaAberta) return;
+    var b = document.getElementById('btnConfirmaSaida');
+    b.disabled = true; b.textContent = 'Saindo\u2026';
+    try {
+      await dbAlunoSairDaTurma(_turmaAberta.id);
+      fecharGaveta('gavetaTurma');
+      toast('Voc\u00ea saiu da turma ' + (_turmaAberta.nome || '') + '.');
+      carregarTurmas();
+    } catch(e) {
+      console.error('[config] sairTurma:', e);
+      var el = document.getElementById('gvTurmaErro');
+      el.textContent = 'N\u00e3o consegui te desvincular agora. Confira a internet e tente de novo.';
+      el.style.display = 'block';
+    }
+    b.disabled = false; b.textContent = 'Sim, sair da turma';
+  }
+  function abrirGavetaCodigo(){
+    document.getElementById('inpCodigoTurma').value = '';
+    var e = document.getElementById('gvCodigoErro'), o = document.getElementById('gvCodigoOk');
+    e.style.display = 'none'; e.textContent = '';
+    o.style.display = 'none'; o.textContent = '';
+    abrirGaveta('gavetaCodigo');
+  }
+  async function confirmarEntrarTurma(){
+    var codigo = document.getElementById('inpCodigoTurma').value.trim();
+    var e = document.getElementById('gvCodigoErro'), o = document.getElementById('gvCodigoOk');
+    e.style.display = 'none'; o.style.display = 'none';
+    if (!codigo) { e.textContent = 'Cole o c\u00f3digo da turma que seu professor passou.'; e.style.display = 'block'; return; }
+    var b = document.getElementById('btnEntrarTurma');
+    b.disabled = true; b.textContent = 'Entrando\u2026';
+    try {
+      var r = await dbAlunoEntrarComCodigo(codigo);
+      if (r.jaEstava) {
+        o.textContent = 'Voc\u00ea j\u00e1 est\u00e1 nesta turma: ' + (r.turma.nome || '') + '.';
+      } else {
+        o.textContent = '\u2705 Voc\u00ea entrou na turma ' + (r.turma.nome || '') + '!';
+      }
+      o.style.display = 'block';
+      carregarTurmas();
+      setTimeout(function(){ fecharGaveta('gavetaCodigo'); }, 1400);
+    } catch(err) {
+      var msg = String(err.message || '');
+      e.textContent = msg.indexOf('inv\u00e1lido') !== -1
+        ? 'C\u00f3digo de turma n\u00e3o encontrado. Confira com seu professor.'
+        : 'N\u00e3o consegui entrar agora. Confira a internet e tente de novo.';
+      e.style.display = 'block';
+    }
+    b.disabled = false; b.textContent = 'Entrar na turma';
+  }
+
+  /* ─── A6 · Tema (pref da base v6: claro/escuro/auto) ─── */
+  var NOMES_TEMA = { claro:'Claro', escuro:'Escuro', auto:'Autom\u00e1tico (segue o aparelho)' };
+  function pintarTema(){
+    var pref = temaPreferido();
+    document.getElementById('temaAtualTx').textContent = NOMES_TEMA[pref] || pref;
+    ['claro','escuro','auto'].forEach(function(t){
+      document.getElementById('pillTema-' + t).classList.toggle('selecionada', t === pref);
+    });
+  }
+  function abrirGavetaTema(){ pintarTema(); abrirGaveta('gavetaTema'); }
+  function escolherTema(pref){
+    aplicarTema(pref);
+    pintarTema();
+    setTimeout(function(){ fecharGaveta('gavetaTema'); }, 160);
+  }
+
+  /* ─── A7 · Plano ─── */
+  var NOMES_PLANO = { free:'Gratuito', basico:'B\u00e1sico', premium:'Premium', elite:'Elite' };
+  function pintarPlano(plano, temTurma){
+    var nomeEl = document.getElementById('planoNome');
+    var descEl = document.getElementById('planoDesc');
+    var btn = document.getElementById('btnFalarPlanos');
+    if (temTurma) {
+      nomeEl.textContent = 'RedaON pela sua escola';
+      descEl.textContent = 'Corre\u00e7\u00e3o nos crit\u00e9rios do INEP, validada pelo seu professor';
+      btn.classList.add('hidden');
+    } else {
+      nomeEl.textContent = 'Plano ' + (NOMES_PLANO[plano] || 'RedaON');
+      descEl.textContent = 'Corre\u00e7\u00e3o nos crit\u00e9rios do INEP, validada por professor';
+      btn.classList.remove('hidden');
+    }
+  }
+  function falarComRedaON(){
+    if (LINKS_PENDENTES.planos) { window.open(LINKS_PENDENTES.planos, '_blank', 'noopener'); return; }
+    toast('Fale com a RedaON pelo seu professor ou canal da escola \u2728', 2800);
+  }
+
+  /* ─── Carga ─── */
+  (async function(){
+    document.getElementById('miniNome').textContent = authGetNome() || 'Estudante';
+    var email = null;
+    try { email = localStorage.getItem('redaon_user_email'); } catch(e) {}
+    document.getElementById('emailTx').textContent = email || '\u2014';
+    pintarTema();
+    carregarFotoMini();
+
+    var u = null;
+    try { u = await dbSincronizarUsuarioAtual(); } catch(e) { console.warn('[config] sync:', e); }
+    if (!u) u = authGetPerfil() || {};
+    document.getElementById('inpNome').value = u.nome || authGetNome() || '';
+    if (u.serie) {
+      _serieEscolhida = u.serie;
+      document.getElementById('serieAtualTx').textContent = u.serie;
+      marcarSerie();
+    }
+    atualizarMini();
+
+    var turmasOk = false;
+    try { await carregarTurmas(); turmasOk = _turmas.length > 0; } catch(e) {}
+    pintarPlano(u.plano || 'free', turmasOk);
+  })();
 </script>
-
 </body>
 </html>
