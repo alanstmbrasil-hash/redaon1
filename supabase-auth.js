@@ -3,6 +3,7 @@
  * Biblioteca global de autenticação e acesso ao banco.
  * Incluir via <script src="supabase-auth.js"></script> em todas as telas.
  * NÃO usa type="module" — funciona com fetch direto.
+ * Atualizado em 23/08/2026 — Login v2: gaveta Sair, recuperar senha, Google OAuth.
  */
 
 // ─────────────────────────────────────────────
@@ -61,7 +62,12 @@ async function authCadastro({ nome, email, senha, perfil = 'aluno', escola = nul
   return data;
 }
 
-async function authLogout() {
+/**
+ * Logout IMEDIATO (sem confirmação). Uso interno e programático
+ * (sessão expirada, guards). Limpa SÓ as chaves de sessão — tema e
+ * favoritos são preservados.
+ */
+async function authLogoutAgora() {
   const token = localStorage.getItem('redaon_token');
   if (token) {
     await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
@@ -82,6 +88,19 @@ async function authLogout() {
   window.location.href = 'login.html';
 }
 
+/**
+ * Sair com confirmação — abre a GAVETA "Sair da sua conta?" (padrão do
+ * produto) antes de deslogar. É o que os botões/links "Sair" chamam
+ * (base v6 do aluno e portal professor) — sem mudar nenhuma tela.
+ * authLogout(true) pula a gaveta (equivale a authLogoutAgora()).
+ */
+async function authLogout(imediato = false) {
+  if (imediato === true || typeof document === 'undefined' || !document.body) {
+    return authLogoutAgora();
+  }
+  authAbrirGavetaSair();
+}
+
 async function authRefreshToken() {
   const refresh = localStorage.getItem('redaon_refresh');
   if (!refresh) return null;
@@ -96,7 +115,7 @@ async function authRefreshToken() {
   });
   
   if (!res.ok) {
-    authLogout();
+    authLogoutAgora();
     return null;
   }
   
@@ -792,7 +811,7 @@ async function dbSincronizarUsuarioAtual() {
 async function dbGetHistoricoRedacoes(limite = 5) {
   const userId = authGetUserId();
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/redacoes?aluno_id=eq.${userId}&status=eq.corrigida&order=created_at.desc&limit=${limite}&select=id,nota_final,tema_livre,created_at,correcoes(c1,c2,c3,c4,c5,feedback_geral,pdca_pareto,pdca_causa_raiz,pdca_tendencia)`,
+    `${SUPABASE_URL}/rest/v1/redacoes?aluno_id=eq.${userId}&status=in.(corrigida,validada)&order=created_at.desc&limit=${limite}&select=id,nota_final,tema_livre,created_at,correcoes(c1,c2,c3,c4,c5,feedback_geral,pdca_pareto,pdca_causa_raiz,pdca_tendencia)`,
     { headers: dbHeaders() }
   );
   const data = await res.json();
@@ -1264,5 +1283,216 @@ async function processarCodigoPendente() {
     console.error('[processarCodigoPendente] erro:', e);
   } finally {
     localStorage.removeItem('redaon_codigo_pendente');
+  }
+}
+
+// ─────────────────────────────────────────────
+// LOGIN v2 (23/08/2026) — GAVETA SAIR
+// Padrão do produto: bottom sheet com grip, "Sair da sua conta?",
+// botão vermelho Sair + Ficar. Injetada uma única vez, sob demanda.
+// Usa os tokens do sistema (--surface, --text, --red...) com fallback.
+// ─────────────────────────────────────────────
+
+function _gavetaSairGarantir() {
+  if (document.getElementById('gvSairRedaON')) return;
+  var css = document.createElement('style');
+  css.id = 'gvSairRedaONcss';
+  css.textContent =
+    '#gvSairBgRedaON{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9990;opacity:0;pointer-events:none;transition:opacity .25s}' +
+    '#gvSairRedaON{position:fixed;left:0;right:0;bottom:0;z-index:9991;background:var(--surface,#1d2026);color:var(--text,#e1e2eb);border-radius:1.25rem 1.25rem 0 0;border-top:1px solid rgba(var(--borderRGB,71,69,84),.25);padding:.9rem 1.25rem calc(1.6rem + env(safe-area-inset-bottom,0px));max-width:34rem;margin:0 auto;transform:translateY(105%);transition:transform .3s cubic-bezier(.22,.9,.3,1);font-family:inherit}' +
+    '#gvSairBgRedaON.open{opacity:1;pointer-events:auto}#gvSairRedaON.open{transform:none}' +
+    '#gvSairRedaON .grip{width:2.4rem;height:.25rem;border-radius:99px;background:rgba(var(--borderRGB,71,69,84),.5);margin:0 auto .9rem}' +
+    '#gvSairRedaON .tit{font-size:1rem;font-weight:800;margin:0 0 .3rem}' +
+    '#gvSairRedaON .tx{font-size:.78rem;color:var(--muted,#928ea0);line-height:1.5;margin:0 0 1rem}' +
+    '#gvSairRedaON .btns{display:flex;flex-direction:column;gap:.5rem}' +
+    '#gvSairRedaON .bSair{width:100%;min-height:48px;border-radius:12px;background:var(--red,#ff8b8b);color:#fff;font-weight:800;font-size:.85rem;border:none;cursor:pointer;font-family:inherit}' +
+    '#gvSairRedaON .bFicar{width:100%;min-height:48px;border-radius:12px;background:var(--surface2,#272a31);color:var(--text,#e1e2eb);font-weight:800;font-size:.85rem;border:1px solid rgba(var(--borderRGB,71,69,84),.25);cursor:pointer;font-family:inherit}';
+  document.head.appendChild(css);
+
+  var bg = document.createElement('div');
+  bg.id = 'gvSairBgRedaON';
+  bg.addEventListener('click', authFecharGavetaSair);
+
+  var gv = document.createElement('div');
+  gv.id = 'gvSairRedaON';
+  gv.setAttribute('role', 'dialog');
+  gv.setAttribute('aria-modal', 'true');
+  gv.setAttribute('aria-labelledby', 'gvSairRedaONtit');
+  var tx = authGetTipo() === 'professor'
+    ? 'Você vai precisar entrar de novo para continuar seu trabalho.'
+    : 'Você vai precisar entrar de novo para continuar seus estudos.';
+  gv.innerHTML =
+    '<div class="grip"></div>' +
+    '<p class="tit" id="gvSairRedaONtit">Sair da sua conta?</p>' +
+    '<p class="tx">' + tx + '</p>' +
+    '<div class="btns">' +
+      '<button type="button" class="bSair" id="gvSairRedaONok">\u{1F6AA} Sair</button>' +
+      '<button type="button" class="bFicar" id="gvSairRedaONnao">Ficar</button>' +
+    '</div>';
+  document.body.appendChild(bg);
+  document.body.appendChild(gv);
+
+  document.getElementById('gvSairRedaONok').addEventListener('click', function () {
+    var b = this;
+    b.disabled = true;
+    b.textContent = 'Saindo...';
+    authLogoutAgora();
+  });
+  document.getElementById('gvSairRedaONnao').addEventListener('click', authFecharGavetaSair);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') authFecharGavetaSair();
+  });
+}
+
+function authAbrirGavetaSair() {
+  _gavetaSairGarantir();
+  document.getElementById('gvSairBgRedaON').classList.add('open');
+  document.getElementById('gvSairRedaON').classList.add('open');
+}
+
+function authFecharGavetaSair() {
+  var bg = document.getElementById('gvSairBgRedaON'), gv = document.getElementById('gvSairRedaON');
+  if (bg) bg.classList.remove('open');
+  if (gv) gv.classList.remove('open');
+}
+
+// ─────────────────────────────────────────────
+// LOGIN v2 — RECUPERAR SENHA
+// ─────────────────────────────────────────────
+
+/** URL absoluta de uma página irmã (mesma pasta do login). */
+function _urlIrma(arquivo) {
+  var base = window.location.href.split('#')[0].split('?')[0];
+  return base.substring(0, base.lastIndexOf('/') + 1) + arquivo;
+}
+
+/**
+ * Envia o e-mail de recuperação de senha (POST /auth/v1/recover).
+ * O link do e-mail volta para recuperar-senha.html (redirect_to),
+ * que precisa estar na lista "Redirect URLs" do Supabase Auth.
+ * Não revela se o e-mail existe — a tela mostra sempre a mesma mensagem.
+ */
+async function authRecuperarSenha(email) {
+  var e = (email || '').trim();
+  if (!e) throw new Error('E-mail obrigatório.');
+  var redirect = encodeURIComponent(_urlIrma('recuperar-senha.html'));
+  var res = await fetch(`${SUPABASE_URL}/auth/v1/recover?redirect_to=${redirect}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+    body: JSON.stringify({ email: e })
+  });
+  if (!res.ok) {
+    var data = await res.json().catch(function () { return null; });
+    throw new Error((data && (data.error_description || data.msg || data.message)) || 'Erro ao enviar o link');
+  }
+  return true;
+}
+
+/**
+ * Lê os tokens que o Supabase devolve no hash da URL
+ * (#access_token=...&refresh_token=...&type=recovery|signup|...).
+ * Retorna objeto ou null. Não altera a URL.
+ */
+function authLerHashAuth() {
+  var h = window.location.hash || '';
+  if (h.indexOf('access_token=') === -1 && h.indexOf('error') === -1) return null;
+  var p = new URLSearchParams(h.replace(/^#/, ''));
+  return {
+    access_token: p.get('access_token'),
+    refresh_token: p.get('refresh_token'),
+    type: p.get('type'),
+    error: p.get('error'),
+    error_description: p.get('error_description')
+  };
+}
+
+/**
+ * Define a senha nova usando o token de recuperação do hash
+ * (PUT /auth/v1/user). Não grava sessão — a pessoa entra de novo no login.
+ */
+async function authRedefinirSenha(accessToken, novaSenha) {
+  if (!accessToken) throw new Error('Link inválido ou expirado.');
+  if (!novaSenha || novaSenha.length < 6) throw new Error('Password should be at least 6 characters');
+  var res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({ password: novaSenha })
+  });
+  var data = await res.json().catch(function () { return null; });
+  if (!res.ok) throw new Error((data && (data.error_description || data.msg || data.message)) || 'Erro ao redefinir a senha');
+  // Encerra a sessão temporária do link
+  await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${accessToken}` }
+  }).catch(function () {});
+  return true;
+}
+
+// ─────────────────────────────────────────────
+// LOGIN v2 — GOOGLE (OAuth via Supabase, fluxo implícito)
+// Requer provider Google ativo no Supabase + login.html nas Redirect URLs.
+// ─────────────────────────────────────────────
+
+/** Redireciona para o consentimento do Google. Volta para login.html com tokens no hash. */
+function authLoginGoogle() {
+  var redirect = encodeURIComponent(_urlIrma('login.html'));
+  window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirect}`;
+}
+
+/**
+ * Processa o retorno do OAuth (tokens no hash). Grava a sessão nas mesmas
+ * chaves do authLogin e devolve { user, perfil } — ou null se não há hash.
+ * Limpa o hash da URL ao final.
+ */
+async function authProcessarRetornoOAuth() {
+  var h = authLerHashAuth();
+  if (!h) return null;
+  if (h.error) throw new Error(h.error_description || h.error);
+  if (!h.access_token) return null;
+
+  var resU = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${h.access_token}` }
+  });
+  var user = await resU.json();
+  if (!resU.ok || !user || !user.id) throw new Error('Não foi possível confirmar o login com o Google.');
+
+  localStorage.setItem('redaon_token', h.access_token);
+  if (h.refresh_token) localStorage.setItem('redaon_refresh', h.refresh_token);
+  localStorage.setItem('redaon_user_id', user.id);
+  localStorage.setItem('redaon_user_email', user.email || '');
+
+  // Trigger on_auth_user_created pode levar um instante para criar public.usuarios
+  var perfil = await dbGetPerfil(user.id, h.access_token);
+  if (!perfil) {
+    await new Promise(function (r) { setTimeout(r, 900); });
+    perfil = await dbGetPerfil(user.id, h.access_token);
+  }
+  var nomeGoogle = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || user.email;
+  localStorage.setItem('redaon_perfil', JSON.stringify(perfil));
+  localStorage.setItem('redaon_tipo', (perfil && perfil.perfil) || 'aluno');
+  localStorage.setItem('redaon_nome', (perfil && perfil.nome) || nomeGoogle);
+
+  try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (_) {}
+  return { user: user, perfil: perfil };
+}
+
+/**
+ * Aluno já está vinculado a alguma turma? (usado no 1º acesso pós-Google:
+ * cadastro fechado → sem turma, pede o código antes de entrar.)
+ */
+async function dbAlunoTemTurma() {
+  try {
+    var res = await dbFetch(
+      `${SUPABASE_URL}/rest/v1/alunos_turma?aluno_id=eq.${authGetUserId()}&status=eq.ativo&select=turma_id&limit=1`,
+      {}
+    );
+    var data = await res.json();
+    return Array.isArray(data) && data.length > 0;
+  } catch (_) {
+    return false;
   }
 }
