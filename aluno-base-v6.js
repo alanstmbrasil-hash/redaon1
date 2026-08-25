@@ -1,5 +1,5 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-1 (24/08/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-2-1 (24/08/2026)
    v6-1: Aparência sai do menu Mais e da sidebar (decisão A6 — tema em
    dois lugares: sol/lua do topo + tela Configurações). Ícones/textos
    de tema remanescentes atualizam só se existirem no DOM.
@@ -95,6 +95,25 @@ function toggleRecolher() {
   try { localStorage.setItem('redaon-menu', mini ? 'mini' : 'full'); } catch(e) {}
 }
 
+/* ─── Foco no resultado (helper compartilhado · v6-2) ───
+   Toda escolha feita nos controles leva o resultado para a área nobre da tela,
+   logo abaixo do cabeçalho. Só rola quando o resultado ainda não está visível ali
+   (evita solavanco). Usado pelo Estúdio; serve Temas/Minhas Redações/Evolução. */
+function focarResultados(id, opts) {
+  opts = opts || {};
+  var el = document.getElementById(id || 'lista');
+  if (!el) return;
+  var header = document.querySelector('header.hApp');
+  var alturaTopo = (header ? header.offsetHeight : 0) + 8;
+  var r = el.getBoundingClientRect();
+  var jaVisivel = (r.top >= alturaTopo - 2 && r.top < window.innerHeight * 0.5);
+  if (typeof opts.travar === 'function') opts.travar(jaVisivel ? 900 : 1400);
+  if (jaVisivel) return;
+  var destino = window.pageYOffset + r.top - alturaTopo;
+  try { window.scrollTo({ top: destino, behavior: 'smooth' }); }
+  catch(e) { window.scrollTo(0, destino); }
+}
+
 /* ─── Gavetas genéricas ─── */
 function abrirGaveta(id) {
   var g = document.getElementById(id), b = document.getElementById(id + 'Bg');
@@ -179,7 +198,7 @@ function montarEsqueleto(cfg) {
         '<p class="nav-section-label"><span>Mais</span></p>' +
         '<a class="nav-item" href="evolucao.html" title="Evolu\u00e7\u00e3o"><i class="em">\u{1F4C8}</i><span class="tx">Evolu\u00e7\u00e3o</span></a>' +
         '<a class="nav-item" href="plano.html" title="Plano de estudos"><i class="em">\u{1F4C5}</i><span class="tx">Plano de estudos</span></a>' +
-        '<a class="nav-item" href="estudio-profa.html" title="IA Est\u00fadio"><i class="em">\u2728</i><span class="tx">IA Est\u00fadio</span></a>' +
+        '<a class="' + navClasse('estudio') + '" href="estudio.html" title="Est\u00fadio"><i class="em">\u{1F4D6}</i><span class="tx">Est\u00fadio</span></a>' +
         '<p class="nav-section-label"><span>Conta</span></p>' +
         '<a class="nav-item" href="configuracoes.html" title="Configura\u00e7\u00f5es"><i class="em">\u2699\uFE0F</i><span class="tx">Configura\u00e7\u00f5es</span></a>' +
         '<a class="nav-item" onclick="authLogout()" style="cursor:pointer;color:var(--red);margin-top:.3rem;" title="Sair"><i class="em">\u{1F6AA}</i><span class="tx">Sair</span></a>' +
@@ -224,7 +243,7 @@ function montarEsqueleto(cfg) {
       '<p class="tit">Mais</p>' +
       '<a class="pill" href="evolucao.html"><i class="pemoji">\u{1F4C8}</i>Evolu\u00e7\u00e3o<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="plano.html"><i class="pemoji">\u{1F4C5}</i>Plano de estudos<i class="fim">\u203A</i></a>' +
-      '<a class="pill" href="estudio-profa.html"><i class="pemoji">\u2728</i>IA Est\u00fadio<i class="fim">\u203A</i></a>' +
+      '<a class="pill" href="estudio.html"><i class="pemoji">\u{1F4D6}</i>Est\u00fadio<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="configuracoes.html"><i class="pemoji">\u2699\uFE0F</i>Configura\u00e7\u00f5es<i class="fim">\u203A</i></a>' +
       '<a class="pill" style="color:var(--red);" onclick="authLogout()"><i class="pemoji">\u{1F6AA}</i>Sair</a>' +
     '</div>' +

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Estúdio</title>
+<!-- RedaON · Portal do Aluno · Estúdio · produção v1-0 · 25/08/2026
+     Biblioteca: materiais da turma + materiais RedaON. O aluno lê e estuda; não gera.
+     Trilha lógica: COMPETÊNCIA (trilho) → FORMATO + ORIGEM (gaveta única) → material.
+     Tipos visíveis (LISTA DE PERMITIDOS): exerc · flash · reper · link · guia.
+     Bloqueados por serem docência ou meio de produção: plano, sequen, rubrica, notamil, slides, video, podcast.
+     Selo: origem=professor + selo=validado → "✓ Validado" · origem=redaon → "🎓 RedaON".
+     Renderização dupla: conteudo_json presente → flip/gabarito · ausente → leitor de texto limpo.
+     Portas: ?comp=C4 · ?tipo=flash · ?material=<uuid> -->
+<script>
+(function(){
+  var pref = 'auto';
+  try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+  var efetivo = pref;
+  if (pref === 'auto') {
+    var claroNoSistema = false;
+    try { claroNoSistema = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+    efetivo = claroNoSistema ? 'claro' : 'escuro';
+  }
+  document.documentElement.setAttribute('data-tema', efetivo);
+  document.documentElement.setAttribute('data-tema-pref', pref);
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="aluno-base-v6.css" rel="stylesheet"/>
+
+<style>
+/* ═══ TELA · Estúdio · v1-0 (produção) ═══ */
+#conteudo{ max-width:1100px; margin:0 auto; width:100%; padding:0 1rem 2rem; }
+
+/* Ouro de conquista: mesmo tom vivo nos dois temas (padrão do Hub e do Plano) */
+:root, html[data-tema="claro"]{ --ouro:#fabd00; --ouroRGB:250,189,0; }
+
+/* Linha de contexto sob o cabeçalho de seção (padrão Início) */
+.linhaCtx{ font-size:.78rem; color:var(--muted); line-height:1.45; margin:-.35rem 0 .6rem; }
+.linhaCtx b{ color:var(--text); font-weight:800; font-size:.95rem; }
+.linhaCtx .comp{ color:var(--cyan); font-weight:800; }
+
+/* Trilha da semana — carrossel com sangria até a borda (padrão .carrA da Início) */
+.trilha{ display:grid; grid-template-columns:repeat(6,1fr); gap:.6rem; }
+@media(max-width:900px){
+  .trilha{ display:flex; gap:10px; overflow-x:auto; scrollbar-width:none; scroll-snap-type:x proximity; align-items:stretch; margin:0 -1rem; padding:0 1rem 4px; }
+  .trilha::-webkit-scrollbar{ display:none; }
+  .trilha > *{ scroll-snap-align:start; flex:0 0 44%; max-width:9.5rem; }
+}
+@media(max-width:480px){ .trilha > *{ flex:0 0 52%; } }
+.passo{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:15px; padding:11px 12px; cursor:pointer; min-width:0; text-align:left; color:var(--text); font-family:inherit; display:block; width:100%; }
+.passo .pc{ font-size:.62rem; font-weight:800; color:var(--cyan); }
+.passo .pt1{ font-size:.78rem; font-weight:800; line-height:1.3; margin:.15rem 0; }
+.passo .pt2{ font-size:.63rem; color:var(--muted); line-height:1.35; }
+.passo.escrever{ border-color:rgba(var(--cyanRGB),.55); }
+.passo.vazio{ opacity:.45; cursor:default; }
+
+/* Seu reforço — quatro toques por formato */
+.umToque{ display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem; }
+@media(max-width:900px){ .umToque{ grid-template-columns:1fr 1fr; gap:10px; } }
+.btnToque{ display:flex; flex-direction:column; align-items:flex-start; gap:.1rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:15px; padding:11px 12px; min-height:56px; cursor:pointer; color:var(--text); text-align:left; min-width:0; }
+.btnToque .bt1{ font-size:.82rem; font-weight:800; }
+.btnToque .bt2{ font-size:.65rem; color:var(--muted); }
+.btnToque:disabled{ opacity:.45; cursor:default; }
+
+/* Filtros no topo (tablet deitado + desktop) — espelho da dock, padrão Temas */
+#filtrosTopo{ display:none; }
+@media (min-width:1024px), (max-width:1023px) and (orientation:landscape){
+  #filtrosTopo{ display:flex; flex-direction:column; gap:.6rem; margin-bottom:.875rem; }
+  #filtrosTopo .linha2{ display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; }
+  #dockEstudio{ display:none !important; }
+  .gv.atras{ z-index:47; padding-bottom:24px; }
+  .gvBg.atras{ z-index:46; }
+}
+/* Busca recolhível dentro da dock (padrão Temas) */
+#dockBusca{ display:none; }
+#dockBusca.aberta{ display:flex; }
+
+/* Acervo */
+.gridMat{ display:grid; grid-template-columns:1fr; gap:.7rem; }
+.gridMat > *{ min-width:0; }
+@media(min-width:641px){ .gridMat{ grid-template-columns:repeat(2,1fr); } }
+@media(min-width:1024px){ .gridMat{ grid-template-columns:repeat(3,1fr); } }
+.mat{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:13px; padding:12px 13px; cursor:pointer; display:flex; gap:.7rem; align-items:flex-start; }
+.mat .ic{ font-size:1.3rem; flex:0 0 auto; margin-top:.1rem; font-style:normal; }
+.mat .tx{ flex:1; min-width:0; }
+.mat .t1{ font-weight:800; font-size:.88rem; line-height:1.35; }
+.mat .t2{ font-size:.72rem; color:var(--muted); margin-top:.2rem; line-height:1.4; }
+.mat .tags{ display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.5rem; }
+.tg{ font-size:11px; font-weight:600; border-radius:6px; padding:3px 8px; background:var(--surface2); color:var(--muted); }
+.tg.selo{ background:rgba(var(--greenRGB),.14); color:var(--green); }
+.tg.comp{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+.tg.tema{ background:rgba(var(--purpleRGB),.16); color:var(--purpleSoft); }
+.salvar{ border:none; background:none; font-size:1.15rem; cursor:pointer; flex:0 0 auto; padding:.1rem; color:var(--muted); }
+.salvar.on{ color:var(--ouro); }
+.vazioL{ text-align:center; color:var(--muted); font-size:.85rem; padding:2rem 1rem; line-height:1.6; }
+.gvSecG{ font-size:.62rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:.85rem .25rem .4rem; }
+
+/* Estados da tela */
+.estadoTela{ text-align:center; color:var(--muted); font-size:.86rem; padding:2.5rem 1rem; line-height:1.65; }
+.estadoTela .em{ font-size:1.8rem; display:block; margin-bottom:.5rem; font-style:normal; }
+.estadoTela h3{ color:var(--text); font-size:1rem; margin-bottom:.35rem; }
+
+/* Leitor */
+#leitor{ position:fixed; inset:0; z-index:60; background:var(--bg); display:none; flex-direction:column; }
+#leitor.open{ display:flex; }
+.leTop{ display:flex; align-items:center; gap:.6rem; padding:1rem 1rem .6rem; max-width:820px; margin:0 auto; width:100%; }
+.leTop .volta{ border:1px solid rgba(var(--borderRGB),.3); background:var(--surface); color:var(--text); border-radius:99px; min-width:2.6rem; min-height:2.2rem; font-weight:800; cursor:pointer; font-family:inherit; }
+.leTop .t{ flex:1; font-size:.92rem; font-weight:800; line-height:1.3; }
+.leCorpo{ flex:1; overflow:auto; padding:0 1rem 3rem; max-width:760px; margin:0 auto; width:100%; }
+.leMeta{ display:flex; gap:.35rem; flex-wrap:wrap; margin:.4rem 0 .9rem; }
+.leTexto{ font-size:.95rem; line-height:1.75; white-space:pre-line; }
+.fc{ perspective:800px; cursor:pointer; margin-top:.8rem; }
+.fcIn{ position:relative; width:100%; height:150px; transform-style:preserve-3d; transition:transform .5s; }
+.fc.flip .fcIn{ transform:rotateY(180deg); }
+.fcFace{ position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:13px; display:flex; align-items:center; justify-content:center; padding:1rem; text-align:center; font-weight:700; font-size:.92rem; line-height:1.5; overflow:auto; }
+.fcFrente{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.3); }
+.fcVerso{ background:rgba(var(--cyanRGB),.13); border:1px solid rgba(var(--cyanRGB),.45); transform:rotateY(180deg); }
+.fcDica{ text-align:center; font-size:.7rem; color:var(--muted); margin-top:.5rem; }
+.ex{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); border-radius:13px; padding:13px; margin-top:.8rem; }
+.ex .enun{ font-size:.9rem; font-weight:700; line-height:1.5; margin-bottom:.7rem; }
+.ex .alt{ display:block; width:100%; min-height:44px; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.28); border-radius:10px; padding:.6rem .8rem; margin-bottom:.45rem; color:var(--text); font-size:.85rem; cursor:pointer; text-align:left; line-height:1.4; font-family:inherit; }
+.ex .alt.certa{ border-color:rgba(var(--greenRGB),.6); background:rgba(var(--greenRGB),.12); }
+.ex .alt.errada{ border-color:rgba(var(--redRGB),.6); background:rgba(var(--redRGB),.10); }
+.ex .gab{ display:none; font-size:.8rem; line-height:1.55; color:var(--muted); border-top:1px dashed rgba(var(--borderRGB),.4); margin-top:.5rem; padding-top:.6rem; }
+.ex.respondida .gab{ display:block; }
+.leLink{ display:flex; align-items:center; gap:.6rem; background:var(--surface); border:1px solid rgba(var(--cyanRGB),.4); border-radius:13px; padding:14px; margin-top:.8rem; color:var(--cyan); font-weight:800; font-size:.9rem; text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div id="main-content">
+  <div id="conteudo">
+
+    <!-- ① REDAÇÃO DA SEMANA -->
+    <div id="blocoSemana" class="hidden">
+      <div class="sec"><span class="secL"><span class="bar"></span>Redação da semana</span><button class="verT" id="btnEscreverTopo">Escrever &rsaquo;</button></div>
+      <p class="linhaCtx" id="ctxSemana"></p>
+      <div class="trilha" id="trilhaSemana"></div>
+    </div>
+
+    <!-- ② SEU REFORÇO -->
+    <div id="blocoReforco" class="hidden">
+      <div class="sec"><span class="secL"><span class="bar"></span>Seu reforço</span></div>
+      <p class="linhaCtx" id="ctxReforco"></p>
+      <div class="umToque" id="reforcoToques"></div>
+    </div>
+
+    <!-- ③ TODOS OS MATERIAIS -->
+    <div class="sec"><div class="secL"><span class="bar"></span>Todos os materiais</div><button class="verT" id="qtdTopo">&mdash;</button></div>
+
+    <div id="filtrosTopo">
+      <div class="abasTrilho" id="abasTopo"></div>
+      <div class="linha2">
+        <button class="filtroBtn" id="fBtnTopo" onclick="toggleGvFiltro()"><span id="lblFiltroTopo">Todos os formatos</span><span class="seta">&#9662;</span></button>
+        <button class="filtroBtn" id="fSalvosTopo" onclick="toggleSalvos()">&#11088; <span class="lblSalvos">Salvos</span></button>
+        <div class="busca"><span class="material-symbols-outlined">search</span><input id="buscaTopo" placeholder="Buscar material..." oninput="sincronizarBusca(this.value)"/></div>
+        <span id="contTopo" style="font-size:.75rem;color:var(--muted);white-space:nowrap;">&mdash;</span>
+      </div>
+    </div>
+
+    <div id="estadoCarregando" class="estadoTela"><i class="em">&#128218;</i>Abrindo seu Estúdio…</div>
+    <div id="estadoErro" class="estadoTela hidden">
+      <i class="em">&#128225;</i>
+      <h3>Não consegui carregar seus materiais</h3>
+      <p>Verifique sua internet e tente de novo.</p>
+      <button class="btn" style="margin-top:.9rem;" onclick="carregarEstudio()">Tentar de novo</button>
+    </div>
+
+    <div class="gridMat hidden" id="lista"></div>
+
+  </div>
+</div>
+
+<!-- DOCK (celular + tablet em pé) -->
+<div class="dockPolegar on" id="dockEstudio">
+  <div class="abasTrilho" id="abasDock"></div>
+  <div class="busca" id="dockBusca"><span class="material-symbols-outlined">search</span><input id="buscaDock" placeholder="Buscar material..." oninput="sincronizarBusca(this.value)"/></div>
+  <div style="display:flex;gap:.5rem;align-items:center;">
+    <button class="filtroBtn" id="fBtnDock" style="flex:1 1 0;" onclick="toggleGvFiltro()"><span id="lblFiltroDock">Todos os formatos</span><span class="seta">&#9662;</span></button>
+    <button class="filtroBtn" id="fSalvosDock" style="flex:0 0 auto;" onclick="toggleSalvos()">&#11088;</button>
+    <button class="filtroBtn" style="flex:0 0 auto;justify-content:center;" onclick="toggleBuscaDock()">&#128269;</button>
+  </div>
+</div>
+
+<!-- GAVETA: FORMATO + ORIGEM -->
+<div class="gvBg atras" id="gvFiltroBg" onclick="fecharGaveta('gvFiltro')"></div>
+<div class="gv atras" id="gvFiltro">
+  <div class="grip"></div>
+  <p class="tit">Filtrar materiais</p>
+  <p class="gvSecG">Formato</p>
+  <div id="gvFormatos"></div>
+  <p class="gvSecG" id="gvSecOrigem">De onde vem</p>
+  <div id="gvOrigens"></div>
+</div>
+
+<!-- LEITOR -->
+<div id="leitor">
+  <div class="leTop">
+    <button class="volta" onclick="fecharLeitor()">&lsaquo;</button>
+    <p class="t" id="leTitulo"></p>
+    <button class="salvar" id="leSalvar" onclick="toggleSalvarLeitor()">&#9734;</button>
+  </div>
+  <div class="leCorpo">
+    <div class="leMeta" id="leMeta"></div>
+    <div id="leConteudo"></div>
+  </div>
+</div>
+
+<script src="supabase-auth.js"></script>
+<script src="aluno-base-v6.js"></script>
+<script>
+/* ═══ RedaON · Estúdio do aluno · produção v1-0 ═══ */
+if (typeof authGuard === 'function') { authGuard('aluno'); }
+
+montarEsqueleto({
+  ativo:  'estudio',
+  titulo: 'Est\u00fadio',
+  icone:  'auto_stories',
+  sino:   true,
+  versao: 'aluno \u00b7 est\u00fadio \u00b7 v1-0'
+});
+
+/* ── Vocabulário ── */
+var COMPS = { C1:'Norma culta', C2:'Tema e repert\u00f3rio', C3:'Argumenta\u00e7\u00e3o', C4:'Coes\u00e3o', C5:'Interven\u00e7\u00e3o' };
+
+/* LISTA DE PERMITIDOS. Tipo fora deste mapa NÃO chega ao aluno.
+   Erro seguro: material some, nunca vaza. Bloqueados de propósito:
+   plano/sequen/rubrica (docência) · notamil (B3) · slides/video/podcast (prompts, meio de produção). */
+var TIPOS = {
+  exerc: { ic:'\u270F\uFE0F',       nm:'Exerc\u00edcios' },
+  flash: { ic:'\uD83C\uDCCF',       nm:'Flashcards' },
+  reper: { ic:'\uD83D\uDCA1',       nm:'Repert\u00f3rio' },
+  link:  { ic:'\uD83C\uDFAC',       nm:'V\u00eddeos' },
+  guia:  { ic:'\uD83D\uDCD6',       nm:'Guias' }
+};
+var ORDEM_REFORCO = ['exerc','flash','link','reper'];
+
+/* ── Estado ── */
+var MATERIAIS = [], TEMAS = {}, SALVOS = {};
+var _comp = 'todos', _formato = null, _origem = null, _soSalvos = false, _busca = '', _aberto = null;
+var _temTurma = false, _uid = null, _temaSemana = null, _focoComp = null;
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function mostrarEstado(id){
+  ['estadoCarregando','estadoErro'].forEach(function(k){
+    var el = document.getElementById(k); if (el) el.classList.toggle('hidden', k !== id);
+  });
+  var l = document.getElementById('lista');
+  if (l) l.classList.toggle('hidden', !!id);
+}
+function acordarDock(){ if (window.mostrarDock_dockEstudio) window.mostrarDock_dockEstudio(); }
+
+/* Mantém a dock visível durante a rolagem automática (v7-0 do mockup) */
+var _travaDock = null;
+function travarDock(ms){
+  var dock = document.getElementById('dockEstudio');
+  if (!dock) return;
+  acordarDock();
+  dock.dataset.segurando = '1';
+  if (_travaDock) clearTimeout(_travaDock);
+  _travaDock = setTimeout(function(){ dock.dataset.segurando = '0'; acordarDock(); }, ms || 1200);
+}
+/* R1 · foco no resultado — helper da base v6-2, com a dock travada durante a subida */
+function focarLista(){
+  if (typeof focarResultados === 'function') focarResultados('lista', { travar: travarDock });
+  else travarDock(900);
+}
+
+/* ── Leitura do banco ── */
+var SEL_MAT = 'id,nome,tipo,conteudo,conteudo_json,arquivo_url,origem,selo,competencia,tema_id,turma_id,criado_em';
+
+async function buscarMateriais(){
+  /* A RLS aluno_le_materiais já resolve o vínculo de turma: publicado AND
+     (origem=redaon OR aluno tem matrícula ativa na turma). A tela não filtra turma. */
+  var url = SUPABASE_URL + '/rest/v1/materiais?select=' + SEL_MAT + '&publicado=eq.true&order=criado_em.desc&limit=300';
+  var res = await dbFetch(url, {});
+  if (!res || !res.ok) throw new Error('materiais');
+  var linhas = await res.json();
+  return (linhas || []).filter(function(m){ return !!TIPOS[m.tipo]; });
+}
+async function buscarTemas(ids){
+  if (!ids.length) return {};
+  var url = SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de&id=in.(' + ids.join(',') + ')';
+  var res = await dbFetch(url, {});
+  if (!res || !res.ok) return {};
+  var linhas = await res.json();
+  var mapa = {};
+  (linhas || []).forEach(function(t){ mapa[t.id] = t; });
+  return mapa;
+}
+async function buscarApostaDaSemana(){
+  try{
+    var url = SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=1';
+    var res = await dbFetch(url, {});
+    if (!res || !res.ok) return null;
+    var linhas = await res.json();
+    return (linhas && linhas[0]) ? linhas[0] : null;
+  }catch(e){ return null; }
+}
+async function buscarSalvos(){
+  if (!_uid) return {};
+  try{
+    var url = SUPABASE_URL + '/rest/v1/materiais_salvos?select=material_id&aluno_id=eq.' + _uid;
+    var res = await dbFetch(url, {});
+    if (!res || !res.ok) return {};
+    var linhas = await res.json();
+    var mapa = {};
+    (linhas || []).forEach(function(s){ mapa[s.material_id] = true; });
+    return mapa;
+  }catch(e){ return {}; }
+}
+/* D5 · pior competência pela média das ÚLTIMAS 4 (menos de 4, usa o que houver) */
+async function piorCompetencia(){
+  try{
+    if (typeof dbGetHistoricoRedacoes !== 'function') return null;
+    var hist = await dbGetHistoricoRedacoes(4);
+    if (!hist || !hist.length) return null;
+    var chaves = ['c1','c2','c3','c4','c5'], soma = {c1:0,c2:0,c3:0,c4:0,c5:0};
+    hist.forEach(function(r){ chaves.forEach(function(k){ soma[k] += (r[k] || 0); }); });
+    var pior = chaves.slice().sort(function(a,b){ return soma[a] - soma[b]; })[0];
+    return pior.toUpperCase();
+  }catch(e){ console.warn('[estudio] pior competencia', e); return null; }
+}
+
+/* ── Etiquetas (D3) ── */
+function etiquetaOrigem(m){
+  return m.origem === 'redaon' ? 'Da RedaON' : 'Da sua turma';
+}
+function etiquetaSelo(m){
+  if (m.origem === 'redaon') return '<span class="tg selo">\uD83C\uDF93 RedaON</span>';
+  if (m.selo === 'validado') return '<span class="tg selo">\u2713 Validado</span>';
+  return '';
+}
+function autorLinha(m){
+  var partes = [etiquetaOrigem(m)];
+  if (m.tema_id && TEMAS[m.tema_id]) partes.push(TEMAS[m.tema_id].titulo);
+  return partes.join(' \u00b7 ');
+}
+
+/* ── Trilho por competência ── */
+function renderAbas(){
+  var itens = [{ k:'todos', r:'Tudo' }];
+  Object.keys(COMPS).forEach(function(c){ itens.push({ k:c, r:c + ' \u00b7 ' + COMPS[c] }); });
+  var html = itens.map(function(i){
+    return '<button class="abaT' + (_comp === i.k ? ' ativa' : '') + '" onclick="irComp(\'' + i.k + '\')">' + esc(i.r) + '</button>';
+  }).join('');
+  var a = document.getElementById('abasDock'); if (a) a.innerHTML = html;
+  var b = document.getElementById('abasTopo'); if (b) b.innerHTML = html;
+}
+function irComp(c){ _comp = c; renderAbas(); render(); acordarDock(); focarLista(); }
+
+/* ── Gaveta: formato + origem ── */
+function renderGvFiltro(){
+  var fs = [{ k:null, ic:'\uD83D\uDCDA', r:'Todos os formatos' }];
+  Object.keys(TIPOS).forEach(function(t){ fs.push({ k:t, ic:TIPOS[t].ic, r:TIPOS[t].nm }); });
+  document.getElementById('gvFormatos').innerHTML = fs.map(function(i){
+    return '<a class="pill' + (_formato === i.k ? ' sel' : '') + '" onclick="escolherFormato(' + (i.k ? "'" + i.k + "'" : 'null') + ')"><i class="pemoji">' + i.ic + '</i>' + esc(i.r) + '<span class="fim">\u2713</span></a>';
+  }).join('');
+
+  /* Aluno B2C sem turma não vê "Da sua turma" — nem a seção, se só sobra uma origem */
+  var os = [{ k:null, ic:'\uD83D\uDCDA', r:'Todas as origens' }];
+  if (_temTurma) os.push({ k:'professor', ic:'\uD83C\uDFEB', r:'Da sua turma' });
+  os.push({ k:'redaon', ic:'\uD83C\uDF93', r:'Da RedaON' });
+  var mostrarOrigem = _temTurma;
+  document.getElementById('gvSecOrigem').classList.toggle('hidden', !mostrarOrigem);
+  document.getElementById('gvOrigens').innerHTML = !mostrarOrigem ? '' : os.map(function(i){
+    return '<a class="pill' + (_origem === i.k ? ' sel' : '') + '" onclick="escolherOrigem(' + (i.k ? "'" + i.k + "'" : 'null') + ')"><i class="pemoji">' + i.ic + '</i>' + esc(i.r) + '<span class="fim">\u2713</span></a>';
+  }).join('');
+}
+function escolherFormato(v){ _formato = v; renderGvFiltro(); render(); acordarDock(); focarLista(); }
+function escolherOrigem(v){ _origem = v; renderGvFiltro(); render(); acordarDock(); focarLista(); }
+function toggleGvFiltro(){ renderGvFiltro(); toggleGaveta('gvFiltro'); acordarDock(); }
+function toggleSalvos(){ _soSalvos = !_soSalvos; render(); acordarDock(); focarLista(); }
+function toggleBuscaDock(){
+  var b = document.getElementById('dockBusca');
+  b.classList.toggle('aberta');
+  if (b.classList.contains('aberta')) document.getElementById('buscaDock').focus();
+  acordarDock();
+}
+function sincronizarBusca(v){
+  _busca = (v || '').toLowerCase().trim();
+  var bd = document.getElementById('buscaDock'); if (bd && bd.value !== v) bd.value = v;
+  var bt = document.getElementById('buscaTopo'); if (bt && bt.value !== v) bt.value = v;
+  render();
+  if (_busca) focarLista();
+}
+
+/* ── Lista ── */
+function filtrados(){
+  return MATERIAIS.filter(function(m){
+    if (_soSalvos && !SALVOS[m.id]) return false;
+    if (_comp !== 'todos' && m.competencia !== _comp) return false;
+    if (_formato && m.tipo !== _formato) return false;
+    if (_origem && m.origem !== _origem) return false;
+    if (_busca){
+      var alvo = (m.nome + ' ' + autorLinha(m) + ' ' + (COMPS[m.competencia] || '') + ' ' + TIPOS[m.tipo].nm).toLowerCase();
+      if (alvo.indexOf(_busca) === -1) return false;
+    }
+    return true;
+  });
+}
+function cartaoMat(m){
+  var comp = m.competencia ? '<span class="tg comp">' + m.competencia + ' \u00b7 ' + esc(COMPS[m.competencia]) + '</span>' : '';
+  var tema = (m.tema_id && TEMAS[m.tema_id]) ? '<span class="tg tema">' + esc(TEMAS[m.tema_id].titulo) + '</span>' : '';
+  return '<div class="mat" onclick="abrirMaterial(\'' + m.id + '\')">' +
+    '<i class="ic">' + TIPOS[m.tipo].ic + '</i>' +
+    '<div class="tx"><p class="t1">' + esc(m.nome) + '</p><p class="t2">' + esc(autorLinha(m)) + '</p>' +
+    '<div class="tags">' + comp + '<span class="tg">' + TIPOS[m.tipo].nm + '</span>' + tema + etiquetaSelo(m) + '</div></div>' +
+    '<button class="salvar' + (SALVOS[m.id] ? ' on' : '') + '" aria-label="Salvar" onclick="event.stopPropagation();toggleSalvar(\'' + m.id + '\')">' + (SALVOS[m.id] ? '\u2B50' : '\u2606') + '</button></div>';
+}
+function render(){
+  var l = filtrados();
+  var lbl = _formato ? TIPOS[_formato].nm : 'Todos os formatos';
+  if (_origem) lbl += ' \u00b7 ' + (_origem === 'professor' ? 'da turma' : 'da RedaON');
+  var el;
+  el = document.getElementById('lblFiltroDock'); if (el) el.textContent = lbl;
+  el = document.getElementById('lblFiltroTopo'); if (el) el.textContent = lbl;
+  var ativo = !!(_formato || _origem);
+  el = document.getElementById('fBtnDock');    if (el) el.classList.toggle('ativo', ativo);
+  el = document.getElementById('fBtnTopo');    if (el) el.classList.toggle('ativo', ativo);
+  el = document.getElementById('fSalvosDock'); if (el) el.classList.toggle('ativo', _soSalvos);
+  el = document.getElementById('fSalvosTopo'); if (el) el.classList.toggle('ativo', _soSalvos);
+  var cont = l.length + (l.length === 1 ? ' material' : ' materiais');
+  el = document.getElementById('contTopo'); if (el) el.textContent = cont;
+  el = document.getElementById('qtdTopo');  if (el) el.textContent = cont;
+
+  var lista = document.getElementById('lista');
+  if (!l.length){
+    lista.innerHTML = '<div class="vazioL" style="grid-column:1/-1;">' + (_soSalvos
+      ? '\u2B50<br>Voc\u00ea ainda n\u00e3o salvou nada.<br>Toque na estrelinha de um material para guard\u00e1-lo aqui.'
+      : 'Nenhum material assim por enquanto.') + '</div>';
+    return;
+  }
+  lista.innerHTML = l.map(cartaoMat).join('');
+}
+
+/* ── Salvos ── */
+async function toggleSalvar(id){
+  if (!_uid) return;
+  var estava = !!SALVOS[id];
+  SALVOS[id] = !estava;                 /* pinta na hora; desfaz se o banco recusar */
+  render();
+  if (_aberto && _aberto.id === id) pintarSalvarLeitor();
+  try{
+    var res;
+    if (!estava){
+      res = await dbFetch(SUPABASE_URL + '/rest/v1/materiais_salvos', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates' },
+        body: JSON.stringify({ aluno_id:_uid, material_id:id })
+      });
+    } else {
+      res = await dbFetch(SUPABASE_URL + '/rest/v1/materiais_salvos?aluno_id=eq.' + _uid + '&material_id=eq.' + id, { method:'DELETE' });
+    }
+    if (!res || !res.ok) throw new Error('salvar');
+    if (!estava) toast('\u2B50 Salvo nos seus materiais');
+  }catch(e){
+    SALVOS[id] = estava;
+    render();
+    if (_aberto && _aberto.id === id) pintarSalvarLeitor();
+    toast('N\u00e3o consegui salvar agora. Tente de novo.');
+  }
+}
+
+/* ── ① Trilha da semana (cascata: material do tema → material RedaON da competência) ── */
+function materialDaComp(c){
+  if (_temaSemana){
+    var doTema = MATERIAIS.find(function(m){ return m.tema_id === _temaSemana.id && m.competencia === c; });
+    if (doTema) return { m:doTema, cascata:false };
+  }
+  var r = MATERIAIS.find(function(m){ return m.origem === 'redaon' && m.competencia === c; });
+  if (r) return { m:r, cascata:true };
+  var q = MATERIAIS.find(function(m){ return m.competencia === c; });
+  return q ? { m:q, cascata:(q.origem === 'redaon') } : null;
+}
+function montarTrilha(){
+  var destinoEscrever = 'nova-redacao.html?metodo=digitar' + (_temaSemana ? ('&tema=' + encodeURIComponent(_temaSemana.id)) : '');
+  var html = Object.keys(COMPS).map(function(c){
+    var r = materialDaComp(c);
+    if (!r) return '<div class="passo vazio"><p class="pc">' + c + '</p><p class="pt1">' + esc(COMPS[c]) + '</p><p class="pt2">em breve</p></div>';
+    return '<button class="passo" onclick="abrirMaterial(\'' + r.m.id + '\')"><p class="pc">' + c + ' \u00b7 ' + TIPOS[r.m.tipo].ic + '</p><p class="pt1">' + esc(COMPS[c]) + '</p><p class="pt2">' + (r.cascata ? 'RedaON' : 'Da turma') + ' \u00b7 ' + TIPOS[r.m.tipo].nm + '</p></button>';
+  }).join('');
+  html += '<a class="passo escrever" href="' + destinoEscrever + '"><p class="pc">\u270F\uFE0F</p><p class="pt1">Escrever</p><p class="pt2">tema j\u00e1 selecionado</p></a>';
+  document.getElementById('trilhaSemana').innerHTML = html;
+  var btn = document.getElementById('btnEscreverTopo');
+  if (btn) btn.onclick = function(){ window.location.href = destinoEscrever; };
+}
+
+/* ── ② Seu reforço ── */
+function montarReforco(){
+  if (!_focoComp) return;
+  document.getElementById('reforcoToques').innerHTML = ORDEM_REFORCO.map(function(t){
+    var doAlvo = MATERIAIS.filter(function(m){ return m.competencia === _focoComp && m.tipo === t; });
+    if (!doAlvo.length) return '<button class="btnToque" disabled><span class="bt1">' + TIPOS[t].ic + ' ' + TIPOS[t].nm + '</span><span class="bt2">nenhum ainda</span></button>';
+    var acao = doAlvo.length === 1 ? ('abrirMaterial(\'' + doAlvo[0].id + '\')') : ('irAcervoFiltrado(\'' + t + '\')');
+    return '<button class="btnToque" onclick="' + acao + '"><span class="bt1">' + TIPOS[t].ic + ' ' + TIPOS[t].nm + '</span><span class="bt2">' + doAlvo.length + (doAlvo.length === 1 ? ' dispon\u00edvel' : ' dispon\u00edveis') + '</span></button>';
+  }).join('');
+}
+function irAcervoFiltrado(tipo){
+  _comp = _focoComp || 'todos'; _formato = tipo; _origem = null; _soSalvos = false;
+  renderAbas(); renderGvFiltro(); render();
+  focarLista();
+  acordarDock();
+}
+
+/* ── ③ Leitor ── */
+function abrirMaterial(id){
+  var m = MATERIAIS.find(function(x){ return x.id === id; });
+  if (!m) return;
+
+  /* Vídeo/Link: o conteúdo mora fora (YouTube, Drive, Spotify) */
+  if (m.tipo === 'link'){
+    if (m.arquivo_url){ window.open(m.arquivo_url, '_blank', 'noopener'); }
+    else { toast('Este v\u00eddeo ainda n\u00e3o tem endere\u00e7o.'); }
+    return;
+  }
+
+  _aberto = m;
+  document.getElementById('leTitulo').textContent = m.nome;
+  var comp = m.competencia ? '<span class="tg comp">' + m.competencia + ' \u00b7 ' + esc(COMPS[m.competencia]) + '</span>' : '';
+  var tema = (m.tema_id && TEMAS[m.tema_id]) ? '<span class="tg tema">' + esc(TEMAS[m.tema_id].titulo) + '</span>' : '';
+  document.getElementById('leMeta').innerHTML = comp + '<span class="tg">' + TIPOS[m.tipo].nm + '</span>' + tema + etiquetaSelo(m);
+
+  document.getElementById('leConteudo').innerHTML = corpoDoLeitor(m);
+  pintarSalvarLeitor();
+  document.getElementById('leitor').classList.add('open');
+  var corpo = document.querySelector('.leCorpo'); if (corpo) corpo.scrollTop = 0;
+}
+
+/* Renderização dupla: conteudo_json → interativo · senão → texto limpo */
+function corpoDoLeitor(m){
+  var j = m.conteudo_json;
+  if (j && typeof j === 'string'){ try { j = JSON.parse(j); } catch(e){ j = null; } }
+
+  if (j && m.tipo === 'flash' && Array.isArray(j.cards) && j.cards.length){
+    return j.cards.map(function(cd){
+      return '<div class="fc" onclick="this.classList.toggle(\'flip\')"><div class="fcIn">' +
+        '<div class="fcFace fcFrente">' + esc(cd.frente) + '</div>' +
+        '<div class="fcFace fcVerso">' + esc(cd.verso) + '</div></div></div>';
+    }).join('') + '<p class="fcDica">Toque no cart\u00e3o para virar \uD83D\uDD04</p>';
+  }
+
+  if (j && m.tipo === 'exerc' && Array.isArray(j.questoes) && j.questoes.length){
+    _questoes = j.questoes;
+    return j.questoes.map(function(q, i){
+      var alts = (q.alternativas || []).map(function(alt, k){
+        return '<button class="alt" onclick="responder(' + i + ',' + k + ')">' + String.fromCharCode(65 + k) + ') ' + esc(alt) + '</button>';
+      }).join('');
+      return '<div class="ex" id="ex' + i + '"><p class="enun">' + (i + 1) + ') ' + esc(q.enunciado) + '</p>' + alts +
+        '<div class="gab">\uD83D\uDCA1 ' + esc(q.comentario || '') + '</div></div>';
+    }).join('');
+  }
+
+  /* Sem estrutura: leitor de texto limpo (materiais já existentes) */
+  return '<p class="leTexto">' + esc(m.conteudo || 'Este material ainda n\u00e3o tem conte\u00fado.') + '</p>';
+}
+
+var _questoes = [];
+function responder(i, k){
+  var q = _questoes[i], caixa = document.getElementById('ex' + i);
+  if (!q || !caixa || caixa.classList.contains('respondida')) return;
+  caixa.classList.add('respondida');
+  var alts = caixa.querySelectorAll('.alt');
+  var certa = (typeof q.correta === 'number') ? q.correta : -1;
+  if (alts[certa]) alts[certa].classList.add('certa');
+  if (k !== certa && alts[k]) alts[k].classList.add('errada');
+}
+function fecharLeitor(){
+  document.getElementById('leitor').classList.remove('open');
+  _aberto = null; _questoes = [];
+  if (location.search.indexOf('material=') !== -1){
+    try { history.replaceState(null, '', location.pathname); } catch(e) {}
+  }
+}
+function pintarSalvarLeitor(){
+  var b = document.getElementById('leSalvar'), on = _aberto && SALVOS[_aberto.id];
+  b.textContent = on ? '\u2B50' : '\u2606';
+  b.classList.toggle('on', !!on);
+}
+function toggleSalvarLeitor(){ if (_aberto) toggleSalvar(_aberto.id); }
+
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape'){ fecharGaveta('gvFiltro'); fecharLeitor(); }
+});
+
+/* ── Portas (parâmetros da URL) ── */
+function lerPortas(){
+  var q = {};
+  try{
+    (location.search || '').replace(/^\?/, '').split('&').forEach(function(par){
+      if (!par) return;
+      var p = par.split('=');
+      q[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || '').replace(/\+/g, ' '));
+    });
+  }catch(e){}
+  return q;
+}
+
+/* ── Carga ── */
+async function carregarEstudio(){
+  mostrarEstado('estadoCarregando');
+  try{
+    _uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+
+    MATERIAIS = await buscarMateriais();
+    _temTurma = MATERIAIS.some(function(m){ return m.origem === 'professor'; });
+
+    var idsTema = [];
+    MATERIAIS.forEach(function(m){ if (m.tema_id && idsTema.indexOf(m.tema_id) === -1) idsTema.push(m.tema_id); });
+    TEMAS = await buscarTemas(idsTema);
+    SALVOS = await buscarSalvos();
+
+    /* D4 · tema da semana em cascata:
+       tema mais recente trabalhado pelo professor → Aposta da Semana → seção some */
+    var doProf = MATERIAIS.find(function(m){ return m.origem === 'professor' && m.tema_id && TEMAS[m.tema_id]; });
+    _temaSemana = doProf ? TEMAS[doProf.tema_id] : await buscarApostaDaSemana();
+
+    _focoComp = await piorCompetencia();
+
+    mostrarEstado(null);
+    renderAbas(); renderGvFiltro(); render();
+
+    if (_temaSemana){
+      document.getElementById('blocoSemana').classList.remove('hidden');
+      document.getElementById('ctxSemana').innerHTML =
+        '<b>' + esc(_temaSemana.titulo) + '</b><br>passeie pelas 5 compet\u00eancias e chegue na escrita municiado';
+      montarTrilha();
+    }
+
+    var ctxR = document.getElementById('ctxReforco');
+    if (_focoComp){
+      document.getElementById('blocoReforco').classList.remove('hidden');
+      ctxR.innerHTML = 'sua compet\u00eancia mais carente, pela Evolu\u00e7\u00e3o \u00b7 hoje mirando <span class="comp">' + _focoComp + ' \u00b7 ' + esc(COMPS[_focoComp]) + '</span>';
+      montarReforco();
+    } else if (MATERIAIS.length){
+      /* Zero redações corrigidas: não há carência a mirar — começa pelo começo */
+      _focoComp = 'C1';
+      document.getElementById('blocoReforco').classList.remove('hidden');
+      ctxR.innerHTML = 'comece por aqui \u00b7 <span class="comp">C1 \u00b7 ' + esc(COMPS.C1) + '</span><br>quando voc\u00ea enviar sua primeira reda\u00e7\u00e3o, este bloco passa a mirar sua compet\u00eancia mais carente';
+      montarReforco();
+    }
+
+    /* Portas */
+    var q = lerPortas();
+    if (q.comp && COMPS[q.comp.toUpperCase()]){ _comp = q.comp.toUpperCase(); renderAbas(); render(); }
+    if (q.tipo && TIPOS[q.tipo]){ _formato = q.tipo; renderGvFiltro(); render(); }
+    if (q.comp || q.tipo) focarLista();
+    if (q.material) abrirMaterial(q.material);
+
+  }catch(e){
+    console.warn('[estudio] carga', e);
+    mostrarEstado('estadoErro');
+  }
+}
+
+iniciarDock('dockEstudio', { protegidaPor:['gvFiltro','gavetaMais','gavetaMetodos'] });
+carregarEstudio();
+</script>
+</body>
+</html>
