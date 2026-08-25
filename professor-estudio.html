@@ -1009,6 +1009,15 @@
       <span>Sem tema vinculado, o material fica só no seu acervo — <strong>não aparece para o aluno</strong>.</span>
     </div>
 
+    <p class="svRot">Competência em foco <span class="opc">— onde este material entra no Estúdio do aluno</span></p>
+    <button class="svCampoBtn" id="svBtnComp" onclick="abrirGaveta('compSalvar')">
+      <span id="svLblComp">Sem competência definida</span><span class="seta">▾</span>
+    </button>
+    <div class="svAviso" id="svAvisoComp" style="display:none;">
+      <span>ℹ️</span>
+      <span id="svAvisoCompTxt">Sugerida pela IA. Toque para trocar se não concordar.</span>
+    </div>
+
     <p class="svRot">Turma</p>
     <div class="svCampoFixo"><span id="svLblTurma">—</span><span class="tag">selecionada no estúdio</span></div>
 
@@ -1494,7 +1503,14 @@
     p += '- Use apenas referências reais e verificáveis. Nunca invente citação, número de lei, estatística ou autoria.\n';
     p += '- Escreva em português do Brasil, linguagem direta, pronta para uso em sala de aula.\n';
     p += '- Não use formatação markdown com asteriscos; use texto corrido com títulos em maiúsculas.\n';
-    if (ehPrompt) p += '- Entregue APENAS o prompt pronto para colar no app indicado, sem explicações extras.\n';
+    if (ehPrompt) p += '- Entregue APENAS o prompt pronto para colar no app indicado, sem explica\u00e7\u00f5es extras.\\n';
+    if (!ehPrompt) {
+      p += '- TERMINE a resposta com uma \u00daLTIMA LINHA isolada, exatamente neste formato, sem nada depois dela:\\n';
+      p += '  COMPETENCIA_FOCO: CX\\n';
+      p += '  onde X \u00e9 de 1 a 5, indicando qual compet\u00eancia do ENEM este material trabalha principalmente.\\n';
+      p += '  C1 norma culta; C2 compreens\u00e3o do tema e repert\u00f3rio; C3 argumenta\u00e7\u00e3o e projeto de texto;\\n';
+      p += '  C4 coes\u00e3o e conectivos; C5 proposta de interven\u00e7\u00e3o.\\n';
+    }
     return p;
   }
 
@@ -1536,9 +1552,18 @@
         return;
       }
       con.style.color = 'var(--text2)';
-      con.textContent = dados.texto || 'A IA não retornou conteúdo. Tente reformular.';
-      window._resultado = dados.texto
-        ? { fmtId:fmtId, nm:f.nm, ic:f.ic, ehPrompt:ehPrompt, assunto:assunto, texto:dados.texto }
+      /* A IA marca a competência na última linha. Tiramos a marca antes de
+         exibir e de salvar: ela é contrato de máquina, não conteúdo do aluno. */
+      var bruto = dados.texto || '';
+      var compIA = null;
+      var mc = bruto.match(/COMPETENCIA_FOCO\s*:\s*(C[1-5])\s*$/i);
+      if (mc) {
+        compIA = mc[1].toUpperCase();
+        bruto = bruto.slice(0, mc.index).replace(/\s+$/, '');
+      }
+      con.textContent = bruto || 'A IA não retornou conteúdo. Tente reformular.';
+      window._resultado = bruto
+        ? { fmtId:fmtId, nm:f.nm, ic:f.ic, ehPrompt:ehPrompt, assunto:assunto, texto:bruto, compIA:compIA }
         : null;
 
       // Fontes consultadas na web
@@ -1562,14 +1587,14 @@
     document.body.removeChild(ta);
   };
   // ═══ v5 · Salvar em Materiais (quadro A1a·A2b·A3·A5, padrão A) ═══
-  var _sv = { temaId:null, temaTitulo:null, enviar:true, validar:false };
+  var _sv = { temaId:null, temaTitulo:null, enviar:true, validar:false, comp:null, compDaIA:false };
   var _temasCache = null;
 
   window.salvarResultado = function(){
     var r = window._resultado;
     if (!r || !r.texto) { toast('Gere um material primeiro'); return; }
     if (!_turmaSel) { toast('Escolha uma turma primeiro'); return; }
-    _sv = { temaId:null, temaTitulo:null, enviar:true, validar:false };
+    _sv = { temaId:null, temaTitulo:null, enviar:true, validar:false, comp:null, compDaIA:false };
     var n = document.getElementById('svNome');
     if (n) n.value = r.nm + ' — ' + r.assunto;
     document.getElementById('svBlocoMaterial').style.display = r.ehPrompt ? 'none' : 'block';
@@ -1577,6 +1602,7 @@
     var tl = document.getElementById('svLblTurma');
     if (tl) tl.textContent = '🏫 ' + _turmaSel.nome;
     svResetTema();
+    svAplicarComp(compProposta(r), !!(r && r.compIA));
     svSetSw('svSwEnviar', true);
     svSetSw('svSwValida', false);
     svPreviaSelo();
@@ -1614,6 +1640,30 @@
       tx.textContent = 'material gerado, ainda sem chancela do professor';
     }
   }
+  /* Competência em foco (opção C: a IA propõe, o professor confirma).
+     Ordem: o que a IA declarou no JSON > a competência escolhida no estúdio > nenhuma. */
+  function compProposta(r){
+    if (r && r.compIA && /^C[1-5]$/.test(r.compIA)) return r.compIA;
+    if (_origem === 'competencia' && _comp && _comp.k) return String(_comp.k).toUpperCase();
+    return null;
+  }
+  function svAplicarComp(valor, veioDaIA){
+    _sv.comp = (valor && /^C[1-5]$/.test(valor)) ? valor : null;
+    _sv.compDaIA = !!veioDaIA && !!_sv.comp;
+    var l = document.getElementById('svLblComp');
+    var b = document.getElementById('svBtnComp');
+    var a = document.getElementById('svAvisoComp');
+    var t = document.getElementById('svAvisoCompTxt');
+    var nomes = { C1:'C1 \u00b7 Norma culta', C2:'C2 \u00b7 Tema e repert\u00f3rio', C3:'C3 \u00b7 Argumenta\u00e7\u00e3o', C4:'C4 \u00b7 Coes\u00e3o', C5:'C5 \u00b7 Interven\u00e7\u00e3o' };
+    if (l) l.textContent = _sv.comp ? nomes[_sv.comp] : 'Sem compet\u00eancia definida';
+    if (b) b.classList.toggle('pend', !_sv.comp);
+    if (a) a.style.display = _sv.comp ? 'flex' : 'none';
+    if (t) t.textContent = _sv.compDaIA
+      ? 'Sugerida pela IA. Toque para trocar se n\u00e3o concordar.'
+      : 'Sem compet\u00eancia, o material aparece s\u00f3 em \u201cTudo\u201d no Est\u00fadio do aluno.';
+  }
+  window.svEscolherComp = function(v){ svAplicarComp(v, false); };
+
   function svResetTema(){
     _sv.temaId = null; _sv.temaTitulo = null;
     var b = document.getElementById('svBtnTema'), l = document.getElementById('svLblTema'), a = document.getElementById('svAvisoTema');
@@ -1678,6 +1728,7 @@
       conteudo: r.texto,
       origem: 'professor',
       tema_id: r.ehPrompt ? null : (_sv.temaId || null),
+      competencia: r.ehPrompt ? null : (_sv.comp || null),
       selo: (!r.ehPrompt && _sv.validar) ? 'validado' : 'ia',
       publicado: r.ehPrompt ? false : !!_sv.enviar
     };
@@ -1802,6 +1853,10 @@
         _turmaSel=(turmasDoProfessor||[]).filter(function(t){ return String(t.id)===String(v); })[0]||null;
         renderTurma(); renderSugestao(); renderFontesInternas(); atualizarResumoFontes();
       };
+    } else if(qual==='compSalvar'){
+      titulo='Compet\u00eancia em foco';
+      opcoes=[{v:'',r:'Sem compet\u00eancia definida'}].concat(COMPS.map(function(c){ return {v:c.k.toUpperCase(), r:c.nm}; }));
+      aoEscolher=function(v){ svEscolherComp(v || null); };
     } else if(qual==='competencia'){
       titulo='Escolher competência';
       opcoes=COMPS.map(function(c){ return {v:c.k, r:c.nm}; });
