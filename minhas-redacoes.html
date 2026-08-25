@@ -109,6 +109,11 @@
 .cmpPill{font-size:.68rem;font-weight:800;padding:.15rem .5rem;border-radius:.4rem;white-space:nowrap;}
 .cmpTxt{font-family:Georgia,serif;font-size:1.02rem;line-height:1.75;color:var(--text);}
 .cmpAviso{font-size:.72rem;color:var(--muted);text-align:center;margin-top:1rem;padding-top:.8rem;border-top:1px solid rgba(var(--borderRGB),.15);}
+
+/* Geração sob demanda (Reescrita/Comparar) — v3-7 */
+.spinnerRed{ width:34px; height:34px; border:3px solid rgba(var(--cyanRGB),.22); border-top-color:var(--cyan); border-radius:50%; animation:girarRed .9s linear infinite; }
+@keyframes girarRed{ to{ transform:rotate(360deg); } }
+.btnTentar{ min-height:44px; padding:.6rem 1.2rem; border-radius:.7rem; background:var(--surface2); color:var(--text); border:1px solid rgba(var(--borderRGB),.3); font-family:inherit; font-size:.82rem; font-weight:800; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -206,13 +211,14 @@
 </div>
 
 <script src="supabase-auth.js"></script>
+<script src="prompts-reescrita.js?v=1-0"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
   if (typeof authGuard === 'function') { authGuard('aluno'); }
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-6'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-7'
   });
 
   var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
@@ -283,6 +289,7 @@
     });
     return {
       id:r.id, titulo:titulo,
+      correcaoId:c.id||null, json:j, chamadas:(j.chamadas||{}),
       data:new Date(r.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}),
       texto:r.texto||'', nota:nota, comp:comp,
       status:(nota&&comp)?(validada?'validada':'corrigida'):'corrigindo',
@@ -439,7 +446,122 @@
     return barra+intro+blocos+'<p class="cmpAviso">A reescrita aplica os crit\u00e9rios do INEP. A nota final depende da avalia\u00e7\u00e3o da banca.</p>';
   }
 
+
+  /* ═══ GERAÇÃO SOB DEMANDA · Chamadas 3 e 4 ═══
+     A correção grava chamadas.redacao_nota_1000 e .melhorias_por_competencia
+     como 'pendente' (Cenário B: não gerar o que ninguém vai ler). Quem dispara
+     a geração é ESTA tela, quando o aluno abre a aba. Ao terminar, grava no
+     correcao_json e marca 'completa' — da próxima vez abre instantâneo. */
+  var _gerando = {};
+
+  async function geminiTexto(prompt){
+    var res = await fetch('/api/gemini', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] })
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error((data && data.error && data.error.message) || 'Erro Gemini');
+    var txt = data.candidates && data.candidates[0] && data.candidates[0].content
+      && data.candidates[0].content.parts && data.candidates[0].content.parts[0]
+      && data.candidates[0].content.parts[0].text;
+    if(!txt) throw new Error('Resposta vazia da IA');
+    return txt;
+  }
+  function jsonDaIA(txt){
+    var limpo = String(txt).replace(/```json|```/g,'').trim();
+    var i = limpo.indexOf('{'), f = limpo.lastIndexOf('}');
+    if(i > 0 || f < limpo.length-1) limpo = limpo.substring(i, f+1);
+    return JSON.parse(limpo);
+  }
+  async function salvarNoCorrecaoJson(campos, chamada){
+    if(!atual || !atual.correcaoId) return;
+    var novo = Object.assign({}, atual.json || {}, campos);
+    novo.chamadas = Object.assign({}, atual.chamadas || {});
+    novo.chamadas[chamada] = 'completa';
+    var res = await dbFetch(SUPABASE_URL+'/rest/v1/correcoes?id=eq.'+atual.correcaoId, {
+      method:'PATCH',
+      body: JSON.stringify({ correcao_json: novo })
+    });
+    if(!res.ok) throw new Error('Não consegui salvar o resultado');
+    atual.json = novo; atual.chamadas = novo.chamadas;
+  }
+  function blocoGerando(titulo, sub){
+    return '<div style="text-align:center;padding:2.2rem 1rem;">'
+      +'<div class="spinnerRed" style="margin:0 auto .9rem;"></div>'
+      +'<p style="font-size:.9rem;font-weight:700;color:var(--text);">'+titulo+'</p>'
+      +'<p style="font-size:.78rem;color:var(--muted);line-height:1.5;margin-top:.3rem;">'+sub+'</p></div>';
+  }
+  function blocoErro(msg, fn){
+    return '<div style="text-align:center;padding:2rem 1rem;">'
+      +'<p style="font-size:.85rem;color:var(--muted);line-height:1.55;margin-bottom:.9rem;">'+escapeHtmlSimples(msg)+'</p>'
+      +'<button class="btnTentar" onclick="'+fn+'">Tentar de novo</button></div>';
+  }
+
+  async function gerarReescrita(){
+    if(_gerando.reescrita) return;
+    if(!atual || !atual.texto){ return; }
+    _gerando.reescrita = true;
+    var c = document.getElementById('abaConteudo');
+    c.innerHTML = rotulo('Reescrita') + blocoGerando('Reescrevendo sua redação\u2026','A PROfa está aplicando os critérios do INEP nas cinco competências. Leva cerca de 30 segundos.');
+    try{
+      var prompt = REDAON_PROMPT_REESCRITA
+        + '\n\nTEMA: ' + (atual.titulo || 'não informado')
+        + '\n\nREDAÇÃO DO ALUNO:\n' + atual.texto;
+      var j = jsonDaIA(await geminiTexto(prompt));
+      var partes = [j.redacao_nota_1000_intro, j.redacao_nota_1000_dev1, j.redacao_nota_1000_dev2, j.redacao_nota_1000_conclusao]
+        .filter(function(p){ return p && String(p).trim().length > 20; });
+      if(!partes.length) throw new Error('A IA não devolveu a reescrita completa');
+      await salvarNoCorrecaoJson({
+        redacao_nota_1000_intro: j.redacao_nota_1000_intro,
+        redacao_nota_1000_dev1: j.redacao_nota_1000_dev1,
+        redacao_nota_1000_dev2: j.redacao_nota_1000_dev2,
+        redacao_nota_1000_conclusao: j.redacao_nota_1000_conclusao
+      }, 'redacao_nota_1000');
+      atual.reescrita = partes.join('\n\n');
+      if(abaAtual === 'reescrita') trocarAba('reescrita');
+    }catch(err){
+      console.error('[redacoes] reescrita:', err);
+      if(abaAtual === 'reescrita'){
+        c.innerHTML = rotulo('Reescrita') + blocoErro('Não consegui gerar a reescrita agora. Confira sua internet e tente de novo.', 'gerarReescrita()');
+      }
+    }
+    _gerando.reescrita = false;
+  }
+
+  async function gerarComparacao(){
+    if(_gerando.comparar) return;
+    if(!atual) return;
+    if(!atual.reescrita){ await gerarReescrita(); if(!atual.reescrita) return; }
+    _gerando.comparar = true;
+    var c = document.getElementById('abaConteudo');
+    c.innerHTML = rotulo('Comparar') + blocoGerando('Comparando as duas versões\u2026','A PROfa está explicando o que mudou em cada competência. Leva cerca de 30 segundos.');
+    try{
+      var prompt = REDAON_PROMPT_COMPARACAO
+        + '\n\nTEMA: ' + (atual.titulo || 'não informado')
+        + '\n\nREDAÇÃO ORIGINAL DO ALUNO:\n' + atual.texto
+        + '\n\nREDAÇÃO REESCRITA (nível nota 1000):\n' + atual.reescrita;
+      var j = jsonDaIA(await geminiTexto(prompt));
+      var campos = {}, achou = false, cmp = {};
+      ['c1','c2','c3','c4','c5'].forEach(function(k,i){
+        var m = j['melhoria_'+k];
+        if(m && String(m).trim().length > 5){ campos['melhoria_'+k] = String(m).trim(); cmp[i] = String(m).trim(); achou = true; }
+      });
+      if(!achou) throw new Error('A IA não devolveu a comparação');
+      await salvarNoCorrecaoJson(campos, 'melhorias_por_competencia');
+      atual.comparar = cmp;
+      if(abaAtual === 'comparar') trocarAba('comparar');
+    }catch(err){
+      console.error('[redacoes] comparação:', err);
+      if(abaAtual === 'comparar'){
+        c.innerHTML = rotulo('Comparar') + blocoErro('Não consegui gerar a comparação agora. Confira sua internet e tente de novo.', 'gerarComparacao()');
+      }
+    }
+    _gerando.comparar = false;
+  }
+
   function trocarAba(a){
+    if(!atual) return;      // guarda: aba sem redação aberta
     abaAtual=a;
     document.querySelectorAll('#trilhoAbas .abaBtn').forEach(function(b){ b.classList.toggle('ativa',b.dataset.aba===a); });
     renderModos();
@@ -465,11 +587,17 @@
       }).join('');
       c.innerHTML=html;
     } else if(a==='reescrita'){
+      // Sob demanda: sem reescrita no banco, gera agora (só quando o aluno pede).
+      if(!atual.reescrita && atual.texto && !_gerando.reescrita){ gerarReescrita(); return; }
+      if(!atual.reescrita && _gerando.reescrita){ c.innerHTML=rotulo('Reescrita')+blocoGerando('Reescrevendo sua reda\u00e7\u00e3o\u2026','A PROfa est\u00e1 aplicando os crit\u00e9rios do INEP nas cinco compet\u00eancias.'); return; }
       c.innerHTML=rotulo('Reescrita')
         +(atual.reescrita
           ? '<p style="font-size:.78rem;color:var(--text2);background:rgba(var(--cyanRGB),.08);border:1px solid rgba(var(--cyanRGB),.25);border-radius:.7rem;padding:.6rem .8rem;margin-bottom:.9rem;">\u2728 Esta \u00e9 a sua reda\u00e7\u00e3o <b>reescrita buscando a nota mil</b> \u2014 mantendo as suas ideias, mas aplicando os crit\u00e9rios do INEP em cada uma das cinco compet\u00eancias.</p><p class="folha">'+escapeHtmlSimples(atual.reescrita)+'</p>'
           : '<p style="font-size:.85rem;color:var(--muted);text-align:center;padding:1.5rem 0;">A reescrita ainda n\u00e3o est\u00e1 dispon\u00edvel para esta reda\u00e7\u00e3o.</p>');
     } else {
+      // Sob demanda: comparação depende da reescrita; gera as duas se preciso.
+      var temCmp = Object.keys(atual.comparar||{}).length > 0;
+      if(!temCmp && atual.texto && !_gerando.comparar){ gerarComparacao(); return; }
       c.innerHTML=montarComparar();
     }
   }
