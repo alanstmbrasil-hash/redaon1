@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparação</title>
-<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-8 (lote M-1/M-2/M-4) · sobre aluno-base-v6 -->
+<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-9 (quiz curado + passo a passo) · sobre aluno-base-v6 -->
 <script>
 (function(){
   var pref = 'auto';
@@ -25,7 +25,7 @@
 
 <style>
 
-/* ═══ TELA · Hub de Preparação · v1-8 (produção) ═══ */
+/* ═══ TELA · Hub de Preparação · v1-9 (produção) ═══ */
 #conteudo{ max-width:680px; margin:0 auto; width:100%; padding:0 .9rem 2rem; }
 .rotuloTopo{ font-size:.66rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:.9rem .1rem .25rem; }
 .tituloTema{ font-family:Georgia,serif; font-size:1.22rem; font-weight:700; line-height:1.3; margin:0 .1rem .45rem; }
@@ -130,6 +130,20 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .fcGrid{ display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.4rem; }
 .fc{ min-height:86px; border-radius:10px; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.25); padding:.55rem; font-size:.72rem; display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer; }
 .fc.virado{ background:rgba(var(--cyanRGB),.08); border-color:rgba(var(--cyanRGB),.35); }
+.qBloco{ display:none; }
+.qBloco.on{ display:block; }
+.qzTop{ display:flex; align-items:center; gap:.6rem; margin:.2rem 0 .6rem; }
+.qzPasso{ font-size:.7rem; font-weight:800; color:var(--muted); white-space:nowrap; }
+.qzBarra{ flex:1; height:5px; border-radius:99px; background:var(--surface2); overflow:hidden; }
+.qzBarra i{ display:block; height:100%; background:var(--cyan); width:0; transition:width .22s ease; }
+.qEnun{ font-size:.82rem; font-weight:700; line-height:1.5; margin-bottom:.5rem; }
+.qGab{ display:none; font-size:.74rem; line-height:1.55; color:var(--muted); border-top:1px dashed rgba(var(--borderRGB),.4); margin-top:.5rem; padding-top:.5rem; }
+.qBloco.respondida .qGab{ display:block; }
+.qzProx{ display:none; width:100%; min-height:44px; margin-top:.6rem; border:none; border-radius:11px; background:var(--cyan); color:var(--onCyan); font-family:inherit; font-size:.8rem; font-weight:800; cursor:pointer; }
+.qBloco.respondida .qzProx{ display:block; }
+.qzFim{ text-align:center; padding:1rem .6rem; }
+.qzFim .pl{ font-size:1.35rem; font-weight:900; color:var(--cyan); }
+.qzFim .ds{ font-size:.75rem; color:var(--muted); margin-top:.25rem; line-height:1.5; }
 .qOpc{ display:block; width:100%; text-align:left; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.25); border-radius:10px; padding:.5rem .65rem; margin:.3rem 0; font-family:inherit; font-size:.75rem; color:var(--text2); cursor:pointer; }
 .qOpc.certa{ border-color:rgba(var(--greenRGB),.6); color:var(--green); }
 .qOpc.errada{ border-color:rgba(var(--redRGB),.6); color:var(--red); }
@@ -293,7 +307,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
-/* ═══ RedaON · Hub de Preparação · produção v1-8 (lote M-1/M-2/M-4) ═══ */
+/* ═══ RedaON · Hub de Preparação · produção v1-9 (quiz curado + passo a passo) ═══ */
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
 montarEsqueleto({
@@ -301,7 +315,7 @@ montarEsqueleto({
   titulo: 'Preparação',
   icone:  'auto_stories',
   sino:   true,
-  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-8'
+  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-9'
 });
 
 /* ───────────────────────────────────────────────────────────────
@@ -509,6 +523,21 @@ function htmlTemaBloqueado(){
 
 /* Cache RAG por tema — RPCs buscar/salvar_material_apoio (transplantado).
    Só opera quando TEMA_ID existe (tema oficial da biblioteca). */
+async function _hubQuizCurado(){
+  if(!TEMA_ID) return null;
+  try{
+    var url = SUPABASE_URL + '/rest/v1/materiais?select=conteudo_json' +
+      '&tema_id=eq.' + encodeURIComponent(TEMA_ID) +
+      '&tipo=eq.quiz&origem=eq.redaon&estado=eq.aprovado&publicado=eq.true&limit=1';
+    var res = await dbFetch(url, {});
+    if(!res.ok) return null;
+    var linhas = await res.json();
+    var j = (linhas && linhas[0]) ? linhas[0].conteudo_json : null;
+    if (typeof j === 'string'){ try{ j = JSON.parse(j); }catch(e){ return null; } }
+    return (j && Array.isArray(j.questoes) && j.questoes.length) ? j.questoes : null;
+  }catch(e){ console.warn('[hub quiz curado]', e); return null; }
+}
+
 async function _hubBuscarMaterial(eixo){
   if(!TEMA_ID)return null;
   try{
@@ -856,6 +885,20 @@ async function materializarAcervo(id){
   painel.innerHTML = '<div class="gerando"><span class="giro"></span>A PROfa est\u00e1 preparando\u2026</div>';
   try{
     var chave = CHAVE_ACERVO[id];
+
+    /* Cascata do quiz: material curado da RedaON vem primeiro. Enquanto a
+       curadoria nao cobrir o tema, cai na geracao de sempre. Quando cobrir,
+       o curado ganha e a geracao por aluno deixa de acontecer. */
+    if (id === 'quiz'){
+      var curado = await _hubQuizCurado();
+      if (curado){
+        painel.innerHTML = renderQuiz(curado);
+        acervoPronto[id] = true;
+        gerando['mat-'+id] = false;
+        return;
+      }
+    }
+
     var bruto = await _hubBuscarMaterial(chave);
     if (!bruto){
       var prompt = (id==='resumo') ? PROMPT_RESUMO(TITULO) : (id==='flash') ? PROMPT_FLASH(TITULO) : PROMPT_QUIZ(TITULO);
@@ -889,14 +932,60 @@ function renderFlash(bruto){
     return '<div class="fc" onclick="virarFc(this)" data-v="'+escapeHTML(c.verso)+'">'+escapeHTML(c.frente)+'</div>';
   }).join('') + '</div>';
 }
+/* Uma questao por vez, gabarito travado no primeiro toque.
+   Aceita o formato curado ({enunciado, comentario}) e o gerado ({pergunta, explicacao}). */
+var _qzL = [], _qzI = 0, _qzOk = 0;
+function _qzNormaliza(q){
+  return {
+    enun: q.enunciado || q.pergunta || '',
+    alts: q.alternativas || [],
+    correta: (typeof q.correta === 'number') ? q.correta : -1,
+    gab: q.comentario || q.explicacao || ''
+  };
+}
 function renderQuiz(bruto){
-  var qs = _parseJsonIA(bruto);
-  return qs.map(function(q, qi){
-    return '<p style="font-weight:700;">'+(qi+1)+'. '+escapeHTML(q.pergunta)+'</p>' +
-      q.alternativas.map(function(a, ai){
-        return '<button class="qOpc" onclick="respQuiz(this,'+(ai===q.correta)+')">'+escapeHTML(a)+'</button>';
-      }).join('');
+  var qs = (typeof bruto === 'string') ? _parseJsonIA(bruto) : bruto;
+  if (qs && !Array.isArray(qs) && Array.isArray(qs.questoes)) qs = qs.questoes;
+  if (!Array.isArray(qs) || !qs.length) return '<p class="erroGerar">Quiz indispon\u00edvel agora.</p>';
+  _qzL = qs.map(_qzNormaliza); _qzI = 0; _qzOk = 0;
+  var topo = '<div class="qzTop"><span class="qzPasso" id="qzPasso">1 de '+_qzL.length+'</span>'+
+    '<div class="qzBarra"><i id="qzFill"></i></div></div>';
+  var blocos = _qzL.map(function(q, i){
+    var alts = q.alts.map(function(a, ai){
+      return '<button class="qOpc" onclick="respQuiz(this,'+i+','+ai+')">'+escapeHTML(a)+'</button>';
+    }).join('');
+    return '<div class="qBloco'+(i===0?' on':'')+'" id="qb'+i+'">'+
+      '<p class="qEnun">'+escapeHTML(q.enun)+'</p>'+alts+
+      '<div class="qGab">\uD83D\uDCA1 '+escapeHTML(q.gab)+'</div>'+
+      '<button class="qzProx" onclick="qzProxima()">'+(i===_qzL.length-1?'Ver resultado':'Pr\u00f3xima')+'</button></div>';
   }).join('');
+  return topo + blocos + '<div class="qBloco" id="qbFim"></div>';
+}
+function qzBarra(){
+  var f=document.getElementById('qzFill'), p=document.getElementById('qzPasso');
+  if(!f||!p||!_qzL.length) return;
+  var n=Math.min(_qzI+1,_qzL.length);
+  f.style.width=Math.round((n/_qzL.length)*100)+'%';
+  p.textContent=n+' de '+_qzL.length;
+}
+function qzProxima(){
+  var at=document.getElementById('qb'+_qzI);
+  if(at) at.classList.remove('on');
+  _qzI++;
+  if(_qzI < _qzL.length){
+    var px=document.getElementById('qb'+_qzI);
+    if(px) px.classList.add('on');
+    qzBarra();
+    return;
+  }
+  var fim=document.getElementById('qbFim');
+  if(fim){
+    fim.innerHTML='<div class="qzFim"><div class="pl">'+_qzOk+' de '+_qzL.length+'</div>'+
+      '<div class="ds">'+(_qzOk===_qzL.length?'Gabaritou. Hora de escrever.':'Revise o repert\u00f3rio e volte quando quiser.')+'</div></div>';
+    fim.classList.add('on');
+  }
+  var f=document.getElementById('qzFill'); if(f) f.style.width='100%';
+  var p=document.getElementById('qzPasso'); if(p) p.textContent='fim';
 }
 function virarFc(el){
   var v = el.getAttribute('data-v');
@@ -905,9 +994,14 @@ function virarFc(el){
   el.classList.toggle('virado');
   marcarPassoHub('estudio'); /* interação real */
 }
-function respQuiz(btn, certa){
-  btn.classList.add(certa ? 'certa' : 'errada');
-  toast(certa ? '\u2713 Correto!' : 'Quase \u2014 revise o repert\u00f3rio e tente a pr\u00f3xima');
+function respQuiz(btn, i, ai){
+  var bloco = document.getElementById('qb'+i);
+  if(!bloco || bloco.classList.contains('respondida')) return; /* segundo toque nao muda nada */
+  bloco.classList.add('respondida');
+  var q = _qzL[i], opcs = bloco.querySelectorAll('.qOpc');
+  if(opcs[q.correta]) opcs[q.correta].classList.add('certa');
+  if(ai !== q.correta && opcs[ai]) opcs[ai].classList.add('errada');
+  if(ai === q.correta) _qzOk++;
   marcarPassoHub('estudio'); /* interação real */
 }
 
