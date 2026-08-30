@@ -4,12 +4,14 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Estúdio</title>
-<!-- RedaON · Portal do Aluno · Estúdio · produção v1-1 · 27/08/2026
+<!-- RedaON · Portal do Aluno · Estúdio · produção v1-2 · 27/08/2026
      Biblioteca: materiais da turma + materiais RedaON. O aluno lê e estuda; não gera.
      Trilha lógica: COMPETÊNCIA (trilho) → FORMATO + ORIGEM (gaveta única) → material.
      Tipos visíveis (LISTA DE PERMITIDOS): exerc · quiz · flash · reper · link · guia.
      Bloqueados por serem docência ou meio de produção: plano, sequen, rubrica, notamil, slides, video, podcast.
-     Selo: origem=professor + selo=validado → "✓ Validado" · origem=redaon → "🎓 RedaON".
+     Selo (v1-2): 🎓 RedaON exige origem=redaon E estado=aprovado. Material RedaON não
+     aprovado não chega à tela — filtrado na consulta. Professor: estado é NULL de propósito
+     (fora da esteira), selo=validado continua valendo.
      Renderização dupla: conteudo_json presente → flip/gabarito · ausente → leitor de texto limpo.
      Portas: ?comp=C4 · ?tipo=flash · ?material=<uuid> -->
 <script>
@@ -224,7 +226,7 @@
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
-/* ═══ RedaON · Estúdio do aluno · produção v1-1 ═══ */
+/* ═══ RedaON · Estúdio do aluno · produção v1-2 ═══ */
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
 montarEsqueleto({
@@ -232,7 +234,7 @@ montarEsqueleto({
   titulo: 'Est\u00fadio',
   icone:  'auto_stories',
   sino:   true,
-  versao: 'aluno \u00b7 est\u00fadio \u00b7 v1-1'
+  versao: 'aluno \u00b7 est\u00fadio \u00b7 v1-2'
 });
 
 /* ── Vocabulário ── */
@@ -283,12 +285,20 @@ function focarLista(){
 }
 
 /* ── Leitura do banco ── */
-var SEL_MAT = 'id,nome,tipo,conteudo,conteudo_json,arquivo_url,origem,selo,competencia,tema_id,turma_id,criado_em';
+var SEL_MAT = 'id,nome,tipo,conteudo,conteudo_json,arquivo_url,origem,selo,estado,competencia,tema_id,turma_id,criado_em';
+
+/* Porta do selo (v1-2). "Ou não é nosso, ou é nosso e está aprovado."
+   Não dá para usar estado=eq.aprovado puro: derrubaria o material do professor,
+   que tem estado NULL de propósito — NULL ali significa "fora da esteira",
+   não "reprovado". Os dois sentidos de NULL só não colidem porque origem
+   é checada primeiro. Mexeu num, confere o outro. */
+var F_APROVADO = '&or=(origem.neq.redaon,estado.eq.aprovado)';
+function seloRedaON(m){ return m.origem === 'redaon' && m.estado === 'aprovado'; }
 
 async function buscarMateriais(){
   /* A RLS aluno_le_materiais já resolve o vínculo de turma: publicado AND
      (origem=redaon OR aluno tem matrícula ativa na turma). A tela não filtra turma. */
-  var url = SUPABASE_URL + '/rest/v1/materiais?select=' + SEL_MAT + '&publicado=eq.true&order=criado_em.desc&limit=300';
+  var url = SUPABASE_URL + '/rest/v1/materiais?select=' + SEL_MAT + '&publicado=eq.true' + F_APROVADO + '&order=criado_em.desc&limit=300';
   var res = await dbFetch(url, {});
   if (!res || !res.ok) throw new Error('materiais');
   var linhas = await res.json();
@@ -343,7 +353,7 @@ function etiquetaOrigem(m){
   return m.origem === 'redaon' ? 'Da RedaON' : 'Da sua turma';
 }
 function etiquetaSelo(m){
-  if (m.origem === 'redaon') return '<span class="tg selo">\uD83C\uDF93 RedaON</span>';
+  if (seloRedaON(m)) return '<span class="tg selo">\uD83C\uDF93 RedaON</span>';
   if (m.selo === 'validado') return '<span class="tg selo">\u2713 Validado</span>';
   return '';
 }
