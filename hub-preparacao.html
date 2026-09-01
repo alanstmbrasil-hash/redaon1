@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparação</title>
-<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-10 (selo dependente de aprovação) · sobre aluno-base-v6 -->
+<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-12 (quatro estados · selo RedaON · prévia · v1-12) · sobre aluno-base-v6 -->
 <script>
 (function(){
   var pref = 'auto';
@@ -118,6 +118,19 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .selo{ font-size:.58rem; font-weight:800; padding:.18rem .5rem; border-radius:99px; letter-spacing:.03em; white-space:nowrap; display:inline-block; }
 .selo.validado{ background:rgba(var(--goldRGB),.14); color:var(--gold); }
 .selo.ia{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+
+/* Selo RedaON — faixa verde, chapéu de professor, o nome inteiro em ciano.
+   Aparece só em material com estado 'aprovado' (selado pela Profa. Blanche).
+   A etiqueta "Gerado por IA" marca o que ainda não passou por ela. */
+.faixaSelo{ display:flex; align-items:center; gap:.45rem; margin:.15rem 0 .55rem; padding:.4rem .6rem; border-radius:9px;
+  background:rgba(var(--greenRGB),.12); border:1px solid rgba(var(--greenRGB),.3); font-size:.68rem; font-weight:700; color:var(--green); line-height:1.4; }
+.faixaSelo .cha{ font-style:normal; font-size:.85rem; flex:0 0 auto; }
+.faixaSelo .marca{ color:var(--cyan); font-weight:800; }
+.faixaIA{ display:flex; align-items:center; gap:.45rem; margin:.15rem 0 .55rem; padding:.4rem .6rem; border-radius:9px;
+  background:rgba(var(--borderRGB),.14); border:1px solid rgba(var(--borderRGB),.28); font-size:.66rem; font-weight:700; color:var(--muted); line-height:1.4; }
+.emPreparo{ padding:.6rem 0; font-size:.76rem; color:var(--muted); line-height:1.6; }
+.faixaPrevia{ display:flex; align-items:center; gap:.5rem; margin:.6rem 0 .2rem; padding:.55rem .8rem; border-radius:11px;
+  background:rgba(var(--orangeRGB),.12); border:1px solid rgba(var(--orangeRGB),.35); color:var(--orange); font-size:.74rem; font-weight:800; line-height:1.45; }
 .btnAbrir{ flex:0 0 auto; min-height:36px; padding:0 .9rem; border-radius:10px; background:rgba(var(--cyanRGB),.12); border:1px solid rgba(var(--cyanRGB),.35); color:var(--cyan); font-family:inherit; font-size:.74rem; font-weight:800; cursor:pointer; }
 .painelMat{ display:none; border-top:1px solid rgba(var(--borderRGB),.12); margin-top:.1rem; }
 .matWrap.aberto .painelMat{ display:block; }
@@ -191,6 +204,9 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
 <div id="conteudo">
 
+  <!-- Prévia da equipe pedagógica (?previa=1) -->
+  <div class="faixaPrevia hidden" id="faixaPrevia"><span>👁️</span><span>Prévia · o aluno ainda não vê</span></div>
+
   <!-- CONVITE (A7 degrau 5): sem tema em nenhum degrau da cascata -->
   <div class="card cardCTA hidden" id="conviteTema" style="margin-top:1.1rem;">
     <p class="t">Escolha um tema para se preparar 🎯</p>
@@ -236,7 +252,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
   <!-- 2 · REPERTÓRIO -->
   <div class="card secCaixa"><span class="bar"></span>Repertório</div>
   <button class="btnGerarTudo" id="btnGerarTudo" onclick="gerarTudo()">⚡ Gerar todo o repertório</button>
-  <p class="rotuloCurado">Relevantes para este tema · IA sugere, equipe valida</p>
+  <p class="rotuloCurado">Relevantes para este tema</p>
   <div id="listaRelevantes"></div>
   <button class="btnVerTodos" id="btnVerTodos" onclick="verTodos()">Ver todos os eixos</button>
   <div id="listaOutros" class="hidden"></div>
@@ -307,15 +323,20 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
-/* ═══ RedaON · Hub de Preparação · produção v1-10 (selo dependente de aprovação) ═══ */
-if (typeof authGuard === 'function') { authGuard('aluno'); }
+/* ═══ RedaON · Hub de Preparação · produção v1-12 (quatro estados · selo RedaON · prévia · v1-12) ═══ */
+/* ── Prévia da Profa. Blanche: hub-preparacao.html?tema=<id>&previa=1 ──
+   Abre o tema mesmo inativo e sem exigir perfil de aluno. Quem não passa em
+   eh_pedagogica() cai no fluxo normal do aluno. */
+var PREVIA = false;
+try{ PREVIA = new URLSearchParams(window.location.search).get('previa') === '1'; }catch(e){}
+if (typeof authGuard === 'function') { PREVIA ? authGuard() : authGuard('aluno'); }
 
 montarEsqueleto({
   ativo:  '',
   titulo: 'Preparação',
   icone:  'auto_stories',
   sino:   true,
-  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-10'
+  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-12'
 });
 
 /* ───────────────────────────────────────────────────────────────
@@ -538,8 +559,34 @@ async function _hubQuizCurado(){
   }catch(e){ console.warn('[hub quiz curado]', e); return null; }
 }
 
+/* Os nove eixos de repertório passam por material_apoio_aluno, que devolve os
+   quatro estados. As outras chaves de cache (entender, resumo, flashcards, quiz,
+   eixos_relevantes) continuam no caminho antigo. */
+var EIXOS_CURADOS = ['legislacao','historia','especialistas','atualidades','literatura','filosofia','cinema','ciencia','culturapop'];
+
+/* As duas únicas etiquetas que o aluno vê no repertório. */
+var HTML_SELO = '<div class="faixaSelo"><i class="cha">\uD83C\uDF93</i><span>Material selado pela <span class="marca">RedaON</span></span></div>';
+var HTML_IA   = '<div class="faixaIA"><span>\u26A1</span><span>Gerado por IA</span></div>';
+
+/* → { estado, conteudo, selado } · estado null = não existe linha (o hub gera) */
+async function _hubMaterialAluno(eixo){
+  if(!TEMA_ID) return { estado:null, conteudo:null, selado:false };
+  try{
+    var res=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/material_apoio_aluno',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID,p_eixo:eixo})});
+    if(!res.ok) return { estado:null, conteudo:null, selado:false };
+    var linhas=await res.json();
+    var l=(linhas&&linhas.length)?linhas[0]:null;
+    if(!l) return { estado:null, conteudo:null, selado:false };
+    return { estado:l.estado||null, conteudo:l.conteudo||null, selado:l.selado===true };
+  }catch(e){ console.warn('[hub material aluno]',e); return { estado:null, conteudo:null, selado:false }; }
+}
+
 async function _hubBuscarMaterial(eixo){
   if(!TEMA_ID)return null;
+  if(EIXOS_CURADOS.indexOf(eixo)>=0){
+    var m=await _hubMaterialAluno(eixo);
+    return (typeof m.conteudo==='string'&&m.conteudo.length>30)?m.conteudo:null;
+  }
   try{
     var res=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/buscar_material_apoio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID,p_eixo:eixo})});
     if(!res.ok)return null;
@@ -631,14 +678,16 @@ function renderResumo(raw){
 var CAMPOS_FICHA = {
   cabeca:   ['fonte','artigo','lei','marco','data','periodo','nome','pensador','corrente','titulo','obra','filme','referencia','pesquisa','cientista','especialista'],
   destaque: ['dado_numerico','dado','texto','descricao','sinopse','conceito','conceito_chave','conclusao','conclusao_principal','ideia','fato','contexto','resumo'],
-  uso:      ['argumento','aplicacao','como_usar','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem']
+  uso:      ['argumento','aplicacao','como_usar','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem'],
+  /* campos internos da curadoria (a Blanche lê no ADM) — nunca vazam para a linha de extras */
+  internos: ['diz','url','fonte_conferida','conferido_por','conferido_em']
 };
 function _campo(obj, lista){
   for (var i=0;i<lista.length;i++){ var v = obj[lista[i]]; if (typeof v==='string' && v.trim()) return v.trim(); }
   return '';
 }
 function _extras(obj){
-  var usados = CAMPOS_FICHA.cabeca.concat(CAMPOS_FICHA.destaque, CAMPOS_FICHA.uso);
+  var usados = CAMPOS_FICHA.cabeca.concat(CAMPOS_FICHA.destaque, CAMPOS_FICHA.uso, CAMPOS_FICHA.internos);
   var partes = [];
   Object.keys(obj).forEach(function(k){
     if (usados.indexOf(k)>=0) return;
@@ -718,7 +767,12 @@ var RELEVANTES = FALLBACK_RELEVANTES.slice();
 var gerado = {};   /* conteúdo já na tela, por eixo/material */
 
 async function carregarEixosRelevantes(){
-  /* M2 (futuro): curadoria da equipe no banco VENCE a IA quando existir */
+  /* M2: a curadoria da equipe VENCE a IA. Se a Profa. Blanche marcou os eixos
+     do tema, são esses — sem chamada ao modelo. */
+  var marcados = Array.isArray(TEMA && TEMA.eixos_relevantes)
+    ? TEMA.eixos_relevantes.filter(function(id){ return EIXOS_META.some(function(e){ return e.id===id; }); })
+    : [];
+  if (marcados.length >= 2){ RELEVANTES = marcados.slice(0,4); return; }
   try{
     var bruto = await _hubBuscarMaterial('eixos_relevantes');
     if(!bruto){
@@ -772,13 +826,26 @@ async function gerarEixo(id, aoTerminar){
   gerando[id] = true;
   box.innerHTML = '<div class="gerando"><span class="giro"></span>A PROfa est\u00e1 preparando\u2026</div>';
   try{
-    var texto = await _hubBuscarMaterial(id);
+    var texto = null, faixa = '';
+    if (EIXOS_CURADOS.indexOf(id) >= 0){
+      var m = await _hubMaterialAluno(id);
+      /* Em revisão ou em ajustes: a Profa. Blanche ainda está lendo. Não mostra e não gera. */
+      if (m.estado === 'revisao' || m.estado === 'ajustes'){
+        box.innerHTML = '<p class="emPreparo">A Profa. Blanche est\u00e1 lendo este eixo. Ele aparece aqui assim que ela selar.</p>';
+        gerando[id] = false; if (aoTerminar) aoTerminar(); return;
+      }
+      texto = (typeof m.conteudo === 'string' && m.conteudo.length > 30) ? m.conteudo : null;
+      if (texto) faixa = m.selado ? HTML_SELO : HTML_IA;
+    } else {
+      texto = await _hubBuscarMaterial(id);
+    }
     if (!texto){
       var prompt = (id === 'entender') ? PROMPT_ENTENDER(TITULO) : (PR[id](TITULO) + '\n\nUse markdown leve. Portugu\u00eas.');
       texto = await geminiGenerate(prompt);
       if (TEMA_ID && texto) _hubSalvarMaterial(id, texto);
+      if (EIXOS_CURADOS.indexOf(id) >= 0) faixa = HTML_IA;
     }
-    box.innerHTML = (id === 'entender' ? renderEntender(texto) : renderEixoConteudo(texto)) + htmlConcluir(passo);
+    box.innerHTML = faixa + (id === 'entender' ? renderEntender(texto) : renderEixoConteudo(texto)) + htmlConcluir(passo);
     gerado[id] = true;
     var s = document.getElementById('estado-'+id);
     if (s) s.classList.add('ok');
@@ -1028,10 +1095,11 @@ function trocarTemaHub(){
    (1) indicação da professora quando existir [futuro — sem fonte no banco ainda]
    (2) ?tema=<id> na URL  (3) sessionStorage  (4) Tema da Semana  (5) convite
    ─────────────────────────────────────────────────────────────── */
-var SEL_TEMA = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de';
+var SEL_TEMA = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de,eixos_relevantes';
 async function temaPorId(id){
   try{
-    var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=' + SEL_TEMA + '&id=eq.' + encodeURIComponent(id) + '&ativo=eq.true&limit=1', {});
+    var filtroAtivo = PREVIA ? '' : '&ativo=eq.true';
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=' + SEL_TEMA + '&id=eq.' + encodeURIComponent(id) + filtroAtivo + '&limit=1', {});
     if(!res.ok) return null;
     var rows = await res.json();
     return (rows && rows.length) ? rows[0] : null;
@@ -1091,7 +1159,18 @@ function modoConvite(){
 /* ───────────────────────────────────────────────────────────────
    INÍCIO
    ─────────────────────────────────────────────────────────────── */
+async function ehPedagogica(){
+  try{
+    var res = await dbFetch(SUPABASE_URL+'/rest/v1/rpc/eh_pedagogica', {method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    if(!res.ok) return false;
+    return (await res.json()) === true;
+  }catch(e){ return false; }
+}
 async function iniciarHub(){
+  if (PREVIA){
+    if (await ehPedagogica()) document.getElementById('faixaPrevia').classList.remove('hidden');
+    else PREVIA = false;
+  }
   TEMA = await resolverTema();
   if (!TEMA){ modoConvite(); return; }
   TEMA_ID = TEMA.id || null;

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-tema="escuro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RedaON · ADM · Pedagógica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* RedaON · ADM · casa da área Pedagógica · produção v1-0
+   (do mockup adm-curadoria v1-2, telas t-b-casa / t-b-selar-lista / t-b-selar,
+    mais a tela Agendar do adm-decidir-temas v2-0)
+   Ler as pontes, selar eixo a eixo, agendar a semana. Sem blur. */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+:root{
+  --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --top:#191c22;
+  --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0; --borderRGB:71,69,84;
+  --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020;
+  --purple:#6c5ce7; --purpleRGB:108,92,231; --purpleSoft:#c6bfff;
+  --green:#4ade80; --greenRGB:74,222,128; --red:#ff8b8b; --redRGB:255,139,139;
+  --orange:#ff9d68; --orangeRGB:255,157,104; --ambar:#e8b23c;
+}
+html[data-tema="claro"]{
+  --bg:#fdfbf4; --sunken:#f2ede0; --surface:#ffffff; --surface2:#f6f2e6; --top:#fbf8ee;
+  --text:#0a4a4b; --text2:#3a5556; --muted:#8a8576; --borderRGB:10,74,75;
+  --cyan:#0a8c8d; --cyanRGB:10,140,141; --onCyan:#ffffff;
+  --purple:#5a4fc4; --purpleRGB:90,79,196; --purpleSoft:#5a4fc4;
+  --green:#0f8a4d; --greenRGB:15,138,77; --red:#c0473b; --redRGB:192,71,59;
+  --orange:#b45f24; --orangeRGB:180,95,36; --ambar:#96700a;
+}
+body{ font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
+.hd{ position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.4);
+  padding:calc(.7rem + env(safe-area-inset-top)) 1rem .7rem; display:flex; align-items:center; gap:.6rem; }
+.hd .voltar{ flex:none; width:34px; height:34px; border-radius:10px; border:none; background:var(--surface2); color:var(--text); font-size:1rem; cursor:pointer; }
+.hd .voltar[hidden]{ display:none; }
+.hd .tit{ flex:1; min-width:0; }
+.hd .tit .q{ font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+.hd .tit .n{ font-size:.95rem; font-weight:800; line-height:1.3; }
+.hd .lua{ flex:none; width:34px; height:34px; border-radius:10px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; }
+.wrap{ max-width:640px; margin:0 auto; padding:1rem 1rem 6rem; }
+.tela{ display:none; } .tela.on{ display:block; }
+h2.t{ font-size:1.15rem; font-weight:800; line-height:1.3; }
+p.s{ font-size:.82rem; color:var(--text2); line-height:1.6; margin-top:.4rem; }
+.sec{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.4rem 0 .6rem; }
+.ok{ color:var(--green); font-weight:800; } .no{ color:var(--red); font-weight:800; } .nc{ color:var(--ambar); font-weight:800; }
+
+.tarefa{ width:100%; text-align:left; font:inherit; color:var(--text); cursor:pointer; background:var(--surface); border:1px solid rgba(var(--borderRGB),.5);
+  border-radius:16px; padding:.85rem; display:flex; align-items:center; gap:.75rem; margin-bottom:.6rem; }
+.tarefa:active{ background:var(--surface2); }
+.tarefa .num{ flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center; font-size:1.1rem; font-weight:800; background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+.tarefa.zero .num{ background:rgba(var(--borderRGB),.35); color:var(--muted); }
+.tarefa .cp{ flex:1; min-width:0; } .tarefa .cp .a{ font-size:.9rem; font-weight:700; }
+.tarefa .cp .b{ font-size:.75rem; color:var(--muted); margin-top:.15rem; line-height:1.45; }
+.tarefa .seta{ flex:none; color:var(--muted); font-size:1.1rem; }
+.tarefa:disabled{ opacity:.45; cursor:default; }
+
+.btn{ width:100%; font:inherit; font-size:.88rem; font-weight:800; padding:.85rem 1rem; border-radius:14px; border:none; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
+.btn:disabled{ opacity:.4; cursor:not-allowed; }
+.btn.g{ background:transparent; color:var(--text); border:1px solid rgba(var(--borderRGB),.6); }
+.btn.ok{ background:var(--green); color:var(--onCyan); }
+.pe{ position:sticky; bottom:0; background:var(--top); border-top:1px solid rgba(var(--borderRGB),.4);
+  margin:1.2rem -1rem 0; padding:.75rem 1rem calc(.75rem + env(safe-area-inset-bottom)); }
+.acoes{ display:grid; gap:.6rem; margin-top:1.3rem; }
+
+.card{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.5); border-radius:16px; padding:.9rem; margin-bottom:.7rem; }
+.card.ok{ border-color:rgba(var(--greenRGB),.45); }
+.card .ct{ font-size:.92rem; font-weight:700; line-height:1.45; }
+.card .cm{ font-size:.73rem; color:var(--muted); margin-top:.3rem; }
+.acs{ display:flex; gap:.5rem; margin-top:.8rem; }
+.acs .btn{ font-size:.8rem; padding:.65rem .5rem; }
+
+.pin{ display:inline-block; font-size:.63rem; font-weight:800; padding:.2rem .5rem; border-radius:99px; white-space:nowrap; }
+.pin.ok{ background:rgba(var(--greenRGB),.16); color:var(--green); }
+.pin.esp{ background:rgba(var(--orangeRGB),.16); color:var(--orange); }
+.pin.neutro{ background:rgba(var(--borderRGB),.4); color:var(--muted); }
+
+/* ponte · quatro camadas: fonte · o que é · o que diz · como usar */
+.ponte{ padding:.7rem 0; border-top:1px solid rgba(var(--borderRGB),.35); }
+.ponte:first-of-type{ border-top:none; padding-top:.2rem; }
+.ponte .pf{ font-size:.78rem; font-weight:800; color:var(--text2); }
+.ponte .pf a{ color:var(--cyan); text-decoration:none; word-break:break-all; font-weight:700; }
+.ponte .pd{ font-size:.85rem; color:var(--text); line-height:1.55; margin-top:.2rem; font-weight:600; }
+.ponte .pz{ font-size:.85rem; color:var(--text2); line-height:1.65; margin-top:.4rem; padding:.5rem .6rem; border-radius:10px; background:var(--surface2); }
+.pzr{ font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); display:block; margin-bottom:.2rem; }
+.ponte .pu{ font-size:.85rem; color:var(--text); line-height:1.65; margin-top:.4rem; padding-left:.7rem; border-left:2px solid var(--purple); }
+.pur{ font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--purpleSoft); display:block; margin-bottom:.15rem; }
+.cru{ font-size:.82rem; line-height:1.6; color:var(--text2); white-space:pre-wrap; margin-top:.4rem; }
+
+.aviso{ display:flex; gap:.6rem; background:rgba(var(--orangeRGB),.1); border:1px solid rgba(var(--orangeRGB),.3); border-radius:14px;
+  padding:.7rem .8rem; margin-top:.9rem; font-size:.8rem; line-height:1.55; color:var(--text2); }
+.aviso .tp{ font-weight:800; color:var(--orange); }
+
+.selo{ display:inline-block; font-size:.63rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:.16rem .4rem; border-radius:6px; margin-bottom:.35rem; background:rgba(var(--greenRGB),.14); color:var(--green); }
+.enun{ font-size:1.1rem; font-weight:800; line-height:1.4; margin-top:.5rem; }
+.linhas{ margin-top:1.1rem; display:grid; gap:.75rem; }
+.linha{ display:grid; grid-template-columns:88px 1fr; gap:.7rem; align-items:start; }
+.linha .k{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding-top:.15rem; }
+.linha .v{ font-size:.84rem; color:var(--text2); line-height:1.6; }
+.sem{ margin-top:.9rem; display:grid; gap:.45rem; }
+.semana{ width:100%; text-align:left; font:inherit; color:var(--text); background:var(--surface); border:1px solid rgba(var(--borderRGB),.5); border-radius:14px;
+  padding:.8rem .9rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:.6rem; }
+.semana .d{ font-size:.86rem; font-weight:700; } .semana .o{ font-size:.72rem; color:var(--muted); }
+.semana.sel{ border-color:rgba(var(--cyanRGB),.65); }
+.semana .ck{ color:var(--cyan); font-weight:800; opacity:0; } .semana.sel .ck{ opacity:1; }
+.rodape{ font-size:.72rem; color:var(--muted); line-height:1.6; margin-top:1.4rem; padding-top:.9rem; border-top:1px solid rgba(var(--borderRGB),.4); }
+
+.vazio{ text-align:center; padding:2.5rem 1rem; color:var(--muted); }
+.vazio .em{ font-size:2rem; }
+.vazio .tx{ font-size:.85rem; line-height:1.6; margin-top:.6rem; }
+.carregando{ font-size:.82rem; color:var(--muted); padding:2rem 0; text-align:center; }
+#toast{ position:fixed; left:50%; bottom:calc(1.4rem + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(160%); z-index:90;
+  background:var(--surface2); border:1px solid rgba(var(--borderRGB),.6); color:var(--text); font-size:.82rem; font-weight:600; padding:.7rem 1.1rem;
+  border-radius:99px; transition:transform .22s ease; max-width:88vw; text-align:center; }
+#toast.on{ transform:translateX(-50%) translateY(0); }
+
+@media (min-width:820px){
+  .wrap{ max-width:760px; } body{ font-size:1.06rem; }
+  h2.t{ font-size:1.45rem; } p.s{ font-size:.95rem; }
+  .card .ct{ font-size:1.02rem; } .card .cm{ font-size:.82rem; }
+  .ponte .pf{ font-size:.85rem; } .ponte .pd, .ponte .pz, .ponte .pu{ font-size:.96rem; line-height:1.7; }
+  .tarefa .cp .a{ font-size:1rem; } .tarefa .cp .b{ font-size:.85rem; }
+  .btn{ font-size:.95rem; } .sec{ font-size:.75rem; } .linha{ grid-template-columns:110px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <button class="voltar" id="btVoltar" onclick="voltar()" aria-label="Voltar">&#8592;</button>
+  <div class="tit"><div class="q">ADM &middot; Pedagógica</div><div class="n" id="hdN">Curadoria</div></div>
+  <button class="lua" onclick="trocarTema()" aria-label="Tema claro ou escuro">&#9789;</button>
+</div>
+
+<div class="wrap">
+
+  <!-- ════════ CASA ════════ -->
+  <div class="tela on" id="t-casa">
+    <h2 class="t" id="saudacao">O que espera por você</h2>
+    <p class="s">Cada linha abre uma tela só para aquilo. Nada se mistura.</p>
+    <div id="avisoRepetida"></div>
+    <div style="margin-top:1.2rem" id="tarefas"><div class="carregando">Carregando&hellip;</div></div>
+  </div>
+
+  <!-- ════════ SELAR · LISTA ════════ -->
+  <div class="tela" id="t-selar-lista">
+    <h2 class="t">Pronto para selar</h2>
+    <p class="s">As fontes já foram conferidas na Fábrica. Falta você ler as pontes para a redação.</p>
+    <div id="listaParaSelar" style="margin-top:1.2rem"></div>
+  </div>
+
+  <!-- ════════ SELAR · UM TEMA ════════ -->
+  <div class="tela" id="t-selar">
+    <h2 class="t" id="selarTema">—</h2>
+    <p class="s">Você lê o que o aluno faz com cada repertório. Um eixo por vez — o que você não selar, o aluno não vê.</p>
+    <div id="listaEixosSelar" style="margin-top:1.2rem"></div>
+    <div id="depoisDeSelar"></div>
+  </div>
+
+  <!-- ════════ SEMANAS ════════ -->
+  <div class="tela" id="t-semanas">
+    <h2 class="t">Programação das semanas</h2>
+    <p class="s">Escolha o tema que vai ao ar em cada segunda-feira. O aluno só vê a semana que já começou.</p>
+    <div class="sec">Já programado</div>
+    <div id="listaAgenda"></div>
+    <div class="sec">Temas com material selado</div>
+    <div id="listaParaAgendar"></div>
+  </div>
+
+  <!-- ════════ AGENDAR ════════ -->
+  <div class="tela" id="t-agendar"><div id="agCorpo"></div></div>
+
+</div>
+
+<div id="toast"></div>
+
+<script src="supabase-auth.js"></script>
+<script>
+/* ═══ tema visual ═══ */
+(function(){ try{ var t=localStorage.getItem('redaon_tema_adm'); if(t) document.documentElement.setAttribute('data-tema',t); }catch(e){} })();
+function trocarTema(){ var h=document.documentElement, n=h.getAttribute('data-tema')==='claro'?'escuro':'claro'; h.setAttribute('data-tema',n); try{ localStorage.setItem('redaon_tema_adm',n); }catch(e){} }
+
+if (typeof authGuard === 'function') authGuard();
+
+/* ═══ constantes ═══ */
+var EIXOS = [['legislacao','Legislação'],['historia','História'],['especialistas','Especialistas'],['atualidades','Atualidades'],['literatura','Literatura'],['filosofia','Filosofia'],['cinema','Cinema'],['ciencia','Ciência'],['culturapop','Cultura pop']];
+var DENTRO = ['revisao','ajustes','aprovado'];
+var TEMAS=[], MAT={}, AGENDA=[], pilha=[], telaAtual='t-casa', temaFoco=null, agTema=null, agSemana=null;
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function porId(id){ for(var i=0;i<TEMAS.length;i++) if(TEMAS[i].id===id) return TEMAS[i]; return null; }
+function rot(id){ for(var i=0;i<EIXOS.length;i++) if(EIXOS[i][0]===id) return EIXOS[i][1]; return id; }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._x); t._x=setTimeout(function(){ t.classList.remove('on'); },2800); }
+
+var NOMES_TELA={ 't-casa':'Curadoria', 't-selar-lista':'Pronto para selar', 't-selar':'Ler e selar', 't-semanas':'Semanas', 't-agendar':'Agendar' };
+function ir(t){ if(telaAtual) pilha.push(telaAtual); mostrar(t); }
+function voltar(){ if(!pilha.length){ mostrar('t-casa'); return; } mostrar(pilha.pop()); }
+function mostrar(t){
+  if(t==='t-selar-lista') montarParaSelar();
+  if(t==='t-semanas') montarSemanas();
+  var i,ts=document.querySelectorAll('.tela'); for(i=0;i<ts.length;i++) ts[i].classList.remove('on');
+  document.getElementById(t).classList.add('on'); telaAtual=t;
+  document.getElementById('btVoltar').hidden=(t==='t-casa');
+  document.getElementById('hdN').textContent=NOMES_TELA[t]||'Curadoria';
+  window.scrollTo(0,0);
+}
+
+/* ═══ datas ═══ */
+function segundaDe(d){ var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); var dow=(x.getDay()+6)%7; x.setDate(x.getDate()-dow); return x; }
+function isoDia(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+function fmtDia(s){ var p=String(s).slice(0,10).split('-'); return p[2]+'/'+p[1]; }
+function proximasSegundas(n){
+  var base=segundaDe(new Date()); base.setDate(base.getDate()+7);
+  var out=[]; for(var i=0;i<n;i++){ var x=new Date(base); x.setDate(base.getDate()+7*i); out.push(x); } return out;
+}
+
+/* ═══ leitura do banco ═══ */
+function eixosDoTema(id, estados){
+  var m=MAT[id]||{}, out=[];
+  for(var i=0;i<EIXOS.length;i++){ var e=m[EIXOS[i][0]]; if(e && estados.indexOf(e.estado)>=0) out.push(e); }
+  return out;
+}
+function escolhidos(t){ var e = Array.isArray(t.eixos_relevantes) ? t.eixos_relevantes.filter(function(x){ return rot(x)!==x; }) : []; return e.length ? e : EIXOS.map(function(x){ return x[0]; }); }
+
+async function carregar(){
+  try{
+    var r1 = await dbFetch(SUPABASE_URL+'/rest/v1/temas?select=id,titulo,categoria,campo,natureza,eixos_relevantes,ativo,created_at&order=created_at.desc&limit=300', {});
+    TEMAS = r1.ok ? await r1.json() : [];
+    var r2 = await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio?select=id,tema_id,eixo,estado,conteudo,fontes,versao', {});
+    var linhas = r2.ok ? await r2.json() : [];
+    MAT={}; for(var i=0;i<linhas.length;i++){ var l=linhas[i]; if(!MAT[l.tema_id]) MAT[l.tema_id]={}; MAT[l.tema_id][l.eixo]=l; }
+    var r3 = await dbFetch(SUPABASE_URL+'/rest/v1/agenda_temas?select=id,tema_id,semana_de,automatico&escopo=eq.redaon&order=semana_de.desc&limit=30', {});
+    AGENDA = r3.ok ? await r3.json() : [];
+  }catch(e){ console.warn('[blanche carregar]', e); }
+  montarCasa();
+}
+
+/* ═══ casa ═══ */
+function montarCasa(){
+  document.getElementById('saudacao').textContent = 'O que espera por você, '+(String(authGetNome()||'').trim().split(/\s+/)[0]||'Profa.');
+
+  var nEixos=0, nTemas=0, i;
+  for(i=0;i<TEMAS.length;i++){ var q=eixosDoTema(TEMAS[i].id,['revisao','ajustes']).length; if(q){ nEixos+=q; nTemas++; } }
+
+  var segs=proximasSegundas(8), vaga=null;
+  for(i=0;i<segs.length;i++){ var d=isoDia(segs[i]); if(!AGENDA.some(function(a){ return String(a.semana_de).slice(0,10)===d; })){ vaga=segs[i]; break; } }
+
+  var h='';
+  h+='<button class="tarefa'+(nEixos?'':' zero')+'" onclick="ir(\'t-selar-lista\')">'
+    +'<span class="num">'+nEixos+'</span><span class="cp"><span class="a">Ler as pontes e selar</span>'
+    +'<span class="b">'+(nEixos ? nEixos+(nEixos===1?' eixo esperando':' eixos esperando')+' em '+nTemas+(nTemas===1?' tema':' temas') : 'Nada esperando. Quando a Fábrica entregar, aparece aqui.')+'</span></span>'
+    +'<span class="seta">&#8250;</span></button>';
+  h+='<button class="tarefa" onclick="ir(\'t-semanas\')">'
+    +'<span class="num">&#128197;</span><span class="cp"><span class="a">Programação das semanas</span>'
+    +'<span class="b">'+(vaga ? 'Próxima data sem tema: segunda, '+fmtDia(isoDia(vaga)) : 'As próximas oito semanas já têm tema.')+'</span></span>'
+    +'<span class="seta">&#8250;</span></button>';
+  h+='<button class="tarefa zero" disabled><span class="num">&#9998;</span><span class="cp"><span class="a">Decidir temas</span>'
+    +'<span class="b">Entra na próxima onda. Por enquanto os temas chegam pela lista de trabalho.</span></span><span class="seta">&#8250;</span></button>';
+  h+='<button class="tarefa zero" disabled><span class="num">&#9783;</span><span class="cp"><span class="a">Escolher os eixos</span>'
+    +'<span class="b">Entra na próxima onda. Por enquanto os eixos chegam pela lista de trabalho.</span></span><span class="seta">&#8250;</span></button>';
+  document.getElementById('tarefas').innerHTML=h;
+
+  /* aviso de semana repetida pela rotina */
+  var av='', hoje=isoDia(segundaDe(new Date()));
+  var atualA=null, anteriorA=null;
+  for(i=0;i<AGENDA.length;i++){ var dd=String(AGENDA[i].semana_de).slice(0,10); if(dd===hoje) atualA=AGENDA[i]; else if(dd<hoje && (!anteriorA || dd>String(anteriorA.semana_de).slice(0,10))) anteriorA=AGENDA[i]; }
+  if(atualA && atualA.automatico===true && anteriorA && anteriorA.tema_id===atualA.tema_id){
+    var t=porId(atualA.tema_id);
+    av='<div class="aviso"><span>&#9888;&#65039;</span><span><span class="tp">A semana repetiu.</span> A rotina de segunda não encontrou tema novo com eixo selado e manteve '+esc(t?t.titulo:'o tema anterior')+'. Sele um eixo e agende a próxima data.</span></div>';
+  }
+  document.getElementById('avisoRepetida').innerHTML=av;
+}
+
+/* ═══ selar · lista ═══ */
+function montarParaSelar(){
+  var h='', i;
+  for(i=0;i<TEMAS.length;i++){
+    var t=TEMAS[i], ms=eixosDoTema(t.id,['revisao','ajustes']); if(!ms.length) continue;
+    var pontes=0; for(var j=0;j<ms.length;j++) pontes += fichasDe(ms[j]).length;
+    h+='<button class="tarefa" onclick="abrirSelar(\''+t.id+'\')"><span class="num">&#127891;</span><span class="cp">'
+      +'<span class="a">'+esc(t.titulo)+'</span>'
+      +'<span class="b">'+ms.length+(ms.length===1?' eixo a ler':' eixos a ler')+' · '+pontes+(pontes===1?' ponte':' pontes')+'</span></span><span class="seta">&#8250;</span></button>';
+  }
+  document.getElementById('listaParaSelar').innerHTML = h || '<div class="vazio"><div class="em">&#128269;</div><div class="tx">Nada esperando você.<br>Quando a Fábrica entregar um eixo, ele aparece aqui.</div></div>';
+}
+
+/* ═══ selar · um tema ═══ */
+function fichasDe(m){
+  var bruto = String(m.conteudo||'').replace(/```json|```/g,'').trim();
+  if(bruto.charAt(0)!=='[' && bruto.charAt(0)!=='{') return [];
+  try{
+    var j=JSON.parse(bruto);
+    if(Array.isArray(j)) return j;
+    if(j && Array.isArray(j.itens)) return j.itens;
+    for(var k in j){ if(Array.isArray(j[k])) return j[k]; }
+  }catch(e){}
+  return [];
+}
+function abrirSelar(id){
+  temaFoco=id; var t=porId(id);
+  document.getElementById('selarTema').textContent = t ? t.titulo : '—';
+  renderEixosSelar(); ir('t-selar');
+}
+function renderEixosSelar(){
+  var ms = eixosDoTema(temaFoco, DENTRO), h='', falta=0, i;
+  for(i=0;i<ms.length;i++){
+    var m=ms[i], selado = m.estado==='aprovado';
+    if(!selado) falta++;
+    var fichas=fichasDe(m), pontes='';
+    if(fichas.length){
+      for(var j=0;j<fichas.length;j++){
+        var f=fichas[j]||{};
+        var fonte = f.fonte || f.cab || '';
+        var url = f.url || '';
+        pontes += '<div class="ponte">'
+          + (fonte ? '<div class="pf">'+esc(fonte)+(url?' · <a href="'+esc(url)+'" target="_blank" rel="noopener">abrir a fonte</a>':'')+'</div>' : '')
+          + (f.dado ? '<div class="pd">'+esc(f.dado)+'</div>' : '')
+          + (f.diz ? '<div class="pz"><span class="pzr">O que diz</span>'+esc(f.diz)+'</div>' : '')
+          + (f.como_usar ? '<div class="pu"><span class="pur">&#9999;&#65039; Como usar na redação</span>'+esc(f.como_usar)+'</div>' : '')
+          + '</div>';
+      }
+    } else {
+      pontes = '<div class="cru">'+esc(String(m.conteudo||'').slice(0,1200))+'</div>';
+    }
+    h += '<div class="card'+(selado?' ok':'')+'">'
+      + '<div style="display:flex;align-items:center;gap:.5rem">'
+        + '<span class="ct" style="flex:1">'+esc(rot(m.eixo))+'</span>'
+        + '<span class="pin '+(selado?'ok':'neutro')+'">'+(selado ? '\u2713 selado' : (fichas.length||1)+((fichas.length||1)===1?' ponte':' pontes'))+'</span></div>'
+      + '<div style="margin-top:.5rem">'+pontes+'</div>'
+      + (selado ? '' : '<div class="acs"><button class="btn" onclick="selarEixo(\''+m.id+'\',\''+m.eixo+'\')">Selar este eixo</button></div>')
+      + '</div>';
+  }
+  document.getElementById('listaEixosSelar').innerHTML = h || '<div class="vazio"><div class="em">&#128076;</div><div class="tx">Não há eixo para ler neste tema.</div></div>';
+
+  var selados = eixosDoTema(temaFoco,['aprovado']).length;
+  var fim='';
+  if(falta===0 && selados>0){
+    fim = '<div class="aviso"><span>&#127891;</span><span><span class="tp">Tudo lido.</span> '+selados+(selados===1?' eixo selado':' eixos selados')+' neste tema. Falta dizer em que semana ele vai ao ar.</span></div>'
+        + '<div class="acoes"><button class="btn ok" onclick="abrirAgendar(\''+temaFoco+'\')">Agendar este tema</button></div>';
+  }
+  document.getElementById('depoisDeSelar').innerHTML=fim;
+}
+async function selarEixo(matId, eixo){
+  var uid=authGetUserId(), agora=new Date().toISOString();
+  try{
+    var res = await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio?id=eq.'+encodeURIComponent(matId), {
+      method:'PATCH', body: JSON.stringify({ estado:'aprovado', aprovado_por:uid, aprovado_em:agora })
+    });
+    if(!res.ok){ var txt=await res.text(); throw new Error(txt||('HTTP '+res.status)); }
+    if(MAT[temaFoco] && MAT[temaFoco][eixo]) MAT[temaFoco][eixo].estado='aprovado';
+    toast(rot(eixo)+' selado. O aluno já pode ver.');
+    renderEixosSelar(); montarCasa();
+  }catch(e){ console.warn('[selar]', e); toast('Não consegui selar agora. Tente de novo.'); }
+}
+
+/* ═══ semanas ═══ */
+function montarSemanas(){
+  var h='', i;
+  var segs=proximasSegundas(6), hoje=isoDia(segundaDe(new Date()));
+  var lista=[{d:hoje, rot:'esta semana'}];
+  for(i=0;i<segs.length;i++) lista.push({ d:isoDia(segs[i]), rot:(i===0?'próxima semana':(i+1)+' semanas') });
+  for(i=0;i<lista.length;i++){
+    var a=null;
+    for(var j=0;j<AGENDA.length;j++) if(String(AGENDA[j].semana_de).slice(0,10)===lista[i].d) a=AGENDA[j];
+    var t=a?porId(a.tema_id):null;
+    var selados = t ? eixosDoTema(t.id,['aprovado']).length : 0;
+    h+='<div class="card"><div style="display:flex;align-items:center;gap:.5rem">'
+      +'<span class="cm" style="flex:1;margin:0">Segunda, '+fmtDia(lista[i].d)+' · '+lista[i].rot+'</span>'
+      +'<span class="pin '+(selados>0?'ok':(t?'esp':'neutro'))+'">'+(selados>0?'\uD83C\uDF93 '+selados+' selados':(t?'sem material selado':'sem tema'))+'</span></div>'
+      +(t?'<div class="ct" style="margin-top:.4rem">'+esc(t.titulo)+'</div>':'<div class="cm" style="margin-top:.4rem">Nenhum tema programado</div>')
+      +(a&&a.automatico===true?'<div class="cm">Escolhido pela rotina de segunda</div>':'')
+      +'</div>';
+  }
+  document.getElementById('listaAgenda').innerHTML=h;
+
+  var h2='';
+  for(i=0;i<TEMAS.length;i++){
+    var tt=TEMAS[i], sel=eixosDoTema(tt.id,['aprovado']).length; if(!sel) continue;
+    var alvo=escolhidos(tt).length;
+    h2+='<button class="tarefa" onclick="abrirAgendar(\''+tt.id+'\')"><span class="num">'+sel+'</span><span class="cp">'
+      +'<span class="a">'+esc(tt.titulo)+'</span><span class="b">'+sel+' de '+alvo+' eixos selados</span></span><span class="seta">&#8250;</span></button>';
+  }
+  document.getElementById('listaParaAgendar').innerHTML = h2 || '<div class="vazio"><div class="em">&#128220;</div><div class="tx">Nenhum tema com material selado ainda.</div></div>';
+}
+
+/* ═══ agendar ═══ */
+function abrirAgendar(id){
+  agTema=porId(id); if(!agTema) return; agSemana=null;
+  var sel=eixosDoTema(agTema.id,['aprovado']).length, alvo=escolhidos(agTema).length;
+  var h = '<span class="selo">Com material selado</span><div class="enun">'+esc(agTema.titulo)+'</div>'
+    + '<div class="linhas"><div class="linha"><div class="k">Campo</div><div class="v">'+esc(agTema.categoria||'sem categoria')+(agTema.campo?' · '+esc(agTema.campo):'')+'</div></div>'
+    + '<div class="linha"><div class="k">Material</div><div class="v"><span class="'+(sel>=alvo?'ok':(sel>0?'nc':'no'))+'">'+sel+' de '+alvo+' eixos selados</span>. '
+    + (sel>=alvo?'Vitrine completa.':(sel>0?'O aluno verá só o que estiver selado.':'A vitrine chega vazia ao aluno.'))+'</div></div></div>';
+  if(sel<alvo) h += '<div class="aviso"><span>&#9888;&#65039;</span><span><span class="tp">Pode agendar mesmo assim.</span> Mas o que não estiver selado na data simplesmente não aparece — sem erro visível.</span></div>';
+  h += '<div class="sec">Semana de publicação</div><div class="sem" id="semanas"></div>'
+     + '<div class="acoes"><button class="btn ok" id="btGravar" onclick="gravarAgenda()">Gravar a data</button>'
+     + '<button class="btn g" onclick="verComoAluno()">Ver como o aluno</button></div>'
+     + '<div class="rodape">Publica na segunda-feira escolhida, pela rotina das 01h de Manaus.</div>';
+  document.getElementById('agCorpo').innerHTML=h;
+  var segs=proximasSegundas(6), hs='';
+  for(var i=0;i<segs.length;i++){
+    var d=isoDia(segs[i]);
+    var ocupada=null; for(var j=0;j<AGENDA.length;j++) if(String(AGENDA[j].semana_de).slice(0,10)===d) ocupada=AGENDA[j];
+    var nota = ocupada ? 'já tem tema — gravar substitui' : (i===0?'próxima semana':(i+1)+' semanas');
+    hs += '<button class="semana" onclick="escolherSemana(this,\''+d+'\')"><span><div class="d">Segunda, '+fmtDia(d)+'</div><div class="o">'+nota+'</div></span><span class="ck">&#10003;</span></button>';
+  }
+  document.getElementById('semanas').innerHTML=hs;
+  ir('t-agendar');
+}
+function escolherSemana(el,d){ var s=document.querySelectorAll('.semana'); for(var i=0;i<s.length;i++) s[i].classList.remove('sel'); el.classList.add('sel'); agSemana=d; }
+function verComoAluno(){ if(agTema) window.open('hub-preparacao.html?tema='+encodeURIComponent(agTema.id)+'&previa=1','_blank'); }
+
+async function gravarAgenda(){
+  if(!agSemana){ toast('Escolha a semana primeiro.'); return; }
+  var bt=document.getElementById('btGravar'); bt.disabled=true; bt.textContent='Gravando…';
+  var uid=authGetUserId();
+  try{
+    await dbFetch(SUPABASE_URL+'/rest/v1/agenda_temas?escopo=eq.redaon&semana_de=eq.'+encodeURIComponent(agSemana), { method:'DELETE' });
+    var res = await dbFetch(SUPABASE_URL+'/rest/v1/agenda_temas', {
+      method:'POST', body: JSON.stringify({ tema_id:agTema.id, semana_de:agSemana, escopo:'redaon', turma_id:null, automatico:false, criado_por:uid })
+    });
+    if(!res.ok){ var txt=await res.text(); throw new Error(txt||('HTTP '+res.status)); }
+    if(agTema.natureza==='redaon' && agTema.ativo!==true){
+      await dbFetch(SUPABASE_URL+'/rest/v1/temas?id=eq.'+encodeURIComponent(agTema.id), { method:'PATCH', body: JSON.stringify({ ativo:true }) });
+      agTema.ativo=true;
+    }
+    AGENDA = AGENDA.filter(function(a){ return String(a.semana_de).slice(0,10)!==agSemana; });
+    AGENDA.unshift({ tema_id:agTema.id, semana_de:agSemana, automatico:false });
+    toast('Data gravada: segunda, '+fmtDia(agSemana)+'.');
+    montarCasa(); montarSemanas(); pilha=[]; mostrar('t-semanas');
+  }catch(e){
+    console.warn('[agendar]', e); toast('Não consegui gravar a data. Tente de novo.');
+    bt.disabled=false;
+  }
+  bt.textContent='Gravar a data';
+}
+
+carregar();
+</script>
+</body>
+</html>

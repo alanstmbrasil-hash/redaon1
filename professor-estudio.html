@@ -623,6 +623,7 @@
     <a class="nav-item" onclick="mostrarEmBreve('Notificações')" style="cursor:pointer;" title="Notificações"><i class="em">&#128276;</i><span class="tx">Notificações</span></a>
     <a class="nav-item" onclick="irModoAluno()" style="cursor:pointer;" title="Modo Aluno"><i class="em">&#127891;</i><span class="tx">Modo Aluno</span></a>
     <a class="nav-item" onclick="mostrarEmBreve('Enviar sugestão')" style="cursor:pointer;" title="Enviar sugestão"><i class="em">&#128172;</i><span class="tx">Enviar sugestão</span></a>
+    <a class="nav-item" id="navAdm" href="adm.html" title="ADM" style="display:none;"><i class="em">&#128273;</i><span class="tx">ADM</span></a>
 
     <!-- ── Conta ── -->
     <p class="nav-section-label"><span>Conta</span></p>
@@ -1107,6 +1108,19 @@
 
 <script>
   authGuard('professor');
+
+  // ─── Link ADM · só para quem passa em eh_pedagogica() ou eh_admin() ───
+  (async function(){
+    async function rpcBool(nome){
+      try{
+        const r = await dbFetch(SUPABASE_URL + '/rest/v1/rpc/' + nome, { method:'POST', body:'{}' });
+        return r.ok && (await r.json()) === true;
+      }catch(e){ return false; }
+    }
+    if (await rpcBool('eh_pedagogica') || await rpcBool('eh_admin')) {
+      const a = document.getElementById('navAdm'); if (a) a.style.display = '';
+    }
+  })();
 
   // Logout local — garante funcionamento mesmo se supabase-auth.js falhar
   window.authLogout = window.authLogout || function() {

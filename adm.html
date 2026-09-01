@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-tema="escuro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RedaON · ADM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* RedaON · ADM · a porta · produção v1-0
+   Lê o usuário logado. pedagogica → casa da Blanche. is_admin → casa da Produção.
+   Quem é os dois escolhe. Quem não é nenhum volta ao portal. Sem blur. */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+:root{
+  --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --top:#191c22;
+  --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0; --borderRGB:71,69,84;
+  --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020;
+  --purple:#6c5ce7; --purpleRGB:108,92,231; --gold:#fabd00; --goldRGB:250,189,0;
+  --green:#4ade80; --greenRGB:74,222,128; --red:#ff8b8b; --redRGB:255,139,139;
+}
+html[data-tema="claro"]{
+  --bg:#fdfbf4; --sunken:#f2ede0; --surface:#ffffff; --surface2:#f6f2e6; --top:#fbf8ee;
+  --text:#0a4a4b; --text2:#3a5556; --muted:#8a8576; --borderRGB:10,74,75;
+  --cyan:#0a8c8d; --cyanRGB:10,140,141; --onCyan:#ffffff;
+  --purple:#5a4fc4; --purpleRGB:90,79,196; --gold:#9a7a10; --goldRGB:154,122,16;
+  --green:#0f8a4d; --greenRGB:15,138,77; --red:#c0473b; --redRGB:192,71,59;
+}
+body{ font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
+.hd{ position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.4);
+  padding:calc(.7rem + env(safe-area-inset-top)) 1rem .7rem; display:flex; align-items:center; gap:.6rem; }
+.hd .voltar{ flex:none; width:34px; height:34px; border-radius:10px; border:none; background:var(--surface2); color:var(--text); font-size:1rem; cursor:pointer; }
+.hd .tit{ flex:1; min-width:0; }
+.hd .tit .q{ font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+.hd .tit .n{ font-size:.95rem; font-weight:800; line-height:1.3; }
+.hd .lua{ flex:none; width:34px; height:34px; border-radius:10px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; }
+.wrap{ max-width:640px; margin:0 auto; padding:1rem 1rem 6rem; }
+h2.t{ font-size:1.15rem; font-weight:800; line-height:1.3; }
+p.s{ font-size:.82rem; color:var(--text2); line-height:1.6; margin-top:.4rem; }
+.porta{ display:grid; gap:.7rem; margin-top:1.2rem; }
+.pCard{ text-align:left; width:100%; font:inherit; cursor:pointer; color:var(--text);
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.5); border-radius:18px; padding:1rem; display:flex; gap:.8rem; align-items:flex-start; }
+.pCard:active{ background:var(--surface2); }
+.pCard .av{ flex:none; width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:1.15rem; }
+.pCard.b .av{ background:rgba(var(--purpleRGB),.16); }
+.pCard.a .av{ background:rgba(var(--goldRGB),.14); }
+.pCard .nm{ font-size:.98rem; font-weight:800; display:block; }
+.pCard .ds{ font-size:.78rem; color:var(--text2); line-height:1.5; margin-top:.2rem; display:block; }
+.aviso{ margin-top:1.2rem; background:rgba(var(--redRGB),.1); border:1px solid rgba(var(--redRGB),.3); border-radius:14px; padding:.9rem; font-size:.82rem; line-height:1.6; color:var(--text2); }
+.btn{ width:100%; font:inherit; font-size:.88rem; font-weight:800; padding:.85rem 1rem; border-radius:14px; border:none; background:var(--cyan); color:var(--onCyan); cursor:pointer; margin-top:1rem; }
+.btn.g{ background:transparent; color:var(--text); border:1px solid rgba(var(--borderRGB),.6); }
+.carregando{ font-size:.82rem; color:var(--muted); padding:2rem 0; text-align:center; }
+@media (min-width:820px){ .wrap{ max-width:760px; } body{ font-size:1.06rem; } h2.t{ font-size:1.45rem; } p.s{ font-size:.95rem; } }
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <button class="voltar" onclick="window.location.href='professor-estudio.html'" aria-label="Voltar ao portal">&#8592;</button>
+  <div class="tit"><div class="q">RedaON</div><div class="n">ADM</div></div>
+  <button class="lua" onclick="trocarTema()" aria-label="Tema claro ou escuro">&#9789;</button>
+</div>
+
+<div class="wrap" id="wrap">
+  <div class="carregando" id="carregando">Abrindo&hellip;</div>
+  <div id="corpo" hidden></div>
+</div>
+
+<script src="supabase-auth.js"></script>
+<script>
+(function(){
+  var TEMA_CHAVE='redaon_tema_adm';
+  try{ var t=localStorage.getItem(TEMA_CHAVE); if(t) document.documentElement.setAttribute('data-tema',t); }catch(e){}
+})();
+function trocarTema(){
+  var h=document.documentElement, novo = h.getAttribute('data-tema')==='claro' ? 'escuro' : 'claro';
+  h.setAttribute('data-tema', novo);
+  try{ localStorage.setItem('redaon_tema_adm', novo); }catch(e){}
+}
+
+if (typeof authGuard === 'function') authGuard();
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function abrirPorta(){
+  var uid = authGetUserId();
+  var pedagogica=false, admin=false, nome=authGetNome();
+  try{
+    var res = await dbFetch(SUPABASE_URL+'/rest/v1/usuarios?select=nome,areas,is_admin&id=eq.'+encodeURIComponent(uid)+'&limit=1', {});
+    var rows = res.ok ? await res.json() : [];
+    var u = rows && rows[0];
+    if(u){
+      nome = u.nome || nome;
+      admin = u.is_admin === true;
+      pedagogica = Array.isArray(u.areas) && u.areas.indexOf('pedagogica') >= 0;
+    }
+  }catch(e){ console.warn('[adm porta]', e); }
+
+  document.getElementById('carregando').hidden = true;
+  var corpo = document.getElementById('corpo');
+  corpo.hidden = false;
+
+  if (pedagogica && !admin){ window.location.replace('adm-pedagogica.html'); return; }
+  if (admin && !pedagogica){ window.location.replace('adm-producao.html'); return; }
+
+  if (pedagogica && admin){
+    corpo.innerHTML =
+      '<h2 class="t">Por onde voc\u00ea entra hoje, '+esc(primeiroNome(nome))+'?</h2>' +
+      '<p class="s">Voc\u00ea tem as duas chaves. Cada casa \u00e9 um trabalho diferente \u2014 escolha a que veio fazer.</p>' +
+      '<div class="porta">' +
+        '<button class="pCard b" onclick="window.location.href=\'adm-pedagogica.html\'">' +
+          '<span class="av">\uD83C\uDF93</span><span><span class="nm">Casa da Profa. Blanche</span>' +
+          '<span class="ds">Ler as pontes, selar o material e agendar a semana.</span></span></button>' +
+        '<button class="pCard a" onclick="window.location.href=\'adm-producao.html\'">' +
+          '<span class="av">\u2699\uFE0F</span><span><span class="nm">Casa da Produ\u00e7\u00e3o</span>' +
+          '<span class="ds">Pedir material \u00e0 F\u00e1brica e trazer o bloco conferido para dentro.</span></span></button>' +
+      '</div>';
+    return;
+  }
+
+  corpo.innerHTML =
+    '<h2 class="t">Esta porta n\u00e3o \u00e9 sua</h2>' +
+    '<div class="aviso">A ADM \u00e9 da equipe pedag\u00f3gica e da produ\u00e7\u00e3o. Se voc\u00ea deveria estar aqui, fale com o Alan para liberar seu acesso.</div>' +
+    '<button class="btn g" onclick="window.location.href=\'professor-estudio.html\'">Voltar ao portal</button>';
+}
+function primeiroNome(n){ return String(n||'').trim().split(/\s+/)[0] || 'voc\u00ea'; }
+abrirPorta();
+</script>
+</body>
+</html>
