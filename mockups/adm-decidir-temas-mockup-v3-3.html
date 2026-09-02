@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script>
+(function(){
+  var pref='auto'; try{ pref=localStorage.getItem('redaon-tema')||'auto'; }catch(e){}
+  var efetivo=pref;
+  if(pref==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',pref);
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RedaON · ADM · Decidir temas · mockup v3-3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RedaON · ADM · Decidir temas · MOCKUP v2-0
+   Junta a lista (v1-1) com o tema em foco (modelo v1-4) e aplica
+   o que foi decidido depois: nomes no lugar de P1–P6, cores só na
+   palavra do estado, gaveta do P6 fora (tabela de âncoras), aprovar
+   move para Aprovados com desfazer, rejeitar tira, importar dentro,
+   categoria confirmada na aprovação, fila de campo na banca, aviso
+   de eixos selados ao agendar.
+   Dados de mentira. Nada fala com o banco. Sem blur.
+   ============================================================ */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+:root{
+  --bg:#fdfbf4; --sunken:#f2ede0; --surface:#ffffff; --surface2:#f6f2e6; --top:#fbf8ee;
+  --text:#0a4a4b; --text2:#3a5556; --muted:#8a8576; --borderRGB:10,74,75;
+  --cyan:#0a8c8d; --cyanRGB:10,140,141; --onCyan:#ffffff;
+  --purple:#5a4fc4; --purpleRGB:90,79,196; --purpleSoft:#5a4fc4;
+  --green:#0f8a4d; --greenRGB:15,138,77;
+  --red:#c0473b; --redRGB:192,71,59;
+  --orange:#b45f24; --orangeRGB:180,95,36;
+  --ambar:#96700a;
+}
+html[data-tema="escuro"]{
+  --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --top:#191c22;
+  --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0; --borderRGB:71,69,84;
+  --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020;
+  --purple:#6c5ce7; --purpleRGB:108,92,231; --purpleSoft:#c6bfff;
+  --green:#4ade80; --greenRGB:74,222,128;
+  --red:#ff8b8b; --redRGB:255,139,139;
+  --orange:#ff9d68; --orangeRGB:255,157,104;
+  --ambar:#e8b23c;
+}
+body{ font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
+
+.hd{ position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.18);
+  padding:calc(.6rem + env(safe-area-inset-top)) 1rem .6rem; }
+.hdIn{ max-width:860px; margin:0 auto; display:flex; align-items:center; gap:.7rem; }
+.marca{ display:flex; align-items:center; gap:.5rem; min-width:0; }
+.marca .lg{ width:30px; height:30px; border-radius:9px; background:var(--cyan); color:var(--onCyan); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem; font-style:italic; flex:0 0 auto; }
+.marca .nm{ font-size:1.02rem; font-weight:900; font-style:italic; letter-spacing:-.04em; color:var(--text); white-space:nowrap; }
+.marca .nm i{ color:var(--cyan); font-style:italic; }
+.hdSep{ width:1px; height:22px; background:rgba(var(--borderRGB),.25); flex:0 0 auto; }
+.hd .voltar{ flex:none; width:36px; height:36px; border-radius:11px; border:1px solid rgba(var(--borderRGB),.22); background:var(--surface); color:var(--text2); font-size:1rem; cursor:pointer; }
+.hd .voltar:hover{ color:var(--cyan); border-color:rgba(var(--cyanRGB),.4); }
+.hd .voltar[hidden]{ display:none; }
+.hd .tit{ flex:1; min-width:0; }
+.hd .tit .q{ font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+.hd .tit .n{ font-size:.95rem; font-weight:800; line-height:1.3; }
+.hd .lua{ flex:none; width:34px; height:34px; border-radius:10px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; }
+
+.wrap{ max-width:640px; margin:0 auto; padding:1rem 1rem 6rem; }
+.tela{ display:none; } .tela.on{ display:block; }
+h2.t{ font-size:1.15rem; font-weight:800; line-height:1.3; }
+p.s{ font-size:.82rem; color:var(--text2); line-height:1.6; margin-top:.4rem; }
+.sec{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.5rem 0 .55rem; }
+.sec .qt{ color:var(--text2); font-weight:700; text-transform:none; letter-spacing:0; }
+.vazio{ font-size:.78rem; color:var(--muted); padding:.7rem .85rem; border:1px dashed rgba(var(--borderRGB),.5); border-radius:12px; line-height:1.5; }
+
+/* campo da Blanche */
+.meu{ background:var(--surface); border:1px solid rgba(var(--purpleRGB),.45); border-radius:18px; padding:1rem; margin-top:1rem; }
+.meu .lb{ font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--purpleSoft); }
+textarea{ width:100%; margin-top:.6rem; font:inherit; font-size:.9rem; line-height:1.5; color:var(--text); background:var(--sunken);
+  border:1px solid rgba(var(--borderRGB),.5); border-radius:12px; padding:.7rem .8rem; resize:vertical; min-height:82px; }
+textarea::placeholder{ color:var(--muted); }
+.meu .btn{ margin-top:.7rem; }
+
+/* item da lista */
+.grupo{ display:grid; gap:.55rem; }
+.item{ width:100%; text-align:left; font:inherit; color:var(--text); cursor:pointer; background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.5); border-radius:16px; padding:.85rem; display:flex; align-items:center; gap:.7rem; }
+.item:active{ background:var(--surface2); }
+.item .cp{ flex:1; min-width:0; }
+.item .tt{ font-size:.9rem; font-weight:700; line-height:1.4; }
+.item .mt{ font-size:.72rem; color:var(--muted); margin-top:.3rem; line-height:1.45; }
+.item .seta{ flex:none; color:var(--muted); font-size:1.1rem; }
+.item.dela{ border-color:rgba(var(--purpleRGB),.45); }
+.item.ap{ border-color:rgba(var(--greenRGB),.4); }
+.desf{ font-size:.72rem; color:var(--muted); margin-top:.3rem; }
+.desf button{ font:inherit; font-size:.72rem; font-weight:700; color:var(--cyan); background:none; border:none; padding:0; cursor:pointer; text-decoration:underline; }
+.faixa{ margin-top:.9rem; padding:.6rem .8rem; border-radius:12px; background:var(--sunken); border:1px solid rgba(var(--borderRGB),.4); font-size:.76rem; color:var(--text2); display:flex; justify-content:space-between; gap:.6rem; align-items:center; }
+.faixa button{ font:inherit; font-size:.76rem; font-weight:700; color:var(--cyan); background:none; border:none; cursor:pointer; text-decoration:underline; }
+
+.selo{ display:inline-block; font-size:.63rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:.16rem .4rem; border-radius:6px; margin-bottom:.35rem; }
+.selo.ia{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+.selo.bl{ background:rgba(var(--purpleRGB),.18); color:var(--purpleSoft); }
+
+/* tema em foco */
+.enun{ font-size:1.1rem; font-weight:800; line-height:1.4; margin-top:.5rem; }
+.mudou{ font-size:.72rem; color:var(--muted); margin-top:.45rem; }
+.mudou button{ font:inherit; font-size:.72rem; font-weight:700; color:var(--cyan); background:none; border:none; padding:0; cursor:pointer; text-decoration:underline; }
+.linhas{ margin-top:1.1rem; display:grid; gap:.75rem; }
+.linha{ display:grid; grid-template-columns:88px 1fr; gap:.7rem; align-items:start; }
+.linha .k{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding-top:.15rem; }
+.linha .v{ font-size:.84rem; color:var(--text2); line-height:1.6; }
+.nome{ color:var(--text); font-weight:800; }
+.medidas{ margin-top:1.1rem; display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+.med{ background:var(--sunken); border:1px solid rgba(var(--borderRGB),.4); border-radius:12px; padding:.7rem .75rem; }
+.med .k{ font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+.med .v{ font-size:.85rem; font-weight:700; margin-top:.28rem; line-height:1.35; }
+.med .d{ font-size:.7rem; color:var(--muted); margin-top:.18rem; line-height:1.4; }
+.crit{ margin-top:1.1rem; background:var(--sunken); border:1px solid rgba(var(--borderRGB),.4); border-radius:14px; overflow:hidden; }
+.crit .cab{ font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding:.75rem .85rem .55rem; }
+.crit .lin{ display:grid; grid-template-columns:minmax(118px,38%) 1fr; gap:.6rem; padding:.62rem .85rem; border-top:1px solid rgba(var(--borderRGB),.3); align-items:start; }
+.crit .lin .p{ font-size:.78rem; font-weight:700; line-height:1.4; }
+.crit .lin .p .cd{ color:var(--muted); font-weight:800; margin-right:.28rem; }
+.crit .lin .r{ font-size:.78rem; line-height:1.5; color:var(--text2); }
+.crit .lin .r b{ color:var(--text); font-weight:700; }
+.ok{ color:var(--green); font-weight:800; } .no{ color:var(--red); font-weight:800; } .nc{ color:var(--ambar); font-weight:800; }
+.aviso{ margin-top:1rem; background:rgba(var(--orangeRGB),.1); border:1px solid rgba(var(--orangeRGB),.35); border-radius:12px; padding:.85rem; font-size:.78rem; color:var(--text2); line-height:1.55; }
+.aviso .tp{ font-weight:800; color:var(--orange); }
+.aviso .prop{ display:block; margin:.6rem 0 .1rem; padding:.7rem .75rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.5); border-radius:10px; font-size:.88rem; font-weight:800; color:var(--text); line-height:1.45; }
+.aviso .pq{ font-size:.75rem; color:var(--muted); line-height:1.5; margin-top:.5rem; }
+.edit{ margin-top:1rem; background:var(--surface); border:1px solid rgba(var(--cyanRGB),.45); border-radius:14px; padding:.85rem; }
+.edit .lb{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--cyan); }
+.edit.mot{ border-color:rgba(var(--purpleRGB),.45); } .edit.mot .lb{ color:var(--purpleSoft); }
+.edit textarea{ min-height:92px; }
+
+.btn{ width:100%; font:inherit; font-size:.88rem; font-weight:800; padding:.85rem 1rem; border-radius:14px; border:none; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
+.btn.g{ background:transparent; color:var(--text); border:1px solid rgba(var(--borderRGB),.6); }
+.btn.ok{ background:var(--green); color:var(--onCyan); }
+.btn.nao{ background:transparent; color:var(--red); border:1px solid rgba(var(--redRGB),.5); }
+.btn.sm{ font-size:.8rem; padding:.7rem .9rem; border-radius:12px; }
+.dupla{ display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:.7rem; }
+.acoes{ display:grid; gap:.6rem; margin-top:1.3rem; }
+.rodape{ font-size:.72rem; color:var(--muted); line-height:1.6; margin-top:1.4rem; padding-top:.9rem; border-top:1px solid rgba(var(--borderRGB),.4); }
+.rodape .btn{ margin-top:.8rem; }
+
+/* banca */
+.oficial{ background:rgba(var(--cyanRGB),.09); border:1px solid rgba(var(--cyanRGB),.4); border-radius:16px; padding:.95rem; margin-top:.9rem; }
+.oficial .k{ font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--cyan); }
+.oficial .v{ font-size:.88rem; line-height:1.6; margin-top:.4rem; }
+.oficial .f{ font-size:.7rem; color:var(--muted); margin-top:.5rem; line-height:1.45; }
+.pad{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.5); border-radius:14px; padding:.85rem; margin-bottom:.55rem; }
+.pad .h{ display:flex; align-items:baseline; gap:.5rem; }
+.pad .cd{ font-size:.68rem; font-weight:800; color:var(--muted); }
+.pad .nm{ font-size:.88rem; font-weight:700; line-height:1.35; }
+.pad .ev{ font-size:.76rem; color:var(--text2); line-height:1.55; margin-top:.4rem; }
+.pad .ds{ font-size:.76rem; color:var(--muted); line-height:1.5; margin-top:.35rem; }
+.pad .ds b{ color:var(--text2); }
+.campos{ background:var(--sunken); border:1px solid rgba(var(--borderRGB),.4); border-radius:14px; overflow:hidden; }
+.cl{ display:grid; grid-template-columns:1fr auto; gap:.5rem; padding:.6rem .85rem; border-top:1px solid rgba(var(--borderRGB),.3); align-items:center; }
+.cl:first-child{ border-top:none; }
+.cl .nm{ font-size:.82rem; font-weight:700; } .cl .lei{ font-size:.7rem; color:var(--muted); margin-top:.1rem; }
+.cl .ct{ font-size:.76rem; text-align:right; color:var(--text2); } .cl .ct b{ color:var(--text); }
+.nunca{ background:var(--sunken); border:1px solid rgba(var(--borderRGB),.4); border-radius:14px; padding:.85rem; margin-top:.6rem; }
+.nunca li{ font-size:.8rem; color:var(--text2); line-height:1.6; margin-left:1.1rem; }
+.fila{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.4); border-radius:14px; padding:.9rem .85rem; }
+.fila .cont{ font-size:.72rem; color:var(--muted); display:flex; justify-content:space-between; }
+.fila .en{ font-size:.98rem; font-weight:800; line-height:1.4; margin-top:.5rem; }
+.fila .meta{ font-size:.74rem; color:var(--muted); margin-top:.3rem; }
+.fila .duplo{ font-size:.76rem; color:var(--ambar); font-weight:600; margin-top:.4rem; }
+.fila .prop{ margin-top:.8rem; display:flex; align-items:center; gap:.6rem; padding:.7rem .75rem; background:var(--sunken); border:1px solid rgba(var(--borderRGB),.5); border-radius:12px; }
+.fila .prop .k{ font-size:.7rem; color:var(--muted); } .fila .prop .v{ font-size:.9rem; font-weight:800; flex:1; }
+.fila .pq{ font-size:.76rem; color:var(--text2); line-height:1.5; margin-top:.5rem; }
+.fila .nav{ display:flex; justify-content:space-between; margin-top:.6rem; }
+.fila .nav button{ font:inherit; font-size:.76rem; font-weight:700; color:var(--cyan); background:none; border:none; cursor:pointer; padding:.3rem 0; }
+
+/* importar */
+.imp textarea{ min-height:180px; font-size:.78rem; font-family:ui-monospace,Menlo,Consolas,monospace; }
+.res{ margin-top:.9rem; display:grid; gap:.45rem; }
+.res .r{ padding:.6rem .75rem; border-radius:10px; background:var(--sunken); border:1px solid rgba(var(--borderRGB),.35); font-size:.78rem; line-height:1.45; }
+.res .r .e{ font-weight:700; } .res .r .m{ color:var(--muted); margin-top:.15rem; }
+
+/* agendar */
+.sem{ margin-top:.9rem; display:grid; gap:.45rem; }
+.semana{ width:100%; text-align:left; font:inherit; color:var(--text); background:var(--surface); border:1px solid rgba(var(--borderRGB),.5); border-radius:14px; padding:.8rem .9rem; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:.6rem; }
+.semana .d{ font-size:.86rem; font-weight:700; } .semana .o{ font-size:.72rem; color:var(--muted); }
+.semana.sel{ border-color:rgba(var(--cyanRGB),.65); }
+.semana .ck{ color:var(--cyan); font-weight:800; opacity:0; } .semana.sel .ck{ opacity:1; }
+
+/* gaveta */
+.veu{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:40; display:none; } .veu.on{ display:block; }
+.gav{ position:fixed; left:0; right:0; bottom:0; z-index:41; background:var(--surface); border-radius:22px 22px 0 0; border-top:1px solid rgba(var(--borderRGB),.5);
+  padding:.6rem 1rem calc(1.2rem + env(safe-area-inset-bottom)); transform:translateY(101%); transition:transform .22s ease; max-height:84vh; overflow-y:auto; }
+.gav.on{ transform:translateY(0); }
+@media (prefers-reduced-motion:reduce){ .gav{ transition:none; } }
+.gav .grip{ width:38px; height:4px; border-radius:2px; background:rgba(var(--borderRGB),.7); margin:.2rem auto .9rem; }
+.gav .gt{ font-size:.92rem; font-weight:800; line-height:1.4; }
+.gav .gs{ font-size:.76rem; color:var(--muted); line-height:1.55; margin-top:.35rem; }
+.pill{ width:100%; min-height:52px; margin-top:.5rem; font:inherit; font-size:.86rem; font-weight:600; text-align:left; color:var(--text); background:var(--sunken);
+  border:1px solid rgba(var(--borderRGB),.5); border-radius:14px; padding:.8rem 1rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+.pill:active{ background:var(--surface2); }
+.pill .sub{ font-size:.7rem; color:var(--muted); font-weight:500; margin-left:.3rem; }
+.pill .ck{ color:var(--cyan); font-weight:800; opacity:0; }
+.pill.sel{ border-color:rgba(var(--cyanRGB),.65); } .pill.sel .ck{ opacity:1; }
+.espera{ text-align:center; padding:2.5rem 1rem; } .espera .p{ font-size:.86rem; color:var(--muted); line-height:1.6; }
+
+@media (min-width:820px){
+  html{ font-size:18.5px; } .wrap{ max-width:860px; }
+  .medidas{ grid-template-columns:repeat(4,1fr); } .linha{ grid-template-columns:110px 1fr; }
+  .crit .lin{ grid-template-columns:minmax(170px,26%) 1fr; }
+}
+@media (min-width:1180px){ html{ font-size:20px; } .wrap{ max-width:940px; } }
+
+/* ═══ v3-2 · ZONA DE EIXOS (CSS que faltou no v3-1) ═══ */
+.zonaEixos{ margin-top:1.1rem; background:var(--surface); border:1px solid rgba(var(--cyanRGB),.35); border-radius:16px; padding:.95rem 1rem; }
+.zonaEixos .zt{ font-size:.9rem; font-weight:800; }
+.zonaEixos .zs{ font-size:.78rem; color:var(--text2); line-height:1.55; margin-top:.3rem; }
+.grade{ display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem; margin-top:.85rem; }
+.eixoBt{ font:inherit; cursor:pointer; padding:.72rem .4rem; border-radius:14px; border:1px solid rgba(var(--borderRGB),.24);
+  background:var(--surface); color:var(--muted); text-align:center; transition:border-color .12s; }
+.eixoBt:hover{ border-color:rgba(var(--cyanRGB),.45); }
+.eixoBt .en{ display:block; font-size:.77rem; font-weight:700; }
+.eixoBt .ee{ display:block; font-size:.62rem; margin-top:.22rem; }
+.eixoBt.sel{ background:rgba(var(--cyanRGB),.12); border-color:var(--cyan); color:var(--cyan); }
+.eixoBt.ia{ border-style:dashed; }
+.contaEixos{ font-size:.78rem; color:var(--text2); margin-top:.75rem; line-height:1.5; }
+.contaEixos b{ color:var(--cyan); }
+
+/* ═══ v3-2 · CORES DO v3-0: cartões brancos, bordas suaves, ciano nos destaques ═══ */
+.item, .item.ap, .item.dela{ background:var(--surface); border-width:1px; }
+.item{ border-color:rgba(var(--borderRGB),.20); transition:border-color .15s; }
+.item:hover{ border-color:rgba(var(--cyanRGB),.45); }
+.item.dela{ border-color:rgba(var(--purpleRGB),.35); }
+.item.ap{ border-color:rgba(var(--greenRGB),.32); }
+.meu{ border-color:rgba(var(--purpleRGB),.35); }
+.med{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); }
+.crit{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); }
+.crit .cab{ background:var(--surface2); }
+.oficial{ background:var(--surface); border:1px solid rgba(var(--cyanRGB),.30); }
+.aviso{ background:rgba(var(--orangeRGB),.08); border-color:rgba(var(--orangeRGB),.28); }
+.aviso .prop{ background:var(--surface); border-color:rgba(var(--borderRGB),.24); }
+.edit{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); }
+textarea{ background:var(--surface); border-color:rgba(var(--borderRGB),.28); }
+textarea:focus{ outline:none; border-color:var(--cyan); }
+.semana, .pill{ background:var(--surface); border-color:rgba(var(--borderRGB),.24); }
+.faixa{ background:var(--surface); border-color:rgba(var(--borderRGB),.20); }
+.vazio{ border-color:rgba(var(--borderRGB),.28); }
+</style>
+</head>
+<body>
+
+<div class="hd"><div class="hdIn">
+  <button class="voltar" id="btVoltar" onclick="voltar()" aria-label="Voltar">&#8592;</button>
+  <div class="marca"><span class="lg">R</span><span class="nm">Reda<i>ON</i></span></div>
+  <div class="hdSep"></div>
+  <div class="tit"><div class="q">ADM · Pedagógica</div><div class="n" id="hdN">Decidir temas</div></div>
+  <button class="lua" id="btLua" onclick="cicloTema()" aria-label="Tema claro, escuro ou automático">&#9788;</button>
+</div>
+</div>
+
+<div class="wrap">
+
+  <!-- ════════ LISTA ════════ -->
+  <div class="tela on" id="t-lista">
+    <h2 class="t">Decidir temas</h2>
+    <p class="s">Proposto pela IA · decidido por você. Cada tema abre em tela própria.</p>
+
+    <div class="meu">
+      <div class="lb">Seu tema</div>
+      <textarea id="campoBlanche" placeholder="Escreva o enunciado como ele apareceria na prova."></textarea>
+      <button class="btn" onclick="avaliarMeuTema()">Avaliar tema proposto</button>
+    </div>
+
+    <div id="faixaDesfazer"></div>
+
+    <div class="sec">Seus temas <span class="qt" id="qtDela"></span></div>
+    <div class="grupo" id="listaDela"></div>
+
+    <div class="sec">Propostos pela IA <span class="qt" id="qtIA"></span></div>
+    <div id="listaIA"></div>
+
+    <div class="sec">Aprovados neste trimestre <span class="qt" id="qtAp"></span></div>
+    <div class="grupo" id="listaAp"></div>
+
+    <div class="rodape">
+      A ordem aqui é por campo, não por qualidade. O trimestre tem 12 temas: 6 de campo recorrente, 4 de campo dormente com lei madura, 2 de campo novo. Teto de 2 por campo — estourar é decisão sua; a medida só avisa.
+      <button class="btn g" onclick="ir('t-banca')">Como a banca escolhe</button>
+    </div>
+  </div>
+
+  <!-- ════════ TEMA EM FOCO ════════ -->
+  <div class="tela" id="t-tema"><div id="temaCorpo"></div></div>
+
+  <div class="tela" id="t-espera"><div class="espera"><div class="p" id="txEspera">Lendo o tema contra os seis critérios&hellip;</div></div></div>
+
+  <!-- ════════ BANCA ════════ -->
+  <div class="tela" id="t-banca">
+    <h2 class="t">Como a banca escolhe</h2>
+    <p class="s">Duas camadas, e elas não têm o mesmo peso. Uma é publicada pelo INEP. A outra é leitura da série.</p>
+    <div class="oficial">
+      <div class="k">Critério oficial · 1</div>
+      <div class="v">O tema é de ordem <b>social, científica, cultural ou política</b>. O texto é dissertativo-argumentativo, em modalidade escrita formal.</div>
+      <div class="f">Cartilha do Participante — A Redação do ENEM. Formulação idêntica em 2018, 2020, 2022, 2024 e 2025.</div>
+    </div>
+    <div class="aviso"><span class="tp">O INEP não publica como o tema é escolhido.</span> Tudo abaixo é leitura da série — contagem que qualquer pessoa refaz, não regra declarada.</div>
+
+    <div class="sec">Padrões observados <span class="qt">· 6</span></div>
+    <div id="listaPadroes"></div>
+
+    <div class="sec">Quando cada campo caiu <span class="qt" id="qtSerie"></span></div>
+    <div class="campos" id="listaCampos"></div>
+
+    <div class="sec">Enunciados ainda sem campo <span class="qt" id="qtFila"></span></div>
+    <p class="s" style="margin-top:0;margin-bottom:.6rem">Enquanto estiverem sem campo, a contagem acima fica menor do que a série. A proposta é da IA; a decisão é sua.</p>
+    <div class="fila" id="fila"></div>
+
+    <div class="sec">O que nunca apareceu</div>
+    <div class="nunca"><ul>
+      <li>Disputa partidária ou eleitoral em curso</li><li>Doutrina religiosa como conteúdo</li><li>Política externa, ou outro país</li>
+      <li>Economia técnica — juros, câmbio, reforma tributária</li><li>Aborto, drogas, armas, pena de morte</li><li>Segurança pública armada</li><li>Avaliação de governo</li>
+    </ul></div>
+    <div class="rodape" id="rodBanca"></div>
+  </div>
+
+  <!-- ════════ AGENDAR ════════ -->
+  <div class="tela" id="t-agendar"><div id="agCorpo"></div></div>
+
+</div>
+
+<div class="veu" id="veu" onclick="fecharGaveta()"></div>
+<div class="gav" id="gav"><div class="grip"></div><div class="gt" id="gavT"></div><div class="gs" id="gavS"></div><div id="gavPills"></div></div>
+
+<script>
+/* ============================================================
+   Dados de mentira. Em producao: campos_da_serie(), total_da_serie(),
+   temas_propostos, aprovar_tema_proposto(), desfazer_aprovacao_tema().
+   Gemini entra so para escrever prosa: tres linhas e reescrita.
+   ============================================================ */
+var ANO = 2026, TOTAL_SERIE = 49, SEM_CAMPO = 22;
+
+var CATEGORIAS = ['Consumo','Cultura','Direitos','Economia','Educação','Meio Ambiente','Saúde','Social','Tecnologia','Trabalho'];
+
+/* id, nome, vezes, ultimo, aConferir, lei, ano, grupo, palavras-chave. Foto do banco em 31/08. */
+var CAMPOS = [
+  { id:'trabalho', nome:'trabalho', vezes:7, ult:2025, conf:3, lei:'CLT · Decreto-Lei 5.452', ano:1943, grupo:'aos trabalhadores', kw:['trabalh','emprego','desemprego','carteira','sindic','automa','doméstic','domestic'] },
+  { id:'infancia', nome:'infância', vezes:2, ult:2014, conf:0, lei:'ECA · Lei 8.069', ano:1990, grupo:'às crianças e adolescentes', kw:['criança','crianc','adolescen','infân','infan','jovem','jovens'] },
+  { id:'cultura', nome:'cultura', vezes:4, ult:2024, conf:0, lei:'Lei Rouanet · Lei 8.313', ano:1991, grupo:'aos artistas de periferia', kw:['cultur','arte','leitura','cinema','músic','music','teatro','patrimôn','patrimon'] },
+  { id:'cidadania', nome:'cidadania', vezes:3, ult:2021, conf:0, lei:'Lei 9.534', ano:1997, grupo:'à população sem documentação', kw:['cidadan','registro civil','document','direito de votar'] },
+  { id:'mulher', nome:'mulher', vezes:1, ult:2015, conf:1, lei:'Maria da Penha · Lei 11.340', ano:2006, grupo:'às mulheres', kw:['mulher','feminin','gênero','genero','matern'] },
+  { id:'tecnologia', nome:'tecnologia', vezes:3, ult:2019, conf:1, lei:'LGPD · Lei 13.709', ano:2018, grupo:'aos usuários', kw:['digital','internet','tecnolog','dados','inteligência artificial','inteligencia artificial','algoritm'] },
+  { id:'alimentacao', nome:'alimentação', vezes:2, ult:2022, conf:0, lei:'LOSAN · Lei 11.346', ano:2006, grupo:'às famílias em insegurança alimentar', kw:['aliment','fome','nutri','desperdício','desperdicio'] },
+  { id:'saude', nome:'saúde', vezes:2, ult:2021, conf:1, lei:'SUS · Lei 8.080', ano:1990, grupo:'aos pacientes', kw:['saúde','saude','doença','doenc','mental','médic','medic','vacin'] },
+  { id:'violencia', nome:'violência', vezes:1, ult:2003, conf:0, lei:'SUSP · Lei 13.675', ano:2018, grupo:'às vítimas', kw:['violênc','violenc','crime'] },
+  { id:'meio_ambiente', nome:'meio ambiente', vezes:2, ult:2008, conf:0, lei:'Proteção e Defesa Civil · Lei 12.608', ano:2012, grupo:'às populações atingidas', kw:['ambient','climátic','climatic','flores','amazôn','amazon','sustentá','sustenta','seca','enchente','desmatamento','clima'] },
+  { id:'educacao', nome:'educação', vezes:0, ult:null, conf:0, lei:'LDB · Lei 9.394', ano:1996, grupo:'aos estudantes', kw:['educaç','educac','ensino','escola','professor','aprendiz','analfabet'] },
+  { id:'saneamento', nome:'saneamento', vezes:0, ult:null, conf:0, lei:'Marco do Saneamento · Lei 11.445', ano:2007, grupo:'às populações ribeirinhas e periféricas', kw:['saneamento','esgoto','água','agua','potável','potavel'] },
+  { id:'envelhecimento', nome:'envelhecimento', vezes:0, ult:null, conf:0, lei:'Estatuto do Idoso · Lei 10.741', ano:2003, grupo:'aos idosos', kw:['envelhec','idoso','idosa','terceira idade','longevidade','aposentad'] }
+];
+function campoPorId(id){ for(var i=0;i<CAMPOS.length;i++) if(CAMPOS[i].id===id) return CAMPOS[i]; return null; }
+
+var GRUPOS = ['idos','envelhec','populações atingidas','populacoes atingidas','mulher','criança','crianc','adolescen','jovem','jovens','surd','cego','deficiên','deficien','indígen','indigen','quilombol','ribeirinh','povos','comunidades tradicionais','população em situação de rua','trabalhador','professor','agricultor','imigrant','refugiad','negro','negra','periféric','periferic','pescador','cuidador','estudant','paciente','usuário','usuario','família','familia','vítima','vitima','artista','moradore'];
+var FORMULAS = ['desafios para','caminhos para','medidas para','alternativas para','formas de','combate a','combate ao','perspectivas acerca','estratégias para','estrategias para'];
+var MARCAS_BR = ['no brasil','na sociedade brasileira','brasileir','nacional','do brasil','no país','no pais'];
+
+var PADROES = [
+  ['Situação-problema','44 dos 45 enunciados. A única exceção é 1998, e nunca se repetiu.','<b>Descarta:</b> "inteligência artificial", "meio ambiente" — enquanto forem campo.'],
+  ['Âncora nacional','13 dos 14 enunciados regulares de 2012 a 2025. Em 2025, a prova especial de Belém saiu com tema nacional.','<b>Descarta:</b> recorte regional e recorte internacional.'],
+  ['Grupo nomeado','Cinco anos seguidos na regular, de 2021 a 2025. Somando as duas camadas, 10 de 11.','<b>Cuidado:</b> o padrão mais forte e o mais recente. Cinco anos não fazem regra.'],
+  ['Verbo de ação','Desafios para · Caminhos para · Medidas para · Alternativas para. A pergunta sumiu da regular em 2004.','<b>Descarta:</b> tema formulado como disputa de opinião.'],
+  ['Quando esse assunto caiu','O enunciado nunca se repete; o campo, sim. A contagem está logo abaixo.','<b>Não descarta nada.</b> Informa quanto tempo faz.'],
+  ['Quando virou lei','Mediana de 15 anos entre a lei e a prova, nos 10 mais recentes.','<b>Uma exceção em 28 edições:</b> 2018, com a LGPD sancionada três meses antes da prova.']
+];
+
+/* Fila de campo: n, ano, aplicacao, enunciado, proposta, porque, duplo */
+var FILA = [
+ [5,'2005','regular','O trabalho infantil na realidade brasileira','trabalho','O problema é o trabalho; a criança é o grupo.','trabalho e infância'],
+ [6,'2015','regular','A persistência da violência contra a mulher na sociedade brasileira','violência','O problema é a violência; a mulher é o grupo.','mulher e violência'],
+ [7,'2023','regular','Desafios para o enfrentamento da invisibilidade do trabalho de cuidado realizado pela mulher no Brasil','trabalho','O problema é o trabalho invisível; a mulher é o grupo.','trabalho e mulher'],
+ [8,'2019','PPL','Combate ao uso indiscriminado das tecnologias digitais de informação por crianças','tecnologia','O objeto é a tecnologia; a criança é o grupo.','infância e tecnologia'],
+ [9,'2021','PPL','Reconhecimento da contribuição das mulheres nas ciências da saúde no Brasil','saúde','O campo é a ciência da saúde; a mulher é o grupo.','mulher e saúde'],
+ [10,'2025','PPL','A idade mínima para o trabalho como forma de proteção à infância','trabalho','O problema é o trabalho precoce; a infância é o grupo.','trabalho e infância'],
+ [11,'1998','regular','Viver e aprender','educação','Leitura fraca. O único enunciado da série sem problema.'],
+ [12,'2004','regular','Como garantir a liberdade de informação e evitar abusos nos meios de comunicação','nenhum','Comunicação não é campo da lista.'],
+ [13,'2007','regular','O desafio de se conviver com a diferença','nenhum','Diversidade sem grupo e sem campo.'],
+ [14,'2009','regular','O indivíduo frente à ética nacional','nenhum','Tema abstrato.'],
+ [15,'2012','regular','O movimento imigratório para o Brasil no século XXI','nenhum','Imigração não é campo da lista.'],
+ [16,'2013','regular','Efeitos da implantação da Lei Seca no Brasil','saúde','Leitura fraca: mortes no trânsito.'],
+ [17,'2016','regular','Caminhos para combater a intolerância religiosa no Brasil','cidadania','O mapa lê como violação de direito.'],
+ [18,'2017','regular','Desafios para a formação educacional de surdos no Brasil','educação','Formação educacional é o problema.'],
+ [19,'2022','regular','Desafios para a valorização de comunidades e povos tradicionais no Brasil','cultura','Valorização cultural de um grupo.'],
+ [20,'2024','regular','Desafios para a valorização da herança africana no Brasil','cultura','Patrimônio e memória.'],
+ [21,'2025','regular','Perspectivas acerca do envelhecimento na sociedade brasileira','envelhecimento','Hoje sem campo — por isso a contagem diz "nunca caiu".'],
+ [22,'2009','PPL','A família contemporânea e o que ela representa para a sociedade','nenhum','Sem campo na lista.'],
+ [23,'2010','PPL','Ajuda humanitária','nenhum','Sem âncora nacional, sem campo.'],
+ [24,'2012','PPL','O grupo fortalece o indivíduo?','nenhum','Pergunta abstrata.'],
+ [25,'2013','PPL','Cooperativismo como alternativa social','trabalho','Organização do trabalho.'],
+ [26,'2014','PPL','O que o fenômeno social dos "rolezinhos" representa?','cultura','Leitura fraca: consumo e espaço público.'],
+ [27,'2017','PPL','Consequências da busca por padrões de beleza idealizados','saúde','Saúde mental e corpo.'],
+ [28,'2020','PPL','A falta de empatia nas relações sociais no Brasil','nenhum','Tema abstrato.'],
+ [29,'2023','PPL','Desafios para a (re)inserção socioeconômica da população em situação de rua no Brasil','cidadania','Leitura fraca: acesso a direito. Cabe trabalho também.'],
+ [30,'2014','2ª aplicação','Alternativas para a escassez de água no Brasil','saneamento','Tira saneamento do zero.'],
+ [31,'2016','2ª aplicação','Caminhos para combater o racismo no Brasil','cidadania','Mesma leitura do 17.'],
+ [32,'2020','digital','O desafio de reduzir as desigualdades entre as regiões do Brasil','nenhum','Recorte regional, sem campo.']
+];
+
+/* Temas do trimestre. rep e fichas vem da Fabrica; o resto o classificador calcula. */
+var TEMAS = [
+  { id:'i1', origem:'ia', grupo:'Campos recorrentes', cat:'Trabalho', estado:'proposto', tt:'Desafios para a valorização do trabalho doméstico remunerado no Brasil', rep:'Emenda Constitucional 72, dados do IBGE e autoras acessíveis. Nove eixos alcançáveis.', fichas:[7,'pronto para produzir'] },
+  { id:'i2', origem:'ia', grupo:'Campos recorrentes', cat:'Educação', estado:'proposto', tt:'Caminhos para garantir a permanência de jovens no ensino médio brasileiro', rep:'LDB, Censo Escolar e pesquisa acadêmica abundante.', fichas:[6,'falta cinema e cultura pop'] },
+  { id:'i3', origem:'ia', grupo:'Campos dormentes, com lei madura', cat:'Meio Ambiente', estado:'proposto', tt:'Desafios para a proteção das populações atingidas por eventos climáticos extremos no Brasil', rep:'Lei, notas do INPE e INMET, e o El Niño de 2026 como atualidade. Repertório que o aluno de Manaus enxerga da janela.', fichas:[8,'pronto para produzir'] },
+  { id:'i4', origem:'ia', grupo:'Campos dormentes, com lei madura', cat:'Meio Ambiente', estado:'proposto', tt:'Medidas para ampliar o acesso à água potável no Brasil', rep:'Marco legal do saneamento, dados do SNIS e do IBGE.', fichas:[5,'falta literatura e filosofia'] },
+  { id:'i5', origem:'ia', grupo:'Campo novo, com âncora sólida', cat:'Tecnologia', estado:'proposto', tt:'Desafios para a proteção de crianças e adolescentes no ambiente digital brasileiro', rep:'ECA, Marco Civil, dados da Cetic e pesquisa recente.', fichas:[6,'falta filosofia'] }
+];
+var pilha = [], telaAtual = 't-lista', seq = 10;
+/* Eixos por tema — no produto, a pré-marcação vem do Gemini; aqui é simulada pelo campo. */
+var EIXOS_GRADE=[['legislacao','Legislação'],['historia','História'],['especialistas','Especialistas'],['atualidades','Atualidades'],['literatura','Literatura'],['filosofia','Filosofia'],['cinema','Cinema'],['ciencia','Ciência'],['culturapop','Cultura pop']];
+var MIN_EIXOS=3, marcados=[], sugestaoIA=[];
+function rotEixoGrade(id){ for(var i=0;i<EIXOS_GRADE.length;i++) if(EIXOS_GRADE[i][0]===id) return EIXOS_GRADE[i][1]; return id; }
+function sugerirEixos(t){
+  /* simulação da chamada ao Gemini: legislação e atualidades quase sempre; a terceira vem do assunto */
+  var r=classificar(t.tt), s=['legislacao','atualidades'];
+  var extra = /mulher|trabalho|cuidado|dom(e|é)stic/i.test(t.tt) ? 'especialistas'
+    : /cultur|heran(c|ç)a|arte|literatur/i.test(t.tt) ? 'literatura'
+    : /digital|internet|dado|tecnolog/i.test(t.tt) ? 'ciencia'
+    : /idos|envelhec|sa(u|ú)de|mental/i.test(t.tt) ? 'filosofia' : 'historia';
+  s.push(extra); return s;
+}
+var atual = null, anterior = null, editando = false, ultimaRejeicao = null;
+
+/* ═══ util ═══ */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function semAcento(s){ return s.toLowerCase().replace(/[áàâã]/g,'a').replace(/[éê]/g,'e').replace(/í/g,'i').replace(/[óôõ]/g,'o').replace(/[úü]/g,'u').replace(/ç/g,'c'); }
+function contem(txt, lista){ var i, t = txt.toLowerCase(), ta = semAcento(txt); for(i=0;i<lista.length;i++){ if(t.indexOf(lista[i])>=0 || ta.indexOf(semAcento(lista[i]))>=0) return lista[i]; } return null; }
+function porId(id){ for(var i=0;i<TEMAS.length;i++) if(TEMAS[i].id===id) return TEMAS[i]; return null; }
+function nomes(arr){ return arr.map(function(n){ return '<span class="nome">'+n+'</span>'; }).join(' e '); }
+
+/* ═══ classificador — em producao os vereditos vem daqui, a prosa do Gemini ═══ */
+function classificar(enun){
+  var t = enun.toLowerCase(), r = {};
+  r.formula  = contem(t.slice(0,28), FORMULAS);
+  r.pergunta = /\?\s*$/.test(enun.trim());
+  r.verbo    = /\b(garantir|combater|enfrentar|proteger|valorizar|ampliar|reduzir|promover|assegurar|preservar|superar|incluir)\b/.test(semAcento(t));
+  r.p1 = !r.pergunta && (!!r.formula || r.verbo);
+  r.p2 = !!contem(t, MARCAS_BR);
+  r.grupo = contem(t, GRUPOS); r.p3 = !!r.grupo; r.p4 = !!r.formula;
+  var i, achou, melhor = 0, c = null;
+  for(i=0;i<CAMPOS.length;i++){ achou = contem(t, CAMPOS[i].kw); if(achou && achou.length > melhor){ melhor = achou.length; c = CAMPOS[i]; } }
+  r.campo = c; r.idade = c ? (ANO - c.ano) : null; r.p6 = c ? (r.idade >= 10) : null;
+  return r;
+}
+function propor(enun, r){
+  if(r.p1 && r.p2 && r.p3 && r.p4) return null;
+  if(!r.p1 || !r.p4) return null;   /* exige reescrever a frase: em producao, Gemini */
+  var s = enun.trim().replace(/\?+$/,''), c = r.campo;
+  if(!r.p3 && c){ if(/\s+no Brasil\s*$/i.test(s)) s = s.replace(/\s+no Brasil\s*$/i, ' ' + c.grupo + ' no Brasil'); else s = s + ' ' + c.grupo; }
+  if(!r.p2 && !/no brasil|brasileir|no país/i.test(s)) s = s + ' no Brasil';
+  s = s.charAt(0).toUpperCase() + s.slice(1);
+  return s === enun.trim() ? null : s;
+}
+function faltam(r){ var f=[]; if(!r.p1) f.push('Situação-problema'); if(!r.p2) f.push('Âncora nacional'); if(!r.p3) f.push('Grupo nomeado'); if(!r.p4) f.push('Verbo de ação'); return f; }
+
+/* ═══ navegacao ═══ */
+var NOMES_TELA = { 't-lista':'Decidir temas', 't-tema':'Tema em foco', 't-banca':'Como a banca escolhe', 't-agendar':'Agendar', 't-espera':'Um instante' };
+function ir(t){ if(telaAtual) pilha.push(telaAtual); mostrar(t); }
+function voltar(){ if(telaAtual==='t-tema' && editando){ editando=false; } if(!pilha.length){ mostrar('t-lista'); return; } mostrar(pilha.pop()); }
+function mostrar(t){
+  var i, telas = document.querySelectorAll('.tela'); for(i=0;i<telas.length;i++) telas[i].classList.remove('on');
+  var el = document.getElementById(t); if(el) el.classList.add('on');
+  telaAtual = t; document.getElementById('btVoltar').hidden = (t==='t-lista');
+  document.getElementById('hdN').textContent = NOMES_TELA[t] || 'Decidir temas';
+  window.scrollTo(0,0);
+}
+var ICONES_TEMA={ claro:'\u2600', escuro:'\u263E', auto:'A' };
+function pintarLua(){ var p=document.documentElement.getAttribute('data-tema-pref')||'auto'; var b=document.getElementById('btLua'); if(b) b.textContent=ICONES_TEMA[p]||'A'; }
+function cicloTema(){
+  var ordem=['claro','escuro','auto'], p=document.documentElement.getAttribute('data-tema-pref')||'auto';
+  var novo=ordem[(ordem.indexOf(p)+1)%3], efetivo=novo;
+  if(novo==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',novo);
+  try{ localStorage.setItem('redaon-tema',novo); }catch(e){}
+  pintarLua();
+}
+pintarLua();
+
+/* ═══ lista ═══ */
+function aprovadosNoCampo(campoId, exceto){ var n=0; for(var i=0;i<TEMAS.length;i++){ var t=TEMAS[i]; if(t.estado!=='aprovado' || t.id===exceto) continue; var r=classificar(t.tt); if(r.campo && r.campo.id===campoId) n++; } return n; }
+function montarItem(t){
+  var r = classificar(t.tt), c = r.campo;
+  var selo = t.origem==='blanche' ? '<span class="selo bl">Proposto por você</span>' : '<span class="selo ia">Proposto pela IA</span>';
+  var meta = c ? (c.nome + ' · ' + (c.ult ? 'último no campo: '+c.ult : 'nunca caiu')) : 'campo não identificado';
+  if(t.estado==='aprovado'){
+    meta = (c ? c.nome : 'sem campo') + ' · ' + esc(t.cat) + (t.semana ? ' · semana de ' + t.semana : ' · sem data')
+         + (t.escolhidos ? '<br>eixos: ' + t.escolhidos.map(rotEixoGrade).join(' · ') : '');
+    return '<div class="item ap" role="button" tabindex="0" onclick="abrirAgendar(\'' + t.id + '\')"><div class="cp">' + selo + '<div class="tt">' + esc(t.tt) + '</div><div class="mt">' + meta + '</div>'
+         + '<div class="desf"><button onclick="event.stopPropagation();desfazerAprovacao(\'' + t.id + '\')">Desfazer aprovação</button></div></div><div class="seta">&#8250;</div></div>';
+  }
+  return '<button class="item' + (t.origem==='blanche'?' dela':'') + '" onclick="abrirTema(\'' + t.id + '\')"><div class="cp">' + selo + '<div class="tt">' + esc(t.tt) + '</div><div class="mt">' + meta + '</div></div><div class="seta">&#8250;</div></button>';
+}
+function montarLista(){
+  var i, t, dela='', ap='', nd=0, na=0, ni=0, h='', grupoAtual=null;
+  for(i=0;i<TEMAS.length;i++){ t=TEMAS[i]; if(t.estado==='aprovado'){ ap+=montarItem(t); na++; } else if(t.origem==='blanche'){ dela+=montarItem(t); nd++; } }
+  for(i=0;i<TEMAS.length;i++){ t=TEMAS[i]; if(t.origem!=='ia' || t.estado!=='proposto') continue; ni++;
+    if(t.grupo!==grupoAtual){ if(grupoAtual!==null) h+='</div>'; h+='<div class="sec" style="margin-top:.8rem">'+esc(t.grupo)+'</div><div class="grupo">'; grupoAtual=t.grupo; }
+    h+=montarItem(t); }
+  if(grupoAtual!==null) h+='</div>';
+  document.getElementById('listaDela').innerHTML = dela || '<div class="vazio">Escreva o seu no campo acima. Ele é diagnosticado do mesmo jeito.</div>';
+  document.getElementById('listaIA').innerHTML = h || '<div class="vazio">Nenhum tema proposto. A Produção traz o bloco do trimestre na casa dela. O que entrar aparece aqui como proposto, esperando você.</div>';
+  document.getElementById('listaAp').innerHTML = ap || '<div class="vazio">Nenhum aprovado ainda. O teto de 2 por campo conta a partir daqui.</div>';
+  document.getElementById('qtDela').textContent = '· '+nd; document.getElementById('qtIA').textContent = '· '+ni+', agrupados por campo'; document.getElementById('qtAp').textContent = '· '+na+' de 12';
+  document.getElementById('faixaDesfazer').innerHTML = ultimaRejeicao ? '<div class="faixa"><span>Rejeitado: '+esc(ultimaRejeicao.tt.slice(0,48))+'…</span><button onclick="desfazerRejeicao()">Desfazer</button></div>' : '';
+}
+
+/* ═══ tema em foco ═══ */
+function abrirTema(id){ atual = porId(id); if(!atual) return; anterior=null; editando=false;
+  sugestaoIA = atual.eixosSug || sugerirEixos(atual); atual.eixosSug = sugestaoIA;
+  marcados = (atual.escolhidos && atual.escolhidos.slice()) || sugestaoIA.slice();
+  renderTema(); ir('t-tema'); }
+function quadro(k,v,d){ return '<div class="med"><div class="k">'+k+'</div><div class="v">'+esc(v)+'</div><div class="d">'+esc(d)+'</div></div>'; }
+function linha(cd,nome,resp){ return '<div class="lin"><div class="p"><span class="cd">'+cd+'</span>'+nome+':</div><div class="r">'+resp+'</div></div>'; }
+function renderTema(){
+  var t = atual, dela = (t.origem==='blanche'), r = classificar(t.tt), c = r.campo, prop = propor(t.tt, r), f = faltam(r);
+  var h = dela ? '<span class="selo bl">Proposto por você</span>' : '<span class="selo ia">Proposto pela IA</span>';
+  h += '<div class="enun">'+esc(t.tt)+'</div>';
+  if(anterior) h += '<div class="mudou">Enunciado alterado · <button onclick="desfazerEnunciado()">voltar ao anterior</button></div>';
+
+  var diz = f.length ? ('Fica devendo '+nomes(f)+'. O resto atende.') : 'Atende a todos os critérios que a tela verifica. O "Quando esse assunto caiu" não aprova nem reprova — informa há quanto tempo o campo não cai.';
+  var risco = c ? (c.vezes===0 ? ('Campo '+c.nome+' nunca caiu na série — com '+SEM_CAMPO+' enunciados ainda sem campo.') : ('Campo '+c.nome+', '+c.vezes+(c.vezes===1?' aparição':' aparições')+' em '+TOTAL_SERIE+' enunciados, a última em '+c.ult+'.')) : 'Não consegui ligar o enunciado a nenhum campo da série.';
+  h += '<div class="linhas"><div class="linha"><div class="k">'+(dela?'O que a série diz':'Por que passa')+'</div><div class="v">'+diz+'</div></div>'
+     + '<div class="linha"><div class="k">Risco</div><div class="v">'+esc(risco)+'</div></div>'
+     + '<div class="linha"><div class="k">Repertório</div><div class="v">'+esc(t.rep||'Levantado na Fábrica, depois que você decidir.')+'</div></div></div>';
+
+  var jaNoCampo = c ? aprovadosNoCampo(c.id, t.id) : 0, posicao = jaNoCampo+1;
+  h += '<div class="medidas">'
+     + quadro('Campo', c?c.nome:'não identificado', c?(c.ult?'último no campo: '+c.ult:'nunca na série'):'entra na fila')
+     + quadro('Âncora', c?c.lei:'a conferir', c?(r.idade+' anos'):'campo não identificado')
+     + quadro('Trimestre', c?(posicao+'º de '+c.nome):'a definir', posicao>2?'acima do teto de 2 por campo':'teto de 2 por campo')
+     + quadro('Material', t.escolhidos?(t.escolhidos.length+' eixos marcados'):'eixos a marcar abaixo', 'produção começa após aprovar')
+     + '</div>';
+
+  h += '<div class="crit"><div class="cab">Critério por critério</div>'
+     + linha('P1','Situação-problema', r.p1 ? '<span class="ok">Atende.</span> Pede intervenção, não opinião.' : '<span class="no">Não atende.</span> '+(r.pergunta?'Termina em pergunta, que sumiu da regular em 2004.':'Ainda é assunto, não problema com sujeito e verbo.'))
+     + linha('P2','Âncora nacional', r.p2 ? '<span class="ok">Atende.</span> Traz a marca nacional no próprio enunciado.' : '<span class="no">Não atende.</span> 13 dos 14 enunciados regulares desde 2012 trazem.')
+     + linha('P3','Grupo nomeado', r.p3 ? '<span class="ok">Atende.</span> Grupo no enunciado: <b>'+esc(r.grupo)+'</b>.' : '<span class="no">Não atende.</span> Nenhum grupo social aparece. Foi o padrão mais forte de 2021 a 2025.')
+     + linha('P4','Verbo de ação', r.p4 ? '<span class="ok">Atende.</span> Abre com <b>'+esc(r.formula)+'</b>, uma das fórmulas da banca.' : '<span class="no">Não atende.</span> Não reconheci fórmula de ação na abertura.')
+     + linha('P5','Quando esse assunto caiu', c ? (c.vezes===0 ? '<span class="nc">Nunca caiu</span> na série. Campo '+esc(c.nome)+'. <b>'+SEM_CAMPO+' enunciados ainda sem campo</b> — a contagem pode mudar.' : 'Campo '+esc(c.nome)+'. Caiu <b>'+c.vezes+(c.vezes===1?' vez':' vezes')+'</b> em '+TOTAL_SERIE+' enunciados, a última em <b>'+c.ult+'</b>.'+(c.conf?' <span class="nc">'+c.conf+' a conferir.</span>':'')) : '<span class="nc">Campo não identificado.</span> Entra na fila.')
+     + linha('P6','Quando virou lei', c ? ((r.idade>=10) ? '<span class="ok">Atende.</span> '+esc(c.lei)+', de <b>'+c.ano+'</b>. '+r.idade+' anos — a mediana da série é quinze.' : '<span class="no">Não atende.</span> '+esc(c.lei)+', de <b>'+c.ano+'</b>. Só '+r.idade+' anos: ainda é notícia.') : '<span class="nc">A conferir.</span> Sem campo identificado, o banco não devolve âncora.')
+     + '</div>';
+
+  if(prop){
+    h += '<div class="aviso"><span class="tp">Ajuste possível.</span> Fecha '+nomes(f)+' sem trocar o assunto:'
+       + '<span class="prop">'+esc(prop)+'</span><span class="pq">Ao usar, a análise acima é refeita na hora. Você pode desfazer.</span>'
+       + '<button class="btn ok sm" style="margin-top:.7rem" onclick="usarProposto()">Usar este enunciado</button></div>';
+  } else if(f.length){
+    h += '<div class="aviso"><span class="tp">Precisa de reescrita.</span> Fechar '+nomes(f)+' exige mudar a estrutura da frase. Em produção quem propõe é o Gemini; aqui, use Editar enunciado.</div>';
+  }
+
+  if(editando){
+    h += '<div class="edit"><div class="lb">Editar o enunciado</div><textarea id="ta">'+esc(t.tt)+'</textarea>'
+       + '<div class="dupla"><button class="btn sm" onclick="salvarEdicao()">Reavaliar</button><button class="btn g sm" onclick="cancelarEdicao()">Cancelar</button></div></div>';
+  }
+  if(dela && f.length && !editando){
+    h += '<div class="edit mot"><div class="lb">Se seguir assim, registre o motivo</div><textarea id="motivo" placeholder="Opcional. Fica gravado junto do tema.">'+esc(t.motivo||'')+'</textarea></div>';
+  }
+
+  h += '<div class="zonaEixos"><div class="zt">Por onde vai o material deste tema?</div>'
+     + '<div class="zs">O tracejado é a sugestão do Gemini — ajuste como quiser. Mínimo de '+MIN_EIXOS+'. A Fábrica só produz para os eixos que você marcar.</div>'
+     + '<div class="grade" id="grade"></div><div class="contaEixos" id="contaEixos"></div></div>';
+
+  h += '<div class="acoes">';
+  if(!editando) h += '<button class="btn g" onclick="abrirEdicao()">'+(dela?'Ajustar':'Editar enunciado')+'</button>';
+  if(dela){ h += '<button class="btn ok" id="btAprovar" onclick="abrirCategoria()">Seguir assim</button>'; }
+  else { h += '<button class="btn ok" id="btAprovar" onclick="abrirCategoria()">Aprovar</button><button class="btn nao" onclick="rejeitar()">Rejeitar</button>'; }
+  h += '</div>';
+  if(dela) h += '<div class="rodape">Se você seguir contra a leitura, o tema entra normalmente e o motivo fica registrado. A leitura é diagnóstico, não veredito.</div>';
+  document.getElementById('temaCorpo').innerHTML = h;
+  montarGrade();
+}
+function montarGrade(){
+  var el=document.getElementById('grade'); if(!el) return;
+  var h='', i;
+  for(i=0;i<EIXOS_GRADE.length;i++){
+    var id=EIXOS_GRADE[i][0], sel=marcados.indexOf(id)>=0, ia=sugestaoIA.indexOf(id)>=0;
+    h+='<button class="eixoBt'+(sel?' sel':'')+(ia?' ia':'')+'" onclick="alternarEixo(\''+id+'\')">'
+      +'<span class="en">'+EIXOS_GRADE[i][1]+'</span><span class="ee">'+(ia?'sugerido':'&nbsp;')+'</span></button>';
+  }
+  el.innerHTML=h;
+  var c=document.getElementById('contaEixos'), b=document.getElementById('btAprovar');
+  if(marcados.length<MIN_EIXOS){
+    if(c) c.innerHTML='<b>'+marcados.length+'</b> de no mínimo '+MIN_EIXOS+' — marque mais '+(MIN_EIXOS-marcados.length)+'.';
+    if(b){ b.disabled=true; b.textContent='Marque pelo menos '+MIN_EIXOS+' eixos'; }
+  } else {
+    if(c) c.innerHTML='<b>'+marcados.length+'</b> marcados: '+marcados.map(rotEixoGrade).join(' \u00b7 ');
+    if(b){ b.disabled=false; b.textContent=(atual&&atual.origem==='blanche'?'Seguir assim':'Aprovar')+' com '+marcados.length+' eixos'; }
+  }
+}
+function alternarEixo(id){ var i=marcados.indexOf(id); if(i>=0) marcados.splice(i,1); else marcados.push(id); montarGrade(); }
+function usarProposto(){ var r=classificar(atual.tt), p=propor(atual.tt,r); if(!p) return; anterior=atual.tt; atual.tt=p; editando=false; renderTema(); window.scrollTo(0,0); }
+function abrirEdicao(){ editando=true; renderTema(); var ta=document.getElementById('ta'); if(ta){ ta.focus(); ta.scrollIntoView({block:'center'}); } }
+function salvarEdicao(){ var v=document.getElementById('ta').value.trim(); if(v.length<20){ alert('O enunciado está curto demais para avaliar.'); return; } anterior=atual.tt; atual.tt=v; editando=false; renderTema(); window.scrollTo(0,0); }
+function cancelarEdicao(){ editando=false; renderTema(); }
+function desfazerEnunciado(){ if(!anterior) return; atual.tt=anterior; anterior=null; renderTema(); window.scrollTo(0,0); }
+
+/* ═══ aprovar: categoria proposta pela IA, confirmada por ela ═══ */
+function abrirCategoria(){
+  if(marcados.length<MIN_EIXOS) return;
+  var m = document.getElementById('motivo'); if(m) atual.motivo = m.value.trim();
+  var h='', i; for(i=0;i<CATEGORIAS.length;i++){ h += '<button class="pill'+(CATEGORIAS[i]===atual.cat?' sel':'')+'" onclick="confirmarCategoria(\''+CATEGORIAS[i]+'\')"><span>'+CATEGORIAS[i]+(CATEGORIAS[i]===atual.cat?'<span class="sub">· proposta</span>':'')+'</span><span class="ck">&#10003;</span></button>'; }
+  abrirGaveta('Em qual categoria o aluno vai encontrar este tema?', atual.cat ? 'A IA propôs uma. Você confirma ou troca.' : 'O tema veio sem categoria. Escolha uma para aprovar.', h);
+}
+function confirmarCategoria(cat){
+  atual.cat = cat; atual.estado='aprovado'; atual.escolhidos = marcados.slice(); fecharGaveta();
+  /* em producao: aprovar_tema_proposto(id, categoria, motivo) — o tema nasce em temas com ativo=false */
+  montarLista(); pilha=[]; mostrar('t-lista');
+}
+function desfazerAprovacao(id){ var t=porId(id); if(!t) return; if(t.fichas && t.fichas[0]>0 && t.semana){ alert('Não dá para desfazer: já tem data e material. Desmarque a data antes.'); return; } t.estado='proposto'; t.semana=null; montarLista(); }
+function rejeitar(){ ultimaRejeicao = atual; atual.estado='rejeitado'; montarLista(); pilha=[]; mostrar('t-lista'); }
+function desfazerRejeicao(){ if(!ultimaRejeicao) return; ultimaRejeicao.estado='proposto'; ultimaRejeicao=null; montarLista(); }
+
+/* ═══ tema da Blanche ═══ */
+function avaliarMeuTema(){
+  var txt = document.getElementById('campoBlanche').value.trim();
+  if(txt.length<20){ alert('O enunciado está curto demais para avaliar.'); return; }
+  var t = { id:'b'+(seq++), origem:'blanche', grupo:null, cat:null, estado:'proposto', tt:txt, rep:null, fichas:null };
+  TEMAS.unshift(t); document.getElementById('campoBlanche').value='';
+  ir('t-espera'); setTimeout(function(){ pilha.pop(); montarLista(); abrirTema(t.id); }, 650);
+}
+
+/* ═══ agendar: avisar quantos eixos estao selados ═══ */
+var agTema=null, agSemana=null;
+function proximasSegundas(n){ var d=new Date(); d.setDate(d.getDate()+((8-d.getDay())%7||7)); var out=[]; for(var i=0;i<n;i++){ var x=new Date(d); x.setDate(d.getDate()+7*i); out.push(x); } return out; }
+function fmt(d){ return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2); }
+function abrirAgendar(id){
+  agTema=porId(id); if(!agTema) return; agSemana=null;
+  var sel = agTema.fichas ? agTema.fichas[0] : 0, c = classificar(agTema.tt).campo;
+  var h = '<span class="selo ia">Aprovado</span><div class="enun">'+esc(agTema.tt)+'</div>'
+        + '<div class="linhas"><div class="linha"><div class="k">Campo</div><div class="v">'+(c?c.nome:'não identificado')+' · '+esc(agTema.cat||'')+'</div></div>'
+        + '<div class="linha"><div class="k">Fichas</div><div class="v"><span class="'+(sel>=9?'ok':(sel>0?'nc':'no'))+'">'+sel+' de 9 eixos selados</span>. '+(sel>=9?'Vitrine completa.':(sel>0?'O aluno verá só o que estiver selado.':'A vitrine chega vazia ao aluno.'))+'</div></div></div>';
+  if(sel<9) h += '<div class="aviso"><span class="tp">Pode agendar mesmo assim.</span> Mas o que não estiver selado na data simplesmente não aparece — sem erro visível.</div>';
+  h += '<div class="sec">Semana de publicação</div><div class="sem" id="semanas"></div>'
+     + '<div class="acoes"><button class="btn ok" onclick="gravarAgenda()">Gravar a data</button></div>'
+     + '<div class="rodape">Publica na segunda-feira escolhida, pela rotina das 01h de Manaus. A data grava em agenda_temas.</div>';
+  document.getElementById('agCorpo').innerHTML = h;
+  var segs=proximasSegundas(6), hs='';
+  for(var i=0;i<segs.length;i++) hs += '<button class="semana" onclick="escolherSemana(this,\''+fmt(segs[i])+'\')"><span><div class="d">Segunda, '+fmt(segs[i])+'</div><div class="o">'+(i===0?'próxima semana':(i+1)+' semanas')+'</div></span><span class="ck">&#10003;</span></button>';
+  document.getElementById('semanas').innerHTML = hs;
+  ir('t-agendar');
+}
+function escolherSemana(el,d){ var s=document.querySelectorAll('.semana'); for(var i=0;i<s.length;i++) s[i].classList.remove('sel'); el.classList.add('sel'); agSemana=d; }
+function gravarAgenda(){ if(!agSemana){ alert('Escolha a semana.'); return; } agTema.semana=agSemana; montarLista(); pilha=[]; mostrar('t-lista'); }
+
+/* A importação de temas mora na casa da Produção (mockup adm-producao v2-0). */
+
+/* ═══ banca ═══ */
+var fi=0, escolha={};
+function montarBanca(){
+  var h='', i;
+  for(i=0;i<PADROES.length;i++) h+='<div class="pad"><div class="h"><span class="cd">P'+(i+1)+'</span><span class="nm">'+PADROES[i][0]+'</span></div><div class="ev">'+PADROES[i][1]+'</div><div class="ds">'+PADROES[i][2]+'</div></div>';
+  document.getElementById('listaPadroes').innerHTML=h;
+  h='';
+  for(i=0;i<CAMPOS.length;i++){ var c=CAMPOS[i]; h+='<div class="cl"><div><div class="nm">'+c.nome+'</div><div class="lei">'+c.lei+' · '+c.ano+'</div></div><div class="ct">'+(c.vezes===0?'nunca caiu':'caiu <b>'+c.vezes+'</b>, última em <b>'+c.ult+'</b>')+(c.conf?'<br><span class="nc">'+c.conf+' a conferir</span>':'')+'</div></div>'; }
+  document.getElementById('listaCampos').innerHTML=h;
+  document.getElementById('qtSerie').textContent='· '+TOTAL_SERIE+' enunciados aplicados';
+  document.getElementById('qtFila').textContent='· '+FILA.length;
+  document.getElementById('rodBanca').innerHTML='Base: '+TOTAL_SERIE+' enunciados aplicados, de 1998 a 2025, nas duas camadas. A prova anulada de 2009 fica no banco como registro e não conta. Nenhuma medida desta tela é porcentagem — frequência de campo não é probabilidade de cair.';
+  fila();
+}
+function fila(){
+  var f=FILA[fi], v=escolha[f[0]]||f[4];
+  document.getElementById('fila').innerHTML = '<div class="cont"><span>'+(fi+1)+' de '+FILA.length+'</span><span>ENEM '+f[1]+' · '+f[2]+'</span></div>'
+    + '<div class="en">'+esc(f[3])+'</div>'+(f[6]?'<div class="duplo">O mapa nomeia dois: '+f[6]+'.</div>':'')
+    + '<div class="prop"><span class="k">Proposta da IA</span><span class="v"'+(v==='nenhum'?' style="color:var(--muted)"':'')+'>'+v+'</span></div><div class="pq">'+esc(f[5])+'</div>'
+    + '<div class="dupla"><button class="btn ok sm" onclick="filaProximo()">Confirmar</button><button class="btn g sm" onclick="abrirCampo()">Trocar</button></div>'
+    + '<div class="nav"><button onclick="filaAnterior()">Anterior</button><button onclick="filaProximo()">Deixar para depois</button></div>';
+}
+function filaProximo(){ fi=(fi+1)%FILA.length; fila(); }
+function filaAnterior(){ fi=(fi-1+FILA.length)%FILA.length; fila(); }
+function abrirCampo(){
+  var f=FILA[fi], v=escolha[f[0]]||f[4], h='', i;
+  for(i=0;i<CAMPOS.length;i++){ var c=CAMPOS[i]; h+='<button class="pill'+(c.nome===v?' sel':'')+'" onclick="escolherCampo(\''+c.nome+'\')"><span>'+c.nome+'<span class="sub">· '+(c.vezes===0?'nunca caiu':'caiu '+c.vezes+' · '+c.ult)+'</span></span><span class="ck">&#10003;</span></button>'; }
+  h+='<button class="pill'+(v==='nenhum'?' sel':'')+'" onclick="escolherCampo(\'nenhum\')"><span>nenhum<span class="sub">· fora de toda contagem</span></span><span class="ck">&#10003;</span></button>';
+  abrirGaveta('Este enunciado é de qual campo?', 'O campo é o problema. O grupo já mora no critério Grupo nomeado.', h);
+}
+function escolherCampo(n){ escolha[FILA[fi][0]]=n; fecharGaveta(); fila(); }
+
+/* ═══ gaveta ═══ */
+function abrirGaveta(t,s,h){ document.getElementById('gavT').textContent=t; document.getElementById('gavS').textContent=s; document.getElementById('gavPills').innerHTML=h; document.getElementById('veu').classList.add('on'); document.getElementById('gav').classList.add('on'); }
+function fecharGaveta(){ document.getElementById('veu').classList.remove('on'); document.getElementById('gav').classList.remove('on'); }
+
+montarLista(); montarBanca();
+</script>
+</body>
+</html>

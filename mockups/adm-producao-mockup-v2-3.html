@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RedaON · ADM · Fábrica — mockup v2-3</title>
+<script>
+(function(){
+  var pref='auto'; try{ pref=localStorage.getItem('redaon-tema')||'auto'; }catch(e){}
+  var efetivo=pref;
+  if(pref==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',pref);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RedaON · ADM · Fábrica · MOCKUP v2-3
+   Novidade aprovada: "Trazer temas para dentro" sai da casa da
+   Pedagógica e mora aqui — o ADM - Fábrica traz, a ADM Pedagógica decide.
+   Validações do contrato transplantadas do decidir v2-0.
+   Visual: identidade do portal (amostra v1). Dados de mentira.
+   Nada fala com o banco. Sem blur.
+   ============================================================ */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+:root{
+  --bg:#fdfbf4; --sunken:#f2ede0; --surface:#ffffff; --surface2:#f6f2e6; --top:#fbf8ee;
+  --text:#0a4a4b; --text2:#3a5556; --muted:#8a8576; --borderRGB:10,74,75;
+  --cyan:#0a8c8d; --cyanRGB:10,140,141; --onCyan:#ffffff;
+  --purple:#5a4fc4; --purpleRGB:90,79,196;
+  --green:#0f8a4d; --greenRGB:15,138,77; --red:#c0473b; --redRGB:192,71,59;
+  --orange:#b45f24; --orangeRGB:180,95,36; --ambar:#96700a;
+}
+html[data-tema="escuro"]{
+  --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --top:#191c22;
+  --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0; --borderRGB:71,69,84;
+  --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020;
+  --purple:#6c5ce7; --purpleRGB:108,92,231;
+  --green:#4ade80; --greenRGB:74,222,128; --red:#ff8b8b; --redRGB:255,139,139;
+  --orange:#ff9d68; --orangeRGB:255,157,104; --ambar:#e8b23c;
+}
+body{ font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
+
+.hd{ position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.18);
+  padding:calc(.6rem + env(safe-area-inset-top)) 1rem .6rem; }
+.hdIn{ max-width:860px; margin:0 auto; display:flex; align-items:center; gap:.7rem; }
+.hd .voltar{ flex:none; width:36px; height:36px; border-radius:11px; border:1px solid rgba(var(--borderRGB),.22);
+  background:var(--surface); color:var(--text2); font-size:1rem; cursor:pointer; }
+.hd .voltar:hover{ color:var(--cyan); border-color:rgba(var(--cyanRGB),.4); }
+.hd .voltar[hidden]{ display:none; }
+.marca{ display:flex; align-items:center; gap:.5rem; min-width:0; }
+.marca .lg{ width:30px; height:30px; border-radius:9px; background:var(--cyan); color:var(--onCyan);
+  display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem; font-style:italic; flex:0 0 auto; }
+.marca .nm{ font-size:1.02rem; font-weight:900; font-style:italic; letter-spacing:-.04em; color:var(--text); white-space:nowrap; }
+.marca .nm i{ color:var(--cyan); font-style:italic; }
+.hdSep{ width:1px; height:22px; background:rgba(var(--borderRGB),.25); flex:0 0 auto; }
+.hdOnde{ min-width:0; flex:1; }
+.hdOnde .q{ font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+.hdOnde .n{ font-size:.92rem; font-weight:800; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hd .lua{ flex:none; width:36px; height:36px; border-radius:11px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; }
+.hd .lua:hover{ color:var(--cyan); background:rgba(var(--cyanRGB),.10); }
+
+.wrap{ max-width:860px; margin:0 auto; padding:1.6rem 1rem 6rem; }
+.tela{ display:none; } .tela.on{ display:block; }
+h2.t{ font-size:1.3rem; font-weight:800; line-height:1.3; letter-spacing:-.01em; }
+p.s{ font-size:.85rem; color:var(--text2); line-height:1.65; margin-top:.4rem; max-width:60ch; }
+.sec{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:1.7rem 0 .7rem; }
+.sec .qt{ color:var(--text2); font-weight:700; text-transform:none; letter-spacing:0; }
+.vazio{ font-size:.8rem; color:var(--muted); padding:.9rem 1rem; border:1px dashed rgba(var(--borderRGB),.28); border-radius:14px; line-height:1.6; }
+.ok{ color:var(--green); font-weight:800; } .no{ color:var(--red); font-weight:800; }
+
+.tarefa{ width:100%; text-align:left; font:inherit; color:var(--text); cursor:pointer;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:16px;
+  padding:1rem 1.05rem; display:flex; align-items:center; gap:.95rem; margin-bottom:.65rem; transition:border-color .15s; }
+.tarefa:hover{ border-color:rgba(var(--cyanRGB),.45); }
+.tarefa:active{ background:var(--surface2); }
+.tarefa .num{ flex:none; width:44px; height:44px; border-radius:13px; display:grid; place-items:center;
+  font-size:1.05rem; font-weight:800; background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.tarefa.zero .num{ background:rgba(var(--borderRGB),.14); color:var(--muted); }
+.tarefa .cp{ flex:1; min-width:0; }
+.tarefa .cp .a{ display:block; font-size:.94rem; font-weight:700; line-height:1.35; }
+.tarefa .cp .b{ display:block; font-size:.78rem; color:var(--muted); margin-top:.25rem; line-height:1.5; }
+.tarefa .seta{ flex:none; color:var(--muted); font-size:1.15rem; }
+.tarefa:disabled{ opacity:.5; cursor:default; }
+.tarefa:disabled:hover{ border-color:rgba(var(--borderRGB),.20); }
+
+.item{ width:100%; text-align:left; font:inherit; color:var(--text); background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.20); border-radius:16px; padding:.95rem 1.05rem; display:flex; align-items:center; gap:.8rem; margin-bottom:.6rem; }
+.item .cp{ flex:1; min-width:0; }
+.item .tt{ display:block; font-size:.92rem; font-weight:700; line-height:1.45; }
+.item .mt{ display:block; font-size:.75rem; color:var(--muted); margin-top:.3rem; line-height:1.5; }
+.barra{ height:5px; border-radius:3px; background:rgba(var(--borderRGB),.14); margin-top:.55rem; overflow:hidden; }
+.barra i{ display:block; height:100%; background:var(--cyan); }
+
+textarea{ width:100%; margin-top:.6rem; font-size:.78rem; line-height:1.5; color:var(--text); background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.28); border-radius:12px; padding:.7rem .8rem; resize:vertical; min-height:170px;
+  font-family:ui-monospace,Menlo,Consolas,monospace; }
+textarea::placeholder{ color:var(--muted); font-family:Inter,system-ui,sans-serif; }
+textarea:focus{ outline:none; border-color:var(--cyan); }
+.btn{ width:100%; font:inherit; font-size:.9rem; font-weight:800; padding:.9rem 1rem; border-radius:14px; border:none; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
+.btn.g{ background:transparent; color:var(--text); border:1px solid rgba(var(--borderRGB),.35); }
+.btn.ok{ background:var(--green); color:var(--onCyan); }
+.acoes{ display:grid; gap:.6rem; margin-top:1.1rem; }
+.rodape{ font-size:.74rem; color:var(--muted); line-height:1.65; margin-top:1.8rem; padding-top:1rem; border-top:1px solid rgba(var(--borderRGB),.16); max-width:60ch; }
+
+/* resultado da conferência do bloco */
+.res{ margin-top:.9rem; display:grid; gap:.45rem; }
+.res .r{ padding:.65rem .8rem; border-radius:12px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); font-size:.8rem; line-height:1.5; }
+.res .r .e{ font-weight:600; }
+.res .r .m{ font-size:.72rem; color:var(--muted); margin-top:.2rem; }
+
+#toast{ position:fixed; left:50%; bottom:calc(1.4rem + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(160%); z-index:90;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.3); color:var(--text); font-size:.82rem; font-weight:600; padding:.7rem 1.1rem;
+  border-radius:99px; transition:transform .22s ease; max-width:88vw; text-align:center; box-shadow:0 4px 14px rgba(0,0,0,.08); }
+#toast.on{ transform:translateX(-50%) translateY(0); }
+.tagAmostra{ position:fixed; right:.9rem; bottom:.9rem; z-index:50; background:rgba(var(--purpleRGB),.14);
+  border:1px solid rgba(var(--purpleRGB),.35); color:var(--purple); font-size:.66rem; font-weight:800; padding:.35rem .6rem; border-radius:99px; }
+
+@media (min-width:820px){ html{ font-size:17px; } .wrap{ padding-top:2.2rem; } h2.t{ font-size:1.5rem; } }
+@media (min-width:1180px){ html{ font-size:18px; } }
+@media (prefers-reduced-motion:reduce){ #toast{ transition:none; } }
+
+/* ═══ v2-1 · tema em curadoria + pedido + importar material + gaveta ═══ */
+.item.clic{ cursor:pointer; transition:border-color .15s; }
+.item.clic:hover{ border-color:rgba(var(--cyanRGB),.45); }
+.item .seta{ flex:none; color:var(--muted); font-size:1.15rem; }
+.selo{ display:inline-block; font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:.2rem .5rem; border-radius:7px; margin-bottom:.4rem; background:rgba(var(--greenRGB),.12); color:var(--green); }
+.enun{ font-size:1.15rem; font-weight:800; line-height:1.45; margin-top:.4rem; }
+.linhas{ margin-top:1.1rem; display:grid; gap:.75rem; }
+.linha{ display:grid; grid-template-columns:96px 1fr; gap:.75rem; align-items:start; }
+.linha .k{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding-top:.15rem; }
+.linha .v{ font-size:.85rem; color:var(--text2); line-height:1.6; }
+.eixos{ margin-top:1.1rem; display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem; }
+.ex{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:13px; padding:.65rem .65rem; }
+.ex .n{ font-size:.77rem; font-weight:700; line-height:1.3; }
+.ex .e{ font-size:.68rem; margin-top:.22rem; font-weight:700; }
+.ex .e.falta{ color:var(--muted); font-weight:500; } .ex .e.revisao{ color:var(--ambar); } .ex .e.aprovado{ color:var(--green); }
+.pedido{ margin-top:1.2rem; background:var(--surface); border:1px solid rgba(var(--cyanRGB),.35); border-radius:16px; padding:.95rem 1rem; }
+.pedido .lb{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--cyan); }
+.pedido .ds{ font-size:.79rem; color:var(--text2); line-height:1.55; margin-top:.35rem; }
+.dupla{ display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:.7rem; }
+.btn.sm{ font-size:.8rem; padding:.72rem .9rem; border-radius:12px; }
+.btn:disabled{ opacity:.45; cursor:default; }
+.resB{ margin-top:.9rem; display:grid; gap:.45rem; }
+.resB .r{ display:flex; gap:.5rem; align-items:flex-start; padding:.6rem .75rem; border-radius:12px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); font-size:.79rem; line-height:1.5; }
+.resB .r .ic{ flex:none; font-weight:800; } .resB .r.ok .ic{ color:var(--green); } .resB .r.mal .ic{ color:var(--red); }
+.previa{ margin-top:.8rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:14px; padding:.85rem .95rem; }
+.previa .cm{ font-size:.7rem; color:var(--muted); }
+.previa .pf{ font-size:.78rem; font-weight:800; color:var(--text2); margin-top:.5rem; }
+.previa .pd{ font-size:.86rem; font-weight:600; line-height:1.55; margin-top:.2rem; }
+.previa .pz, .previa .pu{ font-size:.82rem; line-height:1.6; margin-top:.5rem; color:var(--text2); }
+.previa .pu{ color:var(--text); border-left:2px solid var(--purple); padding-left:.7rem; }
+.previa .pr{ display:block; font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+.alvo{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; padding:.75rem .9rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.24); border-radius:13px; margin-top:.5rem; font-size:.85rem; font-weight:600; cursor:pointer; }
+.alvo:hover{ border-color:rgba(var(--cyanRGB),.45); }
+.alvo .t2{ font-size:.7rem; color:var(--muted); font-weight:500; }
+.veu{ position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; display:none; } .veu.on{ display:block; }
+.gav{ position:fixed; left:0; right:0; bottom:0; z-index:41; background:var(--surface); border-radius:22px 22px 0 0; border-top:1px solid rgba(var(--borderRGB),.25);
+  padding:.6rem 1rem calc(1.2rem + env(safe-area-inset-bottom)); transform:translateY(101%); transition:transform .22s ease; max-height:84vh; overflow-y:auto; }
+.gav.on{ transform:translateY(0); }
+@media (prefers-reduced-motion:reduce){ .gav{ transition:none; } }
+.gav .grip{ width:38px; height:4px; border-radius:2px; background:rgba(var(--borderRGB),.4); margin:.2rem auto .9rem; }
+.gav .gt{ font-size:.92rem; font-weight:800; line-height:1.4; }
+.pill{ width:100%; min-height:52px; margin-top:.5rem; font:inherit; font-size:.86rem; font-weight:600; text-align:left; color:var(--text); background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.24); border-radius:14px; padding:.8rem 1rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+.pill:hover{ border-color:rgba(var(--cyanRGB),.45); }
+.pill .sub{ font-size:.7rem; color:var(--muted); font-weight:500; display:block; margin-top:.1rem; }
+.pill .ck{ color:var(--cyan); font-weight:800; opacity:0; } .pill.sel{ border-color:rgba(var(--cyanRGB),.65); } .pill.sel .ck{ opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="hd"><div class="hdIn">
+  <button class="voltar" id="btVoltar" onclick="voltar()" aria-label="Voltar">&#8592;</button>
+  <div class="marca"><span class="lg">R</span><span class="nm">Reda<i>ON</i></span></div>
+  <div class="hdSep"></div>
+  <div class="hdOnde"><div class="q">ADM · 🏭 Fábrica</div><div class="n" id="hdN">Fábrica</div></div>
+  <button class="lua" id="btLua" onclick="cicloTema()" aria-label="Tema claro, escuro ou automático">&#9788;</button>
+</div></div>
+
+<div class="wrap">
+
+  <!-- ════════ CASA ════════ -->
+  <div class="tela on" id="t-casa">
+    <h2 class="t">ADM &middot; Fábrica</h2>
+    <p class="s">Você pede à Fábrica de Conteúdo, decide com ela o que produzir e o que reaproveitar do acervo, confere as fontes lá — e traz para dentro. Quem decide tema e aprova material é a ADM Pedagógica.</p>
+
+    <div class="sec">Em curadoria, aguardando material <span class="qt" id="qtAg"></span></div>
+    <div id="listaAg"></div>
+
+    <div class="sec">Trazer da Fábrica</div>
+    <button class="tarefa" onclick="ir('t-importar-temas')">
+      <span class="num">&#128221;</span>
+      <span class="cp"><span class="a">Trazer temas para dentro</span>
+        <span class="b">Cola o bloco de temas que saiu da Fábrica de Conteúdo. Entram como propostos — decidir é da ADM Pedagógica.</span></span>
+      <span class="seta">&#8250;</span>
+    </button>
+    <button class="tarefa" onclick="abrirImportarMat(null)">
+      <span class="num">&#8681;</span>
+      <span class="cp"><span class="a">Trazer material para dentro</span>
+        <span class="b">Cola o JSON único do tema, gerado após a sua aprovação na Fábrica. Entra conferido, para a ADM Pedagógica aprovar.</span></span>
+      <span class="seta">&#8250;</span>
+    </button>
+    <button class="tarefa zero" disabled>
+      <span class="num">&#9881;</span>
+      <span class="cp"><span class="a">Gerar exercícios do tema</span>
+        <span class="b">Depois do primeiro tema com material aprovado.</span></span>
+      <span class="seta">&#8250;</span>
+    </button>
+
+    <div class="rodape">Você não decide tema, não aprova material e não escolhe categoria — isso é da ADM Pedagógica. O que é do ADM - Fábrica: pedir, conferir e trazer.</div>
+  </div>
+
+  <!-- ════════ TEMA EM CURADORIA ════════ -->
+  <div class="tela" id="t-tema"><div id="temaCorpo"></div></div>
+
+  <!-- ════════ TRAZER MATERIAL ════════ -->
+  <div class="tela" id="t-importar-mat">
+    <h2 class="t">Trazer material para dentro</h2>
+    <p class="s">Cole o JSON único do tema — o que a Fábrica gera depois do seu "aprovado" na conversa. Ele é verificado eixo a eixo antes de virar linha, e entra <b>conferido, para a ADM Pedagógica aprovar</b>. Eixo que emperrou vem reportado no próprio bloco.</p>
+    <div class="sec">Para qual tema</div>
+    <div class="alvo" onclick="abrirEscolhaTema()"><span id="alvoNome">Escolha o tema</span><span class="t2">trocar &#8250;</span></div>
+    <div class="sec">O bloco</div>
+    <textarea id="colaMat" spellcheck="false" placeholder='{"peca":"material_tema","tema":"...","eixos":[{"eixo":"legislacao","titulo":"...","itens":[{"cab":"...","url":"https://...","dado":"...","diz":"...","como_usar":"...","fonte_conferida":true,"conferido_por":"Pedro","conferido_em":"2026-09-02"}]}],"emperrados":[{"eixo":"filosofia","motivo":"..."}]}'></textarea>
+    <div class="acoes"><button class="btn g" onclick="conferirBloco()">Conferir se está completo</button></div>
+    <div class="resB" id="saidaMat"></div>
+    <div class="acoes"><button class="btn" id="btImportarMat" disabled onclick="importarMat()">Trazer para dentro</button></div>
+  </div>
+
+  <!-- ════════ TRAZER TEMAS ════════ -->
+  <div class="tela" id="t-importar-temas">
+    <h2 class="t">Trazer temas para dentro</h2>
+    <p class="s">Cole o bloco que saiu da conversa com o Claude na Fábrica. Cada tema traz enunciado, categoria (uma das 10), campo (um dos 13) e a linha de repertório. O que não cumprir o contrato fica de fora, com o motivo.</p>
+    <textarea id="jsonImp" spellcheck="false" placeholder='[{"enunciado":"Desafios para ...","categoria":"Trabalho","campo":"trabalho","grupo":"Campos recorrentes","repertorio":"..."}]'></textarea>
+    <div class="acoes"><button class="btn" onclick="conferirImportacao()">Conferir o bloco</button></div>
+    <div class="res" id="resImp"></div>
+    <div id="acImp"></div>
+    <div class="rodape">O Claude nunca escreve no banco — na Fábrica ele só lê o acervo. Os temas entram como <b>propostos</b> e aparecem na fila "Decidir temas" da ADM Pedagógica — aprovar, reformular ou rejeitar continua sendo dela.</div>
+  </div>
+
+</div>
+
+<div class="veu" id="veu" onclick="fecharGaveta()"></div>
+<div class="gav" id="gav"><div class="grip"></div><div class="gt" id="gavT"></div><div id="gavPills"></div></div>
+
+<div id="toast"></div>
+<span class="tagAmostra">MOCKUP · ADM Fábrica v2-3</span>
+
+<script>
+/* ─── tema visual: cascata do portal ─── */
+var ICONES_TEMA={ claro:'\u2600', escuro:'\u263E', auto:'A' };
+function pintarLua(){ var p=document.documentElement.getAttribute('data-tema-pref')||'auto'; document.getElementById('btLua').textContent=ICONES_TEMA[p]||'A'; }
+function cicloTema(){
+  var ordem=['claro','escuro','auto'], p=document.documentElement.getAttribute('data-tema-pref')||'auto';
+  var novo=ordem[(ordem.indexOf(p)+1)%3], efetivo=novo;
+  if(novo==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',novo);
+  try{ localStorage.setItem('redaon-tema',novo); }catch(e){}
+  pintarLua();
+}
+pintarLua();
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._x); t._x=setTimeout(function(){ t.classList.remove('on'); },2800); }
+
+var pilha=[], telaAtual='t-casa';
+var NOMES_TELA={ 't-casa':'Fábrica', 't-tema':'Tema em curadoria', 't-importar-temas':'Trazer temas', 't-importar-mat':'Trazer material' };
+function ir(t){ if(telaAtual) pilha.push(telaAtual); mostrar(t); }
+function voltar(){ if(!pilha.length){ mostrar('t-casa'); return; } mostrar(pilha.pop()); }
+function mostrar(t){ var i,ts=document.querySelectorAll('.tela'); for(i=0;i<ts.length;i++) ts[i].classList.remove('on'); document.getElementById(t).classList.add('on'); telaAtual=t; document.getElementById('btVoltar').hidden=(t==='t-casa'); document.getElementById('hdN').textContent=NOMES_TELA[t]||'Fábrica'; window.scrollTo(0,0); }
+
+/* ─── validações do contrato — transplantadas do decidir v2-0, sem mudança de regra ─── */
+var CATEGORIAS = ['Consumo','Cultura','Direitos','Economia','Educação','Meio Ambiente','Saúde','Social','Tecnologia','Trabalho'];
+var CAMPOS_IDS = ['trabalho','infancia','cultura','cidadania','mulher','tecnologia','alimentacao','saude','violencia','meio_ambiente','educacao','saneamento','envelhecimento'];
+var importaveis=[];
+function conferirImportacao(){
+  var txt=document.getElementById('jsonImp').value.trim(), arr, h='', i; importaveis=[];
+  try{ arr=JSON.parse(txt); }catch(e){ document.getElementById('resImp').innerHTML='<div class="r"><div class="e">Não consegui ler o bloco.</div><div class="m">Precisa ser JSON: uma lista entre colchetes.</div></div>'; document.getElementById('acImp').innerHTML=''; return; }
+  if(!Array.isArray(arr)) arr=[arr];
+  for(i=0;i<arr.length;i++){
+    var o=arr[i]||{}, why=[];
+    if(!o.enunciado || String(o.enunciado).trim().length<20) why.push('enunciado curto ou ausente');
+    if(CATEGORIAS.indexOf(o.categoria)<0) why.push('categoria fora das 10');
+    if(o.campo && CAMPOS_IDS.indexOf(o.campo)<0) why.push('campo fora dos 13');
+    if(why.length){ h+='<div class="r"><div class="e"><span class="no">Fica de fora.</span> '+esc(o.enunciado||'(sem enunciado)')+'</div><div class="m">'+why.join(' · ')+'</div></div>'; }
+    else { importaveis.push(o); h+='<div class="r"><div class="e"><span class="ok">Entra.</span> '+esc(o.enunciado)+'</div><div class="m">'+esc(o.categoria)+(o.campo?' · '+esc(o.campo):'')+(o.grupo?' · '+esc(o.grupo):'')+'</div></div>'; }
+  }
+  document.getElementById('resImp').innerHTML=h;
+  document.getElementById('acImp').innerHTML = importaveis.length ? '<div class="acoes"><button class="btn ok" onclick="importar()">Trazer '+importaveis.length+(importaveis.length===1?' tema':' temas')+' como propostos</button></div>' : '';
+}
+
+/* ─── dados de mentira: temas aprovados pela Pedagógica, com os eixos da fusão ─── */
+var EIXOS=[['legislacao','Legislação'],['historia','História'],['especialistas','Especialistas'],['atualidades','Atualidades'],['literatura','Literatura'],['filosofia','Filosofia'],['cinema','Cinema'],['ciencia','Ciência'],['culturapop','Cultura pop']];
+var MIN_FICHAS=2;
+var TEMAS=[
+  { id:'t1', tt:'Perspectivas acerca do envelhecimento na sociedade brasileira', cat:'Sociedade', rep:'Estatuto da Pessoa Idosa, dados do IBGE sobre transição demográfica.',
+    escolhidos:['legislacao','atualidades','filosofia'], entregue:false, emperrados:[] },
+  { id:'t2', tt:'Invisibilidade e registro civil: garantia de acesso à cidadania no Brasil', cat:'Cidadania', rep:'Lei de Registros Públicos, dados do CNJ, literatura sobre invisibilidade social.',
+    escolhidos:['legislacao','historia','literatura'], entregue:true, emperrados:[{eixo:'literatura', motivo:'nenhuma fonte confirmável encontrada'}] }
+];
+var atual=null, temaImport=null, blocoOk=null;
+function porId(id){ for(var i=0;i<TEMAS.length;i++) if(TEMAS[i].id===id) return TEMAS[i]; return null; }
+function rot(id){ for(var i=0;i<EIXOS.length;i++) if(EIXOS[i][0]===id) return EIXOS[i][1]; return id; }
+function conta(t){ var d=0,s2=0,f=[]; for(var i=0;i<t.escolhidos.length;i++){ var e=t.eixos[t.escolhidos[i]]||'falta'; if(e==='falta') f.push(t.escolhidos[i]); else { d++; if(e==='aprovado') s2++; } } return { alvo:t.escolhidos.length, dentro:d, selados:s2, faltam:f }; }
+
+/* ─── casa ─── */
+function montarCasa(){
+  var h='', i;
+  for(i=0;i<TEMAS.length;i++){ var t=TEMAS[i];
+    var mt = t.entregue
+      ? 'entregue \u00b7 com a ADM Pedag\u00f3gica' + (t.emperrados.length? ' \u00b7 '+t.emperrados.length+' eixo emperrado':'')
+      : t.escolhidos.length+' eixos a produzir na F\u00e1brica';
+    h+='<button class="item clic" onclick="abrirTema(\''+t.id+'\')"><span class="cp"><span class="tt">'+esc(t.tt)+'</span><span class="mt">'+esc(t.cat)+' \u00b7 '+mt+'</span>'
+      +'<span class="barra"><i style="width:'+(t.entregue?100:0)+'%"></i></span></span><span class="seta">&#8250;</span></button>';
+  }
+  document.getElementById('listaAg').innerHTML=h;
+  document.getElementById('qtAg').textContent='\u00b7 '+TEMAS.length;
+}
+
+/* ─── tema: eixos escolhidos + pedido para a Fábrica ─── */
+function abrirTema(id){
+  atual=porId(id); if(!atual) return; var i;
+  var h='<span class="selo">Aprovado pela ADM Pedag\u00f3gica</span><div class="enun">'+esc(atual.tt)+'</div>'
+    +'<div class="linhas"><div class="linha"><div class="k">Categoria</div><div class="v">'+esc(atual.cat)+'</div></div>'
+    +'<div class="linha"><div class="k">Repert\u00f3rio</div><div class="v">'+esc(atual.rep)+'</div></div>'
+    +'<div class="linha"><div class="k">Encomenda</div><div class="v">'+atual.escolhidos.map(rot).join(' \u00b7 ')+'</div></div></div>';
+  h+='<div class="eixos">';
+  for(i=0;i<atual.escolhidos.length;i++){ var eid=atual.escolhidos[i];
+    var emp = atual.emperrados.some(function(x){ return x.eixo===eid; });
+    var rotulo = !atual.entregue ? 'a produzir' : (emp ? 'emperrou' : 'entregue');
+    var cls = !atual.entregue ? 'falta' : (emp ? 'revisao' : 'aprovado');
+    h+='<div class="ex"><div class="n">'+rot(eid)+'</div><div class="e '+cls+'">'+rotulo+'</div></div>'; }
+  h+='</div>';
+  if(!atual.entregue){
+    h+='<div class="pedido"><div class="lb">A fila j\u00e1 est\u00e1 na F\u00e1brica</div><div class="ds">N\u00e3o h\u00e1 nada para copiar: a F\u00e1brica l\u00ea o banco. Abra uma conversa no projeto F\u00e1brica de Conte\u00fado e pe\u00e7a: <b>\u201co que temos para produzir?\u201d</b>. Ela lista este tema com os eixos encomendados. Produza tudo numa conversa s\u00f3, confira as fontes l\u00e1, aprove \u2014 e volte aqui com o JSON \u00fanico do tema.</div>'
+      +'<div class="dupla"><button class="btn ok sm" onclick="abrirImportarMat(\''+atual.id+'\')">Trazer o material deste tema</button><button class="btn g sm" onclick="toast(\'No produto, abre o projeto F\u00e1brica de Conte\u00fado no Claude.\')">Abrir a F\u00e1brica</button></div></div>';
+  } else {
+    h+='<div class="pedido"><div class="lb">Entregue</div><div class="ds">O material deste tema j\u00e1 entrou e est\u00e1 com a ADM Pedag\u00f3gica'+(atual.emperrados.length?' \u2014 com '+atual.emperrados.length+' eixo emperrado reportado ('+esc(atual.emperrados[0].eixo)+': '+esc(atual.emperrados[0].motivo)+'). Quem decide o destino \u00e9 ela':'')+'. Saiu da sua mesa.</div></div>';
+  }
+  h+='<div class="rodape">Uma conversa na F\u00e1brica, um JSON por tema, um colar aqui. Se a produ\u00e7\u00e3o for interrompida, ela fica parada na F\u00e1brica \u2014 a RedaON nem toma conhecimento.</div>';
+  document.getElementById('temaCorpo').innerHTML=h; ir('t-tema');
+}
+
+/* ─── trazer material (mesmas validações da produção) ─── */
+function abrirImportarMat(id){
+  temaImport = id ? porId(id) : null; blocoOk=null;
+  document.getElementById('alvoNome').textContent = temaImport ? temaImport.tt : 'Escolha o tema';
+  document.getElementById('colaMat').value=''; document.getElementById('saidaMat').innerHTML=''; document.getElementById('btImportarMat').disabled=true;
+  ir('t-importar-mat');
+}
+function abrirEscolhaTema(){
+  var h='', i; for(i=0;i<TEMAS.length;i++){ var t=TEMAS[i]; if(t.entregue) continue;
+    h+='<button class="pill'+(temaImport&&temaImport.id===t.id?' sel':'')+'" onclick="escolherTema(\''+t.id+'\')"><span>'+esc(t.tt)+'<span class="sub">'+t.escolhidos.length+' eixos encomendados</span></span><span class="ck">&#10003;</span></button>'; }
+  document.getElementById('gavT').textContent='Para qual tema?';
+  document.getElementById('gavPills').innerHTML = h || '<div class="vazio" style="margin-top:.7rem">Nenhum tema esperando material.</div>';
+  document.getElementById('veu').classList.add('on'); document.getElementById('gav').classList.add('on');
+}
+function escolherTema(id){ temaImport=porId(id); document.getElementById('alvoNome').textContent=temaImport.tt; fecharGaveta(); }
+function fecharGaveta(){ document.getElementById('veu').classList.remove('on'); document.getElementById('gav').classList.remove('on'); }
+
+function validarFichas(its, L, rotEixo){
+  function mal(t){ L.push('<div class="r mal"><span class="ic">&#10007;</span><span>'+t+'</span></div>'); return true; }
+  var falhou=false;
+  if(!Array.isArray(its)||!its.length) return mal(rotEixo+': falta a lista de fichas.');
+  if(its.length<MIN_FICHAS) falhou=mal(rotEixo+': s\u00f3 '+its.length+' ficha(s); o m\u00ednimo \u00e9 '+MIN_FICHAS+'.');
+  var semPonte=0,semDado=0,semFonte=0,semDiz=0,semConf=0,semQuem=0;
+  for(var i=0;i<its.length;i++){ var x=its[i]||{};
+    if(!String(x.como_usar||'').trim()) semPonte++; if(!String(x.dado||'').trim()) semDado++; if(!String(x.diz||'').trim()) semDiz++;
+    if(!/^https?:\/\/\S+$/.test(String(x.url||''))) semFonte++;
+    if(x.fonte_conferida!==true) semConf++; if(!String(x.conferido_por||'').trim()||!String(x.conferido_em||'').trim()) semQuem++; }
+  if(semDado) falhou=mal(rotEixo+': '+semDado+' sem o texto do repert\u00f3rio.');
+  if(semFonte) falhou=mal(rotEixo+': '+semFonte+' sem endere\u00e7o de fonte que abre.');
+  if(semDiz) falhou=mal(rotEixo+': '+semDiz+' sem o "O que diz".');
+  if(semPonte) falhou=mal(rotEixo+': '+semPonte+' sem o "Como usar na reda\u00e7\u00e3o".');
+  if(semConf) falhou=mal(rotEixo+': '+semConf+' sem fonte conferida \u2014 o que n\u00e3o conferir, n\u00e3o entra.');
+  if(semQuem) falhou=mal(rotEixo+': '+semQuem+' sem quem conferiu ou quando.');
+  return falhou;
+}
+function conferirBloco(){
+  var bruto=document.getElementById('colaMat').value.trim(), saida=document.getElementById('saidaMat'), bt=document.getElementById('btImportarMat');
+  blocoOk=null; bt.disabled=true; var L=[];
+  function okL(t){ L.push('<div class="r ok"><span class="ic">&#10003;</span><span>'+t+'</span></div>'); }
+  function mal(t){ L.push('<div class="r mal"><span class="ic">&#10007;</span><span>'+t+'</span></div>'); }
+  if(!temaImport){ mal('Escolha o tema antes.'); saida.innerHTML=L.join(''); return; }
+  var d; try{ d=JSON.parse(bruto); }catch(e){ mal('O bloco n\u00e3o \u00e9 um JSON v\u00e1lido. Confira se veio inteiro, com as chaves de abertura e fechamento.'); saida.innerHTML=L.join(''); return; }
+  var falhou=false, ids=EIXOS.map(function(e){ return e[0]; });
+  if(d.peca==='material_tema') okL('\u00c9 a entrega de um tema inteiro'); else { mal('O bloco precisa ser "peca":"material_tema" \u2014 a entrega \u00e9 do tema completo, numa balsa s\u00f3.'); falhou=true; }
+  var eixos = Array.isArray(d.eixos) ? d.eixos : [];
+  var emperrados = Array.isArray(d.emperrados) ? d.emperrados : [];
+  if(!eixos.length){ mal('Nenhum eixo no bloco.'); falhou=true; }
+  var vistos=[], i;
+  for(i=0;i<eixos.length;i++){ var bx=eixos[i]||{};
+    if(ids.indexOf(bx.eixo)<0){ mal('Eixo "'+esc(String(bx.eixo))+'" fora dos nove permitidos.'); falhou=true; continue; }
+    vistos.push(bx.eixo);
+    if(temaImport.escolhidos.indexOf(bx.eixo)<0) mal(rot(bx.eixo)+': a ADM Pedag\u00f3gica n\u00e3o marcou este eixo. Entra, mas fica fora da vitrine at\u00e9 ela incluir.');
+    else okL(rot(bx.eixo)+': '+((bx.itens||[]).length)+' fichas');
+    if(validarFichas(bx.itens, L, rot(bx.eixo))) falhou=true;
+  }
+  for(i=0;i<emperrados.length;i++){ var em=emperrados[i]||{};
+    L.push('<div class="r"><span class="ic">&#9888;&#65039;</span><span>'+rot(em.eixo)+' emperrou na F\u00e1brica: '+esc(em.motivo||'sem motivo declarado')+'. A ADM Pedag\u00f3gica vai decidir \u2014 tirar da encomenda ou devolver a produzir.</span></div>'); }
+  var cobertos = vistos.concat(emperrados.map(function(x){ return x.eixo; }));
+  var fora = temaImport.escolhidos.filter(function(e){ return cobertos.indexOf(e)<0; });
+  if(fora.length){ mal('A encomenda pedia '+fora.map(rot).join(', ')+' e o bloco n\u00e3o traz nem reporta como emperrado. A entrega \u00e9 do tema completo \u2014 volte \u00e0 F\u00e1brica.'); falhou=true; }
+  if(falhou){ saida.innerHTML=L.join(''); return; }
+  blocoOk=d; bt.disabled=false;
+  var f0 = eixos[0].itens[0];
+  saida.innerHTML=L.join('')+'<div class="previa"><div class="cm">Vai entrar o tema inteiro \u00b7 conferido, para a ADM Pedag\u00f3gica aprovar</div>'
+    +'<div class="pf">'+esc(f0.cab||'\u2014')+'</div><div class="pd">'+esc(f0.dado)+'</div>'
+    +'<div class="pz"><span class="pr">O que diz</span>'+esc(f0.diz)+'</div><div class="pu"><span class="pr">Como usar na reda\u00e7\u00e3o</span>'+esc(f0.como_usar)+'</div></div>';
+}
+function importarMat(){
+  if(!blocoOk||!temaImport) return;
+  temaImport.entregue=true;
+  temaImport.emperrados = Array.isArray(blocoOk.emperrados) ? blocoOk.emperrados : [];
+  toast('O tema entrou inteiro. Agora \u00e9 com a ADM Pedag\u00f3gica.');
+  blocoOk=null; montarCasa(); pilha=[]; mostrar('t-casa');
+}
+montarCasa();
+
+function importar(){
+  var n=importaveis.length;
+  importaveis=[]; document.getElementById('jsonImp').value=''; document.getElementById('resImp').innerHTML=''; document.getElementById('acImp').innerHTML='';
+  toast(n+(n===1?' tema entrou':' temas entraram')+' como propostos. Agora é com a ADM Pedagógica.');
+  pilha=[]; mostrar('t-casa');
+}
+</script>
+</body>
+</html>
