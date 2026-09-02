@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RedaON · ADM P · Aprovar materiais — mockup v1-5</title>
+<script>
+(function(){
+  var pref='auto'; try{ pref=localStorage.getItem('redaon-tema')||'auto'; }catch(e){}
+  var efetivo=pref;
+  if(pref==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',pref);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RedaON · ADM Pedagógica · APROVAR MATERIAIS DE APOIO
+   MOCKUP v1-1 — decisão por FICHA (não por eixo) + pedir reposição — o fluxo aprovado do v1-2, com tudo que foi
+   decidido depois: nome novo, sem a palavra "ponte" na tela,
+   material chega por tema inteiro (balsa única), eixo emperrado
+   com a decisão nas mãos da ADM P, conferência com assinatura,
+   visual da amostra v1. Dados de mentira. Sem blur.
+   ============================================================ */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+:root{
+  --bg:#fdfbf4; --sunken:#f2ede0; --surface:#ffffff; --surface2:#f6f2e6; --top:#fbf8ee;
+  --text:#0a4a4b; --text2:#3a5556; --muted:#8a8576; --borderRGB:10,74,75;
+  --cyan:#0a8c8d; --cyanRGB:10,140,141; --onCyan:#ffffff;
+  --purple:#5a4fc4; --purpleRGB:90,79,196; --purpleSoft:#5a4fc4;
+  --green:#0f8a4d; --greenRGB:15,138,77; --red:#c0473b; --redRGB:192,71,59;
+  --orange:#b45f24; --orangeRGB:180,95,36; --ambar:#96700a;
+}
+html[data-tema="escuro"]{
+  --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --top:#191c22;
+  --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0; --borderRGB:71,69,84;
+  --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020;
+  --purple:#6c5ce7; --purpleRGB:108,92,231; --purpleSoft:#c6bfff;
+  --green:#4ade80; --greenRGB:74,222,128; --red:#ff8b8b; --redRGB:255,139,139;
+  --orange:#ff9d68; --orangeRGB:255,157,104; --ambar:#e8b23c;
+}
+body{ font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
+
+.hd{ position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.18);
+  padding:calc(.6rem + env(safe-area-inset-top)) 1rem .6rem; }
+.hdIn{ max-width:860px; margin:0 auto; display:flex; align-items:center; gap:.7rem; }
+.hd .voltar{ flex:none; width:36px; height:36px; border-radius:11px; border:1px solid rgba(var(--borderRGB),.22);
+  background:var(--surface); color:var(--text2); font-size:1rem; cursor:pointer; }
+.hd .voltar:hover{ color:var(--cyan); border-color:rgba(var(--cyanRGB),.4); }
+.hd .voltar[hidden]{ display:none; }
+.marca{ display:flex; align-items:center; gap:.5rem; min-width:0; }
+.marca .lg{ width:30px; height:30px; border-radius:9px; background:var(--cyan); color:var(--onCyan);
+  display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem; font-style:italic; flex:0 0 auto; }
+.marca .nm{ font-size:1.02rem; font-weight:900; font-style:italic; letter-spacing:-.04em; color:var(--text); white-space:nowrap; }
+.marca .nm i{ color:var(--cyan); font-style:italic; }
+.hdSep{ width:1px; height:22px; background:rgba(var(--borderRGB),.25); flex:0 0 auto; }
+.hdOnde{ min-width:0; flex:1; }
+.hdOnde .q{ font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+.hdOnde .n{ font-size:.92rem; font-weight:800; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hd .lua{ flex:none; width:36px; height:36px; border-radius:11px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; }
+.hd .lua:hover{ color:var(--cyan); background:rgba(var(--cyanRGB),.10); }
+
+.wrap{ max-width:860px; margin:0 auto; padding:1.6rem 1rem 6rem; }
+.tela{ display:none; } .tela.on{ display:block; }
+h2.t{ font-size:1.3rem; font-weight:800; line-height:1.3; letter-spacing:-.01em; }
+p.s{ font-size:.85rem; color:var(--text2); line-height:1.65; margin-top:.4rem; max-width:58ch; }
+.sec{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:1.6rem 0 .7rem; }
+
+.tarefa{ width:100%; text-align:left; font:inherit; color:var(--text); cursor:pointer;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:16px;
+  padding:1rem 1.05rem; display:flex; align-items:center; gap:.95rem; margin-bottom:.65rem; transition:border-color .15s; }
+.tarefa:hover{ border-color:rgba(var(--cyanRGB),.45); }
+.tarefa .num{ flex:none; width:44px; height:44px; border-radius:13px; display:grid; place-items:center;
+  font-size:1.05rem; font-weight:800; background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.tarefa .cp{ flex:1; min-width:0; }
+.tarefa .cp .a{ display:block; font-size:.94rem; font-weight:700; line-height:1.35; }
+.tarefa .cp .b{ display:block; font-size:.78rem; color:var(--muted); margin-top:.25rem; line-height:1.5; }
+.tarefa .seta{ flex:none; color:var(--muted); font-size:1.15rem; }
+
+.card{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:16px; padding:.95rem 1.05rem; margin-bottom:.7rem; }
+.card.ok{ border-color:rgba(var(--greenRGB),.35); }
+.card .ct{ font-size:.95rem; font-weight:800; }
+.pin{ display:inline-block; font-size:.64rem; font-weight:800; padding:.2rem .5rem; border-radius:99px; white-space:nowrap; }
+.pin.ok{ background:rgba(var(--greenRGB),.14); color:var(--green); }
+.pin.neutro{ background:rgba(var(--borderRGB),.14); color:var(--muted); }
+
+/* ficha — as quatro camadas, sem jargão · decisão por ficha */
+.ficha.aprovada{ border-left:2px solid var(--green); padding-left:.75rem; }
+.ficha.recusada .pd, .ficha.recusada .pz, .ficha.recusada .pu{ opacity:.42; }
+.ficha .veredito{ font-size:.7rem; font-weight:800; margin-top:.55rem; }
+.ficha .veredito.ap{ color:var(--green); }
+.ficha .veredito.rec{ color:var(--red); }
+.ficha .veredito .desf{ font:inherit; border:none; background:none; color:var(--muted); font-weight:700; cursor:pointer; text-decoration:underline; margin-left:.5rem; }
+.fAcs{ display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.65rem; }
+.btn.rec{ background:transparent; color:var(--red); border:1px solid rgba(var(--redRGB),.4); }
+.repor{ margin-top:.7rem; }
+
+.ficha{ padding:.85rem 0; border-top:1px solid rgba(var(--borderRGB),.14); }
+.ficha:first-of-type{ border-top:none; padding-top:.4rem; }
+.ficha .pf{ font-size:.78rem; font-weight:800; color:var(--text2); }
+.ficha .pf a{ color:var(--cyan); text-decoration:none; font-weight:700; }
+.ficha .conf{ font-size:.68rem; color:var(--muted); margin-top:.15rem; }
+.ficha .conf b{ color:var(--green); font-weight:700; }
+.ficha .pd{ font-size:.88rem; color:var(--text); line-height:1.55; margin-top:.35rem; font-weight:600; }
+.ficha .pz{ font-size:.85rem; color:var(--text2); line-height:1.65; margin-top:.45rem; padding:.55rem .65rem; border-radius:11px; background:var(--surface2); }
+.rotZ{ font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); display:block; margin-bottom:.2rem; }
+.ficha .pu{ font-size:.87rem; color:var(--text); line-height:1.65; margin-top:.5rem; padding-left:.75rem; border-left:2px solid var(--purple); }
+.rotU{ font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--purpleSoft); display:block; margin-bottom:.15rem; }
+
+.btn{ width:100%; font:inherit; font-size:.9rem; font-weight:800; padding:.85rem 1rem; border-radius:14px; border:none; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
+.btn.g{ background:transparent; color:var(--text); border:1px solid rgba(var(--borderRGB),.35); }
+.btn.ok{ background:var(--green); color:var(--onCyan); }
+.btn.sm{ font-size:.8rem; padding:.7rem .9rem; border-radius:12px; }
+.acs{ margin-top:.9rem; }
+.dupla{ display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:.7rem; }
+.acoes{ display:grid; gap:.6rem; margin-top:1.2rem; }
+
+.aviso{ display:flex; gap:.6rem; background:rgba(var(--orangeRGB),.09); border:1px solid rgba(var(--orangeRGB),.28);
+  border-radius:14px; padding:.8rem .9rem; margin-bottom:.7rem; font-size:.82rem; line-height:1.6; color:var(--text2); }
+.aviso .tp{ font-weight:800; color:var(--orange); }
+.aviso .mm{ flex:1; }
+.avisoOk{ display:flex; gap:.6rem; background:rgba(var(--greenRGB),.09); border:1px solid rgba(var(--greenRGB),.3);
+  border-radius:14px; padding:.8rem .9rem; margin-top:1rem; font-size:.82rem; line-height:1.6; color:var(--text2); }
+.avisoOk .tp{ font-weight:800; color:var(--green); }
+.selo{ display:inline-block; font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:.2rem .5rem; border-radius:7px; margin-bottom:.4rem; background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.enun{ font-size:1.15rem; font-weight:800; line-height:1.45; margin-top:.4rem; }
+.rodape{ font-size:.74rem; color:var(--muted); line-height:1.65; margin-top:1.8rem; padding-top:1rem; border-top:1px solid rgba(var(--borderRGB),.16); max-width:58ch; }
+.vazio{ text-align:center; padding:2.5rem 1rem; color:var(--muted); }
+.vazio .em{ font-size:2rem; } .vazio .tx{ font-size:.85rem; line-height:1.6; margin-top:.6rem; }
+
+#toast{ position:fixed; left:50%; bottom:calc(1.4rem + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(160%); z-index:90;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.3); color:var(--text); font-size:.82rem; font-weight:600; padding:.7rem 1.1rem;
+  border-radius:99px; transition:transform .22s ease; max-width:88vw; text-align:center; box-shadow:0 4px 14px rgba(0,0,0,.08); }
+#toast.on{ transform:translateX(-50%) translateY(0); }
+.veu{ position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; display:none; } .veu.on{ display:block; }
+.gav{ position:fixed; left:0; right:0; bottom:0; z-index:41; background:var(--surface); border-radius:22px 22px 0 0; border-top:1px solid rgba(var(--borderRGB),.25);
+  padding:.6rem 1rem calc(1.2rem + env(safe-area-inset-bottom)); transform:translateY(101%); transition:transform .22s ease; max-height:84vh; overflow-y:auto; }
+.gav.on{ transform:translateY(0); }
+@media (prefers-reduced-motion:reduce){ .gav{ transition:none; } }
+.gav .grip{ width:38px; height:4px; border-radius:2px; background:rgba(var(--borderRGB),.4); margin:.2rem auto .9rem; }
+.gav .gt{ font-size:.95rem; font-weight:800; line-height:1.4; }
+.gav .gs{ font-size:.78rem; color:var(--text2); line-height:1.55; margin-top:.3rem; }
+.gav .quais{ margin-top:.7rem; font-size:.78rem; color:var(--text2); background:var(--surface2); border-radius:11px; padding:.6rem .7rem; line-height:1.55; }
+.gav .quais b{ color:var(--text); }
+.pillM{ width:100%; min-height:48px; margin-top:.5rem; font:inherit; font-size:.84rem; font-weight:600; text-align:left; color:var(--text); background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.24); border-radius:13px; padding:.7rem .9rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+.pillM .ck{ color:var(--cyan); font-weight:800; opacity:0; } .pillM.sel{ border-color:rgba(var(--cyanRGB),.65); } .pillM.sel .ck{ opacity:1; }
+.gav textarea{ width:100%; margin-top:.6rem; font:inherit; font-size:.85rem; line-height:1.55; color:var(--text); background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.28); border-radius:12px; padding:.7rem .8rem; resize:vertical; min-height:88px; }
+.gav textarea:focus{ outline:none; border-color:var(--cyan); }
+.ficha .veredito.rep{ color:var(--ambar); }
+.micWrap{ position:relative; }
+.micWrap textarea{ padding-right:3.2rem; }
+.micBt{ position:absolute; right:.5rem; bottom:.55rem; width:38px; height:38px; border-radius:11px; border:1px solid rgba(var(--borderRGB),.24);
+  background:var(--surface); color:var(--text2); font-size:1rem; cursor:pointer; display:grid; place-items:center; }
+.micBt:hover{ border-color:rgba(var(--cyanRGB),.45); color:var(--cyan); }
+.micBt.on{ background:rgba(var(--redRGB),.12); border-color:rgba(var(--redRGB),.5); color:var(--red); }
+.micBt[hidden]{ display:none; }
+.micDica{ font-size:.68rem; color:var(--muted); margin-top:.35rem; min-height:1em; }
+.micDica.on{ color:var(--red); font-weight:700; }
+.tagAmostra{ position:fixed; right:.9rem; bottom:.9rem; z-index:50; background:rgba(var(--purpleRGB),.14);
+  border:1px solid rgba(var(--purpleRGB),.35); color:var(--purple); font-size:.66rem; font-weight:800; padding:.35rem .6rem; border-radius:99px; }
+@media (min-width:820px){ html{ font-size:17px; } .wrap{ padding-top:2.2rem; } h2.t{ font-size:1.5rem; } }
+@media (min-width:1180px){ html{ font-size:18px; } }
+@media (prefers-reduced-motion:reduce){ #toast{ transition:none; } }
+</style>
+</head>
+<body>
+
+<div class="hd"><div class="hdIn">
+  <button class="voltar" id="btVoltar" onclick="voltar()" aria-label="Voltar">&#8592;</button>
+  <div class="marca"><span class="lg">R</span><span class="nm">Reda<i>ON</i></span></div>
+  <div class="hdSep"></div>
+  <div class="hdOnde"><div class="q">ADM · Pedagógica</div><div class="n" id="hdN">Aprovar materiais</div></div>
+  <button class="lua" id="btLua" onclick="cicloTema()" aria-label="Tema claro, escuro ou automático">&#9788;</button>
+</div></div>
+
+<div class="wrap">
+
+  <!-- ════════ LISTA ════════ -->
+  <div class="tela on" id="t-lista">
+    <h2 class="t">Aprovar materiais de apoio</h2>
+    <p class="s">As fontes já foram conferidas pelo ADM - Fábrica. Você lê informação por informação e decide uma a uma: o que aprovar ganha o selo RedaON e aparece para o aluno; o que recusar, só aquela informação sai — o eixo segue com as demais.</p>
+    <div class="sec">Esperando você</div>
+    <div id="listaTemas"></div>
+  </div>
+
+  <!-- ════════ UM TEMA ════════ -->
+  <div class="tela" id="t-tema"><div id="temaCorpo"></div></div>
+
+</div>
+
+<div class="veu" id="veu" onclick="fecharGaveta()"></div>
+<div class="gav" id="gav"><div class="grip"></div>
+  <div class="gt" id="gavT"></div>
+  <div class="gs" id="gavS"></div>
+  <div class="quais" id="gavQuais"></div>
+  <div id="zonaMotivo">
+    <button class="pillM" data-m="Fonte fraca — quero uma referência mais forte neste ponto." onclick="motivoPronto(this)"><span>Fonte fraca — quero referência mais forte</span><span class="ck">✓</span></button>
+    <button class="pillM" data-m="A informação não serve à argumentação deste tema." onclick="motivoPronto(this)"><span>Não serve à argumentação deste tema</span><span class="ck">✓</span></button>
+    <div class="micWrap"><textarea id="gavTexto" placeholder="Ou escreva aqui o motivo, do seu jeito… ou toque no microfone e fale."></textarea>
+    <button class="micBt" id="micBt" onclick="alternarMic()" aria-label="Falar o motivo" title="Falar o motivo">🎤</button></div>
+    <div class="micDica" id="micDica"></div>
+  </div>
+  <div class="acoes" style="margin-top:.8rem"><button class="btn ok" id="btGav" onclick="confirmarGaveta()">Confirmar</button>
+  <button class="btn g" onclick="fecharGaveta()">Cancelar</button></div>
+</div>
+
+<div id="toast"></div>
+<span class="tagAmostra">MOCKUP · aprovar materiais v1-5</span>
+
+<script>
+/* ─── tema visual: cascata do portal ─── */
+var ICONES_TEMA={ claro:'\u2600', escuro:'\u263E', auto:'A' };
+function pintarLua(){ var p=document.documentElement.getAttribute('data-tema-pref')||'auto'; document.getElementById('btLua').textContent=ICONES_TEMA[p]||'A'; }
+function cicloTema(){
+  var ordem=['claro','escuro','auto'], p=document.documentElement.getAttribute('data-tema-pref')||'auto';
+  var novo=ordem[(ordem.indexOf(p)+1)%3], efetivo=novo;
+  if(novo==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',novo);
+  try{ localStorage.setItem('redaon-tema',novo); }catch(e){}
+  pintarLua();
+}
+pintarLua();
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._x); t._x=setTimeout(function(){ t.classList.remove('on'); },3000); }
+
+var pilha=[], telaAtual='t-lista', temaFoco=null;
+var NOMES={ 't-lista':'Aprovar materiais', 't-tema':'Ler e aprovar' };
+function ir(t){ if(telaAtual) pilha.push(telaAtual); mostrar(t); }
+function voltar(){ if(!pilha.length){ mostrar('t-lista'); return; } mostrar(pilha.pop()); }
+function mostrar(t){
+  if(t==='t-lista') montarLista();
+  var i,ts=document.querySelectorAll('.tela'); for(i=0;i<ts.length;i++) ts[i].classList.remove('on');
+  document.getElementById(t).classList.add('on'); telaAtual=t;
+  document.getElementById('btVoltar').hidden=(t==='t-lista');
+  document.getElementById('hdN').textContent=NOMES[t]||'Aprovar materiais';
+  window.scrollTo(0,0);
+}
+
+/* ─── dados de mentira: o tema chegou INTEIRO da Fábrica (balsa única) ─── */
+var EIXOS_ROT={ legislacao:'Legislação', historia:'História', especialistas:'Especialistas', atualidades:'Atualidades', literatura:'Literatura', filosofia:'Filosofia', cinema:'Cinema', ciencia:'Ciência', culturapop:'Cultura pop' };
+var TEMAS=[
+  { id:'t1', tt:'Perspectivas acerca do envelhecimento na sociedade brasileira', entregueEm:'02/09',
+    emperrados:[{ eixo:'filosofia', motivo:'nenhuma fonte confirmável encontrada nesta sessão', decidido:null }],
+    eixos:[
+      { eixo:'legislacao', fichas:[
+        { estado:null, fonte:'Estatuto da Pessoa Idosa · Lei 10.741', url:'https://www.planalto.gov.br', conf:'Pedro · 02/09',
+          dado:'A lei que protege quem tem 60 anos ou mais.',
+          diz:'Garante prioridade na formulação de políticas públicas e atendimento preferencial em serviços essenciais.',
+          usar:'Usar na proposta de intervenção como base legal do agente Estado.' },
+        { estado:null, fonte:'Constituição Federal · art. 230', url:'https://www.planalto.gov.br/ccivil_03/constituicao', conf:'Pedro · 28/08 (reaproveitada)',
+          dado:'O dever constitucional com a pessoa idosa.',
+          diz:'Família, sociedade e Estado têm o dever de amparar as pessoas idosas, defendendo sua dignidade e bem-estar.',
+          usar:'Usar na introdução para mostrar a distância entre a norma e a realidade vivida.' } ] },
+      { eixo:'atualidades', fichas:[
+        { estado:null, fonte:'IBGE · Censo 2022', url:'https://www.ibge.gov.br', conf:'Pedro · 02/09',
+          dado:'O Brasil envelhece em ritmo acelerado.',
+          diz:'A população com 65 anos ou mais cresceu 57,4% entre 2010 e 2022.',
+          usar:'Usar no desenvolvimento como prova estatística da urgência do tema.' },
+        { estado:null, fonte:'OMS · Década do Envelhecimento Saudável', url:'https://www.who.int', conf:'Pedro · 02/09',
+          dado:'Marco global 2021-2030.',
+          diz:'Envelhecimento saudável é manter a capacidade funcional que permite o bem-estar na velhice.',
+          usar:'Âncora internacional para fundamentar a proposta de intervenção.' } ] }
+    ] },
+  { id:'t2', tt:'Invisibilidade e registro civil: garantia de acesso à cidadania no Brasil', entregueEm:'01/09', emperrados:[],
+    eixos:[
+      { eixo:'legislacao', fichas:[
+        { estado:null, fonte:'Lei 9.534/1997 — gratuidade do registro civil', url:'https://www.planalto.gov.br', conf:'Pedro · 01/09',
+          dado:'A lei que tornou gratuito o registro de nascimento.',
+          diz:'O registro civil de nascimento e o assento de óbito são gratuitos para todos os cidadãos.',
+          usar:'Usar no desenvolvimento para mostrar que a barreira não é legal, e sim de acesso e informação.' },
+        { estado:null, fonte:'CNJ · dados de sub-registro', url:'https://www.cnj.jus.br', conf:'Pedro · 01/09',
+          dado:'Quantos brasileiros ainda vivem sem certidão.',
+          diz:'Centenas de milhares de brasileiros permanecem sem registro civil, concentrados nas regiões Norte e Nordeste.',
+          usar:'Usar como dado de realidade para dimensionar o problema na introdução.' } ] }
+    ] }
+];
+function porId(id){ for(var i=0;i<TEMAS.length;i++) if(TEMAS[i].id===id) return TEMAS[i]; return null; }
+function fichasPendentes(t){ var n=0; for(var i=0;i<t.eixos.length;i++){ for(var j=0;j<t.eixos[i].fichas.length;j++) if(!t.eixos[i].fichas[j].estado) n++; } return n; }
+function contaFichas(t,es){ var n=0; for(var i=0;i<t.eixos.length;i++) for(var j=0;j<t.eixos[i].fichas.length;j++) if(t.eixos[i].fichas[j].estado===es) n++; return n; }
+function emperradosAbertos(t){ return t.emperrados.filter(function(e){ return !e.decidido; }).length; }
+
+/* ─── lista ─── */
+function montarLista(){
+  var h='', i;
+  for(i=0;i<TEMAS.length;i++){ var t=TEMAS[i], p=fichasPendentes(t), emp=emperradosAbertos(t);
+    if(!p && !emp) continue;
+    var b = (p? p+(p===1?' ficha a ler':' fichas a ler')+' em '+t.eixos.length+(t.eixos.length===1?' eixo':' eixos') : 'tudo lido');
+    if(emp) b += ' · '+emp+' emperrado a decidir';
+    b += ' · entregue em '+t.entregueEm;
+    h+='<button class="tarefa" onclick="abrirTema(\''+t.id+'\')"><span class="num">'+(p||'\u26A0')+'</span><span class="cp">'
+      +'<span class="a">'+esc(t.tt)+'</span><span class="b">'+esc(b)+'</span></span><span class="seta">&#8250;</span></button>';
+  }
+  document.getElementById('listaTemas').innerHTML = h || '<div class="vazio"><div class="em">&#127891;</div><div class="tx">Nada esperando voc\u00ea.<br>Quando o ADM - F\u00e1brica trouxer um tema, ele aparece aqui.</div></div>';
+}
+
+/* ─── um tema ─── */
+function abrirTema(id){ temaFoco=id; renderTema(); ir('t-tema'); }
+function renderTema(){
+  var t=porId(temaFoco); if(!t) return;
+  var h='<span class="selo">Entregue pelo ADM - F\u00e1brica em '+t.entregueEm+'</span><div class="enun">'+esc(t.tt)+'</div>', i,j;
+
+  for(i=0;i<t.emperrados.length;i++){ var em=t.emperrados[i];
+    if(em.decidido){
+      h+='<div class="avisoOk" style="margin:1rem 0 0"><span>&#10003;</span><span><span class="tp">'+esc(EIXOS_ROT[em.eixo])+':</span> '+(em.decidido==='tirar'?'tirado da encomenda. O tema fecha sem ele.':'devolvido a produzir. Volta \u00e0 fila da F\u00e1brica.')+'</span></div>';
+    } else {
+      h+='<div class="aviso" style="margin:1rem 0 0"><span>&#9888;&#65039;</span><span class="mm"><span class="tp">'+esc(EIXOS_ROT[em.eixo])+' emperrou na F\u00e1brica:</span> '+esc(em.motivo)+'. A decis\u00e3o \u00e9 sua:'
+        +'<span class="dupla"><button class="btn g sm" onclick="decidirEmp('+i+',\'tirar\')">Tirar da encomenda</button>'
+        +'<button class="btn g sm" onclick="decidirEmp('+i+',\'devolver\')">Devolver a produzir</button></span></span></div>';
+    }
+  }
+
+  h+='<div class="sec" style="margin-top:1.4rem">Leia e decida, ficha a ficha</div>';
+  for(i=0;i<t.eixos.length;i++){ var ex=t.eixos[i];
+    var apr=0, rec=0, pend=0, rep=0, fichas='';
+    for(j=0;j<ex.fichas.length;j++){ var f=ex.fichas[j];
+      if(f.estado==='aprovada') apr++; else if(f.estado==='recusada') rec++; else if(f.estado==='reposicao') rep++; else pend++;
+      var veredito='';
+      if(f.estado==='aprovada') veredito='<div class="veredito ap">\uD83C\uDF93 Aprovada \u2014 o aluno v\u00ea, com o selo RedaON.<button class="desf" onclick="desfazerFicha('+i+','+j+')">desfazer</button></div>';
+      else if(f.estado==='recusada') veredito='<div class="veredito rec">Recusada \u2014 motivo: '+esc(f.motivo||'')+'<button class="desf" onclick="desfazerFicha('+i+','+j+')">desfazer</button></div>';
+      else if(f.estado==='reposicao') veredito='<div class="veredito rep">\u21BB Reposi\u00e7\u00e3o pedida \u00e0 F\u00e1brica \u2014 motivo: '+esc(f.motivo||'')+'</div>';
+      else veredito='<div class="fAcs"><button class="btn sm" onclick="decidirFicha('+i+','+j+',\'aprovada\')">Aprovar</button><button class="btn rec sm" onclick="abrirRecusa('+i+','+j+')">Recusar</button></div>';
+      fichas+='<div class="ficha'+(f.estado==='aprovada'?' aprovada':(f.estado==='recusada'||f.estado==='reposicao'?' recusada':''))+'">'
+        +'<div class="pf">'+esc(f.fonte)+' \u00b7 <a href="'+esc(f.url)+'" target="_blank" rel="noopener">abrir a fonte</a></div>'
+        +'<div class="conf">Fonte conferida: <b>'+esc(f.conf)+'</b></div>'
+        +'<div class="pd">'+esc(f.dado)+'</div>'
+        +'<div class="pz"><span class="rotZ">O que diz</span>'+esc(f.diz)+'</div>'
+        +'<div class="pu"><span class="rotU">&#9999;&#65039; Como usar na reda\u00e7\u00e3o</span>'+esc(f.usar)+'</div>'
+        +veredito+'</div>';
+    }
+    var pin = pend ? '<span class="pin neutro">'+pend+' a ler</span>'
+      : '<span class="pin '+(apr?'ok':'neutro')+'">'+(apr?apr+' no ar':'nada no ar')+(rep?' \u00b7 \u21BB '+rep+' em reposi\u00e7\u00e3o':'')+(rec?' \u00b7 '+rec+' recusada'+(rec>1?'s':''):'')+'</span>';
+    h+='<div class="card'+((!pend&&apr)?' ok':'')+'">'
+      +'<div style="display:flex;align-items:center;gap:.5rem"><span class="ct" style="flex:1">'+esc(EIXOS_ROT[ex.eixo])+'</span>'+pin+'</div>'
+      +'<div style="margin-top:.4rem">'+fichas+'</div>'
+      +(rec&&!pend ? '<div class="repor"><button class="btn g sm" onclick="abrirReposicao('+i+')">Pedir reposi\u00e7\u00e3o do que foi recusado ('+rec+')</button></div>' : '')
+      +'</div>';
+  }
+
+  var pend2=fichasPendentes(t), emp=emperradosAbertos(t);
+  if(!pend2 && !emp){
+    var apr2=contaFichas(t,'aprovada'), rec2=contaFichas(t,'recusada');
+    h+='<div class="avisoOk"><span>&#127891;</span><span><span class="tp">Tudo lido.</span> '+apr2+(apr2===1?' ficha no ar':' fichas no ar')+' com o selo RedaON'+(rec2?' \u00b7 '+rec2+' recusada'+(rec2>1?'s':''):'')+'. Falta dizer em que semana o tema vai ao ar.</span></div>'
+      +'<div class="acoes"><button class="btn ok" onclick="toast(\'No produto, abre a Programa\u00e7\u00e3o das semanas com este tema.\')">Agendar este tema</button></div>';
+  }
+  h+='<div class="rodape">O que voc\u00ea n\u00e3o aprovar, o aluno n\u00e3o v\u00ea. Recusar corta s\u00f3 aquela informa\u00e7\u00e3o, e o motivo fica na ficha. A reposi\u00e7\u00e3o leva apenas o recusado \u2014 o aprovado nunca sai do ar \u2014 com os motivos que voc\u00ea j\u00e1 deu.</div>';
+  document.getElementById('temaCorpo').innerHTML=h;
+}
+function decidirFicha(i,j,es){
+  var t=porId(temaFoco); t.eixos[i].fichas[j].estado=es;
+  toast(es==='aprovada' ? 'Aprovada. O aluno j\u00e1 v\u00ea, com o selo RedaON.' : 'Recusada. O aluno n\u00e3o ver\u00e1 esta informa\u00e7\u00e3o.');
+  renderTema();
+}
+function desfazerFicha(i,j){ var t=porId(temaFoco); t.eixos[i].fichas[j].estado=null; t.eixos[i].fichas[j].motivo=''; renderTema(); }
+function decidirEmp(i,acao){
+  var t=porId(temaFoco); t.emperrados[i].decidido=acao;
+  toast(acao==='tirar' ? EIXOS_ROT[t.emperrados[i].eixo]+' saiu da encomenda.' : EIXOS_ROT[t.emperrados[i].eixo]+' voltou \u00e0 fila da F\u00e1brica.');
+  renderTema();
+}
+var repEixo=null, recEixo=null, recFicha=null, modoGav=null;
+
+/* ─── voz → texto (Web Speech API, sem custo). Some sozinho onde n\u00e3o h\u00e1 suporte.
+   Android reenvia trechos j\u00e1 transcritos no modo cont\u00ednuo: por isso s\u00f3 se processa
+   o que \u00e9 novo (resultIndex) e, no celular, o reconhecedor roda em turnos curtos religados. ─── */
+var Rec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+var rec=null, ouvindo=false, querParar=false, baseTexto='', finais='';
+var MOVEL = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+if(!Rec){ document.getElementById('micBt').hidden=true; }
+function novoRec(){
+  var ta=document.getElementById('gavTexto'), dica=document.getElementById('micDica'), bt=document.getElementById('micBt');
+  var r = new Rec(); r.lang='pt-BR'; r.continuous=!MOVEL; r.interimResults=true; r.maxAlternatives=1;
+  r.onstart=function(){ ouvindo=true; bt.classList.add('on'); dica.textContent='Ouvindo\u2026 toque de novo para parar.'; dica.classList.add('on'); };
+  r.onresult=function(ev){
+    var parcial='';
+    for(var i=ev.resultIndex; i<ev.results.length; i++){
+      var res=ev.results[i];
+      if(res.isFinal) finais += res[0].transcript.trim()+' '; else parcial += res[0].transcript;
+    }
+    ta.value = (baseTexto + finais + parcial).replace(/\s+/g,' ').replace(/^\s/,'');
+    var ps=document.querySelectorAll('.pillM'); for(var k=0;k<ps.length;k++) ps[k].classList.remove('sel');
+  };
+  r.onerror=function(ev){
+    if(ev.error==='no-speech' || ev.error==='aborted') return;
+    querParar=true;
+    dica.textContent = ev.error==='not-allowed' ? 'O navegador n\u00e3o liberou o microfone. Libere nas permiss\u00f5es e tente de novo.' : 'N\u00e3o consegui ouvir. Tente de novo ou escreva.';
+    dica.classList.remove('on');
+  };
+  r.onend=function(){
+    if(MOVEL && !querParar && ouvindo){ try{ rec=novoRec(); rec.start(); return; }catch(e){} }
+    ouvindo=false; bt.classList.remove('on');
+    if(dica.classList.contains('on')){ dica.textContent = ta.value.trim() ? 'Pronto \u2014 confira o texto e ajuste se quiser.' : ''; dica.classList.remove('on'); }
+  };
+  return r;
+}
+function alternarMic(){
+  if(!Rec) return;
+  if(ouvindo){ querParar=true; try{ rec.stop(); }catch(e){} return; }
+  var ta=document.getElementById('gavTexto');
+  baseTexto = ta.value.trim() ? ta.value.trim()+' ' : ''; finais=''; querParar=false;
+  rec = novoRec();
+  try{ rec.start(); }catch(e){ document.getElementById('micDica').textContent='N\u00e3o consegui abrir o microfone.'; }
+}
+function pararMic(){ if(rec && ouvindo){ querParar=true; try{ rec.stop(); }catch(e){} } }
+function abrirRecusa(i,j){
+  var t=porId(temaFoco); modoGav='recusa'; recEixo=i; recFicha=j; var f=t.eixos[i].fichas[j];
+  document.getElementById('gavT').textContent='Por que recusar esta informa\u00e7\u00e3o?';
+  document.getElementById('gavS').textContent='O motivo fica guardado na ficha \u2014 voc\u00ea n\u00e3o precisa lembrar depois. Se pedir reposi\u00e7\u00e3o, \u00e9 este texto que a F\u00e1brica vai ler.';
+  document.getElementById('gavQuais').innerHTML='<b>'+esc(f.fonte)+'</b><br>'+esc(f.dado);
+  document.getElementById('zonaMotivo').hidden=false;
+  document.getElementById('btGav').textContent='Recusar com este motivo';
+  var ps=document.querySelectorAll('.pillM'); for(var k=0;k<ps.length;k++) ps[k].classList.remove('sel');
+  document.getElementById('gavTexto').value=''; document.getElementById('micDica').textContent=''; document.getElementById('micDica').classList.remove('on');
+  document.getElementById('veu').classList.add('on'); document.getElementById('gav').classList.add('on');
+}
+function abrirReposicao(i){
+  var t=porId(temaFoco); modoGav='reposicao'; repEixo=i; var ex=t.eixos[i];
+  var recusadas = ex.fichas.filter(function(f){ return f.estado==='recusada'; });
+  var aprovadas = ex.fichas.filter(function(f){ return f.estado==='aprovada'; }).length;
+  document.getElementById('gavT').textContent='Pedir reposi\u00e7\u00e3o \u00e0 F\u00e1brica';
+  document.getElementById('gavS').textContent='S\u00f3 o recusado volta a produzir, cada ficha com o motivo que voc\u00ea j\u00e1 deu. Nada mais a escrever.';
+  document.getElementById('gavQuais').innerHTML = recusadas.map(function(f){ return '<b>'+esc(f.fonte)+'</b> \u2014 '+esc(f.motivo||''); }).join('<br>')
+    + (aprovadas? '<br><br>'+aprovadas+(aprovadas===1?' aprovada continua':' aprovadas continuam')+' no ar \u2014 nada sai da vitrine.':'');
+  document.getElementById('zonaMotivo').hidden=true;
+  document.getElementById('btGav').textContent='Devolver '+recusadas.length+(recusadas.length===1?' ficha':' fichas')+' \u00e0 F\u00e1brica';
+  document.getElementById('veu').classList.add('on'); document.getElementById('gav').classList.add('on');
+}
+function motivoPronto(el){
+  var ps=document.querySelectorAll('.pillM'); for(var k=0;k<ps.length;k++) ps[k].classList.remove('sel');
+  el.classList.add('sel');
+  document.getElementById('gavTexto').value = el.getAttribute('data-m');
+}
+function fecharGaveta(){ pararMic(); document.getElementById('veu').classList.remove('on'); document.getElementById('gav').classList.remove('on'); }
+function confirmarGaveta(){
+  var t=porId(temaFoco);
+  if(modoGav==='recusa'){
+    var m=document.getElementById('gavTexto').value.trim();
+    if(!m){ toast('Escreva, fale ou escolha o motivo \u2014 ele fica na ficha.'); return; }
+    var f=t.eixos[recEixo].fichas[recFicha]; f.estado='recusada'; f.motivo=m;
+    fecharGaveta(); toast('Recusada, com o motivo guardado. O aluno n\u00e3o ver\u00e1 esta informa\u00e7\u00e3o.'); renderTema(); return;
+  }
+  var ex=t.eixos[repEixo], n=0;
+  for(var j=0;j<ex.fichas.length;j++) if(ex.fichas[j].estado==='recusada'){ ex.fichas[j].estado='reposicao'; n++; }
+  fecharGaveta();
+  toast(n+(n===1?' ficha devolvida':' fichas devolvidas')+' \u00e0 F\u00e1brica, cada uma com o seu motivo. As aprovadas seguem no ar.');
+  renderTema();
+}
+
+montarLista();
+</script>
+</body>
+</html>
