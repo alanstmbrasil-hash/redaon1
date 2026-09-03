@@ -399,7 +399,7 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
 @media(max-width:1023px){ #toast{ bottom:calc(6.2rem + env(safe-area-inset-bottom)); } }
 #admWrap .wrap{ max-width:860px; margin:0 auto; padding:.4rem 0 6rem; }
 #admWrap .sec{ display:block; }
-#admWrap .card .ct{ flex:1 1 auto; min-width:0; white-space:nowrap; } #admWrap .card .pin{ flex:0 0 auto; }
+#admWrap .card .ct.eixo{ flex:1 1 auto; min-width:0; white-space:nowrap; } #admWrap .card .pin{ flex:0 0 auto; }
 /* Tailwind da moldura força svg{display:block}; ícones em linha voltam para inline */
 #admWrap .rotU svg, #admWrap .veredito svg, #admWrap .pin svg, #admWrap .avisoOk .ic svg, #admWrap .aviso .ic svg, #admHd svg, #admWrap .resB .ic svg{ display:inline-block; }
 #admWrap .pill{ margin-bottom:0; text-decoration:none; }
@@ -1101,7 +1101,7 @@ function renderTema(){
       : '<span class="pin '+(apr?'ok':'neutro')+'">'+(apr?apr+' no ar':'nada no ar')+(rep?' \u00b7 \u21BB '+rep+' em reposi\u00e7\u00e3o':'')+(rec?' \u00b7 '+rec+' recusada'+(rec>1?'s':''):'')+'</span>';
     var fora = escolhidos(t).indexOf(ex.eixo)<0 ? ' <span class="pin neutro">fora da encomenda</span>' : '';
     h+='<div class="card'+((!pend&&apr)?' ok':'')+'">'
-      +'<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="ct">'+esc(rot(ex.eixo))+'</span>'+fora+pin+'</div>'
+      +'<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="ct eixo">'+esc(rot(ex.eixo))+'</span>'+fora+pin+'</div>'
       +'<div style="margin-top:.4rem">'+fh+'</div>'
       +(rec&&!pend ? '<div class="repor"><button class="btn g sm" onclick="abrirReposicao(\''+ex.id+'\')">Pedir reposi\u00e7\u00e3o do que foi recusado ('+rec+')</button></div>' : '')
       +'</div>';
