@@ -381,7 +381,6 @@
   #sidebar::-webkit-scrollbar{width:4px;}
   #sidebar::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:10px;}
   #sidebar{scrollbar-width:thin;scrollbar-color:var(--scroll) transparent;}
-  /* Lote 3c: sem hambúrguer no celular (o Mais do rodapé faz isso); toast invisível quando parado e acima da barra */
   #btnHamburger{ display:none !important; }
   #toast{ opacity:0; visibility:hidden; transition:transform .3s, opacity .3s, visibility .3s; }
   #toast.show{ opacity:1; visibility:visible; }
@@ -403,22 +402,14 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
 #admWrap .pill{ margin-bottom:0; text-decoration:none; }
 #admWrap .veu{ z-index:120; } #admWrap .gav{ z-index:121; }
 #admWrap .gav{ padding-bottom:calc(1.2rem + env(safe-area-inset-bottom)); }
-@media(max-width:1023px){ #admWrap .wrap{ padding-bottom:8rem; } }
-#admHd {position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.18); padding:calc(.6rem + env(safe-area-inset-top)) 1rem .6rem;}
-#admHd In{max-width:860px; margin:0 auto; display:flex; align-items:center; gap:.7rem;}
+@media(max-width:1023px){ #admWrap .wrap{ padding-bottom:8rem; } #admWrap{ margin:0 -.6rem; } }
+@media(max-width:640px){ #admWrap .card .ct{ flex:1 1 100%; } #admWrap .card .pin{ margin-left:0; } #admWrap .ficha .fAcs{ grid-template-columns:1fr 1fr; } }
 #admHd .voltar{flex:none; width:36px; height:36px; border-radius:11px; border:1px solid rgba(var(--borderRGB),.22); background:var(--surface); color:var(--text2); font-size:1rem; cursor:pointer;}
 #admHd .voltar:hover{color:var(--cyan); border-color:rgba(var(--cyanRGB),.4);}
 #admHd .voltar[hidden]{display:none;}
-#admHd .marca{display:flex; align-items:center; gap:.5rem; min-width:0;}
-#admHd .marca .lg{width:30px; height:30px; border-radius:9px; background:var(--cyan); color:var(--onCyan); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem; font-style:italic; flex:0 0 auto;}
-#admHd .marca .nm{font-size:1.02rem; font-weight:900; font-style:italic; letter-spacing:-.04em; color:var(--text); white-space:nowrap;}
-#admHd .marca .nm i{color:var(--cyan); font-style:italic;}
-#admHd .hdSep{width:1px; height:22px; background:rgba(var(--borderRGB),.25); flex:0 0 auto;}
 #admHd .hdOnde{min-width:0; flex:1;}
 #admHd .hdOnde .q{font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted);}
 #admHd .hdOnde .n{font-size:.92rem; font-weight:800; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-#admHd .lua{flex:none; width:36px; height:36px; border-radius:11px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer;}
-#admHd .lua:hover{color:var(--cyan); background:rgba(var(--cyanRGB),.10);}
 #admWrap .wrap{max-width:860px; margin:0 auto; padding:1.6rem 1rem 6rem;}
 #admWrap .tela{display:none;}
 #admWrap .tela.on{display:block;}
@@ -967,6 +958,11 @@ function linhas(t){ var m=MAT[t.id]||{}, out=[], i, es=escolhidos(t);
 function fichas(l){ if(l._f) return l._f; try{ var a=JSON.parse(String(l.conteudo||'[]')); l._f=Array.isArray(a)?a:[]; }catch(e){ l._f=[]; } return l._f; }
 function ehEmperrado(l){ return !!(l && l.estado==='ajustes' && l.revisao_json && l.revisao_json.emperrado===true); }
 function empAberto(l){ return ehEmperrado(l) && !(l.revisao_json.decidido); }
+/* fichas antigas (gerador IA) usam outras chaves; mesma leitura do hub do aluno */
+var CHAVES={ fonte:['fonte','cab','artigo','lei','marco','data','periodo','nome','pensador','corrente','titulo','obra','filme','referencia','pesquisa','cientista','especialista'],
+  dado:['dado','dado_numerico','texto','descricao','sinopse','conceito','conceito_chave','conclusao','conclusao_principal','ideia','fato','contexto','resumo'],
+  como_usar:['como_usar','argumento','aplicacao','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem'] };
+function campo(f,lista){ if(!f||typeof f!=='object') return ''; for(var i=0;i<lista.length;i++){ var v=f[lista[i]]; if(typeof v==='string'&&v.trim()) return v.trim(); } return ''; }
 function estadoFicha(f){ return (f && typeof f==='object' && f.estado) ? f.estado : 'pendente'; }
 function contaFichas(t, es){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++){ if(ehEmperrado(ls[i])) continue; if(ls[i].estado==='criacao'||!ls[i].estado) continue; var fs=fichas(ls[i]); for(var j=0;j<fs.length;j++) if(estadoFicha(fs[j])===es) n++; } return n; }
 function eixosComPendente(t){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++){ if(ehEmperrado(ls[i])||ls[i].estado==='criacao'||!ls[i].estado) continue; var fs=fichas(ls[i]); for(var j=0;j<fs.length;j++) if(estadoFicha(fs[j])==='pendente'){ n++; break; } } return n; }
@@ -1087,11 +1083,11 @@ function renderTema(){
       else veredito='<div class="fAcs"><button class="btn sm" onclick="decidirFicha(\''+ex.id+'\','+j+',\'aprovada\')">Aprovar</button><button class="btn rec sm" onclick="abrirRecusa(\''+ex.id+'\','+j+')">Recusar</button></div>';
       var url=String(f.url||'');
       fh+='<div class="ficha'+(e==='aprovada'?' aprovada':(e==='recusada'||e==='reposicao'?' recusada':''))+'">'
-        +'<div class="pf">'+esc(f.fonte||'\u2014')+(/^https?:\/\//.test(url)?' \u00b7 <a href="'+esc(url)+'" target="_blank" rel="noopener">abrir a fonte</a>':'')+'</div>'
+        +'<div class="pf">'+esc(campo(f,CHAVES.fonte)||'\u2014')+(/^https?:\/\//.test(url)?' \u00b7 <a href="'+esc(url)+'" target="_blank" rel="noopener">abrir a fonte</a>':'')+'</div>'
         +'<div class="conf">Fonte conferida: <b>'+esc(conferido(ex,j))+'</b></div>'
-        +'<div class="pd">'+esc(f.dado||'')+'</div>'
-        +'<div class="pz"><span class="rotZ">O que diz</span>'+esc(f.diz||'')+'</div>'
-        +'<div class="pu"><span class="rotU">'+ICO.lapis+'Como usar na reda\u00e7\u00e3o</span>'+esc(f.como_usar||'')+'</div>'
+        +'<div class="pd">'+esc(campo(f,CHAVES.dado))+'</div>'
+        +(f.diz?'<div class="pz"><span class="rotZ">O que diz</span>'+esc(f.diz)+'</div>':'')
+        +'<div class="pu"><span class="rotU">'+ICO.lapis+'Como usar na reda\u00e7\u00e3o</span>'+esc(campo(f,CHAVES.como_usar))+'</div>'
         +veredito+'</div>';
     }
     var pin = pend ? '<span class="pin neutro">'+pend+' a ler</span>'
@@ -1121,7 +1117,7 @@ async function gravarEixo(l){
   var fs=fichas(l), estado=estadoDoEixo(fs), uid=authGetUserId(), agora=new Date().toISOString();
   var corpo={ conteudo:JSON.stringify(fs), estado:estado, revisado_por:uid, revisado_em:agora };
   if(estado==='aprovado'){ corpo.aprovado_por=uid; corpo.aprovado_em=agora; corpo.revisao_json=null; }
-  else if(estado==='ajustes'){ corpo.aprovado_por=null; corpo.aprovado_em=null; corpo.revisao_json=fs.filter(function(f){ return estadoFicha(f)==='reposicao'; }).map(function(f){ return { fonte:f.fonte||'', url:f.url||'', motivo:f.motivo||'' }; }); }
+  else if(estado==='ajustes'){ corpo.aprovado_por=null; corpo.aprovado_em=null; corpo.revisao_json=fs.filter(function(f){ return estadoFicha(f)==='reposicao'; }).map(function(f){ return { fonte:campo(f,CHAVES.fonte), url:f.url||'', motivo:f.motivo||'' }; }); }
   else { corpo.aprovado_por=null; corpo.aprovado_em=null; corpo.revisao_json=null; }
   var res=await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio?id=eq.'+encodeURIComponent(l.id), { method:'PATCH', body:JSON.stringify(corpo) });
   if(!res.ok){ var txt=await res.text(); throw new Error(txt||('HTTP '+res.status)); }
@@ -1208,7 +1204,7 @@ function abrirRecusa(id,j){
   var l=linhaPorId(id); if(!l) return; modoGav='recusa'; recLinha=l; recFicha=j; var f=fichas(l)[j];
   document.getElementById('gavT').textContent='Por que recusar esta informa\u00e7\u00e3o?';
   document.getElementById('gavS').textContent='O motivo fica guardado na ficha \u2014 voc\u00ea n\u00e3o precisa lembrar depois. Se pedir reposi\u00e7\u00e3o, \u00e9 este texto que a F\u00e1brica vai ler.';
-  document.getElementById('gavQuais').innerHTML='<b>'+esc(f.fonte)+'</b><br>'+esc(f.dado);
+  document.getElementById('gavQuais').innerHTML='<b>'+esc(campo(f,CHAVES.fonte)||'\u2014')+'</b><br>'+esc(campo(f,CHAVES.dado));
   document.getElementById('btGav').textContent='Recusar com este motivo';
   var ps=document.querySelectorAll('.pillM'); for(var k=0;k<ps.length;k++) ps[k].classList.remove('sel');
   document.getElementById('gavTexto').value=''; document.getElementById('micDica').textContent=''; document.getElementById('micDica').classList.remove('on');
@@ -1220,7 +1216,7 @@ function abrirReposicao(id){
   var aprovadas = fs.filter(function(f){ return estadoFicha(f)==='aprovada'; }).length;
   document.getElementById('gavT').textContent='Pedir reposi\u00e7\u00e3o \u00e0 F\u00e1brica';
   document.getElementById('gavS').textContent='S\u00f3 o recusado volta a produzir, cada ficha com o motivo que voc\u00ea j\u00e1 deu. Nada mais a escrever.';
-  document.getElementById('gavQuais').innerHTML = recusadas.map(function(f){ return '<b>'+esc(f.fonte)+'</b> \u2014 '+esc(f.motivo||''); }).join('<br>')
+  document.getElementById('gavQuais').innerHTML = recusadas.map(function(f){ return '<b>'+esc(campo(f,CHAVES.fonte)||'\u2014')+'</b> \u2014 '+esc(f.motivo||''); }).join('<br>')
     + (aprovadas? '<br><br>'+aprovadas+(aprovadas===1?' aprovada continua':' aprovadas continuam')+' no ar \u2014 nada sai da vitrine.':'');
   document.getElementById('btGav').textContent='Devolver '+recusadas.length+(recusadas.length===1?' ficha':' fichas')+' \u00e0 F\u00e1brica';
   zonasGaveta(['gavS','gavQuais','gavAcoes']); abrirGaveta();
