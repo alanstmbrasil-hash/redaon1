@@ -404,6 +404,8 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
 #admWrap .rotU svg, #admWrap .veredito svg, #admWrap .pin svg, #admWrap .avisoOk .ic svg, #admWrap .aviso .ic svg, #admHd svg, #admWrap .resB .ic svg{ display:inline-block; }
 #admWrap .pill{ margin-bottom:0; text-decoration:none; }
 #admWrap .veu{ z-index:120; } #admWrap .gav{ z-index:121; }
+/* desktop: a gaveta nasce ao lado da sidebar, centrada na coluna de conteúdo, nunca por baixo do menu (v2-10) */
+@media(min-width:1024px){ #admWrap .gav{ left:232px; right:0; max-width:640px; margin:0 auto; border-radius:22px 22px 0 0; } #sidebar.mini ~ #main-content #admWrap .gav{ left:62px; } }
 #admWrap .gav{ padding-bottom:calc(1.2rem + env(safe-area-inset-bottom)); }
 @media(max-width:1023px){ #admWrap .wrap{ padding-bottom:8rem; } #admWrap{ margin:0 -.6rem; } }
 @media(max-width:640px){ #admWrap .ficha .fAcs{ grid-template-columns:1fr 1fr; } }
