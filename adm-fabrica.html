@@ -1,408 +1,552 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-tema="escuro">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RedaON · ADM · Produção</title>
+<title>RedaON · ADM · Fábrica</title>
+<script>
+(function(){
+  var pref='auto'; try{ pref=localStorage.getItem('redaon-tema')||'auto'; }catch(e){}
+  var efetivo=pref;
+  if(pref==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',pref);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* RedaON · ADM · Produção · produção v1-0 (do mockup adm-producao-v1-0)
-   Pede o material à Fábrica e traz o bloco conferido para dentro.
-   Não sela, não aprova tema, não escolhe categoria. Sem blur. */
+/* ============================================================
+   RedaON · ADM · Fábrica · PRODUÇÃO v2-0 (do mockup v2-3, aprovado)
+   Traz temas (temas_propostos, origem fabrica) e material (material_apoio,
+   estado revisao, fichas com estado pendente) da Fábrica de Conteúdo.
+   Ícones em SVG. Cascata redaon-tema do portal. Sem blur.
+   ============================================================ */
 *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 :root{
-  --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --top:#191c22;
-  --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0; --borderRGB:71,69,84;
-  --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020;
-  --green:#4ade80; --greenRGB:74,222,128; --red:#ff8b8b; --redRGB:255,139,139;
-  --orange:#ff9d68; --orangeRGB:255,157,104; --ambar:#e8b23c;
-}
-html[data-tema="claro"]{
   --bg:#fdfbf4; --sunken:#f2ede0; --surface:#ffffff; --surface2:#f6f2e6; --top:#fbf8ee;
   --text:#0a4a4b; --text2:#3a5556; --muted:#8a8576; --borderRGB:10,74,75;
   --cyan:#0a8c8d; --cyanRGB:10,140,141; --onCyan:#ffffff;
+  --purple:#5a4fc4; --purpleRGB:90,79,196;
   --green:#0f8a4d; --greenRGB:15,138,77; --red:#c0473b; --redRGB:192,71,59;
   --orange:#b45f24; --orangeRGB:180,95,36; --ambar:#96700a;
 }
+html[data-tema="escuro"]{
+  --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --top:#191c22;
+  --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0; --borderRGB:71,69,84;
+  --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020;
+  --purple:#6c5ce7; --purpleRGB:108,92,231;
+  --green:#4ade80; --greenRGB:74,222,128; --red:#ff8b8b; --redRGB:255,139,139;
+  --orange:#ff9d68; --orangeRGB:255,157,104; --ambar:#e8b23c;
+}
 body{ font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
-.hd{ position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.4);
-  padding:calc(.7rem + env(safe-area-inset-top)) 1rem .7rem; display:flex; align-items:center; gap:.6rem; }
-.hd .voltar{ flex:none; width:34px; height:34px; border-radius:10px; border:none; background:var(--surface2); color:var(--text); font-size:1rem; cursor:pointer; }
+
+.hd{ position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.18);
+  padding:calc(.6rem + env(safe-area-inset-top)) 1rem .6rem; }
+.hdIn{ max-width:860px; margin:0 auto; display:flex; align-items:center; gap:.7rem; }
+.hd .voltar{ flex:none; width:36px; height:36px; border-radius:11px; border:1px solid rgba(var(--borderRGB),.22);
+  background:var(--surface); color:var(--text2); font-size:1rem; cursor:pointer; }
+.hd .voltar:hover{ color:var(--cyan); border-color:rgba(var(--cyanRGB),.4); }
 .hd .voltar[hidden]{ display:none; }
-.hd .tit{ flex:1; min-width:0; }
-.hd .tit .q{ font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
-.hd .tit .n{ font-size:.95rem; font-weight:800; line-height:1.3; }
-.hd .lua{ flex:none; width:34px; height:34px; border-radius:10px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; }
-.wrap{ max-width:640px; margin:0 auto; padding:1rem 1rem 6rem; }
+.marca{ display:flex; align-items:center; gap:.5rem; min-width:0; }
+.marca .lg{ width:30px; height:30px; border-radius:9px; background:var(--cyan); color:var(--onCyan);
+  display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem; font-style:italic; flex:0 0 auto; }
+.marca .nm{ font-size:1.02rem; font-weight:900; font-style:italic; letter-spacing:-.04em; color:var(--text); white-space:nowrap; }
+.marca .nm i{ color:var(--cyan); font-style:italic; }
+.hdSep{ width:1px; height:22px; background:rgba(var(--borderRGB),.25); flex:0 0 auto; }
+.hdOnde{ min-width:0; flex:1; }
+.hdOnde .q{ font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+.hdOnde .n{ font-size:.92rem; font-weight:800; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hd .lua{ flex:none; width:36px; height:36px; border-radius:11px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; }
+.hd .lua:hover{ color:var(--cyan); background:rgba(var(--cyanRGB),.10); }
+
+.wrap{ max-width:860px; margin:0 auto; padding:1.6rem 1rem 6rem; }
 .tela{ display:none; } .tela.on{ display:block; }
-h2.t{ font-size:1.15rem; font-weight:800; line-height:1.3; }
-p.s{ font-size:.82rem; color:var(--text2); line-height:1.6; margin-top:.4rem; }
-.sec{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.5rem 0 .55rem; }
+h2.t{ font-size:1.3rem; font-weight:800; line-height:1.3; letter-spacing:-.01em; }
+p.s{ font-size:.85rem; color:var(--text2); line-height:1.65; margin-top:.4rem; max-width:60ch; }
+.sec{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:1.7rem 0 .7rem; }
 .sec .qt{ color:var(--text2); font-weight:700; text-transform:none; letter-spacing:0; }
-.vazio{ font-size:.78rem; color:var(--muted); padding:.7rem .85rem; border:1px dashed rgba(var(--borderRGB),.5); border-radius:12px; line-height:1.5; }
-.ok{ color:var(--green); font-weight:800; } .no{ color:var(--red); font-weight:800; } .nc{ color:var(--ambar); font-weight:800; }
+.vazio{ font-size:.8rem; color:var(--muted); padding:.9rem 1rem; border:1px dashed rgba(var(--borderRGB),.28); border-radius:14px; line-height:1.6; }
+.ok{ color:var(--green); font-weight:800; } .no{ color:var(--red); font-weight:800; }
 
-.tarefa{ width:100%; text-align:left; font:inherit; color:var(--text); cursor:pointer; background:var(--surface); border:1px solid rgba(var(--borderRGB),.5);
-  border-radius:16px; padding:.85rem; display:flex; align-items:center; gap:.75rem; margin-bottom:.6rem; }
+.tarefa{ width:100%; text-align:left; font:inherit; color:var(--text); cursor:pointer;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:16px;
+  padding:1rem 1.05rem; display:flex; align-items:center; gap:.95rem; margin-bottom:.65rem; transition:border-color .15s; }
+.tarefa:hover{ border-color:rgba(var(--cyanRGB),.45); }
 .tarefa:active{ background:var(--surface2); }
-.tarefa .num{ flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center; font-size:1rem; font-weight:800; background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
-.tarefa.zero .num{ background:rgba(var(--borderRGB),.35); color:var(--muted); }
-.tarefa .cp{ flex:1; min-width:0; } .tarefa .cp .a{ font-size:.9rem; font-weight:700; }
-.tarefa .cp .b{ font-size:.75rem; color:var(--muted); margin-top:.15rem; line-height:1.45; }
-.tarefa .seta{ flex:none; color:var(--muted); font-size:1.1rem; }
-.tarefa:disabled{ opacity:.45; cursor:default; }
+.tarefa .num{ flex:none; width:44px; height:44px; border-radius:13px; display:grid; place-items:center;
+  font-size:1.05rem; font-weight:800; background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.tarefa .num svg{ width:22px; height:22px; display:block; }
+.hdOnde .q svg{ width:11px; height:11px; vertical-align:-1px; }
+.ex .e.ajustes{ color:var(--orange); }
+.resB .r.av .ic{ color:var(--orange); }
+.tarefa.zero .num{ background:rgba(var(--borderRGB),.14); color:var(--muted); }
+.tarefa .cp{ flex:1; min-width:0; }
+.tarefa .cp .a{ display:block; font-size:.94rem; font-weight:700; line-height:1.35; }
+.tarefa .cp .b{ display:block; font-size:.78rem; color:var(--muted); margin-top:.25rem; line-height:1.5; }
+.tarefa .seta{ flex:none; color:var(--muted); font-size:1.15rem; }
+.tarefa:disabled{ opacity:.5; cursor:default; }
+.tarefa:disabled:hover{ border-color:rgba(var(--borderRGB),.20); }
 
-.grupo{ display:grid; gap:.55rem; }
-.item{ width:100%; text-align:left; font:inherit; color:var(--text); cursor:pointer; background:var(--surface); border:1px solid rgba(var(--borderRGB),.5);
-  border-radius:16px; padding:.85rem; display:flex; align-items:center; gap:.7rem; }
-.item:active{ background:var(--surface2); }
-.item .cp{ flex:1; min-width:0; } .item .tt{ font-size:.9rem; font-weight:700; line-height:1.4; }
-.item .mt{ font-size:.72rem; color:var(--muted); margin-top:.3rem; line-height:1.45; }
-.item .seta{ flex:none; color:var(--muted); font-size:1.1rem; }
-.barra{ height:5px; border-radius:3px; background:rgba(var(--borderRGB),.35); margin-top:.5rem; overflow:hidden; }
+.item{ width:100%; text-align:left; font:inherit; color:var(--text); background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.20); border-radius:16px; padding:.95rem 1.05rem; display:flex; align-items:center; gap:.8rem; margin-bottom:.6rem; }
+.item .cp{ flex:1; min-width:0; }
+.item .tt{ display:block; font-size:.92rem; font-weight:700; line-height:1.45; }
+.item .mt{ display:block; font-size:.75rem; color:var(--muted); margin-top:.3rem; line-height:1.5; }
+.barra{ height:5px; border-radius:3px; background:rgba(var(--borderRGB),.14); margin-top:.55rem; overflow:hidden; }
 .barra i{ display:block; height:100%; background:var(--cyan); }
 
-.selo{ display:inline-block; font-size:.63rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:.16rem .4rem; border-radius:6px; margin-bottom:.35rem; background:rgba(var(--greenRGB),.14); color:var(--green); }
-.enun{ font-size:1.1rem; font-weight:800; line-height:1.4; margin-top:.5rem; }
-.linhas{ margin-top:1rem; display:grid; gap:.6rem; }
-.linha{ display:grid; grid-template-columns:88px 1fr; gap:.7rem; align-items:start; }
-.linha .k{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding-top:.15rem; }
-.linha .v{ font-size:.84rem; color:var(--text2); line-height:1.6; }
-.eixos{ margin-top:1.1rem; display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; }
-.ex{ background:var(--sunken); border:1px solid rgba(var(--borderRGB),.4); border-radius:12px; padding:.6rem .65rem; }
-.ex.fora{ opacity:.45; }
-.ex .n{ font-size:.76rem; font-weight:700; line-height:1.3; }
-.ex .e{ font-size:.7rem; margin-top:.2rem; font-weight:700; }
-.ex .e.falta{ color:var(--muted); font-weight:500; } .ex .e.revisao, .ex .e.ajustes{ color:var(--ambar); } .ex .e.aprovado{ color:var(--green); } .ex .e.criacao{ color:var(--muted); font-weight:500; }
-.pedido{ margin-top:1.1rem; background:var(--surface); border:1px solid rgba(var(--cyanRGB),.45); border-radius:14px; padding:.85rem; }
-.pedido .lb{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--cyan); }
-.pedido .ds{ font-size:.78rem; color:var(--text2); line-height:1.55; margin-top:.35rem; }
-textarea{ width:100%; margin-top:.6rem; font:inherit; font-size:.78rem; line-height:1.5; color:var(--text); background:var(--sunken); border:1px solid rgba(var(--borderRGB),.5);
-  border-radius:12px; padding:.7rem .8rem; resize:vertical; min-height:150px; font-family:ui-monospace,Menlo,Consolas,monospace; }
+textarea{ width:100%; margin-top:.6rem; font-size:.78rem; line-height:1.5; color:var(--text); background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.28); border-radius:12px; padding:.7rem .8rem; resize:vertical; min-height:170px;
+  font-family:ui-monospace,Menlo,Consolas,monospace; }
 textarea::placeholder{ color:var(--muted); font-family:Inter,system-ui,sans-serif; }
 textarea:focus{ outline:none; border-color:var(--cyan); }
-.btn{ width:100%; font:inherit; font-size:.88rem; font-weight:800; padding:.85rem 1rem; border-radius:14px; border:none; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
-.btn.g{ background:transparent; color:var(--text); border:1px solid rgba(var(--borderRGB),.6); }
+.btn{ width:100%; font:inherit; font-size:.9rem; font-weight:800; padding:.9rem 1rem; border-radius:14px; border:none; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
+.btn.g{ background:transparent; color:var(--text); border:1px solid rgba(var(--borderRGB),.35); }
 .btn.ok{ background:var(--green); color:var(--onCyan); }
-.btn.sm{ font-size:.8rem; padding:.7rem .9rem; border-radius:12px; }
-.btn:disabled{ opacity:.45; cursor:default; }
-.dupla{ display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:.7rem; }
-.acoes{ display:grid; gap:.6rem; margin-top:1.3rem; }
-.rodape{ font-size:.72rem; color:var(--muted); line-height:1.6; margin-top:1.4rem; padding-top:.9rem; border-top:1px solid rgba(var(--borderRGB),.4); }
+.acoes{ display:grid; gap:.6rem; margin-top:1.1rem; }
+.rodape{ font-size:.74rem; color:var(--muted); line-height:1.65; margin-top:1.8rem; padding-top:1rem; border-top:1px solid rgba(var(--borderRGB),.16); max-width:60ch; }
 
-.res{ margin-top:.9rem; display:grid; gap:.4rem; }
-.res .r{ display:flex; gap:.5rem; align-items:flex-start; padding:.55rem .7rem; border-radius:10px; background:var(--sunken); border:1px solid rgba(var(--borderRGB),.35); font-size:.78rem; line-height:1.45; }
-.res .r .ic{ flex:none; font-weight:800; } .res .r.ok .ic{ color:var(--green); } .res .r.mal .ic{ color:var(--red); }
-.previa{ margin-top:.8rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.5); border-radius:12px; padding:.8rem; }
+/* resultado da conferência do bloco */
+.res{ margin-top:.9rem; display:grid; gap:.45rem; }
+.res .r{ padding:.65rem .8rem; border-radius:12px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); font-size:.8rem; line-height:1.5; }
+.res .r .e{ font-weight:600; }
+.res .r .m{ font-size:.72rem; color:var(--muted); margin-top:.2rem; }
+
+#toast{ position:fixed; left:50%; bottom:calc(1.4rem + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(160%); z-index:90;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.3); color:var(--text); font-size:.82rem; font-weight:600; padding:.7rem 1.1rem;
+  border-radius:99px; transition:transform .22s ease; max-width:88vw; text-align:center; box-shadow:0 4px 14px rgba(0,0,0,.08); }
+#toast.on{ transform:translateX(-50%) translateY(0); }
+
+@media (min-width:820px){ html{ font-size:17px; } .wrap{ padding-top:2.2rem; } h2.t{ font-size:1.5rem; } }
+@media (min-width:1180px){ html{ font-size:18px; } }
+@media (prefers-reduced-motion:reduce){ #toast{ transition:none; } }
+
+/* ═══ v2-1 · tema em curadoria + pedido + importar material + gaveta ═══ */
+.item.clic{ cursor:pointer; transition:border-color .15s; }
+.item.clic:hover{ border-color:rgba(var(--cyanRGB),.45); }
+.item .seta{ flex:none; color:var(--muted); font-size:1.15rem; }
+.selo{ display:inline-block; font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:.2rem .5rem; border-radius:7px; margin-bottom:.4rem; background:rgba(var(--greenRGB),.12); color:var(--green); }
+.enun{ font-size:1.15rem; font-weight:800; line-height:1.45; margin-top:.4rem; }
+.linhas{ margin-top:1.1rem; display:grid; gap:.75rem; }
+.linha{ display:grid; grid-template-columns:96px 1fr; gap:.75rem; align-items:start; }
+.linha .k{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding-top:.15rem; }
+.linha .v{ font-size:.85rem; color:var(--text2); line-height:1.6; }
+.eixos{ margin-top:1.1rem; display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem; }
+.ex{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:13px; padding:.65rem .65rem; }
+.ex .n{ font-size:.77rem; font-weight:700; line-height:1.3; }
+.ex .e{ font-size:.68rem; margin-top:.22rem; font-weight:700; }
+.ex .e.falta{ color:var(--muted); font-weight:500; } .ex .e.revisao{ color:var(--ambar); } .ex .e.aprovado{ color:var(--green); }
+.pedido{ margin-top:1.2rem; background:var(--surface); border:1px solid rgba(var(--cyanRGB),.35); border-radius:16px; padding:.95rem 1rem; }
+.pedido .lb{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--cyan); }
+.pedido .ds{ font-size:.79rem; color:var(--text2); line-height:1.55; margin-top:.35rem; }
+.dupla{ display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:.7rem; }
+.btn.sm{ font-size:.8rem; padding:.72rem .9rem; border-radius:12px; }
+.btn:disabled{ opacity:.45; cursor:default; }
+.resB{ margin-top:.9rem; display:grid; gap:.45rem; }
+.resB .r{ display:flex; gap:.5rem; align-items:flex-start; padding:.6rem .75rem; border-radius:12px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); font-size:.79rem; line-height:1.5; }
+.resB .r .ic{ flex:none; font-weight:800; } .resB .r.ok .ic{ color:var(--green); } .resB .r.mal .ic{ color:var(--red); }
+.previa{ margin-top:.8rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:14px; padding:.85rem .95rem; }
 .previa .cm{ font-size:.7rem; color:var(--muted); }
 .previa .pf{ font-size:.78rem; font-weight:800; color:var(--text2); margin-top:.5rem; }
-.previa .pd{ font-size:.85rem; font-weight:600; line-height:1.55; margin-top:.2rem; }
-.previa .pz, .previa .pu{ font-size:.82rem; line-height:1.6; margin-top:.45rem; color:var(--text2); }
-.previa .pu{ color:var(--text); } .previa .pr{ display:block; font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
-.alvo{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; padding:.7rem .85rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.5); border-radius:12px; margin-top:.5rem; font-size:.84rem; font-weight:600; cursor:pointer; }
+.previa .pd{ font-size:.86rem; font-weight:600; line-height:1.55; margin-top:.2rem; }
+.previa .pz, .previa .pu{ font-size:.82rem; line-height:1.6; margin-top:.5rem; color:var(--text2); }
+.previa .pu{ color:var(--text); border-left:2px solid var(--purple); padding-left:.7rem; }
+.previa .pr{ display:block; font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+.alvo{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; padding:.75rem .9rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.24); border-radius:13px; margin-top:.5rem; font-size:.85rem; font-weight:600; cursor:pointer; }
+.alvo:hover{ border-color:rgba(var(--cyanRGB),.45); }
 .alvo .t2{ font-size:.7rem; color:var(--muted); font-weight:500; }
-
-.veu{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:40; display:none; } .veu.on{ display:block; }
-.gav{ position:fixed; left:0; right:0; bottom:0; z-index:41; background:var(--surface); border-radius:22px 22px 0 0; border-top:1px solid rgba(var(--borderRGB),.5);
+.veu{ position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:40; display:none; } .veu.on{ display:block; }
+.gav{ position:fixed; left:0; right:0; bottom:0; z-index:41; background:var(--surface); border-radius:22px 22px 0 0; border-top:1px solid rgba(var(--borderRGB),.25);
   padding:.6rem 1rem calc(1.2rem + env(safe-area-inset-bottom)); transform:translateY(101%); transition:transform .22s ease; max-height:84vh; overflow-y:auto; }
 .gav.on{ transform:translateY(0); }
 @media (prefers-reduced-motion:reduce){ .gav{ transition:none; } }
-.gav .grip{ width:38px; height:4px; border-radius:2px; background:rgba(var(--borderRGB),.7); margin:.2rem auto .9rem; }
+.gav .grip{ width:38px; height:4px; border-radius:2px; background:rgba(var(--borderRGB),.4); margin:.2rem auto .9rem; }
 .gav .gt{ font-size:.92rem; font-weight:800; line-height:1.4; }
-.pill{ width:100%; min-height:52px; margin-top:.5rem; font:inherit; font-size:.86rem; font-weight:600; text-align:left; color:var(--text); background:var(--sunken);
-  border:1px solid rgba(var(--borderRGB),.5); border-radius:14px; padding:.8rem 1rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
-.pill:active{ background:var(--surface2); }
+.pill{ width:100%; min-height:52px; margin-top:.5rem; font:inherit; font-size:.86rem; font-weight:600; text-align:left; color:var(--text); background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.24); border-radius:14px; padding:.8rem 1rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+.pill:hover{ border-color:rgba(var(--cyanRGB),.45); }
 .pill .sub{ font-size:.7rem; color:var(--muted); font-weight:500; display:block; margin-top:.1rem; }
 .pill .ck{ color:var(--cyan); font-weight:800; opacity:0; } .pill.sel{ border-color:rgba(var(--cyanRGB),.65); } .pill.sel .ck{ opacity:1; }
-
-#toast{ position:fixed; left:50%; bottom:calc(1.4rem + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(160%); z-index:90;
-  background:var(--surface2); border:1px solid rgba(var(--borderRGB),.6); color:var(--text); font-size:.82rem; font-weight:600; padding:.7rem 1.1rem;
-  border-radius:99px; transition:transform .22s ease; max-width:88vw; text-align:center; }
-#toast.on{ transform:translateX(-50%) translateY(0); }
-.carregando{ font-size:.82rem; color:var(--muted); padding:2rem 0; text-align:center; }
-
-@media (min-width:820px){ html{ font-size:18.5px; } .wrap{ max-width:860px; } .linha{ grid-template-columns:110px 1fr; } }
-@media (min-width:1180px){ html{ font-size:20px; } .wrap{ max-width:940px; } }
 </style>
 </head>
 <body>
 
-<div class="hd">
+<div class="hd"><div class="hdIn">
   <button class="voltar" id="btVoltar" onclick="voltar()" aria-label="Voltar">&#8592;</button>
-  <div class="tit"><div class="q">ADM &middot; Produção</div><div class="n" id="hdN">Produção</div></div>
-  <button class="lua" onclick="trocarTema()" aria-label="Tema claro ou escuro">&#9789;</button>
-</div>
+  <div class="marca"><span class="lg">R</span><span class="nm">Reda<i>ON</i></span></div>
+  <div class="hdSep"></div>
+  <div class="hdOnde"><div class="q">ADM &middot; <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V9l6 4V9l6 4V9l6 4v8H3z"/><path d="M5 3h3l1 6H4z"/></svg> F&aacute;brica</div><div class="n" id="hdN">F&aacute;brica</div></div>
+  <button class="lua" id="btLua" onclick="cicloTema()" aria-label="Tema claro, escuro ou automático">&#9788;</button>
+</div></div>
 
 <div class="wrap">
 
+  <!-- ════════ CASA ════════ -->
   <div class="tela on" id="t-casa">
-    <h2 class="t">Produção</h2>
-    <p class="s">A Profa. Blanche marca o tema e os eixos. Você pede o material à Fábrica, confere as fontes lá, e traz o bloco pronto para cá.</p>
+    <h2 class="t">ADM &middot; F&aacute;brica</h2>
+    <p class="s">Voc&ecirc; pede &agrave; F&aacute;brica de Conte&uacute;do, decide com ela o que produzir e o que reaproveitar do acervo, confere as fontes l&aacute; &mdash; e traz para dentro. Quem decide tema e aprova material &eacute; a ADM Pedag&oacute;gica.</p>
 
     <div class="sec">Em curadoria, aguardando material <span class="qt" id="qtAg"></span></div>
-    <div class="grupo" id="listaAg"><div class="carregando">Carregando&hellip;</div></div>
+    <div id="listaAg"><div class="vazio">Abrindo&hellip;</div></div>
 
-    <div class="sec">Ferramentas</div>
-    <button class="tarefa" onclick="abrirImportar(null)">
-      <span class="num">&#8681;</span>
-      <span class="cp"><span class="a">Trazer material para dentro</span><span class="b">Cola o bloco conferido. Entra conferido, para a Profa. Blanche selar.</span></span>
+    <div class="sec">Trazer da F&aacute;brica</div>
+    <button class="tarefa" onclick="ir('t-importar-temas')">
+      <span class="num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span>
+      <span class="cp"><span class="a">Trazer temas para dentro</span>
+        <span class="b">Cola o bloco de temas que saiu da F&aacute;brica de Conte&uacute;do. Entram como propostos &mdash; decidir &eacute; da ADM Pedag&oacute;gica.</span></span>
+      <span class="seta">&#8250;</span>
+    </button>
+    <button class="tarefa" onclick="abrirImportarMat(null)">
+      <span class="num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M6 9l6 6 6-6"/><path d="M4 19h16"/></svg></span>
+      <span class="cp"><span class="a">Trazer material para dentro</span>
+        <span class="b">Cola o JSON &uacute;nico do tema, gerado ap&oacute;s a sua aprova&ccedil;&atilde;o na F&aacute;brica. Entra conferido, para a ADM Pedag&oacute;gica aprovar.</span></span>
       <span class="seta">&#8250;</span>
     </button>
     <button class="tarefa zero" disabled>
-      <span class="num">&#9881;</span>
-      <span class="cp"><span class="a">Gerar exercícios do tema</span><span class="b">Depois do primeiro tema selado.</span></span>
+      <span class="num"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+      <span class="cp"><span class="a">Gerar exerc&iacute;cios do tema</span>
+        <span class="b">Depois do primeiro tema com material aprovado.</span></span>
       <span class="seta">&#8250;</span>
     </button>
 
-    <div class="rodape">Você não sela, não aprova tema e não escolhe categoria. Isso é da Profa. Blanche. O que é seu: pedir, conferir e trazer.</div>
+    <div class="rodape">Voc&ecirc; n&atilde;o decide tema, n&atilde;o aprova material e n&atilde;o escolhe categoria &mdash; isso &eacute; da ADM Pedag&oacute;gica. O que &eacute; do ADM - F&aacute;brica: pedir, conferir e trazer.</div>
   </div>
 
+  <!-- ════════ TEMA EM CURADORIA ════════ -->
   <div class="tela" id="t-tema"><div id="temaCorpo"></div></div>
 
-  <div class="tela" id="t-importar">
+  <!-- ════════ TRAZER MATERIAL ════════ -->
+  <div class="tela" id="t-importar-mat">
     <h2 class="t">Trazer material para dentro</h2>
-    <p class="s">Cole o bloco que saiu da Fábrica, um eixo por vez. Ele é verificado antes de virar linha — e entra <b>conferido, para a Profa. Blanche selar</b>. Ficha sem fonte conferida não entra.</p>
+    <p class="s">Cole o JSON &uacute;nico do tema &mdash; o que a F&aacute;brica gera depois do seu "aprovado" na conversa. Ele &eacute; verificado eixo a eixo antes de virar linha, e entra <b>conferido, para a ADM Pedag&oacute;gica aprovar</b>. Eixo que emperrou vem reportado no pr&oacute;prio bloco.</p>
     <div class="sec">Para qual tema</div>
     <div class="alvo" onclick="abrirEscolhaTema()"><span id="alvoNome">Escolha o tema</span><span class="t2">trocar &#8250;</span></div>
     <div class="sec">O bloco</div>
-    <textarea id="cola" spellcheck="false" placeholder='{"peca":"repertorio","eixo":"legislacao","titulo":"...","itens":[{"cab":"...","url":"https://...","dado":"...","diz":"...","como_usar":"...","fonte_conferida":true,"conferido_por":"Pedro","conferido_em":"2026-09-01"}]}'></textarea>
-    <button class="btn g" style="margin-top:.7rem" onclick="conferirBloco()">Conferir se está completo</button>
-    <div class="res" id="saida"></div>
-    <div class="acoes"><button class="btn" id="btImportar" disabled onclick="importar()">Trazer para dentro</button></div>
+    <textarea id="colaMat" spellcheck="false" placeholder='{"peca":"material_tema","tema":"...","eixos":[{"eixo":"legislacao","titulo":"...","itens":[{"cab":"...","url":"https://...","dado":"...","diz":"...","como_usar":"...","fonte_conferida":true,"conferido_por":"Pedro","conferido_em":"2026-09-02"}]}],"emperrados":[{"eixo":"filosofia","motivo":"..."}]}'></textarea>
+    <div class="acoes"><button class="btn g" onclick="conferirBloco()">Conferir se est&aacute; completo</button></div>
+    <div class="resB" id="saidaMat"></div>
+    <div class="acoes"><button class="btn" id="btImportarMat" disabled onclick="importarMat()">Trazer para dentro</button></div>
+  </div>
+
+  <!-- ════════ TRAZER TEMAS ════════ -->
+  <div class="tela" id="t-importar-temas">
+    <h2 class="t">Trazer temas para dentro</h2>
+    <p class="s">Cole o bloco que saiu da conversa com o Claude na F&aacute;brica. Cada tema traz enunciado, categoria (uma das 10), campo (um dos 13) e a linha de repert&oacute;rio. O que n&atilde;o cumprir o contrato fica de fora, com o motivo.</p>
+    <textarea id="jsonImp" spellcheck="false" placeholder='[{"enunciado":"Desafios para ...","categoria":"Trabalho","campo":"trabalho","grupo":"Campos recorrentes","repertorio":"..."}]'></textarea>
+    <div class="acoes"><button class="btn" onclick="conferirImportacao()">Conferir o bloco</button></div>
+    <div class="res" id="resImp"></div>
+    <div id="acImp"></div>
+    <div class="rodape">O Claude nunca escreve no banco &mdash; na F&aacute;brica ele s&oacute; l&ecirc; o acervo. Os temas entram como <b>propostos</b> e aparecem na fila "Decidir temas" da ADM Pedag&oacute;gica &mdash; aprovar, reformular ou rejeitar continua sendo dela.</div>
   </div>
 
 </div>
 
 <div class="veu" id="veu" onclick="fecharGaveta()"></div>
 <div class="gav" id="gav"><div class="grip"></div><div class="gt" id="gavT"></div><div id="gavPills"></div></div>
+
 <div id="toast"></div>
 
+<script>
+(function(){ try{ if(!localStorage.getItem('redaon_token')) localStorage.setItem('redaon_destino','adm-fabrica.html'); }catch(e){} })();
+</script>
 <script src="supabase-auth.js"></script>
 <script>
-/* ═══ tema visual ═══ */
-(function(){ try{ var t=localStorage.getItem('redaon_tema_adm'); if(t) document.documentElement.setAttribute('data-tema',t); }catch(e){} })();
-function trocarTema(){ var h=document.documentElement, n=h.getAttribute('data-tema')==='claro'?'escuro':'claro'; h.setAttribute('data-tema',n); try{ localStorage.setItem('redaon_tema_adm',n); }catch(e){} }
+/* ─── tema visual: cascata do portal ─── */
+var ICONES_TEMA={ claro:'\u2600', escuro:'\u263E', auto:'A' };
+function pintarLua(){ var p=document.documentElement.getAttribute('data-tema-pref')||'auto'; document.getElementById('btLua').textContent=ICONES_TEMA[p]||'A'; }
+function cicloTema(){
+  var ordem=['claro','escuro','auto'], p=document.documentElement.getAttribute('data-tema-pref')||'auto';
+  var novo=ordem[(ordem.indexOf(p)+1)%3], efetivo=novo;
+  if(novo==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',novo);
+  try{ localStorage.setItem('redaon-tema',novo); }catch(e){}
+  pintarLua();
+}
+pintarLua();
 
 if (typeof authGuard === 'function') authGuard();
 
-/* ═══ constantes ═══ */
-var EIXOS = [['legislacao','Legislação'],['historia','História'],['especialistas','Especialistas'],['atualidades','Atualidades'],['literatura','Literatura'],['filosofia','Filosofia'],['cinema','Cinema'],['ciencia','Ciência'],['culturapop','Cultura pop']];
-var MIN_FICHAS = 2;
-var DENTRO = ['revisao','ajustes','aprovado'];   /* material da Fábrica; 'criacao' é reserva do gerador */
-
-var TEMAS = [], MAT = {}, pilha=[], telaAtual='t-casa', atual=null, temaImport=null, blocoOk=null;
-
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._x); t._x=setTimeout(function(){ t.classList.remove('on'); },2800); }
+
+/* ─── navegação: voltar na casa devolve ao portal ─── */
+var pilha=[], telaAtual='t-casa';
+var NOMES_TELA={ 't-casa':'F\u00e1brica', 't-tema':'Tema em curadoria', 't-importar-temas':'Trazer temas', 't-importar-mat':'Trazer material' };
+function ir(t){ if(telaAtual) pilha.push(telaAtual); mostrar(t); }
+function voltar(){ if(!pilha.length){ if(telaAtual==='t-casa'){ window.location.href='professor.html'; return; } mostrar('t-casa'); return; } mostrar(pilha.pop()); }
+function mostrar(t){ var i,ts=document.querySelectorAll('.tela'); for(i=0;i<ts.length;i++) ts[i].classList.remove('on'); document.getElementById(t).classList.add('on'); telaAtual=t; document.getElementById('hdN').textContent=NOMES_TELA[t]||'F\u00e1brica'; window.scrollTo(0,0); }
+
+/* ─── acesso: producao ou admin ─── */
+async function conferirAcesso(){
+  try{
+    var uid=authGetUserId();
+    var r=await dbFetch(SUPABASE_URL+'/rest/v1/usuarios?select=areas,is_admin&id=eq.'+encodeURIComponent(uid)+'&limit=1', {});
+    var u = r.ok ? (await r.json())[0] : null;
+    var areas = (u && Array.isArray(u.areas)) ? u.areas : [];
+    if(u && (areas.indexOf('producao')>=0 || u.is_admin===true)) return true;
+  }catch(e){ console.warn('[fabrica acesso]', e); }
+  window.location.replace('adm.html'); return false;
+}
+
+/* ─── contrato de temas (§8 das instruções v4) ─── */
+var CATEGORIAS = ['Consumo','Cultura','Direitos','Economia','Educa\u00e7\u00e3o','Meio Ambiente','Sa\u00fade','Social','Tecnologia','Trabalho'];
+var CAMPOS_IDS = ['trabalho','infancia','cultura','cidadania','mulher','tecnologia','alimentacao','saude','violencia','meio_ambiente','educacao','saneamento','envelhecimento'];
+var importaveis=[];
+function conferirImportacao(){
+  var txt=document.getElementById('jsonImp').value.trim(), arr, h='', i; importaveis=[];
+  try{ arr=JSON.parse(txt); }catch(e){ document.getElementById('resImp').innerHTML='<div class="r"><div class="e">N\u00e3o consegui ler o bloco.</div><div class="m">Precisa ser JSON: uma lista entre colchetes.</div></div>'; document.getElementById('acImp').innerHTML=''; return; }
+  if(!Array.isArray(arr)) arr=[arr];
+  for(i=0;i<arr.length;i++){
+    var o=arr[i]||{}, why=[];
+    if(!o.enunciado || String(o.enunciado).trim().length<20) why.push('enunciado curto ou ausente');
+    if(CATEGORIAS.indexOf(o.categoria)<0) why.push('categoria fora das 10');
+    if(o.campo && CAMPOS_IDS.indexOf(o.campo)<0) why.push('campo fora dos 13');
+    if(why.length){ h+='<div class="r"><div class="e"><span class="no">Fica de fora.</span> '+esc(o.enunciado||'(sem enunciado)')+'</div><div class="m">'+why.join(' \u00b7 ')+'</div></div>'; }
+    else { importaveis.push(o); h+='<div class="r"><div class="e"><span class="ok">Entra.</span> '+esc(o.enunciado)+'</div><div class="m">'+esc(o.categoria)+(o.campo?' \u00b7 '+esc(o.campo):'')+(o.grupo?' \u00b7 '+esc(o.grupo):'')+'</div></div>'; }
+  }
+  document.getElementById('resImp').innerHTML=h;
+  document.getElementById('acImp').innerHTML = importaveis.length ? '<div class="acoes"><button class="btn ok" id="btImportarTemas" onclick="importar()">Trazer '+importaveis.length+(importaveis.length===1?' tema':' temas')+' como propostos</button></div>' : '';
+}
+function trimestreAtual(){ var d=new Date(); return d.getFullYear()+'-T'+(Math.floor(d.getMonth()/3)+1); }
+async function importar(){
+  var n=importaveis.length; if(!n) return;
+  var bt=document.getElementById('btImportarTemas'); if(bt){ bt.disabled=true; bt.textContent='Trazendo\u2026'; }
+  var tri=trimestreAtual();
+  var linhas=importaveis.map(function(o){
+    return { trimestre:tri, enunciado:String(o.enunciado).trim(), enunciado_original:String(o.enunciado).trim(), campo:o.campo||null,
+      origem:'fabrica', estado:'proposto', categoria_proposta:o.categoria, repertorio:o.repertorio?String(o.repertorio).trim():null, grupo:o.grupo?String(o.grupo).trim():null };
+  });
+  try{
+    var res=await dbFetch(SUPABASE_URL+'/rest/v1/temas_propostos', { method:'POST', body:JSON.stringify(linhas) });
+    if(!res.ok){ var t=await res.text(); throw new Error(t||('HTTP '+res.status)); }
+  }catch(e){
+    console.warn('[importar temas]', e);
+    document.getElementById('resImp').innerHTML += '<div class="r"><div class="e"><span class="no">N\u00e3o consegui gravar.</span></div><div class="m">'+esc(String(e.message||e).slice(0,220))+'</div></div>';
+    if(bt){ bt.disabled=false; bt.textContent='Trazer '+n+(n===1?' tema':' temas')+' como propostos'; }
+    return;
+  }
+  importaveis=[]; document.getElementById('jsonImp').value=''; document.getElementById('resImp').innerHTML=''; document.getElementById('acImp').innerHTML='';
+  toast(n+(n===1?' tema entrou':' temas entraram')+' como propostos. Agora \u00e9 com a ADM Pedag\u00f3gica.');
+  pilha=[]; mostrar('t-casa');
+}
+
+/* ─── dados reais: temas com eixos marcados pela ADM P + material_apoio ─── */
+var EIXOS=[['legislacao','Legisla\u00e7\u00e3o'],['historia','Hist\u00f3ria'],['especialistas','Especialistas'],['atualidades','Atualidades'],['literatura','Literatura'],['filosofia','Filosofia'],['cinema','Cinema'],['ciencia','Ci\u00eancia'],['culturapop','Cultura pop']];
+var MIN_FICHAS=2, DENTRO=['revisao','ajustes','aprovado'];
+var TEMAS=[], MAT={}, atual=null, temaImport=null, blocoOk=null;
 function porId(id){ for(var i=0;i<TEMAS.length;i++) if(TEMAS[i].id===id) return TEMAS[i]; return null; }
 function rot(id){ for(var i=0;i<EIXOS.length;i++) if(EIXOS[i][0]===id) return EIXOS[i][1]; return id; }
-function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._x); t._x=setTimeout(function(){ t.classList.remove('on'); },2600); }
-
-var NOMES_TELA={ 't-casa':'Produção', 't-tema':'Tema em curadoria', 't-importar':'Trazer material' };
-function ir(t){ if(telaAtual) pilha.push(telaAtual); mostrar(t); }
-function voltar(){ if(!pilha.length){ mostrar('t-casa'); return; } mostrar(pilha.pop()); }
-function mostrar(t){ var i,ts=document.querySelectorAll('.tela'); for(i=0;i<ts.length;i++) ts[i].classList.remove('on'); document.getElementById(t).classList.add('on'); telaAtual=t; document.getElementById('btVoltar').hidden=(t==='t-casa'); document.getElementById('hdN').textContent=NOMES_TELA[t]||'Produção'; window.scrollTo(0,0); }
-
-/* ═══ leitura do banco ═══ */
-function escolhidos(t){ var e = Array.isArray(t.eixos_relevantes) ? t.eixos_relevantes.filter(function(x){ return rot(x)!==x; }) : []; return e.length ? e : EIXOS.map(function(x){ return x[0]; }); }
-function estadoDe(temaId, eixo){ var m = MAT[temaId]; return (m && m[eixo]) ? m[eixo].estado : null; }
-function conta(t){
-  var lista = escolhidos(t), d=0, s=0, f=[];
-  for(var i=0;i<lista.length;i++){
-    var e = estadoDe(t.id, lista[i]);
-    if(e && DENTRO.indexOf(e)>=0){ d++; if(e==='aprovado') s++; } else f.push(lista[i]);
+function linhaDe(tid, eixo){ return (MAT[tid] && MAT[tid][eixo]) || null; }
+function ehEmperrado(l){ return !!(l && l.estado==='ajustes' && l.revisao_json && l.revisao_json.emperrado===true); }
+function ehReposicao(l){ return !!(l && l.estado==='ajustes' && !ehEmperrado(l)); }
+/* Situação do tema para a mesa da Fábrica:
+   a_produzir · nada ou parte dentro; reposicao · ADM P pediu fichas de volta;
+   entregue · tudo dentro, com a ADM P; feito · tudo aprovado (sai da lista). */
+function situacao(t){
+  var esc2 = Array.isArray(t.eixos_relevantes) ? t.eixos_relevantes : [];
+  var s={ escolhidos:esc2, dentro:0, aprovados:0, faltam:[], emperrados:[], reposicao:[] };
+  for(var i=0;i<esc2.length;i++){ var l=linhaDe(t.id, esc2[i]);
+    if(!l || DENTRO.indexOf(l.estado)<0){ s.faltam.push(esc2[i]); continue; }
+    if(ehEmperrado(l)){ s.emperrados.push({eixo:esc2[i], motivo:(l.revisao_json&&l.revisao_json.motivo)||''}); s.dentro++; continue; }
+    if(ehReposicao(l)){ s.reposicao.push(esc2[i]); s.dentro++; continue; }
+    s.dentro++; if(l.estado==='aprovado') s.aprovados++;
   }
-  return { alvo:lista.length, dentro:d, selados:s, faltam:f };
+  s.tipo = s.faltam.length ? 'a_produzir' : (s.reposicao.length ? 'reposicao' : (s.aprovados===esc2.length && !s.emperrados.length ? 'feito' : 'entregue'));
+  return s;
 }
-function emCuradoria(t){
-  if(Array.isArray(t.eixos_relevantes) && t.eixos_relevantes.length) return true;
-  var m=MAT[t.id]; if(!m) return false;
-  for(var k in m){ if(DENTRO.indexOf(m[k].estado)>=0) return true; }
-  return false;
-}
-
 async function carregar(){
   try{
-    var r1 = await dbFetch(SUPABASE_URL+'/rest/v1/temas?select=id,titulo,categoria,campo,natureza,eixos_relevantes,ativo,descricao,created_at&order=created_at.desc&limit=300', {});
+    var r1 = await dbFetch(SUPABASE_URL+'/rest/v1/temas?select=id,titulo,categoria,campo,eixos_relevantes,descricao,created_at&eixos_relevantes=not.is.null&order=created_at.desc&limit=300', {});
     TEMAS = r1.ok ? await r1.json() : [];
-    var r2 = await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio?select=id,tema_id,eixo,estado,versao', {});
+    var r2 = await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio?select=id,tema_id,eixo,estado,versao,revisao_json,conteudo,fontes', {});
     var linhas = r2.ok ? await r2.json() : [];
     MAT = {};
     for(var i=0;i<linhas.length;i++){ var l=linhas[i]; if(!MAT[l.tema_id]) MAT[l.tema_id]={}; MAT[l.tema_id][l.eixo]=l; }
-  }catch(e){ console.warn('[producao carregar]', e); }
+  }catch(e){ console.warn('[fabrica carregar]', e); }
   montarCasa();
 }
 
-/* ═══ casa ═══ */
+/* ─── casa ─── */
 function montarCasa(){
   var h='', n=0, i;
-  for(i=0;i<TEMAS.length;i++){
-    var t=TEMAS[i]; if(!emCuradoria(t)) continue;
-    var c=conta(t); n++;
-    var mt = c.dentro===0 ? 'nada dentro ainda' : (c.dentro+' de '+c.alvo+' dentro · '+c.selados+' selados');
-    if(c.faltam.length && c.dentro>0) mt += ' · falta '+c.faltam.map(rot).join(', ');
-    h+='<button class="item" onclick="abrirTema(\''+t.id+'\')"><div class="cp"><div class="tt">'+esc(t.titulo)+'</div><div class="mt">'+esc(t.categoria||'sem categoria')+(t.campo?' · '+esc(t.campo):'')+'</div><div class="mt">'+esc(mt)+'</div>'
-      +'<div class="barra"><i style="width:'+Math.round(c.dentro/Math.max(c.alvo,1)*100)+'%"></i></div></div><div class="seta">&#8250;</div></button>';
+  for(i=0;i<TEMAS.length;i++){ var t=TEMAS[i];
+    if(!Array.isArray(t.eixos_relevantes) || !t.eixos_relevantes.length) continue;
+    var s=situacao(t); if(s.tipo==='feito') continue; n++;
+    var mt, pct;
+    if(s.tipo==='a_produzir'){ mt = s.faltam.length+(s.faltam.length===1?' eixo':' eixos')+' a produzir na F\u00e1brica'; pct=Math.round((s.dentro/Math.max(s.escolhidos.length,1))*100); }
+    else if(s.tipo==='reposicao'){ mt = 'reposi\u00e7\u00e3o a produzir \u00b7 '+s.reposicao.map(rot).join(', '); pct=100; }
+    else { mt = 'entregue \u00b7 com a ADM Pedag\u00f3gica' + (s.emperrados.length? ' \u00b7 '+s.emperrados.length+(s.emperrados.length===1?' eixo emperrado':' eixos emperrados'):''); pct=100; }
+    h+='<button class="item clic" onclick="abrirTema(\''+t.id+'\')"><span class="cp"><span class="tt">'+esc(t.titulo)+'</span><span class="mt">'+esc(t.categoria||'sem categoria')+' \u00b7 '+esc(mt)+'</span>'
+      +'<span class="barra"><i style="width:'+pct+'%"></i></span></span><span class="seta">&#8250;</span></button>';
   }
-  document.getElementById('listaAg').innerHTML = h || '<div class="vazio">Nenhum tema em curadoria por enquanto. Quando a Profa. Blanche marcar os eixos de um tema, ele aparece aqui.</div>';
-  document.getElementById('qtAg').textContent = '· '+n;
+  document.getElementById('listaAg').innerHTML = h || '<div class="vazio">Nenhum tema esperando material. Quando a ADM Pedag\u00f3gica aprovar um tema com eixos, ele aparece aqui.</div>';
+  document.getElementById('qtAg').textContent='\u00b7 '+n;
 }
 
-/* ═══ tema ═══ */
+/* ─── tema: eixos encomendados + a fila já está na Fábrica ─── */
 function abrirTema(id){
-  atual=porId(id); if(!atual) return; var c=conta(atual), lista=escolhidos(atual), i;
-  var h='<span class="selo">Em curadoria</span><div class="enun">'+esc(atual.titulo)+'</div>'
-    +'<div class="linhas"><div class="linha"><div class="k">Categoria</div><div class="v">'+esc(atual.categoria||'—')+(atual.campo?' · campo '+esc(atual.campo):'')+'</div></div>'
-    +'<div class="linha"><div class="k">Material</div><div class="v">'+c.dentro+' de '+c.alvo+' dentro · <span class="'+(c.selados>=c.alvo?'ok':(c.selados>0?'nc':''))+'">'+c.selados+' selados</span></div></div></div>';
+  atual=porId(id); if(!atual) return; var i, s=situacao(atual);
+  var h='<span class="selo">Aprovado pela ADM Pedag\u00f3gica</span><div class="enun">'+esc(atual.titulo)+'</div>'
+    +'<div class="linhas"><div class="linha"><div class="k">Categoria</div><div class="v">'+esc(atual.categoria||'\u2014')+(atual.campo?' \u00b7 campo '+esc(atual.campo):'')+'</div></div>'
+    +'<div class="linha"><div class="k">Repert\u00f3rio</div><div class="v">'+esc(atual.descricao||'\u2014')+'</div></div>'
+    +'<div class="linha"><div class="k">Encomenda</div><div class="v">'+s.escolhidos.map(rot).join(' \u00b7 ')+'</div></div></div>';
   h+='<div class="eixos">';
-  for(i=0;i<EIXOS.length;i++){
-    var eid=EIXOS[i][0], dentro = lista.indexOf(eid)>=0, e = estadoDe(atual.id, eid);
-    var rotulo = (e==='aprovado') ? 'selado' : (e==='revisao'||e==='ajustes') ? 'em revisão' : (e==='criacao') ? 'gerado por IA' : 'falta';
-    h+='<div class="ex'+(dentro?'':' fora')+'"><div class="n">'+EIXOS[i][1]+'</div><div class="e '+(e||'falta')+'">'+rotulo+'</div></div>';
-  }
+  for(i=0;i<s.escolhidos.length;i++){ var eid=s.escolhidos[i], l=linhaDe(atual.id,eid), rotulo, cls;
+    if(!l || DENTRO.indexOf(l.estado)<0){ rotulo='a produzir'; cls='falta'; }
+    else if(ehEmperrado(l)){ rotulo='emperrou'; cls='revisao'; }
+    else if(ehReposicao(l)){ rotulo='reposi\u00e7\u00e3o a produzir'; cls='ajustes'; }
+    else if(l.estado==='aprovado'){ rotulo='aprovado'; cls='aprovado'; }
+    else { rotulo='entregue'; cls='aprovado'; }
+    h+='<div class="ex"><div class="n">'+rot(eid)+'</div><div class="e '+cls+'">'+rotulo+'</div></div>'; }
   h+='</div>';
-  if(c.faltam.length){
-    h+='<div class="pedido"><div class="lb">Pedido para a Fábrica</div><div class="ds">Copie e cole numa conversa nova no projeto Fábrica de Conteúdo. O bloco já traz o enunciado, os eixos que faltam e o contrato de saída. Confira as fontes lá; só marque <b>fonte_conferida</b> depois de abrir cada uma.</div>'
-      +'<textarea id="pedido" readonly>'+esc(montarPedido(atual,c))+'</textarea>'
-      +'<div class="dupla"><button class="btn ok sm" id="btCopiar" onclick="copiarPedido()">Copiar para a Fábrica</button><button class="btn g sm" onclick="abrirImportar(\''+atual.id+'\')">Trazer material deste tema</button></div></div>';
+  if(s.tipo==='a_produzir' || s.tipo==='reposicao'){
+    h+='<div class="pedido"><div class="lb">A fila j\u00e1 est\u00e1 na F\u00e1brica</div><div class="ds">N\u00e3o h\u00e1 nada para copiar: a F\u00e1brica l\u00ea o banco. Abra uma conversa no projeto F\u00e1brica de Conte\u00fado e pe\u00e7a: <b>\u201co que temos para produzir?\u201d</b>. Ela lista este tema com os eixos encomendados. Produza tudo numa conversa s\u00f3, confira as fontes l\u00e1, aprove \u2014 e volte aqui com o JSON \u00fanico do tema.</div>'
+      +'<div class="acoes" style="margin-top:.7rem"><button class="btn ok sm" onclick="abrirImportarMat(\''+atual.id+'\')">Trazer o material deste tema</button></div></div>';
   } else {
-    h+='<div class="pedido"><div class="lb">Material completo</div><div class="ds">Os eixos escolhidos estão dentro. O que falta agora é a Profa. Blanche selar — não é com você.</div></div>';
+    var em = s.emperrados.length ? ' \u2014 com '+s.emperrados.length+(s.emperrados.length===1?' eixo emperrado reportado (':' eixos emperrados reportados (')+s.emperrados.map(function(x){ return rot(x.eixo)+(x.motivo?': '+x.motivo:''); }).join('; ')+'). Quem decide o destino \u00e9 ela' : '';
+    h+='<div class="pedido"><div class="lb">Entregue</div><div class="ds">O material deste tema j\u00e1 entrou e est\u00e1 com a ADM Pedag\u00f3gica'+esc(em)+'. Saiu da sua mesa.</div></div>';
   }
-  h+='<div class="rodape">Cada bloco que voltar da Fábrica entra por "Trazer material para dentro", um eixo por vez, conferido. Quem sela é a Profa. Blanche.</div>';
+  h+='<div class="rodape">Uma conversa na F\u00e1brica, um JSON por tema, um colar aqui. Se a produ\u00e7\u00e3o for interrompida, ela fica parada na F\u00e1brica \u2014 a RedaON nem toma conhecimento.</div>';
   document.getElementById('temaCorpo').innerHTML=h; ir('t-tema');
 }
-function montarPedido(t,c){
-  var hoje=new Date().toISOString().slice(0,10);
-  return 'RedaON · Fábrica de Conteúdo · pedido de material\n'
-    +'\nTema: '+t.titulo+'\nCategoria: '+(t.categoria||'—')+(t.campo?' · Campo: '+t.campo:'')
-    +'\nEixos que faltam ('+c.faltam.length+'): '+c.faltam.map(rot).join(', ')
-    +'\nIds dos eixos: '+c.faltam.join(', ')
-    +'\n\nContrato de saída — um bloco por eixo, mínimo '+MIN_FICHAS+' fichas:\n'
-    +'{"peca":"repertorio","eixo":"<um dos ids acima>","titulo":"...","itens":[\n'
-    +'  {"cab":"nome da fonte","url":"https://...","dado":"o que é",\n'
-    +'   "diz":"o que a lei ou o autor diz, usável na redação",\n'
-    +'   "como_usar":"a ponte: o que o aluno faz com isso na redação",\n'
-    +'   "fonte_conferida":true,"conferido_por":"Pedro","conferido_em":"'+hoje+'"}\n]}\n'
-    +'\nRegras: url começando com http · dado, diz e como_usar obrigatórios · fonte_conferida só depois de abrir a fonte · o que não conferir, não entra.';
-}
-function copiarPedido(){
-  var ta=document.getElementById('pedido'), bt=document.getElementById('btCopiar');
-  function feito(){ bt.textContent='Copiado'; setTimeout(function(){ bt.textContent='Copiar para a Fábrica'; }, 1800); }
-  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value).then(feito, function(){ ta.select(); document.execCommand('copy'); feito(); }); }
-  else { ta.select(); document.execCommand('copy'); feito(); }
-}
 
-/* ═══ importar ═══ */
-function abrirImportar(id){
+/* ─── trazer material ─── */
+function abrirImportarMat(id){
   temaImport = id ? porId(id) : null; blocoOk=null;
   document.getElementById('alvoNome').textContent = temaImport ? temaImport.titulo : 'Escolha o tema';
-  document.getElementById('cola').value=''; document.getElementById('saida').innerHTML=''; document.getElementById('btImportar').disabled=true;
-  ir('t-importar');
+  document.getElementById('colaMat').value=''; document.getElementById('saidaMat').innerHTML=''; document.getElementById('btImportarMat').disabled=true;
+  ir('t-importar-mat');
 }
 function abrirEscolhaTema(){
-  var h='', i;
-  for(i=0;i<TEMAS.length;i++){
-    var t=TEMAS[i]; if(!emCuradoria(t)) continue; var c=conta(t);
-    h+='<button class="pill'+(temaImport&&temaImport.id===t.id?' sel':'')+'" onclick="escolherTema(\''+t.id+'\')"><span>'+esc(t.titulo)+'<span class="sub">'+c.dentro+' de '+c.alvo+' dentro</span></span><span class="ck">&#10003;</span></button>';
-  }
+  var h='', i; for(i=0;i<TEMAS.length;i++){ var t=TEMAS[i]; var s=situacao(t); if(!s.escolhidos.length || s.tipo==='feito' || s.tipo==='entregue') continue;
+    var sub = s.tipo==='reposicao' ? 'reposi\u00e7\u00e3o \u00b7 '+s.reposicao.map(rot).join(', ') : s.faltam.length+(s.faltam.length===1?' eixo encomendado':' eixos encomendados');
+    h+='<button class="pill'+(temaImport&&temaImport.id===t.id?' sel':'')+'" onclick="escolherTema(\''+t.id+'\')"><span>'+esc(t.titulo)+'<span class="sub">'+esc(sub)+'</span></span><span class="ck">&#10003;</span></button>'; }
   document.getElementById('gavT').textContent='Para qual tema?';
-  document.getElementById('gavPills').innerHTML = h || '<div class="vazio" style="margin-top:.7rem">Nenhum tema em curadoria.</div>';
+  document.getElementById('gavPills').innerHTML = h || '<div class="vazio" style="margin-top:.7rem">Nenhum tema esperando material.</div>';
   document.getElementById('veu').classList.add('on'); document.getElementById('gav').classList.add('on');
 }
 function escolherTema(id){ temaImport=porId(id); document.getElementById('alvoNome').textContent=temaImport.titulo; fecharGaveta(); }
 function fecharGaveta(){ document.getElementById('veu').classList.remove('on'); document.getElementById('gav').classList.remove('on'); }
 
+function validarFichas(its, L, rotEixo){
+  function mal(t){ L.push('<div class="r mal"><span class="ic">&#10007;</span><span>'+t+'</span></div>'); return true; }
+  var falhou=false;
+  if(!Array.isArray(its)||!its.length) return mal(rotEixo+': falta a lista de fichas.');
+  if(its.length<MIN_FICHAS) falhou=mal(rotEixo+': s\u00f3 '+its.length+' ficha(s); o m\u00ednimo \u00e9 '+MIN_FICHAS+'.');
+  var semPonte=0,semDado=0,semFonte=0,semDiz=0,semConf=0,semQuem=0;
+  for(var i=0;i<its.length;i++){ var x=its[i]||{};
+    if(!String(x.como_usar||'').trim()) semPonte++; if(!String(x.dado||'').trim()) semDado++; if(!String(x.diz||'').trim()) semDiz++;
+    if(!/^https?:\/\/\S+$/.test(String(x.url||''))) semFonte++;
+    if(x.fonte_conferida!==true) semConf++; if(!String(x.conferido_por||'').trim()||!String(x.conferido_em||'').trim()) semQuem++; }
+  if(semDado) falhou=mal(rotEixo+': '+semDado+' sem o texto do repert\u00f3rio.');
+  if(semFonte) falhou=mal(rotEixo+': '+semFonte+' sem endere\u00e7o de fonte que abre.');
+  if(semDiz) falhou=mal(rotEixo+': '+semDiz+' sem o "O que diz".');
+  if(semPonte) falhou=mal(rotEixo+': '+semPonte+' sem o "Como usar na reda\u00e7\u00e3o".');
+  if(semConf) falhou=mal(rotEixo+': '+semConf+' sem fonte conferida \u2014 o que n\u00e3o conferir, n\u00e3o entra.');
+  if(semQuem) falhou=mal(rotEixo+': '+semQuem+' sem quem conferiu ou quando.');
+  return falhou;
+}
 function conferirBloco(){
-  var bruto=document.getElementById('cola').value.trim(), saida=document.getElementById('saida'), bt=document.getElementById('btImportar');
+  var bruto=document.getElementById('colaMat').value.trim(), saida=document.getElementById('saidaMat'), bt=document.getElementById('btImportarMat');
   blocoOk=null; bt.disabled=true; var L=[];
-  function ok(t){ L.push('<div class="r ok"><span class="ic">&#10003;</span><span>'+t+'</span></div>'); }
+  function okL(t){ L.push('<div class="r ok"><span class="ic">&#10003;</span><span>'+t+'</span></div>'); }
   function mal(t){ L.push('<div class="r mal"><span class="ic">&#10007;</span><span>'+t+'</span></div>'); }
+  function av(t){ L.push('<div class="r av"><span class="ic">!</span><span>'+t+'</span></div>'); }
   if(!temaImport){ mal('Escolha o tema antes.'); saida.innerHTML=L.join(''); return; }
-  var d; try{ d=JSON.parse(bruto); }catch(e){ mal('O bloco não é um JSON válido. Confira se veio inteiro, com as chaves de abertura e fechamento.'); saida.innerHTML=L.join(''); return; }
-  var falhou=false, ids=EIXOS.map(function(e){ return e[0]; });
-  if(d.peca==='repertorio') ok('É um repertório'); else { mal('Por enquanto só entra repertório por aqui.'); falhou=true; }
-  if(ids.indexOf(d.eixo)>=0){
-    ok('Eixo: '+rot(d.eixo));
-    var atualE = estadoDe(temaImport.id, d.eixo);
-    if(atualE && DENTRO.indexOf(atualE)>=0) mal('Este eixo já está dentro para este tema ('+(atualE==='aprovado'?'selado':'em revisão')+'). Trazer de novo substitui — e derruba o selo.');
-    else if(atualE==='criacao') ok('Vai substituir o material antigo, gerado por IA.');
+  var d; try{ d=JSON.parse(bruto.replace(/```json|```/g,'')); }catch(e){ mal('O bloco n\u00e3o \u00e9 um JSON v\u00e1lido. Confira se veio inteiro, com as chaves de abertura e fechamento.'); saida.innerHTML=L.join(''); return; }
+  var falhou=false, ids=EIXOS.map(function(e){ return e[0]; }), s=situacao(temaImport), repo = d.reposicao===true;
+  if(d.peca==='material_tema') okL(repo ? '\u00c9 uma reposi\u00e7\u00e3o de fichas' : '\u00c9 a entrega de um tema inteiro'); else { mal('O bloco precisa ser "peca":"material_tema" \u2014 a entrega \u00e9 do tema completo, numa balsa s\u00f3.'); falhou=true; }
+  var eixos = Array.isArray(d.eixos) ? d.eixos : [];
+  var emperrados = Array.isArray(d.emperrados) ? d.emperrados : [];
+  if(!eixos.length && !emperrados.length){ mal('Nenhum eixo no bloco.'); falhou=true; }
+  var vistos=[], i;
+  for(i=0;i<eixos.length;i++){ var bx=eixos[i]||{};
+    if(ids.indexOf(bx.eixo)<0){ mal('Eixo "'+esc(String(bx.eixo))+'" fora dos nove permitidos.'); falhou=true; continue; }
+    if(vistos.indexOf(bx.eixo)>=0){ mal(rot(bx.eixo)+' aparece duas vezes no bloco.'); falhou=true; continue; }
+    vistos.push(bx.eixo);
+    var l=linhaDe(temaImport.id, bx.eixo);
+    if(repo){
+      if(!ehReposicao(l)){ mal(rot(bx.eixo)+': a ADM Pedag\u00f3gica n\u00e3o pediu reposi\u00e7\u00e3o deste eixo.'); falhou=true; }
+      else okL(rot(bx.eixo)+': '+((bx.itens||[]).length)+' fichas de reposi\u00e7\u00e3o');
+    } else {
+      if(l && l.estado==='aprovado'){ mal(rot(bx.eixo)+': j\u00e1 est\u00e1 aprovado pela ADM Pedag\u00f3gica. S\u00f3 entra por reposi\u00e7\u00e3o pedida por ela.'); falhou=true; }
+      else if(s.escolhidos.indexOf(bx.eixo)<0) av(rot(bx.eixo)+': a ADM Pedag\u00f3gica n\u00e3o marcou este eixo. Entra, mas fica fora da vitrine at\u00e9 ela incluir.');
+      else okL(rot(bx.eixo)+': '+((bx.itens||[]).length)+' fichas');
+    }
+    if(validarFichas(bx.itens, L, rot(bx.eixo))) falhou=true;
   }
-  else { mal('Eixo fora dos nove permitidos.'); falhou=true; }
-  if(d.titulo&&String(d.titulo).trim()) ok('Título presente'); else { mal('Falta o título.'); falhou=true; }
-  var its=d.itens;
-  if(!Array.isArray(its)||!its.length){ mal('Falta a lista de fichas (campo itens).'); falhou=true; }
-  else {
-    if(its.length<MIN_FICHAS){ mal('Só '+its.length+' ficha(s). O mínimo é '+MIN_FICHAS+'.'); falhou=true; } else ok(its.length+' fichas');
-    var semPonte=0,semDado=0,semFonte=0,semDiz=0,semConf=0,semQuem=0;
-    for(var i=0;i<its.length;i++){ var x=its[i]||{};
-      if(!String(x.como_usar||'').trim()) semPonte++; if(!String(x.dado||'').trim()) semDado++; if(!String(x.diz||'').trim()) semDiz++;
-      if(!/^https?:\/\/\S+$/.test(String(x.url||''))) semFonte++;
-      if(x.fonte_conferida!==true) semConf++; if(!String(x.conferido_por||'').trim()||!String(x.conferido_em||'').trim()) semQuem++; }
-    if(semDado){ mal(semDado+' sem o texto do repertório.'); falhou=true; }
-    if(semFonte){ mal(semFonte+' sem endereço de fonte que abre.'); falhou=true; }
-    if(semDiz){ mal(semDiz+' sem o "O que diz". Sem o conteúdo, o aluno tem a referência mas não tem o que escrever.'); falhou=true; } else ok('Todas têm o conteúdo da lei ou da ideia');
-    if(semPonte){ mal(semPonte+' sem o "Como usar na redação". Sem isso a parte mais útil some da tela do aluno.'); falhou=true; } else ok('Todas têm o "Como usar na redação"');
-    if(semConf){ mal(semConf+' sem fonte conferida. Confira na Fábrica e marque fonte_conferida — o que não conferir, não entra.'); falhou=true; } else ok('Todas com fonte conferida');
-    if(semQuem){ mal(semQuem+' sem quem conferiu ou quando. A conferência precisa deixar marca.'); falhou=true; } else if(!semConf) ok('Conferido por '+esc(its[0].conferido_por)+' em '+esc(its[0].conferido_em));
+  for(i=0;i<emperrados.length;i++){ var em=emperrados[i]||{};
+    if(ids.indexOf(em.eixo)<0){ mal('Emperrado "'+esc(String(em.eixo))+'" fora dos nove permitidos.'); falhou=true; continue; }
+    var le=linhaDe(temaImport.id, em.eixo);
+    if(le && le.estado==='aprovado'){ mal(rot(em.eixo)+': est\u00e1 aprovado, n\u00e3o pode voltar como emperrado.'); falhou=true; continue; }
+    av(rot(em.eixo)+' emperrou na F\u00e1brica: '+esc(em.motivo||'sem motivo declarado')+'. A ADM Pedag\u00f3gica vai decidir \u2014 tirar da encomenda ou devolver a produzir.'); }
+  if(!repo){
+    var cobertos = vistos.concat(emperrados.map(function(x){ return x.eixo; }));
+    var fora = s.faltam.filter(function(e){ return cobertos.indexOf(e)<0; });
+    if(fora.length){ mal('A encomenda pedia '+fora.map(rot).join(', ')+' e o bloco n\u00e3o traz nem reporta como emperrado. A entrega \u00e9 do tema completo \u2014 volte \u00e0 F\u00e1brica.'); falhou=true; }
   }
   if(falhou){ saida.innerHTML=L.join(''); return; }
   blocoOk=d; bt.disabled=false;
-  saida.innerHTML=L.join('')+'<div class="previa"><div class="cm">Vai entrar como '+esc(rot(d.eixo))+' · conferido, para a Profa. Blanche selar</div>'
-    +'<div class="pf">'+esc(its[0].cab||'—')+'</div><div class="pd">'+esc(its[0].dado)+'</div>'
-    +'<div class="pz"><span class="pr">O que diz</span>'+esc(its[0].diz)+'</div><div class="pu"><span class="pr">Como usar na redação</span>'+esc(its[0].como_usar)+'</div></div>';
+  var f0 = eixos.length ? eixos[0].itens[0] : null;
+  saida.innerHTML=L.join('')+(f0 ? '<div class="previa"><div class="cm">Vai entrar '+(repo?'a reposi\u00e7\u00e3o':'o tema inteiro')+' \u00b7 conferido, para a ADM Pedag\u00f3gica aprovar</div>'
+    +'<div class="pf">'+esc(f0.cab||'\u2014')+'</div><div class="pd">'+esc(f0.dado)+'</div>'
+    +'<div class="pz"><span class="pr">O que diz</span>'+esc(f0.diz)+'</div><div class="pu"><span class="pr">Como usar na reda\u00e7\u00e3o</span>'+esc(f0.como_usar)+'</div></div>' : '');
 }
 
-/* Conversão §3(a): o JSON da Fábrica vira o texto que a tela do aluno já desenha.
-   Guardamos um array JSON com as chaves que o hub já mapeia (fonte · dado · como_usar),
-   mais url e diz, que o hub aprendeu a desenhar nesta mesma onda. */
-function converterConteudo(bloco){
-  var itens = bloco.itens.map(function(x){
-    return { fonte:String(x.cab||'').trim(), url:String(x.url||'').trim(), dado:String(x.dado||'').trim(), diz:String(x.diz||'').trim(), como_usar:String(x.como_usar||'').trim() };
-  });
-  return JSON.stringify(itens);
+/* ─── gravação: uma linha por eixo · fichas entram pendente · tema → entregue ─── */
+function fichasDe(itens){
+  return itens.map(function(x){ return { fonte:String(x.cab||'').trim(), url:String(x.url||'').trim(), dado:String(x.dado||'').trim(), diz:String(x.diz||'').trim(), como_usar:String(x.como_usar||'').trim(), estado:'pendente', motivo:null }; });
 }
-function montarFontes(bloco){
-  return bloco.itens.map(function(x){ return { url:String(x.url||'').trim(), conferido_por:String(x.conferido_por||'').trim(), conferido_em:String(x.conferido_em||'').trim() }; });
+function fontesDe(itens){
+  return itens.map(function(x){ return { url:String(x.url||'').trim(), conferido_por:String(x.conferido_por||'').trim(), conferido_em:String(x.conferido_em||'').trim() }; });
 }
-
-async function importar(){
+function lerArray(s){ try{ var a=JSON.parse(String(s||'[]')); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+async function gravarLinha(existente, corpo){
+  var res;
+  if(existente){
+    res = await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio?id=eq.'+encodeURIComponent(existente.id), { method:'PATCH', body:JSON.stringify(corpo) });
+  } else {
+    res = await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio', { method:'POST', body:JSON.stringify(corpo) });
+  }
+  if(!res.ok){ var txt=await res.text(); throw new Error(txt||('HTTP '+res.status)); }
+}
+async function importarMat(){
   if(!blocoOk||!temaImport) return;
-  var bt=document.getElementById('btImportar'); bt.disabled=true; bt.textContent='Trazendo…';
-  var uid=authGetUserId(), agora=new Date().toISOString();
-  var conteudo=converterConteudo(blocoOk), fontes=montarFontes(blocoOk);
-  var existente = (MAT[temaImport.id] && MAT[temaImport.id][blocoOk.eixo]) || null;
+  var bt=document.getElementById('btImportarMat'); bt.disabled=true; bt.textContent='Trazendo\u2026';
+  var uid=authGetUserId(), agora=new Date().toISOString(), repo = blocoOk.reposicao===true, i;
+  var eixos = Array.isArray(blocoOk.eixos) ? blocoOk.eixos : [], emperrados = Array.isArray(blocoOk.emperrados) ? blocoOk.emperrados : [];
+  var feito=0;
   try{
-    var res;
-    if(existente){
-      res = await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio?id=eq.'+encodeURIComponent(existente.id), {
-        method:'PATCH',
-        body: JSON.stringify({ conteudo:conteudo, fontes:fontes, estado:'revisao', versao:(existente.versao||1)+1,
-          revisado_por:uid, revisado_em:agora, aprovado_por:null, aprovado_em:null })
-      });
-    } else {
-      res = await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio', {
-        method:'POST',
-        body: JSON.stringify({ tema_id:temaImport.id, eixo:blocoOk.eixo, conteudo:conteudo, fontes:fontes, estado:'revisao',
-          versao:1, gerado_por:uid, revisado_por:uid, revisado_em:agora })
-      });
+    for(i=0;i<eixos.length;i++){ var bx=eixos[i], ex=linhaDe(temaImport.id, bx.eixo), novas=fichasDe(bx.itens), fontes=fontesDe(bx.itens), corpo;
+      if(repo){
+        var antigas=lerArray(ex.conteudo).map(function(f){ if(f && f.estado==='reposicao') f.estado='substituida'; return f; });
+        var fontesAnt = Array.isArray(ex.fontes) ? ex.fontes : [];
+        corpo={ conteudo:JSON.stringify(antigas.concat(novas)), fontes:fontesAnt.concat(fontes), estado:'revisao', versao:(ex.versao||1)+1, revisado_por:uid, revisado_em:agora, revisao_json:null };
+      } else {
+        corpo={ tema_id:temaImport.id, eixo:bx.eixo, conteudo:JSON.stringify(novas), fontes:fontes, estado:'revisao', versao:ex?(ex.versao||1)+1:1,
+          gerado_por:uid, revisado_por:uid, revisado_em:agora, aprovado_por:null, aprovado_em:null, revisao_json:null };
+      }
+      await gravarLinha(ex, corpo); feito++;
     }
-    if(!res.ok){ var txt=await res.text(); throw new Error(txt||('HTTP '+res.status)); }
-    var linhas = await res.json().catch(function(){ return []; });
-    var nova = (linhas && linhas[0]) ? linhas[0] : { id:(existente?existente.id:null), tema_id:temaImport.id, eixo:blocoOk.eixo, estado:'revisao', versao:(existente?(existente.versao||1)+1:1) };
-    if(!MAT[temaImport.id]) MAT[temaImport.id]={};
-    MAT[temaImport.id][blocoOk.eixo]=nova;
-    toast(rot(blocoOk.eixo)+' entrou. Agora é com a Profa. Blanche.');
-    blocoOk=null; montarCasa(); pilha=[]; mostrar('t-casa');
+    for(i=0;i<emperrados.length;i++){ var em=emperrados[i], le=linhaDe(temaImport.id, em.eixo);
+      var c2={ tema_id:temaImport.id, eixo:em.eixo, conteudo:'[]', fontes:[], estado:'ajustes', versao:le?(le.versao||1)+1:1,
+        gerado_por:uid, revisado_por:uid, revisado_em:agora, aprovado_por:null, aprovado_em:null, revisao_json:{ emperrado:true, motivo:String(em.motivo||'') } };
+      await gravarLinha(le, c2); feito++;
+    }
   }catch(e){
-    console.warn('[importar]', e);
-    document.getElementById('saida').innerHTML += '<div class="r mal"><span class="ic">&#10007;</span><span>Não consegui gravar. '+esc(String(e.message||e).slice(0,220))+'</span></div>';
-    bt.disabled=false;
+    console.warn('[importar material]', e);
+    document.getElementById('saidaMat').innerHTML += '<div class="r mal"><span class="ic">&#10007;</span><span>N\u00e3o consegui gravar'+(feito?' tudo ('+feito+' eixo(s) entraram)':'')+'. '+esc(String(e.message||e).slice(0,220))+'</span></div>';
+    bt.disabled=false; bt.textContent='Trazer para dentro'; await carregar(); return;
   }
   bt.textContent='Trazer para dentro';
+  toast(repo ? 'A reposi\u00e7\u00e3o entrou. Agora \u00e9 com a ADM Pedag\u00f3gica.' : 'O tema entrou inteiro. Agora \u00e9 com a ADM Pedag\u00f3gica.');
+  blocoOk=null; pilha=[]; mostrar('t-casa'); await carregar();
 }
 
-carregar();
+(async function(){ if(await conferirAcesso()) carregar(); })();
 </script>
 </body>
 </html>

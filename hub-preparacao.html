@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparação</title>
-<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-12 (quatro estados · selo RedaON · prévia · v1-12) · sobre aluno-base-v6 -->
+<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-13 (quatro estados · selo RedaON · prévia · só fichas aprovadas · v1-13) · sobre aluno-base-v6 -->
 <script>
 (function(){
   var pref = 'auto';
@@ -323,7 +323,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
-/* ═══ RedaON · Hub de Preparação · produção v1-12 (quatro estados · selo RedaON · prévia · v1-12) ═══ */
+/* ═══ RedaON · Hub de Preparação · produção v1-13 (quatro estados · selo RedaON · prévia · só fichas aprovadas · v1-13) ═══ */
 /* ── Prévia da Profa. Blanche: hub-preparacao.html?tema=<id>&previa=1 ──
    Abre o tema mesmo inativo e sem exigir perfil de aluno. Quem não passa em
    eh_pedagogica() cai no fluxo normal do aluno. */
@@ -336,7 +336,7 @@ montarEsqueleto({
   titulo: 'Preparação',
   icone:  'auto_stories',
   sino:   true,
-  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-12'
+  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-13'
 });
 
 /* ───────────────────────────────────────────────────────────────
@@ -680,7 +680,7 @@ var CAMPOS_FICHA = {
   destaque: ['dado_numerico','dado','texto','descricao','sinopse','conceito','conceito_chave','conclusao','conclusao_principal','ideia','fato','contexto','resumo'],
   uso:      ['argumento','aplicacao','como_usar','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem'],
   /* campos internos da curadoria (a Blanche lê no ADM) — nunca vazam para a linha de extras */
-  internos: ['diz','url','fonte_conferida','conferido_por','conferido_em']
+  internos: ['diz','url','fonte_conferida','conferido_por','conferido_em','estado','motivo']
 };
 function _campo(obj, lista){
   for (var i=0;i<lista.length;i++){ var v = obj[lista[i]]; if (typeof v==='string' && v.trim()) return v.trim(); }
@@ -718,15 +718,19 @@ function _achaLista(x){
   }
   return null;
 }
+/* v1-13 · o aluno vê só ficha aprovada pela ADM Pedagógica; ficha sem estado (IA ou professor) segue como antes */
+function _soAprovadas(lista){
+  return lista.filter(function(f){ return !(f && typeof f==='object' && f.estado && f.estado!=='aprovada'); });
+}
 function renderEixoConteudo(bruto){
   var limpo = String(bruto).replace(/```json|```/g,'').trim();
   if (limpo.charAt(0)==='[' || limpo.charAt(0)==='{'){
     try{
       var lista = _achaLista(JSON.parse(limpo));
-      if (lista && lista.length) return lista.map(fichaHTML).join('');
+      if (lista && lista.length){ var la = _soAprovadas(lista); return la.length ? la.map(fichaHTML).join('') : '<p class="emPreparo">Este eixo est\u00e1 sendo refeito. Ele volta assim que a Profa. Blanche aprovar.</p>'; }
     }catch(e){}
     var m = limpo.match(/\[[\s\S]*\]/);
-    if (m){ try{ var l2 = JSON.parse(m[0]); if (Array.isArray(l2) && l2.length) return l2.map(fichaHTML).join(''); }catch(e2){} }
+    if (m){ try{ var l2 = JSON.parse(m[0]); if (Array.isArray(l2) && l2.length){ var l3=_soAprovadas(l2); return l3.length ? l3.map(fichaHTML).join('') : '<p class="emPreparo">Este eixo est\u00e1 sendo refeito. Ele volta assim que a Profa. Blanche aprovar.</p>'; } }catch(e2){} }
   }
   return md(limpo);
 }
