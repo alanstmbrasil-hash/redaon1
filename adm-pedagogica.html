@@ -381,6 +381,7 @@
   #sidebar::-webkit-scrollbar{width:4px;}
   #sidebar::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:10px;}
   #sidebar{scrollbar-width:thin;scrollbar-color:var(--scroll) transparent;}
+  /* Lote 3c: sem hambúrguer no celular (o Mais do rodapé faz isso); toast invisível quando parado e acima da barra */
   #btnHamburger{ display:none !important; }
   #toast{ opacity:0; visibility:hidden; transition:transform .3s, opacity .3s, visibility .3s; }
   #toast.show{ opacity:1; visibility:visible; }
@@ -538,6 +539,105 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
 #admWrap .vazio .em svg{width:34px; height:34px; color:var(--muted);}
 #admWrap .ficha .veredito svg, #admWrap .rotU svg{width:14px; height:14px; vertical-align:-2px; margin-right:.25rem;}
 #admWrap .avisoOk .ic svg{width:18px; height:18px;}
+#admWrap .sec .qt{color:var(--text2); font-weight:700; text-transform:none; letter-spacing:0;}
+#admWrap .meu{background:var(--surface); border:1px solid rgba(var(--purpleRGB),.35); border-radius:18px; padding:1rem; margin-top:1rem;}
+#admWrap .meu .lb{font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--purpleSoft);}
+#admWrap .meu textarea, #admWrap .edit textarea{width:100%; margin-top:.6rem; font:inherit; font-size:.9rem; line-height:1.5; color:var(--text); background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.28); border-radius:12px; padding:.7rem .8rem; resize:vertical; min-height:82px;}
+#admWrap .meu textarea::placeholder, #admWrap .edit textarea::placeholder{color:var(--muted);}
+#admWrap .meu textarea:focus, #admWrap .edit textarea:focus{outline:none; border-color:var(--cyan);}
+#admWrap .meu .btn{margin-top:.7rem;}
+#admWrap .grupo{display:grid; gap:.55rem;}
+#admWrap .item{width:100%; text-align:left; font:inherit; color:var(--text); cursor:pointer; background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.20); border-radius:16px; padding:.85rem; display:flex; align-items:center; gap:.7rem; transition:border-color .15s;}
+#admWrap .item:hover{border-color:rgba(var(--cyanRGB),.45);}
+#admWrap .item:active{background:var(--surface2);}
+#admWrap .item .cp{flex:1; min-width:0;}
+#admWrap .item .tt{font-size:.9rem; font-weight:700; line-height:1.4;}
+#admWrap .item .mt{font-size:.72rem; color:var(--muted); margin-top:.3rem; line-height:1.45;}
+#admWrap .item .seta{flex:none; color:var(--muted); font-size:1.1rem;}
+#admWrap .item.dela{border-color:rgba(var(--purpleRGB),.35);}
+#admWrap .item.ap{border-color:rgba(var(--greenRGB),.32);}
+#admWrap .desfAp{font-size:.72rem; color:var(--muted); margin-top:.3rem;}
+#admWrap .desfAp button{font:inherit; font-size:.72rem; font-weight:700; color:var(--cyan); background:none; border:none; padding:0; cursor:pointer; text-decoration:underline;}
+#admWrap .faixa{margin-top:.9rem; padding:.6rem .8rem; border-radius:12px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); font-size:.76rem; color:var(--text2); display:flex; justify-content:space-between; gap:.6rem; align-items:center;}
+#admWrap .faixa button{font:inherit; font-size:.76rem; font-weight:700; color:var(--cyan); background:none; border:none; cursor:pointer; text-decoration:underline;}
+#admWrap .selo.ia{background:rgba(var(--cyanRGB),.14); color:var(--cyan);}
+#admWrap .selo.bl{background:rgba(var(--purpleRGB),.18); color:var(--purpleSoft);}
+#admWrap .mudou{font-size:.72rem; color:var(--muted); margin-top:.45rem;}
+#admWrap .mudou button{font:inherit; font-size:.72rem; font-weight:700; color:var(--cyan); background:none; border:none; padding:0; cursor:pointer; text-decoration:underline;}
+#admWrap .nome{color:var(--text); font-weight:800;}
+#admWrap .medidas{margin-top:1.1rem; display:grid; grid-template-columns:1fr 1fr; gap:.5rem;}
+#admWrap .med{background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:12px; padding:.7rem .75rem;}
+#admWrap .med .k{font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted);}
+#admWrap .med .v{font-size:.85rem; font-weight:700; margin-top:.28rem; line-height:1.35;}
+#admWrap .med .d{font-size:.7rem; color:var(--muted); margin-top:.18rem; line-height:1.4;}
+#admWrap .crit{margin-top:1.1rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:14px; overflow:hidden;}
+#admWrap .crit .cab{font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); padding:.75rem .85rem .55rem; background:var(--surface2);}
+#admWrap .crit .lin{display:grid; grid-template-columns:minmax(118px,38%) 1fr; gap:.6rem; padding:.62rem .85rem; border-top:1px solid rgba(var(--borderRGB),.3); align-items:start;}
+#admWrap .crit .lin .p{font-size:.78rem; font-weight:700; line-height:1.4;}
+#admWrap .crit .lin .p .cd{color:var(--muted); font-weight:800; margin-right:.28rem;}
+#admWrap .crit .lin .r{font-size:.78rem; line-height:1.5; color:var(--text2);}
+#admWrap .crit .lin .r b{color:var(--text); font-weight:700;}
+#admWrap .aviso .mm .prop{display:block; margin:.6rem 0 .1rem; padding:.7rem .75rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.24); border-radius:10px; font-size:.88rem; font-weight:800; color:var(--text); line-height:1.45;}
+#admWrap .aviso .mm .pq{display:block; font-size:.75rem; color:var(--muted); line-height:1.5; margin-top:.5rem;}
+#admWrap .aviso .mm .btn{margin-top:.7rem;}
+#admWrap .edit{margin-top:1rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:14px; padding:.85rem;}
+#admWrap .edit .lb{font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--cyan);}
+#admWrap .edit.mot{border-color:rgba(var(--purpleRGB),.45);}
+#admWrap .edit.mot .lb{color:var(--purpleSoft);}
+#admWrap .edit textarea{min-height:92px;}
+#admWrap .btn.nao{background:transparent; color:var(--red); border:1px solid rgba(var(--redRGB),.5);}
+#admWrap .rodape .btn{margin-top:.8rem;}
+#admWrap .oficial{background:var(--surface); border:1px solid rgba(var(--cyanRGB),.30); border-radius:16px; padding:.95rem; margin-top:.9rem;}
+#admWrap .oficial .k{font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--cyan);}
+#admWrap .oficial .v{font-size:.88rem; line-height:1.6; margin-top:.4rem;}
+#admWrap .oficial .f{font-size:.7rem; color:var(--muted); margin-top:.5rem; line-height:1.45;}
+#admWrap .pad{background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:14px; padding:.85rem; margin-bottom:.55rem;}
+#admWrap .pad .h{display:flex; align-items:baseline; gap:.5rem;}
+#admWrap .pad .cd{font-size:.68rem; font-weight:800; color:var(--muted);}
+#admWrap .pad .nm{font-size:.88rem; font-weight:700; line-height:1.35;}
+#admWrap .pad .ev{font-size:.76rem; color:var(--text2); line-height:1.55; margin-top:.4rem;}
+#admWrap .pad .ds{font-size:.76rem; color:var(--muted); line-height:1.5; margin-top:.35rem;}
+#admWrap .pad .ds b{color:var(--text2);}
+#admWrap .campos{background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:14px; overflow:hidden;}
+#admWrap .cl{display:grid; grid-template-columns:1fr auto; gap:.5rem; padding:.6rem .85rem; border-top:1px solid rgba(var(--borderRGB),.3); align-items:center;}
+#admWrap .cl:first-child{border-top:none;}
+#admWrap .cl .nm{font-size:.82rem; font-weight:700;}
+#admWrap .cl .lei{font-size:.7rem; color:var(--muted); margin-top:.1rem;}
+#admWrap .cl .ct{font-size:.76rem; text-align:right; color:var(--text2);}
+#admWrap .cl .ct b{color:var(--text);}
+#admWrap .nunca{background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:14px; padding:.85rem; margin-top:.6rem;}
+#admWrap .nunca li{font-size:.8rem; color:var(--text2); line-height:1.6; margin-left:1.1rem;}
+#admWrap .fila{background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:14px; padding:.9rem .85rem;}
+#admWrap .fila .cont{font-size:.72rem; color:var(--muted); display:flex; justify-content:space-between;}
+#admWrap .fila .en{font-size:.98rem; font-weight:800; line-height:1.4; margin-top:.5rem;}
+#admWrap .fila .duplo{font-size:.76rem; color:var(--ambar); font-weight:600; margin-top:.4rem;}
+#admWrap .fila .prop{margin-top:.8rem; display:flex; align-items:center; gap:.6rem; padding:.7rem .75rem; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.20); border-radius:12px;}
+#admWrap .fila .prop .k{font-size:.7rem; color:var(--muted);}
+#admWrap .fila .prop .v{font-size:.9rem; font-weight:800; flex:1;}
+#admWrap .fila .prop .v.nenhum{color:var(--muted);}
+#admWrap .fila .pq{font-size:.76rem; color:var(--text2); line-height:1.5; margin-top:.5rem;}
+#admWrap .fila .nav{display:flex; justify-content:space-between; margin-top:.6rem;}
+#admWrap .fila .nav button{font:inherit; font-size:.76rem; font-weight:700; color:var(--cyan); background:none; border:none; cursor:pointer; padding:.3rem 0;}
+#admWrap .pill .sub{font-size:.7rem; color:var(--muted); font-weight:500; margin-left:.3rem;}
+#admWrap .espera{text-align:center; padding:2.5rem 1rem;}
+#admWrap .espera .p{font-size:.86rem; color:var(--muted); line-height:1.6;}
+#admWrap .zonaEixos{margin-top:1.1rem; background:var(--surface); border:1px solid rgba(var(--cyanRGB),.35); border-radius:16px; padding:.95rem 1rem;}
+#admWrap .zonaEixos .zt{font-size:.9rem; font-weight:800;}
+#admWrap .zonaEixos .zs{font-size:.78rem; color:var(--text2); line-height:1.55; margin-top:.3rem;}
+#admWrap .grade{display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem; margin-top:.85rem;}
+#admWrap .eixoBt{font:inherit; cursor:pointer; padding:.72rem .4rem; border-radius:14px; border:1px solid rgba(var(--borderRGB),.24);
+  background:var(--surface); color:var(--muted); text-align:center; transition:border-color .12s;}
+#admWrap .eixoBt:hover{border-color:rgba(var(--cyanRGB),.45);}
+#admWrap .eixoBt .en{display:block; font-size:.77rem; font-weight:700;}
+#admWrap .eixoBt .ee{display:block; font-size:.62rem; margin-top:.22rem;}
+#admWrap .eixoBt.sel{background:rgba(var(--cyanRGB),.12); border-color:var(--cyan); color:var(--cyan);}
+#admWrap .eixoBt.ia{border-style:dashed;}
+#admWrap .contaEixos{font-size:.78rem; color:var(--text2); margin-top:.75rem; line-height:1.5;}
+#admWrap .contaEixos b{color:var(--cyan);}
+@media (min-width:820px){#admWrap .medidas{grid-template-columns:repeat(4,1fr);}
+#admWrap .crit .lin{grid-template-columns:minmax(170px,26%) 1fr;}}
 #admWrap [hidden]{display:none !important;}
 </style>
 <script src="supabase-auth.js"></script>
@@ -662,6 +762,68 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
 
   <!-- ════════ AGENDAR ════════ -->
   <div class="tela" id="t-agendar"><div id="agCorpo"></div></div>
+
+  <!-- ════════ DECIDIR · LISTA (mockup v3-3) ════════ -->
+  <div class="tela" id="t-decidir">
+    <h2 class="t">Decidir temas</h2>
+    <p class="s">Proposto pela IA &middot; decidido por voc&ecirc;. Cada tema abre em tela pr&oacute;pria.</p>
+
+    <div class="meu">
+      <div class="lb">Seu tema</div>
+      <textarea id="campoBlanche" placeholder="Escreva o enunciado como ele apareceria na prova."></textarea>
+      <button class="btn" id="btAvaliarMeu" onclick="avaliarMeuTema()">Avaliar tema proposto</button>
+    </div>
+
+    <div id="faixaDesfazer"></div>
+
+    <div class="sec">Seus temas <span class="qt" id="qtDela"></span></div>
+    <div class="grupo" id="listaDela"></div>
+
+    <div class="sec">Propostos pela IA <span class="qt" id="qtIA"></span></div>
+    <div id="listaIA"></div>
+
+    <div class="sec">Aprovados neste trimestre <span class="qt" id="qtAp"></span></div>
+    <div class="grupo" id="listaAp"></div>
+
+    <div class="rodape">
+      A ordem aqui &eacute; por campo, n&atilde;o por qualidade. O trimestre tem 12 temas: 6 de campo recorrente, 4 de campo dormente com lei madura, 2 de campo novo. Teto de 2 por campo &mdash; estourar &eacute; decis&atilde;o sua; a medida s&oacute; avisa.
+      <button class="btn g" onclick="ir('t-banca')">Como a banca escolhe</button>
+    </div>
+  </div>
+
+  <!-- ════════ DECIDIR · TEMA EM FOCO ════════ -->
+  <div class="tela" id="t-dtema"><div id="dTemaCorpo"></div></div>
+
+  <div class="tela" id="t-despera"><div class="espera"><div class="p" id="txEspera">Lendo o tema contra os seis crit&eacute;rios&hellip;</div></div></div>
+
+  <!-- ════════ DECIDIR · BANCA ════════ -->
+  <div class="tela" id="t-banca">
+    <h2 class="t">Como a banca escolhe</h2>
+    <p class="s">Duas camadas, e elas n&atilde;o t&ecirc;m o mesmo peso. Uma &eacute; publicada pelo INEP. A outra &eacute; leitura da s&eacute;rie.</p>
+    <div class="oficial">
+      <div class="k">Crit&eacute;rio oficial &middot; 1</div>
+      <div class="v">O tema &eacute; de ordem <b>social, cient&iacute;fica, cultural ou pol&iacute;tica</b>. O texto &eacute; dissertativo-argumentativo, em modalidade escrita formal.</div>
+      <div class="f">Cartilha do Participante &mdash; A Reda&ccedil;&atilde;o do ENEM. Formula&ccedil;&atilde;o id&ecirc;ntica em 2018, 2020, 2022, 2024 e 2025.</div>
+    </div>
+    <div class="aviso" style="margin-top:1rem"><span class="ic" id="icBanca"></span><span class="mm"><span class="tp">O INEP n&atilde;o publica como o tema &eacute; escolhido.</span> Tudo abaixo &eacute; leitura da s&eacute;rie &mdash; contagem que qualquer pessoa refaz, n&atilde;o regra declarada.</span></div>
+
+    <div class="sec">Padr&otilde;es observados <span class="qt">&middot; 6</span></div>
+    <div id="listaPadroes"></div>
+
+    <div class="sec">Quando cada campo caiu <span class="qt" id="qtSerie"></span></div>
+    <div class="campos" id="listaCampos"></div>
+
+    <div class="sec">Enunciados ainda sem campo <span class="qt" id="qtFila"></span></div>
+    <p class="s" style="margin-top:0;margin-bottom:.6rem">Enquanto estiverem sem campo, a contagem acima fica menor do que a s&eacute;rie. A proposta &eacute; da IA; a decis&atilde;o &eacute; sua.</p>
+    <div class="fila" id="fila"></div>
+
+    <div class="sec">O que nunca apareceu</div>
+    <div class="nunca"><ul>
+      <li>Disputa partid&aacute;ria ou eleitoral em curso</li><li>Doutrina religiosa como conte&uacute;do</li><li>Pol&iacute;tica externa, ou outro pa&iacute;s</li>
+      <li>Economia t&eacute;cnica &mdash; juros, c&acirc;mbio, reforma tribut&aacute;ria</li><li>Aborto, drogas, armas, pena de morte</li><li>Seguran&ccedil;a p&uacute;blica armada</li><li>Avalia&ccedil;&atilde;o de governo</li>
+    </ul></div>
+    <div class="rodape" id="rodBanca"></div>
+  </div>
 
 </div>
 
@@ -914,11 +1076,11 @@ function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,
 
 /* ─── navegação: voltar na casa devolve ao portal ─── */
 var pilha=[], telaAtual='t-casa';
-var NOMES={ 't-casa':'Curadoria', 't-lista':'Aprovar materiais', 't-tema':'Ler e aprovar', 't-semanas':'Semanas', 't-agendar':'Agendar' };
+var NOMES={ 't-casa':'Curadoria', 't-lista':'Aprovar materiais', 't-tema':'Ler e aprovar', 't-semanas':'Semanas', 't-agendar':'Agendar', 't-decidir':'Decidir temas', 't-dtema':'Tema em foco', 't-banca':'Como a banca escolhe', 't-despera':'Um instante' };
 function ir(t){ if(telaAtual) pilha.push(telaAtual); mostrar(t); }
 function voltar(){ if(!pilha.length){ if(telaAtual==='t-casa') return; mostrar('t-casa'); return; } mostrar(pilha.pop()); }
 function mostrar(t){
-  if(t==='t-casa') montarCasa(); if(t==='t-lista') montarLista(); if(t==='t-semanas') montarSemanas();
+  if(t==='t-casa') montarCasa(); if(t==='t-lista') montarLista(); if(t==='t-semanas') montarSemanas(); if(t==='t-decidir') dMontarLista(); if(t==='t-banca') montarBanca();
   var i,ts=document.querySelectorAll('.tela'); for(i=0;i<ts.length;i++) ts[i].classList.remove('on');
   document.getElementById(t).classList.add('on'); telaAtual=t;
   document.getElementById('hdN').textContent=NOMES[t]||'Curadoria'; document.getElementById('btVoltar').hidden=(t==='t-casa'); window.scrollTo(0,0);
@@ -1010,9 +1172,7 @@ async function carregar(){
     var r3 = await dbFetch(SUPABASE_URL+'/rest/v1/agenda_temas?select=id,tema_id,semana_de,automatico&escopo=eq.redaon&order=semana_de.desc&limit=40', {});
     var ag = r3.ok ? await r3.json() : []; AGENDA=[];
     for(i=0;i<ag.length;i++) AGENDA.push({ id:ag[i].id, semana:String(ag[i].semana_de).slice(0,10), tema:ag[i].tema_id, automatico:ag[i].automatico===true });
-    var r4 = await dbFetch(SUPABASE_URL+'/rest/v1/temas_propostos?select=origem&estado=eq.proposto', {});
-    var tp = r4.ok ? await r4.json() : []; DECIDIR={ fabrica:0, seus:0 };
-    for(i=0;i<tp.length;i++){ if(tp[i].origem==='blanche') DECIDIR.seus++; else DECIDIR.fabrica++; }
+    await carregarPropostos();
   }catch(e){ console.warn('[pedagogica carregar]', e); }
   mostrar(telaAtual);
 }
@@ -1035,7 +1195,7 @@ function montarCasa(){
   for(i=0;i<TEMAS.length;i++){ var p=contaFichas(TEMAS[i],'pendente'); if(p){ aLer+=p; temasLer++; } emp+=emperradosAbertos(TEMAS[i]); }
   var vaga=null, ss=semanas(); for(i=0;i<ss.length;i++) if(!agendaDe(ss[i])){ vaga=ss[i]; break; }
   var nd=DECIDIR.fabrica+DECIDIR.seus, h='';
-  h+='<button class="tarefa'+(nd?'':' zero')+'" onclick="toast(\'Decidir temas entra no pr\u00f3ximo lote.\')"><span class="num">'+nd+'</span><span class="cp"><span class="a">Decidir temas</span>'
+  h+='<button class="tarefa'+(nd?'':' zero')+'" onclick="abrirDecidir()"><span class="num">'+nd+'</span><span class="cp"><span class="a">Decidir temas</span>'
     +'<span class="b">'+(nd? nd+' esperando sua decis\u00e3o \u00b7 '+DECIDIR.fabrica+' da F\u00e1brica, '+DECIDIR.seus+(DECIDIR.seus===1?' seu':' seus')+'. Aprovar j\u00e1 marca os eixos.' : 'Nenhum tema esperando decis\u00e3o.')+'</span></span><span class="seta">&#8250;</span></button>';
   h+='<button class="tarefa'+(aLer||emp?'':' zero')+'" onclick="ir(\'t-lista\')"><span class="num">'+(aLer||(emp?ICO.alerta:'0'))+'</span><span class="cp"><span class="a">Aprovar materiais de apoio</span>'
     +'<span class="b">'+(aLer? aLer+' fichas a ler em '+temasLer+(temasLer===1?' tema':' temas') : 'Nada a ler')+(emp? ' \u00b7 '+emp+(emp===1?' emperrado a decidir':' emperrados a decidir'):'')+'</span></span><span class="seta">&#8250;</span></button>';
@@ -1331,6 +1491,378 @@ async function gravar(){
   bt.disabled=false; bt.textContent='Gravar a data';
   toast('Data gravada: segunda, '+fmt(agSemana)+'.');
   pilha=['t-casa']; mostrar('t-semanas');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DECIDIR TEMAS (mockup v3-3) · Lote 4
+   Diagnóstico P1–P6 e "Ajuste possível" são lógica local (JS).
+   Gemini entra só na pré-marcação dos eixos. Nomes com prefixo d-
+   onde colidiam com a casa (lista/tema/gaveta/porId/linha).
+   ═══════════════════════════════════════════════════════════════ */
+var ANO=new Date().getFullYear(), TOTAL_SERIE=0, SEM_CAMPO=0, MIN_EIXOS=3;
+var CATEGORIAS=['Consumo','Cultura','Direitos','Economia','Educa\u00e7\u00e3o','Meio Ambiente','Sa\u00fade','Social','Tecnologia','Trabalho'];
+var EIXOS_GRADE=[['legislacao','Legisla\u00e7\u00e3o'],['historia','Hist\u00f3ria'],['especialistas','Especialistas'],['atualidades','Atualidades'],['literatura','Literatura'],['filosofia','Filosofia'],['cinema','Cinema'],['ciencia','Ci\u00eancia'],['culturapop','Cultura pop']];
+var EIXOS_IDS=EIXOS_GRADE.map(function(e){ return e[0]; });
+var CAMPOS=[], PROPS=[], FILA=[], dCarregado=false, dCarregando=null;
+var GRUPOS=['idos','envelhec','popula\u00e7\u00f5es atingidas','populacoes atingidas','mulher','crian\u00e7a','crianc','adolescen','jovem','jovens','surd','cego','defici\u00ean','deficien','ind\u00edgen','indigen','quilombol','ribeirinh','povos','comunidades tradicionais','popula\u00e7\u00e3o em situa\u00e7\u00e3o de rua','trabalhador','professor','agricultor','imigrant','refugiad','negro','negra','perif\u00e9ric','periferic','pescador','cuidador','estudant','paciente','usu\u00e1rio','usuario','fam\u00edlia','familia','v\u00edtima','vitima','artista','moradore'];
+var FORMULAS=['desafios para','caminhos para','medidas para','alternativas para','formas de','combate a','combate ao','perspectivas acerca','estrat\u00e9gias para','estrategias para'];
+var MARCAS_BR=['no brasil','na sociedade brasileira','brasileir','nacional','do brasil','no pa\u00eds','no pais'];
+var PADROES=[
+  ['Situa\u00e7\u00e3o-problema','44 dos 45 enunciados. A \u00fanica exce\u00e7\u00e3o \u00e9 1998, e nunca se repetiu.','<b>Descarta:</b> "intelig\u00eancia artificial", "meio ambiente" \u2014 enquanto forem campo.'],
+  ['\u00c2ncora nacional','13 dos 14 enunciados regulares de 2012 a 2025. Em 2025, a prova especial de Bel\u00e9m saiu com tema nacional.','<b>Descarta:</b> recorte regional e recorte internacional.'],
+  ['Grupo nomeado','Cinco anos seguidos na regular, de 2021 a 2025. Somando as duas camadas, 10 de 11.','<b>Cuidado:</b> o padr\u00e3o mais forte e o mais recente. Cinco anos n\u00e3o fazem regra.'],
+  ['Verbo de a\u00e7\u00e3o','Desafios para \u00b7 Caminhos para \u00b7 Medidas para \u00b7 Alternativas para. A pergunta sumiu da regular em 2004.','<b>Descarta:</b> tema formulado como disputa de opini\u00e3o.'],
+  ['Quando esse assunto caiu','O enunciado nunca se repete; o campo, sim. A contagem est\u00e1 logo abaixo.','<b>N\u00e3o descarta nada.</b> Informa quanto tempo faz.'],
+  ['Quando virou lei','Mediana de 15 anos entre a lei e a prova, nos 10 mais recentes.','<b>Uma exce\u00e7\u00e3o em 28 edi\u00e7\u00f5es:</b> 2018, com a LGPD sancionada tr\u00eas meses antes da prova.']
+];
+var atual=null, anterior=null, editando=false, ultimaRejeicao=null, marcados=[], sugestaoIA=[], pedidoGemini=0;
+
+/* ─── util ─── */
+function semAcento(s){ return String(s).toLowerCase().replace(/[\u00e1\u00e0\u00e2\u00e3]/g,'a').replace(/[\u00e9\u00ea]/g,'e').replace(/\u00ed/g,'i').replace(/[\u00f3\u00f4\u00f5]/g,'o').replace(/[\u00fa\u00fc]/g,'u').replace(/\u00e7/g,'c'); }
+function contem(txt,lista){ var i, t=String(txt).toLowerCase(), ta=semAcento(txt); for(i=0;i<lista.length;i++){ if(t.indexOf(lista[i])>=0 || ta.indexOf(semAcento(lista[i]))>=0) return lista[i]; } return null; }
+function campoPorId(id){ for(var i=0;i<CAMPOS.length;i++) if(CAMPOS[i].id===id) return CAMPOS[i]; return null; }
+function propPorId(id){ for(var i=0;i<PROPS.length;i++) if(PROPS[i].id===id) return PROPS[i]; return null; }
+function rotEixoGrade(id){ return EIXOS_ROT[id]||id; }
+function nomes(arr){ return arr.map(function(n){ return '<span class="nome">'+n+'</span>'; }).join(' e '); }
+function trimestreAtual(){ var d=new Date(); return d.getFullYear()+'-T'+(Math.floor(d.getMonth()/3)+1); }
+function apLocal(p){ return p.estado==='aprovado'; }
+function dCampo(p){ return (p.campo && campoPorId(p.campo)) || classificar(p.enunciado).campo; }
+
+/* ─── classificador: vereditos locais ─── */
+function classificar(enun){
+  var s=String(enun||''), t=s.toLowerCase(), r={};
+  r.formula=contem(t.slice(0,28),FORMULAS);
+  r.pergunta=/\?\s*$/.test(s.trim());
+  r.verbo=/\b(garantir|combater|enfrentar|proteger|valorizar|ampliar|reduzir|promover|assegurar|preservar|superar|incluir)\b/.test(semAcento(t));
+  r.p1=!r.pergunta && (!!r.formula || r.verbo);
+  r.p2=!!contem(t,MARCAS_BR);
+  r.grupo=contem(t,GRUPOS); r.p3=!!r.grupo; r.p4=!!r.formula;
+  var i, achou, melhor=0, c=null, todos=[];
+  for(i=0;i<CAMPOS.length;i++){ achou=contem(t,CAMPOS[i].kw); if(achou){ todos.push(CAMPOS[i]); if(achou.length>melhor){ melhor=achou.length; c=CAMPOS[i]; r.chave=achou; } } }
+  r.campo=c; r.campos=todos; r.idade=c?(ANO-c.ano):null; r.p6=c?(r.idade>=10):null;
+  return r;
+}
+function propor(enun,r){
+  if(r.p1&&r.p2&&r.p3&&r.p4) return null;
+  if(!r.p1||!r.p4) return null;
+  var s=String(enun).trim().replace(/\?+$/,''), c=r.campo;
+  if(!r.p3&&c){ if(/\s+no Brasil\s*$/i.test(s)) s=s.replace(/\s+no Brasil\s*$/i,' '+c.grupo+' no Brasil'); else s=s+' '+c.grupo; }
+  if(!r.p2&&!/no brasil|brasileir|no pa\u00eds/i.test(s)) s=s+' no Brasil';
+  s=s.charAt(0).toUpperCase()+s.slice(1);
+  return s===String(enun).trim()?null:s;
+}
+function faltam(r){ var f=[]; if(!r.p1) f.push('Situa\u00e7\u00e3o-problema'); if(!r.p2) f.push('\u00c2ncora nacional'); if(!r.p3) f.push('Grupo nomeado'); if(!r.p4) f.push('Verbo de a\u00e7\u00e3o'); return f; }
+function diagnosticoDe(enun){ var r=classificar(enun); return { enunciado:enun, p1:r.p1, p2:r.p2, p3:r.p3, p4:r.p4, p6:r.p6, campo:r.campo?r.campo.id:null, grupo:r.grupo, formula:r.formula, idade_lei:r.idade, faltam:faltam(r), avaliado_em:new Date().toISOString() }; }
+
+/* ─── dados ─── */
+async function dCarregar(){
+  if(dCarregado) return; if(dCarregando) return dCarregando;
+  dCarregando=(async function(){
+    try{
+      var rc=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/campos_da_serie',{method:'POST',body:'{}'});
+      var cs=rc.ok?await rc.json():[]; CAMPOS=[];
+      for(var i=0;i<cs.length;i++) CAMPOS.push({ id:cs[i].id, nome:cs[i].nome, grupo:cs[i].grupo_padrao||'', lei:cs[i].lei||'', ano:cs[i].lei_ano||ANO, kw:cs[i].palavras_chave||[], vezes:cs[i].vezes||0, ult:cs[i].ultimo_ano||null });
+      var rt=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/total_da_serie',{method:'POST',body:'{}'});
+      TOTAL_SERIE=rt.ok?(parseInt(await rt.text(),10)||0):0;
+      var rf=await dbFetch(SUPABASE_URL+'/rest/v1/temas?select=id,titulo,ano_enem,aplicacao&natureza=eq.enem&aplicacao=neq.cancelada&campo=is.null&order=ano_enem.asc,titulo.asc',{});
+      FILA=rf.ok?await rf.json():[]; SEM_CAMPO=FILA.length;
+      dCarregado=true;
+    }catch(e){ console.warn('[decidir carregar]',e); }
+    dCarregando=null;
+  })();
+  return dCarregando;
+}
+async function carregarPropostos(){
+  var r=await dbFetch(SUPABASE_URL+'/rest/v1/temas_propostos?select=id,trimestre,enunciado,enunciado_original,campo,origem,estado,diagnostico,motivo_contra,tema_id,decidido_em,criado_em,categoria_proposta,repertorio,grupo&estado=in.(proposto,aprovado)&order=criado_em.desc&limit=200',{});
+  PROPS=r.ok?await r.json():[];
+  DECIDIR={ fabrica:0, seus:0 };
+  for(var i=0;i<PROPS.length;i++){ if(PROPS[i].estado!=='proposto') continue; if(PROPS[i].origem==='blanche') DECIDIR.seus++; else DECIDIR.fabrica++; }
+}
+async function abrirDecidir(){ if(dCarregado){ ir('t-decidir'); return; } pilha.push(telaAtual); mostrar('t-despera'); await dCarregar(); mostrar('t-decidir'); }
+
+/* ─── lista ─── */
+function aprovadosNoCampo(campoId,exceto){ var n=0; for(var i=0;i<PROPS.length;i++){ var p=PROPS[i]; if(!apLocal(p)||p.id===exceto) continue; var c=dCampo(p); if(c&&c.id===campoId) n++; } return n; }
+function semanaDe(temaId){ var ds=datasDoTema(temaId); if(!ds.length) return null; for(var i=0;i<ds.length;i++) if(ds[i].semana>=SEMANA_ATUAL) return ds[i].semana; return ds[ds.length-1].semana; }
+function montarItem(p){
+  var c=dCampo(p), dela=p.origem==='blanche';
+  var selo=dela?'<span class="selo bl">Proposto por voc\u00ea</span>':'<span class="selo ia">Proposto pela IA</span>';
+  var meta=c?(esc(c.nome)+' \u00b7 '+(c.ult?'\u00faltimo no campo: '+c.ult:'nunca caiu')):'campo n\u00e3o identificado';
+  if(apLocal(p)){
+    var t=p.tema_id?porId(p.tema_id):null, sem=p.tema_id?semanaDe(p.tema_id):null, ex=t?escolhidos(t):[];
+    meta=(c?esc(c.nome):'sem campo')+' \u00b7 '+esc(p.categoria_proposta||'')+(sem?' \u00b7 semana de '+fmt(sem):' \u00b7 sem data')+(ex.length?'<br>eixos: '+ex.map(rotEixoGrade).join(' \u00b7 '):'');
+    return '<div class="item ap" role="button" tabindex="0" onclick="abrirAgendar(\''+p.tema_id+'\')"><div class="cp">'+selo+'<div class="tt">'+esc(p.enunciado)+'</div><div class="mt">'+meta+'</div>'
+      +'<div class="desfAp"><button onclick="event.stopPropagation();desfazerAprovacao(\''+p.id+'\')">Desfazer aprova\u00e7\u00e3o</button></div></div><div class="seta">&#8250;</div></div>';
+  }
+  return '<button class="item'+(dela?' dela':'')+'" onclick="dAbrirTema(\''+p.id+'\')"><div class="cp">'+selo+'<div class="tt">'+esc(p.enunciado)+'</div><div class="mt">'+meta+'</div></div><div class="seta">&#8250;</div></button>';
+}
+function dMontarLista(){
+  var i,p,dela='',ap='',nd=0,na=0,ni=0,h='',grupos={},ordem=[];
+  for(i=0;i<PROPS.length;i++){ p=PROPS[i]; if(apLocal(p)){ ap+=montarItem(p); na++; } else if(p.origem==='blanche'){ dela+=montarItem(p); nd++; } }
+  for(i=0;i<PROPS.length;i++){ p=PROPS[i]; if(p.origem==='blanche'||p.estado!=='proposto') continue; ni++;
+    var g=p.grupo||'Trazidos pela F\u00e1brica'; if(!grupos[g]){ grupos[g]=''; ordem.push(g); } grupos[g]+=montarItem(p); }
+  for(i=0;i<ordem.length;i++) h+='<div class="sec" style="margin-top:.8rem">'+esc(ordem[i])+'</div><div class="grupo">'+grupos[ordem[i]]+'</div>';
+  document.getElementById('listaDela').innerHTML=dela||'<div class="vazio">Escreva o seu no campo acima. Ele \u00e9 diagnosticado do mesmo jeito.</div>';
+  document.getElementById('listaIA').innerHTML=h||'<div class="vazio">Nenhum tema proposto. A Produ\u00e7\u00e3o traz o bloco do trimestre na casa dela. O que entrar aparece aqui como proposto, esperando voc\u00ea.</div>';
+  document.getElementById('listaAp').innerHTML=ap||'<div class="vazio">Nenhum aprovado ainda. O teto de 2 por campo conta a partir daqui.</div>';
+  document.getElementById('qtDela').textContent='\u00b7 '+nd; document.getElementById('qtIA').textContent='\u00b7 '+ni+', agrupados por campo'; document.getElementById('qtAp').textContent='\u00b7 '+na+' de 12';
+  document.getElementById('faixaDesfazer').innerHTML=ultimaRejeicao?'<div class="faixa"><span>Rejeitado: '+esc(String(ultimaRejeicao.enunciado).slice(0,48))+'\u2026</span><button onclick="desfazerRejeicao()">Desfazer</button></div>':'';
+}
+
+/* ─── tema em foco ─── */
+function dAbrirTema(id){
+  atual=propPorId(id); if(!atual) return; anterior=null; editando=false;
+  sugestaoIA=atual._sug||[]; marcados=sugestaoIA.slice();
+  dRenderTema(); ir('t-dtema');
+  if(!atual._sug) sugerirEixos(atual);
+}
+async function sugerirEixos(p){
+  var meu=++pedidoGemini, ctrl=null, timer=null;
+  try{
+    var prompt='Voc\u00ea prepara material de apoio para reda\u00e7\u00e3o do ENEM. Para o tema abaixo, escolha os TR\u00caS eixos de repert\u00f3rio mais fortes para o aluno argumentar, entre estes ids: '+EIXOS_IDS.join(', ')+'.\nTema: "'+String(p.enunciado).replace(/"/g,"'")+'"\nResponda somente JSON no formato {"eixos":["id","id","id"]}, usando exatamente os ids da lista.';
+    if(window.AbortController){ ctrl=new AbortController(); timer=setTimeout(function(){ ctrl.abort(); },12000); }
+    var res=await fetch('/api/gemini',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ contents:[{ parts:[{ text:prompt }] }] }), signal:ctrl?ctrl.signal:undefined });
+    var data=await res.json(); if(!res.ok) throw new Error('gemini '+res.status);
+    var txt=data.candidates[0].content.parts[0].text, obj=JSON.parse(String(txt).replace(/```json|```/g,'').trim());
+    var lista=Array.isArray(obj.eixos)?obj.eixos:[], ok=[];
+    for(var i=0;i<lista.length;i++){ var e=String(lista[i]).toLowerCase().trim(); if(EIXOS_IDS.indexOf(e)>=0&&ok.indexOf(e)<0) ok.push(e); }
+    p._sug=ok.slice(0,3);
+  }catch(e){ console.warn('[eixos gemini]',e); p._sug=[]; }
+  if(timer) clearTimeout(timer);
+  if(meu!==pedidoGemini||atual!==p||telaAtual!=='t-dtema') return;
+  sugestaoIA=p._sug.slice(); if(!marcados.length) marcados=sugestaoIA.slice();
+  montarGrade();
+}
+function quadro(k,v,d){ return '<div class="med"><div class="k">'+k+'</div><div class="v">'+esc(v)+'</div><div class="d">'+esc(d)+'</div></div>'; }
+function dLinha(cd,nome,resp){ return '<div class="lin"><div class="p"><span class="cd">'+cd+'</span>'+nome+':</div><div class="r">'+resp+'</div></div>'; }
+function dRenderTema(){
+  var t=atual, dela=(t.origem==='blanche'), r=classificar(t.enunciado), c=r.campo, prop=propor(t.enunciado,r), f=faltam(r);
+  var h=dela?'<span class="selo bl">Proposto por voc\u00ea</span>':'<span class="selo ia">Proposto pela IA</span>';
+  h+='<div class="enun">'+esc(t.enunciado)+'</div>';
+  if(anterior) h+='<div class="mudou">Enunciado alterado \u00b7 <button onclick="desfazerEnunciado()">voltar ao anterior</button></div>';
+  var diz=f.length?('Fica devendo '+nomes(f)+'. O resto atende.'):'Atende a todos os crit\u00e9rios que a tela verifica. O "Quando esse assunto caiu" n\u00e3o aprova nem reprova \u2014 informa h\u00e1 quanto tempo o campo n\u00e3o cai.';
+  var risco=c?(c.vezes===0?('Campo '+c.nome+' nunca caiu na s\u00e9rie \u2014 com '+SEM_CAMPO+' enunciados ainda sem campo.'):('Campo '+c.nome+', '+c.vezes+(c.vezes===1?' apari\u00e7\u00e3o':' apari\u00e7\u00f5es')+' em '+TOTAL_SERIE+' enunciados, a \u00faltima em '+c.ult+'.')):'N\u00e3o consegui ligar o enunciado a nenhum campo da s\u00e9rie.';
+  h+='<div class="linhas"><div class="linha"><div class="k">'+(dela?'O que a s\u00e9rie diz':'Por que passa')+'</div><div class="v">'+diz+'</div></div>'
+    +'<div class="linha"><div class="k">Risco</div><div class="v">'+esc(risco)+'</div></div>'
+    +'<div class="linha"><div class="k">Repert\u00f3rio</div><div class="v">'+esc(t.repertorio||'Levantado na F\u00e1brica, depois que voc\u00ea decidir.')+'</div></div></div>';
+  var jaNoCampo=c?aprovadosNoCampo(c.id,t.id):0, posicao=jaNoCampo+1;
+  h+='<div class="medidas">'
+    +quadro('Campo',c?c.nome:'n\u00e3o identificado',c?(c.ult?'\u00faltimo no campo: '+c.ult:'nunca na s\u00e9rie'):'entra na fila')
+    +quadro('\u00c2ncora',c?c.lei:'a conferir',c?(r.idade+' anos'):'campo n\u00e3o identificado')
+    +quadro('Trimestre',c?(posicao+'\u00ba de '+c.nome):'a definir',posicao>2?'acima do teto de 2 por campo':'teto de 2 por campo')
+    +quadro('Material','eixos a marcar abaixo','produ\u00e7\u00e3o come\u00e7a ap\u00f3s aprovar')
+    +'</div>';
+  h+='<div class="crit"><div class="cab">Crit\u00e9rio por crit\u00e9rio</div>'
+    +dLinha('P1','Situa\u00e7\u00e3o-problema',r.p1?'<span class="ok">Atende.</span> Pede interven\u00e7\u00e3o, n\u00e3o opini\u00e3o.':'<span class="no">N\u00e3o atende.</span> '+(r.pergunta?'Termina em pergunta, que sumiu da regular em 2004.':'Ainda \u00e9 assunto, n\u00e3o problema com sujeito e verbo.'))
+    +dLinha('P2','\u00c2ncora nacional',r.p2?'<span class="ok">Atende.</span> Traz a marca nacional no pr\u00f3prio enunciado.':'<span class="no">N\u00e3o atende.</span> 13 dos 14 enunciados regulares desde 2012 trazem.')
+    +dLinha('P3','Grupo nomeado',r.p3?'<span class="ok">Atende.</span> Grupo no enunciado: <b>'+esc(r.grupo)+'</b>.':'<span class="no">N\u00e3o atende.</span> Nenhum grupo social aparece. Foi o padr\u00e3o mais forte de 2021 a 2025.')
+    +dLinha('P4','Verbo de a\u00e7\u00e3o',r.p4?'<span class="ok">Atende.</span> Abre com <b>'+esc(r.formula)+'</b>, uma das f\u00f3rmulas da banca.':'<span class="no">N\u00e3o atende.</span> N\u00e3o reconheci f\u00f3rmula de a\u00e7\u00e3o na abertura.')
+    +dLinha('P5','Quando esse assunto caiu',c?(c.vezes===0?'<span class="nc">Nunca caiu</span> na s\u00e9rie. Campo '+esc(c.nome)+'. <b>'+SEM_CAMPO+' enunciados ainda sem campo</b> \u2014 a contagem pode mudar.':'Campo '+esc(c.nome)+'. Caiu <b>'+c.vezes+(c.vezes===1?' vez':' vezes')+'</b> em '+TOTAL_SERIE+' enunciados, a \u00faltima em <b>'+c.ult+'</b>.'):'<span class="nc">Campo n\u00e3o identificado.</span> Entra na fila.')
+    +dLinha('P6','Quando virou lei',c?((r.idade>=10)?'<span class="ok">Atende.</span> '+esc(c.lei)+', de <b>'+c.ano+'</b>. '+r.idade+' anos \u2014 a mediana da s\u00e9rie \u00e9 quinze.':'<span class="no">N\u00e3o atende.</span> '+esc(c.lei)+', de <b>'+c.ano+'</b>. S\u00f3 '+r.idade+' anos: ainda \u00e9 not\u00edcia.'):'<span class="nc">A conferir.</span> Sem campo identificado, o banco n\u00e3o devolve \u00e2ncora.')
+    +'</div>';
+  if(prop){
+    h+='<div class="aviso" style="margin-top:1rem"><span class="ic">'+ICO.alerta+'</span><span class="mm"><span class="tp">Ajuste poss\u00edvel.</span> Fecha '+nomes(f)+' sem trocar o assunto:'
+      +'<span class="prop">'+esc(prop)+'</span><span class="pq">Ao usar, a an\u00e1lise acima \u00e9 refeita na hora. Voc\u00ea pode desfazer.</span>'
+      +'<button class="btn ok sm" onclick="usarProposto()">Usar este enunciado</button></span></div>';
+  } else if(f.length){
+    h+='<div class="aviso" style="margin-top:1rem"><span class="ic">'+ICO.alerta+'</span><span class="mm"><span class="tp">Precisa de reescrita.</span> Fechar '+nomes(f)+' exige mudar a estrutura da frase. Use Editar enunciado.</span></div>';
+  }
+  if(editando){
+    h+='<div class="edit"><div class="lb">Editar o enunciado</div><textarea id="ta">'+esc(t.enunciado)+'</textarea>'
+      +'<div class="dupla"><button class="btn sm" onclick="salvarEdicao()">Reavaliar</button><button class="btn g sm" onclick="cancelarEdicao()">Cancelar</button></div></div>';
+  }
+  if(dela&&f.length&&!editando){
+    h+='<div class="edit mot"><div class="lb">Se seguir assim, registre o motivo</div><textarea id="motivo" placeholder="Opcional. Fica gravado junto do tema.">'+esc(t.motivo_contra||'')+'</textarea></div>';
+  }
+  h+='<div class="zonaEixos"><div class="zt">Por onde vai o material deste tema?</div>'
+    +'<div class="zs">O tracejado \u00e9 a sugest\u00e3o do Gemini \u2014 ajuste como quiser. M\u00ednimo de '+MIN_EIXOS+'. A F\u00e1brica s\u00f3 produz para os eixos que voc\u00ea marcar.</div>'
+    +'<div class="grade" id="grade"></div><div class="contaEixos" id="contaEixos"></div></div>';
+  h+='<div class="acoes">';
+  if(!editando) h+='<button class="btn g" onclick="abrirEdicao()">'+(dela?'Ajustar':'Editar enunciado')+'</button>';
+  if(dela){ h+='<button class="btn ok" id="btAprovar" onclick="abrirCategoria()">Seguir assim</button>'; }
+  else { h+='<button class="btn ok" id="btAprovar" onclick="abrirCategoria()">Aprovar</button><button class="btn nao" id="btRejeitar" onclick="rejeitar()">Rejeitar</button>'; }
+  h+='</div>';
+  if(dela) h+='<div class="rodape">Se voc\u00ea seguir contra a leitura, o tema entra normalmente e o motivo fica registrado. A leitura \u00e9 diagn\u00f3stico, n\u00e3o veredito.</div>';
+  document.getElementById('dTemaCorpo').innerHTML=h;
+  montarGrade();
+}
+function montarGrade(){
+  var el=document.getElementById('grade'); if(!el) return;
+  var h='', i;
+  for(i=0;i<EIXOS_GRADE.length;i++){
+    var id=EIXOS_GRADE[i][0], sel=marcados.indexOf(id)>=0, ia=sugestaoIA.indexOf(id)>=0;
+    h+='<button class="eixoBt'+(sel?' sel':'')+(ia?' ia':'')+'" onclick="alternarEixo(\''+id+'\')"><span class="en">'+EIXOS_GRADE[i][1]+'</span><span class="ee">'+(ia?'sugerido':'&nbsp;')+'</span></button>';
+  }
+  el.innerHTML=h;
+  var c=document.getElementById('contaEixos'), b=document.getElementById('btAprovar');
+  if(marcados.length<MIN_EIXOS){
+    if(c) c.innerHTML='<b>'+marcados.length+'</b> de no m\u00ednimo '+MIN_EIXOS+' \u2014 marque mais '+(MIN_EIXOS-marcados.length)+'.';
+    if(b){ b.disabled=true; b.textContent='Marque pelo menos '+MIN_EIXOS+' eixos'; }
+  } else {
+    if(c) c.innerHTML='<b>'+marcados.length+'</b> marcados: '+marcados.map(rotEixoGrade).join(' \u00b7 ');
+    if(b){ b.disabled=false; b.textContent=(atual&&atual.origem==='blanche'?'Seguir assim':'Aprovar')+' com '+marcados.length+' eixos'; }
+  }
+}
+function alternarEixo(id){ var i=marcados.indexOf(id); if(i>=0) marcados.splice(i,1); else marcados.push(id); montarGrade(); }
+
+/* enunciado: usar proposto / editar / desfazer — grava em temas_propostos.enunciado (o original fica em enunciado_original) */
+async function gravarEnunciado(novo){
+  var antes=atual.enunciado, p=atual;
+  var r=await dbFetch(SUPABASE_URL+'/rest/v1/temas_propostos?id=eq.'+encodeURIComponent(p.id),{ method:'PATCH', body:JSON.stringify({ enunciado:novo }) });
+  if(!r.ok) throw new Error(await r.text());
+  anterior=antes; p.enunciado=novo; p._sug=null;
+}
+async function usarProposto(){
+  var r=classificar(atual.enunciado), p=propor(atual.enunciado,r); if(!p) return;
+  try{ await gravarEnunciado(p); }catch(e){ console.warn(e); toast('N\u00e3o consegui gravar. Tente de novo.'); return; }
+  editando=false; dRenderTema(); window.scrollTo(0,0); sugerirEixos(atual);
+}
+function abrirEdicao(){ editando=true; dRenderTema(); var ta=document.getElementById('ta'); if(ta){ ta.focus(); ta.scrollIntoView({block:'center'}); } }
+async function salvarEdicao(){
+  var v=document.getElementById('ta').value.trim(); if(v.length<20){ toast('O enunciado est\u00e1 curto demais para avaliar.'); return; }
+  if(v===atual.enunciado){ editando=false; dRenderTema(); return; }
+  try{ await gravarEnunciado(v); }catch(e){ console.warn(e); toast('N\u00e3o consegui gravar. Tente de novo.'); return; }
+  editando=false; dRenderTema(); window.scrollTo(0,0); sugerirEixos(atual);
+}
+function cancelarEdicao(){ editando=false; dRenderTema(); }
+async function desfazerEnunciado(){
+  if(!anterior) return; var volta=anterior;
+  try{ await gravarEnunciado(volta); }catch(e){ console.warn(e); toast('N\u00e3o consegui gravar. Tente de novo.'); return; }
+  anterior=null; dRenderTema(); window.scrollTo(0,0); sugerirEixos(atual);
+}
+
+/* ─── gaveta do Decidir (reaproveita gavT/gavS/gavPills da casa) ─── */
+function dGaveta(t,s,h){ modoGav='decidir'; document.getElementById('gavT').textContent=t; document.getElementById('gavS').textContent=s; document.getElementById('gavPills').innerHTML=h; zonasGaveta(['gavS','gavPills']); abrirGaveta(); }
+
+/* ─── aprovar: categoria proposta pela IA, confirmada por ela ─── */
+function abrirCategoria(){
+  if(marcados.length<MIN_EIXOS) return;
+  var m=document.getElementById('motivo'); if(m) atual.motivo_contra=m.value.trim();
+  var h='', i, cat=atual.categoria_proposta;
+  for(i=0;i<CATEGORIAS.length;i++){ h+='<button class="pill'+(CATEGORIAS[i]===cat?' sel':'')+'" onclick="confirmarCategoria(this,\''+CATEGORIAS[i]+'\')"><span>'+CATEGORIAS[i]+(CATEGORIAS[i]===cat?'<span class="sub">\u00b7 proposta</span>':'')+'</span><span class="ck">&#10003;</span></button>'; }
+  dGaveta('Em qual categoria o aluno vai encontrar este tema?', cat?'A IA prop\u00f4s uma. Voc\u00ea confirma ou troca.':'O tema veio sem categoria. Escolha uma para aprovar.', h);
+}
+async function confirmarCategoria(el,cat){
+  var p=atual, eixos=marcados.slice(), r=classificar(p.enunciado), bts=document.querySelectorAll('#gavPills .pill'), k;
+  for(k=0;k<bts.length;k++) bts[k].disabled=true;
+  try{
+    var corpo={ diagnostico:diagnosticoDe(p.enunciado) }; if(!p.campo&&r.campo) corpo.campo=r.campo.id;
+    var r0=await dbFetch(SUPABASE_URL+'/rest/v1/temas_propostos?id=eq.'+encodeURIComponent(p.id),{ method:'PATCH', body:JSON.stringify(corpo) });
+    if(!r0.ok) throw new Error(await r0.text());
+    var r1=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/aprovar_tema_proposto',{ method:'POST', body:JSON.stringify({ p_id:p.id, p_categoria:cat, p_motivo_contra:p.motivo_contra||null }) });
+    if(!r1.ok) throw new Error(await r1.text());
+    var temaId=String(await r1.json()).replace(/"/g,'');
+    var r2=await dbFetch(SUPABASE_URL+'/rest/v1/temas?id=eq.'+encodeURIComponent(temaId),{ method:'PATCH', body:JSON.stringify({ eixos_relevantes:eixos }) });
+    if(!r2.ok) throw new Error(await r2.text());
+  }catch(e){ console.warn('[aprovar tema]',e); for(k=0;k<bts.length;k++) bts[k].disabled=false; toast(mensagemDoBanco(e,'N\u00e3o consegui aprovar. Tente de novo.')); return; }
+  p.estado='aprovado'; p.tema_id=temaId; p.categoria_proposta=cat; p.diagnostico=corpo.diagnostico; if(corpo.campo) p.campo=corpo.campo; p.decidido_em=new Date().toISOString();
+  TEMAS.unshift({ id:temaId, titulo:p.enunciado, categoria:cat, campo:p.campo||null, eixos_relevantes:eixos, created_at:p.decidido_em });
+  if(p.origem==='blanche') DECIDIR.seus=Math.max(0,DECIDIR.seus-1); else DECIDIR.fabrica=Math.max(0,DECIDIR.fabrica-1);
+  fecharGaveta(); toast('Aprovado com '+eixos.length+' eixos. A F\u00e1brica j\u00e1 v\u00ea o pedido.');
+  pilha=['t-casa']; mostrar('t-decidir');
+}
+function mensagemDoBanco(e,padrao){ try{ var o=JSON.parse(e.message); if(o&&o.message) return o.message; }catch(x){} return padrao; }
+async function desfazerAprovacao(id){
+  var p=propPorId(id); if(!p) return;
+  var t=p.tema_id?porId(p.tema_id):null;
+  if(t&&(datasDoTema(t.id).length||linhas(t).length)){ toast('N\u00e3o d\u00e1 para desfazer: j\u00e1 tem data ou material. Desmarque a data antes.'); return; }
+  try{
+    var r=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/desfazer_aprovacao_tema',{ method:'POST', body:JSON.stringify({ p_id:p.id }) });
+    if(!r.ok) throw new Error(await r.text());
+  }catch(e){ console.warn('[desfazer aprovacao]',e); toast(mensagemDoBanco(e,'N\u00e3o consegui desfazer. Tente de novo.')); return; }
+  TEMAS=TEMAS.filter(function(x){ return x.id!==p.tema_id; });
+  p.estado='proposto'; p.tema_id=null; p.decidido_em=null; p._sug=null;
+  if(p.origem==='blanche') DECIDIR.seus++; else DECIDIR.fabrica++;
+  toast('Aprova\u00e7\u00e3o desfeita. O tema voltou para a lista.'); dMontarLista();
+}
+async function rejeitar(){
+  var p=atual, m=document.getElementById('motivo'), motivo=m?m.value.trim():(p.motivo_contra||''), bt=document.getElementById('btRejeitar'); if(bt) bt.disabled=true;
+  try{
+    var r=await dbFetch(SUPABASE_URL+'/rest/v1/temas_propostos?id=eq.'+encodeURIComponent(p.id),{ method:'PATCH', body:JSON.stringify({ estado:'rejeitado', motivo_contra:motivo||null, diagnostico:diagnosticoDe(p.enunciado), decidido_por:authGetUserId(), decidido_em:new Date().toISOString() }) });
+    if(!r.ok) throw new Error(await r.text());
+  }catch(e){ console.warn('[rejeitar]',e); if(bt) bt.disabled=false; toast('N\u00e3o consegui gravar. Tente de novo.'); return; }
+  p.estado='rejeitado'; ultimaRejeicao=p;
+  if(p.origem==='blanche') DECIDIR.seus=Math.max(0,DECIDIR.seus-1); else DECIDIR.fabrica=Math.max(0,DECIDIR.fabrica-1);
+  pilha=['t-casa']; mostrar('t-decidir');
+}
+async function desfazerRejeicao(){
+  if(!ultimaRejeicao) return; var p=ultimaRejeicao;
+  try{
+    var r=await dbFetch(SUPABASE_URL+'/rest/v1/temas_propostos?id=eq.'+encodeURIComponent(p.id),{ method:'PATCH', body:JSON.stringify({ estado:'proposto', decidido_por:null, decidido_em:null }) });
+    if(!r.ok) throw new Error(await r.text());
+  }catch(e){ console.warn('[desfazer rejeicao]',e); toast('N\u00e3o consegui desfazer. Tente de novo.'); return; }
+  p.estado='proposto'; ultimaRejeicao=null;
+  if(p.origem==='blanche') DECIDIR.seus++; else DECIDIR.fabrica++;
+  dMontarLista();
+}
+
+/* ─── tema da Blanche ─── */
+async function avaliarMeuTema(){
+  var ta=document.getElementById('campoBlanche'), txt=ta.value.trim(), bt=document.getElementById('btAvaliarMeu');
+  if(txt.length<20){ toast('O enunciado est\u00e1 curto demais para avaliar.'); return; }
+  var r=classificar(txt), corpo={ origem:'blanche', estado:'proposto', trimestre:trimestreAtual(), enunciado:txt, enunciado_original:txt, campo:r.campo?r.campo.id:null, categoria_proposta:null, diagnostico:diagnosticoDe(txt) };
+  bt.disabled=true; ir('t-despera');
+  try{
+    var res=await dbFetch(SUPABASE_URL+'/rest/v1/temas_propostos?select=id,trimestre,enunciado,enunciado_original,campo,origem,estado,diagnostico,motivo_contra,tema_id,decidido_em,criado_em,categoria_proposta,repertorio,grupo',{ method:'POST', headers:{ 'Prefer':'return=representation' }, body:JSON.stringify(corpo) });
+    if(!res.ok) throw new Error(await res.text());
+    var p=(await res.json())[0];
+  }catch(e){ console.warn('[propor tema]',e); bt.disabled=false; pilha.pop(); mostrar('t-decidir'); toast('N\u00e3o consegui gravar o tema. Tente de novo.'); return; }
+  bt.disabled=false; ta.value=''; PROPS.unshift(p); DECIDIR.seus++;
+  pilha.pop(); telaAtual='t-decidir'; dMontarLista(); dAbrirTema(p.id);
+}
+
+/* ─── banca ─── */
+var fi=0, escolha={};
+function montarBanca(){
+  var h='', i;
+  document.getElementById('icBanca').innerHTML=ICO.alerta;
+  for(i=0;i<PADROES.length;i++) h+='<div class="pad"><div class="h"><span class="cd">P'+(i+1)+'</span><span class="nm">'+PADROES[i][0]+'</span></div><div class="ev">'+PADROES[i][1]+'</div><div class="ds">'+PADROES[i][2]+'</div></div>';
+  document.getElementById('listaPadroes').innerHTML=h;
+  h='';
+  for(i=0;i<CAMPOS.length;i++){ var c=CAMPOS[i]; h+='<div class="cl"><div><div class="nm">'+esc(c.nome)+'</div><div class="lei">'+esc(c.lei)+' \u00b7 '+c.ano+'</div></div><div class="ct">'+(c.vezes===0?'nunca caiu':'caiu <b>'+c.vezes+'</b>, \u00faltima em <b>'+c.ult+'</b>')+'</div></div>'; }
+  document.getElementById('listaCampos').innerHTML=h||'<div class="vazio">Nenhum campo na s\u00e9rie.</div>';
+  document.getElementById('qtSerie').textContent='\u00b7 '+TOTAL_SERIE+' enunciados aplicados';
+  document.getElementById('qtFila').textContent='\u00b7 '+FILA.length;
+  document.getElementById('rodBanca').innerHTML='Base: '+TOTAL_SERIE+' enunciados aplicados, de 1998 a 2025, nas duas camadas. A prova anulada de 2009 fica no banco como registro e n\u00e3o conta. Nenhuma medida desta tela \u00e9 porcentagem \u2014 frequ\u00eancia de campo n\u00e3o \u00e9 probabilidade de cair.';
+  fila();
+}
+function rotAplicacao(a){ a=String(a||''); return a==='ppl'?'PPL':(a==='regular'?'regular':a.replace('_',' ')); }
+function propostaFila(f){
+  if(!f._r){ var r=classificar(f.titulo); f._r={ campo:r.campo?r.campo.nome:'nenhum', chave:r.chave||null, duplo:(r.campos.length>1?r.campos.map(function(c){ return c.nome; }).join(' e '):null) }; }
+  return f._r;
+}
+function fila(){
+  var el=document.getElementById('fila');
+  if(!FILA.length){ el.innerHTML='<div class="vazio">Todos os enunciados da s\u00e9rie j\u00e1 t\u00eam campo.</div>'; return; }
+  fi=fi%FILA.length; var f=FILA[fi], pr=propostaFila(f), v=escolha[f.id]||pr.campo;
+  var pq=pr.chave?('A palavra "'+pr.chave+'" liga ao campo '+pr.campo+'.'):'Nenhuma palavra-chave da lista aparece no enunciado.';
+  el.innerHTML='<div class="cont"><span>'+(fi+1)+' de '+FILA.length+'</span><span>ENEM '+f.ano_enem+' \u00b7 '+esc(rotAplicacao(f.aplicacao))+'</span></div>'
+    +'<div class="en">'+esc(f.titulo)+'</div>'+(pr.duplo?'<div class="duplo">O mapa nomeia dois: '+esc(pr.duplo)+'.</div>':'')
+    +'<div class="prop"><span class="k">Proposta da IA</span><span class="v'+(v==='nenhum'?' nenhum':'')+'">'+esc(v)+'</span></div><div class="pq">'+esc(pq)+'</div>'
+    +'<div class="dupla"><button class="btn ok sm" id="btFilaOk" onclick="confirmarCampo()">Confirmar</button><button class="btn g sm" onclick="abrirCampo()">Trocar</button></div>'
+    +'<div class="nav"><button onclick="filaAnterior()">Anterior</button><button onclick="filaProximo()">Deixar para depois</button></div>';
+}
+function filaProximo(){ if(!FILA.length) return; fi=(fi+1)%FILA.length; fila(); }
+function filaAnterior(){ if(!FILA.length) return; fi=(fi-1+FILA.length)%FILA.length; fila(); }
+function abrirCampo(){
+  var f=FILA[fi], v=escolha[f.id]||propostaFila(f).campo, h='', i;
+  for(i=0;i<CAMPOS.length;i++){ var c=CAMPOS[i]; h+='<button class="pill'+(c.nome===v?' sel':'')+'" onclick="escolherCampo(\''+c.id+'\')"><span>'+esc(c.nome)+'<span class="sub">\u00b7 '+(c.vezes===0?'nunca caiu':'caiu '+c.vezes+' \u00b7 '+c.ult)+'</span></span><span class="ck">&#10003;</span></button>'; }
+  h+='<button class="pill'+(v==='nenhum'?' sel':'')+'" onclick="escolherCampo(\'nenhum\')"><span>nenhum<span class="sub">\u00b7 fora de toda contagem</span></span><span class="ck">&#10003;</span></button>';
+  dGaveta('Este enunciado \u00e9 de qual campo?', 'O campo \u00e9 o problema. O grupo j\u00e1 mora no crit\u00e9rio Grupo nomeado.', h);
+}
+function escolherCampo(id){ var c=campoPorId(id); escolha[FILA[fi].id]=c?c.nome:'nenhum'; fecharGaveta(); fila(); }
+async function confirmarCampo(){
+  var f=FILA[fi], nome=escolha[f.id]||propostaFila(f).campo, c=null, bt=document.getElementById('btFilaOk');
+  for(var i=0;i<CAMPOS.length;i++) if(CAMPOS[i].nome===nome) c=CAMPOS[i];
+  if(!c){ /* "nenhum": fica fora da contagem, sem gravar; sai da fila s\u00f3 nesta sess\u00e3o */ FILA.splice(fi,1); toast('Fica fora de toda contagem. O enunciado segue sem campo no banco.'); fila(); return; }
+  if(bt) bt.disabled=true;
+  try{
+    var r=await dbFetch(SUPABASE_URL+'/rest/v1/temas?id=eq.'+encodeURIComponent(f.id),{ method:'PATCH', body:JSON.stringify({ campo:c.id }) });
+    if(!r.ok) throw new Error(await r.text());
+    var rc=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/campos_da_serie',{method:'POST',body:'{}'});
+    if(rc.ok){ var cs=await rc.json(); for(i=0;i<cs.length;i++){ var k=campoPorId(cs[i].id); if(k){ k.vezes=cs[i].vezes||0; k.ult=cs[i].ultimo_ano||null; } } }
+  }catch(e){ console.warn('[campo da serie]',e); if(bt) bt.disabled=false; toast('N\u00e3o consegui gravar o campo. Tente de novo.'); return; }
+  FILA.splice(fi,1); SEM_CAMPO=FILA.length; delete escolha[f.id];
+  toast('Campo gravado: '+c.nome+'. A contagem j\u00e1 mudou.'); montarBanca();
 }
 
 (async function(){ if(await conferirAcesso()) carregar(); })();
