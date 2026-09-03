@@ -623,7 +623,13 @@
     <a class="nav-item" onclick="mostrarEmBreve('Notificações')" style="cursor:pointer;" title="Notificações"><i class="em">&#128276;</i><span class="tx">Notificações</span></a>
     <a class="nav-item" onclick="irModoAluno()" style="cursor:pointer;" title="Modo Aluno"><i class="em">&#127891;</i><span class="tx">Modo Aluno</span></a>
     <a class="nav-item" onclick="mostrarEmBreve('Enviar sugestão')" style="cursor:pointer;" title="Enviar sugestão"><i class="em">&#128172;</i><span class="tx">Enviar sugestão</span></a>
-    <a class="nav-item" id="navAdm" href="adm.html" title="ADM" style="display:none;"><i class="em">&#128273;</i><span class="tx">ADM</span></a>
+
+    <!-- ── ADM (só quem tem chave; preenchido por ligarMenuAdm) ── -->
+    <div id="secAdmSide" style="display:none;">
+      <p class="nav-section-label"><span>ADM</span></p>
+      <a class="nav-item" id="navAdmPedag" href="adm-pedagogica.html" title="ADM Pedagógica" style="display:none;"><i class="em">&#128273;</i><span class="tx">ADM Pedagógica</span></a>
+      <a class="nav-item" id="navAdmFabrica" href="adm-fabrica.html" title="ADM Fábrica" style="display:none;"><i class="em">&#127981;</i><span class="tx">ADM Fábrica</span></a>
+    </div>
 
     <!-- ── Conta ── -->
     <p class="nav-section-label"><span>Conta</span></p>
@@ -1088,6 +1094,11 @@
   <a class="pill" onclick="mostrarEmBreve('Notificações')"><i class="pemoji">&#128276;</i>Notificações<i class="fim">&#8250;</i></a>
   <a class="pill" onclick="irModoAluno()"><i class="pemoji">&#127891;</i>Modo Aluno<i class="fim">&#8250;</i></a>
   <a class="pill" onclick="mostrarEmBreve('Enviar sugestão')"><i class="pemoji">&#128172;</i>Enviar sugestão<i class="fim">&#8250;</i></a>
+  <div id="secAdmMais" style="display:none;">
+    <p class="tit" style="margin-top:.9rem;">ADM</p>
+    <a class="pill" id="pillAdmPedag" href="adm-pedagogica.html" style="display:none;"><i class="pemoji">&#128273;</i>ADM Pedagógica<i class="fim">&#8250;</i></a>
+    <a class="pill" id="pillAdmFabrica" href="adm-fabrica.html" style="display:none;"><i class="pemoji">&#127981;</i>ADM Fábrica<i class="fim">&#8250;</i></a>
+  </div>
   <p class="tit" style="margin-top:.9rem;">Conta</p>
   <a class="pill" onclick="alternarTema()"><i class="pemoji" id="iconeTemaMais">&#9728;&#65039;</i><span id="txtTemaMais">Aparência</span></a>
   <a class="pill" href="configuracoes.html"><i class="pemoji">&#9881;&#65039;</i>Configurações<i class="fim">&#8250;</i></a>
@@ -1109,17 +1120,24 @@
 <script>
   authGuard('professor');
 
-  // ─── Link ADM · só para quem passa em eh_pedagogica() ou eh_admin() ───
-  (async function(){
-    async function rpcBool(nome){
-      try{
-        const r = await dbFetch(SUPABASE_URL + '/rest/v1/rpc/' + nome, { method:'POST', body:'{}' });
-        return r.ok && (await r.json()) === true;
-      }catch(e){ return false; }
-    }
-    if (await rpcBool('eh_pedagogica') || await rpcBool('eh_admin')) {
-      const a = document.getElementById('navAdm'); if (a) a.style.display = '';
-    }
+  // ─── Seção ADM do menu · uma consulta só · 🔑 pedagogica · 🏭 producao ou admin ───
+  (async function ligarMenuAdm(){
+    var ped = false, fab = false;
+    try{
+      var uid = authGetUserId();
+      var r = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?select=areas,is_admin&id=eq.' + encodeURIComponent(uid) + '&limit=1', {});
+      var u = r.ok ? (await r.json())[0] : null;
+      if (u){
+        var areas = Array.isArray(u.areas) ? u.areas : [];
+        ped = areas.indexOf('pedagogica') >= 0;
+        fab = areas.indexOf('producao') >= 0 || u.is_admin === true;
+      }
+    }catch(e){}
+    if (!ped && !fab) return;
+    function mostrar(id, sim){ var el = document.getElementById(id); if (el && sim) el.style.display = ''; }
+    mostrar('secAdmSide', true); mostrar('secAdmMais', true);
+    mostrar('navAdmPedag', ped); mostrar('pillAdmPedag', ped);
+    mostrar('navAdmFabrica', fab); mostrar('pillAdmFabrica', fab);
   })();
 
   // Logout local — garante funcionamento mesmo se supabase-auth.js falhar

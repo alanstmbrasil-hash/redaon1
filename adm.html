@@ -1,90 +1,142 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-tema="escuro">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RedaON · ADM</title>
+<script>
+/* Tema RedaON — mesma cascata do portal (redaon-tema: claro/escuro/auto), antes da pintura. */
+(function(){
+  var pref='auto'; try{ pref=localStorage.getItem('redaon-tema')||'auto'; }catch(e){}
+  var efetivo=pref;
+  if(pref==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',pref);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* RedaON · ADM · a porta · produção v1-0
-   Lê o usuário logado. pedagogica → casa da Blanche. is_admin → casa da Produção.
-   Quem é os dois escolhe. Quem não é nenhum volta ao portal. Sem blur. */
+/* RedaON · ADM · a porta · produção v2-0 (padrão visual amostra-adm-visual-v1)
+   Lê o usuário logado uma vez. pedagogica ∧ admin → escolhe.
+   só pedagogica → ADM Pedagógica. producao ou admin → ADM Fábrica.
+   Senão → "esta porta não é sua". Ícones em SVG. Sem blur. */
 *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 :root{
-  --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --top:#191c22;
-  --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0; --borderRGB:71,69,84;
-  --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020;
-  --purple:#6c5ce7; --purpleRGB:108,92,231; --gold:#fabd00; --goldRGB:250,189,0;
-  --green:#4ade80; --greenRGB:74,222,128; --red:#ff8b8b; --redRGB:255,139,139;
-}
-html[data-tema="claro"]{
   --bg:#fdfbf4; --sunken:#f2ede0; --surface:#ffffff; --surface2:#f6f2e6; --top:#fbf8ee;
   --text:#0a4a4b; --text2:#3a5556; --muted:#8a8576; --borderRGB:10,74,75;
   --cyan:#0a8c8d; --cyanRGB:10,140,141; --onCyan:#ffffff;
-  --purple:#5a4fc4; --purpleRGB:90,79,196; --gold:#9a7a10; --goldRGB:154,122,16;
-  --green:#0f8a4d; --greenRGB:15,138,77; --red:#c0473b; --redRGB:192,71,59;
+  --orange:#b45f24; --orangeRGB:180,95,36;
+}
+html[data-tema="escuro"]{
+  --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --top:#191c22;
+  --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0; --borderRGB:71,69,84;
+  --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020;
+  --orange:#ff9d68; --orangeRGB:255,157,104;
 }
 body{ font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
-.hd{ position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.4);
-  padding:calc(.7rem + env(safe-area-inset-top)) 1rem .7rem; display:flex; align-items:center; gap:.6rem; }
-.hd .voltar{ flex:none; width:34px; height:34px; border-radius:10px; border:none; background:var(--surface2); color:var(--text); font-size:1rem; cursor:pointer; }
-.hd .tit{ flex:1; min-width:0; }
-.hd .tit .q{ font-size:.66rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
-.hd .tit .n{ font-size:.95rem; font-weight:800; line-height:1.3; }
-.hd .lua{ flex:none; width:34px; height:34px; border-radius:10px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; }
-.wrap{ max-width:640px; margin:0 auto; padding:1rem 1rem 6rem; }
-h2.t{ font-size:1.15rem; font-weight:800; line-height:1.3; }
-p.s{ font-size:.82rem; color:var(--text2); line-height:1.6; margin-top:.4rem; }
-.porta{ display:grid; gap:.7rem; margin-top:1.2rem; }
-.pCard{ text-align:left; width:100%; font:inherit; cursor:pointer; color:var(--text);
-  background:var(--surface); border:1px solid rgba(var(--borderRGB),.5); border-radius:18px; padding:1rem; display:flex; gap:.8rem; align-items:flex-start; }
-.pCard:active{ background:var(--surface2); }
-.pCard .av{ flex:none; width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:1.15rem; }
-.pCard.b .av{ background:rgba(var(--purpleRGB),.16); }
-.pCard.a .av{ background:rgba(var(--goldRGB),.14); }
-.pCard .nm{ font-size:.98rem; font-weight:800; display:block; }
-.pCard .ds{ font-size:.78rem; color:var(--text2); line-height:1.5; margin-top:.2rem; display:block; }
-.aviso{ margin-top:1.2rem; background:rgba(var(--redRGB),.1); border:1px solid rgba(var(--redRGB),.3); border-radius:14px; padding:.9rem; font-size:.82rem; line-height:1.6; color:var(--text2); }
-.btn{ width:100%; font:inherit; font-size:.88rem; font-weight:800; padding:.85rem 1rem; border-radius:14px; border:none; background:var(--cyan); color:var(--onCyan); cursor:pointer; margin-top:1rem; }
-.btn.g{ background:transparent; color:var(--text); border:1px solid rgba(var(--borderRGB),.6); }
+
+.hd{ position:sticky; top:0; z-index:20; background:var(--top); border-bottom:1px solid rgba(var(--borderRGB),.18);
+  padding:calc(.6rem + env(safe-area-inset-top)) 1rem .6rem; }
+.hdIn{ max-width:860px; margin:0 auto; display:flex; align-items:center; gap:.7rem; }
+.hd .voltar{ flex:none; width:36px; height:36px; border-radius:11px; border:1px solid rgba(var(--borderRGB),.22);
+  background:var(--surface); color:var(--text2); font-size:1rem; cursor:pointer; }
+.hd .voltar:hover{ color:var(--cyan); border-color:rgba(var(--cyanRGB),.4); }
+.marca{ display:flex; align-items:center; gap:.5rem; min-width:0; }
+.marca .lg{ width:30px; height:30px; border-radius:9px; background:var(--cyan); color:var(--onCyan);
+  display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.9rem; font-style:italic; flex:0 0 auto; }
+.marca .nm{ font-size:1.02rem; font-weight:900; font-style:italic; letter-spacing:-.04em; color:var(--text); white-space:nowrap; }
+.marca .nm i{ color:var(--cyan); font-style:italic; }
+.hdSep{ width:1px; height:22px; background:rgba(var(--borderRGB),.25); flex:0 0 auto; }
+.hdOnde{ min-width:0; flex:1; }
+.hdOnde .q{ font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+.hdOnde .n{ font-size:.92rem; font-weight:800; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hd .lua{ flex:none; width:36px; height:36px; border-radius:11px; border:none; background:transparent; color:var(--muted); font-size:1rem; cursor:pointer; }
+.hd .lua:hover{ color:var(--cyan); background:rgba(var(--cyanRGB),.10); }
+
+.wrap{ max-width:860px; margin:0 auto; padding:1.6rem 1rem 6rem; }
+h2.t{ font-size:1.3rem; font-weight:800; line-height:1.3; letter-spacing:-.01em; }
+p.s{ font-size:.85rem; color:var(--text2); line-height:1.65; margin-top:.4rem; max-width:56ch; }
+.sec{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:1.7rem 0 .7rem; }
+
+.tarefa{ width:100%; text-align:left; font:inherit; color:var(--text); cursor:pointer;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.20); border-radius:16px;
+  padding:1rem 1.05rem; display:flex; align-items:center; gap:.95rem; margin-bottom:.65rem; transition:border-color .15s; }
+.tarefa:hover{ border-color:rgba(var(--cyanRGB),.45); }
+.tarefa:active{ background:var(--surface2); }
+.tarefa .num{ flex:none; width:44px; height:44px; border-radius:13px; display:grid; place-items:center;
+  background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.tarefa .num svg{ width:22px; height:22px; display:block; }
+.tarefa .cp{ flex:1; min-width:0; }
+.tarefa .cp .a{ display:block; font-size:.94rem; font-weight:700; line-height:1.35; }
+.tarefa .cp .b{ display:block; font-size:.78rem; color:var(--muted); margin-top:.25rem; line-height:1.5; }
+.tarefa .seta{ flex:none; color:var(--muted); font-size:1.15rem; }
+
+.aviso{ display:flex; gap:.6rem; background:rgba(var(--orangeRGB),.09); border:1px solid rgba(var(--orangeRGB),.28);
+  border-radius:14px; padding:.8rem .9rem; margin-top:1.1rem; font-size:.82rem; line-height:1.6; color:var(--text2); }
+.aviso svg{ flex:none; width:20px; height:20px; color:var(--orange); margin-top:.1rem; }
+.aviso .tp{ font-weight:800; color:var(--orange); }
+.btn{ display:block; width:100%; font:inherit; font-size:.88rem; font-weight:800; padding:.85rem 1rem; border-radius:14px; cursor:pointer;
+  margin-top:1rem; background:transparent; color:var(--text); border:1px solid rgba(var(--borderRGB),.30); }
+.btn:hover{ border-color:rgba(var(--cyanRGB),.45); color:var(--cyan); }
 .carregando{ font-size:.82rem; color:var(--muted); padding:2rem 0; text-align:center; }
-@media (min-width:820px){ .wrap{ max-width:760px; } body{ font-size:1.06rem; } h2.t{ font-size:1.45rem; } p.s{ font-size:.95rem; } }
+.rodape{ font-size:.74rem; color:var(--muted); line-height:1.65; margin-top:1.8rem; padding-top:1rem;
+  border-top:1px solid rgba(var(--borderRGB),.16); max-width:56ch; }
+
+@media (min-width:820px){ html{ font-size:17px; } .wrap{ padding-top:2.2rem; } h2.t{ font-size:1.5rem; } .tarefa{ padding:1.1rem 1.2rem; } }
+@media (min-width:1180px){ html{ font-size:18px; } }
 </style>
 </head>
 <body>
 
-<div class="hd">
-  <button class="voltar" onclick="window.location.href='professor-estudio.html'" aria-label="Voltar ao portal">&#8592;</button>
-  <div class="tit"><div class="q">RedaON</div><div class="n">ADM</div></div>
-  <button class="lua" onclick="trocarTema()" aria-label="Tema claro ou escuro">&#9789;</button>
-</div>
+<div class="hd"><div class="hdIn">
+  <button class="voltar" onclick="window.location.href='professor.html'" aria-label="Voltar ao portal">&#8592;</button>
+  <div class="marca"><span class="lg">R</span><span class="nm">Reda<i>ON</i></span></div>
+  <div class="hdSep"></div>
+  <div class="hdOnde"><div class="q">RedaON</div><div class="n">ADM</div></div>
+  <button class="lua" id="btLua" onclick="cicloTema()" aria-label="Tema claro, escuro ou automático">&#9788;</button>
+</div></div>
 
-<div class="wrap" id="wrap">
+<div class="wrap">
   <div class="carregando" id="carregando">Abrindo&hellip;</div>
   <div id="corpo" hidden></div>
 </div>
 
+<script>
+/* Destino: quem chega deslogado volta para cá depois do login (login.html lê redaon_destino). */
+(function(){
+  try{ if(!localStorage.getItem('redaon_token')) localStorage.setItem('redaon_destino','adm.html'); }catch(e){}
+})();
+</script>
 <script src="supabase-auth.js"></script>
 <script>
-(function(){
-  var TEMA_CHAVE='redaon_tema_adm';
-  try{ var t=localStorage.getItem(TEMA_CHAVE); if(t) document.documentElement.setAttribute('data-tema',t); }catch(e){}
-})();
-function trocarTema(){
-  var h=document.documentElement, novo = h.getAttribute('data-tema')==='claro' ? 'escuro' : 'claro';
-  h.setAttribute('data-tema', novo);
-  try{ localStorage.setItem('redaon_tema_adm', novo); }catch(e){}
+/* Cascata claro/escuro/auto — igual ao portal, gravando em redaon-tema */
+var ICONES={ claro:'\u2600', escuro:'\u263E', auto:'A' };
+function pintarLua(){ var p=document.documentElement.getAttribute('data-tema-pref')||'auto'; document.getElementById('btLua').textContent=ICONES[p]||'A'; }
+function aplicarTema(pref){
+  var efetivo=pref;
+  if(pref==='auto'){ var claro=false; try{ claro=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(e){} efetivo=claro?'claro':'escuro'; }
+  document.documentElement.setAttribute('data-tema',efetivo);
+  document.documentElement.setAttribute('data-tema-pref',pref);
+  try{ localStorage.setItem('redaon-tema',pref); }catch(e){}
+  pintarLua();
 }
+function cicloTema(){ var ordem=['claro','escuro','auto']; var p=document.documentElement.getAttribute('data-tema-pref')||'auto'; aplicarTema(ordem[(ordem.indexOf(p)+1)%3]); }
+pintarLua();
 
 if (typeof authGuard === 'function') authGuard();
 
+var SVG_CHAVE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><path d="M11.5 11.5 21 2M17 6l3 3M14.5 8.5l3 3"/></svg>';
+var SVG_FABRICA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l6 4V9l6 4V9l6 4v8H3z"/><path d="M5 3h3l1 6H4z"/><path d="M8 17h2M13 17h2"/></svg>';
+var SVG_ALERTA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg>';
+
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function primeiroNome(n){ return String(n||'').trim().split(/\s+/)[0] || 'voc\u00ea'; }
 
 async function abrirPorta(){
   var uid = authGetUserId();
-  var pedagogica=false, admin=false, nome=authGetNome();
+  var pedagogica=false, producao=false, admin=false, nome=authGetNome();
   try{
     var res = await dbFetch(SUPABASE_URL+'/rest/v1/usuarios?select=nome,areas,is_admin&id=eq.'+encodeURIComponent(uid)+'&limit=1', {});
     var rows = res.ok ? await res.json() : [];
@@ -92,38 +144,41 @@ async function abrirPorta(){
     if(u){
       nome = u.nome || nome;
       admin = u.is_admin === true;
-      pedagogica = Array.isArray(u.areas) && u.areas.indexOf('pedagogica') >= 0;
+      var areas = Array.isArray(u.areas) ? u.areas : [];
+      pedagogica = areas.indexOf('pedagogica') >= 0;
+      producao   = areas.indexOf('producao') >= 0;
     }
   }catch(e){ console.warn('[adm porta]', e); }
+
+  var fabrica = producao || admin;
+
+  if (pedagogica && !fabrica){ window.location.replace('adm-pedagogica.html'); return; }
+  if (fabrica && !pedagogica){ window.location.replace('adm-fabrica.html'); return; }
 
   document.getElementById('carregando').hidden = true;
   var corpo = document.getElementById('corpo');
   corpo.hidden = false;
 
-  if (pedagogica && !admin){ window.location.replace('adm-pedagogica.html'); return; }
-  if (admin && !pedagogica){ window.location.replace('adm-producao.html'); return; }
-
-  if (pedagogica && admin){
+  if (pedagogica && fabrica){
     corpo.innerHTML =
       '<h2 class="t">Por onde voc\u00ea entra hoje, '+esc(primeiroNome(nome))+'?</h2>' +
       '<p class="s">Voc\u00ea tem as duas chaves. Cada casa \u00e9 um trabalho diferente \u2014 escolha a que veio fazer.</p>' +
-      '<div class="porta">' +
-        '<button class="pCard b" onclick="window.location.href=\'adm-pedagogica.html\'">' +
-          '<span class="av">\uD83C\uDF93</span><span><span class="nm">Casa da Profa. Blanche</span>' +
-          '<span class="ds">Ler as pontes, selar o material e agendar a semana.</span></span></button>' +
-        '<button class="pCard a" onclick="window.location.href=\'adm-producao.html\'">' +
-          '<span class="av">\u2699\uFE0F</span><span><span class="nm">Casa da Produ\u00e7\u00e3o</span>' +
-          '<span class="ds">Pedir material \u00e0 F\u00e1brica e trazer o bloco conferido para dentro.</span></span></button>' +
-      '</div>';
+      '<div class="sec">As duas casas</div>' +
+      '<button class="tarefa" onclick="window.location.href=\'adm-pedagogica.html\'">' +
+        '<span class="num">'+SVG_CHAVE+'</span><span class="cp"><span class="a">ADM Pedag\u00f3gica</span>' +
+        '<span class="b">Decidir temas e eixos, aprovar materiais ficha a ficha e programar as semanas.</span></span><span class="seta">\u203A</span></button>' +
+      '<button class="tarefa" onclick="window.location.href=\'adm-fabrica.html\'">' +
+        '<span class="num">'+SVG_FABRICA+'</span><span class="cp"><span class="a">ADM F\u00e1brica</span>' +
+        '<span class="b">Trazer temas e material da F\u00e1brica de Conte\u00fado para dentro.</span></span><span class="seta">\u203A</span></button>' +
+      '<div class="rodape">IA corrige, professor valida. Quem decide tema e aprova material \u00e9 a ADM Pedag\u00f3gica; a ADM F\u00e1brica traz para dentro.</div>';
     return;
   }
 
   corpo.innerHTML =
     '<h2 class="t">Esta porta n\u00e3o \u00e9 sua</h2>' +
-    '<div class="aviso">A ADM \u00e9 da equipe pedag\u00f3gica e da produ\u00e7\u00e3o. Se voc\u00ea deveria estar aqui, fale com o Alan para liberar seu acesso.</div>' +
-    '<button class="btn g" onclick="window.location.href=\'professor-estudio.html\'">Voltar ao portal</button>';
+    '<div class="aviso">'+SVG_ALERTA+'<span><span class="tp">Acesso restrito.</span> A ADM \u00e9 da equipe pedag\u00f3gica e da F\u00e1brica. Se voc\u00ea deveria estar aqui, fale com o Alan para liberar seu acesso.</span></div>' +
+    '<button class="btn" onclick="window.location.href=\'professor.html\'">Voltar ao portal</button>';
 }
-function primeiroNome(n){ return String(n||'').trim().split(/\s+/)[0] || 'voc\u00ea'; }
 abrirPorta();
 </script>
 </body>

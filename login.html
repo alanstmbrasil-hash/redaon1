@@ -29,7 +29,8 @@
     try { tk = localStorage.getItem('redaon_token'); tipo = localStorage.getItem('redaon_tipo') || 'aluno'; } catch(e) {}
     if (!tk) return;
     var rotas = { aluno: 'inicio.html', professor: 'professor.html', admin: 'admin-professores.html' };
-    window.location.replace(rotas[tipo] || 'inicio.html');
+    var destino = null; try { destino = localStorage.getItem('redaon_destino'); localStorage.removeItem('redaon_destino'); } catch(e) {}
+    window.location.replace((destino && tipo === 'professor') ? destino : (rotas[tipo] || 'inicio.html'));
   })();
 </script>
 <script src="supabase-auth.js?v=2-0"></script>
@@ -256,7 +257,7 @@
       </div>
 
     </div>
-    <a class="adminLk" href="admin-professores.html" style="display:block;text-decoration:none;">Acesso Admin</a>
+    <a class="adminLk" href="adm.html" onclick="return irAcessoAdmin()" style="display:block;text-decoration:none;">Acesso Admin</a>
   </div>
 
 </div>
@@ -398,7 +399,19 @@
     b.innerHTML = sim ? '<span class="spinner"></span>Aguarde...' : texto;
   }
   var ROTAS = { aluno: 'inicio.html', professor: 'professor.html', admin: 'admin-professores.html' };
-  function irParaCasa(tipo){ window.location.replace(ROTAS[tipo] || 'inicio.html'); }
+  function irParaCasa(tipo){
+    var destino = null; try { destino = localStorage.getItem('redaon_destino'); localStorage.removeItem('redaon_destino'); } catch(e) {}
+    window.location.replace((destino && tipo === 'professor') ? destino : (ROTAS[tipo] || 'inicio.html'));
+  }
+  // ─── Acesso Admin: logado vai direto; deslogado entra e cai em adm.html ───
+  function irAcessoAdmin(){
+    var tk = null; try { tk = localStorage.getItem('redaon_token'); } catch(e) {}
+    if (tk) return true;
+    try { localStorage.setItem('redaon_destino', 'adm.html'); } catch(e) {}
+    toast('Entre com sua conta para abrir a ADM');
+    var el = document.getElementById('loginEmail'); if (el) el.focus();
+    return false;
+  }
 
   // ─── Erros do Supabase em português ───
   function traduzirErroAuth(msg) {
