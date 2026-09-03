@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparação</title>
-<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-13 (quatro estados · selo RedaON · prévia · só fichas aprovadas · v1-13) · sobre aluno-base-v6 -->
+<!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-14 (quatro estados · selo RedaON · prévia · só fichas aprovadas · Entender em JSON fixo · v1-14) · sobre aluno-base-v6 -->
 <script>
 (function(){
   var pref = 'auto';
@@ -323,7 +323,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
-/* ═══ RedaON · Hub de Preparação · produção v1-13 (quatro estados · selo RedaON · prévia · só fichas aprovadas · v1-13) ═══ */
+/* ═══ RedaON · Hub de Preparação · produção v1-14 (quatro estados · selo RedaON · prévia · só fichas aprovadas · Entender em JSON fixo · v1-14) ═══ */
 /* ── Prévia da Profa. Blanche: hub-preparacao.html?tema=<id>&previa=1 ──
    Abre o tema mesmo inativo e sem exigir perfil de aluno. Quem não passa em
    eh_pedagogica() cai no fluxo normal do aluno. */
@@ -336,7 +336,7 @@ montarEsqueleto({
   titulo: 'Preparação',
   icone:  'auto_stories',
   sino:   true,
-  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-13'
+  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-14'
 });
 
 /* ───────────────────────────────────────────────────────────────
@@ -615,11 +615,12 @@ var PR = {
 };
 /* "Entender o tema" — mesmo briefing/pipeline da Tela 4 (cache compartilhado, chave 'entender') */
 function PROMPT_ENTENDER(t){
-  return 'Voc\u00ea \u00e9 a PROfa da RedaON. Para o tema de reda\u00e7\u00e3o ENEM "' + t + '", produza um briefing curto em 3 blocos, em texto simples com **negrito** nos r\u00f3tulos:\n' +
-    '**Recorte**: qual \u00e9 exatamente o recorte do tema (o que ele pede e o que N\u00c3O pede), em 2-3 frases.\n' +
-    '**O que a banca espera**: diagn\u00f3stico com causas e consequ\u00eancias + proposta de interven\u00e7\u00e3o completa (agente, a\u00e7\u00e3o, meio, finalidade, detalhamento), em 2-3 frases.\n' +
-    '**Armadilhas**: 2-3 erros comuns que fazem o candidato tangenciar ou perder pontos neste tema.\n' +
-    'M\u00e1ximo de 130 palavras no total. Sem introdu\u00e7\u00e3o nem despedida.';
+  return 'Voc\u00ea \u00e9 a PROfa da RedaON. Para o tema de reda\u00e7\u00e3o ENEM "' + t + '", produza um briefing curto em 3 blocos.\n' +
+    'Responda APENAS um JSON v\u00e1lido, sem markdown e sem texto fora dele, exatamente neste formato:\n' +
+    '{"recorte":"<qual \u00e9 exatamente o recorte do tema: o que ele pede e o que N\u00c3O pede, em 2-3 frases>",' +
+    '"banca":"<o que a banca espera: diagn\u00f3stico com causas e consequ\u00eancias + proposta de interven\u00e7\u00e3o completa (agente, a\u00e7\u00e3o, meio, finalidade, detalhamento), em 2-3 frases>",' +
+    '"armadilhas":"<2-3 erros comuns que fazem o candidato tangenciar ou perder pontos neste tema>"}\n' +
+    'M\u00e1ximo de 130 palavras no total. Texto simples dentro dos campos, sem negrito. Sem introdu\u00e7\u00e3o nem despedida.';
 }
 /* Resumo didático (transplantado; JSON estruturado) */
 function PROMPT_RESUMO(t){
@@ -739,7 +740,8 @@ function renderEntender(bruto){
   var limpo = String(bruto).replace(/```json|```/g,'').trim();
   if (limpo.charAt(0)==='{' || limpo.charAt(0)==='['){
     try{
-      var lista = _achaLista(JSON.parse(limpo));
+      var obj = JSON.parse(limpo), h = '';
+      var lista = (obj && typeof obj==='object' && !Array.isArray(obj) && _chaveParecida(obj,'recorte')) ? null : _achaLista(obj);
       if (lista && lista.length){
         return lista.map(function(b){
           var rot = (b.rotulo||b.titulo||'').replace(/\*\*/g,'');
@@ -747,9 +749,35 @@ function renderEntender(bruto){
           return (rot?'<h4>'+escapeHTML(rot)+'</h4>':'') + (txt?'<p>'+escapeHTML(txt)+'</p>':'');
         }).join('');
       }
+      if (obj && typeof obj==='object' && !Array.isArray(obj)){
+        /* objeto: chaves fixas primeiro (recorte/banca/armadilhas), depois qualquer outra chave que o modelo tenha usado */
+        var ROT = { recorte:'Recorte', banca:'O que a banca espera', armadilhas:'Armadilhas' }, vistas = {};
+        Object.keys(ROT).forEach(function(k){
+          var ch = _chaveParecida(obj, k); if (!ch) return; vistas[ch] = 1;
+          h += '<h4>'+ROT[k]+'</h4><p>'+escapeHTML(_texto(obj[ch]))+'</p>';
+        });
+        Object.keys(obj).forEach(function(ch){
+          if (vistas[ch]) return;
+          var v = _texto(obj[ch]); if (!v) return;
+          h += '<h4>'+escapeHTML(ch.replace(/\*\*/g,''))+'</h4><p>'+escapeHTML(v)+'</p>';
+        });
+        if (h) return h;
+      }
     }catch(e){}
   }
   return md(limpo);
+}
+function _chaveParecida(obj, k){
+  var ks = Object.keys(obj), i, n;
+  var alvo = { recorte:['recorte'], banca:['banca','espera'], armadilhas:['armadilha','erro'] }[k];
+  for (i=0;i<ks.length;i++){ n = ks[i].toLowerCase(); for (var j=0;j<alvo.length;j++) if (n.indexOf(alvo[j])>=0) return ks[i]; }
+  return null;
+}
+function _texto(v){
+  if (v == null) return '';
+  if (Array.isArray(v)) return v.map(_texto).filter(Boolean).join(' ');
+  if (typeof v === 'object') return Object.keys(v).map(function(k){ return _texto(v[k]); }).filter(Boolean).join(' ');
+  return String(v).replace(/\*\*/g,'').trim();
 }
 
 /* ───────────────────────────────────────────────────────────────
