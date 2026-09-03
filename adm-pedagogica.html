@@ -399,11 +399,14 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
 @media(max-width:1023px){ #toast{ bottom:calc(6.2rem + env(safe-area-inset-bottom)); } }
 #admWrap .wrap{ max-width:860px; margin:0 auto; padding:.4rem 0 6rem; }
 #admWrap .sec{ display:block; }
+#admWrap .card .ct{ flex:1 1 auto; min-width:0; white-space:nowrap; } #admWrap .card .pin{ flex:0 0 auto; }
+/* Tailwind da moldura força svg{display:block}; ícones em linha voltam para inline */
+#admWrap .rotU svg, #admWrap .veredito svg, #admWrap .pin svg, #admWrap .avisoOk .ic svg, #admWrap .aviso .ic svg, #admHd svg, #admWrap .resB .ic svg{ display:inline-block; }
 #admWrap .pill{ margin-bottom:0; text-decoration:none; }
 #admWrap .veu{ z-index:120; } #admWrap .gav{ z-index:121; }
 #admWrap .gav{ padding-bottom:calc(1.2rem + env(safe-area-inset-bottom)); }
 @media(max-width:1023px){ #admWrap .wrap{ padding-bottom:8rem; } #admWrap{ margin:0 -.6rem; } }
-@media(max-width:640px){ #admWrap .card .ct{ flex:1 1 100%; } #admWrap .card .pin{ margin-left:0; } #admWrap .ficha .fAcs{ grid-template-columns:1fr 1fr; } }
+@media(max-width:640px){ #admWrap .ficha .fAcs{ grid-template-columns:1fr 1fr; } }
 #admHd .voltar{flex:none; width:36px; height:36px; border-radius:11px; border:1px solid rgba(var(--borderRGB),.22); background:var(--surface); color:var(--text2); font-size:1rem; cursor:pointer;}
 #admHd .voltar:hover{color:var(--cyan); border-color:rgba(var(--cyanRGB),.4);}
 #admHd .voltar[hidden]{display:none;}
@@ -955,13 +958,17 @@ function linhas(t){ var m=MAT[t.id]||{}, out=[], i, es=escolhidos(t);
   for(i=0;i<es.length;i++) if(m[es[i]]) out.push(m[es[i]]);
   for(var k in m) if(es.indexOf(k)<0) out.push(m[k]);
   return out; }
-function fichas(l){ if(l._f) return l._f; try{ var a=JSON.parse(String(l.conteudo||'[]')); l._f=Array.isArray(a)?a:[]; }catch(e){ l._f=[]; } return l._f; }
+function fichas(l){ if(l._f) return l._f; try{ var a=JSON.parse(String(l.conteudo||'[]')); l._f=Array.isArray(a)?a:[]; }catch(e){ l._f=[]; }
+  /* ficha sem estado (gerador antigo) herda o do eixo: eixo aprovado → aprovada; senão → pendente */
+  var herdado = (l.estado==='aprovado') ? 'aprovada' : 'pendente';
+  for(var i=0;i<l._f.length;i++){ var f=l._f[i]; if(f && typeof f==='object' && !f.estado) f.estado=herdado; }
+  return l._f; }
 function ehEmperrado(l){ return !!(l && l.estado==='ajustes' && l.revisao_json && l.revisao_json.emperrado===true); }
 function empAberto(l){ return ehEmperrado(l) && !(l.revisao_json.decidido); }
 /* fichas antigas (gerador IA) usam outras chaves; mesma leitura do hub do aluno */
 var CHAVES={ fonte:['fonte','cab','artigo','lei','marco','data','periodo','nome','pensador','corrente','titulo','obra','filme','referencia','pesquisa','cientista','especialista'],
   dado:['dado','dado_numerico','texto','descricao','sinopse','conceito','conceito_chave','conclusao','conclusao_principal','ideia','fato','contexto','resumo'],
-  como_usar:['como_usar','argumento','aplicacao','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem'] };
+  como_usar:['como_usar','argumento','aplicacao','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem','articulacao_enem','articulacao'] };
 function campo(f,lista){ if(!f||typeof f!=='object') return ''; for(var i=0;i<lista.length;i++){ var v=f[lista[i]]; if(typeof v==='string'&&v.trim()) return v.trim(); } return ''; }
 function estadoFicha(f){ return (f && typeof f==='object' && f.estado) ? f.estado : 'pendente'; }
 function contaFichas(t, es){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++){ if(ehEmperrado(ls[i])) continue; if(ls[i].estado==='criacao'||!ls[i].estado) continue; var fs=fichas(ls[i]); for(var j=0;j<fs.length;j++) if(estadoFicha(fs[j])===es) n++; } return n; }
@@ -1094,7 +1101,7 @@ function renderTema(){
       : '<span class="pin '+(apr?'ok':'neutro')+'">'+(apr?apr+' no ar':'nada no ar')+(rep?' \u00b7 \u21BB '+rep+' em reposi\u00e7\u00e3o':'')+(rec?' \u00b7 '+rec+' recusada'+(rec>1?'s':''):'')+'</span>';
     var fora = escolhidos(t).indexOf(ex.eixo)<0 ? ' <span class="pin neutro">fora da encomenda</span>' : '';
     h+='<div class="card'+((!pend&&apr)?' ok':'')+'">'
-      +'<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="ct" style="flex:1">'+esc(rot(ex.eixo))+'</span>'+fora+pin+'</div>'
+      +'<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="ct">'+esc(rot(ex.eixo))+'</span>'+fora+pin+'</div>'
       +'<div style="margin-top:.4rem">'+fh+'</div>'
       +(rec&&!pend ? '<div class="repor"><button class="btn g sm" onclick="abrirReposicao(\''+ex.id+'\')">Pedir reposi\u00e7\u00e3o do que foi recusado ('+rec+')</button></div>' : '')
       +'</div>';
