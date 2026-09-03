@@ -381,6 +381,11 @@
   #sidebar::-webkit-scrollbar{width:4px;}
   #sidebar::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:10px;}
   #sidebar{scrollbar-width:thin;scrollbar-color:var(--scroll) transparent;}
+  /* Lote 3c: sem hambúrguer no celular (o Mais do rodapé faz isso); toast invisível quando parado e acima da barra */
+  #btnHamburger{ display:none !important; }
+  #toast{ opacity:0; visibility:hidden; transition:transform .3s, opacity .3s, visibility .3s; }
+  #toast.show{ opacity:1; visibility:visible; }
+  @media(max-width:1023px){ #toast{ bottom:calc(6.2rem + env(safe-area-inset-bottom)); } }
 </style>
 <script src="supabase-auth.js"></script>
 </head>
@@ -536,7 +541,7 @@
     <!-- ── Conta ── -->
     <p class="nav-section-label"><span>Conta</span></p>
     <a class="nav-item" onclick="alternarTema()" style="cursor:pointer;" title="Aparência (claro/escuro/automático)"><i class="em" id="iconeTemaSide">&#9728;&#65039;</i><span class="tx" id="txtTemaSide">Aparência</span></a>
-    <a class="nav-item" href="configuracoes.html" title="Configurações"><i class="em">&#9881;&#65039;</i><span class="tx">Configurações</span></a>
+    <a class="nav-item" onclick="mostrarEmBreve('Configurações')" style="cursor:pointer;" title="Configurações"><i class="em">&#9881;&#65039;</i><span class="tx">Configurações</span></a>
     <a class="nav-item" onclick="authLogout()" style="cursor:pointer;color:var(--red);margin-top:.3rem;" title="Sair"><i class="em">&#128682;</i><span class="tx">Sair</span></a>
   </nav>
 
@@ -875,7 +880,7 @@
   </div>
   <p class="tit" style="margin-top:.9rem;">Conta</p>
   <a class="pill" onclick="alternarTema()"><i class="pemoji" id="iconeTemaMais">&#9728;&#65039;</i><span id="txtTemaMais">Aparência</span></a>
-  <a class="pill" href="configuracoes.html"><i class="pemoji">&#9881;&#65039;</i>Configurações<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="mostrarEmBreve('Configurações')"><i class="pemoji">&#9881;&#65039;</i>Configurações<i class="fim">&#8250;</i></a>
   <a class="pill" style="color:var(--red);" onclick="authLogout()"><i class="pemoji">&#128682;</i>Sair</a>
 </div>
 

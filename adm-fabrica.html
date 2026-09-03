@@ -381,6 +381,11 @@
   #sidebar::-webkit-scrollbar{width:4px;}
   #sidebar::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:10px;}
   #sidebar{scrollbar-width:thin;scrollbar-color:var(--scroll) transparent;}
+  /* Lote 3c: sem hambúrguer no celular (o Mais do rodapé faz isso); toast invisível quando parado e acima da barra */
+  #btnHamburger{ display:none !important; }
+  #toast{ opacity:0; visibility:hidden; transition:transform .3s, opacity .3s, visibility .3s; }
+  #toast.show{ opacity:1; visibility:visible; }
+  @media(max-width:1023px){ #toast{ bottom:calc(6.2rem + env(safe-area-inset-bottom)); } }
 </style>
 <style>
 
@@ -388,6 +393,11 @@
 html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e8b23c; }
 #admHd{ display:flex; align-items:center; gap:.6rem; min-width:0; }
 #admHd .voltar[hidden]{ display:none; }
+#admHd .hdOnde .n{ font-size:1.05rem; }
+/* toast do portal: invisível de verdade quando parado; acima da barra inferior no celular */
+#toast{ opacity:0; visibility:hidden; transition:transform .3s, opacity .3s, visibility .3s; }
+#toast.show{ opacity:1; visibility:visible; }
+@media(max-width:1023px){ #toast{ bottom:calc(6.2rem + env(safe-area-inset-bottom)); } }
 #admWrap .wrap{ max-width:860px; margin:0 auto; padding:.4rem 0 6rem; }
 #admWrap .sec{ display:block; }
 #admWrap .pill{ margin-bottom:0; text-decoration:none; }
@@ -558,7 +568,7 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
     <!-- ── Conta ── -->
     <p class="nav-section-label"><span>Conta</span></p>
     <a class="nav-item" onclick="alternarTema()" style="cursor:pointer;" title="Aparência (claro/escuro/automático)"><i class="em" id="iconeTemaSide">&#9728;&#65039;</i><span class="tx" id="txtTemaSide">Aparência</span></a>
-    <a class="nav-item" href="configuracoes.html" title="Configurações"><i class="em">&#9881;&#65039;</i><span class="tx">Configurações</span></a>
+    <a class="nav-item" onclick="mostrarEmBreve('Configurações')" style="cursor:pointer;" title="Configurações"><i class="em">&#9881;&#65039;</i><span class="tx">Configurações</span></a>
     <a class="nav-item" onclick="authLogout()" style="cursor:pointer;color:var(--red);margin-top:.3rem;" title="Sair"><i class="em">&#128682;</i><span class="tx">Sair</span></a>
   </nav>
 
@@ -582,7 +592,7 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
       <button id="btnHamburger" onclick="toggleSidebar()" style="padding:.5rem;border-radius:.5rem;background:none;border:none;color:var(--muted);cursor:pointer;">
         <span class="material-symbols-outlined">menu</span>
       </button>
-      <div id="admHd"><button class="voltar" id="btVoltar" onclick="voltar()" aria-label="Voltar" hidden>&#8592;</button><div class="marca"><span class="lg">R</span><span class="nm">Reda<i>ON</i></span></div><div class="hdSep"></div><div class="hdOnde"><div class="q">ADM &middot; <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:11px;height:11px;vertical-align:-1px"><path d="M3 21V9l6 4V9l6 4V9l6 4v8H3z"/><path d="M5 3h3l1 6H4z"/></svg> F&aacute;brica</div><div class="n" id="hdN">F&aacute;brica</div></div></div>
+      <div id="admHd"><button class="voltar" id="btVoltar" onclick="voltar()" aria-label="Voltar" hidden>&#8592;</button><div class="hdOnde"><div class="q">ADM &middot; <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:11px;height:11px;vertical-align:-1px"><path d="M3 21V9l6 4V9l6 4V9l6 4v8H3z"/><path d="M5 3h3l1 6H4z"/></svg> F&aacute;brica</div><div class="n" id="hdN">F&aacute;brica</div></div></div>
     </div>
 
     <div style="display:flex;align-items:center;gap:1rem;">
@@ -706,7 +716,7 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
   </div>
   <p class="tit" style="margin-top:.9rem;">Conta</p>
   <a class="pill" onclick="alternarTema()"><i class="pemoji" id="iconeTemaMais">&#9728;&#65039;</i><span id="txtTemaMais">Aparência</span></a>
-  <a class="pill" href="configuracoes.html"><i class="pemoji">&#9881;&#65039;</i>Configurações<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="mostrarEmBreve('Configurações')"><i class="pemoji">&#9881;&#65039;</i>Configurações<i class="fim">&#8250;</i></a>
   <a class="pill" style="color:var(--red);" onclick="authLogout()"><i class="pemoji">&#128682;</i>Sair</a>
 </div>
 
