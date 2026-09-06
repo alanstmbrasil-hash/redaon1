@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v4-7</title>
-<!-- RedaON · Portal do Aluno · Início · v4-7 · sobre aluno-base-v6 -->
+<title>RedaON | Início v4-9</title>
+<!-- RedaON · Portal do Aluno · Início · v4-9 · sobre aluno-base-v6 -->
+<!-- v4-8 (07/09/2026): galeria com 7 personagens (Ben, Alice, Profa. Blanche Oiê, Profa. Blanche Sorrindo, Corretor, Reescritor, Feliz) -->
 <!-- v4-7 (07/09/2026): desktop/tablet deitado em duas colunas de grid: esquerda = saudação + balão + Seu Status; direita = personagem do topo ao pé do status (380px). Sem sobreposição, sem buraco entre balão e status -->
 <!-- v4-6 (07/09/2026): desktop: zona do personagem com altura mínima de 400px (status desce), personagem 380px, cartão até 900px; tablet em pé: slot do personagem 220px encostado na borda e balão mais estreito (cotovelos inteiros, balão fora da foto) -->
 <!-- v4-5 (07/09/2026): padrão único em todas as larguras (mockup balão v5): carrossel vira balão de HQ à esquerda, na altura do rosto, falando com o personagem à direita; notas C1–C5 dentro de "Seu Status", alinhadas pelas caixas; desktop/tablet deitado = mesmo cartão maior (sem bolinha); saem o grid de 3 colunas (duasCol) e as regras de 1200/1500px -->
@@ -305,7 +306,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-7'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-9'
   });
 
   // Sauda\u00e7\u00e3o
@@ -327,8 +328,13 @@
   // ═══ Cartão do Início v4-0: personagem da galeria, fotos (cartão + bolinha) e enquadramento ═══
   var _BUCKET_AVATAR = 'avatares-alunos';
   var GALERIA = [
-    { id:'menino', nome:'Menino da medalha', src:'avatares/menino-busto.webp' },
-    { id:'menina', nome:'Menina do campo',   src:'avatares/menina-busto.webp' }
+    { id:'menino',           nome:'Ben',                      src:'avatares/menino-busto.webp' },
+    { id:'menina',           nome:'Alice',                    src:'avatares/menina-busto.webp' },
+    { id:'blanche-oie',      nome:'Profa. Blanche Oi\u00ea',   src:'avatares/blanche-oie-busto.webp' },
+    { id:'blanche-sorrindo', nome:'Profa. Blanche Sorrindo',  src:'avatares/blanche-sorrindo-busto.webp' },
+    { id:'corretor',         nome:'Corretor',                 src:'avatares/corretor-busto.webp' },
+    { id:'reescritor',       nome:'Reescritor',               src:'avatares/reescritor-busto.webp' },
+    { id:'feliz',            nome:'Feliz',                    src:'avatares/feliz-busto.webp' }
   ];
   var RATIO = { cartao:1.35, perfil:1 };            /* altura/largura da moldura */
   var _cartao = { avatar:null, enqCartao:null, enqPerfil:null, urlCartao:null, urlPerfil:null };
