@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v4-10</title>
-<!-- RedaON · Portal do Aluno · Início · v4-10 · sobre aluno-base-v6 -->
+<title>RedaON | Início v4-11</title>
+<!-- RedaON · Portal do Aluno · Início · v4-11 · sobre aluno-base-v6 -->
+<!-- v4-11 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
 <!-- v4-10 (07/09/2026): celular: personagem cabe pela largura do slot (sem corte), balão sem ícone e mais estreito, saudação sem ✍️ e limitada à esquerda do personagem; tablet em pé: balão e slot reaproximados -->
 <!-- v4-8 (07/09/2026): galeria com 7 personagens (Ben, Alice, Profa. Blanche Oiê, Profa. Blanche Sorrindo, Corretor, Reescritor, Feliz) -->
 <!-- v4-7 (07/09/2026): desktop/tablet deitado em duas colunas de grid: esquerda = saudação + balão + Seu Status; direita = personagem do topo ao pé do status (380px). Sem sobreposição, sem buraco entre balão e status -->
@@ -39,7 +40,7 @@
 /* ===== Cartão do Início (mockup final 06/09 + larguras v5 07/09) — todas as larguras ===== */
 @media (min-width:0){
   .heroCard{ position:relative; padding:4px 0 0; margin-bottom:.875rem; overflow:hidden; }
-  .hcCab{ display:flex; align-items:center; gap:10px; position:relative; z-index:3; width:calc(100% - 176px); }
+  .hcCab{ display:flex; align-items:center; gap:10px; position:relative; z-index:3; width:calc(100% - 130px); }
   .hcAv{ position:relative; width:46px; height:46px; border-radius:50%; background:var(--surface2) center/cover no-repeat; border:2px solid var(--surface); box-shadow:0 0 0 1px rgba(var(--borderRGB),.22); display:flex; align-items:center; justify-content:center; font-size:22px; flex:0 0 auto; cursor:pointer; }
   .hcAv .selo{ position:absolute; right:-5px; bottom:-5px; width:20px; height:20px; border-radius:50%; background:var(--cyan); color:var(--onCyan); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center; }
   .hcAv .selo svg{ width:11px; height:11px; }
@@ -57,6 +58,8 @@
   /* personagem / foto: do topo do bloco ao pé (borda baixa) da caixa de status; bottom é medido no JS */
   .hcArt{ position:absolute; right:0; top:4px; bottom:80px; width:180px; z-index:1; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; }
   .hcArt img{ width:auto; height:auto; max-width:100%; max-height:100%; display:block; }
+  .hcArt.enq{ overflow:hidden; }
+  .hcArt.enq img{ position:absolute; left:0; top:0; max-width:none; max-height:none; transform-origin:0 0; }
   .hcArt.moldura{ right:0; width:126px; border-radius:63px 63px 14px 14px; overflow:hidden; background:rgba(var(--cyanRGB),.10); box-shadow:inset 0 0 0 2px rgba(var(--cyanRGB),.32); display:block; }
   .hcArt.moldura img{ position:absolute; left:0; top:0; width:auto; height:auto; max-width:none; transform-origin:0 0; }
   .hcArt.vazio{ display:none; }
@@ -100,7 +103,7 @@
   .hcArt.moldura img{ max-width:none; max-height:none; }
   #bannerEntrarTurma{ max-width:960px; }
 }
-@media (max-width:340px){ .hcCab{ width:calc(100% - 150px); } .balao{ width:calc(100% - 162px); } .hcArt{ width:150px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
+@media (max-width:340px){ .hcCab{ width:calc(100% - 118px); } .balao{ width:calc(100% - 162px); } .hcArt{ width:150px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
 
 /* balão de HQ (v4-5): contorno grosso, rabinho reto para o rosto do personagem; o carrossel mora dentro */
 .balao{ position:relative; z-index:3; width:calc(100% - 192px); margin-top:14px; background:var(--surface); border:2.5px solid var(--text); border-radius:20px; }
@@ -166,6 +169,8 @@
 #enqJanela img{position:absolute;left:0;top:0;width:auto;height:auto;max-width:none;transform-origin:0 0;display:block;}
 #enqJanela.arco{border-radius:50% 50% 14px 14px / 36% 36% 14px 14px;}
 #enqJanela.circ{border-radius:50%;}
+#enqJanela.slot{border-radius:14px;background:var(--bg);}
+#enqJanela.slot img{filter:none;}
 .enqZoom{display:flex;align-items:center;gap:10px;width:100%;max-width:340px;margin-top:12px;color:#fff;font-size:18px;font-weight:700;}
 .enqZoom input{flex:1;accent-color:var(--cyan);height:28px;}
 #enqDica{color:#fff;font-size:.8rem;margin:.7rem 0 .9rem;text-align:center;opacity:.85;}
@@ -240,6 +245,7 @@
   <p class="sub">Escolha um personagem da galeria ou use suas fotos.</p>
   <a class="pill" onclick="abrirApelido()"><i class="pemoji">&#128172;</i>Como quer ser chamado?<i class="fim" id="apelidoAtual" style="opacity:.7;font-size:.78rem;font-weight:600;"></i></a>
   <a class="pill" onclick="abrirGaleria()"><i class="pemoji">&#127917;</i>Personagem da galeria<i class="fim">&#8250;</i></a>
+  <a class="pill" id="pillEnqAvatar" onclick="abrirEnquadre('avatar')"><i class="pemoji">&#128207;</i>Enquadrar personagem<i class="fim">&#8250;</i></a>
   <a class="pill" onclick="escolherFoto()"><i class="pemoji">&#128444;&#65039;</i>Trocar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
   <a class="pill" id="pillEnqCartao" onclick="abrirEnquadre('cartao')"><i class="pemoji">&#128207;</i>Enquadrar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
   <a class="pill" onclick="escolherPerfil()"><i class="pemoji">&#128100;</i>Trocar foto da bolinha<i class="fim">&#8250;</i></a>
@@ -308,7 +314,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-10'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-11'
   });
 
   // Sauda\u00e7\u00e3o
@@ -338,8 +344,8 @@
     { id:'reescritor',       nome:'Reescritor',               src:'avatares/reescritor-busto.webp' },
     { id:'feliz',            nome:'Feliz',                    src:'avatares/feliz-busto.webp' }
   ];
-  var RATIO = { cartao:1.35, perfil:1 };            /* altura/largura da moldura */
-  var _cartao = { avatar:null, enqCartao:null, enqPerfil:null, urlCartao:null, urlPerfil:null };
+  var RATIO = { cartao:1.35, perfil:1, avatar:1.28 };   /* altura/largura da moldura; avatar = slot do personagem */
+  var _cartao = { avatar:null, enqCartao:null, enqPerfil:null, enqAvatar:null, urlCartao:null, urlPerfil:null };
 
   async function baixarImagemPrivada(caminho) {
     try {
@@ -387,7 +393,8 @@
   function mostrarArt(modo, url) {            /* modo: 'personagem' | 'recortada' | 'moldura' | 'vazio' */
     var art = document.getElementById('hcArt'), img = document.getElementById('hcArtImg');
     if (!art || !img) return;
-    art.className = 'hcArt' + (modo === 'moldura' ? ' moldura' : (modo === 'vazio' ? ' vazio' : ''));
+    var enqAv = (modo === 'personagem' && _cartao.enqAvatar && _cartao.enqAvatar.w && _cartao.enqAvatar.id === (_cartao.avatar || personagemPadrao().id)) ? _cartao.enqAvatar : null;
+    art.className = 'hcArt' + (modo === 'moldura' ? ' moldura' : (modo === 'vazio' ? ' vazio' : '')) + (enqAv ? ' enq' : '');
     img.removeAttribute('style');
     if (modo === 'vazio') { img.removeAttribute('src'); return; }
     img.onload = function(){
@@ -395,6 +402,7 @@
         var enq = _cartao.enqCartao && _cartao.enqCartao.w ? _cartao.enqCartao : enqPadrao(img.naturalWidth, img.naturalHeight, RATIO.cartao);
         aplicarEnqNoCartao(img, enq, art.clientWidth || 126);
       }
+      if (enqAv) aplicarEnqNoCartao(img, enqAv, art.clientWidth || 180);
       ajustarArt();
     };
     img.src = url;
@@ -433,9 +441,9 @@
     ajustarArt();
     try {
       var uid = uidAtual(); if (!uid) return;
-      var res = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid + '&select=cartao_enq,perfil_enq,avatar_galeria,apelido', {});
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid + '&select=cartao_enq,perfil_enq,avatar_galeria,apelido,avatar_enq', {});
       var row = res && res.ok ? (await res.json())[0] : null;
-      if (row) { _cartao.avatar = row.avatar_galeria || null; _cartao.enqCartao = row.cartao_enq || null; _cartao.enqPerfil = row.perfil_enq || null; window.APELIDO_ALUNO = row.apelido || null; montarSaudacao(); mostrarApelidoNaGaveta(); }
+      if (row) { _cartao.avatar = row.avatar_galeria || null; _cartao.enqCartao = row.cartao_enq || null; _cartao.enqPerfil = row.perfil_enq || null; _cartao.enqAvatar = row.avatar_enq || null; window.APELIDO_ALUNO = row.apelido || null; montarSaudacao(); mostrarApelidoNaGaveta(); }
       var recortada = !!(_cartao.enqCartao && _cartao.enqCartao.recortada);
       var capa = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + (recortada ? '/capa.png' : '/capa.jpg'));
       if (capa) { _cartao.urlCartao = capa; var pc = document.getElementById('pillEnqCartao'); if (pc) pc.style.display = (recortada || !_cartao.enqCartao) ? 'none' : ''; }
@@ -569,11 +577,12 @@
   var _enq = { alvo:null, W:0, H:0, fx:0, fy:0, fw:0, fh:0, iw:1, ih:1, px:0, py:0, s:1, smin:1 };
   function abrirEnquadre(alvo) {
     fecharGaveta('gavetaCard');
-    var url = alvo === 'cartao' ? _cartao.urlCartao : _cartao.urlPerfil;
+    var url = alvo === 'cartao' ? _cartao.urlCartao : (alvo === 'perfil' ? _cartao.urlPerfil : null);
+    if (alvo === 'avatar') { var g = GALERIA.filter(function(x){ return x.id === (_cartao.avatar || personagemPadrao().id); })[0]; url = g ? g.src : null; }
     if (!url) { toast(alvo === 'cartao' ? 'Envie uma foto do cart\u00e3o primeiro.' : 'Envie uma foto da bolinha primeiro.', 2600); return; }
     _enq.alvo = alvo;
     var f = document.getElementById('enqFoto'), fn = document.getElementById('enqFotoNitida'), jan = document.getElementById('enqJanela');
-    jan.className = alvo === 'cartao' ? 'arco' : 'circ';
+    jan.className = alvo === 'cartao' ? 'arco' : (alvo === 'perfil' ? 'circ' : 'slot');
     f.onload = function(){ medirEnquadre(); };
     f.src = url; fn.src = url;
     document.getElementById('enqFundo').classList.add('aberto');
@@ -588,21 +597,23 @@
     jan.style.width = e.fw + 'px'; jan.style.height = e.fh + 'px';
     e.fx = Math.round((e.W - e.fw) / 2); e.fy = Math.round((e.H - e.fh) / 2); jan.style.left = e.fx + 'px'; jan.style.top = e.fy + 'px';
     f.style.width = e.iw + 'px'; fn.style.width = e.iw + 'px';
-    e.smin = Math.max(e.fw / e.iw, e.fh / e.ih);
-    var salvo = e.alvo === 'cartao' ? _cartao.enqCartao : _cartao.enqPerfil;
+    e.smin = (e.alvo === 'avatar') ? Math.min(e.fw / e.iw, e.fh / e.ih) * 0.6 : Math.max(e.fw / e.iw, e.fh / e.ih);
+    var salvo = e.alvo === 'cartao' ? _cartao.enqCartao : (e.alvo === 'perfil' ? _cartao.enqPerfil : ((_cartao.enqAvatar && _cartao.enqAvatar.id === (_cartao.avatar || personagemPadrao().id)) ? _cartao.enqAvatar : null));
     if (salvo && salvo.w) { e.s = Math.max(e.smin, salvo.w * e.fw / e.iw); e.px = e.fx + salvo.x * e.fw; e.py = e.fy + salvo.y * e.fw; }
+    else if (e.alvo === 'avatar') { e.s = Math.min(e.fw / e.iw, e.fh / e.ih); e.px = e.fx + (e.fw - e.iw * e.s) / 2; e.py = e.fy + e.fh - e.ih * e.s; }
     else { e.s = e.smin; e.px = e.fx - (e.iw * e.s - e.fw) / 2; e.py = e.fy - (e.ih * e.s - e.fh) / 2; }
     var z = document.getElementById('enqZoom'); if (z) z.value = Math.round(100 * e.s / e.smin);
     desenharEnquadre();
   }
   function desenharEnquadre() {
     var e = _enq, f = document.getElementById('enqFoto'), fn = document.getElementById('enqFotoNitida');
-    e.px = Math.min(e.fx, Math.max(e.fx + e.fw - e.iw * e.s, e.px)); e.py = Math.min(e.fy, Math.max(e.fy + e.fh - e.ih * e.s, e.py));
+    if (e.alvo !== 'avatar') { e.px = Math.min(e.fx, Math.max(e.fx + e.fw - e.iw * e.s, e.px)); e.py = Math.min(e.fy, Math.max(e.fy + e.fh - e.ih * e.s, e.py)); }
+    else { e.px = Math.max(e.fx - e.iw * e.s + 40, Math.min(e.fx + e.fw - 40, e.px)); e.py = Math.max(e.fy - e.ih * e.s + 40, Math.min(e.fy + e.fh - 40, e.py)); }
     f.style.transform = 'translate(' + e.px + 'px,' + e.py + 'px) scale(' + e.s + ')';
     fn.style.transform = 'translate(' + (e.px - e.fx) + 'px,' + (e.py - e.fy) + 'px) scale(' + e.s + ')';
   }
   function zoomEnquadre(ns) {
-    var e = _enq; ns = Math.max(e.smin, Math.min(e.smin * 3, ns));
+    var e = _enq; ns = Math.max(e.smin, Math.min(e.smin * (e.alvo === 'avatar' ? 4 : 3), ns));
     var cx = e.fx + e.fw / 2, cy = e.fy + e.fh / 2;
     e.px = cx - (cx - e.px) * ns / e.s; e.py = cy - (cy - e.py) * ns / e.s; e.s = ns;
     var z = document.getElementById('enqZoom'); if (z) z.value = Math.round(100 * e.s / e.smin);
@@ -614,8 +625,9 @@
     var enq = { x:(e.px - e.fx) / e.fw, y:(e.py - e.fy) / e.fw, w:e.iw * e.s / e.fw };
     fecharEnquadre();
     if (e.alvo === 'cartao') { _cartao.enqCartao = enq; renderArt(); }
+    else if (e.alvo === 'avatar') { enq.id = _cartao.avatar || personagemPadrao().id; _cartao.enqAvatar = enq; renderArt(); }
     else { _cartao.enqPerfil = enq; if (_cartao.urlPerfil) aplicarFotoPerfil(_cartao.urlPerfil); }
-    var ok = await salvarUsuario(e.alvo === 'cartao' ? { cartao_enq: enq } : { perfil_enq: enq });
+    var ok = await salvarUsuario(e.alvo === 'cartao' ? { cartao_enq: enq } : (e.alvo === 'avatar' ? { avatar_enq: enq } : { perfil_enq: enq }));
     toast(ok ? '\u2705 Enquadramento salvo' : 'Salvei s\u00f3 neste aparelho; tente de novo mais tarde.', 2600);
   }
   (function(){
