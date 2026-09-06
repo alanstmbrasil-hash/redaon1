@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v4-2</title>
-<!-- RedaON · Portal do Aluno · Início · v4-2 · sobre aluno-base-v6 -->
+<title>RedaON | Início v4-4</title>
+<!-- RedaON · Portal do Aluno · Início · v4-4 · sobre aluno-base-v6 -->
+<!-- v4-4 (07/09/2026): apelido ("nick") — usuarios.apelido, até 20 letras; opção "Como quer ser chamado?" na gaveta Seu cartão; a saudação usa apelido || primeiro nome; nome oficial não muda -->
+<!-- v4-3 (07/09/2026): desktop com sidebar: coluna da direita elástica e só ao lado a partir de 1200px (1024–1199 = carrossel e turma abaixo do cartão, cartão 400+240); celular: cabeçalho mais largo (calc(100% - 118px)), saudação 16px, subtítulo em linha única -->
 <!-- v4-2 (07/09/2026): cartão em todas as larguras (mockup larguras v5): saudação como cabeçalho do cartão; tablet em pé = celular 1,6×; desktop/tablet deitado = personagem ao lado, sem bolinha (fica na sidebar), carrossel + turma na 3ª coluna; C1–C5 borda 2px; aba "Seu Status"; saem saudacaoDesktop e statsDesktop; ☰ removido abaixo de 1024px (aluno-base-v6.css) -->
 <!-- v4-1 (07/09/2026): avatares com a marca RedaON; foto de capa antiga (pré-v4) não entra no cartão; primeiro acesso abre a galeria uma vez e a linha sob o nome convida "Escolha seu personagem"; padrão sorteado pela conta -->
 <!-- v4-0 (06/09/2026): Cartão do Início novo (mockup final aprovado): layout aberto, C1–C5 por faixa (200 = ouro), Status do Aluno em aba, personagem da galeria / foto do aluno (arco ou recortada), bolinha com selo, enquadramento com zoom (cartão e bolinha) salvo em usuarios.cartao_enq/perfil_enq/avatar_galeria -->
@@ -32,13 +34,13 @@
 /* ===== Cartão do Início (mockup final 06/09 + larguras v5 07/09) — todas as larguras ===== */
 @media (min-width:0){
   .heroCard{ position:relative; padding:4px 0 0; margin-bottom:.875rem; overflow:hidden; }
-  .hcCab{ display:flex; align-items:center; gap:10px; position:relative; z-index:3; width:calc(100% - 150px); }
+  .hcCab{ display:flex; align-items:center; gap:10px; position:relative; z-index:3; width:calc(100% - 118px); }
   .hcAv{ position:relative; width:46px; height:46px; border-radius:50%; background:var(--surface2) center/cover no-repeat; border:2px solid var(--surface); box-shadow:0 0 0 1px rgba(var(--borderRGB),.22); display:flex; align-items:center; justify-content:center; font-size:22px; flex:0 0 auto; cursor:pointer; }
   .hcAv .selo{ position:absolute; right:-5px; bottom:-5px; width:20px; height:20px; border-radius:50%; background:var(--cyan); color:var(--onCyan); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center; }
   .hcAv .selo svg{ width:11px; height:11px; }
   .hcNome{ min-width:0; }
-  .hcNome .n{ margin:0; font-size:17px; font-weight:800; line-height:1.15; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .hcNome .s{ margin:2px 0 0; font-size:11px; color:var(--muted); line-height:1.2; min-height:13px; }
+  .hcNome .n{ margin:0; font-size:16px; font-weight:800; line-height:1.15; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hcNome .s{ margin:2px 0 0; font-size:11px; color:var(--muted); line-height:1.2; min-height:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .hcComps{ display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-top:14px; width:calc(100% - 150px); position:relative; z-index:3; }
   .cc{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px 5px; border-radius:9px; border:2px solid rgba(var(--borderRGB),.22); background:var(--surface); min-width:0; }
   .cc span{ font-size:9.5px; font-weight:700; color:var(--muted); line-height:1; }
@@ -72,25 +74,33 @@
 }
 /* ── tablet deitado e notebook (≥1024): personagem ao lado; carrossel + turma na 3ª coluna ── */
 @media (min-width:1024px){
-  .duasCol{ display:grid; grid-template-columns:max-content minmax(340px,420px); gap:36px; align-items:end; justify-content:start; margin-bottom:1.25rem; }
-  .duasCol .avisoCard{ margin-bottom:0; }
-  .duasCol #bannerEntrarTurma{ margin-top:12px; }
-  .heroCard{ display:grid; grid-template-columns:440px 300px; grid-template-areas:"cab art" "comps art" "status art"; column-gap:28px; align-items:end; overflow:visible; padding:0; margin-bottom:0; }
+  .duasCol{ display:block; margin-bottom:1.25rem; }
+  .duasCol > div + div{ margin-top:18px; }
+  .heroCard{ display:grid; grid-template-columns:400px 240px; grid-template-areas:"cab art" "comps art" "status art"; column-gap:28px; align-items:end; overflow:visible; padding:0; margin-bottom:0; }
   .hcCab{ grid-area:cab; width:auto; }
   .hcAv{ display:none; }
   .hcComps{ grid-area:comps; width:auto; margin-top:16px; }
   .hcStatus{ grid-area:status; margin-top:44px; }
-  .hcArt{ grid-area:art; position:relative; right:auto; top:auto; bottom:auto !important; width:300px; height:auto; align-self:end; justify-content:center; }
+  .hcArt{ grid-area:art; position:relative; right:auto; top:auto; bottom:auto !important; width:240px; height:auto; align-self:end; justify-content:center; }
   .hcArt img{ height:auto; width:100%; max-height:none; }
-  .hcArt.moldura{ width:300px; height:400px; border-radius:150px 150px 20px 20px; }
+  .hcArt.moldura{ width:240px; height:320px; border-radius:120px 120px 20px 20px; }
   .hcArt.moldura img{ width:auto; height:auto; }
   .hcNome .n{ font-size:24px; } .hcNome .s{ font-size:14px; margin-top:4px; }
   .cc{ padding:9px 4px 8px; gap:5px; border-radius:11px; } .cc span{ font-size:12px; } .cc b{ font-size:16px; }
   .hcAba{ font-size:15px; height:36px; line-height:34px; top:-35px; padding:0 18px; } .hcStatus{ padding:14px; }
   .hcTiles{ gap:10px; } .hcTile{ padding:11px 6px 12px; gap:6px; } .hcTile .l{ font-size:12px; } .hcTile .tv i{ width:22px; height:22px; font-size:19px; line-height:22px; } .hcTile .tv b{ font-size:19px; }
 }
-@media (min-width:1400px){ .heroCard{ grid-template-columns:500px 340px; } .hcArt{ width:340px; } .hcArt.moldura{ width:340px; height:450px; border-radius:170px 170px 20px 20px; } .duasCol{ gap:48px; } }
-@media (max-width:340px){ .hcCab,.hcComps{ width:calc(100% - 128px); } .hcArt{ width:150px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
+/* ≥1200: cabe a terceira coluna ao lado (sidebar 232 + cartão 768 + coluna elástica) */
+@media (min-width:1200px){
+  .duasCol{ display:grid; grid-template-columns:max-content minmax(300px,420px); gap:32px; align-items:end; justify-content:start; }
+  .duasCol > div + div{ margin-top:0; }
+  .duasCol .avisoCard{ margin-bottom:0; }
+  .duasCol #bannerEntrarTurma{ margin-top:12px; }
+  .heroCard{ grid-template-columns:440px 300px; }
+  .hcArt{ width:300px; } .hcArt.moldura{ width:300px; height:400px; border-radius:150px 150px 20px 20px; }
+}
+@media (min-width:1500px){ .heroCard{ grid-template-columns:500px 340px; } .hcArt{ width:340px; } .hcArt.moldura{ width:340px; height:450px; border-radius:170px 170px 20px 20px; } .duasCol{ gap:48px; } }
+@media (max-width:340px){ .hcCab{ width:calc(100% - 104px); } .hcComps{ width:calc(100% - 128px); } .hcArt{ width:150px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
 
 .avisoCard{ margin-bottom:1rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:14px; overflow:hidden; }
 .avisoTrack{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -ms-overflow-style:none; }
@@ -232,11 +242,23 @@
   <div class="grip"></div>
   <p class="tit">Seu cart&atilde;o</p>
   <p class="sub">Escolha um personagem da galeria ou use suas fotos.</p>
+  <a class="pill" onclick="abrirApelido()"><i class="pemoji">&#128172;</i>Como quer ser chamado?<i class="fim" id="apelidoAtual" style="opacity:.7;font-size:.78rem;font-weight:600;"></i></a>
   <a class="pill" onclick="abrirGaleria()"><i class="pemoji">&#127917;</i>Personagem da galeria<i class="fim">&#8250;</i></a>
   <a class="pill" onclick="escolherFoto()"><i class="pemoji">&#128444;&#65039;</i>Trocar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
   <a class="pill" id="pillEnqCartao" onclick="abrirEnquadre('cartao')"><i class="pemoji">&#128207;</i>Enquadrar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
   <a class="pill" onclick="escolherPerfil()"><i class="pemoji">&#128100;</i>Trocar foto da bolinha<i class="fim">&#8250;</i></a>
   <a class="pill" id="pillEnqPerfil" onclick="abrirEnquadre('perfil')"><i class="pemoji">&#128207;</i>Enquadrar foto da bolinha<i class="fim">&#8250;</i></a>
+</div>
+<div class="gvBg atrasBarra" id="gavetaApelidoBg" onclick="fecharGaveta('gavetaApelido')"></div>
+<div class="gv atrasBarra" id="gavetaApelido">
+  <div class="grip"></div>
+  <p class="tit">Como quer ser chamado?</p>
+  <p class="sub">S&oacute; voc&ecirc; v&ecirc;. Para a professora continua seu nome completo.</p>
+  <input type="text" id="inputApelido" maxlength="20" autocomplete="nickname" placeholder="Seu apelido" style="width:100%;min-height:48px;border-radius:14px;border:1px solid rgba(var(--borderRGB),.3);background:var(--surface2);color:var(--text);font:inherit;font-size:1rem;padding:0 14px;margin:.25rem 0 .75rem;"/>
+  <div style="display:flex;gap:.6rem;">
+    <button onclick="salvarApelido(true)" style="flex:1;min-height:46px;border-radius:14px;border:1px solid rgba(var(--borderRGB),.3);background:transparent;color:var(--text2);font:inherit;font-weight:700;cursor:pointer;">Usar meu nome</button>
+    <button onclick="salvarApelido(false)" style="flex:1;min-height:46px;border-radius:14px;border:none;background:var(--cyan);color:var(--onCyan);font:inherit;font-weight:800;cursor:pointer;">Salvar</button>
+  </div>
 </div>
 <div class="gvBg atrasBarra" id="gavetaGaleriaBg" onclick="fecharGaveta('gavetaGaleria')"></div>
 <div class="gv atrasBarra" id="gavetaGaleria">
@@ -290,18 +312,18 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-2'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-4'
   });
 
   // Sauda\u00e7\u00e3o
-  (function(){
+  function montarSaudacao(){
     var h = new Date().getHours();
     var periodo = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
     var s = document.getElementById('saudacaoLinha');
-    if (s) s.innerHTML = periodo + ', <span style="color:var(--cyan);">' + escapeHtmlSimples(window.PRIMEIRO_NOME || 'Estudante') + '</span> \u270D\uFE0F';
-    var c = document.getElementById('nomeUsuarioCard');
-    if (c) c.textContent = window.NOME_ALUNO || 'Estudante';
-  })();
+    var como = (window.APELIDO_ALUNO && String(window.APELIDO_ALUNO).trim()) || window.PRIMEIRO_NOME || 'Estudante';
+    if (s) s.innerHTML = periodo + ', <span style="color:var(--cyan);">' + escapeHtmlSimples(como) + '</span> \u270D\uFE0F';
+  }
+  montarSaudacao();
 
   // Perfil da sidebar abre a gaveta do cart\u00e3o
   (function(){
@@ -407,9 +429,9 @@
     ajustarArt();
     try {
       var uid = uidAtual(); if (!uid) return;
-      var res = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid + '&select=cartao_enq,perfil_enq,avatar_galeria', {});
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid + '&select=cartao_enq,perfil_enq,avatar_galeria,apelido', {});
       var row = res && res.ok ? (await res.json())[0] : null;
-      if (row) { _cartao.avatar = row.avatar_galeria || null; _cartao.enqCartao = row.cartao_enq || null; _cartao.enqPerfil = row.perfil_enq || null; }
+      if (row) { _cartao.avatar = row.avatar_galeria || null; _cartao.enqCartao = row.cartao_enq || null; _cartao.enqPerfil = row.perfil_enq || null; window.APELIDO_ALUNO = row.apelido || null; montarSaudacao(); mostrarApelidoNaGaveta(); }
       var recortada = !!(_cartao.enqCartao && _cartao.enqCartao.recortada);
       var capa = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + (recortada ? '/capa.png' : '/capa.jpg'));
       if (capa) { _cartao.urlCartao = capa; var pc = document.getElementById('pillEnqCartao'); if (pc) pc.style.display = (recortada || !_cartao.enqCartao) ? 'none' : ''; }
@@ -424,6 +446,24 @@
       if (semEscolha && !localStorage.getItem('redaon-galeria-convite')) { localStorage.setItem('redaon-galeria-convite', '1'); setTimeout(abrirGaleria, 600); }
     } catch(e) {}
   }
+
+  /* ─── apelido ─── */
+  function mostrarApelidoNaGaveta(){ var e = document.getElementById('apelidoAtual'); if (e) e.textContent = window.APELIDO_ALUNO ? window.APELIDO_ALUNO : (window.PRIMEIRO_NOME || ''); }
+  function abrirApelido(){
+    fecharGaveta('gavetaCard');
+    var i = document.getElementById('inputApelido'); if (i) i.value = window.APELIDO_ALUNO || '';
+    abrirGaveta('gavetaApelido');
+    setTimeout(function(){ if (i) i.focus(); }, 350);
+  }
+  async function salvarApelido(limpar){
+    var i = document.getElementById('inputApelido');
+    var v = limpar ? '' : String((i && i.value) || '').replace(/\s+/g, ' ').trim().slice(0, 20);
+    fecharGaveta('gavetaApelido');
+    window.APELIDO_ALUNO = v || null; montarSaudacao(); mostrarApelidoNaGaveta();
+    var ok = await salvarUsuario({ apelido: v || null });
+    toast(ok ? (v ? '\u2705 Agora te chamo de ' + v : '\u2705 Volto a te chamar pelo nome') : 'N\u00e3o consegui salvar. Tente de novo.', 2600);
+  }
+  document.getElementById('inputApelido').addEventListener('keydown', function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); salvarApelido(false); } });
 
   /* ─── galeria ─── */
   function abrirGaleria() {
