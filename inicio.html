@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v4-6</title>
-<!-- RedaON · Portal do Aluno · Início · v4-6 · sobre aluno-base-v6 -->
+<title>RedaON | Início v4-7</title>
+<!-- RedaON · Portal do Aluno · Início · v4-7 · sobre aluno-base-v6 -->
+<!-- v4-7 (07/09/2026): desktop/tablet deitado em duas colunas de grid: esquerda = saudação + balão + Seu Status; direita = personagem do topo ao pé do status (380px). Sem sobreposição, sem buraco entre balão e status -->
 <!-- v4-6 (07/09/2026): desktop: zona do personagem com altura mínima de 400px (status desce), personagem 380px, cartão até 900px; tablet em pé: slot do personagem 220px encostado na borda e balão mais estreito (cotovelos inteiros, balão fora da foto) -->
 <!-- v4-5 (07/09/2026): padrão único em todas as larguras (mockup balão v5): carrossel vira balão de HQ à esquerda, na altura do rosto, falando com o personagem à direita; notas C1–C5 dentro de "Seu Status", alinhadas pelas caixas; desktop/tablet deitado = mesmo cartão maior (sem bolinha); saem o grid de 3 colunas (duasCol) e as regras de 1200/1500px -->
 <!-- v4-4 (07/09/2026): apelido ("nick") — usuarios.apelido, até 20 letras; opção "Como quer ser chamado?" na gaveta Seu cartão; a saudação usa apelido || primeiro nome; nome oficial não muda -->
@@ -79,20 +80,23 @@
   .balao::before{ top:24px; } .balao::after{ top:27px; }
 }
 
-/* ── tablet deitado e notebook (≥1024): mesmo cartão, maior; sem bolinha (fica na sidebar) ── */
+/* ── tablet deitado e notebook (≥1024): duas colunas — esquerda: saudação, balão, status · direita: personagem inteiro ── */
 @media (min-width:1024px){
-  .heroCard{ max-width:900px; }
-  .hcAv{ display:none; }
-  .hcCab{ width:calc(100% - 400px); } .hcNome .n{ font-size:24px; } .hcNome .s{ font-size:14px; margin-top:4px; }
-  .balao{ width:calc(100% - 420px); margin-top:22px; border-radius:24px; }
+  .heroCard{ display:grid; grid-template-columns:minmax(0,1fr) 380px; grid-template-areas:"cab art" "balao art" "status art"; column-gap:32px; align-items:start; max-width:960px; overflow:visible; padding:0; }
+  .hcCab{ grid-area:cab; width:auto; } .hcAv{ display:none; }
+  .hcNome .n{ font-size:24px; } .hcNome .s{ font-size:14px; margin-top:4px; }
+  .balao{ grid-area:balao; width:auto; margin-top:22px; border-radius:24px; }
   .balao::before{ right:-40px; top:30px; border-width:16px 0 16px 40px; } .balao::after{ right:-32px; top:34px; border-width:12px 0 12px 34px; }
   .avisoSlide{ padding:15px 18px 12px; } .avisoTit{ font-size:12px; } .avisoTxt{ font-size:15px; } .avisoIco{ font-size:26px; }
-  .hcArt{ width:380px; right:0; }
-  .hcArt.moldura{ width:240px; border-radius:120px 120px 20px 20px; }
-  .hcStatus{ margin-top:52px; padding:14px; } .hcAba{ font-size:15px; height:36px; line-height:34px; top:-35px; padding:0 18px; }
+  .hcStatus{ grid-area:status; margin-top:52px; padding:14px; }
+  .hcAba{ font-size:15px; height:36px; line-height:34px; top:-35px; padding:0 18px; }
   .hcTiles{ gap:10px; } .hcTile{ padding:11px 6px 12px; gap:6px; } .hcTile .l{ font-size:12px; } .hcTile .tv i{ width:22px; height:22px; font-size:19px; line-height:22px; } .hcTile .tv b{ font-size:19px; }
   .hcComps{ gap:10px; margin-top:10px; } .cc{ padding:10px 4px 9px; } .cc b{ font-size:16px; } .cc span{ font-size:12px; }
-  #bannerEntrarTurma{ max-width:900px; }
+  .hcArt{ grid-area:art; position:relative; right:auto; top:auto; bottom:auto !important; width:380px; height:auto; align-self:stretch; display:flex; align-items:flex-end; justify-content:center; }
+  .hcArt img{ width:auto; height:auto; max-width:100%; max-height:100%; }
+  .hcArt.moldura{ width:300px; height:400px; align-self:end; justify-self:center; border-radius:150px 150px 20px 20px; }
+  .hcArt.moldura img{ max-width:none; max-height:none; }
+  #bannerEntrarTurma{ max-width:960px; }
 }
 @media (max-width:340px){ .hcCab{ width:calc(100% - 104px); } .balao{ width:calc(100% - 128px); } .hcArt{ width:150px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
 
@@ -301,7 +305,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-6'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-7'
   });
 
   // Sauda\u00e7\u00e3o
@@ -357,12 +361,7 @@
     var st = document.getElementById('hcStatus'), art = document.getElementById('hcArt');
     var hero = document.getElementById('heroCard');
     if (!(st && art && hero)) return;
-    /* desktop: a zona do personagem (topo → status) tem pelo menos 400px */
-    if (window.innerWidth >= 1024) {
-      st.style.marginTop = '';
-      var falta = 400 - st.offsetTop;
-      if (falta > 0) st.style.marginTop = (52 + falta) + 'px';
-    } else { st.style.marginTop = ''; }
+    if (window.innerWidth >= 1024) { art.style.bottom = ''; return; }   /* desktop: o grid cuida */
     art.style.bottom = (hero.offsetHeight - st.offsetTop) + 'px';
   }
   window.addEventListener('resize', ajustarArt);
