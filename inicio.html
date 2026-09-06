@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v4-0</title>
-<!-- RedaON · Portal do Aluno · Início · v4-0 · sobre aluno-base-v6 -->
+<title>RedaON | Início v4-1</title>
+<!-- RedaON · Portal do Aluno · Início · v4-1 · sobre aluno-base-v6 -->
+<!-- v4-1 (07/09/2026): avatares com a marca RedaON; foto de capa antiga (pré-v4) não entra no cartão; primeiro acesso abre a galeria uma vez e a linha sob o nome convida "Escolha seu personagem"; padrão sorteado pela conta -->
 <!-- v4-0 (06/09/2026): Cartão do Início novo (mockup final aprovado): layout aberto, C1–C5 por faixa (200 = ouro), Status do Aluno em aba, personagem da galeria / foto do aluno (arco ou recortada), bolinha com selo, enquadramento com zoom (cartão e bolinha) salvo em usuarios.cartao_enq/perfil_enq/avatar_galeria -->
 <!-- v3-11 (18/08/2026): capa e foto de perfil por REST direto do Storage (dbFetch autenticado) — o cliente supabase-js nunca existiu na página; upload/leitura estavam mortos desde o v3-10 -->
 <script>
@@ -281,7 +282,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-0'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-1'
   });
 
   // Sauda\u00e7\u00e3o
@@ -379,11 +380,19 @@
     });
     var pe = document.getElementById('pillEnqPerfil'); if (pe) pe.style.display = '';
   }
+  function personagemPadrao(){ var uid = uidAtual() || '', n = 0; for (var i = 0; i < uid.length; i++) n += uid.charCodeAt(i); return GALERIA[n % GALERIA.length]; }
+  function convidarEscolha(mostrar){
+    var l = document.getElementById('linhaCard'); if (!l) return;
+    if (mostrar) { l.innerHTML = '<a onclick="abrirGaleria()" style="color:var(--cyan);font-weight:700;cursor:pointer;">Escolha seu personagem \u203a</a>'; }
+    else { l.innerHTML = '&nbsp;'; }
+  }
   function renderArt() {
+    convidarEscolha(false);
     var av = _cartao.avatar ? GALERIA.filter(function(g){ return g.id === _cartao.avatar; })[0] : null;
     if (av) return mostrarArt('personagem', av.src);
-    if (_cartao.urlCartao) return mostrarArt(_cartao.enqCartao && _cartao.enqCartao.recortada ? 'recortada' : 'moldura', _cartao.urlCartao);
-    mostrarArt('personagem', GALERIA[0].src);   /* padrão atribuído */
+    if (_cartao.urlCartao && _cartao.enqCartao) return mostrarArt(_cartao.enqCartao.recortada ? 'recortada' : 'moldura', _cartao.urlCartao);
+    mostrarArt('personagem', personagemPadrao().src);   /* padrão sorteado pela conta, até o aluno escolher */
+    convidarEscolha(true);
   }
 
   async function carregarCartao() {
@@ -395,12 +404,17 @@
       if (row) { _cartao.avatar = row.avatar_galeria || null; _cartao.enqCartao = row.cartao_enq || null; _cartao.enqPerfil = row.perfil_enq || null; }
       var recortada = !!(_cartao.enqCartao && _cartao.enqCartao.recortada);
       var capa = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + (recortada ? '/capa.png' : '/capa.jpg'));
-      if (capa) { _cartao.urlCartao = capa; var pc = document.getElementById('pillEnqCartao'); if (pc) pc.style.display = recortada ? 'none' : ''; }
+      if (capa) { _cartao.urlCartao = capa; var pc = document.getElementById('pillEnqCartao'); if (pc) pc.style.display = (recortada || !_cartao.enqCartao) ? 'none' : ''; }
       else { var pc2 = document.getElementById('pillEnqCartao'); if (pc2) pc2.style.display = 'none'; }
       var perfil = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
       if (perfil) aplicarFotoPerfil(perfil); else { var pp = document.getElementById('pillEnqPerfil'); if (pp) pp.style.display = 'none'; }
     } catch(e) { console.warn('[cartão]', e); }
     renderArt();
+    /* opção C: primeiro acesso sem escolha abre a galeria uma vez */
+    try {
+      var semEscolha = !_cartao.avatar && !(_cartao.urlCartao && _cartao.enqCartao);
+      if (semEscolha && !localStorage.getItem('redaon-galeria-convite')) { localStorage.setItem('redaon-galeria-convite', '1'); setTimeout(abrirGaleria, 600); }
+    } catch(e) {}
   }
 
   /* ─── galeria ─── */
@@ -411,7 +425,7 @@
       var sel = (_cartao.avatar === g.id);
       return '<a class="pill" onclick="escolherPersonagem(\'' + g.id + '\')"><span class="pillThumb" style="background-image:url(' + g.src + ');"></span>' + g.nome + '<i class="fim" style="opacity:' + (sel ? 1 : 0) + ';">\u2713</i></a>';
     }).join('');
-    var ck = document.getElementById('ckMinhaFoto'); if (ck) ck.style.opacity = (!_cartao.avatar && _cartao.urlCartao) ? 1 : 0;
+    var ck = document.getElementById('ckMinhaFoto'); if (ck) ck.style.opacity = (!_cartao.avatar && _cartao.urlCartao && _cartao.enqCartao) ? 1 : 0;
     abrirGaveta('gavetaGaleria');
   }
   async function escolherPersonagem(id) {
@@ -422,8 +436,11 @@
   async function usarMinhaFoto() {
     fecharGaveta('gavetaGaleria');
     if (!_cartao.urlCartao) { toast('Envie uma foto do cart\u00e3o primeiro.', 2600); escolherFoto(); return; }
-    _cartao.avatar = null; renderArt();
-    await salvarUsuario({ avatar_galeria: null });
+    _cartao.avatar = null;
+    if (!_cartao.enqCartao) _cartao.enqCartao = { v:4 };
+    renderArt();
+    await salvarUsuario({ avatar_galeria: null, cartao_enq: _cartao.enqCartao });
+    var pc = document.getElementById('pillEnqCartao'); if (pc) pc.style.display = _cartao.enqCartao.recortada ? 'none' : '';
   }
 
   /* ─── envio de fotos ─── */
@@ -471,7 +488,7 @@
       var ok = await enviarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/' + nome, blob, recortada ? 'image/png' : 'image/jpeg');
       if (!ok) throw new Error('upload recusado');
       _cartao.urlCartao = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/' + nome);
-      _cartao.enqCartao = recortada ? { recortada:true } : null;
+      _cartao.enqCartao = recortada ? { recortada:true } : { v:4 };
       _cartao.avatar = null;
       await salvarUsuario({ cartao_enq: _cartao.enqCartao, avatar_galeria: null });
       var pc = document.getElementById('pillEnqCartao'); if (pc) pc.style.display = recortada ? 'none' : '';
