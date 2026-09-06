@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v3-16</title>
-<!-- RedaON · Portal do Aluno · Início · v3-16 · sobre aluno-base-v6 -->
-<!-- v3-16 (24/08/2026): A2 — enquadramento da capa persiste no banco (usuarios.capa_pos) e não se perde mais no extremo 0%; ?personalizar=1 abre a gaveta do cartão (porta vinda de Configurações) -->
+<title>RedaON | Início v4-0</title>
+<!-- RedaON · Portal do Aluno · Início · v4-0 · sobre aluno-base-v6 -->
+<!-- v4-0 (06/09/2026): Cartão do Início novo (mockup final aprovado): layout aberto, C1–C5 por faixa (200 = ouro), Status do Aluno em aba, personagem da galeria / foto do aluno (arco ou recortada), bolinha com selo, enquadramento com zoom (cartão e bolinha) salvo em usuarios.cartao_enq/perfil_enq/avatar_galeria -->
 <!-- v3-11 (18/08/2026): capa e foto de perfil por REST direto do Storage (dbFetch autenticado) — o cliente supabase-js nunca existiu na página; upload/leitura estavam mortos desde o v3-10 -->
 <script>
 (function(){
@@ -38,30 +38,44 @@
 @media(max-width:640px){ .saudacaoDesktop, .statsDesktop { display:none !important; } }
 @media(max-width:900px) and (min-width:641px){ .statsDesktop{ grid-template-columns:repeat(2,1fr);} }
 
-.feedCardMobile{ display:none; }
+/* ===== Cartão do Início v4-0 (mockup final aprovado 06/09/2026) — só no mobile; desktop mantém statsDesktop ===== */
+.heroCard{ display:none; }
 @media (max-width:640px){
-  .feedCardMobile{ display:block; margin-bottom:.875rem; border-radius:16px; overflow:hidden; background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); }
-  .fcCover{ position:relative; height:290px; background:linear-gradient(160deg,#2b3a4d 0%,#33506b 40%,#6a5a7d 75%,#caa988 100%); background-size:cover; background-position:center; }
-  html[data-tema="claro"] .fcCover{ background:linear-gradient(160deg,#0a8c8d 0%,#0c6b6c 52%,#3a8a7e 78%,#d8c9a8 100%); background-size:cover; background-position:center; }
-  .fcCover.comFoto{ background-image:var(--fotoCapa) !important; background-position:center var(--posCapa, 50%) !important; }
-  .fcTop{ position:absolute; top:0; left:0; right:0; z-index:2; display:flex; align-items:center; gap:9px; padding:12px 12px; background:linear-gradient(180deg,rgba(8,10,15,.55),transparent); }
-  .fcAv{ width:38px; height:38px; border-radius:50%; border:2px solid #fff; background:linear-gradient(160deg,#3a4a6a,#222a3a); background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-size:18px; flex:0 0 auto; }
-  .fcNome{ margin:0; font-size:14px; font-weight:800; color:#fff; }
-  .fcSub{ margin:1px 0 0; font-size:10.5px; color:rgba(255,255,255,.85); }
-  .fcDots{ margin-left:auto; color:#fff; font-size:19px; background:rgba(0,0,0,.3); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  .fcBot{ position:absolute; left:0; right:0; bottom:0; z-index:2; padding:26px 14px 14px; background:linear-gradient(0deg,rgba(8,12,18,.9) 0%,rgba(8,12,18,.45) 55%,transparent 100%); }
-  .fcMetrics{ display:flex; align-items:flex-end; justify-content:space-between; }
-  .fcM{ display:flex; flex-direction:column; align-items:center; }
-  .fcM .v{ font-size:19px; font-weight:800; line-height:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.5); }
-  .fcM .l{ font-size:9.5px; color:rgba(255,255,255,.72); margin-top:3px; }
-  .feedCardMobile.tam-medio .fcCover{ height:auto; background:linear-gradient(160deg,#1f2a3a,#2d3d52) !important; }
-  .feedCardMobile.tam-medio .fcTop{ position:relative; background:transparent; padding:12px 13px 4px; }
-  .feedCardMobile.tam-medio .fcBot{ position:relative; background:transparent; padding:6px 13px 13px; }
-  .feedCardMobile.tam-grande .fcCover{ height:290px; }
-  .feedCardMobile.tam-xg .fcCover{ height:auto; aspect-ratio:4/5; }
-  .feedCardMobile.tam-xg .fcBot{ padding:34px 14px 14px; }
-  .feedCardMobile.tam-xg .fcM .v{ font-size:21px; }
+  .heroCard{ display:block; position:relative; padding:4px 0 0; margin-bottom:.875rem; overflow:hidden; }
+  .hcCab{ display:flex; align-items:center; gap:10px; position:relative; z-index:3; width:calc(100% - 150px); }
+  .hcAv{ position:relative; width:46px; height:46px; border-radius:50%; background:var(--surface2) center/cover no-repeat; border:2px solid var(--surface); box-shadow:0 0 0 1px rgba(var(--borderRGB),.22); display:flex; align-items:center; justify-content:center; font-size:22px; flex:0 0 auto; cursor:pointer; }
+  .hcAv .selo{ position:absolute; right:-5px; bottom:-5px; width:20px; height:20px; border-radius:50%; background:var(--cyan); color:var(--onCyan); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center; }
+  .hcAv .selo svg{ width:11px; height:11px; }
+  .hcNome{ min-width:0; }
+  .hcNome .n{ margin:0; font-size:17px; font-weight:800; line-height:1.15; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hcNome .s{ margin:2px 0 0; font-size:11px; color:var(--muted); line-height:1.2; min-height:13px; }
+  .hcComps{ display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-top:14px; width:calc(100% - 150px); position:relative; z-index:3; }
+  .cc{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px 5px; border-radius:9px; border:1px solid rgba(var(--borderRGB),.22); background:var(--surface); min-width:0; }
+  .cc span{ font-size:9.5px; font-weight:700; color:var(--muted); line-height:1; }
+  .cc b{ font-size:12px; font-weight:800; color:var(--muted); line-height:1; font-variant-numeric:tabular-nums; }
+  .cc.n-verde{ border-color:rgba(var(--greenRGB),.6); }  .cc.n-verde b{ color:var(--green); }
+  .cc.n-amar{ border-color:rgba(var(--orangeRGB),.6); }  .cc.n-amar b{ color:var(--orange); }
+  .cc.n-verm{ border-color:rgba(var(--redRGB),.6); }     .cc.n-verm b{ color:var(--red); }
+  .cc.n-ouro{ background:#fabd00; border-color:#fabd00; } .cc.n-ouro span{ color:#1a1400; opacity:.8; } .cc.n-ouro b{ color:#1a1400; }
+  /* personagem / foto: do topo do bloco ao pé (borda baixa) da caixa de status; bottom é medido no JS */
+  .hcArt{ position:absolute; right:-8px; top:4px; bottom:80px; width:180px; z-index:1; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; }
+  .hcArt img{ height:100%; width:auto; max-width:none; display:block; }
+  .hcArt.moldura{ right:0; width:126px; border-radius:63px 63px 14px 14px; overflow:hidden; background:rgba(var(--cyanRGB),.10); box-shadow:inset 0 0 0 2px rgba(var(--cyanRGB),.32); display:block; }
+  .hcArt.moldura img{ position:absolute; left:0; top:0; width:auto; height:auto; max-width:none; transform-origin:0 0; }
+  .hcArt.vazio{ display:none; }
+  /* caixa de status em aba */
+  .hcStatus{ position:relative; margin-top:40px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:0 16px 16px 16px; padding:10px; z-index:2; }
+  .hcAba{ position:absolute; left:-1px; top:-29px; height:30px; line-height:28px; margin:0; padding:0 14px; font-size:12.5px; font-weight:800; color:var(--text); background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-bottom:none; border-radius:12px 12px 0 0; z-index:3; }
+  .hcAba::after{ content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--surface); }
+  .hcAba::before{ content:""; position:absolute; right:-12px; bottom:-1px; width:12px; height:12px; overflow:hidden; background:radial-gradient(circle at 100% 0, transparent 11.5px, rgba(var(--borderRGB),.18) 12px, var(--surface) 13px); z-index:-1; }
+  .hcTiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .hcTile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:7px 4px 8px; border-radius:12px; background:var(--surface); border:1.5px solid rgba(var(--borderRGB),.30); min-width:0; }
+  .hcTile .l{ font-size:9.5px; font-weight:700; color:var(--muted); line-height:1; }
+  .hcTile .tv{ display:flex; flex-direction:row; align-items:center; justify-content:center; gap:5px; white-space:nowrap; }
+  .hcTile .tv i{ width:16px; height:16px; font-size:14.5px; line-height:16px; text-align:center; font-style:normal; flex:0 0 auto; }
+  .hcTile .tv b{ font-size:14px; font-weight:800; line-height:1; color:var(--text); font-variant-numeric:tabular-nums; }
 }
+@media (max-width:340px){ .hcCab,.hcComps{ width:calc(100% - 128px); } .hcArt{ width:150px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
 
 .avisoCard{ margin-bottom:1rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:14px; overflow:hidden; }
 .avisoTrack{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -ms-overflow-style:none; }
@@ -112,19 +126,21 @@
 .msgErro { display:none; margin-top:.6rem; padding:.5rem .75rem; background:rgba(var(--redRGB),.1); border:1px solid rgba(var(--redRGB),.3); border-radius:.5rem; color:var(--red2); font-size:.78rem; }
 .msgOk { display:none; margin-top:.6rem; padding:.5rem .75rem; background:rgba(var(--greenRGB),.1); border:1px solid rgba(var(--greenRGB),.3); border-radius:.5rem; color:var(--green); font-size:.78rem; }
 .btnModal { width:100%; margin-top:1rem; padding:.75rem; background:linear-gradient(135deg,var(--cyan),var(--purple)); color:var(--onCyan); font-weight:800; border:none; border-radius:.75rem; font-size:.875rem; cursor:pointer; }
+/* enquadramento v4-0: moldura fixa e grande; a foto move (1 dedo), pinça/barra dão zoom */
 #enqFundo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:80;align-items:center;justify-content:center;flex-direction:column;padding:1rem;}
 #enqFundo.aberto{display:flex;}
-#enqPalco{position:relative;width:100%;max-width:340px;touch-action:none;cursor:grab;border-radius:12px;overflow:hidden;background:#000;}
-#enqFoto{display:block;width:100%;height:auto;filter:grayscale(1) brightness(.42);}
-#enqJanela{position:absolute;left:0;right:0;overflow:hidden;pointer-events:none;}
-#enqJanela img{position:absolute;left:0;width:100%;display:block;}
-#enqMolduraG{position:absolute;left:0;right:0;border:2px dashed rgba(255,255,255,.9);border-radius:6px;pointer-events:none;}
-#enqMolduraM{position:absolute;left:0;right:0;border:2px solid var(--cyan);border-radius:6px;pointer-events:none;}
-.enqLeg{display:flex;gap:1rem;justify-content:center;margin-top:.6rem;font-size:.7rem;color:#fff;opacity:.9;}
-.enqLeg i{font-style:normal;margin-right:.3rem;}
-#enqDica{color:#fff;font-size:.8rem;margin:.9rem 0;text-align:center;opacity:.85;}
-.enqBtns{display:flex;gap:.6rem;width:100%;max-width:360px;}
+#enqPalco{position:relative;width:100%;max-width:340px;height:380px;touch-action:none;cursor:grab;border-radius:12px;overflow:hidden;background:#000;user-select:none;}
+#enqFoto{position:absolute;left:0;top:0;width:auto;height:auto;max-width:none;transform-origin:0 0;filter:grayscale(1) brightness(.42);pointer-events:none;display:block;}
+#enqJanela{position:absolute;overflow:hidden;pointer-events:none;box-shadow:0 0 0 2px var(--cyan);}
+#enqJanela img{position:absolute;left:0;top:0;width:auto;height:auto;max-width:none;transform-origin:0 0;display:block;}
+#enqJanela.arco{border-radius:50% 50% 14px 14px / 36% 36% 14px 14px;}
+#enqJanela.circ{border-radius:50%;}
+.enqZoom{display:flex;align-items:center;gap:10px;width:100%;max-width:340px;margin-top:12px;color:#fff;font-size:18px;font-weight:700;}
+.enqZoom input{flex:1;accent-color:var(--cyan);height:28px;}
+#enqDica{color:#fff;font-size:.8rem;margin:.7rem 0 .9rem;text-align:center;opacity:.85;}
+.enqBtns{display:flex;gap:.6rem;width:100%;max-width:340px;}
 .enqBtns button{flex:1;min-height:46px;border-radius:.75rem;border:none;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;}
+.pillThumb{width:34px;height:34px;border-radius:50%;background:var(--surface2) center/cover no-repeat;margin-right:.6rem;flex:0 0 auto;}
 </style>
 </head>
 <body>
@@ -138,23 +154,26 @@
       <div id="indicadorTurmas" class="hidden"></div>
     </div>
 
-    <div class="feedCardMobile tam-grande" id="feedCard">
-      <div class="fcCover" id="fcCover">
-        <div class="fcTop">
-          <div class="fcAv" id="avatarCard">&#129333;&#8205;&#127891;</div>
-          <div style="min-width:0;">
-            <p class="fcNome" id="nomeUsuarioCard">Estudante</p>
-            <p class="fcSub" id="subCard">Portal do Aluno</p>
-          </div>
-          <div class="fcDots" onclick="abrirGaveta('gavetaCard')">&#8943;</div>
-        </div>
-        <div class="fcBot">
-          <div class="fcMetrics">
-            <div class="fcM"><span class="v" id="mMedia">&mdash;</span><span class="l">M&eacute;dia</span></div>
-            <div class="fcM"><span class="v" id="mRedacoes">&mdash;</span><span class="l">Reda&ccedil;&otilde;es</span></div>
-            <div class="fcM"><span class="v" id="mPontos">&mdash;</span><span class="l">pontos</span></div>
-            <div class="fcM"><svg width="40" height="22" viewBox="0 0 40 22" id="mSpark"><polyline points="2,18 12,14 22,15 31,8 38,4" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="l">Evolu&ccedil;&atilde;o</span></div>
-          </div>
+    <!-- Cartão do Início v4-0 · mobile -->
+    <div class="heroCard" id="heroCard">
+      <div class="hcCab">
+        <div class="hcAv" id="avatarCard" onclick="abrirGaveta('gavetaCard')" title="Trocar fotos">&#129333;&#8205;&#127891;<span class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span></div>
+        <div class="hcNome"><p class="n" id="nomeUsuarioCard">Estudante</p><p class="s" id="linhaCard">&nbsp;</p></div>
+      </div>
+      <div class="hcComps" id="hcComps">
+        <div class="cc" id="ccC1"><span>C1</span><b>&mdash;</b></div>
+        <div class="cc" id="ccC2"><span>C2</span><b>&mdash;</b></div>
+        <div class="cc" id="ccC3"><span>C3</span><b>&mdash;</b></div>
+        <div class="cc" id="ccC4"><span>C4</span><b>&mdash;</b></div>
+        <div class="cc" id="ccC5"><span>C5</span><b>&mdash;</b></div>
+      </div>
+      <div class="hcArt vazio" id="hcArt"><img id="hcArtImg" alt="" draggable="false"/></div>
+      <div class="hcStatus" id="hcStatus">
+        <p class="hcAba">Status do Aluno</p>
+        <div class="hcTiles">
+          <div class="hcTile"><span class="l">M&eacute;dia</span><div class="tv"><i>&#128202;</i><b id="mMedia">&mdash;</b></div></div>
+          <div class="hcTile"><span class="l">Reda&ccedil;&otilde;es</span><div class="tv"><i>&#128218;</i><b id="mRedacoes">&mdash;</b></div></div>
+          <div class="hcTile"><span class="l">Pontos</span><div class="tv"><i>&#127942;</i><b id="mPontos">&mdash;</b></div></div>
         </div>
       </div>
     </div>
@@ -198,29 +217,33 @@
   </div>
 </div>
 
-<!-- Gaveta do card (foto + tamanho) — própria do Início -->
+<!-- Gaveta do cartão (fotos + personagem) — própria do Início · v4-0 -->
 <div class="gvBg atrasBarra" id="gavetaCardBg" onclick="fecharGaveta('gavetaCard')"></div>
 <div class="gv atrasBarra" id="gavetaCard">
   <div class="grip"></div>
   <p class="tit">Seu cart&atilde;o</p>
-  <p class="sub">A foto aparece como capa do seu cart&atilde;o inicial.</p>
-  <a class="pill" onclick="escolherFoto()"><i class="pemoji">&#128247;</i>Trocar foto de capa<i class="fim">&#8250;</i></a>
-  <a class="pill" id="pillEnquadrar" onclick="abrirEnquadre()"><i class="pemoji">&#128207;</i>Ajustar enquadramento<i class="fim">&#8250;</i></a>
-  <a class="pill" onclick="escolherPerfil()"><i class="pemoji">&#128100;</i>Trocar foto de perfil<i class="fim">&#8250;</i></a>
-  <p class="tit" style="margin-top:.75rem;">Tamanho do cart&atilde;o</p>
-  <a class="pill tamOpt" id="opt-medio" onclick="setTamanhoCard('medio')"><i class="pemoji">&#9644;</i>Pequeno<i class="fim" style="opacity:0;">&#10003;</i></a>
-  <a class="pill tamOpt sel" id="opt-grande" onclick="setTamanhoCard('grande')"><i class="pemoji">&#9645;</i>M&eacute;dio<i class="fim">&#10003;</i></a>
-  <a class="pill tamOpt" id="opt-xg" onclick="setTamanhoCard('xg')"><i class="pemoji">&#11036;</i>Grande<i class="fim" style="opacity:0;">&#10003;</i></a>
+  <p class="sub">Escolha um personagem da galeria ou use suas fotos.</p>
+  <a class="pill" onclick="abrirGaleria()"><i class="pemoji">&#127917;</i>Personagem da galeria<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="escolherFoto()"><i class="pemoji">&#128444;&#65039;</i>Trocar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
+  <a class="pill" id="pillEnqCartao" onclick="abrirEnquadre('cartao')"><i class="pemoji">&#128207;</i>Enquadrar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="escolherPerfil()"><i class="pemoji">&#128100;</i>Trocar foto da bolinha<i class="fim">&#8250;</i></a>
+  <a class="pill" id="pillEnqPerfil" onclick="abrirEnquadre('perfil')"><i class="pemoji">&#128207;</i>Enquadrar foto da bolinha<i class="fim">&#8250;</i></a>
+</div>
+<div class="gvBg atrasBarra" id="gavetaGaleriaBg" onclick="fecharGaveta('gavetaGaleria')"></div>
+<div class="gv atrasBarra" id="gavetaGaleria">
+  <div class="grip"></div>
+  <p class="tit">Personagem da galeria</p>
+  <p class="sub">Aparece no seu cart&atilde;o inicial.</p>
+  <div id="listaGaleria"></div>
+  <a class="pill" onclick="usarMinhaFoto()"><i class="pemoji">&#128444;&#65039;</i>Usar minha foto no cart&atilde;o<i class="fim" id="ckMinhaFoto" style="opacity:0;">&#10003;</i></a>
 </div>
 <div id="enqFundo">
   <div id="enqPalco">
-    <img id="enqFoto" alt=""/>
-    <div id="enqJanela"><img id="enqFotoNitida" alt=""/></div>
-    <div id="enqMolduraG"></div>
-    <div id="enqMolduraM"></div>
+    <img id="enqFoto" alt="" draggable="false"/>
+    <div id="enqJanela" class="arco"><img id="enqFotoNitida" alt="" draggable="false"/></div>
   </div>
-  <div class="enqLeg"><span><i style="color:var(--cyan);">&#9646;</i>M&eacute;dio</span><span><i>&#9647;</i>Grande</span></div>
-  <p id="enqDica">Arraste a foto: o que ficar fora das molduras n&atilde;o aparece no cart&atilde;o</p>
+  <div class="enqZoom"><span>&minus;</span><input type="range" id="enqZoom" min="100" max="300" value="100" aria-label="Zoom"/><span>+</span></div>
+  <p id="enqDica">Arraste a foto e use a pin&ccedil;a ou a barra para ajustar</p>
   <div class="enqBtns">
     <button style="background:var(--surface2);color:var(--text);" onclick="fecharEnquadre()">Cancelar</button>
     <button style="background:var(--cyan);color:var(--onCyan);" onclick="salvarEnquadre()">Salvar</button>
@@ -228,7 +251,6 @@
 </div>
 <input type="file" id="inputFoto" accept="image/jpeg,image/png,image/webp" style="display:none;"/>
 <input type="file" id="inputPerfil" accept="image/jpeg,image/png,image/webp" style="display:none;"/>
-
 <!-- Modal Entrar em Turma -->
 <div id="modalEntrarTurma" class="modalFundo" onclick="if(event.target===this)fecharModalEntrarTurma()">
   <div class="modalBox">
@@ -259,7 +281,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v3-16'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-0'
   });
 
   // Sauda\u00e7\u00e3o
@@ -278,45 +300,15 @@
     if (p) p.onclick = function(){ abrirGaveta('gavetaCard'); };
   })();
 
-  // v3-16: porta vinda de Configura\u00e7\u00f5es — ?personalizar=1 abre a gaveta do cart\u00e3o
-  (function(){
-    try {
-      var q = new URLSearchParams(window.location.search);
-      if (q.get('personalizar') === '1') {
-        setTimeout(function(){ abrirGaveta('gavetaCard'); }, 250);
-        history.replaceState(null, '', window.location.pathname);
-      }
-    } catch(e) {}
-  })();
-
-  // ─── Tamanho do cart\u00e3o ───
-  function setTamanhoCard(tam, silencioso) {
-    var card = document.getElementById('feedCard');
-    if (card) {
-      card.classList.remove('tam-medio','tam-grande','tam-xg');
-      card.classList.add('tam-' + tam);
-    }
-    ['medio','grande','xg'].forEach(function(t){
-      var o = document.getElementById('opt-' + t);
-      if (!o) return;
-      var eh = (t === tam);
-      o.classList.toggle('sel', eh);
-      var ck = o.querySelector('.fim');
-      if (ck) ck.style.opacity = eh ? '1' : '0';
-    });
-    try { localStorage.setItem('redaon-card-tam', tam); } catch(e) {}
-    if (!silencioso) toast('Cart\u00e3o: ' + (tam === 'medio' ? 'Pequeno' : tam === 'grande' ? 'M\u00e9dio' : 'Grande'));
-  }
-  (function(){
-    var tam = 'grande';
-    try { tam = localStorage.getItem('redaon-card-tam') || 'grande'; } catch(e) {}
-    if (['medio','grande','xg'].indexOf(tam) < 0) tam = 'grande';
-    setTamanhoCard(tam, true);
-  })();
-
-  // ─── Foto de capa (bucket privado: avatares-alunos/<id>/capa.jpg) ───
+  // ═══ Cartão do Início v4-0: personagem da galeria, fotos (cartão + bolinha) e enquadramento ═══
   var _BUCKET_AVATAR = 'avatares-alunos';
-  /* v3-11: Storage por REST direto (sem supabase-js). dbFetch cuida de token e refresh. */
+  var GALERIA = [
+    { id:'menino', nome:'Menino da medalha', src:'avatares/menino-busto.webp' },
+    { id:'menina', nome:'Menina do campo',   src:'avatares/menina-busto.webp' }
+  ];
+  var RATIO = { cartao:1.35, perfil:1 };            /* altura/largura da moldura */
+  var _cartao = { avatar:null, enqCartao:null, enqPerfil:null, urlCartao:null, urlPerfil:null };
+
   async function baixarImagemPrivada(caminho) {
     try {
       var res = await dbFetch(SUPABASE_URL + '/storage/v1/object/authenticated/' + caminho);
@@ -325,209 +317,260 @@
       return URL.createObjectURL(blob);
     } catch(e) { return null; }
   }
-  async function enviarImagemPrivada(caminho, blob) {
+  async function enviarImagemPrivada(caminho, blob, tipo) {
     var res = await dbFetch(SUPABASE_URL + '/storage/v1/object/' + caminho, {
-      method: 'POST',
-      headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'true' },
-      body: blob
+      method: 'POST', headers: { 'Content-Type': tipo || 'image/jpeg', 'x-upsert': 'true' }, body: blob
     });
     return !!(res && res.ok);
   }
-  async function carregarFotoCapa() {
-    try {
-      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
-      if (!uid) return;
-      /* v3-16: enquadramento vem do banco (vale em qualquer aparelho); localStorage vira cache */
-      try {
-        var resPos = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid + '&select=capa_pos');
-        var dPos = await resPos.json();
-        if (resPos.ok && Array.isArray(dPos) && dPos[0] && dPos[0].capa_pos !== null && dPos[0].capa_pos !== undefined) {
-          _posCapa = Math.max(0, Math.min(100, dPos[0].capa_pos));
-          try { localStorage.setItem('redaon-capa-pos', String(_posCapa)); } catch(e2) {}
-        }
-      } catch(ePos) { /* segue com o cache local */ }
-      var capa = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg');
-      if (capa) aplicarFotoCapa(capa);
-      // Foto de perfil da conta (definida em Configura\u00e7\u00f5es) \u2014 usada na bolinha
-      var perfil = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
-      if (perfil) aplicarFotoPerfil(perfil);
-    } catch(e) { /* sem foto \u2014 mant\u00e9m o degrad\u00ea */ }
-  }
-  var _urlCapa = null, _posCapa = 50;
-  /* v3-16: parse seguro — 0% é válido (o antigo `|| 50` descartava o extremo do topo) */
-  try {
-    var _pSalva = parseFloat(localStorage.getItem('redaon-capa-pos'));
-    if (!isNaN(_pSalva)) _posCapa = Math.max(0, Math.min(100, _pSalva));
-  } catch(e) {}
-  function aplicarFotoCapa(url) {
-    _urlCapa = url;
-    var capa = document.getElementById('fcCover');
-    if (capa) {
-      capa.style.setProperty('--fotoCapa', 'url("' + url + '")');
-      capa.style.setProperty('--posCapa', _posCapa + '%');
-      capa.classList.add('comFoto');
-    }
-    var pe = document.getElementById('pillEnquadrar');
-    if (pe) pe.style.display = '';
-  }
-  /* A bolinha usa a foto de PERFIL da conta (Configurações) — não a capa */
-  function aplicarFotoPerfil(url) {
-    ['avatarCard','avatarSidebar'].forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) { el.style.backgroundImage = 'url("' + url + '")'; el.textContent = ''; }
+  function uidAtual(){ return (typeof authGetUserId === 'function') ? authGetUserId() : null; }
+  async function salvarUsuario(obj) {
+    var uid = uidAtual(); if (!uid) return false;
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid, {
+      method:'PATCH', headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' }, body: JSON.stringify(obj)
     });
+    return !!(res && res.ok);
   }
-  /* Enquadramento: moldura do Médio (sólida) e do Grande (tracejada).
-     O que fica fora aparece em cinza e escurecido. */
-  var _enqPos = 50, _arrastando = false, _yIni = 0, _posIni = 50;
-  function abrirEnquadre(){
-    if (!_urlCapa) { toast('Envie uma foto de capa primeiro.', 2400); return; }
-    fecharGaveta('gavetaCard');
-    _enqPos = _posCapa;
-    var f = document.getElementById('enqFoto'), fn = document.getElementById('enqFotoNitida');
-    f.onload = function(){ posicionarMolduras(); desenharEnquadre(); };
-    f.src = _urlCapa; fn.src = _urlCapa;
-    document.getElementById('enqFundo').classList.add('aberto');
-    setTimeout(function(){ posicionarMolduras(); desenharEnquadre(); }, 60);
-  }
-  function posicionarMolduras(){
-    var palco = document.getElementById('enqPalco');
-    var largura = palco.offsetWidth || 320, altura = palco.offsetHeight || 400;
-    var hG = Math.min(altura, largura * 1.25);
-    var hM = Math.min(altura, largura * 0.744);
-    var gG = document.getElementById('enqMolduraG'), gM = document.getElementById('enqMolduraM');
-    gG.style.height = hG + 'px'; gM.style.height = hM + 'px';
-    gG.dataset.h = hG; gM.dataset.h = hM;
-  }
-  function desenharEnquadre(){
-    var palco = document.getElementById('enqPalco');
-    var altura = palco.offsetHeight || 400;
-    var gG = document.getElementById('enqMolduraG'), gM = document.getElementById('enqMolduraM');
-    var hG = parseFloat(gG.dataset.h || 0), hM = parseFloat(gM.dataset.h || 0);
-    var topoG = (altura - hG) * (_enqPos / 100);
-    gG.style.top = topoG + 'px';
-    gM.style.top = (topoG + (hG - hM) / 2) + 'px';
-    var jan = document.getElementById('enqJanela'), fn = document.getElementById('enqFotoNitida');
-    jan.style.top = topoG + 'px'; jan.style.height = hG + 'px';
-    fn.style.top = (-topoG) + 'px';
-  }
-  function fecharEnquadre(){ document.getElementById('enqFundo').classList.remove('aberto'); }
-  function salvarEnquadre(){
-    _posCapa = _enqPos;
-    try { localStorage.setItem('redaon-capa-pos', String(_posCapa)); } catch(e) {}
-    /* v3-16: persiste no banco — o ajuste não se perde ao trocar de aparelho ou limpar o navegador */
-    (async function(){
-      try {
-        var uid = authGetUserId();
-        if (!uid) return;
-        await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid, {
-          method: 'PATCH',
-          body: JSON.stringify({ capa_pos: Math.round(_posCapa) })
-        });
-      } catch(e){ console.warn('[inicio] capa_pos n\u00e3o salvo no banco:', e); }
-    })();
-    var capa = document.getElementById('fcCover');
-    if (capa) capa.style.setProperty('--posCapa', _posCapa + '%');
-    fecharEnquadre();
-    toast('\u2705 Enquadramento salvo');
-  }
-  (function(){
-    var palco = document.getElementById('enqPalco');
-    if (!palco) return;
-    function inicio(y){ _arrastando = true; _yIni = y; _posIni = _enqPos; }
-    function move(y){
-      if (!_arrastando) return;
-      var alt = palco.offsetHeight || 300;
-      _enqPos = Math.max(0, Math.min(100, _posIni + ((_yIni - y) / alt) * 100));
-      desenharEnquadre();
-    }
-    palco.addEventListener('pointerdown', function(e){ inicio(e.clientY); try{ palco.setPointerCapture(e.pointerId); }catch(err){} });
-    palco.addEventListener('pointermove', function(e){ if(_arrastando){ e.preventDefault(); move(e.clientY); } });
-    ['pointerup','pointercancel'].forEach(function(ev){ palco.addEventListener(ev, function(){ _arrastando = false; }); });
-    palco.addEventListener('touchstart', function(e){ inicio(e.touches[0].clientY); }, { passive:true });
-    palco.addEventListener('touchmove', function(e){ move(e.touches[0].clientY); }, { passive:true });
-    palco.addEventListener('touchend', function(){ _arrastando = false; }, { passive:true });
-    window.addEventListener('resize', function(){ posicionarMolduras(); desenharEnquadre(); });
-  })();
 
-  function escolherFoto() {
-    document.getElementById('inputFoto').click();
-    setTimeout(function(){ fecharGaveta('gavetaCard'); }, 0);
+  /* ─── slot do personagem: mede a caixa de status para apoiar o pé na borda baixa ─── */
+  function ajustarArt() {
+    var st = document.getElementById('hcStatus'), art = document.getElementById('hcArt');
+    if (st && art) art.style.bottom = st.offsetHeight + 'px';
   }
-  function escolherPerfil() {
-    document.getElementById('inputPerfil').click();
-    setTimeout(function(){ fecharGaveta('gavetaCard'); }, 0);
+  window.addEventListener('resize', ajustarArt);
+
+  /* enq = {x,y,w} normalizado pela largura da moldura (independe do aparelho). w = largura da foto em "molduras". */
+  function enqPadrao(iw, ih, ratio) {
+    var w = Math.max(1, ratio * iw / ih);
+    return { x: -(w - 1) / 2, y: -(w * ih / iw - ratio) / 2, w: w };
   }
-  document.getElementById('inputFoto').addEventListener('change', function(){
-    var f = this.files && this.files[0];
-    this.value = '';
-    if (f) enviarFotoCapa(f);
-  });
-  document.getElementById('inputPerfil').addEventListener('change', function(){
-    var f = this.files && this.files[0];
-    this.value = '';
-    if (f) enviarFotoPerfil(f);
-  });
-  async function enviarFotoPerfil(arquivo) {
-    if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0) { toast('Use JPG, PNG ou WebP.', 3000); return; }
-    toast('Enviando foto\u2026', 4000);
+  function aplicarEnqNoCartao(img, enq, larguraMoldura) {
+    if (!img || !enq) return;
+    img.style.width = (enq.w * larguraMoldura) + 'px';
+    img.style.transform = 'translate(' + (enq.x * larguraMoldura) + 'px,' + (enq.y * larguraMoldura) + 'px)';
+  }
+  function mostrarArt(modo, url) {            /* modo: 'personagem' | 'recortada' | 'moldura' | 'vazio' */
+    var art = document.getElementById('hcArt'), img = document.getElementById('hcArtImg');
+    if (!art || !img) return;
+    art.className = 'hcArt' + (modo === 'moldura' ? ' moldura' : (modo === 'vazio' ? ' vazio' : ''));
+    img.removeAttribute('style');
+    if (modo === 'vazio') { img.removeAttribute('src'); return; }
+    img.onload = function(){
+      if (modo === 'moldura') {
+        var enq = _cartao.enqCartao && _cartao.enqCartao.w ? _cartao.enqCartao : enqPadrao(img.naturalWidth, img.naturalHeight, RATIO.cartao);
+        aplicarEnqNoCartao(img, enq, art.clientWidth || 126);
+      }
+      ajustarArt();
+    };
+    img.src = url;
+  }
+  function aplicarFotoPerfil(url) {
+    _cartao.urlPerfil = url;
+    ['avatarCard','avatarSidebar'].forEach(function(id){
+      var el = document.getElementById(id); if (!el) return;
+      el.style.backgroundImage = 'url("' + url + '")';
+      var enq = _cartao.enqPerfil && _cartao.enqPerfil.w ? _cartao.enqPerfil : null;
+      if (enq) {
+        var L = el.clientWidth || 46;
+        el.style.backgroundSize = (enq.w * L) + 'px auto';
+        el.style.backgroundPosition = (enq.x * L) + 'px ' + (enq.y * L) + 'px';
+      } else { el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; }
+      var txt = el.childNodes[0]; if (txt && txt.nodeType === 3) txt.textContent = '';
+    });
+    var pe = document.getElementById('pillEnqPerfil'); if (pe) pe.style.display = '';
+  }
+  function renderArt() {
+    var av = _cartao.avatar ? GALERIA.filter(function(g){ return g.id === _cartao.avatar; })[0] : null;
+    if (av) return mostrarArt('personagem', av.src);
+    if (_cartao.urlCartao) return mostrarArt(_cartao.enqCartao && _cartao.enqCartao.recortada ? 'recortada' : 'moldura', _cartao.urlCartao);
+    mostrarArt('personagem', GALERIA[0].src);   /* padrão atribuído */
+  }
+
+  async function carregarCartao() {
+    ajustarArt();
     try {
-      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
-      if (!uid) { toast('Sua sess\u00e3o expirou.', 3200); return; }
-      var blob = await comprimirImagem(arquivo);
-      var ok = await enviarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg', blob);
-      if (!ok) throw new Error('upload recusado');
-      var url = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
-      if (url) aplicarFotoPerfil(url);
-      toast('\u2705 Foto de perfil atualizada!');
-    } catch(e) { console.warn(e); toast('N\u00e3o consegui enviar a foto.', 3200); }
+      var uid = uidAtual(); if (!uid) return;
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/usuarios?id=eq.' + uid + '&select=cartao_enq,perfil_enq,avatar_galeria', {});
+      var row = res && res.ok ? (await res.json())[0] : null;
+      if (row) { _cartao.avatar = row.avatar_galeria || null; _cartao.enqCartao = row.cartao_enq || null; _cartao.enqPerfil = row.perfil_enq || null; }
+      var recortada = !!(_cartao.enqCartao && _cartao.enqCartao.recortada);
+      var capa = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + (recortada ? '/capa.png' : '/capa.jpg'));
+      if (capa) { _cartao.urlCartao = capa; var pc = document.getElementById('pillEnqCartao'); if (pc) pc.style.display = recortada ? 'none' : ''; }
+      else { var pc2 = document.getElementById('pillEnqCartao'); if (pc2) pc2.style.display = 'none'; }
+      var perfil = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
+      if (perfil) aplicarFotoPerfil(perfil); else { var pp = document.getElementById('pillEnqPerfil'); if (pp) pp.style.display = 'none'; }
+    } catch(e) { console.warn('[cartão]', e); }
+    renderArt();
   }
-  function comprimirImagem(arquivo) {
+
+  /* ─── galeria ─── */
+  function abrirGaleria() {
+    fecharGaveta('gavetaCard');
+    var l = document.getElementById('listaGaleria'); if (!l) return;
+    l.innerHTML = GALERIA.map(function(g){
+      var sel = (_cartao.avatar === g.id);
+      return '<a class="pill" onclick="escolherPersonagem(\'' + g.id + '\')"><span class="pillThumb" style="background-image:url(' + g.src + ');"></span>' + g.nome + '<i class="fim" style="opacity:' + (sel ? 1 : 0) + ';">\u2713</i></a>';
+    }).join('');
+    var ck = document.getElementById('ckMinhaFoto'); if (ck) ck.style.opacity = (!_cartao.avatar && _cartao.urlCartao) ? 1 : 0;
+    abrirGaveta('gavetaGaleria');
+  }
+  async function escolherPersonagem(id) {
+    _cartao.avatar = id; renderArt(); fecharGaveta('gavetaGaleria');
+    var ok = await salvarUsuario({ avatar_galeria: id });
+    toast(ok ? '\u2705 Personagem escolhido' : 'N\u00e3o consegui salvar. Tente de novo.', 2400);
+  }
+  async function usarMinhaFoto() {
+    fecharGaveta('gavetaGaleria');
+    if (!_cartao.urlCartao) { toast('Envie uma foto do cart\u00e3o primeiro.', 2600); escolherFoto(); return; }
+    _cartao.avatar = null; renderArt();
+    await salvarUsuario({ avatar_galeria: null });
+  }
+
+  /* ─── envio de fotos ─── */
+  function escolherFoto(){ fecharGaveta('gavetaCard'); document.getElementById('inputFoto').click(); }
+  function escolherPerfil(){ fecharGaveta('gavetaCard'); document.getElementById('inputPerfil').click(); }
+  document.getElementById('inputFoto').addEventListener('change', function(){ var f = this.files && this.files[0]; this.value = ''; if (f) enviarFotoCartao(f); });
+  document.getElementById('inputPerfil').addEventListener('change', function(){ var f = this.files && this.files[0]; this.value = ''; if (f) enviarFotoPerfil(f); });
+
+  function carregarImagem(arquivo) {
     return new Promise(function(resolve, reject){
-      var img = new Image();
-      var url = URL.createObjectURL(arquivo);
-      img.onload = function(){
-        URL.revokeObjectURL(url);
-        var MAX = 1200;
-        var w = img.width, h = img.height;
-        if (w > MAX || h > MAX) {
-          if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
-          else { w = Math.round(w * MAX / h); h = MAX; }
-        }
-        var c = document.createElement('canvas');
-        c.width = w; c.height = h;
-        c.getContext('2d').drawImage(img, 0, 0, w, h);
-        c.toBlob(function(blob){
-          if (blob) resolve(blob); else reject(new Error('Falha ao processar imagem'));
-        }, 'image/jpeg', 0.82);
-      };
+      var img = new Image(), url = URL.createObjectURL(arquivo);
+      img.onload = function(){ resolve({ img:img, url:url }); };
       img.onerror = function(){ URL.revokeObjectURL(url); reject(new Error('Falha ao carregar imagem')); };
       img.src = url;
     });
   }
-  async function enviarFotoCapa(arquivo) {
-    if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0) {
-      toast('Formato n\u00e3o aceito. Use JPG, PNG ou WebP.', 3000);
-      return;
-    }
+  function temTransparencia(img) {
+    try {
+      var n = 64, c = document.createElement('canvas'); c.width = n; c.height = n;
+      var g = c.getContext('2d'); g.drawImage(img, 0, 0, n, n);
+      var d = g.getImageData(0, 0, n, n).data;
+      for (var i = 3; i < d.length; i += 4) if (d[i] < 40) return true;
+    } catch(e) {}
+    return false;
+  }
+  function redimensionar(img, MAX, mime, q) {
+    return new Promise(function(resolve, reject){
+      var w = img.width, h = img.height;
+      if (w > MAX || h > MAX) { if (w >= h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; } }
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      c.toBlob(function(blob){ if (blob) resolve(blob); else reject(new Error('Falha ao processar imagem')); }, mime, q);
+    });
+  }
+  async function enviarFotoCartao(arquivo) {
+    if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0) { toast('Use JPG, PNG ou WebP.', 3000); return; }
     toast('Enviando foto\u2026', 4000);
     try {
-      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
-      if (!uid) { toast('Sua sess\u00e3o expirou. Entre novamente.', 3200); return; }
-      var blob = await comprimirImagem(arquivo);
-      if (blob.size > 5 * 1024 * 1024) { toast('Imagem muito grande mesmo comprimida.', 3200); return; }
-      var ok = await enviarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg', blob);
+      var uid = uidAtual(); if (!uid) { toast('Sua sess\u00e3o expirou. Entre novamente.', 3200); return; }
+      var carr = await carregarImagem(arquivo);
+      var recortada = (arquivo.type !== 'image/jpeg') && temTransparencia(carr.img);
+      URL.revokeObjectURL(carr.url);
+      var blob = recortada ? await redimensionar(carr.img, 1200, 'image/png') : await redimensionar(carr.img, 1200, 'image/jpeg', 0.82);
+      var nome = recortada ? 'capa.png' : 'capa.jpg';
+      var ok = await enviarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/' + nome, blob, recortada ? 'image/png' : 'image/jpeg');
       if (!ok) throw new Error('upload recusado');
-      var url = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/capa.jpg');
-      if (url) aplicarFotoCapa(url);
-      toast('\u2705 Foto de capa atualizada!');
-    } catch(e) {
-      console.warn('Erro ao enviar foto:', e);
-      toast('N\u00e3o consegui enviar a foto. Tente de novo.', 3200);
-    }
+      _cartao.urlCartao = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/' + nome);
+      _cartao.enqCartao = recortada ? { recortada:true } : null;
+      _cartao.avatar = null;
+      await salvarUsuario({ cartao_enq: _cartao.enqCartao, avatar_galeria: null });
+      var pc = document.getElementById('pillEnqCartao'); if (pc) pc.style.display = recortada ? 'none' : '';
+      renderArt();
+      if (recortada) toast('\u2705 Foto recortada no cart\u00e3o!');
+      else { toast('\u2705 Foto enviada. Ajuste o enquadramento.'); abrirEnquadre('cartao'); }
+    } catch(e) { console.warn(e); toast('N\u00e3o consegui enviar a foto.', 3200); }
   }
-  (function(){ var pe=document.getElementById('pillEnquadrar'); if(pe) pe.style.display='none'; })();
-  carregarFotoCapa();
+  async function enviarFotoPerfil(arquivo) {
+    if (['image/jpeg','image/png','image/webp'].indexOf(arquivo.type) < 0) { toast('Use JPG, PNG ou WebP.', 3000); return; }
+    toast('Enviando foto\u2026', 4000);
+    try {
+      var uid = uidAtual(); if (!uid) { toast('Sua sess\u00e3o expirou.', 3200); return; }
+      var carr = await carregarImagem(arquivo);
+      var blob = await redimensionar(carr.img, 800, 'image/jpeg', 0.85); URL.revokeObjectURL(carr.url);
+      var ok = await enviarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg', blob, 'image/jpeg');
+      if (!ok) throw new Error('upload recusado');
+      _cartao.enqPerfil = null; await salvarUsuario({ perfil_enq: null });
+      var url = await baixarImagemPrivada(_BUCKET_AVATAR + '/' + uid + '/perfil.jpg');
+      if (url) aplicarFotoPerfil(url);
+      toast('\u2705 Foto enviada. Ajuste o enquadramento.'); abrirEnquadre('perfil');
+    } catch(e) { console.warn(e); toast('N\u00e3o consegui enviar a foto.', 3200); }
+  }
+
+  /* ─── enquadramento: moldura fixa; foto (px,py,s) move e dá zoom; mínimo = cobrir a moldura ─── */
+  var _enq = { alvo:null, W:0, H:0, fx:0, fy:0, fw:0, fh:0, iw:1, ih:1, px:0, py:0, s:1, smin:1 };
+  function abrirEnquadre(alvo) {
+    fecharGaveta('gavetaCard');
+    var url = alvo === 'cartao' ? _cartao.urlCartao : _cartao.urlPerfil;
+    if (!url) { toast(alvo === 'cartao' ? 'Envie uma foto do cart\u00e3o primeiro.' : 'Envie uma foto da bolinha primeiro.', 2600); return; }
+    _enq.alvo = alvo;
+    var f = document.getElementById('enqFoto'), fn = document.getElementById('enqFotoNitida'), jan = document.getElementById('enqJanela');
+    jan.className = alvo === 'cartao' ? 'arco' : 'circ';
+    f.onload = function(){ medirEnquadre(); };
+    f.src = url; fn.src = url;
+    document.getElementById('enqFundo').classList.add('aberto');
+    if (f.complete && f.naturalWidth) setTimeout(medirEnquadre, 30);
+  }
+  function medirEnquadre() {
+    var palco = document.getElementById('enqPalco'), jan = document.getElementById('enqJanela'), f = document.getElementById('enqFoto'), fn = document.getElementById('enqFotoNitida');
+    var e = _enq, ratio = RATIO[e.alvo];
+    e.W = palco.clientWidth; e.H = palco.clientHeight; e.iw = f.naturalWidth || 1; e.ih = f.naturalHeight || 1;
+    e.fw = Math.round(e.W * 0.78); e.fh = Math.round(e.fw * ratio);
+    if (e.fh > e.H - 20) { e.fh = e.H - 20; e.fw = Math.round(e.fh / ratio); }
+    jan.style.width = e.fw + 'px'; jan.style.height = e.fh + 'px';
+    e.fx = Math.round((e.W - e.fw) / 2); e.fy = Math.round((e.H - e.fh) / 2); jan.style.left = e.fx + 'px'; jan.style.top = e.fy + 'px';
+    f.style.width = e.iw + 'px'; fn.style.width = e.iw + 'px';
+    e.smin = Math.max(e.fw / e.iw, e.fh / e.ih);
+    var salvo = e.alvo === 'cartao' ? _cartao.enqCartao : _cartao.enqPerfil;
+    if (salvo && salvo.w) { e.s = Math.max(e.smin, salvo.w * e.fw / e.iw); e.px = e.fx + salvo.x * e.fw; e.py = e.fy + salvo.y * e.fw; }
+    else { e.s = e.smin; e.px = e.fx - (e.iw * e.s - e.fw) / 2; e.py = e.fy - (e.ih * e.s - e.fh) / 2; }
+    var z = document.getElementById('enqZoom'); if (z) z.value = Math.round(100 * e.s / e.smin);
+    desenharEnquadre();
+  }
+  function desenharEnquadre() {
+    var e = _enq, f = document.getElementById('enqFoto'), fn = document.getElementById('enqFotoNitida');
+    e.px = Math.min(e.fx, Math.max(e.fx + e.fw - e.iw * e.s, e.px)); e.py = Math.min(e.fy, Math.max(e.fy + e.fh - e.ih * e.s, e.py));
+    f.style.transform = 'translate(' + e.px + 'px,' + e.py + 'px) scale(' + e.s + ')';
+    fn.style.transform = 'translate(' + (e.px - e.fx) + 'px,' + (e.py - e.fy) + 'px) scale(' + e.s + ')';
+  }
+  function zoomEnquadre(ns) {
+    var e = _enq; ns = Math.max(e.smin, Math.min(e.smin * 3, ns));
+    var cx = e.fx + e.fw / 2, cy = e.fy + e.fh / 2;
+    e.px = cx - (cx - e.px) * ns / e.s; e.py = cy - (cy - e.py) * ns / e.s; e.s = ns;
+    var z = document.getElementById('enqZoom'); if (z) z.value = Math.round(100 * e.s / e.smin);
+    desenharEnquadre();
+  }
+  function fecharEnquadre(){ document.getElementById('enqFundo').classList.remove('aberto'); }
+  async function salvarEnquadre() {
+    var e = _enq;
+    var enq = { x:(e.px - e.fx) / e.fw, y:(e.py - e.fy) / e.fw, w:e.iw * e.s / e.fw };
+    fecharEnquadre();
+    if (e.alvo === 'cartao') { _cartao.enqCartao = enq; renderArt(); }
+    else { _cartao.enqPerfil = enq; if (_cartao.urlPerfil) aplicarFotoPerfil(_cartao.urlPerfil); }
+    var ok = await salvarUsuario(e.alvo === 'cartao' ? { cartao_enq: enq } : { perfil_enq: enq });
+    toast(ok ? '\u2705 Enquadramento salvo' : 'Salvei s\u00f3 neste aparelho; tente de novo mais tarde.', 2600);
+  }
+  (function(){
+    var palco = document.getElementById('enqPalco'); if (!palco) return;
+    var on = false, pin = false, sx, sy, ox, oy, d0 = 0, s0 = 1;
+    function dist(t){ return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+    palco.addEventListener('mousedown', function(ev){ on = true; sx = ev.clientX; sy = ev.clientY; ox = _enq.px; oy = _enq.py; ev.preventDefault(); });
+    window.addEventListener('mousemove', function(ev){ if (!on) return; _enq.px = ox + (ev.clientX - sx); _enq.py = oy + (ev.clientY - sy); desenharEnquadre(); });
+    window.addEventListener('mouseup', function(){ on = false; });
+    palco.addEventListener('touchstart', function(ev){
+      if (ev.touches.length === 2) { pin = true; on = false; d0 = dist(ev.touches); s0 = _enq.s; }
+      else { on = true; sx = ev.touches[0].clientX; sy = ev.touches[0].clientY; ox = _enq.px; oy = _enq.py; }
+      ev.preventDefault();
+    }, { passive:false });
+    palco.addEventListener('touchmove', function(ev){
+      if (pin && ev.touches.length === 2) zoomEnquadre(s0 * dist(ev.touches) / d0);
+      else if (on && ev.touches.length === 1) { _enq.px = ox + (ev.touches[0].clientX - sx); _enq.py = oy + (ev.touches[0].clientY - sy); desenharEnquadre(); }
+      ev.preventDefault();
+    }, { passive:false });
+    palco.addEventListener('touchend', function(ev){ if (ev.touches.length < 2) pin = false; if (ev.touches.length === 0) on = false; });
+    var z = document.getElementById('enqZoom'); if (z) z.addEventListener('input', function(){ zoomEnquadre(_enq.smin * z.value / 100); });
+    window.addEventListener('resize', function(){ if (document.getElementById('enqFundo').classList.contains('aberto')) medirEnquadre(); });
+  })();
+  carregarCartao();
 
   // ─── Card rotativo de avisos ───
   function montarAvisos(itens) {
@@ -768,6 +811,19 @@
       el = document.getElementById('mMedia');    if (el) el.textContent = fmtNum(media);
       el = document.getElementById('mRedacoes'); if (el) el.textContent = fmtNum(totalRedacoes);
       el = document.getElementById('mPontos');   if (el) el.textContent = evolStr;
+      /* v4-0: notas C1–C5 (média das mesmas redações da Média) com cor por faixa; 200 = ouro */
+      (function(){
+        ['c1','c2','c3','c4','c5'].forEach(function(k, i){
+          var soma = 0, n = 0;
+          historico.forEach(function(r){ if (typeof r[k] === 'number') { soma += r[k]; n++; } });
+          var el = document.getElementById('ccC' + (i + 1)); if (!el) return;
+          if (!n) return;
+          var v = Math.round(soma / n);
+          el.className = 'cc ' + (v >= 200 ? 'n-ouro' : v >= 160 ? 'n-verde' : v >= 120 ? 'n-amar' : 'n-verm');
+          el.querySelector('b').textContent = v;
+        });
+        ajustarArt();
+      })();
       el = document.getElementById('dMedia');    if (el) el.textContent = fmtNum(media);
       el = document.getElementById('dRedacoes'); if (el) el.textContent = fmtNum(totalRedacoes);
       el = document.getElementById('dPontos');
