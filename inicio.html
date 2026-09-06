@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v4-4</title>
-<!-- RedaON · Portal do Aluno · Início · v4-4 · sobre aluno-base-v6 -->
+<title>RedaON | Início v4-5</title>
+<!-- RedaON · Portal do Aluno · Início · v4-5 · sobre aluno-base-v6 -->
+<!-- v4-5 (07/09/2026): padrão único em todas as larguras (mockup balão v5): carrossel vira balão de HQ à esquerda, na altura do rosto, falando com o personagem à direita; notas C1–C5 dentro de "Seu Status", alinhadas pelas caixas; desktop/tablet deitado = mesmo cartão maior (sem bolinha); saem o grid de 3 colunas (duasCol) e as regras de 1200/1500px -->
 <!-- v4-4 (07/09/2026): apelido ("nick") — usuarios.apelido, até 20 letras; opção "Como quer ser chamado?" na gaveta Seu cartão; a saudação usa apelido || primeiro nome; nome oficial não muda -->
 <!-- v4-3 (07/09/2026): desktop com sidebar: coluna da direita elástica e só ao lado a partir de 1200px (1024–1199 = carrossel e turma abaixo do cartão, cartão 400+240); celular: cabeçalho mais largo (calc(100% - 118px)), saudação 16px, subtítulo em linha única -->
 <!-- v4-2 (07/09/2026): cartão em todas as larguras (mockup larguras v5): saudação como cabeçalho do cartão; tablet em pé = celular 1,6×; desktop/tablet deitado = personagem ao lado, sem bolinha (fica na sidebar), carrossel + turma na 3ª coluna; C1–C5 borda 2px; aba "Seu Status"; saem saudacaoDesktop e statsDesktop; ☰ removido abaixo de 1024px (aluno-base-v6.css) -->
@@ -41,10 +42,10 @@
   .hcNome{ min-width:0; }
   .hcNome .n{ margin:0; font-size:16px; font-weight:800; line-height:1.15; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .hcNome .s{ margin:2px 0 0; font-size:11px; color:var(--muted); line-height:1.2; min-height:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .hcComps{ display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-top:14px; width:calc(100% - 150px); position:relative; z-index:3; }
-  .cc{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px 5px; border-radius:9px; border:2px solid rgba(var(--borderRGB),.22); background:var(--surface); min-width:0; }
-  .cc span{ font-size:9.5px; font-weight:700; color:var(--muted); line-height:1; }
-  .cc b{ font-size:12px; font-weight:800; color:var(--muted); line-height:1; font-variant-numeric:tabular-nums; }
+  .hcComps{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:8px; width:100%; position:relative; z-index:3; }
+  .cc{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 2px 7px; border-radius:12px; border:2px solid rgba(var(--borderRGB),.22); background:var(--surface); min-width:0; }
+  .cc span{ font-size:10.5px; font-weight:700; color:var(--muted); line-height:1; }
+  .cc b{ font-size:14px; font-weight:800; color:var(--muted); line-height:1; font-variant-numeric:tabular-nums; }
   .cc.n-verde{ border-color:rgba(var(--greenRGB),.85); }  .cc.n-verde b{ color:var(--green); }
   .cc.n-amar{ border-color:rgba(var(--orangeRGB),.85); }  .cc.n-amar b{ color:var(--orange); }
   .cc.n-verm{ border-color:rgba(var(--redRGB),.85); }     .cc.n-verm b{ color:var(--red); }
@@ -72,40 +73,33 @@
 @media (min-width:641px) and (max-width:1023px){
   .heroCard{ zoom:1.6; }
 }
-/* ── tablet deitado e notebook (≥1024): personagem ao lado; carrossel + turma na 3ª coluna ── */
-@media (min-width:1024px){
-  .duasCol{ display:block; margin-bottom:1.25rem; }
-  .duasCol > div + div{ margin-top:18px; }
-  .heroCard{ display:grid; grid-template-columns:400px 240px; grid-template-areas:"cab art" "comps art" "status art"; column-gap:28px; align-items:end; overflow:visible; padding:0; margin-bottom:0; }
-  .hcCab{ grid-area:cab; width:auto; }
-  .hcAv{ display:none; }
-  .hcComps{ grid-area:comps; width:auto; margin-top:16px; }
-  .hcStatus{ grid-area:status; margin-top:44px; }
-  .hcArt{ grid-area:art; position:relative; right:auto; top:auto; bottom:auto !important; width:240px; height:auto; align-self:end; justify-content:center; }
-  .hcArt img{ height:auto; width:100%; max-height:none; }
-  .hcArt.moldura{ width:240px; height:320px; border-radius:120px 120px 20px 20px; }
-  .hcArt.moldura img{ width:auto; height:auto; }
-  .hcNome .n{ font-size:24px; } .hcNome .s{ font-size:14px; margin-top:4px; }
-  .cc{ padding:9px 4px 8px; gap:5px; border-radius:11px; } .cc span{ font-size:12px; } .cc b{ font-size:16px; }
-  .hcAba{ font-size:15px; height:36px; line-height:34px; top:-35px; padding:0 18px; } .hcStatus{ padding:14px; }
-  .hcTiles{ gap:10px; } .hcTile{ padding:11px 6px 12px; gap:6px; } .hcTile .l{ font-size:12px; } .hcTile .tv i{ width:22px; height:22px; font-size:19px; line-height:22px; } .hcTile .tv b{ font-size:19px; }
-}
-/* ≥1200: cabe a terceira coluna ao lado (sidebar 232 + cartão 768 + coluna elástica) */
-@media (min-width:1200px){
-  .duasCol{ display:grid; grid-template-columns:max-content minmax(300px,420px); gap:32px; align-items:end; justify-content:start; }
-  .duasCol > div + div{ margin-top:0; }
-  .duasCol .avisoCard{ margin-bottom:0; }
-  .duasCol #bannerEntrarTurma{ margin-top:12px; }
-  .heroCard{ grid-template-columns:440px 300px; }
-  .hcArt{ width:300px; } .hcArt.moldura{ width:300px; height:400px; border-radius:150px 150px 20px 20px; }
-}
-@media (min-width:1500px){ .heroCard{ grid-template-columns:500px 340px; } .hcArt{ width:340px; } .hcArt.moldura{ width:340px; height:450px; border-radius:170px 170px 20px 20px; } .duasCol{ gap:48px; } }
-@media (max-width:340px){ .hcCab{ width:calc(100% - 104px); } .hcComps{ width:calc(100% - 128px); } .hcArt{ width:150px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
 
-.avisoCard{ margin-bottom:1rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:14px; overflow:hidden; }
+/* ── tablet deitado e notebook (≥1024): mesmo cartão, maior; sem bolinha (fica na sidebar) ── */
+@media (min-width:1024px){
+  .heroCard{ max-width:760px; }
+  .hcAv{ display:none; }
+  .hcCab{ width:calc(100% - 330px); } .hcNome .n{ font-size:24px; } .hcNome .s{ font-size:14px; margin-top:4px; }
+  .balao{ width:calc(100% - 340px); margin-top:18px; border-radius:24px; }
+  .balao::before{ right:-40px; top:30px; border-width:16px 0 16px 40px; } .balao::after{ right:-32px; top:34px; border-width:12px 0 12px 34px; }
+  .avisoSlide{ padding:15px 18px 12px; } .avisoTit{ font-size:12px; } .avisoTxt{ font-size:15px; } .avisoIco{ font-size:26px; }
+  .hcArt{ width:330px; right:0; }
+  .hcArt.moldura{ width:240px; border-radius:120px 120px 20px 20px; }
+  .hcStatus{ margin-top:52px; padding:14px; } .hcAba{ font-size:15px; height:36px; line-height:34px; top:-35px; padding:0 18px; }
+  .hcTiles{ gap:10px; } .hcTile{ padding:11px 6px 12px; gap:6px; } .hcTile .l{ font-size:12px; } .hcTile .tv i{ width:22px; height:22px; font-size:19px; line-height:22px; } .hcTile .tv b{ font-size:19px; }
+  .hcComps{ gap:10px; margin-top:10px; } .cc{ padding:10px 4px 9px; } .cc b{ font-size:16px; } .cc span{ font-size:12px; }
+  #bannerEntrarTurma{ max-width:760px; }
+}
+@media (max-width:340px){ .hcCab{ width:calc(100% - 104px); } .balao{ width:calc(100% - 128px); } .hcArt{ width:150px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
+
+/* balão de HQ (v4-5): contorno grosso, rabinho reto para o rosto do personagem; o carrossel mora dentro */
+.balao{ position:relative; z-index:3; width:calc(100% - 150px); margin-top:14px; background:var(--surface); border:2.5px solid var(--text); border-radius:20px; }
+.balao::before,.balao::after{ content:""; position:absolute; width:0; height:0; border-style:solid; }
+.balao::before{ right:-24px; top:26px; border-width:12px 0 12px 24px; border-color:transparent transparent transparent var(--text); }
+.balao::after{ right:-17px; top:29px; border-width:9px 0 9px 19px; border-color:transparent transparent transparent var(--surface); }
+.avisoCard{ margin:0; background:transparent; border:none; border-radius:18px; overflow:hidden; }
 .avisoTrack{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -ms-overflow-style:none; }
 .avisoTrack::-webkit-scrollbar{ display:none; }
-.avisoSlide{ flex:0 0 100%; scroll-snap-align:start; display:flex; align-items:center; gap:11px; padding:13px 15px; }
+.avisoSlide{ flex:0 0 100%; scroll-snap-align:start; display:flex; align-items:center; gap:10px; padding:11px 12px 9px; }
 .avisoIco{ font-size:22px; line-height:1; flex:0 0 auto; }
 .avisoTit{ font-size:11px; font-weight:700; color:var(--cyan); margin:0 0 2px; }
 .avisoTxt{ font-size:12.5px; color:var(--text2); margin:0; line-height:1.35; }
@@ -173,21 +167,13 @@
 <div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
   <div id="conteudo">
 
-    <div class="duasCol">
-    <div>
-    <!-- Cartão do Início v4-0 · mobile -->
+    <!-- Cartão do Início · padrão único (v4-5) -->
     <div class="heroCard" id="heroCard">
       <div class="hcCab">
         <div class="hcAv" id="avatarCard" onclick="abrirGaveta('gavetaCard')" title="Trocar fotos">&#129333;&#8205;&#127891;<span class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span></div>
         <div class="hcNome"><p class="n" id="saudacaoLinha">Ol&aacute;, <span style="color:var(--cyan);">Estudante</span> &#9997;&#65039;</p><p class="s" id="linhaCard">Sua central da RedaON</p></div>
       </div>
-      <div class="hcComps" id="hcComps">
-        <div class="cc" id="ccC1"><span>C1</span><b>&mdash;</b></div>
-        <div class="cc" id="ccC2"><span>C2</span><b>&mdash;</b></div>
-        <div class="cc" id="ccC3"><span>C3</span><b>&mdash;</b></div>
-        <div class="cc" id="ccC4"><span>C4</span><b>&mdash;</b></div>
-        <div class="cc" id="ccC5"><span>C5</span><b>&mdash;</b></div>
-      </div>
+      <div class="balao"><div class="avisoCard" id="avisoCard"><div class="avisoTrack" id="avisoTrack"></div><div class="avisoDots" id="avisoDots"></div></div></div>
       <div class="hcArt vazio" id="hcArt"><img id="hcArtImg" alt="" draggable="false"/></div>
       <div class="hcStatus" id="hcStatus">
         <p class="hcAba">Seu Status</p>
@@ -196,24 +182,22 @@
           <div class="hcTile"><span class="l">Reda&ccedil;&otilde;es</span><div class="tv"><i>&#128218;</i><b id="mRedacoes">&mdash;</b></div></div>
           <div class="hcTile"><span class="l">Pontos</span><div class="tv"><i>&#127942;</i><b id="mPontos">&mdash;</b></div></div>
         </div>
+        <div class="hcComps" id="hcComps">
+        <div class="cc" id="ccC1"><span>C1</span><b>&mdash;</b></div>
+        <div class="cc" id="ccC2"><span>C2</span><b>&mdash;</b></div>
+        <div class="cc" id="ccC3"><span>C3</span><b>&mdash;</b></div>
+        <div class="cc" id="ccC4"><span>C4</span><b>&mdash;</b></div>
+        <div class="cc" id="ccC5"><span>C5</span><b>&mdash;</b></div>
+      </div>
       </div>
     </div>
 
     <div id="indicadorTurmasMobile" class="hidden" style="font-size:.72rem;color:var(--muted);margin:-.35rem 0 .875rem;"></div>
     <div id="indicadorTurmas" class="hidden" style="display:none;"></div>
-    </div>
-    <div>
-
-    <div class="avisoCard" id="avisoCard">
-      <div class="avisoTrack" id="avisoTrack"></div>
-      <div class="avisoDots" id="avisoDots"></div>
-    </div>
 
     <div id="bannerEntrarTurma" class="hidden">
       <p>&#127979; <b>Entre na sua turma</b> com o c&oacute;digo que sua professora passou.</p>
       <button class="btnTurma" onclick="abrirModalEntrarTurma()">Entrar</button>
-    </div>
-    </div>
     </div>
 
     <div class="sec"><span class="secL"><span class="bar"></span>Para a sua melhoria</span></div>
@@ -312,7 +296,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-4'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-5'
   });
 
   // Sauda\u00e7\u00e3o
@@ -366,7 +350,8 @@
   /* ─── slot do personagem: mede a caixa de status para apoiar o pé na borda baixa ─── */
   function ajustarArt() {
     var st = document.getElementById('hcStatus'), art = document.getElementById('hcArt');
-    if (st && art) art.style.bottom = (window.innerWidth >= 1024) ? '' : st.offsetHeight + 'px';
+    var hero = document.getElementById('heroCard');
+    if (st && art && hero) art.style.bottom = (hero.offsetHeight - st.offsetTop) + 'px';
   }
   window.addEventListener('resize', ajustarArt);
 
