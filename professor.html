@@ -336,7 +336,9 @@
   @media (max-width:640px){ .avisoIco{ display:none; } .avisoTxt{ font-size:12.5px; } }
   .avisoIco{ font-size:22px; line-height:1; flex:0 0 auto; }
   .avisoTit{ font-size:11px; font-weight:700; color:var(--cyan); margin:0 0 2px; }
-  .avisoTxt{ font-size:12.5px; color:var(--text2); margin:0; line-height:1.35; }
+  .avisoTxt{ font-size:12.5px; color:var(--text2); margin:0; line-height:1.35; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }   /* teto: 4 linhas por card; o balão nunca estica com mensagem longa */
+  .avisoSlide > div{ min-width:0; flex:1; }
+  .avisoTit{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .avisoTxt b{ color:var(--text); }
   .avisoSlide.acao{ cursor:pointer; }
   .avisoGo{ margin-left:auto; flex:0 0 auto; font-size:15px; font-weight:900; color:var(--cyan); opacity:.85; }
@@ -571,7 +573,7 @@
       <span style="font-size:.65rem;color:var(--purple);font-weight:700;letter-spacing:.04em;">&#11088; PORTAL PRO</span>
     </span>
   </div>
-  <p class="sideVersao">In&iacute;cio &middot; produ&ccedil;&atilde;o &middot; v5-1</p>
+  <p class="sideVersao">In&iacute;cio &middot; produ&ccedil;&atilde;o &middot; v5-2</p>
 </aside>
 
 <!-- MAIN -->
@@ -1096,6 +1098,7 @@
       return null;
     }catch(e){ return null; }
   }
+  function encurtar(t, n){ t = String(t || '').trim(); return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '\u2026' : t; }
   function ddmm(iso){ var p = String(iso || '').split('-'); return p.length === 3 ? (p[2] + '/' + p[1]) : ''; }
 
   // ─── Balão: "Sua próxima ação · n/N" — pendentes → semana → turma em atenção → boas-vindas ───
@@ -1104,7 +1107,7 @@
     var itens = [];
     var pend = 0; turmas.forEach(function(t){ pend += (t.pendentes || 0); });
     if (pend > 0) itens.push({ ico:'\u23F3', txt:'<b>' + pend + '</b> reda\u00e7' + (pend > 1 ? '\u00f5es esperam' : '\u00e3o espera') + ' sua valida\u00e7\u00e3o \u2014 toque para validar', url:'professor-redacoes.html' });
-    if (temaSemana && temaSemana.titulo) itens.push({ ico:'\u{1F4CC}', txt:'Semana de ' + ddmm(temaSemana.semana_de) + ': tema <b>' + escapeHtml(temaSemana.titulo) + '</b> \u2014 ver a semana', url:'professor-temas.html' });
+    if (temaSemana && temaSemana.titulo) itens.push({ ico:'\u{1F4CC}', txt:'Semana de ' + ddmm(temaSemana.semana_de) + ': tema <b>' + escapeHtml(encurtar(temaSemana.titulo, 45)) + '</b> \u2014 ver a semana', url:'professor-temas.html' });
     var comMedia = turmas.filter(function(t){ return typeof t.media === 'number'; }).sort(function(a,b){ return a.media - b.media; });
     if (comMedia.length) { var ta = comMedia[0]; itens.push({ ico:'\u{1F3AF}', txt:'Turma <b>' + escapeHtml(ta.nome) + '</b> com m\u00e9dia ' + ta.media + ' \u2014 ver quem precisa de aten\u00e7\u00e3o', url:'professor-alunos.html?turma=' + ta.id }); }
     var total = itens.length + 1;
