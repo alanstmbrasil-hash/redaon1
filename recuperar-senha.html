@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RedaON — Recuperar senha</title>
 <meta name="theme-color" content="#0a8c8d">
-<!-- RedaON · recuperar-senha.html · PRODUÇÃO v1-0 · 23/08/2026 · mesma base visual do login v2-0 -->
+<!-- RedaON · recuperar-senha.html · PRODUÇÃO v1-1 · 07/09/2026 · mesma base visual do login v2-0 · v1-1: olhinho no 2º campo + Enter pula de campo -->
 <!-- Dois modos na mesma página: (a) sem hash → pedir link por e-mail; (b) #access_token&type=recovery → criar senha nova -->
 <script>
   (function(){
@@ -172,7 +172,10 @@
           <button class="olho" onclick="alternarOlho('novaSenha',this)">👁</button>
         </div>
         <span class="lbl">Repita a senha nova</span>
-        <input class="campo" id="novaSenha2" type="password" placeholder="••••••••" autocomplete="new-password">
+        <div class="campoWrap">
+          <input class="campo" id="novaSenha2" type="password" placeholder="••••••••" autocomplete="new-password" style="padding-right:2.9rem;">
+          <button class="olho" onclick="alternarOlho('novaSenha2',this)">👁</button>
+        </div>
         <div class="msgErro" id="novaErro"></div>
         <div class="msgOk" id="novaOk"></div>
         <button class="btnP" id="btnNova" onclick="salvarSenhaNova()">Salvar senha nova</button>
@@ -263,7 +266,11 @@
   document.addEventListener('keydown', function(e){
     if (e.key !== 'Enter') return;
     if (e.target && e.target.tagName === 'BUTTON') return;
-    if (vistaAtual === 'nova') salvarSenhaNova(); else fazerRecuperar();
+    if (vistaAtual === 'nova') {
+      // Enter no 1º campo só pula para o 2º; Enter no 2º salva
+      if (e.target && e.target.id === 'novaSenha') { e.preventDefault(); document.getElementById('novaSenha2').focus(); return; }
+      salvarSenhaNova();
+    } else fazerRecuperar();
   });
 
   // ─── Carga: decide o modo pelo hash ───
