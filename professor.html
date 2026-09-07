@@ -257,12 +257,14 @@
   /* ===== Cartão do Início do Professor · v5 (mesmo cartão do aluno v4-11; dados do professor) ===== */
   @media (min-width:0){
     .heroCard{ position:relative; padding:4px 0 0; margin-bottom:.875rem; overflow:hidden; }
-    .hcCab{ display:flex; align-items:center; gap:10px; position:relative; z-index:3; width:calc(100% - 130px); }
+    .hcCab{ display:flex; align-items:center; gap:10px; position:relative; z-index:3; width:calc(100% - 118px); }
     .hcAv{ position:relative; width:46px; height:46px; border-radius:50%; background:var(--surface2) center/cover no-repeat; border:2px solid var(--surface); box-shadow:0 0 0 1px rgba(var(--borderRGB),.22); display:flex; align-items:center; justify-content:center; font-size:22px; flex:0 0 auto; cursor:pointer; }
     .hcAv .selo{ position:absolute; right:-5px; bottom:-5px; width:20px; height:20px; border-radius:50%; background:var(--cyan); color:var(--onCyan); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center; }
     .hcAv .selo svg{ width:11px; height:11px; }
     .hcNome{ min-width:0; }
-    .hcNome .n{ margin:0; font-size:16px; font-weight:800; line-height:1.15; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    /* saudação N1 (07/09): "Boa tarde," pequeno em cima; nome inteiro embaixo, nunca corta */
+    .hcNome .n{ margin:0; font-size:13px; font-weight:700; line-height:1.1; color:var(--muted); }
+    .hcNome .n span{ display:block; font-size:17px; font-weight:800; color:var(--cyan); line-height:1.15; }
     .hcNome .s{ margin:2px 0 0; font-size:11px; color:var(--muted); line-height:1.2; min-height:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .hcComps{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:0; width:100%; position:relative; z-index:3; }
     .cc{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 2px 7px; border-radius:12px; border:2px solid rgba(var(--borderRGB),.22); background:var(--surface); min-width:0; }
@@ -275,8 +277,8 @@
     /* rótulo das médias (professor) */
     .rotComps{ margin:10px 0 4px; font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; }
     /* personagem / foto: do topo do bloco ao pé (borda baixa) da caixa de status; bottom é medido no JS */
-    .hcArt{ position:absolute; right:0; top:4px; bottom:80px; width:180px; z-index:1; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; }
-    .hcArt img{ width:auto; height:auto; max-width:100%; max-height:100%; display:block; }
+    .hcArt{ position:absolute; right:0; top:4px; bottom:80px; width:150px; z-index:1; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; }
+    .hcArt img{ width:auto; height:auto; max-width:100%; max-height:min(100%, 330px); display:block; }   /* teto: o balão pode crescer, a personagem não */
     .hcArt.enq{ overflow:hidden; }
     .hcArt.enq img{ position:absolute; left:0; top:0; max-width:none; max-height:none; transform-origin:0 0; }
     .hcArt.moldura{ right:0; width:126px; border-radius:63px 63px 14px 14px; overflow:hidden; background:rgba(var(--cyanRGB),.10); box-shadow:inset 0 0 0 2px rgba(var(--cyanRGB),.32); display:block; }
@@ -297,16 +299,16 @@
   /* ── tablet em pé (641–1023): igual ao celular, 1,6× ── */
   @media (min-width:641px) and (max-width:1023px){
     .heroCard{ zoom:1.6; }
-    .hcArt{ width:200px; right:0; }
-    .hcCab{ width:calc(100% - 196px); }
-    .balao{ width:calc(100% - 212px); }
+    .hcArt{ width:170px; right:0; }
+    .hcCab{ width:calc(100% - 140px); }
+    .balao{ width:calc(100% - 172px); }
     .balao::before{ top:24px; } .balao::after{ top:27px; }
   }
   /* ── tablet deitado e notebook (≥1024): duas colunas — esquerda: saudação, balão, status · direita: personagem inteiro ── */
   @media (min-width:1024px){
     .heroCard{ display:grid; grid-template-columns:minmax(0,1fr) 380px; grid-template-areas:"cab art" "balao art" "status art"; column-gap:32px; align-items:start; max-width:960px; overflow:visible; padding:0; }
     .hcCab{ grid-area:cab; width:auto; } .hcAv{ display:none; }
-    .hcNome .n{ font-size:24px; } .hcNome .s{ font-size:14px; margin-top:4px; }
+    .hcNome .n{ font-size:24px; color:var(--text); font-weight:800; } .hcNome .n span{ display:inline; font-size:24px; } .hcNome .s{ font-size:14px; margin-top:4px; }
     .balao{ grid-area:balao; width:auto; margin-top:22px; border-radius:24px; }
     .balao::before{ right:-40px; top:30px; border-width:16px 0 16px 40px; } .balao::after{ right:-32px; top:34px; border-width:12px 0 12px 34px; }
     .avisoSlide{ padding:15px 18px 12px; } .avisoTit{ font-size:12px; } .avisoTxt{ font-size:15px; } .avisoIco{ font-size:26px; }
@@ -320,10 +322,10 @@
     .hcArt.moldura img{ max-width:none; max-height:none; }
     #bannerSemTurma{ max-width:960px; }
   }
-  @media (max-width:340px){ .hcCab{ width:calc(100% - 118px); } .balao{ width:calc(100% - 162px); } .hcArt{ width:150px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
+  @media (max-width:340px){ .hcCab{ width:calc(100% - 104px); } .balao{ width:calc(100% - 136px); } .hcArt{ width:136px; } .hcTile{ padding:6px 2px 7px; } .hcTile .tv b{ font-size:13px; } }
 
   /* balão de HQ: contorno grosso, rabinho reto para o rosto do personagem; o carrossel mora dentro */
-  .balao{ position:relative; z-index:3; width:calc(100% - 192px); margin-top:14px; background:var(--surface); border:2.5px solid var(--text); border-radius:20px; }
+  .balao{ position:relative; z-index:3; width:calc(100% - 150px); margin-top:14px; background:var(--surface); border:2.5px solid var(--text); border-radius:20px; }
   .balao::before,.balao::after{ content:""; position:absolute; width:0; height:0; border-style:solid; }
   .balao::before{ right:-24px; top:26px; border-width:12px 0 12px 24px; border-color:transparent transparent transparent var(--text); }
   .balao::after{ right:-17px; top:29px; border-width:9px 0 9px 19px; border-color:transparent transparent transparent var(--surface); }
@@ -569,7 +571,7 @@
       <span style="font-size:.65rem;color:var(--purple);font-weight:700;letter-spacing:.04em;">&#11088; PORTAL PRO</span>
     </span>
   </div>
-  <p class="sideVersao">In&iacute;cio &middot; produ&ccedil;&atilde;o &middot; v5</p>
+  <p class="sideVersao">In&iacute;cio &middot; produ&ccedil;&atilde;o &middot; v5-1</p>
 </aside>
 
 <!-- MAIN -->
@@ -606,7 +608,7 @@
   <!-- CONTEÚDO -->
   <div style="flex:1;padding:1.5rem;max-width:1400px;margin:0 auto;width:100%;">
 
-    <!-- ===== Cartão do Início do Professor · v5 (mockup v2 aprovado 07/09/2026) ===== -->
+    <!-- ===== Cartão do Início do Professor · v5-1 (mockup v2 + composição C, saudação N1, aba "Suas Turmas" · 07/09/2026) ===== -->
     <div id="dashboard-content">
 
     <div class="heroCard" id="heroCard">
@@ -617,7 +619,7 @@
       <div class="balao"><div class="avisoCard" id="avisoCard"><div class="avisoTrack" id="avisoTrack"></div><div class="avisoDots" id="avisoDots"></div></div></div>
       <div class="hcArt vazio" id="hcArt"><img id="hcArtImg" alt="" draggable="false"/></div>
       <div class="hcStatus" id="hcStatus">
-        <p class="hcAba">Seu Status</p>
+        <p class="hcAba">Suas Turmas</p>
         <div class="hcTiles">
           <div class="hcTile"><span class="l">Turmas</span><div class="tv"><i>&#127979;</i><b id="mTurmas">&mdash;</b></div></div>
           <div class="hcTile"><span class="l">Pendentes</span><div class="tv"><i>&#8987;</i><b id="mPendentes">&mdash;</b></div></div>
@@ -642,7 +644,7 @@
 
     <!-- Suas turmas (carrossel no mobile, lista no desktop) — some enquanto n&atilde;o houver turma -->
     <div id="blocoTurmas" style="display:none;">
-      <div class="sec"><span class="secL"><span class="bar"></span>Suas turmas</span><span class="verT" onclick="window.location.href='professor-alunos.html'">Ver todas</span></div>
+      <div class="sec"><span class="secL"><span class="bar"></span>Turma por turma</span><span class="verT" onclick="window.location.href='professor-alunos.html'">Ver todas</span></div>
       <div id="listaTurmasHome" class="turmasWrap"><div class="vazioSec">Carregando&hellip;</div></div>
       <div style="padding:0 0 4px;"><button class="btnNovaTurma" onclick="abrirModalTurma()"><span class="material-symbols-outlined" style="font-size:1.1rem;">add</span>Nova turma</button></div>
     </div>
@@ -1299,7 +1301,7 @@
         var enq = _cartao.enqCartao && _cartao.enqCartao.w ? _cartao.enqCartao : enqPadrao(img.naturalWidth, img.naturalHeight, RATIO.cartao);
         aplicarEnqNoCartao(img, enq, art.clientWidth || 126);
       }
-      if (enqAv) aplicarEnqNoCartao(img, enqAv, art.clientWidth || 180);
+      if (enqAv) aplicarEnqNoCartao(img, enqAv, art.clientWidth || 150);
       ajustarArt();
     };
     img.src = url;
