@@ -321,7 +321,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-14'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-16'
   });
 
   // Sauda\u00e7\u00e3o
@@ -790,7 +790,7 @@
       var itens = await res.json();
       if (!itens.length){
         _bioSemJornada = true;
-        window._cardPlano = { ico:'\u{1F680}', tit:'Comece por aqui', txt:'Monte sua primeira semana: <b>10 a 15 min por dia</b> para ficar fera em reda\u00e7\u00e3o', acao:'Montar minha semana', url:'plano.html' };
+        window._cardPlano = { ico:'\u{1F680}', tit:'Comece por aqui', txt:'Agende sua semana: <b>10 min por dia</b> rumo \u00e0 nota 1.000', acao:'Montar semana', url:'plano.html' };
       } else {
         var feitos = itens.filter(function(i){ return !!i.feito_em; }).length;
         _bioSemana = 'semana ' + feitos + '/5';
@@ -798,7 +798,7 @@
         if (!pend){
           window._cardPlano = { ico:'\u{1F3C1}', tit:'Semana completa!', txt:'Voc\u00ea fechou as 5 etapas', acao:'Quer ir al\u00e9m?', url:'plano.html' };
         } else {
-          window._cardPlano = { ico:'\u{1F9ED}', tit:'Seu pr\u00f3ximo passo \u00b7 ' + feitos + '/5', txt: escapeHtmlSimples(pend.rotulo), acao:'Toque para come\u00e7ar', url: (pend.destino || 'plano.html') };
+          window._cardPlano = { ico:'\u{1F9ED}', tit:'Pr\u00f3ximo passo \u00b7 ' + feitos + '/5', txt: escapeHtmlSimples(pend.rotulo), acao:'Toque para come\u00e7ar', url: (pend.destino || 'plano.html') };
         }
       }
       montarAvisos(window._ultimosAvisos || null);
@@ -948,11 +948,11 @@
       try { if (typeof dbGetCompetenciasConsolidadas === 'function') consolidadas = await dbGetCompetenciasConsolidadas(); } catch(e) {}
 
       var avisos = [];
-      avisos.push({ ico:'\u{1F31F}', tit:'\u00DAltima nota', txt:'Voc\u00ea fez <b>' + ultima + '</b>', acao:'Reveja a corre\u00e7\u00e3o e entenda o porqu\u00ea', url:'minhas-redacoes.html' });
-      if (melhorNota > ultima) avisos.push({ ico:'\u{1F3C6}', tit:'Sua melhor nota', txt:'<b>' + melhorNota + '</b>', acao:'D\u00e1 pra alcan\u00e7ar de novo', url:'evolucao.html' });
+      avisos.push({ ico:'\u{1F31F}', tit:'\u00DAltima nota', txt:'Voc\u00ea fez <b>' + ultima + '</b>', acao:'Veja a corre\u00e7\u00e3o', url:'minhas-redacoes.html' });
+      if (melhorNota > ultima) avisos.push({ ico:'\u{1F3C6}', tit:'Sua melhor nota', txt:'<b>' + melhorNota + '</b>', acao:'Vamos l\u00e1 buscar', url:'evolucao.html' });
       if (pareto) avisos.push({ ico:'\u{1F3AF}', tit:'Foco agora', txt: escapeHtmlSimples(pareto), acao:'Ver sua evolu\u00e7\u00e3o', url:'evolucao.html' });
-      if (consolidadas && consolidadas.length > 0) avisos.push({ ico:'\u2705', tit:'Conquistas', txt: escapeHtmlSimples(consolidadas.join(' \u00B7 ')), acao:'Ver suas conquistas', url:'evolucao.html' });
-      if (evolucao > 0) avisos.push({ ico:'\u2B06\uFE0F', tit:'Evolu\u00e7\u00e3o', txt:'Voc\u00ea subiu <b>' + evolucao + ' pontos</b>', acao:'Veja o que funcionou', url:'evolucao.html' });
+      if (consolidadas && consolidadas.length > 0) avisos.push({ ico:'\u2705', tit:'Conquistas', txt: escapeHtmlSimples(consolidadas.join(' \u00B7 ')), acao:'Ver as conquistas', url:'evolucao.html' });
+      if (evolucao > 0) avisos.push({ ico:'\u2B06\uFE0F', tit:'Evolu\u00e7\u00e3o', txt:'Voc\u00ea subiu <b>' + evolucao + ' pontos</b>', acao:'Veja como foi', url:'evolucao.html' });
       else if (evolucao < 0) avisos.push({ ico:'\u{1F4AA}', tit:'Bora', txt:'Pr\u00f3xima reda\u00e7\u00e3o voc\u00ea sobe', acao:'Vamos juntos', url:'nova-redacao.html?metodo=digitar' });
       montarAvisos(avisos.slice(0, 5));
       atualizarBio();
