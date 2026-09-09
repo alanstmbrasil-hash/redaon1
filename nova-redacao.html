@@ -235,7 +235,7 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -3305,13 +3305,47 @@ async function _salvarMaterialNoBanco(temaId, eixo, conteudo) {
 
 /* ═══════════ FIM DO MOTOR TRANSPLANTADO ═══════════ */
 
-/* ── Arranque: ?metodo= da URL + estado inicial ── */
-(function iniciar(){
+/* ── v9-27 · Tema pela URL (?tema=<id>): o Plano e qualquer outra origem podem abrir
+   a folha já com o tema. A URL vence o tema_selecionado da sessão. Sem URL, a faixa
+   TEMA é preenchida com o tema da sessão (Temas/Início). Só depois disso os rascunhos
+   são restaurados, porque a chave local e o filtro da nuvem dependem do id do tema. ── */
+var SEL_TEMA_URL = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de';
+function aplicarTemaNaFolha(tema){
+  try {
+    if (tema && tema.id) sessionStorage.setItem('tema_selecionado', JSON.stringify(tema));
+  } catch(e) {}
+  var inp = document.getElementById('tituloRedacao');
+  if (inp && tema && tema.titulo && inp.value.trim() !== tema.titulo) inp.value = tema.titulo;
+  if (tema && tema.titulo) window._temaAtual = tema.titulo;
+}
+async function temaPelaUrl(){
+  var id = null;
+  try { id = new URLSearchParams(window.location.search).get('tema'); } catch(e) {}
+  if (id && /^[0-9a-f-]{36}$/i.test(id)) {
+    try {
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=' + SEL_TEMA_URL + '&id=eq.' + encodeURIComponent(id) + '&ativo=eq.true&limit=1', {});
+      if (res.ok) {
+        var rows = await res.json();
+        if (rows && rows[0]) { aplicarTemaNaFolha(rows[0]); return; }
+      }
+      console.warn('[tema url] tema não encontrado ou inativo:', id);
+    } catch(e) { console.warn('[tema url]', e); }
+  }
+  /* sem URL (ou falha): o tema da sessão preenche a faixa */
+  try {
+    var s = sessionStorage.getItem('tema_selecionado');
+    if (s) { var t = JSON.parse(s); if (t && t.id) aplicarTemaNaFolha(t); }
+  } catch(e) {}
+}
+
+/* ── Arranque: ?tema= + ?metodo= da URL + estado inicial ── */
+(async function iniciar(){
   try { authGuard('aluno'); } catch(e) { console.error('[RedaON] authGuard:', e); }
   realojarAcoes();
   var fonteSalva = 'manuscrita';
   try { fonteSalva = localStorage.getItem('redaon-fonte-folha') || 'manuscrita'; } catch(e) {}
   aplicarFonteFolha(fonteSalva);
+  try { await temaPelaUrl(); } catch(e) { console.warn('[tema url]', e); }
   restaurarRascunho();
   restaurarRascunhoNuvem(); /* nuvem: o mais recente vence, sem bloquear a tela */
   ajustarAlturaFolha(); atualizarRegua();
