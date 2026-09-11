@@ -235,7 +235,7 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera (capture) e "Enviar imagem" abre a galeria ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id da biblioteca ao enviar ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -3301,6 +3301,9 @@ ${FORMATO_JSON_MELHORIAS}`;
         const _tituloInput = document.getElementById('tituloRedacao')?.value?.trim() || null;
         const _temaSession = (() => { try { const s = sessionStorage.getItem('tema_selecionado'); return s ? JSON.parse(s).titulo : null; } catch(e) { return null; } })();
         const _temaFinal = _tituloInput || _temaSession || window._temaAtual || null;
+        /* v9-32: grava o tema_id quando o tema veio da biblioteca (Temas/Início/Plano) — sem ele, a Reescrita e o hub n\u00e3o acham o acervo do tema */
+        const _temaObjSalvar = obterTemaAtual();
+        const _temaIdFinal = (_temaObjSalvar && _temaObjSalvar.id) ? _temaObjSalvar.id : null;
 
         let redacao = null;
         if (_rascunhoNuvem.id){
@@ -3309,7 +3312,7 @@ ${FORMATO_JSON_MELHORIAS}`;
             const resProm = await dbFetch(SUPABASE_URL + '/rest/v1/redacoes?id=eq.' + _rascunhoNuvem.id, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-              body: JSON.stringify({ texto: texto || '[Arquivo enviado]', tema_livre: _temaFinal, status: 'enviada' })
+              body: JSON.stringify({ texto: texto || '[Arquivo enviado]', tema_livre: _temaFinal, tema_id: _temaIdFinal, status: 'enviada' })
             });
             if (resProm.ok){ const l = await resProm.json(); redacao = l && l[0]; }
           } catch(ePr) { console.warn('[promover rascunho]', ePr); }
@@ -3317,7 +3320,8 @@ ${FORMATO_JSON_MELHORIAS}`;
         if (!redacao){
           redacao = await dbSalvarRedacao({
             texto: texto || '[Arquivo enviado]',
-            tema_livre: _temaFinal
+            tema_livre: _temaFinal,
+            tema_id: _temaIdFinal
           });
         }
         _rascunhoNuvem.id = null; _rascunhoNuvem.sujo = false;
