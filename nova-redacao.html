@@ -235,7 +235,7 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -3076,14 +3076,23 @@ ${FORMATO_JSON_MELHORIAS}`;
       throw new Error(`Falha técnica ao avaliar ${falhou.join(', ')}. Isso costuma ser instabilidade momentânea do servidor — por favor, reenvie a redação.`);
     }
 
-    // Trava de tangenciamento (gatekeeper manda)
-    const travado = gate.tangenciamento === true || gate.tema_cumprido === 'nao' || gate.tema_cumprido === 'parcial';
+    // Trava de tangenciamento (v9-29, 11/09/2026): o gatekeeper sozinho NÃO trava mais.
+    // Ele lê o texto em segundos e marcava "parcial" em redação que trata do tema (caso real: 320 pontos
+    // com os especialistas dando 120/80/120). A trava só vale quando o especialista da C2 — dono do
+    // critério "compreensão da proposta" — concorda (nota ≤ 40), ou quando o gatekeeper aponta FUGA total.
     let notas = [Number(c1.nota)||0, Number(c2.nota)||0, Number(c3.nota)||0, Number(c4.nota)||0, Number(c5.nota)||0];
+    const fugaTotal = gate.tema_cumprido === 'nao';
+    const travado = fugaTotal || ((gate.tangenciamento === true || gate.tema_cumprido === 'parcial') && notas[1] <= 40);
     if (travado) {
       notas[1] = Math.min(notas[1], 40);
       notas[2] = Math.min(notas[2], 40);
       notas[4] = Math.min(notas[4], 40);
-      console.info('[7agentes] Tangenciamento detectado → C2/C3/C5 travados em ≤40');
+      const motivo = String(gate.justificativa || '').trim();
+      const aviso = (fugaTotal ? 'Fuga ao tema: ' : 'Tangenciamento do tema: ') + (motivo || 'a redação não desenvolve o núcleo do tema proposto') + '. Pela Cartilha do INEP, isso limita C2, C3 e C5 a 40 pontos. ';
+      c2.feedback = aviso + (c2.feedback || ''); c3.feedback = aviso + (c3.feedback || ''); c5.feedback = aviso + (c5.feedback || '');
+      console.info('[7agentes] Tangenciamento confirmado pelo C2 → C2/C3/C5 travados em ≤40');
+    } else if (gate.tangenciamento === true || gate.tema_cumprido === 'parcial') {
+      console.info('[7agentes] Gatekeeper marcou "parcial", mas o especialista C2 deu ' + notas[1] + ' → sem trava');
     }
 
     // ETAPA 3 — ORQUESTRADOR

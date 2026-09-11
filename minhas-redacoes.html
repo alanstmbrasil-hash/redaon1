@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v3-8 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v3-9 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
 <script>
 (function(){
   var pref='auto';
@@ -211,14 +211,14 @@
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="prompts-reescrita.js?v=2-0"></script>
+<script src="prompts-reescrita.js?v=2-1"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
   if (typeof authGuard === 'function') { authGuard('aluno'); }
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-8'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-9'
   });
 
   var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
@@ -487,11 +487,14 @@
     var novo = Object.assign({}, atual.json || {}, campos);
     novo.chamadas = Object.assign({}, atual.chamadas || {});
     novo.chamadas[chamada] = 'completa';
-    var res = await dbFetch(SUPABASE_URL+'/rest/v1/correcoes?id=eq.'+atual.correcaoId, {
+    var res = await dbFetch(SUPABASE_URL+'/rest/v1/correcoes?id=eq.'+atual.correcaoId+'&select=id', {
       method:'PATCH',
+      headers:{ 'Prefer':'return=representation' },
       body: JSON.stringify({ correcao_json: novo })
     });
-    if(!res.ok) throw new Error('Não consegui salvar o resultado');
+    if(!res.ok) throw new Error('N\u00e3o consegui salvar o resultado ('+res.status+')');
+    var linhas = []; try{ linhas = await res.json(); }catch(e){}
+    if(Array.isArray(linhas) && linhas.length === 0) throw new Error('Grava\u00e7\u00e3o n\u00e3o atingiu a corre\u00e7\u00e3o (permiss\u00e3o?) \u2014 id '+atual.correcaoId);
     atual.json = novo; atual.chamadas = novo.chamadas;
   }
   function blocoGerando(titulo, sub){
@@ -535,7 +538,11 @@
       var partes = [j.redacao_nota_1000_intro, j.redacao_nota_1000_dev1, j.redacao_nota_1000_dev2, j.redacao_nota_1000_conclusao]
         .filter(function(p){ return p && String(p).trim().length > 20; });
       if(partes.length < 4) throw new Error('A IA n\u00e3o devolveu a reescrita completa');
-      await salvarNoCorrecaoJson({
+      /* v3-9: mostra primeiro, grava depois — se a gravação falhar, o aluno vê o texto e o console registra o motivo */
+      atual.reescrita = partes.join('\n\n');
+      atual.plano = plano;
+      if(abaAtual === 'reescrita') trocarAba('reescrita');
+      try{ await salvarNoCorrecaoJson({
         redacao_nota_1000_intro: j.redacao_nota_1000_intro,
         redacao_nota_1000_dev1: j.redacao_nota_1000_dev1,
         redacao_nota_1000_dev2: j.redacao_nota_1000_dev2,
@@ -543,11 +550,9 @@
         elementos_c5_reescrita: j.elementos_c5 || null,
         plano_reescrita: plano,
         reescrita_guardas: falhas.length ? falhas : null,
-        reescrita_versao: 'v2-0'
-      }, 'redacao_nota_1000');
-      atual.reescrita = partes.join('\n\n');
-      atual.plano = plano;
-      if(abaAtual === 'reescrita') trocarAba('reescrita');
+        reescrita_versao: 'v2-1'
+      }, 'redacao_nota_1000'); }
+      catch(e2){ console.error('[redacoes] reescrita gerada mas N\u00c3O gravada:', e2); }
     }catch(err){
       console.error('[redacoes] reescrita:', err);
       if(abaAtual === 'reescrita'){

@@ -1,4 +1,4 @@
-/* RedaON · prompts-reescrita.js · v2-0 (11/09/2026)
+/* RedaON · prompts-reescrita.js · v2-1 (11/09/2026)
    Reescrita em duas etapas (plano → texto) ancorada no acervo e no Gabarito do Tema,
    Melhorias em campos separados, e guardas por código antes de mostrar ao aluno.
    Carregado por minhas-redacoes.html. Não depende de nada além de fetch/dbFetch.
@@ -42,7 +42,7 @@ REGRAS:
 2. Use EXATAMENTE os repertórios do plano, com os nomes e relações que o plano fixou. Os dados e citações acrescentados vêm do campo "repertorio_acrescentado" e devem entrar no texto com o mesmo conteúdo (números, artigos de lei e nomes idênticos) — pode integrar à frase, não pode alterar. Não acrescente nenhum nome, obra, lei ou dado que não esteja no plano.
 3. A conclusão contém os cinco elementos do plano, cada um reconhecível, e retoma a moldura da introdução.
 4. Norma culta impecável, períodos completos, conectivos variados e semanticamente adequados (sem repetir o mesmo conectivo), sem clichês ("é notório que", "hodiernamente").
-5. Texto entre 25 e 32 linhas de ENEM (aprox. 2.200 a 2.900 caracteres). Não ultrapasse.
+5. Texto entre 24 e 28 linhas de ENEM (aprox. 2.000 a 2.600 caracteres). Não ultrapasse: acima de 30 linhas o ENEM desconsidera. Prefira períodos curtos a parágrafos cheios.
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
@@ -412,7 +412,7 @@ function redaonTextoReescrita(j){ return [j.redacao_nota_1000_intro,j.redacao_no
 function redaonChecarReescrita(j, plano, ac){
   var falhas = [], t = redaonTextoReescrita(j), tn = redaonNorm(t);
   if(t.length < 600) falhas.push('reescrita curta ou incompleta');
-  if(t.length > 3050) falhas.push('texto longo demais: '+t.length+' caracteres (máximo ~2.900, 30 linhas); reduza cada parágrafo a no máximo 5 frases sem tirar argumento nem repertório');
+  if(t.length > 2750) falhas.push('texto longo demais: '+t.length+' caracteres (máximo 2.600, 28 linhas); reduza cada parágrafo a no máximo 5 frases curtas, sem tirar argumento nem repertório');
   ['retomando a moldura','moldura inicial','serao analisados','serao abordados','a tese e que','este texto','o presente texto','e notorio que','e fundamental ressaltar','hodiernamente'].forEach(function(c){ if(tn.indexOf(c)>=0) falhas.push('remova a expressão "'+c+'" (metalinguagem ou vazamento do plano)'); });
   if(/estatuto do idoso/.test(tn)) falhas.push('use o nome atual "Estatuto da Pessoa Idosa (Lei nº 10.741/2003)" no lugar de "Estatuto do Idoso"');
   if(/ministerio da mulher/.test(tn)) falhas.push('o Ministério da Mulher, da Família e dos Direitos Humanos não existe mais; use o agente do plano');
