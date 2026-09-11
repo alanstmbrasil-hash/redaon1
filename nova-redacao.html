@@ -235,7 +235,7 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash, foto aceita pela câmera ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera (capture) e "Enviar imagem" abre a galeria ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -954,7 +954,8 @@ function montarEsqueleto(cfg) {
       '<p class="tit">Como voc\u00ea quer fazer sua reda\u00e7\u00e3o?</p>' +
       '<p class="sub" id="metodoTema">Escolha o tema depois, na folha</p>' +
       '<a class="pill" style="background:rgba(var(--cyanRGB),.12);color:var(--cyan);border-color:rgba(var(--cyanRGB),.35);" href="nova-redacao.html?metodo=digitar"><i class="pemoji">\u270F\uFE0F</i>Digitar na folha <span style="font-size:.7rem;color:var(--muted);font-weight:400;">recomendado</span><i class="fim">\u203A</i></a>' +
-      '<a class="pill" href="nova-redacao.html?metodo=imagem"><i class="pemoji" style="color:var(--purpleSoft);">\u{1F4F7}</i>Enviar imagem<i class="fim">\u203A</i></a>' +
+      '<a class="pill" href="nova-redacao.html?metodo=foto"><i class="pemoji" style="color:var(--purpleSoft);">\u{1F4F7}</i>Tirar foto da reda\u00e7\u00e3o<i class="fim">\u203A</i></a>' +
+      '<a class="pill" href="nova-redacao.html?metodo=imagem"><i class="pemoji" style="color:var(--purpleSoft);">\u{1F5BC}\uFE0F</i>Enviar imagem da galeria<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="nova-redacao.html?metodo=pdf"><i class="pemoji" style="color:var(--gold);">\u{1F4C4}</i>Enviar documento<i class="fim">\u203A</i></a>' +
     '</div>' +
     '<nav id="barraInferior">' +
@@ -1060,7 +1061,7 @@ montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle',
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){
-  var mapa = { 'digitar':'aplicarMetodo(\'digitar\')', 'imagem':'aplicarMetodo(\'imagem\')', 'pdf':'aplicarMetodo(\'pdf\')' };
+  var mapa = { 'digitar':'aplicarMetodo(\'digitar\')', 'foto':'aplicarMetodo(\'foto\')', 'imagem':'aplicarMetodo(\'imagem\')', 'pdf':'aplicarMetodo(\'pdf\')' };
   document.querySelectorAll('#gavetaMetodos a.pill').forEach(function(p){
     var href = p.getAttribute('href') || '';
     var m = href.match(/metodo=(\w+)/);
@@ -1496,9 +1497,11 @@ function zerarTempo(){
 
 /* ── MÉTODO DE ENVIO (?metodo= e gaveta pelo 📷) ── */
 function aplicarMetodo(m){
-  if (m === 'imagem' || m === 'pdf'){
+  if (m === 'foto' || m === 'imagem' || m === 'pdf'){
     var inp = document.getElementById('inputArquivo');
     inp.accept = (m === 'pdf') ? 'application/pdf' : 'image/*';
+    /* v9-31: 'foto' abre a c\u00e2mera traseira direto (capture); 'imagem' abre a galeria. Alguns Androids s\u00f3 mostram a c\u00e2mera com capture. */
+    if (m === 'foto') inp.setAttribute('capture', 'environment'); else inp.removeAttribute('capture');
     inp.value = '';
     inp.click();
   } else {
