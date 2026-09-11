@@ -634,6 +634,25 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
 #admWrap .eixoBt .ee{display:block; font-size:.62rem; margin-top:.22rem;}
 #admWrap .eixoBt.sel{background:rgba(var(--cyanRGB),.12); border-color:var(--cyan); color:var(--cyan);}
 #admWrap .eixoBt.ia{border-style:dashed;}
+/* ═══ Gabarito do tema · decidir temas e aprovar materiais (11/09/2026) ═══ */
+#admWrap .gradeSub{grid-column:1/-1; font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-top:.4rem; display:flex; align-items:center; gap:.4rem;}
+#admWrap .gradeSub svg{width:14px; height:14px;}
+#admWrap .eixoBt.gab.sel{background:rgba(var(--purpleRGB),.10); border-color:var(--purple); color:var(--purple);}
+#admWrap .eixoBt.gab .ee{color:inherit; opacity:.75;}
+#admWrap .card.gab{border-color:rgba(var(--purpleRGB),.35);}
+#admWrap .gabNota{font-size:.76rem; color:var(--text2); line-height:1.55; margin:.3rem 0 .2rem; padding:.5rem .65rem; border-radius:11px; background:rgba(var(--purpleRGB),.07); display:flex; gap:.5rem; align-items:flex-start;}
+#admWrap .gabNota svg{width:16px; height:16px; flex:none; margin-top:.1rem; color:var(--purple);}
+#admWrap .ficha .ref{display:inline-block; font-size:.62rem; font-weight:800; letter-spacing:.04em; padding:.15rem .45rem; border-radius:99px; background:rgba(var(--purpleRGB),.12); color:var(--purple); margin-right:.4rem;}
+#admWrap .ficha .arg{font-size:.95rem; font-weight:700; line-height:1.5;}
+#admWrap .ficha .cons{font-size:.87rem; color:var(--text); line-height:1.6; margin-top:.5rem; padding-left:.75rem; border-left:2px solid var(--cyan); font-style:italic;}
+#admWrap .ficha .prov{font-size:.78rem; color:var(--text2); margin-top:.45rem;}
+#admWrap .ficha .prov b{color:var(--cyan); font-weight:700;}
+#admWrap .lista{margin-top:.55rem;}
+#admWrap .lista .lt{font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:.6rem 0 .25rem;}
+#admWrap .lista .it{font-size:.84rem; line-height:1.55; padding:.4rem 0; border-top:1px solid rgba(var(--borderRGB),.12); display:flex; gap:.5rem; align-items:flex-start;}
+#admWrap .lista .it .esf{font-size:.6rem; font-weight:800; padding:.12rem .4rem; border-radius:99px; background:rgba(var(--borderRGB),.14); color:var(--muted); white-space:nowrap; margin-top:.2rem;}
+#admWrap .lista .it a{color:var(--cyan);}
+#admWrap .lista .proib{font-size:.78rem; color:var(--text2); margin-top:.5rem; padding:.45rem .6rem; border-radius:10px; background:rgba(var(--orangeRGB),.08);}
 #admWrap .contaEixos{font-size:.78rem; color:var(--text2); margin-top:.75rem; line-height:1.5;}
 #admWrap .contaEixos b{color:var(--cyan);}
 @media (min-width:820px){#admWrap .medidas{grid-template-columns:repeat(4,1fr);}
@@ -1111,10 +1130,13 @@ async function conferirAcesso(){
 }
 
 /* ─── dados reais ─── */
-var EIXOS_ROT={ legislacao:'Legisla\u00e7\u00e3o', historia:'Hist\u00f3ria', especialistas:'Especialistas', atualidades:'Atualidades', literatura:'Literatura', filosofia:'Filosofia', cinema:'Cinema', ciencia:'Ci\u00eancia', culturapop:'Cultura pop' };
+var EIXOS_ROT={ argumentos:'Argumentos', intervencao:'Interven\u00e7\u00e3o', legislacao:'Legisla\u00e7\u00e3o', historia:'Hist\u00f3ria', especialistas:'Especialistas', atualidades:'Atualidades', literatura:'Literatura', filosofia:'Filosofia', cinema:'Cinema', ciencia:'Ci\u00eancia', culturapop:'Cultura pop' };
 var TEMAS=[], MAT={}, AGENDA=[], DECIDIR={ fabrica:0, seus:0 }, temaFoco=null, agTema=null, agSemana=null;
 function porId(id){ for(var i=0;i<TEMAS.length;i++) if(TEMAS[i].id===id) return TEMAS[i]; return null; }
 function rot(e){ return EIXOS_ROT[e]||e; }
+/* Gabarito do tema (11/09/2026): dois eixos que o aluno n\u00e3o v\u00ea; a Reescrita e as Melhorias bebem deles */
+function ehGab(id){ return id==='argumentos'||id==='intervencao'; }
+var EIXOS_GAB=[['argumentos','Argumentos'],['intervencao','Interven\u00e7\u00e3o']];
 function escolhidos(t){ return Array.isArray(t.eixos_relevantes)?t.eixos_relevantes:[]; }
 function linhas(t){ var m=MAT[t.id]||{}, out=[], i, es=escolhidos(t);
   for(i=0;i<es.length;i++) if(m[es[i]]) out.push(m[es[i]]);
@@ -1249,7 +1271,27 @@ function renderTema(){
       else if(e==='reposicao') veredito='<div class="veredito rep">\u21BB Reposi\u00e7\u00e3o pedida \u00e0 F\u00e1brica \u2014 motivo: '+esc(f.motivo||'')+'</div>';
       else veredito='<div class="fAcs"><button class="btn sm" onclick="decidirFicha(\''+ex.id+'\','+j+',\'aprovada\')">Aprovar</button><button class="btn rec sm" onclick="abrirRecusa(\''+ex.id+'\','+j+')">Recusar</button></div>';
       var url=String(f.url||'');
-      fh+='<div class="ficha'+(e==='aprovada'?' aprovada':(e==='recusada'||e==='reposicao'?' recusada':''))+'">'
+      var cls='ficha'+(e==='aprovada'?' aprovada':(e==='recusada'||e==='reposicao'?' recusada':''));
+      /* gabarito do tema: argumento (um por ficha) e interven\u00e7\u00e3o (a biblioteca inteira numa ficha) */
+      if(ex.eixo==='argumentos'){
+        fh+='<div class="'+cls+'"><div><span class="ref">'+esc(f.ref||'')+'</span><span class="arg">'+esc(f.argumento||'')+'</span></div>'
+          +'<div class="prov">Provado por: <b>'+(Array.isArray(f.fichas)?f.fichas.map(esc).join('</b> \u00b7 <b>'):'\u2014')+'</b></div>'
+          +'<div class="cons">'+esc(f.consequencia_modelo||'')+'</div>'
+          +(f.combina_com?'<div class="pz"><span class="rotZ">Combina com o que o aluno costuma trazer</span>'+esc(f.combina_com)+'</div>':'')
+          +(f.armadilha?'<div class="pu"><span class="rotU">'+ICO.alerta+'Armadilha</span>'+esc(f.armadilha)+'</div>':'')
+          +veredito+'</div>';
+        continue;
+      }
+      if(ex.eixo==='intervencao'){
+        var Lg='', ag=f.agentes||[], ins=f.instrumentos||[], det=f.detalhamentos||[], pro=f.nao_serve_como_meio||[];
+        Lg+='<div class="lt">Agentes \u00b7 quem age</div>'+ag.map(function(a){ return '<div class="it"><span class="ref">'+esc(a.ref||'')+'</span><span style="flex:1">'+esc(a.nome||'')+(a.por_que_cabe?' \u2014 '+esc(a.por_que_cabe):'')+(/^https?:\/\//.test(String(a.url||''))?' \u00b7 <a href="'+esc(a.url)+'" target="_blank" rel="noopener">fonte</a>':(a.geral_ref?' \u00b7 Biblioteca Geral '+esc(a.geral_ref):''))+'</span>'+(a.esfera?'<span class="esf">'+esc(a.esfera)+'</span>':'')+'</div>'; }).join('');
+        Lg+='<div class="lt">Instrumentos \u00b7 o meio</div>'+ins.map(function(a){ return '<div class="it"><span class="ref">'+esc(a.ref||'')+'</span><span style="flex:1">'+esc(a.nome||'')+(a.o_que_e?' \u2014 '+esc(a.o_que_e):'')+(/^https?:\/\//.test(String(a.url||''))?' \u00b7 <a href="'+esc(a.url)+'" target="_blank" rel="noopener">fonte</a>':(a.geral_ref?' \u00b7 Biblioteca Geral '+esc(a.geral_ref):''))+'</span></div>'; }).join('');
+        Lg+='<div class="lt">Detalhamentos \u00b7 como, onde, com que frequ\u00eancia</div>'+det.map(function(a){ return '<div class="it"><span class="ref">'+esc(a.ref||'')+'</span><span style="flex:1">'+esc(a.texto||'')+'</span></div>'; }).join('');
+        if(pro.length) Lg+='<div class="proib">N\u00e3o serve como meio sozinho: '+pro.map(esc).join(' \u00b7 ')+'</div>';
+        fh+='<div class="'+cls+'"><div class="conf">Fontes conferidas: <b>'+esc(conferido(ex,0))+'</b></div><div class="lista">'+Lg+'</div>'+veredito+'</div>';
+        continue;
+      }
+      fh+='<div class="'+cls+'">'
         +'<div class="pf">'+esc(campo(f,CHAVES.fonte)||'\u2014')+(/^https?:\/\//.test(url)?' \u00b7 <a href="'+esc(url)+'" target="_blank" rel="noopener">abrir a fonte</a>':'')+'</div>'
         +'<div class="conf">Fonte conferida: <b>'+esc(conferido(ex,j))+'</b></div>'
         +'<div class="pd">'+esc(campo(f,CHAVES.dado))+'</div>'
@@ -1260,8 +1302,9 @@ function renderTema(){
     var pin = pend ? '<span class="pin neutro">'+pend+' a ler</span>'
       : '<span class="pin '+(apr?'ok':'neutro')+'">'+(apr?apr+' no ar':'nada no ar')+(rep?' \u00b7 \u21BB '+rep+' em reposi\u00e7\u00e3o':'')+(rec?' \u00b7 '+rec+' recusada'+(rec>1?'s':''):'')+'</span>';
     var fora = escolhidos(t).indexOf(ex.eixo)<0 ? ' <span class="pin neutro">fora da encomenda</span>' : '';
-    h+='<div class="card'+((!pend&&apr)?' ok':'')+'">'
-      +'<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="ct eixo">'+esc(rot(ex.eixo))+'</span>'+fora+pin+'</div>'
+    var notaGab = ehGab(ex.eixo) ? '<div class="gabNota"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>'+(ex.eixo==='argumentos' ? 'Gabarito do tema. O aluno n\u00e3o v\u00ea estes eixos: a Reescrita escolhe daqui o argumento de cada par\u00e1grafo. Aprove um a um.' : 'Gabarito do tema. A Reescrita monta a proposta com 1 agente + 1 instrumento + 1 detalhamento daqui. A biblioteca \u00e9 uma ficha s\u00f3: aprovar ou pedir reposi\u00e7\u00e3o com o motivo.')+'</span></div>' : '';
+    h+='<div class="card'+((!pend&&apr)?' ok':'')+(ehGab(ex.eixo)?' gab':'')+'">'
+      +'<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="ct eixo">'+esc(rot(ex.eixo))+'</span>'+fora+pin+'</div>'+notaGab
       +'<div style="margin-top:.4rem">'+fh+'</div>'
       +(rec&&!pend ? '<div class="repor"><button class="btn g sm" onclick="abrirReposicao(\''+ex.id+'\')">Pedir reposi\u00e7\u00e3o do que foi recusado ('+rec+')</button></div>' : '')
       +'</div>';
@@ -1284,7 +1327,7 @@ async function gravarEixo(l){
   var fs=fichas(l), estado=estadoDoEixo(fs), uid=authGetUserId(), agora=new Date().toISOString();
   var corpo={ conteudo:JSON.stringify(fs), estado:estado, revisado_por:uid, revisado_em:agora };
   if(estado==='aprovado'){ corpo.aprovado_por=uid; corpo.aprovado_em=agora; corpo.revisao_json=null; }
-  else if(estado==='ajustes'){ corpo.aprovado_por=null; corpo.aprovado_em=null; corpo.revisao_json=fs.filter(function(f){ return estadoFicha(f)==='reposicao'; }).map(function(f){ return { fonte:campo(f,CHAVES.fonte), url:f.url||'', motivo:f.motivo||'' }; }); }
+  else if(estado==='ajustes'){ corpo.aprovado_por=null; corpo.aprovado_em=null; corpo.revisao_json=fs.filter(function(f){ return estadoFicha(f)==='reposicao'; }).map(function(f){ return { fonte:campo(f,CHAVES.fonte)||(f.ref?String(f.ref):(l.eixo==='intervencao'?'biblioteca de interven\u00e7\u00e3o':'')), url:f.url||'', motivo:f.motivo||'' }; }); }
   else { corpo.aprovado_por=null; corpo.aprovado_em=null; corpo.revisao_json=null; }
   var res=await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio?id=eq.'+encodeURIComponent(l.id), { method:'PATCH', body:JSON.stringify(corpo) });
   if(!res.ok){ var txt=await res.text(); throw new Error(txt||('HTTP '+res.status)); }
@@ -1371,7 +1414,7 @@ function abrirRecusa(id,j){
   var l=linhaPorId(id); if(!l) return; modoGav='recusa'; recLinha=l; recFicha=j; var f=fichas(l)[j];
   document.getElementById('gavT').textContent='Por que recusar esta informa\u00e7\u00e3o?';
   document.getElementById('gavS').textContent='O motivo fica guardado na ficha \u2014 voc\u00ea n\u00e3o precisa lembrar depois. Se pedir reposi\u00e7\u00e3o, \u00e9 este texto que a F\u00e1brica vai ler.';
-  document.getElementById('gavQuais').innerHTML='<b>'+esc(campo(f,CHAVES.fonte)||'\u2014')+'</b><br>'+esc(campo(f,CHAVES.dado));
+  document.getElementById('gavQuais').innerHTML= l.eixo==='argumentos' ? '<b>'+esc(f.ref||'')+'</b> '+esc(f.argumento||'') : (l.eixo==='intervencao' ? '<b>Biblioteca de interven\u00e7\u00e3o</b><br>'+((f.agentes||[]).length)+' agentes \u00b7 '+((f.instrumentos||[]).length)+' instrumentos \u00b7 '+((f.detalhamentos||[]).length)+' detalhamentos' : '<b>'+esc(campo(f,CHAVES.fonte)||'\u2014')+'</b><br>'+esc(campo(f,CHAVES.dado)));
   document.getElementById('btGav').textContent='Recusar com este motivo';
   var ps=document.querySelectorAll('.pillM'); for(var k=0;k<ps.length;k++) ps[k].classList.remove('sel');
   document.getElementById('gavTexto').value=''; document.getElementById('micDica').textContent=''; document.getElementById('micDica').classList.remove('on');
@@ -1611,7 +1654,7 @@ function dMontarLista(){
 /* ─── tema em foco ─── */
 function dAbrirTema(id){
   atual=propPorId(id); if(!atual) return; anterior=null; editando=false;
-  sugestaoIA=atual._sug||[]; marcados=sugestaoIA.slice();
+  sugestaoIA=atual._sug||[]; marcados=sugestaoIA.slice().concat(['argumentos','intervencao']); /* gabarito por padr\u00e3o */
   dRenderTema(); ir('t-dtema');
   if(!atual._sug) sugerirEixos(atual);
 }
@@ -1629,7 +1672,7 @@ async function sugerirEixos(p){
   }catch(e){ console.warn('[eixos gemini]',e); p._sug=[]; }
   if(timer) clearTimeout(timer);
   if(meu!==pedidoGemini||atual!==p||telaAtual!=='t-dtema') return;
-  sugestaoIA=p._sug.slice(); if(!marcados.length) marcados=sugestaoIA.slice();
+  sugestaoIA=p._sug.slice(); if(!marcados.filter(function(x){ return !ehGab(x); }).length) marcados=sugestaoIA.slice().concat(marcados.filter(ehGab));
   montarGrade();
 }
 function quadro(k,v,d){ return '<div class="med"><div class="k">'+k+'</div><div class="v">'+esc(v)+'</div><div class="d">'+esc(d)+'</div></div>'; }
@@ -1674,7 +1717,7 @@ function dRenderTema(){
     h+='<div class="edit mot"><div class="lb">Se seguir assim, registre o motivo</div><textarea id="motivo" placeholder="Opcional. Fica gravado junto do tema.">'+esc(t.motivo_contra||'')+'</textarea></div>';
   }
   h+='<div class="zonaEixos"><div class="zt">Por onde vai o material deste tema?</div>'
-    +'<div class="zs">O tracejado \u00e9 a sugest\u00e3o do Gemini \u2014 ajuste como quiser. M\u00ednimo de '+MIN_EIXOS+'. A F\u00e1brica s\u00f3 produz para os eixos que voc\u00ea marcar.</div>'
+    +'<div class="zs">O tracejado \u00e9 a sugest\u00e3o do Gemini \u2014 ajuste como quiser. M\u00ednimo de '+MIN_EIXOS+' de repert\u00f3rio. Argumentos e Interven\u00e7\u00e3o v\u00eam marcados: s\u00e3o o gabarito que a Reescrita usa; desmarque se n\u00e3o quiser. A F\u00e1brica s\u00f3 produz para os eixos que voc\u00ea marcar.</div>'
     +'<div class="grade" id="grade"></div><div class="contaEixos" id="contaEixos"></div></div>';
   h+='<div class="acoes">';
   if(!editando) h+='<button class="btn g" onclick="abrirEdicao()">'+(dela?'Ajustar':'Editar enunciado')+'</button>';
@@ -1692,13 +1735,23 @@ function montarGrade(){
     var id=EIXOS_GRADE[i][0], sel=marcados.indexOf(id)>=0, ia=sugestaoIA.indexOf(id)>=0;
     h+='<button class="eixoBt'+(sel?' sel':'')+(ia?' ia':'')+'" onclick="alternarEixo(\''+id+'\')"><span class="en">'+EIXOS_GRADE[i][1]+'</span><span class="ee">'+(ia?'sugerido':'&nbsp;')+'</span></button>';
   }
+  /* gabarito do tema: vem marcado por padr\u00e3o; a ADM desmarca se n\u00e3o quiser */
+  h+='<div class="gradeSub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Gabarito do tema \u00b7 padr\u00e3o</div>';
+  for(i=0;i<EIXOS_GAB.length;i++){
+    var gid=EIXOS_GAB[i][0], gsel=marcados.indexOf(gid)>=0;
+    h+='<button class="eixoBt gab'+(gsel?' sel':'')+'" onclick="alternarEixo(\''+gid+'\')"><span class="en">'+EIXOS_GAB[i][1]+'</span><span class="ee">'+(gsel?'marcado':'fora')+'</span></button>';
+  }
   el.innerHTML=h;
+  var rep=marcados.filter(function(x){ return !ehGab(x); }), gab=marcados.filter(ehGab);
   var c=document.getElementById('contaEixos'), b=document.getElementById('btAprovar');
-  if(marcados.length<MIN_EIXOS){
-    if(c) c.innerHTML='<b>'+marcados.length+'</b> de no m\u00ednimo '+MIN_EIXOS+' \u2014 marque mais '+(MIN_EIXOS-marcados.length)+'.';
-    if(b){ b.disabled=true; b.textContent='Marque pelo menos '+MIN_EIXOS+' eixos'; }
+  var gabTxt = gab.length===2 ? 'Gabarito completo (Argumentos e Interven\u00e7\u00e3o): a Reescrita e as Melhorias bebem daqui.'
+    : gab.length===1 ? 'S\u00f3 '+rot(gab[0])+' no gabarito \u2014 a Reescrita fica pela metade.'
+    : 'Sem gabarito: a Reescrita usa s\u00f3 o repert\u00f3rio.';
+  if(rep.length<MIN_EIXOS){
+    if(c) c.innerHTML='<b>'+rep.length+'</b> de no m\u00ednimo '+MIN_EIXOS+' eixos de repert\u00f3rio \u2014 marque mais '+(MIN_EIXOS-rep.length)+'.<br>'+gabTxt;
+    if(b){ b.disabled=true; b.textContent='Marque pelo menos '+MIN_EIXOS+' eixos de repert\u00f3rio'; }
   } else {
-    if(c) c.innerHTML='<b>'+marcados.length+'</b> marcados: '+marcados.map(rotEixoGrade).join(' \u00b7 ');
+    if(c) c.innerHTML='<b>'+rep.length+'</b> de repert\u00f3rio: '+rep.map(rotEixoGrade).join(' \u00b7 ')+'<br>'+gabTxt;
     if(b){ b.disabled=false; b.textContent=(atual&&atual.origem==='blanche'?'Seguir assim':'Aprovar')+' com '+marcados.length+' eixos'; }
   }
 }
@@ -1735,7 +1788,7 @@ function dGaveta(t,s,h){ modoGav='decidir'; document.getElementById('gavT').text
 
 /* ─── aprovar: categoria proposta pela IA, confirmada por ela ─── */
 function abrirCategoria(){
-  if(marcados.length<MIN_EIXOS) return;
+  if(marcados.filter(function(x){ return !ehGab(x); }).length<MIN_EIXOS) return;
   var m=document.getElementById('motivo'); if(m) atual.motivo_contra=m.value.trim();
   var h='', i, cat=atual.categoria_proposta;
   for(i=0;i<CATEGORIAS.length;i++){ h+='<button class="pill'+(CATEGORIAS[i]===cat?' sel':'')+'" onclick="confirmarCategoria(this,\''+CATEGORIAS[i]+'\')"><span>'+CATEGORIAS[i]+(CATEGORIAS[i]===cat?'<span class="sub">\u00b7 proposta</span>':'')+'</span><span class="ck">&#10003;</span></button>'; }

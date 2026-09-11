@@ -965,7 +965,9 @@ async function importar(){
 }
 
 /* ─── dados reais: temas com eixos marcados pela ADM P + material_apoio ─── */
-var EIXOS=[['legislacao','Legisla\u00e7\u00e3o'],['historia','Hist\u00f3ria'],['especialistas','Especialistas'],['atualidades','Atualidades'],['literatura','Literatura'],['filosofia','Filosofia'],['cinema','Cinema'],['ciencia','Ci\u00eancia'],['culturapop','Cultura pop']];
+/* Gabarito do tema (11/09/2026): dois eixos com formato pr\u00f3prio */
+function ehGab(id){ return id==='argumentos'||id==='intervencao'; }
+var EIXOS=[['argumentos','Argumentos'],['intervencao','Interven\u00e7\u00e3o'],['legislacao','Legisla\u00e7\u00e3o'],['historia','Hist\u00f3ria'],['especialistas','Especialistas'],['atualidades','Atualidades'],['literatura','Literatura'],['filosofia','Filosofia'],['cinema','Cinema'],['ciencia','Ci\u00eancia'],['culturapop','Cultura pop']];
 var MIN_FICHAS=2, DENTRO=['revisao','ajustes','aprovado'];
 var TEMAS=[], MAT={}, atual=null, temaImport=null, blocoOk=null;
 function porId(id){ for(var i=0;i<TEMAS.length;i++) if(TEMAS[i].id===id) return TEMAS[i]; return null; }
@@ -1062,6 +1064,42 @@ function abrirEscolhaTema(){
 function escolherTema(id){ temaImport=porId(id); document.getElementById('alvoNome').textContent=temaImport.titulo; fecharGaveta(); }
 function fecharGaveta(){ document.getElementById('veu').classList.remove('on'); document.getElementById('gav').classList.remove('on'); }
 
+/* ─── Gabarito do tema: valida\u00e7\u00e3o dos eixos argumentos e intervencao (contrato \u00a711 das instru\u00e7\u00f5es v5 da F\u00e1brica) ─── */
+function validarGabarito(bx, L){
+  function mal(t){ L.push('<div class="r mal"><span class="ic">&#10007;</span><span>'+t+'</span></div>'); return true; }
+  function okL(t){ L.push('<div class="r ok"><span class="ic">&#10003;</span><span>'+t+'</span></div>'); }
+  var falhou=false, its=Array.isArray(bx.itens)?bx.itens:[], i;
+  if(bx.eixo==='argumentos'){
+    if(its.length<2||its.length>4) falhou=mal('Argumentos: '+its.length+' item(ns); o gabarito pede de 2 a 4 eixos argumentativos.');
+    var semFicha=0, semCons=0, semRef=0, semArg=0;
+    for(i=0;i<its.length;i++){ var a=its[i]||{};
+      if(!String(a.ref||'').trim()) semRef++;
+      if(!String(a.argumento||'').trim()) semArg++;
+      if(!Array.isArray(a.fichas)||!a.fichas.length) semFicha++;
+      if(!/^(Assim|Desse modo|Logo),/.test(String(a.consequencia_modelo||'').trim())) semCons++; }
+    if(semRef) falhou=mal('Argumentos: '+semRef+' sem ref (ARG-n).');
+    if(semArg) falhou=mal('Argumentos: '+semArg+' sem a frase do argumento.');
+    if(semFicha) falhou=mal('Argumentos: '+semFicha+' sem ficha de repert\u00f3rio que o prove \u2014 argumento sem prova n\u00e3o entra.');
+    if(semCons) falhou=mal('Argumentos: '+semCons+' sem consequ\u00eancia-modelo come\u00e7ando por "Assim," / "Desse modo," / "Logo,".');
+    if(!falhou) okL('Argumentos: '+its.length+' eixos argumentativos, todos com ficha e consequ\u00eancia');
+    return falhou;
+  }
+  var g=its[0]||{}; var ag=Array.isArray(g.agentes)?g.agentes:[], ins=Array.isArray(g.instrumentos)?g.instrumentos:[], det=Array.isArray(g.detalhamentos)?g.detalhamentos:[];
+  if(its.length!==1) falhou=mal('Interven\u00e7\u00e3o: a biblioteca \u00e9 UMA ficha (um item em "itens") com as tr\u00eas listas.');
+  if(ag.length<3) falhou=mal('Interven\u00e7\u00e3o: '+ag.length+' agente(s); m\u00ednimo 3 \u2014 \u00e9 o que garante reescritas diferentes.');
+  if(ins.length<3) falhou=mal('Interven\u00e7\u00e3o: '+ins.length+' instrumento(s); m\u00ednimo 3.');
+  if(det.length<3) falhou=mal('Interven\u00e7\u00e3o: '+det.length+' detalhamento(s); m\u00ednimo 3.');
+  var semUrl=0, semConf=0, semNome=0;
+  ag.concat(ins).forEach(function(x){ x=x||{}; if(!String(x.nome||'').trim()) semNome++; if(String(x.geral_ref||'').trim()) return; if(!/^https?:\/\/\S+$/.test(String(x.url||''))) semUrl++; if(x.fonte_conferida!==true) semConf++; });
+  if(semNome) falhou=mal('Interven\u00e7\u00e3o: '+semNome+' item(ns) sem nome oficial.');
+  if(semUrl) falhou=mal('Interven\u00e7\u00e3o: '+semUrl+' agente(s)/instrumento(s) sem endere\u00e7o de fonte que abre (ou sem ref da Biblioteca Geral).');
+  if(semConf) falhou=mal('Interven\u00e7\u00e3o: '+semConf+' sem fonte conferida \u2014 \u00f3rg\u00e3o n\u00e3o conferido n\u00e3o entra.');
+  var vazios=det.filter(function(d){ return !String((d||{}).texto||'').trim(); }).length;
+  if(vazios) falhou=mal('Interven\u00e7\u00e3o: '+vazios+' detalhamento(s) vazio(s).');
+  if(!Array.isArray(g.nao_serve_como_meio)||!g.nao_serve_como_meio.length) falhou=mal('Interven\u00e7\u00e3o: falta a lista "n\u00e3o serve como meio" (copie a lista fixa das instru\u00e7\u00f5es da F\u00e1brica).');
+  if(!falhou) okL('Interven\u00e7\u00e3o: '+ag.length+' agentes \u00b7 '+ins.length+' instrumentos \u00b7 '+det.length+' detalhamentos');
+  return falhou;
+}
 function validarFichas(its, L, rotEixo){
   function mal(t){ L.push('<div class="r mal"><span class="ic">&#10007;</span><span>'+t+'</span></div>'); return true; }
   var falhou=false;
@@ -1095,7 +1133,7 @@ function conferirBloco(){
   if(!eixos.length && !emperrados.length){ mal('Nenhum eixo no bloco.'); falhou=true; }
   var vistos=[], i;
   for(i=0;i<eixos.length;i++){ var bx=eixos[i]||{};
-    if(ids.indexOf(bx.eixo)<0){ mal('Eixo "'+esc(String(bx.eixo))+'" fora dos nove permitidos.'); falhou=true; continue; }
+    if(ids.indexOf(bx.eixo)<0){ mal('Eixo "'+esc(String(bx.eixo))+'" fora dos onze permitidos.'); falhou=true; continue; }
     if(vistos.indexOf(bx.eixo)>=0){ mal(rot(bx.eixo)+' aparece duas vezes no bloco.'); falhou=true; continue; }
     vistos.push(bx.eixo);
     var l=linhaDe(temaImport.id, bx.eixo);
@@ -1105,12 +1143,12 @@ function conferirBloco(){
     } else {
       if(l && l.estado==='aprovado'){ mal(rot(bx.eixo)+': j\u00e1 est\u00e1 aprovado pela ADM Pedag\u00f3gica. S\u00f3 entra por reposi\u00e7\u00e3o pedida por ela.'); falhou=true; }
       else if(s.escolhidos.indexOf(bx.eixo)<0) av(rot(bx.eixo)+': a ADM Pedag\u00f3gica n\u00e3o marcou este eixo. Entra, mas fica fora da vitrine at\u00e9 ela incluir.');
-      else okL(rot(bx.eixo)+': '+((bx.itens||[]).length)+' fichas');
+      else if(!ehGab(bx.eixo)) okL(rot(bx.eixo)+': '+((bx.itens||[]).length)+' fichas');
     }
-    if(validarFichas(bx.itens, L, rot(bx.eixo))) falhou=true;
+    if(ehGab(bx.eixo)){ if(validarGabarito(bx, L)) falhou=true; } else if(validarFichas(bx.itens, L, rot(bx.eixo))) falhou=true;
   }
   for(i=0;i<emperrados.length;i++){ var em=emperrados[i]||{};
-    if(ids.indexOf(em.eixo)<0){ mal('Emperrado "'+esc(String(em.eixo))+'" fora dos nove permitidos.'); falhou=true; continue; }
+    if(ids.indexOf(em.eixo)<0){ mal('Emperrado "'+esc(String(em.eixo))+'" fora dos onze permitidos.'); falhou=true; continue; }
     var le=linhaDe(temaImport.id, em.eixo);
     if(le && le.estado==='aprovado'){ mal(rot(em.eixo)+': est\u00e1 aprovado, n\u00e3o pode voltar como emperrado.'); falhou=true; continue; }
     av(rot(em.eixo)+' emperrou na F\u00e1brica: '+esc(em.motivo||'sem motivo declarado')+'. A ADM Pedag\u00f3gica vai decidir \u2014 tirar da encomenda ou devolver a produzir.'); }
@@ -1121,17 +1159,27 @@ function conferirBloco(){
   }
   if(falhou){ saida.innerHTML=L.join(''); return; }
   blocoOk=d; bt.disabled=false;
-  var f0 = eixos.length ? eixos[0].itens[0] : null;
-  saida.innerHTML=L.join('')+(f0 ? '<div class="previa"><div class="cm">Vai entrar '+(repo?'a reposi\u00e7\u00e3o':'o tema inteiro')+' \u00b7 conferido, para a ADM Pedag\u00f3gica aprovar</div>'
-    +'<div class="pf">'+esc(f0.cab||'\u2014')+'</div><div class="pd">'+esc(f0.dado)+'</div>'
-    +'<div class="pz"><span class="pr">O que diz</span>'+esc(f0.diz)+'</div><div class="pu"><span class="pr">Como usar na reda\u00e7\u00e3o</span>'+esc(f0.como_usar)+'</div></div>' : '');
+  var rep0 = eixos.filter(function(x){ return !ehGab(x.eixo); })[0], gabs = eixos.filter(function(x){ return ehGab(x.eixo); });
+  var f0 = rep0 ? rep0.itens[0] : null;
+  var gabTxt = gabs.length ? '<div class="pz"><span class="pr">Gabarito do tema</span>'+gabs.map(function(x){ var it=x.itens||[]; return x.eixo==='argumentos' ? it.length+' eixos argumentativos' : ((it[0]||{}).agentes||[]).length+' agentes \u00b7 '+((it[0]||{}).instrumentos||[]).length+' instrumentos \u00b7 '+((it[0]||{}).detalhamentos||[]).length+' detalhamentos'; }).join(' \u00b7 ')+' \u2014 o aluno n\u00e3o v\u00ea; a Reescrita e as Melhorias bebem daqui.</div>'
+    : (repo ? '' : '<div class="pz"><span class="pr">Gabarito do tema</span>N\u00e3o veio neste bloco. A Reescrita usa s\u00f3 o repert\u00f3rio at\u00e9 a F\u00e1brica entregar.</div>');
+  saida.innerHTML=L.join('')+((f0||gabs.length) ? '<div class="previa"><div class="cm">Vai entrar '+(repo?'a reposi\u00e7\u00e3o':'o tema inteiro')+' \u00b7 conferido, para a ADM Pedag\u00f3gica aprovar</div>'
+    +(f0 ? '<div class="pf">'+esc(f0.cab||'\u2014')+'</div><div class="pd">'+esc(f0.dado)+'</div>'
+    +'<div class="pz"><span class="pr">O que diz</span>'+esc(f0.diz)+'</div><div class="pu"><span class="pr">Como usar na reda\u00e7\u00e3o</span>'+esc(f0.como_usar)+'</div>' : '')+gabTxt+'</div>' : '');
 }
 
 /* ─── gravação: uma linha por eixo · fichas entram pendente · tema → entregue ─── */
-function fichasDe(itens){
+function fichasDe(itens, eixo){
+  if(eixo==='argumentos') return itens.map(function(a){ return { ref:String(a.ref||'').trim(), argumento:String(a.argumento||'').trim(), fichas:Array.isArray(a.fichas)?a.fichas.map(String):[], consequencia_modelo:String(a.consequencia_modelo||'').trim(), combina_com:String(a.combina_com||'').trim(), armadilha:String(a.armadilha||'').trim(), estado:'pendente', motivo:null }; });
+  if(eixo==='intervencao'){ var g=itens[0]||{}; return [{ agentes:(g.agentes||[]).map(function(a){ return { ref:String(a.ref||'').trim(), nome:String(a.nome||'').trim(), esfera:String(a.esfera||'').trim(), por_que_cabe:String(a.por_que_cabe||'').trim(), url:String(a.url||'').trim(), geral_ref:String(a.geral_ref||'').trim()||null }; }),
+    instrumentos:(g.instrumentos||[]).map(function(a){ return { ref:String(a.ref||'').trim(), nome:String(a.nome||'').trim(), o_que_e:String(a.o_que_e||'').trim(), agentes:Array.isArray(a.agentes)?a.agentes.map(String):[], url:String(a.url||'').trim(), geral_ref:String(a.geral_ref||'').trim()||null }; }),
+    detalhamentos:(g.detalhamentos||[]).map(function(a){ return { ref:String(a.ref||'').trim(), texto:String(a.texto||'').trim(), combina_com:Array.isArray(a.combina_com)?a.combina_com.map(String):[] }; }),
+    nao_serve_como_meio:(g.nao_serve_como_meio||[]).map(String), estado:'pendente', motivo:null }]; }
   return itens.map(function(x){ return { fonte:String(x.cab||'').trim(), url:String(x.url||'').trim(), dado:String(x.dado||'').trim(), diz:String(x.diz||'').trim(), como_usar:String(x.como_usar||'').trim(), estado:'pendente', motivo:null }; });
 }
-function fontesDe(itens){
+function fontesDe(itens, eixo){
+  if(eixo==='argumentos') return [];
+  if(eixo==='intervencao'){ var g=itens[0]||{}; return (g.agentes||[]).concat(g.instrumentos||[]).filter(function(x){ return !x.geral_ref; }).map(function(x){ return { ref:String(x.ref||'').trim(), url:String(x.url||'').trim(), conferido_por:String(x.conferido_por||'').trim(), conferido_em:String(x.conferido_em||'').trim() }; }); }
   return itens.map(function(x){ return { url:String(x.url||'').trim(), conferido_por:String(x.conferido_por||'').trim(), conferido_em:String(x.conferido_em||'').trim() }; });
 }
 function lerArray(s){ try{ var a=JSON.parse(String(s||'[]')); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
@@ -1151,7 +1199,7 @@ async function importarMat(){
   var eixos = Array.isArray(blocoOk.eixos) ? blocoOk.eixos : [], emperrados = Array.isArray(blocoOk.emperrados) ? blocoOk.emperrados : [];
   var feito=0;
   try{
-    for(i=0;i<eixos.length;i++){ var bx=eixos[i], ex=linhaDe(temaImport.id, bx.eixo), novas=fichasDe(bx.itens), fontes=fontesDe(bx.itens), corpo;
+    for(i=0;i<eixos.length;i++){ var bx=eixos[i], ex=linhaDe(temaImport.id, bx.eixo), novas=fichasDe(bx.itens, bx.eixo), fontes=fontesDe(bx.itens, bx.eixo), corpo;
       if(repo){
         var antigas=lerArray(ex.conteudo).map(function(f){ if(f && f.estado==='reposicao') f.estado='substituida'; return f; });
         var fontesAnt = Array.isArray(ex.fontes) ? ex.fontes : [];
