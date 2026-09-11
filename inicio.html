@@ -927,7 +927,8 @@
           var el = document.getElementById('ccC' + (i + 1)); if (!el) return;
           if (!n) return;
           var v = Math.round(soma / n);
-          el.className = 'cc ' + (v >= 200 ? 'n-ouro' : v >= 160 ? 'n-verde' : v >= 120 ? 'n-amar' : 'n-verm');
+          /* Régua de cores (Alan, 11/09/2026): 0–79 vermelho · 80–120 amarelo · 121–200 verde · 200 ouro */
+          el.className = 'cc ' + (v >= 200 ? 'n-ouro' : v >= 121 ? 'n-verde' : v >= 80 ? 'n-amar' : 'n-verm');
           el.querySelector('b').textContent = v;
         });
         ajustarArt();

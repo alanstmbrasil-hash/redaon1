@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v3-11 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v3-12 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
 <script>
 (function(){
   var pref='auto';
@@ -218,7 +218,7 @@
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-11'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-12'
   });
 
   var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
@@ -231,7 +231,8 @@
   ];
   var REDACOES=[], atual=null, correcaoAtual=null, filtroAtivo='todas', abaAtual='original';
 
-  function corComp(v){ return v>=160?'var(--green)':(v>=120?'var(--gold)':'var(--red)'); }
+  /* Régua de cores (Alan, 11/09/2026): 0–79 vermelho · 80–120 amarelo · 121–200 verde. Dourado é só de conquista (200 no Início). */
+  function corComp(v){ return v>=121?'var(--green)':(v>=80?'var(--orange)':'var(--red)'); }
   function alternarGvExc(id){
     var g=document.getElementById(id);
     if(g && g.classList.contains('open')){ fecharGaveta(id); marcarBtnDock(); return; }
