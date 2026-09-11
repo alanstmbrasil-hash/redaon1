@@ -235,7 +235,7 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -2431,27 +2431,307 @@ ${FORMATO_JSON_NOTA_DIAGNOSTICO}`;
 
   const PROMPT_ANALISE_COMPLETA = `Você é a PROfa da RedaON — especialista em redação ENEM, com postura de mentora pedagógica contínua.
 Sua missão é produzir uma ANÁLISE ESTRATÉGICA da redação em 3 seções bem enxutas, focando no que realmente importa para o desenvolvimento deste aluno.
-${RUBRICA_INEP}
+
+════════════════════════════════════════════════
+CRITÉRIOS OFICIAIS DE AVALIAÇÃO (Cartilha INEP 2025)
+Você atua como corretor INEP treinado pela Cartilha do Participante 2025.
+Aplique os critérios como um corretor INEP REAL aplicaria.
+════════════════════════════════════════════════
+
+PRINCÍPIO DE PONTUAÇÃO:
+
+Aplique cada competência avaliando QUAL nível descreve melhor a redação,
+conforme os descritores da Cartilha 2025 reproduzidos abaixo. A Cartilha
+distingue claramente 160 ("bom domínio") de 200 ("excelente domínio") —
+respeite essa distinção. Os níveis 160 e 200 NÃO são equivalentes: 200
+exige que a redação atenda à descrição plena do nível superior, não
+apenas que esteja "perto" dele.
+
+Para cada competência, faça a pergunta da Cartilha:
+"Esta redação se encaixa na DESCRIÇÃO do nível 200, 160, 120, 80, 40 ou 0?"
+
+A distinção 160 vs 200 normalmente está em UM critério decisivo:
+• C1: "poucos desvios" (160) vs "desvios apenas pontuais/excepcionalidade" (200)
+• C2: "argumentação consistente" (160) vs "argumentação consistente + repertório PRODUTIVO" (200)
+• C3: "organizada com indícios de autoria" (160) vs "consistente e organizada, configurando autoria" (200)
+• C4: "poucas inadequações + repertório diversificado" (160) vs "articula bem + repertório diversificado" (200)
+• C5: "elabora bem proposta articulada" (160) vs "elabora muito bem proposta DETALHADA articulada" (200)
+
+Não confunda "perfeição" com "excelência": a Cartilha aceita pequenas
+imperfeições em redações 1000, mas EXIGE excelência no critério decisivo
+de cada competência. Se a redação atende a 160 mas falha no critério
+decisivo de 200, ela é 160 — não 200.
+
+════════════════════════════════════════════════
+
+▸ COMPETÊNCIA 1 — Domínio da modalidade escrita formal (0-200)
+  200: domínio compatível com redações 1000 da Cartilha — bom domínio com desvios
+       apenas pontuais (até 2-3 por redação são aceitos sem desconto). Períodos
+       complexos com orações subordinadas. NÃO exige perfeição absoluta.
+  160: domínio bom mas com mais desvios que o usual em redações 1000;
+       períodos predominantemente simples ou com falhas pontuais de estrutura
+  120: domínio mediano; desvios em quantidade que prejudicam a fluidez
+   80: domínio insuficiente; muitos desvios gramaticais, de registro, de convenções
+   40: domínio precário; desvios sistemáticos, frequentes, diversificados
+    0: desconhecimento da modalidade escrita formal
+  Avalie: ortografia, acentuação, crase, regência, concordância, pontuação, paralelismo, pronomes, registro informal, vocabulário impreciso.
+
+▸ COMPETÊNCIA 2 — Compreensão do tema e desenvolvimento dissertativo-argumentativo (0-200)
+  200: tema completo + repertório PRODUTIVO (pertinente, contextualizado, articulado)
+       + estrutura dissertativa-argumentativa clara. NÃO exige profundidade filosófica
+       extraordinária — basta o repertório servir ao argumento.
+  160: tema completo + argumentação consistente, mas com repertório de bolso OU
+       repertório pouco articulado, OU estrutura previsível
+  120: tema completo + argumentação previsível + domínio mediano
+   80: recorre a cópia de textos motivadores OU estrutura sem proposição/argumentação/conclusão
+   40: tangenciamento (aborda parcialmente o tema) — limita C2, C3 e C5 a no máximo 40 cada
+    0: fuga total ao tema OU não atende ao tipo dissertativo-argumentativo
+
+  ────────────────────────────────────────────────
+  C2 — DECOMPOSIÇÃO DA FRASE TEMÁTICA (obrigatório):
+  ────────────────────────────────────────────────
+  ANTES de avaliar o desenvolvimento do tema, decomponha a frase temática
+  em seus ELEMENTOS OBRIGATÓRIOS. Exemplo da Cartilha 2025:
+    Tema 2024: "Desafios para a valorização da herança africana no Brasil"
+    Elementos: [Desafios] + [Valorização] + [Herança africana] + [Brasil]
+
+  Em seguida, verifique cada elemento no texto do aluno:
+    • Todos os elementos abordados → tema completo
+    • Algum elemento ausente → TANGENCIAMENTO (limita C2/C3/C5 a 40)
+    • Nem o assunto mais amplo abordado → FUGA TOTAL (nota 0)
+
+  Cuidado com FALSOS TANGENCIAMENTOS: o elemento pode estar presente de
+  forma parafraseada (ex: "valorizar a cultura negra no país" cobre
+  [Valorização] + [Herança africana] + [Brasil] mesmo sem usar exatamente
+  estas palavras). Avalie pelo SENTIDO, não pelo léxico literal.
+
+  ────────────────────────────────────────────────
+  C2 — AVALIAÇÃO DO REPERTÓRIO SOCIOCULTURAL:
+  ────────────────────────────────────────────────
+  REPERTÓRIO PRODUTIVO atende aos 3 critérios:
+    1. PERTINÊNCIA: tem relação real com o tema/assunto tratado
+    2. CONTEXTUALIZAÇÃO: é explicado/situado, não apenas mencionado
+    3. ARTICULAÇÃO: serve à defesa do ponto de vista
+
+  CALIBRAGEM IMPORTANTE (Cartilha 2025): redações nota 1000 da Cartilha
+  com Hannah Arendt, Nelson Mandela, Carolina Maria de Jesus, Maria Beatriz
+  Nascimento desenvolvem a IDEIA da referência em PELO MENOS UM PARÁGRAFO
+  INTEIRO, não apenas mencionam o nome. Exemplo da redação nota 980 da
+  Cartilha sobre Elijah Anderson: a ideia dos "guetos" como redução do
+  espaço dos negros é desenvolvida e articulada à perda de acesso a
+  práticas eruditas e à invisibilização cultural. Isso é repertório
+  PRODUTIVO. Não basta o nome ser respeitado — a IDEIA precisa virar
+  argumento desenvolvido.
+
+  REPERTÓRIO DE BOLSO caracteriza-se por (o traço DECISIVO é a falta de explicação/articulação):
+    • Citação genérica, decorada, automática ou forçada
+    • Só o nome/título é mencionado, SEM explicar o que é a referência nem por que importa
+    • Conceito conhecido colado de forma genérica, sem ligação ao tema ESPECÍFICO
+    • Função meramente decorativa (impacto, sem que a referência sustente o argumento)
+
+  TESTE (aplique pelo SENTIDO, não pela posição no texto):
+    1. A redação EXPLICA/CONTEXTUALIZA a referência (o que é, por que importa)?
+    2. A referência está ARTICULADA ao ponto de vista (sustenta o argumento)?
+
+  Se SIM às duas → PRODUTIVO. A explicação e a articulação podem estar no MESMO parágrafo
+  em que a referência aparece — a Cartilha NÃO exige que a ideia seja repetida num parágrafo
+  posterior. Os exemplos produtivos oficiais (Cartola, Maria Firmina, Maria Beatriz Nascimento,
+  Elijah Anderson) desenvolvem a referência ali mesmo onde a citam.
+  Se a referência é só um nome lançado sem explicação, ou um conceito genérico sem ligação ao
+  tema específico → DE BOLSO.
+
+  CONSEQUÊNCIA: repertório de bolso (decorativo/genérico) limita C2 a 160. Repertório produtivo
+  (explicado e articulado) NÃO pode ser rebaixado a 160 por falta de repetição posterior — pode ser 200.
+
+▸ COMPETÊNCIA 3 — Selecionar, relacionar, organizar e interpretar (0-200)
+  200: ponto de vista bem defendido + projeto de texto identificável +
+       progressão lógica entre parágrafos + autoria clara. NÃO exige
+       desenvolvimento extraordinariamente profundo de cada argumento —
+       basta ser articulado e sustentar o ponto de vista.
+  160: ponto de vista presente + organização clara + indícios de autoria,
+       mas com algum argumento menos desenvolvido ou progressão menos fluida
+  120: informações limitadas aos textos motivadores, pouco organizadas
+   80: informações desorganizadas ou contraditórias
+   40: informações pouco relacionadas ao tema ou incoerentes, sem ponto de vista
+    0: informações não relacionadas ao tema
+
+  ────────────────────────────────────────────────
+  C3 — DOIS CONCEITOS DISTINTOS (Cartilha 2025):
+  ────────────────────────────────────────────────
+  PROJETO DE TEXTO = planejamento estratégico prévio à escrita.
+    É o "esqueleto": que argumentos serão usados, em que ordem,
+    com qual estratégia. É IDENTIFICÁVEL na progressão do texto.
+
+  DESENVOLVIMENTO = fundamentação dos argumentos via exemplos,
+    definições, comparações, analogias, dados, estatísticas.
+
+  DISTINÇÃO DECISIVA 160 vs 200 (Cartilha 2025):
+    • 160 = "informações organizadas COM INDÍCIOS DE AUTORIA"
+    • 200 = "informações de forma consistente e organizada, CONFIGURANDO AUTORIA"
+
+  Indícios ≠ configuração. "Indícios de autoria" significa que há tentativas
+  de organização autoral mas com falhas (argumentos amontoados, sobreposição
+  entre parágrafos, progressão irregular). "Configurando autoria" significa
+  que o projeto de texto é executado com consistência — cada parágrafo
+  desenvolve UM argumento próprio, sem repetir o anterior, com progressão
+  lógica clara.
+
+  CRITÉRIOS PARA 200 EM C3 (todos devem estar atendidos):
+    1. Projeto de texto identificável (anúncio explícito ou progressão cristalina)
+    2. Cada parágrafo de desenvolvimento aborda UM argumento DISTINTO
+       (sem sobreposição: P2 e P3 não podem tratar do mesmo subargumento)
+    3. Argumentos articulados ao ponto de vista, sem saltos temáticos
+    4. Desenvolvimento mínimo de cada argumento (não basta anunciar, precisa
+       explicar/exemplificar/articular)
+
+  Se qualquer um destes critérios falha (especialmente o 2 — sobreposição
+  entre parágrafos), C3 é NO MÁXIMO 160. Exemplos de falha do critério 2:
+    • P2 aborda argumento A + argumento B amontoados; P3 retoma argumento B
+    • P2 menciona desigualdade; P3 desenvolve a MESMA desigualdade com
+      outras palavras
+    • Dois parágrafos de desenvolvimento que poderiam ser fundidos em um
+
+  ────────────────────────────────────────────────
+  C3 — ANÚNCIO DO PROJETO DE TEXTO NA INTRODUÇÃO:
+  ────────────────────────────────────────────────
+  Padrão observado nas redações 1000 da Cartilha 2025: a INTRODUÇÃO
+  anuncia EXPLICITAMENTE os argumentos a serem desenvolvidos. Exemplos:
+    • "destacam-se o racismo estrutural e a negligência por parte da sociedade"
+    • "duas são principais: o legado racista... e a negligência educacional"
+    • "tais como: a precária representatividade nas escolas e a falta de incentivos"
+
+  Como avaliar:
+    • Anúncio EXPLÍCITO + cumprimento total → indício forte de C3 = 200
+    • Anúncio AUSENTE mas progressão clara e cumprida → não penalize.
+      Progressão lógica cristalina compensa ausência de anúncio formal.
+    • Anúncio EXPLÍCITO + cumprimento PARCIAL ou DIVERGENTE → penalize:
+      o aluno prometeu A e B mas desenvolveu C, ou desenvolveu só A.
+    • Saltos temáticos (mudanças abruptas sem articulação) → penalize.
+
+▸ COMPETÊNCIA 4 — Conhecimento dos mecanismos linguísticos (0-200)
+
+  AVALIE ALÉM DA CONTAGEM DE CONECTIVOS:
+  C4 não é apenas sobre repetição. A Cartilha avalia:
+    1. ADEQUAÇÃO SEMÂNTICA dos conectivos (a relação lógica está correta?
+       "Para isso" pede finalidade real; "Desse modo" pede modo/causa real;
+       "Portanto" pede conclusão real — não basta o conectivo existir,
+       precisa significar o que conecta).
+    2. DIVERSIDADE do repertório coesivo (pronomes, sinônimos, hipônimos,
+       hiperônimos, expressões resumitivas, elipses — não apenas conectivos).
+    3. ARTICULAÇÃO inter e intraparágrafo.
+
+  DISTINÇÃO 160 vs 200 (Cartilha 2025):
+    • 200 = "articula BEM as partes do texto e apresenta repertório
+      DIVERSIFICADO de recursos coesivos" (excelência em articulação +
+      diversidade)
+    • 160 = "articula as partes do texto com POUCAS INADEQUAÇÕES e
+      apresenta repertório diversificado" (bom domínio, mas com falhas
+      pontuais — conectivo mal escolhido, relação lógica imprecisa,
+      conectivo vago como "essa situação")
+
+  Sobre repetição de conectivos (regra Cartilha):
+    • Repetições de até 2 vezes do mesmo conectivo são PONTUAIS e NÃO
+      descem a nota por si só.
+    • 3+ repetições do mesmo conectivo OU pobreza geral de mecanismos
+      caracterizam o nível 160.
+    • IMPORTANTE: a ausência de repetição NÃO garante 200. Se houver
+      inadequações semânticas (conectivos mal escolhidos) ou pobreza de
+      diversidade, mesmo sem repetição, a nota é 160.
+
+  200: articulação BEM feita + repertório DIVERSIFICADO de recursos coesivos.
+       Conectivos semanticamente adequados ao contexto. Sem inadequações
+       relevantes. Sem repetição sistemática.
+  160: articulação com POUCAS INADEQUAÇÕES (1-3 conectivos mal escolhidos
+       semanticamente, OU 3+ repetições do mesmo conectivo, OU repertório
+       pouco diversificado) + repertório ainda diversificado.
+  120: articulação mediana; inadequações presentes em maior número;
+       repertório limitado.
+   80: articulação insuficiente; muitas inadequações.
+   40: articulação precária.
+    0: não articula as informações.
+  Avalie: operadores argumentativos (porém, entretanto, ademais, portanto), referenciação (pronomes, sinônimos, hipônimos, hiperônimos, elipses), articulação inter e intraparágrafo. Penalize: ausência de paragrafação, conectivos semanticamente inadequados ao contexto, conectivos repetidos SISTEMATICAMENTE (3+ vezes do mesmo), "onde" para pessoas/ideias.
+
+▸ COMPETÊNCIA 5 — Proposta de intervenção (0-200)
+
+  ⚠️ REGRA DE COERÊNCIA — TETO DESCENDENTE (anti-contradição) ⚠️
+  Esta regra é apenas um TETO, não um PISO:
+    • Se você marcou menos de 5 elementos como presentes, a nota NÃO PODE
+      ser 200. Use os tetos abaixo:
+    • 4 dos 5 elementos presentes E proposta articulada → no máximo 160.
+    • 3 dos 5 elementos presentes → no máximo 120.
+    • 1-2 elementos OU desarticulada → no máximo 80.
+  Marcar todos os 5 elementos como presentes NÃO força 200. Para chegar a
+  200, a proposta precisa ALÉM disso ser DETALHADA, conforme distinção
+  Cartilha 2025 entre níveis 160 e 200 (ver abaixo).
+
+  200: proposta com TODOS os 5 elementos, DETALHADA (não apenas presente),
+       articulada à discussão do texto. "Detalhada" significa que pelo menos
+       um elemento (tipicamente o detalhamento, o meio, ou a finalidade) é
+       desenvolvido com especificidade real — não apenas mencionado.
+  160: proposta com TODOS os 5 elementos PRESENTES (mas sem detalhamento
+       específico) OU com 4 dos 5 elementos, articulada ao texto.
+  120: proposta com 3 dos 5 elementos, articulada ao texto.
+   80: proposta com 1-2 elementos OU desarticulada do texto.
+   40: proposta vaga, precária.
+    0: proposta ausente OU viola direitos humanos OU não relacionada ao tema.
+
+  OS 5 ELEMENTOS OBRIGATÓRIOS (Cartilha 2025):
+    1. AÇÃO: o que deve ser feito concretamente (não vago)
+    2. AGENTE: quem executa (Ministério, escolas, mídia, empresas, sociedade civil...)
+    3. MEIO: como será feito (lei, campanha, projeto, programa, parceria...)
+    4. FINALIDADE: para quê / qual o resultado esperado
+    5. DETALHAMENTO: exemplificação ou complemento adicional
+
+  DISTINÇÃO ENTRE "PRESENTE" E "DETALHADO" (decisiva para 160 vs 200):
+    • "Presente" = o elemento EXISTE na proposta, mesmo que sucintamente.
+      Exemplo: "por meio de uma lei" → MEIO presente.
+    • "Detalhado" = pelo menos UM dos elementos é desenvolvido com
+      especificidade real — não apenas mencionado.
+      Exemplo de detalhamento real: "por meio de uma lei que torne
+      obrigatório o ensino de história africana em todas as escolas
+      públicas, com componente curricular específico no ensino médio".
+
+  As redações 1000 da Cartilha 2025 apresentam propostas com 5 elementos
+  PRESENTES + DETALHAMENTO REAL em ao menos um deles (frequentemente o
+  detalhamento, o meio ou a finalidade). Não basta "elemento mencionado"
+  para 200 — exige especificidade que diferencie a proposta de uma
+  formulação genérica.
+
+  VIOLAÇÃO DH (nota 0 automática): tortura, mutilação, execução sumária,
+  "justiça com as próprias mãos", incitação à violência por raça/etnia/
+  gênero/credo/condição, discurso de ódio contra grupos sociais.
 
 CONTEXTO IMPORTANTE:
-- Este aluno já recebeu feedbacks específicos por competência (Chamada 1).
-- Sua função aqui NÃO é repetir essas observações.
-- Seu papel é DAR SENTIDO ao conjunto — identificar padrões, hierarquizar problemas, e apontar um caminho.
+- Este aluno já recebeu notas, feedbacks E um DIAGNÓSTICO ESTRUTURADO por competência (fornecido abaixo: desvios da C1 com trechos, inventário de repertórios da C2, tese/fecho/mapa/sobreposição da C3, conectivos da C4, elementos da C5). USE esse diagnóstico: ele é a sua matéria-prima. Não o contradiga; dê sentido a ele.
+- Sua função NÃO é repetir as observações competência a competência.
+- Seu papel é DAR SENTIDO ao conjunto — identificar UM padrão, hierarquizar, e apontar um caminho.
 
-DIRETRIZES DE ESCRITA:
-- Fale DIRETAMENTE com o aluno (usando "você"), como uma mentora conversando.
-- NUNCA use fórmulas mecânicas como "Parágrafo 1 apresenta...", "Este parágrafo tem como função...", "Observa-se que...".
-- Seja concreta: cite trechos reais da redação quando útil.
-- Evite repetir o mesmo tipo de análise em seções diferentes.
-- Tom: mentora competente, acolhedora e direta.
+REGRAS OBRIGATÓRIAS DE PROFUNDIDADE:
+1. Cite NO MÍNIMO TRÊS frases exatas da redação entre aspas ao longo da análise (copiadas caractere a caractere). Sem três trechos, a análise é inválida.
+2. Em "analise_projeto_texto", compare EXPLICITAMENTE a frase da tese (introdução) com a frase do fecho (conclusão): elas dizem a mesma coisa? Se a tese estiver invertida, ambígua ou contradita no fecho, diga isso com os dois trechos.
+3. Em "analise_padrao_dominante", nomeie UM padrão só e mostre como ele aparece em pelo menos TRÊS competências diferentes, com um trecho para cada.
+4. Em "analise_proximo_passo", dê um exercício com FRASES DE EXEMPLO escritas para este tema (ex.: "minha tese em uma linha — '...'"), não um checklist.
+5. Escreva em texto corrido, direto ao aluno ("você"), sem fórmulas ("Parágrafo 1 apresenta...", "Observa-se que...").
+
+EXEMPLO DE ANÁLISE NO PADRÃO ESPERADO (redação de OUTRO aluno, sobre OUTRO tema — use como modelo de PROFUNDIDADE e de FORMA, não de conteúdo):
+{
+  "analise_projeto_texto": "Você tinha uma boa intuição de arco: abrir com a cena do documentário, discutir por que as escolas do interior não têm biblioteca e fechar retomando a mesma cena. Essa moldura existe e é um mérito. O problema é que, entre a abertura e o fecho, o texto perde o controle da própria tese. Na introdução você escreve \\"é essencial a falta de bibliotecas nas escolas\\", que diz literalmente o oposto do que você defende (o essencial é combater essa falta). E na conclusão você afirma que \\"o acesso ao livro já está garantido\\" — depois de dois parágrafos argumentando que não está. Quem lê essas duas frases não consegue saber qual é o seu ponto de vista. No miolo, o segundo parágrafo entra em \\"editoras que aumentam o preço\\", que é assunto de mercado editorial, não de biblioteca escolar, e o terceiro volta ao tema real sem nenhuma ponte com o anterior. Quem conduz aqui não é você, é o texto.",
+  "analise_padrao_dominante": "O padrão que mais derruba sua nota é escrever antes de fechar a ideia na cabeça — e ele aparece em várias competências ao mesmo tempo. Períodos como \\"a leitura que os alunos não tendo acesso\\" não são erros de gramática avulsos: são frases que começaram sem que você soubesse onde iam terminar, e por isso perderam o verbo no meio do caminho. É o mesmo movimento que faz a introdução dizer o contrário da tese, que faz o documentário ficar só como cena ilustrada sem virar argumento sobre o Brasil, e que faz a proposta terminar em \\"políticas de incentivo\\" sem dizer quais.",
+  "analise_proximo_passo": "Para a próxima redação, faça este exercício em duas etapas. Antes de escrever, anote três frases curtas e completas: (1) minha tese em uma linha — \\"A falta de bibliotecas nas escolas públicas do interior limita a formação leitora\\"; (2) o argumento do P2 em uma linha; (3) o argumento do P3 em uma linha, DIFERENTE do P2. Só então escreva. Depois de escrever, releia cada período perguntando: onde está o verbo principal desta frase? Se não achar em cinco segundos, a frase precisa ser reescrita começando pelo sujeito."
+}
+FIM DO EXEMPLO. Repare no que ele faz: cita frases exatas do texto entre aspas, nomeia UM padrão e mostra como ele aparece em mais de uma competência, e o próximo passo tem frases de exemplo, não instruções genéricas.
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
-2. Dentro de strings, use \\n (escapado) para quebras de linha.
-3. Mantenha COERÊNCIA com as notas e feedbacks já atribuídos.
+2. Dentro de strings, use \\n (escapado) para quebras de linha e \\" para aspas internas.
+3. Mantenha COERÊNCIA com as notas e o diagnóstico já atribuídos.
 
 Formato EXATO da resposta:
-${FORMATO_JSON_ANALISE_COMPLETA}`;
+{
+  "analise_projeto_texto": "<1 a 2 parágrafos sobre o ARCO: tese × fecho, progressão ou saltos, quem controla quem>",
+  "analise_padrao_dominante": "<1 parágrafo: UM padrão, mostrado em 3+ competências com trecho>",
+  "analise_proximo_passo": "<1 parágrafo: exercício concreto com frases de exemplo para este tema>"
+}`;
 
   // CHAMADA 3 — Redação Nota 1000 (sob demanda — Commit 4)
   const FORMATO_JSON_REDACAO_NOTA_1000 = `{
@@ -2559,60 +2839,79 @@ ${FORMATO_JSON_MELHORIAS}`;
   // ── PROMPT 3: AGENTE C2 (compreensão do tema + repertório) ──
   const AG_C2 = `Você é um corretor ENEM especialista EXCLUSIVAMENTE na Competência 2: compreensão da proposta e aplicação de repertório sociocultural produtivo. Avalie SOMENTE C2.
 
-  C2 avalia: (a) o tema foi compreendido e desenvolvido em texto dissertativo-argumentativo? (b) há repertório sociocultural (fato histórico, dado, citação, obra, lei) e ele é PRODUTIVO?
+  C2 avalia: (a) o tema foi compreendido e desenvolvido em texto dissertativo-argumentativo? (b) há repertório sociocultural e ele é PRODUTIVO?
 
-  CONCEITO CRÍTICO — repertório produtivo vs de bolso (definição da Cartilha 2025):
-  PRODUTIVO (3 critérios, todos atendidos): (1) PERTINENTE ao tema; (2) CONTEXTUALIZADO/EXPLICADO — a redação diz o que é a referência e por que importa, não só cita o nome; (3) ARTICULADO ao ponto de vista — serve para sustentar o argumento.
-  IMPORTANTE: a explicação e a articulação PODEM ocorrer no MESMO parágrafo em que a referência aparece. A Cartilha NÃO exige que a ideia seja repetida num parágrafo posterior. Nos exemplos produtivos oficiais (Cartola, Maria Firmina dos Reis, Maria Beatriz Nascimento, Elijah Anderson), a referência é desenvolvida ali mesmo — explicada e ligada à tese. Isso já basta para PRODUTIVO.
-  DE BOLSO (decorativo): referência genérica, decorada, citada só pelo nome/título sem explicação, usada como impacto sem conexão real com o tema específico (exemplos oficiais: "Utopia" de Thomas More como contraponto vago; "instituições zumbis" de Bauman colado genericamente). O que define o de bolso é a AUSÊNCIA de explicação/articulação — NÃO a ausência de repetição posterior.
+  PASSO 1 — INVENTÁRIO. Liste TODAS as referências socioculturais do texto, uma a uma: obras (filme, livro, série, música), fatos históricos, dados, leis, autores, conceitos E TAMBÉM ditados, máximas e frases feitas ("seu direito termina onde começa o do outro" É um repertório e precisa ser avaliado). Para cada uma, preencha um item de "repertorios".
 
-  COMO DECIDIR:
-  - A referência é específica, explicada e ligada ao ponto de vista (ainda que num parágrafo só)? → PRODUTIVO.
-  - É só um nome/título lançado sem desenvolvimento, ou um conceito genérico colado à força? → DE BOLSO.
-  - Em "retomada_trecho", aponte o trecho que evidencia a explicação/articulação da referência (ou null se de bolso).
+  PASSO 2 — TESTE DE PRODUTIVIDADE, para CADA referência (Cartilha 2025):
+    (1) PERTINÊNCIA: tem relação real com o tema?
+    (2) EXPLICAÇÃO: o texto diz o que a referência é/mostra, ou só a nomeia?
+    (3) ARTICULAÇÃO: o texto responde "o que essa referência revela sobre a realidade brasileira / sobre o tema?" com uma frase ARGUMENTATIVA, não apenas a descrição da cena ou da citação?
+  Uma referência que só reproduz uma cena ou uma frase ("no filme X, o personagem Y é levado ao asilo") sem tirar dela uma afirmação sobre o Brasil é ILUSTRATIVA — conta como DE BOLSO, mesmo sendo pertinente e mesmo sendo bem descrita. Ditado/máxima sem função argumentativa = DE BOLSO.
+  A explicação e a articulação PODEM estar no mesmo parágrafo da referência. A Cartilha NÃO exige repetição posterior.
 
-  RÉGUA (Cartilha 2025):
+  PASSO 3 — PROVA. Em "articulacao_trecho" copie a frase EXATA em que o texto transforma a referência em argumento sobre o tema. REGRAS: (a) essa frase NÃO PODE ser a mesma frase em que a referência é apresentada/descrita; (b) ela precisa AFIRMAR algo sobre a realidade brasileira ou sobre o tema QUE DECORRE da referência (ex.: "essa cena revela que, no Brasil, ..."); uma frase de contexto geral ("o envelhecimento deve ser debatido porque a expectativa de vida aumentou") NÃO é articulação de referência nenhuma. Se não existir frase que cumpra (a) e (b), a articulação é AUSENTE, o campo fica null e NENHUM repertório pode ser "produtivo".
+  COERÊNCIA: "repertorio_tipo" só pode ser "produtivo" se pelo menos um item de "repertorios" tiver veredito "produtivo" E "articulacao_trecho" estiver preenchido.
+
+  PASSO 4 — RÉGUA (Cartilha 2025):
   - Tema não compreendido / tangenciado → no máximo 40.
-  - Tema completo + argumentação consistente + bom domínio dissertativo-argumentativo → 160.
-  - Tema completo + argumentação consistente + repertório PRODUTIVO + excelente domínio dissertativo-argumentativo → 200.
-  - Repertório de bolso (decorativo/genérico) limita a 160. Mas repertório produtivo NÃO pode ser rebaixado a 160 por falta de repetição em parágrafo posterior — se é explicado e articulado, é produtivo e pode ser 200.
+  - Tema completo + estrutura dissertativo-argumentativa + argumentação consistente → 160.
+  - Isso + pelo menos UM repertório PRODUTIVO (explicado E articulado, com "articulacao_trecho" preenchido) → 200.
+  - Tema completo mas argumentação previsível/rasa OU todos os repertórios ilustrativos/de bolso OU desenvolvimento com trecho confuso que compromete a compreensão do tema → 120.
+  - Repertório de bolso limita a 160; repertório produtivo não pode ser rebaixado por falta de repetição posterior.
+
+  REGRA "TRECHO OU NADA": todo problema apontado no "feedback" e no "para_subir" precisa vir acompanhado de uma frase EXATA da redação, entre aspas, copiada caractere a caractere. Comentário sem trecho citado é inválido. Não invente trecho: se não encontrar a frase no texto, não aponte o problema.
 
   Responda APENAS com este JSON:
   {
     "nota": 0 | 40 | 80 | 120 | 160 | 200,
-    "repertorio_referencia": "<qual referência sociocultural foi usada>",
+    "repertorios": [
+      { "referencia": "<nome da referência>", "tipo": "obra" | "fato" | "dado" | "lei" | "autor" | "ditado" | "outro", "pertinente": true | false, "explicado": true | false, "articulado": true | false, "veredito": "produtivo" | "bolso" }
+    ],
     "repertorio_tipo": "produtivo" | "bolso" | "ausente",
-    "retomada_trecho": "<frase EXATA do desenvolvimento que retoma a ideia, ou null>",
-    "feedback": "<2-3 frases pedagógicas>",
-    "para_subir": "<o que faria subir um nível, ou null se 200>"
+    "articulacao_trecho": "<frase EXATA, diferente da frase de apresentação, ou null>",
+    "feedback": "<2-3 frases pedagógicas, cada problema com o trecho entre aspas>",
+    "para_subir": "<o que faria subir um nível, com exemplo concreto de repertório para este tema, ou null se 200>"
   }`;
 
   // ── PROMPT 4: AGENTE C3 (seleção/organização de argumentos — autoria) ──
   const AG_C3 = `Você é um corretor ENEM especialista EXCLUSIVAMENTE na Competência 3: seleção, organização e interpretação de informações em defesa de um ponto de vista (projeto de texto e autoria). Avalie SOMENTE C3.
 
-  C3 avalia: há um PROJETO DE TEXTO claro (a redação tem um plano perceptível)? Os argumentos são organizados com progressão? Há AUTORIA (desenvolvimento próprio e aprofundado, não só constatação)?
+  Siga os passos NA ORDEM e preencha os campos correspondentes ANTES de decidir a nota.
 
-  VERIFICAÇÃO OBRIGATÓRIA DE SOBREPOSIÇÃO:
-  Compare os parágrafos de desenvolvimento (tipicamente P2 e P3). Pergunte:
-  - Eles tratam de EIXOS ARGUMENTATIVOS DISTINTOS, ou o segundo é uma reformulação/repetição do primeiro?
-  - Se eu fundisse os dois parágrafos, perderia um argumento real ou só removeria redundância?
-  Preencha "sobreposicao": true se há sobreposição temática (dois parágrafos no mesmo eixo), false se cada um traz eixo distinto.
+  PASSO 1 — TESE. Copie a frase EXATA da introdução que enuncia o ponto de vista ("tese_trecho"). Leia-a literalmente: ela diz o que o aluno quer defender, ou diz o contrário / é ambígua? Preencha "tese_clara".
+  PASSO 2 — FECHO. Copie a frase EXATA da conclusão que retoma o ponto de vista ("fecho_trecho"). Ela CONFIRMA a tese ou a CONTRADIZ? Preencha "fecho_contradiz".
+  PASSO 3 — MAPA. Para cada parágrafo de DESENVOLVIMENTO (os que ficam ENTRE a introdução e a conclusão — normalmente P2 e P3; a conclusão NÃO entra no mapa nem na sobreposição), escreva em UMA linha qual argumento ele defende ("mapa_paragrafos"). Se um parágrafo não defende argumento nenhum (só descreve, ou é confuso), diga isso.
+  PASSO 4 — ANÚNCIO. A introdução anuncia argumentos? Se sim, os parágrafos cumprem o que foi anunciado? Preencha "anuncio_cumprido" (true / false / null se não há anúncio).
+  PASSO 5 — SOBREPOSIÇÃO. Compare as linhas do mapa. Os parágrafos tratam de EIXOS DISTINTOS ou repetem o mesmo argumento? Se eu fundisse os dois, perderia um argumento real? Preencha "sobreposicao" e "sobreposicao_detalhe".
+  PASSO 6 — PROGRESSÃO. Há ponte lógica entre os parágrafos ou saltos? Algum parágrafo desvia do tema/tese? Preencha "saltos" com os trechos.
 
-  RÉGUA (Cartilha 2025 — a fronteira 200/160 é AUTORIA CONFIGURADA vs INDÍCIOS de autoria):
-  - 200 = informações, fatos e opiniões apresentados de forma CONSISTENTE e ORGANIZADA, configurando AUTORIA, em defesa de um ponto de vista. Autoria configurada = o aluno desenvolve raciocínio próprio (explica, relaciona, interpreta), não apenas constata. NÃO exige profundidade extraordinária — exige desenvolvimento próprio e organizado que sustente a tese.
-  - 160 = organizado, com INDÍCIOS de autoria (o desenvolvimento próprio existe mas é mais raso ou irregular), em defesa de um ponto de vista.
-  - 120 = informações limitadas aos textos motivadores e pouco organizadas.
-  - 80 = desorganizadas ou contraditórias. 40 = pouco relacionadas/incoerentes, sem ponto de vista. 0 = não relacionadas.
-  SOBRE SOBREPOSIÇÃO: sobreposição REAL entre P2 e P3 (o mesmo argumento repetido) é UM sinal de organização frágil que pode puxar para 160 — mas NÃO é uma trava automática. Se há autoria configurada e dois eixos efetivamente distintos, a nota é 200. Só caracterize sobreposição quando os parágrafos desenvolvem de fato o MESMO argumento; não rebaixe um texto com autoria plena por mera suspeita.
-  ATENÇÃO: NÃO desconte C3 por causa do repertório — repertório é assunto EXCLUSIVO da C2. C3 avalia projeto de texto, organização, progressão e autoria, nada mais.
+  RÉGUA (Cartilha 2025):
+  - 200 = informações CONSISTENTES e ORGANIZADAS, configurando AUTORIA: tese clara, fecho coerente, cada parágrafo com um argumento distinto e desenvolvido (explica, relaciona, interpreta), progressão sem saltos.
+  - 160 = organizado, com INDÍCIOS de autoria: tese clara, mas algum argumento raso ou irregular, ou sobreposição leve.
+  - 120 = informações limitadas e POUCO ORGANIZADAS: tese confusa/invertida, OU um parágrafo sem argumento reconhecível, OU sobreposição real entre parágrafos, OU salto temático sem ponte.
+  - 80 = informações DESORGANIZADAS OU CONTRADITÓRIAS: parágrafos incoerentes entre si, ou fecho que contradiz a tese QUANDO o desenvolvimento também não sustenta um ponto de vista reconhecível.
+  REGRA DO FECHO CONTRADITÓRIO: se a tese e o desenvolvimento sustentam um ponto de vista reconhecível e SÓ a frase do fecho o contradiz (deslize de escrita), a nota é 120; se a contradição atravessa o texto (tese invertida E fecho contraditório E parágrafo sem argumento), a nota é 80.
+  - 40 = pouco relacionadas/incoerentes, sem ponto de vista. 0 = não relacionadas.
+  Tese invertida ou fecho contraditório são sinais FORTES: não dê 160 a um texto cuja introdução diz o contrário do que ele defende.
+  ATENÇÃO: NÃO desconte C3 por causa do repertório (isso é C2) nem por causa de conectivos (isso é C4).
+
+  REGRA "TRECHO OU NADA": todo problema apontado no "feedback" e no "para_subir" precisa vir acompanhado de uma frase EXATA da redação, entre aspas, copiada caractere a caractere. Comentário sem trecho citado é inválido. Não invente trecho: se não encontrar a frase no texto, não aponte o problema.
 
   Responda APENAS com este JSON:
   {
     "nota": 0 | 40 | 80 | 120 | 160 | 200,
+    "tese_trecho": "<frase EXATA da tese>",
+    "tese_clara": true | false,
+    "fecho_trecho": "<frase EXATA do fecho, ou null>",
+    "fecho_contradiz": true | false,
+    "mapa_paragrafos": ["<P2: argumento em uma linha>", "<P3: argumento em uma linha>"],
+    "anuncio_cumprido": true | false | null,
     "sobreposicao": true | false,
-    "sobreposicao_detalhe": "<qual eixo se repete, ou null se sobreposicao=false>",
-    "feedback": "<2-3 frases pedagógicas>",
-    "para_subir": "<o que faria subir um nível, ou null se 200>"
+    "sobreposicao_detalhe": "<qual eixo se repete, ou null>",
+    "saltos": ["<trecho onde o texto desvia ou salta, se houver>"],
+    "feedback": "<2-3 frases pedagógicas, cada problema com o trecho entre aspas>",
+    "para_subir": "<o que faria subir um nível: diga QUAIS dois eixos distintos o aluno poderia desenvolver neste tema, ou null se 200>"
   }`;
 
   // ── PROMPT 5: AGENTE C4 (coesão) ──
@@ -2829,7 +3128,7 @@ ${FORMATO_JSON_MELHORIAS}`;
       c5_elementos_faltantes: c5.elementos_faltantes || [],
       // Campos C2 individuais (compat)
       c2_repertorio_tipo: c2.repertorio_tipo || null,
-      c2_repertorio_retomado: (c2.retomada_trecho && c2.retomada_trecho !== null) ? true : false,
+      c2_repertorio_retomado: ((c2.articulacao_trecho || c2.retomada_trecho) && (c2.articulacao_trecho || c2.retomada_trecho) !== null) ? true : false, // v9-28: o agente C2 passou a chamar de articulacao_trecho
       // dados crus dos agentes pra calibragem e debug
       _agentes: { gate, c1, c2, c3, c4, c5, orq, travado }
     };
@@ -3088,6 +3387,7 @@ ${FORMATO_JSON_MELHORIAS}`;
                 + 'Notas por competência: '
                 + dados.competencias.map((c,i) => `C${i+1}=${c.nota}`).join(', ') + '\n'
                 + 'Feedbacks: ' + dados.competencias.map((c,i) => `C${i+1}: ${c.feedback}`).join(' | ')
+                + (dados._agentes ? '\n\nDIAGNÓSTICO ESTRUTURADO DOS CORRETORES (JSON):\n' + JSON.stringify({ c1:dados._agentes.c1, c2:dados._agentes.c2, c3:dados._agentes.c3, c4:dados._agentes.c4, c5:dados._agentes.c5 }) : '')
                 + '\n\nRedação:\n' + (texto || '[Arquivo enviado]');
 
               // task='correcao' → roteado para Gemini 3 Flash (mesmo motor da Chamada 1)

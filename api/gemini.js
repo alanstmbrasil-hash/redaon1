@@ -1,4 +1,4 @@
-// api/gemini.js – Função serverless do Vercel
+// api/gemini.js – Função serverless do Vercel · retry em 429/503 (11/09/2026)
 // ROTEAMENTO POR TASK (v2 — 28/05/2026):
 // - task='correcao'  → gemini-3-flash       (R$ 0,07/correção, raciocínio superior, resolve oscilação C3/C4)
 // - task=qualquer outro ou ausente → gemini-2.5-flash-lite (R$ 0,001/chamada, suficiente pra Hub, OCR, Material de Apoio)
@@ -100,16 +100,24 @@ module.exports = async function handler(req, res) {
       corpo.generationConfig.responseMimeType = 'text/plain';
     }
 
-    const geminiRes = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey
-      },
-      body: JSON.stringify(corpo),
-    });
-
-    const data = await geminiRes.json();
+    // ─── Retry (11/09/2026): o Gemini devolve 503 "high demand" / 429 em rajadas.
+    // Na bancada de calibragem foram 209 em uma noite. Três tentativas com espera
+    // curta resolvem a maioria sem o aluno perceber; só depois devolvemos o erro.
+    let geminiRes, data;
+    for (let tentativa = 1; tentativa <= 3; tentativa++) {
+      geminiRes = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify(corpo),
+      });
+      data = await geminiRes.json();
+      const transitorio = [429, 500, 503, 529].includes(geminiRes.status);
+      if (geminiRes.ok || !transitorio || tentativa === 3) break;
+      await new Promise(r => setTimeout(r, 1500 * tentativa));
+    }
 
     if (!geminiRes.ok) {
       return res.status(geminiRes.status).json({ error: data.error?.message || 'Erro do Gemini' });

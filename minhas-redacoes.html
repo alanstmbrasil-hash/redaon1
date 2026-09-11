@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v3-6 · sobre aluno-base-v6 -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v3-8 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
 <script>
 (function(){
   var pref='auto';
@@ -211,14 +211,14 @@
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="prompts-reescrita.js?v=1-0"></script>
+<script src="prompts-reescrita.js?v=2-0"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
   if (typeof authGuard === 'function') { authGuard('aluno'); }
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-7'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-8'
   });
 
   var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
@@ -252,7 +252,7 @@
       var userId=(typeof authGetUserId==='function')?authGetUserId():null;
       if(!userId){ grid.innerHTML='<p class="vazio">Sess\u00e3o inv\u00e1lida. Entre novamente.</p>'; return; }
       var url=SUPABASE_URL+'/rest/v1/redacoes?aluno_id=eq.'+userId+'&order=created_at.desc'
-        +'&select=id,texto,tema_livre,status,nota_final,created_at,temas(titulo),'
+        +'&select=id,texto,tema_livre,tema_id,status,nota_final,created_at,temas(titulo),'
         +'correcoes(c1,c2,c3,c4,c5,nota_total,feedback_geral,feedback_c1,feedback_c2,feedback_c3,feedback_c4,feedback_c5,pontos_fortes,pontos_melhorar,revisao_professor,correcao_json)';
       var res=await dbFetch(url,{});
       if(!res.ok) throw new Error('HTTP '+res.status);
@@ -285,10 +285,11 @@
     var cmp={};
     ['c1','c2','c3','c4','c5'].forEach(function(k,i){
       var m=j['melhoria_'+k];
-      if(m && String(m).trim().length>5) cmp[i]=String(m).trim();
+      if(m && typeof m==='object' && (m.reescrita||m.por_que)) cmp[i]=m;          /* v3-8: campos separados */
+      else if(m && String(m).trim().length>5) cmp[i]=String(m).trim();           /* formato antigo (texto) */
     });
     return {
-      id:r.id, titulo:titulo,
+      id:r.id, titulo:titulo, temaId:r.tema_id||null,
       correcaoId:c.id||null, json:j, chamadas:(j.chamadas||{}),
       data:new Date(r.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}),
       texto:r.texto||'', nota:nota, comp:comp,
@@ -436,10 +437,17 @@
       var txt=atual.comparar[i];
       if(!txt) return '';
       var cor=corComp(v);
+      var corpo;
+      if(typeof txt==='object'){ /* v3-8: Na sua redação / Na Reescrita / Por que melhora / ficha do acervo */
+        corpo=(txt.original?'<p class="cmpTxt"><b>Na sua reda\u00e7\u00e3o:</b> \u201c'+escapeHtmlSimples(txt.original)+'\u201d</p>':'')
+          +(txt.reescrita?'<p class="cmpTxt"><b>Na Reescrita:</b> \u201c'+escapeHtmlSimples(txt.reescrita)+'\u201d</p>':'')
+          +(txt.por_que?'<p class="cmpTxt"><b>Por que melhora:</b> '+escapeHtmlSimples(nomearReescrita(txt.por_que))+'</p>':'')
+          +(txt.ficha?'<p class="cmpTxt" style="font-size:.78rem;color:var(--muted);">Esse repert\u00f3rio est\u00e1 no acervo do tema (ficha '+escapeHtmlSimples(String(txt.ficha))+'). Vale estudar.</p>':'');
+      } else corpo='<p class="cmpTxt">'+escapeHtmlSimples(nomearReescrita(txt))+'</p>';
       return '<div class="cmpBloco" style="border-left-color:'+cor+';">'
         +'<div class="cmpCab"><span class="cmpTit" style="color:'+cor+';">'+NOMES[i]+'</span>'
         +'<span class="cmpPill" style="background:rgba(var(--borderRGB),.14);color:'+cor+';">'+v+' de 200</span></div>'
-        +'<p class="cmpTxt">'+escapeHtmlSimples(nomearReescrita(txt))+'</p></div>';
+        +corpo+'</div>';
     }).join('');
     if(!blocos) blocos='<p style="font-size:.85rem;color:var(--green);text-align:center;padding:1.5rem 0;">\u2713 Todas as compet\u00eancias j\u00e1 est\u00e3o no teto.</p>';
     else if(noTeto.length) blocos+='<p style="font-size:.76rem;color:var(--muted);text-align:center;margin-top:.4rem;">'+noTeto.join(' e ')+' j\u00e1 '+(noTeto.length>1?'est\u00e3o':'est\u00e1')+' no teto.</p>';
@@ -498,32 +506,52 @@
       +'<button class="btnTentar" onclick="'+fn+'">Tentar de novo</button></div>';
   }
 
+  /* v3-8 · Reescrita em duas etapas: PLANO (escolhe do acervo e do gabarito) → TEXTO (a partir do plano) → guardas por código.
+     Se uma guarda falhar, refaz o texto uma vez com a lista de falhas; se ainda falhar em item grave, tenta o plano de novo. */
   async function gerarReescrita(){
     if(_gerando.reescrita) return;
     if(!atual || !atual.texto){ return; }
     _gerando.reescrita = true;
     var c = document.getElementById('abaConteudo');
-    c.innerHTML = rotulo('Reescrita') + blocoGerando('Reescrevendo sua redação\u2026','A PROfa está aplicando os critérios do INEP nas cinco competências. Leva cerca de 30 segundos.');
+    c.innerHTML = rotulo('Reescrita') + blocoGerando('Reescrevendo sua reda\u00e7\u00e3o\u2026','A PROfa est\u00e1 planejando com o acervo do tema e aplicando os crit\u00e9rios do INEP nas cinco compet\u00eancias. Leva cerca de 40 segundos.');
     try{
-      var prompt = REDAON_PROMPT_REESCRITA
-        + '\n\nTEMA: ' + (atual.titulo || 'não informado')
-        + '\n\nREDAÇÃO DO ALUNO:\n' + atual.texto;
-      var j = jsonDaIA(await geminiTexto(prompt));
+      var tema = atual.titulo || 'n\u00e3o informado';
+      var ac = await redaonCarregarAcervo(atual.temaId);
+      var diag = redaonTextoDiagnostico(atual.json);
+      /* 1) plano */
+      var pPlano = REDAON_PROMPT_PLANO + '\n\nTema: ' + tema + diag + redaonTextoFichas(ac) + redaonTextoGabarito(ac) + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno:\n' + atual.texto;
+      var plano = jsonDaIA(await geminiTexto(pPlano));
+      /* 2) texto a partir do plano */
+      var base = REDAON_PROMPT_REESCRITA + '\n\nTema: ' + tema + '\n\nPLANO (siga \u00e0 risca):\n' + JSON.stringify(plano) + redaonFichasReferenciadas(ac, plano) + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno (para manter a voz):\n' + atual.texto;
+      var j = redaonCorrigirNomes(jsonDaIA(await geminiTexto(base)));
+      var falhas = redaonChecarReescrita(j, plano, ac);
+      if(falhas.length){
+        console.warn('[reescrita] guardas:', falhas);
+        var j2 = redaonCorrigirNomes(jsonDaIA(await geminiTexto(base + '\n\nA VERS\u00c3O ANTERIOR FALHOU NESTES PONTOS (corrija obrigatoriamente, sem mudar o resto):\n- ' + falhas.join('\n- '))));
+        var f2 = redaonChecarReescrita(j2, plano, ac);
+        if(f2.length <= falhas.length) { j = j2; falhas = f2; }
+        if(falhas.length) console.warn('[reescrita] guardas ap\u00f3s refazer:', falhas);
+      }
       var partes = [j.redacao_nota_1000_intro, j.redacao_nota_1000_dev1, j.redacao_nota_1000_dev2, j.redacao_nota_1000_conclusao]
         .filter(function(p){ return p && String(p).trim().length > 20; });
-      if(!partes.length) throw new Error('A IA não devolveu a reescrita completa');
+      if(partes.length < 4) throw new Error('A IA n\u00e3o devolveu a reescrita completa');
       await salvarNoCorrecaoJson({
         redacao_nota_1000_intro: j.redacao_nota_1000_intro,
         redacao_nota_1000_dev1: j.redacao_nota_1000_dev1,
         redacao_nota_1000_dev2: j.redacao_nota_1000_dev2,
-        redacao_nota_1000_conclusao: j.redacao_nota_1000_conclusao
+        redacao_nota_1000_conclusao: j.redacao_nota_1000_conclusao,
+        elementos_c5_reescrita: j.elementos_c5 || null,
+        plano_reescrita: plano,
+        reescrita_guardas: falhas.length ? falhas : null,
+        reescrita_versao: 'v2-0'
       }, 'redacao_nota_1000');
       atual.reescrita = partes.join('\n\n');
+      atual.plano = plano;
       if(abaAtual === 'reescrita') trocarAba('reescrita');
     }catch(err){
       console.error('[redacoes] reescrita:', err);
       if(abaAtual === 'reescrita'){
-        c.innerHTML = rotulo('Reescrita') + blocoErro('Não consegui gerar a reescrita agora. Confira sua internet e tente de novo.', 'gerarReescrita()');
+        c.innerHTML = rotulo('Reescrita') + blocoErro('N\u00e3o consegui gerar a reescrita agora. Confira sua internet e tente de novo.', 'gerarReescrita()');
       }
     }
     _gerando.reescrita = false;
@@ -535,17 +563,22 @@
     if(!atual.reescrita){ await gerarReescrita(); if(!atual.reescrita) return; }
     _gerando.comparar = true;
     var c = document.getElementById('abaConteudo');
-    c.innerHTML = rotulo('Comparar') + blocoGerando('Comparando as duas versões\u2026','A PROfa está explicando o que mudou em cada competência. Leva cerca de 30 segundos.');
+    c.innerHTML = rotulo('Comparar') + blocoGerando('Comparando as duas versões\u2026','A PROfa est\u00e1 explicando o que mudou em cada compet\u00eancia e apontando as fichas do acervo. Leva cerca de 30 segundos.');
     try{
+      var planoTxt = (atual.plano || (atual.json && atual.json.plano_reescrita)) ? '\n\nPLANO DA REESCRITA (com fichas usadas):\n' + JSON.stringify(atual.plano || atual.json.plano_reescrita) : '';
       var prompt = REDAON_PROMPT_COMPARACAO
-        + '\n\nTEMA: ' + (atual.titulo || 'não informado')
-        + '\n\nREDAÇÃO ORIGINAL DO ALUNO:\n' + atual.texto
-        + '\n\nREDAÇÃO REESCRITA (nível nota 1000):\n' + atual.reescrita;
+        + '\n\nTema: ' + (atual.titulo || 'n\u00e3o informado')
+        + redaonTextoDiagnostico(atual.json) + planoTxt
+        + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno:\n' + atual.texto
+        + '\n\nREESCRITA:\n' + atual.reescrita;
       var j = jsonDaIA(await geminiTexto(prompt));
       var campos = {}, achou = false, cmp = {};
       ['c1','c2','c3','c4','c5'].forEach(function(k,i){
         var m = j['melhoria_'+k];
-        if(m && String(m).trim().length > 5){ campos['melhoria_'+k] = String(m).trim(); cmp[i] = String(m).trim(); achou = true; }
+        if(m && typeof m==='object' && (m.reescrita || m.por_que)){ /* v3-8: campos separados */
+          var o = { original:String(m.original||'').trim(), reescrita:String(m.reescrita||'').trim(), por_que:String(m.por_que||'').trim(), ficha:m.ficha?String(m.ficha).trim():null, mantido:m.mantido===true };
+          campos['melhoria_'+k] = o; cmp[i] = o; achou = true;
+        } else if(m && String(m).trim().length > 5){ campos['melhoria_'+k] = String(m).trim(); cmp[i] = String(m).trim(); achou = true; }
       });
       if(!achou) throw new Error('A IA não devolveu a comparação');
       await salvarNoCorrecaoJson(campos, 'melhorias_por_competencia');
