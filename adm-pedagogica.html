@@ -635,6 +635,8 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
 #admWrap .eixoBt.sel{background:rgba(var(--cyanRGB),.12); border-color:var(--cyan); color:var(--cyan);}
 #admWrap .eixoBt.ia{border-style:dashed;}
 /* ═══ Gabarito do tema · decidir temas e aprovar materiais (11/09/2026) ═══ */
+#admWrap .tirar{margin-top:.55rem;}
+#admWrap .tirar .dupla{display:flex; gap:.5rem;}
 #admWrap .gradeSub{grid-column:1/-1; font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-top:.4rem; display:flex; align-items:center; gap:.4rem;}
 #admWrap .gradeSub svg{width:14px; height:14px;}
 #admWrap .eixoBt.gab.sel{background:rgba(var(--purpleRGB),.10); border-color:var(--purple); color:var(--purple);}
@@ -1483,7 +1485,10 @@ function montarSemanas(){
     h+='<div class="card"><div style="display:flex;align-items:center;gap:.5rem"><span class="cm" style="flex:1;margin:0">Segunda, '+fmt(lista[i].d)+' \u00b7 '+lista[i].r+'</span>'
       +'<span class="pin '+(n?'ok':(t?'esp':'neutro'))+'">'+(n?ICO.chapeu+' '+n+' fichas no ar':(t?'sem material aprovado':'sem tema'))+'</span></div>'
       +(t?'<div class="ct" style="margin-top:.4rem">'+esc(t.titulo)+'</div>':'<div class="cm" style="margin-top:.4rem">Nenhum tema programado</div>')
-      +(a&&a.automatico?'<div class="cm">Repetido pela rotina de segunda \u2014 sem tema novo aprovado.</div>':'')+'</div>';
+      +(a&&a.automatico?'<div class="cm">Repetido pela rotina de segunda \u2014 sem tema novo aprovado.</div>':'')
+      /* Tirar desta semana (11/09/2026): só a linha da agenda sai; tema e fichas ficam. Confirmação em linha. */
+      +(t&&!(a&&a.automatico)?'<div class="tirar" id="tirar-'+lista[i].d+'"><button class="btn g sm" onclick="pedirTirar(\''+lista[i].d+'\')">Tirar desta semana</button></div>':'')
+      +'</div>';
   }
   document.getElementById('listaAgenda').innerHTML=h;
   var h2='', ordenados=ordenar(TEMAS.filter(function(x){ return eixosAprovados(x)>0; }));
@@ -1493,6 +1498,36 @@ function montarSemanas(){
       +'<span class="b">'+ea+' de '+escolhidos(tt).length+' eixos com material aprovado \u00b7 '+fichasNoAr(tt)+' fichas no ar \u00b7 entrou em '+fmt(entrou(tt))+(uso?'<br><span class="uso">'+esc(uso)+'</span>':'')+'</span></span><span class="seta">&#8250;</span></button>';
   }
   document.getElementById('listaParaAgendar').innerHTML = h2 || '<div class="vazio">Nenhum tema com material aprovado ainda.</div>';
+}
+
+/* ═══ TIRAR DA SEMANA (11/09/2026) ═══
+   Remove só a linha de agenda daquela segunda; o tema volta para a lista de aprovados.
+   Semana já iniciada com redações escritas nela: não se tira — o aluno está escrevendo. */
+async function pedirTirar(semana){
+  var box=document.getElementById('tirar-'+semana); if(!box) return;
+  var a=agendaDe(semana), t=a?porId(a.tema):null; if(!a||!t) return;
+  box.innerHTML='<div class="cm">Conferindo\u2026</div>';
+  if(semana<=SEMANA_ATUAL){
+    try{
+      var fim=new Date(semana+'T00:00:00'); fim.setDate(fim.getDate()+7);
+      var r=await dbFetch(SUPABASE_URL+'/rest/v1/redacoes?select=id&tema_id=eq.'+encodeURIComponent(t.id)+'&created_at=gte.'+semana+'T00:00:00&created_at=lt.'+fim.toISOString().slice(0,10)+'T00:00:00&limit=1',{});
+      var rows=r.ok?await r.json():[];
+      if(rows.length){ box.innerHTML='<div class="cm">Esta semana j\u00e1 come\u00e7ou e h\u00e1 reda\u00e7\u00f5es escritas neste tema. N\u00e3o d\u00e1 para tir\u00e1-lo agora.</div>'; return; }
+    }catch(e){ console.warn('[tirar]', e); }
+  }
+  box.innerHTML='<div class="cm">Tirar <b>'+esc(t.titulo)+'</b> desta semana? O tema volta para a lista de aprovados; nada \u00e9 apagado.</div>'
+    +'<div class="dupla" style="margin-top:.4rem"><button class="btn rec sm" onclick="tirarDaSemana(\''+semana+'\')">Tirar</button><button class="btn g sm" onclick="montarSemanas()">Deixar</button></div>';
+}
+async function tirarDaSemana(semana){
+  var a=agendaDe(semana); if(!a) return;
+  var box=document.getElementById('tirar-'+semana); if(box) box.innerHTML='<div class="cm">Tirando\u2026</div>';
+  try{
+    var rd=await dbFetch(SUPABASE_URL+'/rest/v1/agenda_temas?escopo=eq.redaon&semana_de=eq.'+encodeURIComponent(semana)+'&tema_id=eq.'+encodeURIComponent(a.tema), { method:'DELETE' });
+    if(!rd.ok) throw new Error(await rd.text());
+  }catch(e){ console.warn('[tirar]', e); toast('N\u00e3o consegui tirar o tema. Tente de novo.'); montarSemanas(); return; }
+  AGENDA = AGENDA.filter(function(x){ return !(x.semana===semana && x.tema===a.tema); });
+  toast('Tirado da segunda, '+fmt(semana)+'. O tema continua na lista.');
+  montarSemanas();
 }
 
 /* ═══ AGENDAR ═══ */
@@ -1517,11 +1552,21 @@ function abrirAgendar(id){
   }
   document.getElementById('semanas').innerHTML=hs; ir('t-agendar');
 }
-function escolherSemana(el,d){ var s=document.querySelectorAll('.semana'); for(var i=0;i<s.length;i++) s[i].classList.remove('sel'); el.classList.add('sel'); agSemana=d; }
+function escolherSemana(el,d){ var s=document.querySelectorAll('.semana'); for(var i=0;i<s.length;i++) s[i].classList.remove('sel'); el.classList.add('sel'); agSemana=d; agConfirmaDup=null; var bt=document.getElementById('btGravar'); if(bt) bt.textContent='Gravar a data'; }
 function verComoAluno(){ if(agTema) window.open('hub-preparacao.html?tema='+encodeURIComponent(agTema.id)+'&previa=1','_blank'); }
+var agConfirmaDup=null;
 async function gravar(){
   if(!agSemana){ toast('Escolha a semana primeiro.'); return; }
-  var bt=document.getElementById('btGravar'); bt.disabled=true; bt.textContent='Gravando\u2026';
+  var bt=document.getElementById('btGravar');
+  /* Duplicidade (11/09/2026): o mesmo tema já em outra semana pede um segundo toque antes de gravar de novo */
+  var outras=AGENDA.filter(function(x){ return x.tema===agTema.id && x.semana!==agSemana; });
+  if(outras.length && agConfirmaDup!==agSemana){
+    agConfirmaDup=agSemana;
+    bt.textContent='J\u00e1 est\u00e1 na segunda, '+fmt(outras[0].semana)+'. Gravar tamb\u00e9m em '+fmt(agSemana)+'?';
+    return;
+  }
+  agConfirmaDup=null;
+  bt.disabled=true; bt.textContent='Gravando\u2026';
   var uid=authGetUserId();
   try{
     var rd=await dbFetch(SUPABASE_URL+'/rest/v1/agenda_temas?escopo=eq.redaon&semana_de=eq.'+encodeURIComponent(agSemana), { method:'DELETE' });

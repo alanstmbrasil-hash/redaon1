@@ -49,8 +49,10 @@ module.exports = async function handler(req, res) {
     // arquitetura de agentes resolve a instabilidade dividindo o trabalho,
     // não trocando o modelo. Estrutura mantida para reativar premium se preciso:
     // basta listar a task em TASKS_PREMIUM e definir o modelo premium abaixo.
-    const TASKS_PREMIUM = []; // vazio: nenhuma task usa modelo premium por ora
-    const MODELO_PREMIUM = 'gemini-3.5-flash';
+    // 11/09/2026: a transcrição de FOTO (task 'ocr') vai para o gemini-2.5-flash — o Flash-Lite pulou
+    // linhas e fundiu frases em manuscrito cursivo fotografado deitado. Correção continua no Flash-Lite.
+    const TASKS_PREMIUM = ['ocr'];
+    const MODELO_PREMIUM = 'gemini-2.5-flash';
     const MODELO_PADRAO = 'gemini-2.5-flash-lite';
     const modelo = TASKS_PREMIUM.includes(task) ? MODELO_PREMIUM : MODELO_PADRAO;
 

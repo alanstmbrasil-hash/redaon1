@@ -235,7 +235,7 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash, foto aceita pela câmera ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -652,7 +652,7 @@ header.hApp{ display:none !important; }
   </div></div>
 </div>
 <!-- GAVETA-MENU (Ir para) — camada mais alta; Mais/Métodos abrem atrás dela -->
-<input type="file" id="inputArquivo" style="display:none" onchange="aoEscolherArquivo(this)">
+<input type="file" id="inputArquivo" accept="image/*,application/pdf" style="display:none" onchange="aoEscolherArquivo(this)">
 <div id="gavetaMenu">
   <p class="rotuloNav">Ir para</p>
   <div id="menuHospede"></div>
@@ -1527,7 +1527,7 @@ async function aoEscolherArquivo(inp){
       arquivoMime = f.type || 'application/pdf';
     }
     document.getElementById('statusArquivo').textContent = 'transcrevendo\u2026';
-    var ocrPrompt = 'Transcreva fielmente o texto manuscrito/impresso desta imagem de reda\u00e7\u00e3o. Responda APENAS com o texto transcrito, sem coment\u00e1rios.';
+    var ocrPrompt = 'Voc\u00ea \u00e9 um transcritor de reda\u00e7\u00f5es do ENEM. Transcreva FIELMENTE todo o texto desta imagem (manuscrito ou impresso). Regras: 1) se a imagem estiver deitada ou de cabe\u00e7a para baixo, gire mentalmente e leia na orienta\u00e7\u00e3o certa; 2) leia linha por linha, do in\u00edcio ao fim, sem pular nenhuma linha e sem juntar frases de linhas diferentes; 3) preserve os par\u00e1grafos (uma linha em branco entre eles) e a ordem original; 4) mantenha exatamente as palavras do aluno, inclusive erros de ortografia, acentua\u00e7\u00e3o e concord\u00e2ncia \u2014 n\u00e3o corrija nada; 5) se houver um t\u00edtulo ou a linha "Tema: ..." no topo, n\u00e3o inclua; 6) se uma palavra estiver ileg\u00edvel, escreva [ileg\u00edvel]. Responda APENAS com o texto transcrito, sem coment\u00e1rios.'; /* v9-30: linha a linha, imagem deitada, sem corrigir */
     var texto = await geminiOCR(ocrPrompt, arquivoBase64, arquivoMime);
     if (texto && texto.trim().length >= 40){
       textarea.value = texto.trim();
@@ -1826,6 +1826,7 @@ var arquivoBase64 = null, arquivoMime = null, modoEliteAtivo = false;
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          task: 'ocr', /* v9-30: o proxy roteia a transcri\u00e7\u00e3o de foto para o gemini-2.5-flash */
           contents: [{ parts: [
             { inline_data: { mime_type: arquivoMime, data: arquivoBase64 } },
             { text: prompt }
@@ -3219,9 +3220,9 @@ ${FORMATO_JSON_MELHORIAS}`;
       // OCR: se veio arquivo, transcreve primeiro (chamada à parte, Flash Lite).
       let textoParaCorrigir = texto;
       if (arquivoBase64) {
-        const ocrPrompt = 'Transcreva fielmente o texto manuscrito/impresso desta imagem de redação. Responda APENAS com o texto transcrito, sem comentários.';
+        const ocrPrompt = 'Voc\u00ea \u00e9 um transcritor de reda\u00e7\u00f5es do ENEM. Transcreva FIELMENTE todo o texto desta imagem (manuscrito ou impresso). Regras: 1) se a imagem estiver deitada ou de cabe\u00e7a para baixo, gire mentalmente e leia na orienta\u00e7\u00e3o certa; 2) leia linha por linha, do in\u00edcio ao fim, sem pular nenhuma linha e sem juntar frases de linhas diferentes; 3) preserve os par\u00e1grafos (uma linha em branco entre eles) e a ordem original; 4) mantenha exatamente as palavras do aluno, inclusive erros de ortografia, acentua\u00e7\u00e3o e concord\u00e2ncia \u2014 n\u00e3o corrija nada; 5) se houver um t\u00edtulo ou a linha "Tema: ..." no topo, n\u00e3o inclua; 6) se uma palavra estiver ileg\u00edvel, escreva [ileg\u00edvel]. Responda APENAS com o texto transcrito, sem coment\u00e1rios.';
         try {
-          textoParaCorrigir = await geminiGenerate(ocrPrompt, arquivoBase64, arquivoMime, null);
+          textoParaCorrigir = await geminiGenerate(ocrPrompt, arquivoBase64, arquivoMime, 'ocr'); /* v9-30: tarefa ocr → modelo mais forte no proxy */
         } catch(e) {
           throw new Error('Falha ao transcrever a imagem: ' + e.message);
         }

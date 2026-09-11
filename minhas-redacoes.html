@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v3-9 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v3-10 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
 <script>
 (function(){
   var pref='auto';
@@ -218,7 +218,7 @@
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-9'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-10'
   });
 
   var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
@@ -623,6 +623,18 @@
           +'<p style="font-size:.74rem;font-weight:700;color:var(--gold);margin-bottom:.1rem;">\u2197 A melhorar</p>'
           +'<p style="font-size:.85rem;color:var(--text2);line-height:1.55;">'+escapeHtmlSimples(t)+'</p></div>';
       }).join('');
+      /* v3-10 · Deslizes de escrita: o agente C1 já lista os desvios com o trecho e a corre\u00e7\u00e3o — agora o aluno v\u00ea */
+      var desv=(atual.json&&atual.json._agentes&&atual.json._agentes.c1&&atual.json._agentes.c1.desvios)||[];
+      if(Array.isArray(desv)&&desv.length){
+        html+='<p style="font-size:.74rem;font-weight:700;color:var(--muted);margin:1rem 0 .4rem;text-transform:uppercase;letter-spacing:.04em;">Deslizes de escrita apontados (C1)</p>';
+        html+=desv.map(function(d){
+          var txt=String(typeof d==='string'?d:(d.desvio||d.trecho||JSON.stringify(d))), k=txt.indexOf(' - Desvio:'), trecho=k>0?txt.slice(0,k):'', expl=k>0?txt.slice(k+3):txt;
+          if(trecho.length>170) trecho=trecho.slice(0,170)+'\u2026';
+          return '<div style="border-left:2px solid rgba(var(--borderRGB),.6);padding-left:.7rem;margin-bottom:.6rem;">'
+            +(trecho?'<p style="font-size:.78rem;color:var(--muted);line-height:1.5;font-style:italic;">\u201c'+escapeHtmlSimples(trecho)+'\u201d</p>':'')
+            +'<p style="font-size:.85rem;color:var(--text2);line-height:1.55;">'+escapeHtmlSimples(expl)+'</p></div>';
+        }).join('');
+      }
       c.innerHTML=html;
     } else if(a==='reescrita'){
       // Sob demanda: sem reescrita no banco, gera agora (só quando o aluno pede).
