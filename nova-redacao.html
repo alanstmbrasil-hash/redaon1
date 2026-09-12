@@ -235,7 +235,7 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id da biblioteca ao enviar ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id · v9-33 foto deitada vira retrato a 2000px, OCR em duas leituras ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -1531,7 +1531,10 @@ async function aoEscolherArquivo(inp){
     }
     document.getElementById('statusArquivo').textContent = 'transcrevendo\u2026';
     var ocrPrompt = 'Voc\u00ea \u00e9 um transcritor de reda\u00e7\u00f5es do ENEM. Transcreva FIELMENTE todo o texto desta imagem (manuscrito ou impresso). Regras: 1) se a imagem estiver deitada ou de cabe\u00e7a para baixo, gire mentalmente e leia na orienta\u00e7\u00e3o certa; 2) leia linha por linha, do in\u00edcio ao fim, sem pular nenhuma linha e sem juntar frases de linhas diferentes; 3) preserve os par\u00e1grafos (uma linha em branco entre eles) e a ordem original; 4) mantenha exatamente as palavras do aluno, inclusive erros de ortografia, acentua\u00e7\u00e3o e concord\u00e2ncia \u2014 n\u00e3o corrija nada; 5) se houver um t\u00edtulo ou a linha "Tema: ..." no topo, n\u00e3o inclua; 6) se uma palavra estiver ileg\u00edvel, escreva [ileg\u00edvel]. Responda APENAS com o texto transcrito, sem coment\u00e1rios.'; /* v9-30: linha a linha, imagem deitada, sem corrigir */
-    var texto = await geminiOCR(ocrPrompt, arquivoBase64, arquivoMime);
+    /* v9-33: duas leituras em paralelo; fica a mais completa (o OCR, quando erra, PULA linhas — a versão mais longa é a mais fiel) */
+    var leituras = await Promise.all([geminiOCR(ocrPrompt, arquivoBase64, arquivoMime), geminiOCR(ocrPrompt, arquivoBase64, arquivoMime).catch(function(){ return ''; })]);
+    var texto = leituras.map(function(t){ return String(t||'').trim(); }).sort(function(a,b){ return b.length - a.length; })[0];
+    if (leituras[0] && leituras[1] && Math.abs(leituras[0].length - leituras[1].length) > 0.15 * Math.max(leituras[0].length, leituras[1].length)) console.warn('[ocr] leituras divergiram:', leituras[0].length, leituras[1].length);
     if (texto && texto.trim().length >= 40){
       textarea.value = texto.trim();
       ajustarAlturaFolha(); atualizarRegua(); rascunhoDebounced();
@@ -1864,26 +1867,34 @@ var arquivoBase64 = null, arquivoMime = null, modoEliteAtivo = false;
 
   // ── NOME USUÁRIO ───────────────────────────────────
 
-  function comprimirImagem(file, maxWidth = 1500, qualidade = 0.8) {
+  /* v9-33 (12/09/2026): a foto deitada (paisagem) era reduzida pela LARGURA a 1500px — as linhas do texto, que ficavam
+     na vertical, sobravam com ~1100px e o OCR pulava linhas. Agora: uma página de redação é sempre retrato; se a foto vier
+     deitada, gira 90° para retrato antes de enviar; o lado maior vai a 2000px e a qualidade a 0,85. */
+  function comprimirImagem(file, maxLado = 2000, qualidade = 0.85) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (ev) => {
         const img = new Image();
         img.onload = () => {
-          // Calcula dimensões mantendo proporção
-          let w = img.width, h = img.height;
-          if (w > maxWidth) {
-            h = Math.round(h * (maxWidth / w));
-            w = maxWidth;
-          }
-          // Desenha em canvas e exporta como JPEG comprimido
+          const deitada = img.width > img.height * 1.15;
+          // dimensões finais em retrato
+          let sw = img.width, sh = img.height;
+          let w = deitada ? sh : sw, h = deitada ? sw : sh;
+          const escala = Math.min(1, maxLado / Math.max(w, h));
+          w = Math.round(w * escala); h = Math.round(h * escala);
           const canvas = document.createElement('canvas');
           canvas.width = w;
           canvas.height = h;
           const ctx = canvas.getContext('2d');
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, w, h);
-          ctx.drawImage(img, 0, 0, w, h);
+          if (deitada) {
+            // gira 90° no sentido horário (celular deitado com a câmera à esquerda — o caso mais comum)
+            ctx.translate(w, 0); ctx.rotate(Math.PI / 2);
+            ctx.drawImage(img, 0, 0, h, w);
+          } else {
+            ctx.drawImage(img, 0, 0, w, h);
+          }
           // toDataURL retorna 'data:image/jpeg;base64,XXXX' — extraímos só o base64
           const dataUrl = canvas.toDataURL('image/jpeg', qualidade);
           const base64 = dataUrl.split(',')[1];
