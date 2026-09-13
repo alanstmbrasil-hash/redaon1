@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v3-14 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v3-15 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
 <script>
 (function(){
   var pref='auto';
@@ -214,14 +214,14 @@
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="prompts-reescrita.js?v=2-1"></script>
+<script src="prompts-reescrita.js?v=2-2"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
   if (typeof authGuard === 'function') { authGuard('aluno'); }
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-14'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-15'
   });
 
   var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
@@ -538,13 +538,15 @@
       var base = REDAON_PROMPT_REESCRITA + '\n\nTema: ' + tema + '\n\nPLANO (siga \u00e0 risca):\n' + JSON.stringify(plano) + redaonFichasReferenciadas(ac, plano) + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno (para manter a voz):\n' + atual.texto;
       var j = redaonCorrigirNomes(jsonDaIA(await geminiTexto(base)));
       var falhas = redaonChecarReescrita(j, plano, ac);
-      if(falhas.length){
-        console.warn('[reescrita] guardas:', falhas);
-        var j2 = redaonCorrigirNomes(jsonDaIA(await geminiTexto(base + '\n\nA VERS\u00c3O ANTERIOR FALHOU NESTES PONTOS (corrija obrigatoriamente, sem mudar o resto):\n- ' + falhas.join('\n- '))));
-        var f2 = redaonChecarReescrita(j2, plano, ac);
-        if(f2.length <= falhas.length) { j = j2; falhas = f2; }
-        if(falhas.length) console.warn('[reescrita] guardas ap\u00f3s refazer:', falhas);
+      /* v3-15: at\u00e9 duas tentativas de corre\u00e7\u00e3o; fica a vers\u00e3o com MENOS falhas graves (repert\u00f3rio do aluno sumiu / texto longo) */
+      var grave = function(fs){ return fs.filter(function(f){ return /repert\u00f3rio do aluno|longo demais/.test(f); }).length; };
+      for(var tent = 1; tent <= 2 && falhas.length; tent++){
+        console.warn('[reescrita] guardas (tentativa '+tent+'):', falhas);
+        var jN = redaonCorrigirNomes(jsonDaIA(await geminiTexto(base + '\n\nA VERS\u00c3O ANTERIOR FALHOU NESTES PONTOS (corrija TODOS, obrigatoriamente, sem mudar o resto):\n- ' + falhas.join('\n- ') + (grave(falhas) ? '\n\nLEMBRETE: o repert\u00f3rio do aluno (obras, personagens, ditado) tem que aparecer nomeado, e o texto inteiro tem no m\u00e1ximo 2.600 caracteres.' : ''))));
+        var fN = redaonChecarReescrita(jN, plano, ac);
+        if(grave(fN) < grave(falhas) || (grave(fN) === grave(falhas) && fN.length <= falhas.length)) { j = jN; falhas = fN; }
       }
+      if(falhas.length) console.warn('[reescrita] guardas finais:', falhas);
       var partes = [j.redacao_nota_1000_intro, j.redacao_nota_1000_dev1, j.redacao_nota_1000_dev2, j.redacao_nota_1000_conclusao]
         .filter(function(p){ return p && String(p).trim().length > 20; });
       if(partes.length < 4) throw new Error('A IA n\u00e3o devolveu a reescrita completa');
@@ -560,7 +562,7 @@
         elementos_c5_reescrita: j.elementos_c5 || null,
         plano_reescrita: plano,
         reescrita_guardas: falhas.length ? falhas : null,
-        reescrita_versao: 'v2-1'
+        reescrita_versao: 'v2-2'
       }, 'redacao_nota_1000'); }
       catch(e2){ console.error('[redacoes] reescrita gerada mas N\u00c3O gravada:', e2); }
     }catch(err){

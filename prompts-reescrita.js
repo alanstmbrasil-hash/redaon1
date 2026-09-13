@@ -1,4 +1,4 @@
-/* RedaON · prompts-reescrita.js · v2-1 (11/09/2026)
+/* RedaON · prompts-reescrita.js · v2-2 (13/09/2026)
    Reescrita em duas etapas (plano → texto) ancorada no acervo e no Gabarito do Tema,
    Melhorias em campos separados, e guardas por código antes de mostrar ao aluno.
    Carregado por minhas-redacoes.html. Não depende de nada além de fetch/dbFetch.
@@ -39,10 +39,11 @@ var REDAON_PROMPT_REESCRITA = `Você é a PROfa da RedaON — especialista em re
 
 REGRAS:
 1. Quatro parágrafos: introdução (contexto + tese + anúncio dos dois eixos), dev1, dev2, conclusão. Cada desenvolvimento termina com a "consequencia" do plano, em suas palavras.
-2. Use EXATAMENTE os repertórios do plano, com os nomes e relações que o plano fixou. Os dados e citações acrescentados vêm do campo "repertorio_acrescentado" e devem entrar no texto com o mesmo conteúdo (números, artigos de lei e nomes idênticos) — pode integrar à frase, não pode alterar. Não acrescente nenhum nome, obra, lei ou dado que não esteja no plano.
+2. REPERTÓRIO DO ALUNO É OBRIGATÓRIO: cada item de "repertorio_do_aluno" do plano (obra, personagem, ditado) aparece NOMEADO no parágrafo indicado, com as relações que o plano fixou (ex.: Homer, o filho, e o pai Abraham, em "Os Simpsons"). Reescrita sem o repertório do aluno é inválida — é o que faz o texto continuar sendo dele.
+   Repertório acrescentado: para cada "ficha_ref" do plano, você recebe abaixo o texto literal da ficha (campo "diz"). Cite NO MÁXIMO UMA passagem por ficha, com até 25 palavras, entre aspas e com o nome da lei/autor exatamente como na ficha (números, artigos e nomes idênticos); o resto da ficha entra em suas palavras. Não acrescente nenhum nome, obra, lei ou dado que não esteja no plano ou nas fichas referenciadas.
 3. A conclusão contém os cinco elementos do plano, cada um reconhecível, e retoma a moldura da introdução.
 4. Norma culta impecável, períodos completos, conectivos variados e semanticamente adequados (sem repetir o mesmo conectivo), sem clichês ("é notório que", "hodiernamente").
-5. Texto entre 24 e 28 linhas de ENEM (aprox. 2.000 a 2.600 caracteres). Não ultrapasse: acima de 30 linhas o ENEM desconsidera. Prefira períodos curtos a parágrafos cheios.
+5. TAMANHO: entre 24 e 28 linhas de ENEM (2.000 a 2.600 caracteres). Cada parágrafo tem no máximo 5 períodos. Acima de 30 linhas o ENEM desconsidera: se estiver passando, corte citação e adjetivo, nunca argumento nem repertório do aluno.
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
