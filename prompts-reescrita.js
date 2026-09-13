@@ -1,4 +1,4 @@
-/* RedaON · prompts-reescrita.js · v2-2 (13/09/2026)
+/* RedaON · prompts-reescrita.js · v2-3 (13/09/2026)
    Reescrita em duas etapas (plano → texto) ancorada no acervo e no Gabarito do Tema,
    Melhorias em campos separados, e guardas por código antes de mostrar ao aluno.
    Carregado por minhas-redacoes.html. Não depende de nada além de fetch/dbFetch.
@@ -44,6 +44,22 @@ REGRAS:
 3. A conclusão contém os cinco elementos do plano, cada um reconhecível, e retoma a moldura da introdução.
 4. Norma culta impecável, períodos completos, conectivos variados e semanticamente adequados (sem repetir o mesmo conectivo), sem clichês ("é notório que", "hodiernamente").
 5. TAMANHO: entre 24 e 28 linhas de ENEM (2.000 a 2.600 caracteres). Cada parágrafo tem no máximo 5 períodos. Acima de 30 linhas o ENEM desconsidera: se estiver passando, corte citação e adjetivo, nunca argumento nem repertório do aluno.
+
+REGRAS CRÍTICAS DE SAÍDA:
+1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
+2. Dentro de strings, use \\n (escapado) para quebras de linha e \\" para aspas internas.
+
+Formato EXATO da resposta:
+{
+  "redacao_nota_1000_intro": "...",
+  "redacao_nota_1000_dev1": "...",
+  "redacao_nota_1000_dev2": "...",
+  "redacao_nota_1000_conclusao": "...",
+  "elementos_c5": { "acao": "<trecho>", "agente": "<trecho>", "meio": "<trecho>", "finalidade": "<trecho>", "detalhamento": "<trecho>" }
+}`;
+
+/* v2-3 · passagem de CORTE, usada só quando a única falha da reescrita é o tamanho */
+var REDAON_PROMPT_CORTE = `Você é a revisora final da PROfa da RedaON. A Reescrita abaixo passou do limite de 30 linhas do ENEM. Reduza-a para NO MÁXIMO 2.500 caracteres sem tirar: a tese, os dois argumentos, o repertório do aluno (obras, personagens, ditado), o repertório acrescentado (uma citação por ficha, encurtada para até 20 palavras se preciso) e os cinco elementos da proposta. Corte adjetivos, repetições, orações explicativas e trechos de citação longos. Mantenha os quatro parágrafos e a frase de consequência no fim de cada desenvolvimento. Nada de metalinguagem ("analisar-se-á", "este texto").
 
 REGRAS CRÍTICAS DE SAÍDA:
 1. Responda APENAS com um objeto JSON válido. Sem texto antes ou depois. Sem markdown.
@@ -414,7 +430,7 @@ function redaonChecarReescrita(j, plano, ac){
   var falhas = [], t = redaonTextoReescrita(j), tn = redaonNorm(t);
   if(t.length < 600) falhas.push('reescrita curta ou incompleta');
   if(t.length > 2750) falhas.push('texto longo demais: '+t.length+' caracteres (máximo 2.600, 28 linhas); reduza cada parágrafo a no máximo 5 frases curtas, sem tirar argumento nem repertório');
-  ['retomando a moldura','moldura inicial','serao analisados','serao abordados','a tese e que','este texto','o presente texto','e notorio que','e fundamental ressaltar','hodiernamente'].forEach(function(c){ if(tn.indexOf(c)>=0) falhas.push('remova a expressão "'+c+'" (metalinguagem ou vazamento do plano)'); });
+  ['retomando a moldura','moldura inicial','serao analisados','serao abordados','analisar-se-a','abordar-se-a','a tese e que','este texto','o presente texto','e notorio que','e fundamental ressaltar','hodiernamente'].forEach(function(c){ if(tn.indexOf(c)>=0) falhas.push('remova a expressão "'+c+'" (metalinguagem ou vazamento do plano)'); });
   if(/estatuto do idoso/.test(tn)) falhas.push('use o nome atual "Estatuto da Pessoa Idosa (Lei nº 10.741/2003)" no lugar de "Estatuto do Idoso"');
   if(/ministerio da mulher/.test(tn)) falhas.push('o Ministério da Mulher, da Família e dos Direitos Humanos não existe mais; use o agente do plano');
   /* repertório do aluno preservado: nomes próprios listados no plano precisam aparecer */

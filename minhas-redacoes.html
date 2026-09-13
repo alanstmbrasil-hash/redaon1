@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v3-15 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v3-16 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
 <script>
 (function(){
   var pref='auto';
@@ -214,14 +214,14 @@
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="prompts-reescrita.js?v=2-2"></script>
+<script src="prompts-reescrita.js?v=2-3"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
   if (typeof authGuard === 'function') { authGuard('aluno'); }
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-15'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-16'
   });
 
   var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
@@ -546,6 +546,14 @@
         var fN = redaonChecarReescrita(jN, plano, ac);
         if(grave(fN) < grave(falhas) || (grave(fN) === grave(falhas) && fN.length <= falhas.length)) { j = jN; falhas = fN; }
       }
+      /* v3-16: se s\u00f3 sobrou o tamanho, uma passagem dedicada de corte (pedido \u00fanico, o modelo obedece melhor) */
+      if(falhas.length && falhas.every(function(f){ return /longo demais/.test(f); }) && typeof REDAON_PROMPT_CORTE !== 'undefined'){
+        try{
+          var jC = redaonCorrigirNomes(jsonDaIA(await geminiTexto(REDAON_PROMPT_CORTE + '\n\nREESCRITA A REDUZIR:\n' + redaonTextoReescrita(j))));
+          var fC = redaonChecarReescrita(jC, plano, ac);
+          if(!grave(fC) || redaonTextoReescrita(jC).length < redaonTextoReescrita(j).length) { j = jC; falhas = fC; }
+        }catch(eC){ console.warn('[reescrita] corte falhou:', eC); }
+      }
       if(falhas.length) console.warn('[reescrita] guardas finais:', falhas);
       var partes = [j.redacao_nota_1000_intro, j.redacao_nota_1000_dev1, j.redacao_nota_1000_dev2, j.redacao_nota_1000_conclusao]
         .filter(function(p){ return p && String(p).trim().length > 20; });
@@ -562,7 +570,7 @@
         elementos_c5_reescrita: j.elementos_c5 || null,
         plano_reescrita: plano,
         reescrita_guardas: falhas.length ? falhas : null,
-        reescrita_versao: 'v2-2'
+        reescrita_versao: 'v2-3'
       }, 'redacao_nota_1000'); }
       catch(e2){ console.error('[redacoes] reescrita gerada mas N\u00c3O gravada:', e2); }
     }catch(err){
