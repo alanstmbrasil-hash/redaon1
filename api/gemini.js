@@ -52,7 +52,9 @@ module.exports = async function handler(req, res) {
     // 11/09/2026: a transcrição de FOTO (task 'ocr') vai para o gemini-2.5-flash — o Flash-Lite pulou
     // linhas e fundiu frases em manuscrito cursivo fotografado deitado. Correção continua no Flash-Lite.
     const TASKS_PREMIUM = ['ocr'];
-    const MODELO_PREMIUM = 'gemini-2.5-flash';
+    // Modelo do OCR em uma linha só, para trocar sem mexer no resto (ex.: 'gemini-2.5-pro' se o flash seguir "corrigindo" o aluno).
+    const MODELO_OCR = 'gemini-2.5-flash';
+    const MODELO_PREMIUM = MODELO_OCR;
     const MODELO_PADRAO = 'gemini-2.5-flash-lite';
     const modelo = TASKS_PREMIUM.includes(task) ? MODELO_PREMIUM : MODELO_PADRAO;
 

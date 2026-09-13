@@ -235,7 +235,7 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id · v9-33 foto deitada vira retrato a 2000px, OCR em duas leituras ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id · v9-33 foto deitada vira retrato a 2000px, OCR em duas leituras · v9-34 passagem de conferência (foto + transcrição) ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -1535,6 +1535,17 @@ async function aoEscolherArquivo(inp){
     var leituras = await Promise.all([geminiOCR(ocrPrompt, arquivoBase64, arquivoMime), geminiOCR(ocrPrompt, arquivoBase64, arquivoMime).catch(function(){ return ''; })]);
     var texto = leituras.map(function(t){ return String(t||'').trim(); }).sort(function(a,b){ return b.length - a.length; })[0];
     if (leituras[0] && leituras[1] && Math.abs(leituras[0].length - leituras[1].length) > 0.15 * Math.max(leituras[0].length, leituras[1].length)) console.warn('[ocr] leituras divergiram:', leituras[0].length, leituras[1].length);
+    /* v9-34: passagem de CONFER\u00caNCIA — o modelo recebe a foto E a transcri\u00e7\u00e3o e devolve a transcri\u00e7\u00e3o corrigida:
+       linha pulada volta, palavra "corrigida" volta ao que o aluno escreveu (o OCR tende a consertar erros do aluno). */
+    if (texto && texto.length >= 40) {
+      try {
+        var confPrompt = 'Voc\u00ea \u00e9 um conferente de transcri\u00e7\u00e3o. Abaixo est\u00e1 a TRANSCRI\u00c7\u00c3O feita por outro leitor desta mesma imagem de reda\u00e7\u00e3o. Compare a imagem com a transcri\u00e7\u00e3o LINHA POR LINHA e corrija: 1) linha ou trecho da imagem que n\u00e3o est\u00e1 na transcri\u00e7\u00e3o \u2014 acrescente no lugar certo; 2) palavra, acento, v\u00edrgula ou termina\u00e7\u00e3o que na imagem est\u00e1 DIFERENTE da transcri\u00e7\u00e3o \u2014 volte para EXATAMENTE o que est\u00e1 escrito na imagem, mesmo que seja erro de portugu\u00eas do aluno (n\u00e3o corrija o aluno: "n\u00e3o t\u00eam", "por cuidando", "dos do pr\u00f3ximo" ficam como o aluno escreveu); 3) trecho que est\u00e1 na transcri\u00e7\u00e3o mas n\u00e3o na imagem \u2014 remova. Preserve os par\u00e1grafos. N\u00e3o inclua a linha "Tema:". Responda APENAS com a transcri\u00e7\u00e3o final corrigida, sem coment\u00e1rios.\n\nTRANSCRI\u00c7\u00c3O A CONFERIR:\n' + texto;
+        var conferido = String(await geminiOCR(confPrompt, arquivoBase64, arquivoMime) || '').trim();
+        /* aceita a confer\u00eancia s\u00f3 se ela n\u00e3o encolheu o texto (confer\u00eancia que corta \u00e9 pior que nenhuma) */
+        if (conferido.length >= texto.length * 0.9) { if (conferido !== texto) console.info('[ocr] confer\u00eancia ajustou a transcri\u00e7\u00e3o (' + texto.length + ' \u2192 ' + conferido.length + ')'); texto = conferido; }
+        else console.warn('[ocr] confer\u00eancia descartada (encolheu):', texto.length, '\u2192', conferido.length);
+      } catch (e) { console.warn('[ocr] confer\u00eancia falhou:', e); }
+    }
     if (texto && texto.trim().length >= 40){
       textarea.value = texto.trim();
       ajustarAlturaFolha(); atualizarRegua(); rascunhoDebounced();
