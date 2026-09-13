@@ -235,7 +235,7 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id · v9-33 foto deitada vira retrato a 2000px, OCR em duas leituras · v9-34 passagem de conferência (foto + transcrição) ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id · v9-33 foto deitada vira retrato a 2000px, OCR em duas leituras · v9-34 passagem de conferência (foto + transcrição) · v9-35 gaveta e faixa "confira o texto da foto", Conferir e enviar ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -326,6 +326,13 @@ header.hApp{ display:none !important; }
   background:rgba(var(--purpleRGB),.07); border-bottom:1px dashed rgba(var(--purpleRGB),.35);
   padding:.5rem .875rem; font-size:.72rem; color:#5a5470; }
 #faixaArquivo.visivel{ display:flex; }
+/* v9-35 · conferência do texto vindo da foto */
+#faixaConferir{ display:none; flex:0 0 auto; align-items:center; gap:.5rem; margin:0 0 .35rem; padding:.42rem .7rem; border-radius:10px;
+  background:rgba(var(--purpleRGB),.10); border:1px solid rgba(var(--purpleRGB),.28); color:var(--text2); font-size:.74rem; line-height:1.35; }
+#faixaConferir.visivel{ display:flex; }
+#faixaConferir svg{ width:16px; height:16px; flex:none; color:var(--purple); }
+#gavetaConferir .txt{ font-size:.9rem; line-height:1.55; color:var(--text2); margin:.2rem 0 .9rem; }
+#gavetaConferir .btnOk{ width:100%; min-height:44px; border:0; border-radius:12px; background:var(--purple); color:#fff; font-weight:700; font-size:.95rem; }
 #faixaArquivo .nomeArq{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:700; }
 #faixaArquivo button{ background:none; border:none; color:#8a8576; cursor:pointer; display:flex; padding:.2rem; }
 
@@ -600,6 +607,7 @@ header.hApp{ display:none !important; }
           <span id="statusArquivo" style="flex:0 0 auto;font-size:.66rem;color:#8a8576;">transcrevendo…</span>
           <button onclick="removerArquivoPrevia()" aria-label="Remover arquivo"><span class="material-symbols-outlined" style="font-size:1rem;">close</span></button>
         </div>
+        <div id="faixaConferir" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Texto vindo da foto \u2014 confira antes de enviar</span></div>
         <div class="areaFolha" id="areaFolha">
           <textarea id="textoRedacao" placeholder="Comece a escrever sua redação aqui… (pode colar um texto pronto)" spellcheck="false"></textarea>
         </div>
@@ -674,6 +682,15 @@ header.hApp{ display:none !important; }
   <a class="pill" id="pillSim60" onclick="escolherTempo(3600)"><i class="pemoji">⏳</i>Simulado · 60 minutos<i class="fim">›</i></a>
   <a class="pill" id="pillSim90" onclick="escolherTempo(5400)"><i class="pemoji">⏳</i>Simulado · 90 minutos<i class="fim">›</i></a>
   <a class="pill" id="pillSim120" onclick="escolherTempo(7200)"><i class="pemoji">⏳</i>Simulado · 120 minutos<i class="fim">›</i></a>
+</div>
+
+<!-- GAVETA · CONFERIR O TEXTO DA FOTO (v9-35) -->
+<div class="gvBg atrasTudo" id="gavetaConferirBg" onclick="fecharConferir()"></div>
+<div class="gv atrasTudo" id="gavetaConferir">
+  <div class="grip"></div>
+  <p class="tit">Transcrevemos a sua foto</p>
+  <p class="txt">A leitura pode trocar uma palavra, um acento ou uma v\u00edrgula. Leia a folha e corrija o que n\u00e3o estiver como voc\u00ea escreveu \u2014 a nota \u00e9 do seu texto, n\u00e3o do texto da foto.</p>
+  <button class="btnOk" onclick="fecharConferir()">Vou conferir</button>
 </div>
 
 <!-- GAVETA · MATERIAL DE APOIO (celular/tablet vertical) -->
@@ -1201,6 +1218,7 @@ function ocultarSeloRascunho(){
 }
 /* primeira intera\u00e7\u00e3o com a folha dispensa o selo */
 textarea.addEventListener('input', ocultarSeloRascunho);
+textarea.addEventListener('pointerdown', conferido); textarea.addEventListener('keydown', conferido); /* v9-35: primeiro toque no texto = est\u00e1 conferindo */
 textarea.addEventListener('pointerdown', ocultarSeloRascunho);
 
 /* gravação imediata ao sair da aba/tela — cobre navegar pelo Ir Para e fechar o app */
@@ -1551,7 +1569,7 @@ async function aoEscolherArquivo(inp){
       ajustarAlturaFolha(); atualizarRegua(); rascunhoDebounced();
       arquivoBase64 = null; arquivoMime = null; /* corre\u00e7\u00e3o parte do texto revisado */
       document.getElementById('faixaArquivo').classList.remove('visivel');
-      toast('\u2705 Texto transcrito! Revise e corrija antes de enviar.', 5500);
+      marcarTextoDaFoto(); /* v9-35: gaveta + faixa de confer\u00eancia */
     } else {
       document.getElementById('statusArquivo').textContent = 'anexado \u2014 transcri\u00e7\u00e3o no envio';
       toast('\u26a0\ufe0f Transcri\u00e7\u00e3o incompleta. Voc\u00ea pode digitar ou enviar mesmo assim.', 6000);
@@ -1712,7 +1730,34 @@ function rodarCena(aoTrabalhar){
     titulo.textContent = 'Agora sim, corrigindo a sua reda\u00e7\u00e3o\u2026 \ud83d\ude05'; /* punchline */
     aoTrabalhar(); }, 5500);
 }
-function enviarPrevia(){ enviar(); } /* nome preservado pelos onclicks; motor real */
+/* v9-35 · Conferência do texto vindo da foto: gaveta uma vez, faixa até o primeiro toque no texto,
+   e "Conferir e enviar" se o aluno for direto ao Enviar sem tocar na folha. Lembrete, não trava. */
+var _textoDaFoto = false, _pediuConferir = false;
+function marcarTextoDaFoto(){
+  _textoDaFoto = true; _pediuConferir = false;
+  var f = document.getElementById('faixaConferir'); if (f) f.classList.add('visivel');
+  abrirGaveta('gavetaConferir');
+}
+function fecharConferir(){
+  fecharGaveta('gavetaConferir');
+  try { textarea.focus(); textarea.setSelectionRange(0, 0); textarea.scrollTop = 0; } catch(e) {}
+}
+function conferido(){
+  if (!_textoDaFoto) return;
+  _textoDaFoto = false;
+  var f = document.getElementById('faixaConferir'); if (f) f.classList.remove('visivel');
+  ['btnEnviar','btnEnviarCtx'].forEach(function(id){ var b = document.getElementById(id); if (b && b.dataset.rotuloOriginal) { b.textContent = b.dataset.rotuloOriginal; delete b.dataset.rotuloOriginal; } });
+}
+function enviarPrevia(){
+  if (_textoDaFoto && !_pediuConferir) {
+    _pediuConferir = true;
+    ['btnEnviar','btnEnviarCtx'].forEach(function(id){ var b = document.getElementById(id); if (b) { if (!b.dataset.rotuloOriginal) b.dataset.rotuloOriginal = b.textContent; b.textContent = 'Conferir e enviar'; } });
+    toast('Confira o texto da foto na folha e toque de novo para enviar.', 4000);
+    try { textarea.focus(); } catch(e) {}
+    return;
+  }
+  enviar();
+} /* nome preservado pelos onclicks; motor real */
 
 /* ── Ponte HQ ↔ 7 agentes: a cena roda em paralelo à correção ── */
 var _etapasIntv = null;
