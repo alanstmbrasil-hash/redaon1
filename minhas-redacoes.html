@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v3-12 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v3-14 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
 <script>
 (function(){
   var pref='auto';
@@ -19,6 +19,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link href="aluno-base-v6.css" rel="stylesheet"/>
 <style>
+  /* amarelo de nota (não é o dourado de conquista) */
+  :root{ --notaAmarelo:#f5d547; --notaAmareloRGB:245,213,71; }
+  html[data-tema="claro"]{ --notaAmarelo:#b98a00; --notaAmareloRGB:185,138,0; }
 /* ===== Só o que é próprio de MINHAS REDAÇÕES ===== */
 .abaBtn{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem .5rem;border:none;border-radius:.65rem;background:transparent;color:var(--muted);font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;}
 .abaBtn .ic{font-size:.95rem;line-height:1;font-style:normal;}
@@ -218,7 +221,7 @@
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-12'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-14'
   });
 
   var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
@@ -232,7 +235,7 @@
   var REDACOES=[], atual=null, correcaoAtual=null, filtroAtivo='todas', abaAtual='original';
 
   /* Régua de cores (Alan, 11/09/2026): 0–79 vermelho · 80–120 amarelo · 121–200 verde. Dourado é só de conquista (200 no Início). */
-  function corComp(v){ return v>=121?'var(--green)':(v>=80?'var(--orange)':'var(--red)'); }
+  function corComp(v){ return v>=121?'var(--green)':(v>=80?'var(--notaAmarelo)':'var(--red)'); }
   function alternarGvExc(id){
     var g=document.getElementById(id);
     if(g && g.classList.contains('open')){ fecharGaveta(id); marcarBtnDock(); return; }
@@ -254,7 +257,7 @@
       if(!userId){ grid.innerHTML='<p class="vazio">Sess\u00e3o inv\u00e1lida. Entre novamente.</p>'; return; }
       var url=SUPABASE_URL+'/rest/v1/redacoes?aluno_id=eq.'+userId+'&order=created_at.desc'
         +'&select=id,texto,tema_livre,tema_id,status,nota_final,created_at,temas(titulo),'
-        +'correcoes(c1,c2,c3,c4,c5,nota_total,feedback_geral,feedback_c1,feedback_c2,feedback_c3,feedback_c4,feedback_c5,pontos_fortes,pontos_melhorar,revisao_professor,correcao_json)';
+        +'correcoes(id,c1,c2,c3,c4,c5,nota_total,feedback_geral,feedback_c1,feedback_c2,feedback_c3,feedback_c4,feedback_c5,pontos_fortes,pontos_melhorar,revisao_professor,correcao_json)';
       var res=await dbFetch(url,{});
       if(!res.ok) throw new Error('HTTP '+res.status);
       var rows=await res.json();
@@ -488,7 +491,7 @@
     }
   }
   async function salvarNoCorrecaoJson(campos, chamada){
-    if(!atual || !atual.correcaoId) return;
+    if(!atual || !atual.correcaoId) throw new Error('Corre\u00e7\u00e3o sem id \u2014 nada gravado'); /* v3-14: antes retornava em sil\u00eancio */
     var novo = Object.assign({}, atual.json || {}, campos);
     novo.chamadas = Object.assign({}, atual.chamadas || {});
     novo.chamadas[chamada] = 'completa';
