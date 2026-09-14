@@ -1,5 +1,5 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-2-1 (24/08/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-3-1 (24/08/2026)
    v6-1: Aparência sai do menu Mais e da sidebar (decisão A6 — tema em
    dois lugares: sol/lua do topo + tela Configurações). Ícones/textos
    de tema remanescentes atualizam só se existirem no DOM.
@@ -62,6 +62,8 @@ function aplicarIconeTema() {
   el = document.getElementById('txtTemaMais');    if (el) el.textContent = 'Apar\u00eancia \u00b7 ' + nome;
 }
 function alternarTema() {
+  /* v6-3: a pílula "Aparência" no menu Mais mostra o estado atual */
+  setTimeout(function(){ var p=document.getElementById('pillTema'); if(p){ var a=document.documentElement.getAttribute('data-tema-pref')||'auto'; p.textContent = a==='auto'?'autom\u00e1tico':(a==='claro'?'claro':'escuro'); } }, 0);
   var ordem = ['claro','escuro','auto'];
   var prox = ordem[(ordem.indexOf(temaPreferido()) + 1) % 3];
   aplicarTema(prox);
@@ -95,7 +97,7 @@ function toggleRecolher() {
   try { localStorage.setItem('redaon-menu', mini ? 'mini' : 'full'); } catch(e) {}
 }
 
-/* ─── Foco no resultado (helper compartilhado · v6-2) ───
+/* ─── Foco no resultado (helper compartilhado · v6-3) ───
    Toda escolha feita nos controles leva o resultado para a área nobre da tela,
    logo abaixo do cabeçalho. Só rola quando o resultado ainda não está visível ali
    (evita solavanco). Usado pelo Estúdio; serve Temas/Minhas Redações/Evolução. */
@@ -217,6 +219,24 @@ function montarEsqueleto(cfg) {
   /* Header dentro do main-content */
   var main = document.getElementById('main-content');
   if (main) {
+    /* v6-3 (14/09/2026 · decisão de Alan): ganhar espaço vertical.
+       Abaixo de 1024px o cabeçalho do app sai — o dock já diz onde o aluno está.
+       Telas que vêm do menu "Mais" (não têm aba no dock) ganham uma linha fina com
+       seta de voltar (o Safari do iPhone não tem botão do sistema), o MESMO ícone do
+       dock/menu e o título. Tema volta para o "Mais"; o sino sai até existir notificação. */
+    var ABAS_DOCK = ['inicio','temas','escrever','redacoes'];
+    var noDock = ABAS_DOCK.indexOf(cfg.ativo || '') >= 0;
+    var EMOJI_TELA = { 'evolucao':'\u{1F4C8}', 'plano':'\u{1F4C5}', 'voce-on':'\u{1F3AC}',
+                       'configuracoes':'\u2699\uFE0F', 'preparacao':'\u{1F4DA}' };
+    function chaveTela(){
+      var t = (cfg.titulo || '').toLowerCase();
+      if (t.indexOf('evolu') === 0) return 'evolucao';
+      if (t.indexOf('plano') === 0) return 'plano';
+      if (t.indexOf('voc') === 0) return 'voce-on';
+      if (t.indexOf('config') === 0) return 'configuracoes';
+      if (t.indexOf('prepara') === 0) return 'preparacao';
+      return '';
+    }
     var hd = document.createElement('header');
     hd.className = 'hApp';
     hd.innerHTML =
@@ -229,9 +249,24 @@ function montarEsqueleto(cfg) {
       '</div>' +
       '<div style="display:flex;align-items:center;gap:.25rem;">' +
         '<button id="btnTema" onclick="alternarTema()" title="Alternar tema" aria-label="Alternar tema"><span class="material-symbols-outlined" id="iconeTema">light_mode</span></button>' +
-        (cfg.sino ? '<button class="hIcone" onclick="mostrarEmBreve(\'Notifica\u00e7\u00f5es\')" aria-label="Notifica\u00e7\u00f5es"><span class="material-symbols-outlined">notifications</span><span class="ponto"></span></button>' : '') +
       '</div>';
     main.insertBefore(hd, main.firstChild);
+
+    /* linha fina das telas de dentro do "Mais" (só no celular e no tablet vertical) */
+    if (!noDock) {
+      var ch = chaveTela();
+      var ph = document.createElement('div');
+      ph.className = 'pgHead';
+      ph.innerHTML =
+        '<button class="pgVoltar" onclick="history.length>1?history.back():(window.location.href=\'inicio.html\')" aria-label="Voltar">\u2039</button>' +
+        '<span class="pgIco">' + (EMOJI_TELA[ch] || '\u{1F4C4}') + '</span>' +
+        '<span class="pgTit">' + (cfg.titulo || '') + '</span>';
+      var cont = document.getElementById('conteudo');
+      if (cont) cont.insertBefore(ph, cont.firstChild);
+      else main.insertBefore(ph, hd.nextSibling);
+      /* a tela já tinha o próprio título repetido logo abaixo — esconde no celular */
+      document.documentElement.classList.add('temPgHead');
+    }
   }
 
   /* Barra inferior + gavetas Mais/Métodos + toast */
@@ -245,6 +280,7 @@ function montarEsqueleto(cfg) {
       '<a class="pill" href="plano.html"><i class="pemoji">\u{1F4C5}</i>Plano de estudos<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="voce-on.html"><i class="pemoji">\u{1F3AC}</i>Voc\u00ea ON<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="configuracoes.html"><i class="pemoji">\u2699\uFE0F</i>Configura\u00e7\u00f5es<i class="fim">\u203A</i></a>' +
+      '<a class="pill" onclick="alternarTema()"><i class="pemoji">\u{1F313}</i>Apar\u00eancia<span class="fim" id="pillTema" style="font-size:.72rem;color:var(--muted);"></span></a>' +
       '<a class="pill" style="color:var(--red);" onclick="authLogout()"><i class="pemoji">\u{1F6AA}</i>Sair</a>' +
     '</div>' +
     '<div class="gvBg atrasTudo" id="gavetaMetodosBg" onclick="fecharMetodos()"></div>' +

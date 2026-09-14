@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v5-0</title>
-<!-- RedaON · Portal do Aluno · Início · v5-0 · sobre aluno-base-v6 -->
-<!-- v5-0 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
+<title>RedaON | Início v5-1</title>
+<!-- RedaON · Portal do Aluno · Início · v5-1 · sobre aluno-base-v6 -->
+<!-- v5-1 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
 <!-- v4-10 (07/09/2026): celular: personagem cabe pela largura do slot (sem corte), balão sem ícone e mais estreito, saudação sem ✍️ e limitada à esquerda do personagem; tablet em pé: balão e slot reaproximados -->
 <!-- v4-8 (07/09/2026): galeria com 7 personagens (Ben, Alice, Profa. Blanche Oiê, Profa. Blanche Sorrindo, Corretor, Reescritor, Feliz) -->
 <!-- v4-7 (07/09/2026): desktop/tablet deitado em duas colunas de grid: esquerda = saudação + balão + Seu Status; direita = personagem do topo ao pé do status (380px). Sem sobreposição, sem buraco entre balão e status -->
@@ -200,8 +200,8 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 #heroCard .hcArt{ display:none !important; }              /* personagem fora em toda largura */
-#subMelhoria, #gradeMelhoria, #tituloMelhoria,
-#tituloVitrine, #subVitrine, #carrVitrine{ display:none !important; }
+#secMelhoria, #subMelhoria, #gradeMelhoria,
+#secVitrine, .carrVit{ display:none !important; }
 
 /* ── o balão vira o trilho dos cards ── */
 #heroCard .balao{ width:100% !important; margin:0 !important; border:0 !important; background:transparent !important;
@@ -217,7 +217,7 @@
   border:0; border-radius:clamp(18px,5.5vw,26px); background:#cfe3ea; display:flex; flex-direction:column;
   align-items:flex-start; text-align:left; cursor:pointer;
   padding:clamp(16px,5vw,24px) clamp(16px,5vw,24px) clamp(32px,8.5vw,42px);
-  min-height:clamp(400px,120vw,520px); }
+  min-height:0; height:100%; }
 .cardCiclo .bg{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; z-index:0; }
 .cardCiclo .veu{ position:absolute; inset:0; z-index:1; }
 .cardCiclo .veu::before{ content:''; position:absolute; left:0; right:0; top:0; height:28%;
@@ -269,6 +269,18 @@
   #heroCard .balao{ order:3; }
 }
 
+
+/* ── altura: o card ocupa o que sobra da tela, entre o Status e o dock ──
+   --alturaCiclo é calculada em JS a cada abertura e a cada giro de tela (medida real,
+   incluindo a barra do navegador, que muda de altura ao rolar no Android). */
+@media(max-width:640px){
+  #heroCard .avisoCard{ height:var(--alturaCiclo, 58vh); min-height:300px; }
+  #heroCard .avisoTrack{ height:100%; }
+  .cardCiclo{ height:100%; }
+  #heroCard .avisoDots{ bottom:8px; }
+  /* sobra de espaço: o Início não rola mais atrás do dock */
+  #main-content{ padding-bottom:0 !important; }
+}
 /* ── tablet e desktop: card central em destaque ── */
 @media(min-width:641px){
   #heroCard{ zoom:1 !important; display:block !important; grid-template-columns:none !important;
@@ -348,7 +360,7 @@
       <button class="btnTurma" onclick="abrirModalEntrarTurma()">Entrar</button>
     </div>
 
-    <div class="sec"><span class="secL"><span class="bar"></span>Para a sua melhoria</span></div>
+    <div class="sec" id="secMelhoria"><span class="secL"><span class="bar"></span>Para a sua melhoria</span></div>
     <p id="subMelhoria" style="font-size:.62rem;color:var(--muted);margin:-.3rem 0 .55rem .55rem;">muda conforme você evolui</p>
     <div class="carrA" id="gradeMelhoria">
       <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">📚</div><h4>Repertório da semana</h4><p>no Hub de Preparação</p></div>
@@ -357,7 +369,7 @@
       <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">✨</div><h4>Materiais para você</h4><p>da sua professora ou da PROfa</p></div>
     </div>
 
-    <div class="sec"><span class="secL"><span class="bar"></span>Aprenda com a RedaON</span></div>
+    <div class="sec" id="secVitrine"><span class="secL"><span class="bar"></span>Aprenda com a RedaON</span></div>
     <div class="carrVit" style="margin-bottom:1rem;">
       <div class="vCard" onclick="mostrarEmBreve('A estrutura da redação ENEM')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#2d6a4f,#1b4332);"><span class="vBadge">Base</span><div class="vTitle">A estrutura da redação ENEM</div></div></div>
       <div class="vCard" onclick="mostrarEmBreve('Correção Guiada')"><span class="emBreve">EM BREVE</span><div class="vThumb" style="background:linear-gradient(135deg,#6c5ce7,#4a3fb0);"><span class="vBadge">Correção Guiada</span><div class="vTitle">O que o corretor considera em cada competência</div></div></div>
@@ -840,6 +852,19 @@
     }, { passive:true });
     marcarCentro();
   }
+
+  /* mede o espaço livre para o card: tela real − cabeçalho − nome − Status − dock − respiro */
+  function medirCiclo(){
+    if (!window.matchMedia('(max-width:640px)').matches) { document.documentElement.style.removeProperty('--alturaCiclo'); return; }
+    var alt = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    function h(sel){ var e=document.querySelector(sel); return e ? e.getBoundingClientRect().height : 0; }
+    var usado = h('.hApp') + h('#heroCard .hcCab') + h('#heroCard .hcStatus') + h('#barraInferior') + 26;
+    var livre = Math.max(300, Math.round(alt - usado));
+    document.documentElement.style.setProperty('--alturaCiclo', livre + 'px');
+    if (typeof marcarCentro === 'function') marcarCentro();
+  }
+  window.addEventListener('resize', medirCiclo);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', medirCiclo);
   function cardsNaTela(){ return Array.prototype.slice.call(document.querySelectorAll('.cardCiclo')); }
   function marcarCentro(){
     var track = document.getElementById('avisoTrack'), dots = document.getElementById('avisoDots');
@@ -1150,7 +1175,7 @@
         { chave:'evolucao', emo:'\u{1F4C8}', img:'card-evolucao.webp', tt:'Sua evolu\u00e7\u00e3o',
           frase: totalRedacoes > 1 ? ((evolucao >= 0 ? '+' : '') + evolucao + ' pontos desde a \u00faltima')
                                    : 'Sua evolu\u00e7\u00e3o come\u00e7a agora',
-          apoio: totalRedacoes ? (totalRedacoes + ' reda\u00e7\u00e3o' + (totalRedacoes > 1 ? '\u00f5es enviadas' : ' enviada') + ' \u00b7 m\u00e9dia ' + media + (focoTxt ? ' \u00b7 refor\u00e7e a ' + focoTxt : ''))
+          apoio: totalRedacoes ? (totalRedacoes + (totalRedacoes > 1 ? ' reda\u00e7\u00f5es enviadas' : ' reda\u00e7\u00e3o enviada') + ' \u00b7 m\u00e9dia ' + media + (focoTxt ? ' \u00b7 reforce a ' + focoTxt : ''))
                               : 'cada reda\u00e7\u00e3o enviada vira um ponto no seu gr\u00e1fico',
           cta:'Ver evolu\u00e7\u00e3o', rod: melhorNota ? ('sua melhor: ' + melhorNota) : '', url:'evolucao.html' }
       ];

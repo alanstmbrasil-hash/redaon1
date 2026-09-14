@@ -224,3 +224,21 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 .modalTopo h3 { font-weight:800; color:var(--text); font-size:.95rem; }
 .modalCorpo { padding:1.25rem; }
 .btnFecharX { background:none; border:none; color:var(--muted); cursor:pointer; display:flex; }
+
+/* ═══ v6-3 · mais espaço vertical no celular e no tablet vertical (14/09/2026) ═══
+   O cabeçalho do app sai abaixo de 1024px: o dock já diz onde o aluno está, e o próprio
+   título da página repetia a informação. Telas de dentro do "Mais" ganham a linha .pgHead,
+   com seta de voltar (o Safari do iPhone não tem botão do sistema), ícone igual ao do menu e título. */
+.pgHead{ display:none; align-items:center; gap:.45rem; margin:0 0 .7rem; }
+.pgHead .pgVoltar{ width:34px; height:34px; flex:none; border:1px solid rgba(var(--borderRGB),.18);
+  background:var(--surface); color:var(--text); border-radius:50%; font-size:20px; line-height:1;
+  font-family:inherit; cursor:pointer; display:grid; place-items:center; padding:0 2px 2px 0; }
+.pgHead .pgIco{ font-size:19px; line-height:1; }
+.pgHead .pgTit{ font-size:1.05rem; font-weight:800; color:var(--text); }
+@media(max-width:1023px){
+  .hApp{ display:none !important; }
+  .pgHead{ display:flex; }
+  /* títulos repetidos das telas: a .pgHead já os diz */
+  html.temPgHead .evoCabeca h1, html.temPgHead .tituloTela{ display:none !important; }
+  html.temPgHead .evoCabeca{ margin-top:-.2rem; }
+}
