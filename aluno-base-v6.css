@@ -252,8 +252,8 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 }
 
 /* ═══ v6-4 · o "ON" de "Você ON" segue o logotipo da RedaON ═══
-   A cor exata do logotipo não está registrada no sistema de design; --marcaON é o ponto
+   O ON usa o ciano da casa, o mesmo do "Escrever" no dock; --marcaON é o ponto
    único de troca (hoje usa o dourado da paleta). Mudando aqui, muda em toda a RedaON. */
-:root{ --marcaON:var(--gold); }
-html[data-tema="claro"]{ --marcaON:var(--gold); }
+:root{ --marcaON:var(--cyan); }            /* mesma cor do "Escrever" do dock e do ON do logotipo */
+html[data-tema="claro"]{ --marcaON:var(--cyan); }
 .marcaON{ color:var(--marcaON); font-weight:900; letter-spacing:.01em; }

@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v5-3</title>
-<!-- RedaON · Portal do Aluno · Início · v5-3 · sobre aluno-base-v6 -->
-<!-- v5-3 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
+<title>RedaON | Início v5-4</title>
+<!-- RedaON · Portal do Aluno · Início · v5-4 · sobre aluno-base-v6 -->
+<!-- v5-4 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
 <!-- v4-10 (07/09/2026): celular: personagem cabe pela largura do slot (sem corte), balão sem ícone e mais estreito, saudação sem ✍️ e limitada à esquerda do personagem; tablet em pé: balão e slot reaproximados -->
 <!-- v4-8 (07/09/2026): galeria com 7 personagens (Ben, Alice, Profa. Blanche Oiê, Profa. Blanche Sorrindo, Corretor, Reescritor, Feliz) -->
 <!-- v4-7 (07/09/2026): desktop/tablet deitado em duas colunas de grid: esquerda = saudação + balão + Seu Status; direita = personagem do topo ao pé do status (380px). Sem sobreposição, sem buraco entre balão e status -->
@@ -229,6 +229,7 @@
 .cardCiclo .emo{ display:grid; place-items:center; width:clamp(34px,9.5vw,42px); height:clamp(34px,9.5vw,42px); flex:none;
   font-size:clamp(20px,5.6vw,25px); line-height:1; border-radius:12px; background:rgba(255,255,255,.86);
   box-shadow:0 2px 8px rgba(0,0,0,.18); }
+.cardCiclo .tt .onCard{ color:#7ef0f1; font-weight:900; text-shadow:0 1px 2px rgba(0,0,0,.72); }
 .cardCiclo .tt{ margin:0; font-size:clamp(13px,3.9vw,16px); font-weight:800; color:#fff;
   text-shadow:0 1px 2px rgba(0,0,0,.70), 0 2px 10px rgba(0,0,0,.55); }
 .cardCiclo .frase{ position:relative; z-index:2; margin:0 0 clamp(6px,2vw,10px); max-width:14ch;
@@ -842,7 +843,7 @@
       + '<img class="bg" src="img/' + c.img + '" alt="" loading="' + (i === 0 ? 'eager' : 'lazy') + '"/>'
       + '<span class="veu"></span>'
       + (c.selo ? '<span class="selo">' + escapeHtmlSimples(c.selo) + '</span>' : '')
-      + '<div class="top"><span class="emo">' + c.emo + '</span><p class="tt">' + (typeof rotuloON === 'function' ? rotuloON(escapeHtmlSimples(c.tt)) : escapeHtmlSimples(c.tt)) + '</p></div>'
+      + '<div class="top"><span class="emo">' + c.emo + '</span><p class="tt">' + escapeHtmlSimples(c.tt).replace(/\bON\b/g, '<span class="onCard">ON</span>') + '</p></div>'
       + '<p class="frase">' + escapeHtmlSimples(c.frase) + '</p>'
       + '<p class="apoio">' + escapeHtmlSimples(c.apoio) + '</p>'
       + '<span class="espaco"></span>'
@@ -1223,7 +1224,8 @@
       if (!turmas || turmas.length === 0) {
         if (indicador) indicador.classList.add('hidden');
         if (indicadorM) indicadorM.classList.add('hidden');
-        if (banner) banner.classList.remove('hidden');
+        /* v5-4: o convite virou o primeiro card do carrossel — a faixa antiga sai de cena */
+        if (banner) banner.classList.add('hidden');
       } else {
         var principais = turmas.slice(0, 2).map(function(t){
           var escola = t.escolas && t.escolas.nome ? t.escolas.nome : '';
