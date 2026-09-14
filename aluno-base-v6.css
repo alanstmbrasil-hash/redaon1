@@ -229,16 +229,12 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
    O cabeçalho do app sai abaixo de 1024px: o dock já diz onde o aluno está, e o próprio
    título da página repetia a informação. Telas de dentro do "Mais" ganham a linha .pgHead,
    com seta de voltar (o Safari do iPhone não tem botão do sistema), ícone igual ao do menu e título. */
-.pgHead{ display:none; align-items:center; gap:.45rem; margin:0 0 .7rem; padding-top:.35rem; }
-/* v6-5: a linha da página precisa do mesmo respiro em toda tela. Algumas telas redefinem
-   o #conteudo com padding-top zero (o Plano faz isso) e a linha encostava no alto,
-   enquanto a Evolução, que usa o padrão da casa, respirava. Aqui a medida é uma só. */
-@media(max-width:1023px){ .pgHead{ margin-top:.65rem; } }
+.pgHead{ display:none; align-items:center; gap:.45rem; margin:0 0 .7rem; }
 .pgHead .pgVoltar{ width:34px; height:34px; flex:none; border:1px solid rgba(var(--borderRGB),.18);
   background:var(--surface); color:var(--text); border-radius:50%; font-size:20px; line-height:1;
   font-family:inherit; cursor:pointer; display:grid; place-items:center; padding:0 2px 2px 0; }
-.pgHead .pgIco{ font-size:19px; line-height:1; width:22px; text-align:center; flex:none; }
-.pgHead .pgTit{ font-size:1.2rem; font-weight:800; color:var(--text); line-height:1.2; letter-spacing:-.01em; }
+.pgHead .pgIco{ font-size:19px; line-height:1; }
+.pgHead .pgTit{ font-size:1.05rem; font-weight:800; color:var(--text); }
 @media(max-width:1023px){
   .hApp{ display:none !important; }
   .pgHead{ display:flex; }
