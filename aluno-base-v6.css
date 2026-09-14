@@ -56,9 +56,9 @@ button { font-family:inherit; }
   #sidebar.mini ~ #main-content { margin-left:62px; }
   #btnHamburger { display:none !important; }
 }
-@media(max-width:1023px){ #main-content { margin-left:0; } #sidebar { display:none !important; } #overlay { display:none !important; } }
-/* v6 · 07/09/2026: abaixo de 1024px a sidebar não existe, então o ☰ abria nada; o menu é o "Mais" do rodapé */
-@media(max-width:1023px){ #btnHamburger { display:none !important; } }
+@media(max-width:1023px){ #main-content { margin-left:0; } #sidebar { display:none !important; } #overlay { display:none !important; }
+  /* 14/09/2026: abaixo de 1024px a barra lateral não existe — o botão de menu abria uma gaveta vazia. Sai do cabeçalho. */
+  #btnHamburger { display:none !important; } }
 .sideLogo { display:flex; align-items:center; gap:.55rem; padding:.25rem .5rem .75rem; white-space:nowrap; }
 .sideLogo .lg { width:30px;height:30px;border-radius:9px;background:var(--cyan);color:var(--onCyan);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;flex:0 0 auto;cursor:pointer;font-style:italic; }
 .sideLogo .nm { font-size:1.05rem;font-weight:900;font-style:italic;letter-spacing:-.04em;color:var(--text); }

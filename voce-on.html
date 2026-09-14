@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RedaON | Você ON · v1-0</title>
+<script>
+(function(){ var p='auto'; try{ p=localStorage.getItem('redaon-tema')||'auto'; }catch(e){}
+ var e=p; if(p==='auto'){ var c=false; try{ c=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(x){} e=c?'claro':'escuro'; }
+ document.documentElement.setAttribute('data-tema',e); document.documentElement.setAttribute('data-tema-pref',p); })();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="aluno-base-v6.css" rel="stylesheet"/>
+<style>
+/* ══ Você ON · acervo em vídeo ══
+   Gramática emprestada do YouTube: chips de trilha rolando na horizontal, carrossel de
+   "continue de onde parou", lista vertical compacta com miniatura à esquerda e duração no canto.
+   O que NÃO copiamos: sugestões, shorts, canal, próximo vídeo — o aluno vem estudar e voltar. */
+.chips{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin:0 -1rem 14px; padding:2px 1rem 2px; }
+.chips::-webkit-scrollbar{ display:none; }
+.chip{ flex:0 0 auto; border:1px solid rgba(var(--borderRGB),.22); background:var(--surface2); color:var(--text2);
+  border-radius:9px; padding:8px 14px; font-size:13px; font-weight:700; font-family:inherit; white-space:nowrap; }
+.chip.on{ background:var(--cyan); color:var(--onCyan); border-color:var(--cyan); }
+
+.secTit{ display:flex; align-items:baseline; justify-content:space-between; margin:18px 0 10px; }
+.secTit h2{ margin:0; font-size:15px; font-weight:800; color:var(--text); }
+.secTit span{ font-size:12px; color:var(--muted); }
+
+/* continue de onde parou — carrossel, miniatura 16:9 */
+.carr{ display:flex; gap:12px; overflow-x:auto; scrollbar-width:none; margin:0 -1rem; padding:0 1rem 6px; }
+.carr::-webkit-scrollbar{ display:none; }
+.vGrande{ flex:0 0 74%; }
+.vGrande .cap{ width:100%; aspect-ratio:16/9; border-radius:14px; }
+.vGrande h3{ margin:8px 0 2px; font-size:14px; font-weight:700; line-height:1.3; color:var(--text); }
+.vGrande p{ margin:0; font-size:11.5px; color:var(--muted); }
+
+/* lista compacta — miniatura à esquerda */
+.lista{ display:flex; flex-direction:column; gap:12px; }
+.vItem{ display:flex; gap:11px; align-items:flex-start; cursor:pointer; }
+.vItem .cap{ flex:0 0 132px; aspect-ratio:16/9; border-radius:11px; }
+.vItem .txt{ flex:1; min-width:0; padding-top:1px; }
+.vItem h3{ margin:0 0 3px; font-size:13.5px; font-weight:700; line-height:1.32; color:var(--text);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.vItem p{ margin:0; font-size:11.5px; color:var(--muted); line-height:1.4; }
+
+/* capa: miniatura do YouTube no arquivo real; aqui, marca d'água com play e duração */
+.cap{ position:relative; overflow:hidden; background:linear-gradient(140deg, rgba(var(--cyanRGB),.22), rgba(var(--purpleRGB),.16)); display:grid; place-items:center; }
+.cap.b{ background:linear-gradient(140deg, rgba(var(--cyanRGB),.26), rgba(var(--cyanRGB),.10)); }
+.cap.c{ background:linear-gradient(140deg, rgba(var(--purpleRGB),.24), rgba(var(--purpleRGB),.09)); }
+.cap.a{ background:linear-gradient(140deg, rgba(var(--goldRGB),.22), rgba(var(--orangeRGB),.12)); }
+.cap.r{ background:linear-gradient(140deg, rgba(var(--greenRGB),.22), rgba(var(--greenRGB),.08)); }
+.cap .mini{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.cap .play{ position:relative; z-index:2;  width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.92); display:grid; place-items:center;
+  box-shadow:0 2px 10px rgba(0,0,0,.18); }
+.cap .play svg{ width:17px; height:17px; margin-left:2px; color:#0a4a4b; }
+.cap .dur{ position:absolute; right:6px; bottom:6px; background:rgba(0,0,0,.74); color:#fff; font-size:10.5px;
+  font-weight:700; padding:2px 6px; border-radius:6px; letter-spacing:.02em; }
+.cap .barra{ position:absolute; left:0; right:0; bottom:0; height:3px; background:rgba(0,0,0,.25); }
+.cap .barra i{ display:block; height:100%; background:var(--cyan); }
+.selo{ display:inline-block; font-size:10px; font-weight:800; padding:2px 7px; border-radius:7px;
+  background:rgba(var(--cyanRGB),.14); color:var(--cyan); margin-right:6px; }
+.vazio{ font-size:12.5px; color:var(--muted); padding:14px 2px; }
+
+/* player: só carrega ao tocar (no arquivo real, o iframe do YouTube entra aqui) */
+.telaVideo{ position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.88); display:none; flex-direction:column; }
+.telaVideo.on{ display:flex; }
+.telaVideo .topo{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:#fff; }
+.telaVideo .topo button{ background:transparent; border:0; color:#fff; font-size:22px; font-family:inherit; line-height:1; }
+.telaVideo .topo b{ font-size:14px; font-weight:700; }
+.telaVideo .quadro{ width:100%; aspect-ratio:16/9; background:#000; display:grid; place-items:center; color:#8ea; font-size:13px; }
+.telaVideo .desc{ color:rgba(255,255,255,.8); font-size:12.5px; padding:14px; line-height:1.5; }
+@media(min-width:641px){
+  .vGrande{ flex:0 0 320px; } .vItem .cap{ flex:0 0 180px; } .vItem h3{ font-size:15px; } .vItem p{ font-size:12.5px; }
+  .telaVideo .quadro{ max-width:900px; margin:0 auto; }
+}
+</style>
+</head>
+<body>
+<div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
+  <div id="conteudo">
+
+    <div class="chips" id="chips"></div>
+    <div id="corpo"></div>
+
+  </div>
+</div>
+
+<div class="telaVideo" id="telaVideo">
+  <div class="topo"><button onclick="fecharVideo()">&#10005;</button><b id="vTit"></b></div>
+  <div class="quadro" id="vQuadro">aqui entra o player do YouTube</div>
+  <p class="desc" id="vDesc"></p>
+</div>
+
+<script src="supabase-auth.js"></script>
+<script src="aluno-base-v6.js"></script>
+<script>
+montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'smart_display', sino:true, versao:'aluno · você on · mockup v1' });
+
+var TRILHAS=[
+ {id:'todos', nome:'Todos'},
+ {id:'base', nome:'Base', sub:'a estrutura da redação, competência a competência'},
+ {id:'correcao', nome:'Correção Guiada', sub:'uma redação corrigida na sua frente'},
+ {id:'aposta', nome:'Aposta da Semana', sub:'por que este tema, e como atacá-lo'},
+ {id:'rota', nome:'Rota 1.000', sub:'construindo a redação com o material das trilhas'}
+];
+var VIDEOS=[];
+var filtro='todos';
+var PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+function capa(v,grande){
+  var mini = v.yt ? '<img class="mini" src="https://i.ytimg.com/vi/'+v.yt+'/hqdefault.jpg" alt="" loading="lazy"/>' : '';
+  return '<div class="cap '+v.cap+(grande?' g':'')+'">'+mini+'<span class="play">'+PLAY+'</span>'
+    +''+(v.dur?'<span class="dur">'+v.dur+'</span>':'')+''
+    +(v.progresso?'<span class="barra"><i style="width:'+v.progresso+'%"></i></span>':'')+'</div>';
+}
+function nomeTrilha(id){ for(var i=0;i<TRILHAS.length;i++) if(TRILHAS[i].id===id) return TRILHAS[i].nome; return ''; }
+function item(v,i){
+  return '<div class="vItem" onclick="abrirVideo('+i+')">'+capa(v)
+    +'<div class="txt"><h3>'+(v.novo?'<span class="selo">novo</span>':'')+v.tit+'</h3>'
+    +'<p>'+nomeTrilha(v.t)+' \u00b7 '+v.dur+(v.progresso?' \u00b7 faltam '+(100-v.progresso)+'%':'')+'</p></div></div>';
+}
+function montar(){
+  document.getElementById('chips').innerHTML=TRILHAS.map(function(t){
+    return '<button class="chip'+(filtro===t.id?' on':'')+'" onclick="filtrar(\''+t.id+'\')">'+t.nome+'</button>';
+  }).join('');
+  var h='';
+  var emCurso=VIDEOS.map(function(v,i){ return {v:v,i:i}; }).filter(function(x){ return x.v.progresso; });
+  if(filtro==='todos' && emCurso.length){
+    h+='<div class="secTit"><h2>Continue de onde parou</h2></div><div class="carr">'
+      +emCurso.map(function(x){
+        return '<div class="vGrande" onclick="abrirVideo('+x.i+')">'+capa(x.v,true)
+          +'<h3>'+x.v.tit+'</h3><p>'+nomeTrilha(x.v.t)+' \u00b7 faltam '+(100-x.v.progresso)+'%</p></div>';
+      }).join('')+'</div>';
+  }
+  var trilhas = filtro==='todos' ? TRILHAS.slice(1) : TRILHAS.filter(function(t){ return t.id===filtro; });
+  trilhas.forEach(function(t){
+    var lista=VIDEOS.map(function(v,i){ return {v:v,i:i}; }).filter(function(x){ return x.v.t===t.id; });
+    h+='<div class="secTit"><h2>'+t.nome+'</h2><span>'+lista.length+' v\u00eddeo'+(lista.length===1?'':'s')+'</span></div>';
+    h+= lista.length ? '<div class="lista">'+lista.map(function(x){ return item(x.v,x.i); }).join('')+'</div>'
+                     : '<p class="vazio">Em breve. A Profa. Blanche est\u00e1 gravando.</p>';
+    if(t.sub) h=h.replace('<span>'+lista.length,'<span>'+lista.length);
+  });
+  document.getElementById('corpo').innerHTML=h;
+}
+function filtrar(id){ filtro=id; montar(); window.scrollTo({top:0,behavior:'smooth'}); }
+function abrirVideo(i){
+  var v=VIDEOS[i];
+  document.getElementById('vTit').textContent=v.tit;
+  document.getElementById('vDesc').textContent=v.desc;
+  var q=document.getElementById('vQuadro');
+  q.innerHTML = v.yt ? '<iframe src="https://www.youtube-nocookie.com/embed/'+v.yt+'?rel=0&modestbranding=1&playsinline=1&autoplay=1" title="'+(v.tit||'').replace(/"/g,'')+'" frameborder="0" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:0;"></iframe>' : 'v\u00eddeo indispon\u00edvel';
+  document.getElementById('telaVideo').classList.add('on');
+}
+function fecharVideo(){ document.getElementById('telaVideo').classList.remove('on'); document.getElementById('vQuadro').innerHTML=''; /* descarrega o player */ }
+
+/* ── carrega os vídeos publicados (materiais tipo='video'), na trilha e na ordem do banco ── */
+function idYoutube(url){
+  var m = String(url||'').match(/(?:youtu\.be\/|v=|\/shorts\/|\/embed\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+async function carregar(){
+  try{
+    var res = await dbFetch(SUPABASE_URL+'/rest/v1/materiais?tipo=eq.video&publicado=eq.true&select=id,nome,conteudo,arquivo_url,trilha,competencia,tema_id,criado_em&order=criado_em.desc', {});
+    if(!res.ok) throw new Error('falha ao carregar');
+    var linhas = await res.json();
+    VIDEOS = linhas.map(function(m){
+      return { id:m.id, t:m.trilha||'base', yt:idYoutube(m.arquivo_url), tit:m.nome||'', desc:m.conteudo||'',
+               dur:'', cap:({base:'b',correcao:'c',aposta:'a',rota:'r'})[m.trilha]||'b',
+               novo:(new Date() - new Date(m.criado_em)) < 7*864e5 };
+    }).filter(function(v){ return v.yt; });
+  }catch(e){ console.warn('[você on]', e); VIDEOS=[]; }
+  montar();
+}
+carregar();
+</script>
+</body>
+</html>

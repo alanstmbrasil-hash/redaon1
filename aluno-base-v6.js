@@ -198,7 +198,7 @@ function montarEsqueleto(cfg) {
         '<p class="nav-section-label"><span>Mais</span></p>' +
         '<a class="nav-item" href="evolucao.html" title="Evolu\u00e7\u00e3o"><i class="em">\u{1F4C8}</i><span class="tx">Evolu\u00e7\u00e3o</span></a>' +
         '<a class="nav-item" href="plano.html" title="Plano de estudos"><i class="em">\u{1F4C5}</i><span class="tx">Plano de estudos</span></a>' +
-        '<a class="' + navClasse('estudio') + '" href="estudio.html" title="Est\u00fadio"><i class="em">\u{1F4D6}</i><span class="tx">Est\u00fadio</span></a>' +
+        '<a class="' + navClasse('voce-on') + '" href="voce-on.html" title="Voc\u00ea ON"><i class="em">\u{1F3AC}</i><span class="tx">Voc\u00ea ON</span></a>' +
         '<p class="nav-section-label"><span>Conta</span></p>' +
         '<a class="nav-item" href="configuracoes.html" title="Configura\u00e7\u00f5es"><i class="em">\u2699\uFE0F</i><span class="tx">Configura\u00e7\u00f5es</span></a>' +
         '<a class="nav-item" onclick="authLogout()" style="cursor:pointer;color:var(--red);margin-top:.3rem;" title="Sair"><i class="em">\u{1F6AA}</i><span class="tx">Sair</span></a>' +
@@ -243,7 +243,7 @@ function montarEsqueleto(cfg) {
       '<p class="tit">Mais</p>' +
       '<a class="pill" href="evolucao.html"><i class="pemoji">\u{1F4C8}</i>Evolu\u00e7\u00e3o<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="plano.html"><i class="pemoji">\u{1F4C5}</i>Plano de estudos<i class="fim">\u203A</i></a>' +
-      '<a class="pill" href="estudio.html"><i class="pemoji">\u{1F4D6}</i>Est\u00fadio<i class="fim">\u203A</i></a>' +
+      '<a class="pill" href="voce-on.html"><i class="pemoji">\u{1F3AC}</i>Voc\u00ea ON<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="configuracoes.html"><i class="pemoji">\u2699\uFE0F</i>Configura\u00e7\u00f5es<i class="fim">\u203A</i></a>' +
       '<a class="pill" style="color:var(--red);" onclick="authLogout()"><i class="pemoji">\u{1F6AA}</i>Sair</a>' +
     '</div>' +
