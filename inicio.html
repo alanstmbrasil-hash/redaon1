@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v5-1</title>
-<!-- RedaON · Portal do Aluno · Início · v5-1 · sobre aluno-base-v6 -->
-<!-- v5-1 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
+<title>RedaON | Início v5-3</title>
+<!-- RedaON · Portal do Aluno · Início · v5-3 · sobre aluno-base-v6 -->
+<!-- v5-3 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
 <!-- v4-10 (07/09/2026): celular: personagem cabe pela largura do slot (sem corte), balão sem ícone e mais estreito, saudação sem ✍️ e limitada à esquerda do personagem; tablet em pé: balão e slot reaproximados -->
 <!-- v4-8 (07/09/2026): galeria com 7 personagens (Ben, Alice, Profa. Blanche Oiê, Profa. Blanche Sorrindo, Corretor, Reescritor, Feliz) -->
 <!-- v4-7 (07/09/2026): desktop/tablet deitado em duas colunas de grid: esquerda = saudação + balão + Seu Status; direita = personagem do topo ao pé do status (380px). Sem sobreposição, sem buraco entre balão e status -->
@@ -214,7 +214,8 @@
 
 /* ── o card ── */
 .cardCiclo{ flex:0 0 100%; scroll-snap-align:center; scroll-snap-stop:always; position:relative; overflow:hidden;
-  border:0; border-radius:clamp(18px,5.5vw,26px); background:#cfe3ea; display:flex; flex-direction:column;
+  border:0; border-radius:clamp(18px,5.5vw,26px);
+  background:linear-gradient(160deg, rgba(var(--cyanRGB),.30), rgba(var(--purpleRGB),.22)); display:flex; flex-direction:column;
   align-items:flex-start; text-align:left; cursor:pointer;
   padding:clamp(16px,5vw,24px) clamp(16px,5vw,24px) clamp(32px,8.5vw,42px);
   min-height:0; height:100%; }
@@ -270,16 +271,18 @@
 }
 
 
-/* ── altura: o card ocupa o que sobra da tela, entre o Status e o dock ──
-   --alturaCiclo é calculada em JS a cada abertura e a cada giro de tela (medida real,
-   incluindo a barra do navegador, que muda de altura ao rolar no Android). */
+/* ── altura do card (14/09/2026) ──
+   Antes: media pelo visualViewport e remedia a cada aparecer/sumir da barra do navegador —
+   o card "respirava" e obrigava o olho a se readaptar. Agora: mede UMA vez na abertura
+   (e só de novo ao girar o aparelho) e congela. O dock é espaço ocupado, nunca sobreposto.
+   Padrão Discover/Samsung Health: o card cresce entre um mínimo e um máximo; o que sobrar
+   em tela grande vira respiro entre o Status e o card, sem esticar a ilustração. */
 @media(max-width:640px){
-  #heroCard .avisoCard{ height:var(--alturaCiclo, 58vh); min-height:300px; }
+  #heroCard .avisoCard{ height:var(--alturaCiclo, 56svh); min-height:300px; max-height:560px;
+    margin-top:auto; margin-bottom:auto; }
   #heroCard .avisoTrack{ height:100%; }
   .cardCiclo{ height:100%; }
   #heroCard .avisoDots{ bottom:8px; }
-  /* sobra de espaço: o Início não rola mais atrás do dock */
-  #main-content{ padding-bottom:0 !important; }
 }
 /* ── tablet e desktop: card central em destaque ── */
 @media(min-width:641px){
@@ -813,7 +816,7 @@
         apoio:'material de apoio com fonte, para estudar antes de escrever',
         cta: temaSem ? 'Preparar' : 'Ver temas', rod:'15 minutos por dia',
         url: temaSem ? ('hub-preparacao.html?tema=' + encodeURIComponent(temaSem.id)) : 'temas.html' },
-      { emo:'\u270D\uFE0F', img:'card-vamos.webp', tt:'Vamos l\u00e1!', frase:'Sua primeira reda\u00e7\u00e3o',
+      { emo:'\u270D\uFE0F', img:'card-blanche.webp', tt:'Vamos l\u00e1!', frase:'Sua primeira reda\u00e7\u00e3o',
         apoio:'escreva, tire uma foto ou digite \u2014 a corre\u00e7\u00e3o sai em segundos',
         cta:'Come\u00e7ar agora', rod:'', url:'nova-redacao.html?metodo=digitar' + (temaSem ? '&tema=' + encodeURIComponent(temaSem.id) : '') },
       { emo:'\u{1F4DD}', img:'card-redacao.webp', tt:'Sua reda\u00e7\u00e3o', frase:'A corre\u00e7\u00e3o aparece aqui',
@@ -824,6 +827,12 @@
       { emo:'\u{1F4C8}', img:'card-evolucao.webp', tt:'Sua evolu\u00e7\u00e3o', frase:'Sua evolu\u00e7\u00e3o come\u00e7a agora',
         apoio:'cada reda\u00e7\u00e3o enviada vira um ponto no seu gr\u00e1fico', cta:'Ver evolu\u00e7\u00e3o', rod:'', url:'evolucao.html' }
     ];
+    var semTurma = false;
+    try { var ts = await dbGetMinhasTurmas(); semTurma = !(ts && ts.length); } catch(e) {}
+    if (semTurma) CICLO.unshift({ emo:'\u{1F3EB}', img:'card-blanche.webp', tt:'Sua turma',
+      frase:'A Profa. Blanche est\u00e1 te esperando',
+      apoio:'use o c\u00f3digo que sua professora passou para entrar na turma',
+      cta:'Entrar', rod:'leva 10 segundos', url:'configuracoes.html#turma' });
     montarCiclo();
   }
 
@@ -833,7 +842,7 @@
       + '<img class="bg" src="img/' + c.img + '" alt="" loading="' + (i === 0 ? 'eager' : 'lazy') + '"/>'
       + '<span class="veu"></span>'
       + (c.selo ? '<span class="selo">' + escapeHtmlSimples(c.selo) + '</span>' : '')
-      + '<div class="top"><span class="emo">' + c.emo + '</span><p class="tt">' + escapeHtmlSimples(c.tt) + '</p></div>'
+      + '<div class="top"><span class="emo">' + c.emo + '</span><p class="tt">' + (typeof rotuloON === 'function' ? rotuloON(escapeHtmlSimples(c.tt)) : escapeHtmlSimples(c.tt)) + '</p></div>'
       + '<p class="frase">' + escapeHtmlSimples(c.frase) + '</p>'
       + '<p class="apoio">' + escapeHtmlSimples(c.apoio) + '</p>'
       + '<span class="espaco"></span>'
@@ -853,18 +862,26 @@
     marcarCentro();
   }
 
-  /* mede o espaço livre para o card: tela real − cabeçalho − nome − Status − dock − respiro */
-  function medirCiclo(){
-    if (!window.matchMedia('(max-width:640px)').matches) { document.documentElement.style.removeProperty('--alturaCiclo'); return; }
-    var alt = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-    function h(sel){ var e=document.querySelector(sel); return e ? e.getBoundingClientRect().height : 0; }
-    var usado = h('.hApp') + h('#heroCard .hcCab') + h('#heroCard .hcStatus') + h('#barraInferior') + 26;
-    var livre = Math.max(300, Math.round(alt - usado));
+  /* mede o espaço livre UMA vez; só refaz ao girar o aparelho (não na barra do navegador) */
+  var _larguraMedida = 0;
+  function medirCiclo(forcar){
+    if (!window.matchMedia('(max-width:640px)').matches) {
+      document.documentElement.style.removeProperty('--alturaCiclo'); return;
+    }
+    if (!forcar && _larguraMedida === window.innerWidth) return;   /* mesma orientação: não remede */
+    _larguraMedida = window.innerWidth;
+    /* altura ESTÁVEL da janela: ignora a barra do navegador que recolhe ao rolar */
+    var alt = Math.round(document.documentElement.clientHeight);
+    function h(sel){ var e = document.querySelector(sel); return e ? e.getBoundingClientRect().height : 0; }
+    var dock = h('#barraInferior') || 76;
+    var usado = h('#heroCard .hcCab') + h('#heroCard .hcStatus') + dock + 34;   /* 34 = respiros */
+    var livre = Math.min(560, Math.max(300, Math.round(alt - usado)));
     document.documentElement.style.setProperty('--alturaCiclo', livre + 'px');
     if (typeof marcarCentro === 'function') marcarCentro();
   }
-  window.addEventListener('resize', medirCiclo);
-  if (window.visualViewport) window.visualViewport.addEventListener('resize', medirCiclo);
+  /* só orientação muda a medida */
+  window.addEventListener('orientationchange', function(){ setTimeout(function(){ medirCiclo(true); }, 260); });
+  window.addEventListener('resize', function(){ medirCiclo(false); });
   function cardsNaTela(){ return Array.prototype.slice.call(document.querySelectorAll('.cardCiclo')); }
   function marcarCentro(){
     var track = document.getElementById('avisoTrack'), dots = document.getElementById('avisoDots');
@@ -1142,6 +1159,10 @@
       }
       var focoTxt = pareto ? pareto : null;
 
+      /* sem turma: o convite da Profa. Blanche abre o carrossel e some quando o aluno entra */
+      var semTurma = false;
+      try { var ts = await dbGetMinhasTurmas(); semTurma = !(ts && ts.length); } catch(e) {}
+
       CICLO = [
         { chave:'tema', emo:'\u{1F4DA}', img:'card-tema.webp', tt:'Tema da Semana',
           frase: temaSem ? temaSem.titulo : 'Escolha um tema para come\u00e7ar',
@@ -1150,7 +1171,7 @@
           rod: '15 minutos por dia',
           url: temaSem ? ('hub-preparacao.html?tema=' + encodeURIComponent(temaSem.id)) : 'temas.html' },
 
-        { chave:'vamos', emo:'\u270D\uFE0F', img:'card-vamos.webp', tt:'Vamos l\u00e1!',
+        { chave:'vamos', emo:'\u270D\uFE0F', img: totalRedacoes ? 'card-vamos.webp' : 'card-blanche.webp', tt:'Vamos l\u00e1!',
           frase: totalRedacoes ? 'Escrever a reda\u00e7\u00e3o da semana' : 'Sua primeira reda\u00e7\u00e3o',
           apoio: totalRedacoes ? 'voc\u00ea j\u00e1 estudou o repert\u00f3rio \u2014 agora \u00e9 com voc\u00ea'
                                : 'escreva, tire uma foto ou digite \u2014 a corre\u00e7\u00e3o sai em segundos',
@@ -1179,6 +1200,10 @@
                               : 'cada reda\u00e7\u00e3o enviada vira um ponto no seu gr\u00e1fico',
           cta:'Ver evolu\u00e7\u00e3o', rod: melhorNota ? ('sua melhor: ' + melhorNota) : '', url:'evolucao.html' }
       ];
+      if (semTurma) CICLO.unshift({ chave:'turma', emo:'\u{1F3EB}', img:'card-blanche.webp', tt:'Sua turma',
+        frase:'A Profa. Blanche est\u00e1 te esperando',
+        apoio:'use o c\u00f3digo que sua professora passou para entrar na turma',
+        cta:'Entrar', rod:'leva 10 segundos', url:'configuracoes.html#turma' });
       montarCiclo();
       preencherGrade(historico);
     } catch(e) {

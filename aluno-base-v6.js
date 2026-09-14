@@ -1,5 +1,5 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-3-1 (24/08/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-4-1 (24/08/2026)
    v6-1: Aparência sai do menu Mais e da sidebar (decisão A6 — tema em
    dois lugares: sol/lua do topo + tela Configurações). Ícones/textos
    de tema remanescentes atualizam só se existirem no DOM.
@@ -62,7 +62,7 @@ function aplicarIconeTema() {
   el = document.getElementById('txtTemaMais');    if (el) el.textContent = 'Apar\u00eancia \u00b7 ' + nome;
 }
 function alternarTema() {
-  /* v6-3: a pílula "Aparência" no menu Mais mostra o estado atual */
+  /* v6-4: a pílula "Aparência" no menu Mais mostra o estado atual */
   setTimeout(function(){ var p=document.getElementById('pillTema'); if(p){ var a=document.documentElement.getAttribute('data-tema-pref')||'auto'; p.textContent = a==='auto'?'autom\u00e1tico':(a==='claro'?'claro':'escuro'); } }, 0);
   var ordem = ['claro','escuro','auto'];
   var prox = ordem[(ordem.indexOf(temaPreferido()) + 1) % 3];
@@ -97,7 +97,7 @@ function toggleRecolher() {
   try { localStorage.setItem('redaon-menu', mini ? 'mini' : 'full'); } catch(e) {}
 }
 
-/* ─── Foco no resultado (helper compartilhado · v6-3) ───
+/* ─── Foco no resultado (helper compartilhado · v6-4) ───
    Toda escolha feita nos controles leva o resultado para a área nobre da tela,
    logo abaixo do cabeçalho. Só rola quando o resultado ainda não está visível ali
    (evita solavanco). Usado pelo Estúdio; serve Temas/Minhas Redações/Evolução. */
@@ -174,6 +174,10 @@ function toggleMetodos() {
 }
 
 /* ─── Montagem do esqueleto ─── */
+/* v6-4: "Você ON" com o ON na cor do logotipo (uma variável só: --marcaON) */
+function rotuloON(txt){
+  return String(txt || '').replace(/\bON\b/g, '<span class="marcaON">ON</span>');
+}
 function montarEsqueleto(cfg) {
   cfg = cfg || {};
   var ativo = cfg.ativo || '';
@@ -200,7 +204,7 @@ function montarEsqueleto(cfg) {
         '<p class="nav-section-label"><span>Mais</span></p>' +
         '<a class="nav-item" href="evolucao.html" title="Evolu\u00e7\u00e3o"><i class="em">\u{1F4C8}</i><span class="tx">Evolu\u00e7\u00e3o</span></a>' +
         '<a class="nav-item" href="plano.html" title="Plano de estudos"><i class="em">\u{1F4C5}</i><span class="tx">Plano de estudos</span></a>' +
-        '<a class="' + navClasse('voce-on') + '" href="voce-on.html" title="Voc\u00ea ON"><i class="em">\u{1F3AC}</i><span class="tx">Voc\u00ea ON</span></a>' +
+        '<a class="' + navClasse('voce-on') + '" href="voce-on.html" title="Voc\u00ea ON"><i class="em">\u{1F3AC}</i><span class="tx">Voc\u00ea <span class="marcaON">ON</span></span></a>' +
         '<p class="nav-section-label"><span>Conta</span></p>' +
         '<a class="nav-item" href="configuracoes.html" title="Configura\u00e7\u00f5es"><i class="em">\u2699\uFE0F</i><span class="tx">Configura\u00e7\u00f5es</span></a>' +
         '<a class="nav-item" onclick="authLogout()" style="cursor:pointer;color:var(--red);margin-top:.3rem;" title="Sair"><i class="em">\u{1F6AA}</i><span class="tx">Sair</span></a>' +
@@ -219,7 +223,7 @@ function montarEsqueleto(cfg) {
   /* Header dentro do main-content */
   var main = document.getElementById('main-content');
   if (main) {
-    /* v6-3 (14/09/2026 · decisão de Alan): ganhar espaço vertical.
+    /* v6-4 (14/09/2026 · decisão de Alan): ganhar espaço vertical.
        Abaixo de 1024px o cabeçalho do app sai — o dock já diz onde o aluno está.
        Telas que vêm do menu "Mais" (não têm aba no dock) ganham uma linha fina com
        seta de voltar (o Safari do iPhone não tem botão do sistema), o MESMO ícone do
@@ -244,7 +248,7 @@ function montarEsqueleto(cfg) {
         '<button id="btnHamburger" onclick="toggleSidebar()" aria-label="Abrir menu"><span class="material-symbols-outlined">menu</span></button>' +
         '<div style="display:flex;align-items:center;gap:.5rem;">' +
           '<span class="material-symbols-outlined" style="color:var(--cyan);font-variation-settings:\'FILL\' 1;">' + (cfg.icone || 'edit_note') + '</span>' +
-          '<h2 style="font-size:1.1rem;font-weight:800;color:var(--text);">' + (cfg.titulo || 'RedaON') + '</h2>' +
+          '<h2 style="font-size:1.1rem;font-weight:800;color:var(--text);">' + rotuloON(cfg.titulo || 'RedaON') + '</h2>' +
         '</div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:.25rem;">' +
@@ -260,7 +264,7 @@ function montarEsqueleto(cfg) {
       ph.innerHTML =
         '<button class="pgVoltar" onclick="history.length>1?history.back():(window.location.href=\'inicio.html\')" aria-label="Voltar">\u2039</button>' +
         '<span class="pgIco">' + (EMOJI_TELA[ch] || '\u{1F4C4}') + '</span>' +
-        '<span class="pgTit">' + (cfg.titulo || '') + '</span>';
+        '<span class="pgTit">' + rotuloON(cfg.titulo || '') + '</span>';
       var cont = document.getElementById('conteudo');
       if (cont) cont.insertBefore(ph, cont.firstChild);
       else main.insertBefore(ph, hd.nextSibling);
@@ -278,7 +282,7 @@ function montarEsqueleto(cfg) {
       '<p class="tit">Mais</p>' +
       '<a class="pill" href="evolucao.html"><i class="pemoji">\u{1F4C8}</i>Evolu\u00e7\u00e3o<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="plano.html"><i class="pemoji">\u{1F4C5}</i>Plano de estudos<i class="fim">\u203A</i></a>' +
-      '<a class="pill" href="voce-on.html"><i class="pemoji">\u{1F3AC}</i>Voc\u00ea ON<i class="fim">\u203A</i></a>' +
+      '<a class="pill" href="voce-on.html"><i class="pemoji">\u{1F3AC}</i>Voc\u00ea <span class="marcaON">ON</span><i class="fim">\u203A</i></a>' +
       '<a class="pill" href="configuracoes.html"><i class="pemoji">\u2699\uFE0F</i>Configura\u00e7\u00f5es<i class="fim">\u203A</i></a>' +
       '<a class="pill" onclick="alternarTema()"><i class="pemoji">\u{1F313}</i>Apar\u00eancia<span class="fim" id="pillTema" style="font-size:.72rem;color:var(--muted);"></span></a>' +
       '<a class="pill" style="color:var(--red);" onclick="authLogout()"><i class="pemoji">\u{1F6AA}</i>Sair</a>' +
