@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Início v4-11</title>
-<!-- RedaON · Portal do Aluno · Início · v4-11 · sobre aluno-base-v6 -->
-<!-- v4-11 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
+<title>RedaON | Início v5-0</title>
+<!-- RedaON · Portal do Aluno · Início · v5-0 · sobre aluno-base-v6 -->
+<!-- v5-0 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
 <!-- v4-10 (07/09/2026): celular: personagem cabe pela largura do slot (sem corte), balão sem ícone e mais estreito, saudação sem ✍️ e limitada à esquerda do personagem; tablet em pé: balão e slot reaproximados -->
 <!-- v4-8 (07/09/2026): galeria com 7 personagens (Ben, Alice, Profa. Blanche Oiê, Profa. Blanche Sorrindo, Corretor, Reescritor, Feliz) -->
 <!-- v4-7 (07/09/2026): desktop/tablet deitado em duas colunas de grid: esquerda = saudação + balão + Seu Status; direita = personagem do topo ao pé do status (380px). Sem sobreposição, sem buraco entre balão e status -->
@@ -185,6 +185,129 @@
 .enqBtns button{flex:1;min-height:46px;border-radius:.75rem;border:none;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;}
 .pillThumb{width:34px;height:34px;border-radius:50%;background:var(--surface2) center/cover no-repeat;margin-right:.6rem;flex:0 0 auto;}
 </style>
+
+<style id="inicioV5">
+/* ═══════════════════ INÍCIO v5 · CARDS DO CICLO (14/09/2026) ═══════════════════
+   Decisões fechadas com Alan:
+   · o Início responde: quem eu sou · como estou · o que devo fazer
+   · personagem sai do Início (a ilustração do card faz esse papel; Blanche e agentes ficam na correção)
+   · cinco cards do ciclo — Tema da Semana · Vamos lá! · Sua redação · Você ON · Sua evolução
+   · arranjo: ícone no canto com o título, frase grande, linha de apoio, ação e rodapé
+   · ilustração de fundo com véu MÍNIMO (só no topo e no pé, onde há texto)
+   · "Para a sua melhoria" e a vitrine saem da tela
+   · celular: um card por vez, elástico nas duas pontas
+   · tablet/desktop: card central em destaque, vizinhos menores, setas e teclado
+   ══════════════════════════════════════════════════════════════════════════ */
+
+#heroCard .hcArt{ display:none !important; }              /* personagem fora em toda largura */
+#subMelhoria, #gradeMelhoria, #tituloMelhoria,
+#tituloVitrine, #subVitrine, #carrVitrine{ display:none !important; }
+
+/* ── o balão vira o trilho dos cards ── */
+#heroCard .balao{ width:100% !important; margin:0 !important; border:0 !important; background:transparent !important;
+  border-radius:0; overflow:visible; min-height:0; }
+#heroCard .balao::before, #heroCard .balao::after{ display:none !important; }
+#heroCard .avisoCard{ position:relative; background:transparent; border:0; overflow:visible; min-height:0; }
+#heroCard .avisoTrack{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
+  -ms-overflow-style:none; overscroll-behavior-x:contain; align-items:stretch; }
+#heroCard .avisoTrack::-webkit-scrollbar{ display:none; }
+
+/* ── o card ── */
+.cardCiclo{ flex:0 0 100%; scroll-snap-align:center; scroll-snap-stop:always; position:relative; overflow:hidden;
+  border:0; border-radius:clamp(18px,5.5vw,26px); background:#cfe3ea; display:flex; flex-direction:column;
+  align-items:flex-start; text-align:left; cursor:pointer;
+  padding:clamp(16px,5vw,24px) clamp(16px,5vw,24px) clamp(32px,8.5vw,42px);
+  min-height:clamp(400px,120vw,520px); }
+.cardCiclo .bg{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center bottom; z-index:0; }
+.cardCiclo .veu{ position:absolute; inset:0; z-index:1; }
+.cardCiclo .veu::before{ content:''; position:absolute; left:0; right:0; top:0; height:28%;
+  background:linear-gradient(180deg, rgba(6,42,44,.26) 0%, rgba(6,42,44,.08) 60%, rgba(6,42,44,0) 100%); }
+.cardCiclo .veu::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:26%;
+  background:linear-gradient(0deg, rgba(6,42,44,.30) 0%, rgba(6,42,44,.08) 62%, rgba(6,42,44,0) 100%); }
+.cardCiclo .top{ display:flex; align-items:center; gap:9px; margin-bottom:clamp(10px,3vw,16px); position:relative; z-index:2; }
+.cardCiclo .emo{ display:grid; place-items:center; width:clamp(34px,9.5vw,42px); height:clamp(34px,9.5vw,42px); flex:none;
+  font-size:clamp(20px,5.6vw,25px); line-height:1; border-radius:12px; background:rgba(255,255,255,.86);
+  box-shadow:0 2px 8px rgba(0,0,0,.18); }
+.cardCiclo .tt{ margin:0; font-size:clamp(13px,3.9vw,16px); font-weight:800; color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.70), 0 2px 10px rgba(0,0,0,.55); }
+.cardCiclo .frase{ position:relative; z-index:2; margin:0 0 clamp(6px,2vw,10px); max-width:14ch;
+  font-size:clamp(19px,5.6vw,25px); font-weight:700; line-height:1.24; color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.72), 0 2px 14px rgba(0,0,0,.55); }
+.cardCiclo .apoio{ position:relative; z-index:2; margin:0; max-width:22ch; font-size:clamp(12px,3.6vw,14px);
+  line-height:1.42; color:rgba(255,255,255,.94); text-shadow:0 1px 2px rgba(0,0,0,.70), 0 2px 10px rgba(0,0,0,.50); }
+.cardCiclo .espaco{ flex:1; }
+.cardCiclo .cta{ position:relative; z-index:2; margin-top:auto; align-self:flex-start; border:0;
+  border-radius:clamp(10px,3.4vw,14px); background:rgba(255,255,255,.94); color:#0a4a4b; font-family:inherit;
+  font-weight:800; font-size:clamp(14px,4.2vw,17px); min-height:clamp(44px,13vw,56px);
+  padding:0 clamp(16px,5vw,24px); box-shadow:0 2px 10px rgba(0,0,0,.22); }
+.cardCiclo .rod{ position:relative; z-index:2; margin:clamp(8px,2.6vw,12px) 0 0; font-size:clamp(11px,3.4vw,14px);
+  color:rgba(255,255,255,.90); text-shadow:0 1px 2px rgba(0,0,0,.70); }
+.cardCiclo .selo{ position:absolute; top:clamp(14px,4vw,18px); right:clamp(14px,4vw,18px); z-index:3;
+  font-size:clamp(9px,2.8vw,11px); font-weight:900; padding:4px 9px; border-radius:9px;
+  background:rgba(255,255,255,.92); color:#0f6b3f; }
+#heroCard .avisoDots{ position:absolute; left:0; right:0; bottom:clamp(12px,3.5vw,18px); padding:0; z-index:4; }
+#heroCard .avisoDots span{ background:#dfe9ec; opacity:.55; }
+#heroCard .avisoDots span.on{ background:#fff; opacity:1; }
+#setasCiclo{ display:none; }
+
+/* ── celular ── */
+@media(max-width:640px){
+  #heroCard{ position:relative; overflow:visible; padding:0; display:flex; flex-direction:column; }
+  #heroCard .hcCab{ width:100% !important; margin:0 0 10px !important; align-items:center; order:1; }
+  #heroCard .hcNome .n{ font-size:clamp(16px,4.8vw,21px) !important; font-weight:800; }
+  #heroCard .hcNome .n span{ display:inline !important; font-size:inherit !important; }
+  #heroCard .hcNome .s{ display:none !important; }
+  #heroCard .hcStatus{ order:2; width:100% !important; margin:0 0 12px !important; padding:0 !important;
+    background:transparent; border:0; }
+  #heroCard .hcAba{ display:none !important; }
+  #heroCard .hcTiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  #heroCard .hcTile{ min-height:clamp(46px,13vw,58px); padding:8px 6px; background:var(--surface);
+    border:1px solid rgba(var(--borderRGB),.18); border-radius:13px; }
+  #heroCard .hcTile .l{ font-size:clamp(9px,2.8vw,11px); }
+  #heroCard .hcTile .tv b{ font-size:clamp(14px,4.3vw,18px); }
+  #heroCard .hcComps{ display:none !important; }
+  #heroCard .balao{ order:3; }
+}
+
+/* ── tablet e desktop: card central em destaque ── */
+@media(min-width:641px){
+  #heroCard{ zoom:1 !important; display:block !important; grid-template-columns:none !important;
+    grid-template-areas:none !important; max-width:none !important; padding:0 !important; column-gap:0 !important; }
+  #heroCard .hcCab{ width:100% !important; margin:0 0 12px !important; align-items:center; }
+  #heroCard .hcNome .n{ font-size:22px !important; } #heroCard .hcNome .n span{ font-size:22px !important; }
+  #heroCard .hcNome .s{ display:none !important; }
+  #heroCard .hcStatus{ grid-area:auto !important; width:100% !important; margin:0 0 16px !important;
+    padding:0 !important; background:transparent; border:0; }
+  #heroCard .hcAba{ display:none !important; }
+  #heroCard .hcTiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  #heroCard .hcTile{ min-height:62px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:14px; }
+  #heroCard .hcTile .l{ font-size:12px; } #heroCard .hcTile .tv b{ font-size:20px; }
+  #heroCard .hcComps{ display:none !important; }
+  #heroCard .avisoTrack{ gap:20px; align-items:center; padding:14px 0 18px; }
+  .cardCiclo{ aspect-ratio:3/4; min-height:0; border-radius:26px;
+    transition:transform .28s ease, opacity .28s ease, filter .28s ease;
+    transform:scale(.86); opacity:.55; filter:saturate(.85); }
+  .cardCiclo.centro{ transform:scale(1); opacity:1; filter:none; box-shadow:0 10px 34px rgba(0,0,0,.16); }
+  #heroCard .avisoTrack::before, #heroCard .avisoTrack::after{ content:''; flex:0 0 auto; }
+  #heroCard .avisoDots{ position:static !important; padding:10px 0 0 !important; }
+  #heroCard .avisoDots span{ background:var(--muted); opacity:.4; }
+  #heroCard .avisoDots span.on{ background:var(--cyan); opacity:1; }
+  #setasCiclo{ display:flex; justify-content:center; gap:14px; margin-top:2px; }
+  #setasCiclo button{ width:44px; height:44px; border-radius:50%; border:1px solid rgba(var(--borderRGB),.24);
+    background:var(--surface); color:var(--text); font-size:19px; font-family:inherit; cursor:pointer; line-height:1; }
+  #setasCiclo button:hover{ background:var(--surface2); }
+}
+@media(min-width:641px) and (max-width:1023px){
+  #main-content{ max-width:720px; margin-left:auto; margin-right:auto; }
+  .cardCiclo{ flex:0 0 62%; }
+  #heroCard .avisoTrack::before, #heroCard .avisoTrack::after{ width:19%; }
+}
+@media(min-width:1024px){
+  .cardCiclo{ flex:0 0 38%; }
+  #heroCard .avisoTrack::before, #heroCard .avisoTrack::after{ width:31%; }
+  #heroCard .hcNome .n{ font-size:26px !important; } #heroCard .hcNome .n span{ font-size:26px !important; }
+}
+</style>
 </head>
 <body>
 
@@ -197,7 +320,8 @@
         <div class="hcAv" id="avatarCard" onclick="abrirGaveta('gavetaCard')" title="Trocar fotos">&#129333;&#8205;&#127891;<span class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span></div>
         <div class="hcNome"><p class="n" id="saudacaoLinha">Ol&aacute;, <span style="color:var(--cyan);">Estudante</span></p><p class="s" id="linhaCard">Sua central da RedaON</p></div>
       </div>
-      <div class="balao"><div class="avisoCard" id="avisoCard"><div class="avisoTrack" id="avisoTrack"></div><div class="avisoDots" id="avisoDots"></div></div></div>
+      <div class="balao"><div class="avisoCard" id="avisoCard"><div class="avisoTrack" id="avisoTrack"></div><div class="avisoDots" id="avisoDots"></div>
+<div id="setasCiclo"><button type="button" aria-label="Card anterior">&#8249;</button><button type="button" aria-label="Próximo card">&#8250;</button></div></div></div>
       <div class="hcArt vazio" id="hcArt"><img id="hcArtImg" alt="" draggable="false"/></div>
       <div class="hcStatus" id="hcStatus">
         <p class="hcAba">Seu Status</p>
@@ -661,111 +785,118 @@
   carregarCartao();
 
   // ─── Card rotativo de avisos ───
-  function montarAvisos(itens) {
-    if (!itens || itens.length === 0) {
-      itens = [
-        { ico:'\u{1F44B}', tit:'Bem-vindo(a)', txt:'Este \u00e9 o seu espa\u00e7o de escrita no RedaON' },
-        { ico:'\u{1F58B}\uFE0F', tit:'Primeiro passo', txt:'Envie sua primeira reda\u00e7\u00e3o para ver seus dados aqui', acao:'Escrever agora', url:'nova-redacao.html?metodo=digitar' },
-        { ico:'\u{1F331}', tit:'Rumo \u00e0 nota 1000', txt:'Cada reda\u00e7\u00e3o \u00e9 um passo na sua evolu\u00e7\u00e3o' }
-      ];
-    }
-    window._ultimosAvisos = itens;
-    if (window._cardPlano) itens = [window._cardPlano].concat(itens);
-    window._avisosRender = itens;
-    var track = document.getElementById('avisoTrack');
-    var dotsBox = document.getElementById('avisoDots');
-    if (!track || !dotsBox) return;
-    track.innerHTML = itens.map(function(it, i){
-      var clicavel = !!it.url;
-      return '<div class="avisoSlide' + (clicavel ? ' acao' : '') + '"'
-        + (clicavel ? ' onclick="irAviso(' + i + ')"' : '') + '>'
-        + '<span class="avisoIco">' + it.ico + '</span><div>'
-        + '<p class="avisoTit">' + it.tit + '</p>'
-        + '<p class="avisoTxt">' + it.txt + '</p>'
-        + (it.acao ? '<p class="avisoAcao">' + it.acao + '</p>' : '') + '</div>'
-        + '</div>';
-    }).join('');
-    dotsBox.innerHTML = '';
-    for (var i = 0; i < itens.length; i++) {
-      var d = document.createElement('span');
-      if (i === 0) d.className = 'on';
-      dotsBox.appendChild(d);
-    }
-    iniciarRotacaoAvisos(itens.length);
+  function montarAvisos(itens){ /* v5: o Início não usa mais os "avisos"; os cards vêm de montarCiclo() */ }
+
+  /* ═══════════ INÍCIO v5 · os cinco cards do ciclo ═══════════
+     estudar o tema → escrever → receber a correção → reforçar → recomeçar.
+     Cada card: emoji + título · frase · linha de apoio · uma ação · rodapé objetivo.
+     Sem dado do aluno, o card entra no estado vazio (texto de convite), nunca some. */
+  var CICLO = [];
+  /* aluno sem redação: os cinco cards existem do mesmo jeito, convidando a começar */
+  async function cicloVazio(){
+    var temaSem = null; try { temaSem = await temaDaSemanaInicio(); } catch(e) {}
+    CICLO = [
+      { emo:'\u{1F4DA}', img:'card-tema.webp', tt:'Tema da Semana',
+        frase: temaSem ? temaSem.titulo : 'Escolha um tema para come\u00e7ar',
+        apoio:'material de apoio com fonte, para estudar antes de escrever',
+        cta: temaSem ? 'Preparar' : 'Ver temas', rod:'15 minutos por dia',
+        url: temaSem ? ('hub-preparacao.html?tema=' + encodeURIComponent(temaSem.id)) : 'temas.html' },
+      { emo:'\u270D\uFE0F', img:'card-vamos.webp', tt:'Vamos l\u00e1!', frase:'Sua primeira reda\u00e7\u00e3o',
+        apoio:'escreva, tire uma foto ou digite \u2014 a corre\u00e7\u00e3o sai em segundos',
+        cta:'Come\u00e7ar agora', rod:'', url:'nova-redacao.html?metodo=digitar' + (temaSem ? '&tema=' + encodeURIComponent(temaSem.id) : '') },
+      { emo:'\u{1F4DD}', img:'card-redacao.webp', tt:'Sua reda\u00e7\u00e3o', frase:'A corre\u00e7\u00e3o aparece aqui',
+        apoio:'envie sua reda\u00e7\u00e3o e veja onde ganhou e onde perdeu ponto', cta:'Escrever', rod:'',
+        url:'nova-redacao.html?metodo=digitar' },
+      { emo:'\u{1F3AC}', img:'card-voceon.webp', tt:'Voc\u00ea ON', frase:'As 5 compet\u00eancias em 6 minutos',
+        apoio:'a estrutura da reda\u00e7\u00e3o, do come\u00e7o ao fim', cta:'Assistir', rod:'Base', url:'voce-on.html' },
+      { emo:'\u{1F4C8}', img:'card-evolucao.webp', tt:'Sua evolu\u00e7\u00e3o', frase:'Sua evolu\u00e7\u00e3o come\u00e7a agora',
+        apoio:'cada reda\u00e7\u00e3o enviada vira um ponto no seu gr\u00e1fico', cta:'Ver evolu\u00e7\u00e3o', rod:'', url:'evolucao.html' }
+    ];
+    montarCiclo();
   }
-  var _avisoTimer = null, _avisoObs = null;
-  function iniciarRotacaoAvisos(total) {
-    var track = document.getElementById('avisoTrack');
-    var dots = document.querySelectorAll('#avisoDots span');
-    var slides = track.querySelectorAll('.avisoSlide');
-    var atual = 0;
-    function marcar(idx) {
-      atual = idx;
-      dots.forEach(function(d, k){ d.className = (k === idx) ? 'on' : ''; });
-    }
-    var proximo = 1;  // o relógio conta sozinho, sem depender do slide em cena
-    function reiniciarRelogio(){
-      if (_avisoTimer) clearInterval(_avisoTimer);
-      _avisoTimer = setInterval(function(){
-        proximo = (atual + 1) % total;
-        track.scrollTo({ left: proximo * track.clientWidth, behavior:'smooth' });
-        marcar(proximo);
-      }, 5000);
-    }
-    // O navegador avisa qual slide está em cena — sem calcular posição na mão.
-    if (_avisoObs) { _avisoObs.disconnect(); _avisoObs = null; }
-    if (window.IntersectionObserver) {
-      _avisoObs = new IntersectionObserver(function(entradas){
-        entradas.forEach(function(e){
-          if (e.isIntersecting && e.intersectionRatio > 0.55) {
-            var idx = Array.prototype.indexOf.call(slides, e.target);
-            if (idx >= 0 && idx !== atual) marcar(idx);
-          }
-        });
-      }, { root: track, threshold: [0.56] });
-      slides.forEach(function(s){ _avisoObs.observe(s); });
-    } else {
-      // Navegador antigo: acompanha pela rolagem
-      track.addEventListener('scroll', function(){
-        var idx = Math.round(track.scrollLeft / (track.clientWidth || 1));
-        if (idx < 0) idx = 0;
-        if (idx > total - 1) idx = total - 1;
-        if (idx !== atual) marcar(idx);
-      }, { passive:true });
-    }
-    // Qualquer interação manual reinicia a contagem dos 5s
-    if (!track.dataset.toqueLigado) {
-      track.dataset.toqueLigado = '1';
-      ['touchstart','pointerdown','mousedown','wheel'].forEach(function(ev){
-        track.addEventListener(ev, function(){ if (_avisoTimer) clearInterval(_avisoTimer); }, { passive:true });
-      });
-      ['touchend','pointerup','mouseup'].forEach(function(ev){
-        track.addEventListener(ev, function(){ setTimeout(reiniciarRelogio, 400); }, { passive:true });
-      });
-    }
-    /* card parado é card encaixado: largura inteira por card e acerto no fim de qualquer rolagem */
-    function medirCards(){
-      track.style.width = ''; slides.forEach(function(s){ s.style.flexBasis = ''; });
-      var w = Math.floor(track.getBoundingClientRect().width); if (!w) return;
-      track.style.width = w + 'px'; slides.forEach(function(s){ s.style.flexBasis = w + 'px'; });
-      track.scrollLeft = atual * w;
-    }
-    medirCards();
-    if (!track.dataset.medidaLigada) {
-      track.dataset.medidaLigada = '1';
-      window.addEventListener('resize', function(){ medirCards(); });
-      var _acerto = null;
-      track.addEventListener('scroll', function(){
-        clearTimeout(_acerto);
-        _acerto = setTimeout(function(){
-          var w = track.clientWidth || 1, alvo = Math.round(track.scrollLeft / w) * w;
-          if (Math.abs(track.scrollLeft - alvo) > 0.5) track.scrollLeft = alvo;
-        }, 140);
-      }, { passive:true });
-    }
-    marcar(0);
-    reiniciarRelogio();
+
+  function cardCiclo(c, i, total){
+    var pts = '';
+    return '<div class="cardCiclo" onclick="window.location.href=\'' + c.url + '\'">'
+      + '<img class="bg" src="img/' + c.img + '" alt="" loading="' + (i === 0 ? 'eager' : 'lazy') + '"/>'
+      + '<span class="veu"></span>'
+      + (c.selo ? '<span class="selo">' + escapeHtmlSimples(c.selo) + '</span>' : '')
+      + '<div class="top"><span class="emo">' + c.emo + '</span><p class="tt">' + escapeHtmlSimples(c.tt) + '</p></div>'
+      + '<p class="frase">' + escapeHtmlSimples(c.frase) + '</p>'
+      + '<p class="apoio">' + escapeHtmlSimples(c.apoio) + '</p>'
+      + '<span class="espaco"></span>'
+      + '<button class="cta" type="button">' + escapeHtmlSimples(c.cta) + '</button>'
+      + (c.rod ? '<p class="rod">' + escapeHtmlSimples(c.rod) + '</p>' : '')
+      + '</div>';
   }
+  function montarCiclo(){
+    var track = document.getElementById('avisoTrack'), dots = document.getElementById('avisoDots');
+    if (!track) return;
+    track.innerHTML = CICLO.map(function(c, i){ return cardCiclo(c, i, CICLO.length); }).join('');
+    if (dots) dots.innerHTML = CICLO.map(function(_, i){ return '<span class="' + (i === 0 ? 'on' : '') + '"></span>'; }).join('');
+    track.addEventListener('scroll', function(){
+      clearTimeout(track._t);
+      track._t = setTimeout(function(){ marcarCentro(); }, 90);
+    }, { passive:true });
+    marcarCentro();
+  }
+  function cardsNaTela(){ return Array.prototype.slice.call(document.querySelectorAll('.cardCiclo')); }
+  function marcarCentro(){
+    var track = document.getElementById('avisoTrack'), dots = document.getElementById('avisoDots');
+    if (!track) return;
+    var meio = track.scrollLeft + track.clientWidth / 2, melhor = null, dist = 1e9;
+    cardsNaTela().forEach(function(c){
+      var d = Math.abs((c.offsetLeft + c.offsetWidth / 2) - meio);
+      if (d < dist){ dist = d; melhor = c; }
+    });
+    cardsNaTela().forEach(function(c){ c.classList.toggle('centro', c === melhor); });
+    var i = cardsNaTela().indexOf(melhor);
+    if (dots) dots.querySelectorAll('span').forEach(function(s, j){ s.className = (j === i ? 'on' : ''); });
+  }
+  function andarCiclo(dir){
+    var track = document.getElementById('avisoTrack'), cs = cardsNaTela();
+    if (!track || !cs.length) return;
+    var atual = cs.findIndex(function(c){ return c.classList.contains('centro'); });
+    if (atual < 0) atual = 0;
+    var i = atual + dir;
+    if (i < 0) i = cs.length - 1; else if (i >= cs.length) i = 0;   /* dá a volta */
+    var alvo = cs[i].offsetLeft - (track.clientWidth - cs[i].offsetWidth) / 2;
+    track.scrollTo({ left: Math.max(0, alvo), behavior:'smooth' });
+    setTimeout(marcarCentro, 380);
+  }
+  /* elástico no celular: passar do último volta ao primeiro (decisão ao SOLTAR o dedo,
+     porque na ponta não há rolagem e o evento de scroll não dispara) */
+  (function(){
+    var t = document.getElementById('avisoTrack'); if (!t) return;
+    var LIMITE = 60, x0 = null, dx = 0, naPonta = null, indo = false;
+    function max(){ return t.scrollWidth - t.clientWidth; }
+    function irPara(alvo){
+      if (indo) return; indo = true;
+      var snap = t.style.scrollSnapType; t.style.scrollSnapType = 'none';
+      t.scrollTo({ left: alvo, behavior:'smooth' });
+      setTimeout(function(){ t.style.scrollSnapType = snap || 'x mandatory'; indo = false; marcarCentro(); }, 450);
+    }
+    t.addEventListener('touchstart', function(e){
+      x0 = e.touches[0].clientX; dx = 0;
+      naPonta = (t.scrollLeft >= max() - 6) ? 'fim' : (t.scrollLeft <= 6 ? 'inicio' : null);
+    }, { passive:true });
+    t.addEventListener('touchmove', function(e){ if (x0 !== null) dx = e.touches[0].clientX - x0; }, { passive:true });
+    t.addEventListener('touchend', function(){
+      if (x0 === null) return; x0 = null;
+      if (naPonta === 'fim' && t.scrollLeft >= max() - 6 && dx < -LIMITE) irPara(0);
+      else if (naPonta === 'inicio' && t.scrollLeft <= 6 && dx > LIMITE) irPara(max());
+      naPonta = null; dx = 0;
+    }, { passive:true });
+    var setas = document.getElementById('setasCiclo');
+    if (setas){ setas.children[0].onclick = function(){ andarCiclo(-1); }; setas.children[1].onclick = function(){ andarCiclo(1); }; }
+    document.addEventListener('keydown', function(e){
+      if (!window.matchMedia('(min-width:641px)').matches) return;
+      if (e.key === 'ArrowRight') andarCiclo(1);
+      if (e.key === 'ArrowLeft') andarCiclo(-1);
+    });
+    window.addEventListener('resize', marcarCentro);
+  })();
+
 
   window.irAviso = function(i){
     var it = (window._avisosRender || [])[i];
@@ -905,7 +1036,7 @@
     try {
       if (typeof dbGetHistoricoRedacoes !== 'function') return;
       var historico = await dbGetHistoricoRedacoes(8);
-      if (!historico || historico.length === 0) return;
+      if (!historico || historico.length === 0) { await cicloVazio(); return; }
       var notas = historico.map(function(r){ return r.total; });
       var media = Math.round(notas.reduce(function(a,b){ return a + b; }, 0) / notas.length);
       var ultima = notas[0];
@@ -948,15 +1079,82 @@
       try { if (typeof dbGetCompetenciaPareto === 'function') pareto = await dbGetCompetenciaPareto(); } catch(e) {}
       try { if (typeof dbGetCompetenciasConsolidadas === 'function') consolidadas = await dbGetCompetenciasConsolidadas(); } catch(e) {}
 
-      var avisos = [];
-      avisos.push({ ico:'\u{1F31F}', tit:'\u00DAltima nota', txt:'Voc\u00ea fez <b>' + ultima + '</b>', acao:'Veja a corre\u00e7\u00e3o', url:'minhas-redacoes.html' });
-      if (melhorNota > ultima) avisos.push({ ico:'\u{1F3C6}', tit:'Sua melhor nota', txt:'<b>' + melhorNota + '</b>', acao:'Vamos l\u00e1 buscar', url:'evolucao.html' });
-      if (pareto) avisos.push({ ico:'\u{1F3AF}', tit:'Foco agora', txt: escapeHtmlSimples(pareto), acao:'Ver sua evolu\u00e7\u00e3o', url:'evolucao.html' });
-      if (consolidadas && consolidadas.length > 0) avisos.push({ ico:'\u2705', tit:'Conquistas', txt: escapeHtmlSimples(consolidadas.join(' \u00B7 ')), acao:'Ver as conquistas', url:'evolucao.html' });
-      if (evolucao > 0) avisos.push({ ico:'\u2B06\uFE0F', tit:'Evolu\u00e7\u00e3o', txt:'Voc\u00ea subiu <b>' + evolucao + ' pontos</b>', acao:'Veja como foi', url:'evolucao.html' });
-      else if (evolucao < 0) avisos.push({ ico:'\u{1F4AA}', tit:'Bora', txt:'Pr\u00f3xima reda\u00e7\u00e3o voc\u00ea sobe', acao:'Vamos juntos', url:'nova-redacao.html?metodo=digitar' });
-      montarAvisos(avisos.slice(0, 5));
-      atualizarBio();
+      /* ─── v5: os cinco cards do ciclo, com os dados do aluno ─── */
+      var temaSem = null; try { temaSem = await temaDaSemanaInicio(); } catch(e) {}
+      var fichas = 0;
+      if (temaSem) {
+        try {
+          var rm = await dbFetch(SUPABASE_URL + '/rest/v1/material_apoio?tema_id=eq.' + encodeURIComponent(temaSem.id) + '&estado=eq.aprovado&select=eixo,conteudo', {});
+          if (rm.ok) {
+            var linhas = await rm.json();
+            linhas.forEach(function(l){
+              if (l.eixo === 'argumentos' || l.eixo === 'intervencao') return;   /* gabarito é interno */
+              try { (JSON.parse(l.conteudo || '[]') || []).forEach(function(f){ if (f && f.estado === 'aprovada') fichas++; }); } catch(e) {}
+            });
+          }
+        } catch(e) {}
+      }
+      var ult = historico[0] || null;
+      var temReescrita = false, validada = false, quandoTxt = '';
+      if (ult) {
+        /* dias desde a correção, e se já há Reescrita e validação da professora */
+        try {
+          var dias = Math.floor((Date.now() - new Date(ult.data).getTime()) / 864e5);
+          quandoTxt = dias <= 0 ? 'hoje' : (dias === 1 ? 'ontem' : ('h\u00e1 ' + dias + ' dias'));
+        } catch(e) {}
+        try {
+          var rc = await dbFetch(SUPABASE_URL + '/rest/v1/correcoes?redacao_id=eq.' + encodeURIComponent(ult.id) + '&select=correcao_json,revisao_professor&limit=1', {});
+          if (rc.ok) {
+            var cs = await rc.json(), c0 = cs && cs[0];
+            if (c0) {
+              validada = !!c0.revisao_professor;
+              var cj = c0.correcao_json;
+              if (typeof cj === 'string') { try { cj = JSON.parse(cj); } catch(e) { cj = null; } }
+              temReescrita = !!(cj && cj.redacao_nota_1000_intro);
+            }
+          }
+        } catch(e) {}
+      }
+      var focoTxt = pareto ? pareto : null;
+
+      CICLO = [
+        { chave:'tema', emo:'\u{1F4DA}', img:'card-tema.webp', tt:'Tema da Semana',
+          frase: temaSem ? temaSem.titulo : 'Escolha um tema para come\u00e7ar',
+          apoio: fichas ? (fichas + ' fichas com fonte para estudar antes de escrever') : 'material de apoio com fonte, para estudar antes de escrever',
+          cta: temaSem ? 'Preparar' : 'Ver temas',
+          rod: '15 minutos por dia',
+          url: temaSem ? ('hub-preparacao.html?tema=' + encodeURIComponent(temaSem.id)) : 'temas.html' },
+
+        { chave:'vamos', emo:'\u270D\uFE0F', img:'card-vamos.webp', tt:'Vamos l\u00e1!',
+          frase: totalRedacoes ? 'Escrever a reda\u00e7\u00e3o da semana' : 'Sua primeira reda\u00e7\u00e3o',
+          apoio: totalRedacoes ? 'voc\u00ea j\u00e1 estudou o repert\u00f3rio \u2014 agora \u00e9 com voc\u00ea'
+                               : 'escreva, tire uma foto ou digite \u2014 a corre\u00e7\u00e3o sai em segundos',
+          cta:'Come\u00e7ar agora',
+          rod: temaSem ? 'tema da semana j\u00e1 selecionado' : '',
+          url: 'nova-redacao.html?metodo=digitar' + (temaSem ? '&tema=' + encodeURIComponent(temaSem.id) : '') },
+
+        { chave:'redacao', emo:'\u{1F4DD}', img:'card-redacao.webp', tt:'Sua reda\u00e7\u00e3o',
+          frase: ult ? (ult.total + ' pontos' + (temReescrita ? ', com a Reescrita pronta' : '')) : 'A corre\u00e7\u00e3o aparece aqui',
+          apoio: ult ? 'melhorias, compara\u00e7\u00e3o e o coment\u00e1rio da professora'
+                     : 'envie sua reda\u00e7\u00e3o e veja onde ganhou e onde perdeu ponto',
+          cta: ult ? 'Abrir' : 'Escrever',
+          rod: ult ? ('corrigida ' + (quandoTxt || 'recentemente')) : '',
+          selo: validada ? 'validada' : null,
+          url: ult ? 'minhas-redacoes.html' : 'nova-redacao.html?metodo=digitar' },
+
+        { chave:'voceon', emo:'\u{1F3AC}', img:'card-voceon.webp', tt:'Voc\u00ea ON',
+          frase: focoTxt ? ('Como o corretor l\u00ea a ' + focoTxt.split(' ')[0]) : 'As 5 compet\u00eancias em 6 minutos',
+          apoio: focoTxt ? 'v\u00eddeo curto sobre a compet\u00eancia que mais te segura' : 'a estrutura da reda\u00e7\u00e3o, do come\u00e7o ao fim',
+          cta:'Assistir', rod:'Corre\u00e7\u00e3o Guiada', url:'voce-on.html' },
+
+        { chave:'evolucao', emo:'\u{1F4C8}', img:'card-evolucao.webp', tt:'Sua evolu\u00e7\u00e3o',
+          frase: totalRedacoes > 1 ? ((evolucao >= 0 ? '+' : '') + evolucao + ' pontos desde a \u00faltima')
+                                   : 'Sua evolu\u00e7\u00e3o come\u00e7a agora',
+          apoio: totalRedacoes ? (totalRedacoes + ' reda\u00e7\u00e3o' + (totalRedacoes > 1 ? '\u00f5es enviadas' : ' enviada') + ' \u00b7 m\u00e9dia ' + media + (focoTxt ? ' \u00b7 refor\u00e7e a ' + focoTxt : ''))
+                              : 'cada reda\u00e7\u00e3o enviada vira um ponto no seu gr\u00e1fico',
+          cta:'Ver evolu\u00e7\u00e3o', rod: melhorNota ? ('sua melhor: ' + melhorNota) : '', url:'evolucao.html' }
+      ];
+      montarCiclo();
       preencherGrade(historico);
     } catch(e) {
       console.warn('Erro ao carregar dados do aluno:', e);
