@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<title>RedaON · Nova Redação · v9-12</title>
+<title>RedaON · Nova Redação · v9-13</title>
 <!-- v9-7: CASCATA DE TEMA. Esta tela era a única sem o script de arranque que as
      outras (inicio, temas, plano, minhas-redacoes) já tinham. Sem o atributo
      data-tema no elemento raiz, a regra html[data-tema="claro"] nunca casava e
@@ -415,7 +415,7 @@ header.hApp{ display:none !important; }
 .eixoItem .estado{ flex:0 0 auto; font-size:.6rem; font-weight:800; padding:.18rem .5rem;
   border-radius:99px; background:rgba(var(--greenRGB),.12); color:var(--green); display:none; }
 .eixoItem .estado.ok{ display:inline-block; }
-.eixoItem .seta{ flex:0 0 auto; color:var(--muted); font-size:1rem; transition:transform .25s; }
+.eixoItem .seta{ flex:0 0 auto; color:var(--muted); font-size:1rem; transition:transform .25s; font-style:normal; }
 .eixoItem.aberto .seta{ transform:rotate(90deg); }
 .eixoItem .corpo{ max-height:0; overflow:hidden; transition:max-height .35s ease; }
 .eixoItem.aberto .corpo{ max-height:420px; overflow-y:auto; }
@@ -427,7 +427,7 @@ header.hApp{ display:none !important; }
   border-radius:50%; animation:giroAnim .8s linear infinite; flex:0 0 auto; }
 @keyframes giroAnim{ to{ transform:rotate(360deg); } }
 .rotuloCurado{ font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--muted); margin:.2rem .25rem .5rem; }
+  color:var(--muted); margin:.55rem .25rem .5rem; }
 /* "Entender o tema": primeiro item do apoio, destaque suave da PROfa */
 .eixoItem.entender{ border-color:rgba(var(--cyanRGB),.35); }
 .eixoItem.entender .nome{ color:var(--cyan); }
@@ -451,6 +451,15 @@ header.hApp{ display:none !important; }
   color:var(--text2); margin-bottom:.15rem; }
 .repUsoRot .lapis{ font-size:1rem; font-style:normal; }
 .repUsoTxt{ font-size:.73rem; color:var(--text2); line-height:1.55; }
+/* v9-13: do hub enviado — ficha reprovada/em revisao nao aparece para o aluno */
+.emPreparo{ padding:.6rem 0; font-size:.76rem; color:var(--muted); line-height:1.6; }
+/* v9-13: SELO DE ORIGEM do material (opcao A aprovada por Alan).
+   O hub pinta o selo "validado" em dourado, mas nesta casa dourado e exclusivo
+   de conquista do aluno — aqui vai no verde da validacao da PROfa. Se voce
+   preferir igual ao hub, e trocar --green por --gold nesta regra (e ai vale
+   revisar o principio, ou o hub). */
+.eixoItem .estado.daProfa{ background:rgba(var(--greenRGB),.14); color:var(--green); }
+.eixoItem .estado.daIA{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 
 /* ── FIO DE PROGRESSO (permanente, 4px — toque mostra os números) ── */
 #fioProgresso{ flex:0 0 auto; position:relative; height:4px; background:rgba(var(--borderRGB),.22); cursor:pointer; }
@@ -671,7 +680,7 @@ header.hApp{ display:none !important; }
   <!-- TOPBAR DO MODO FOCO -->
   <div class="topFoco">
     <button class="voltar" onclick="voltarDaEscrita()" aria-label="Voltar"><span class="material-symbols-outlined">arrow_back</span></button>
-    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-12</span></h1>
+    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-13</span></h1>
     <button class="tIcone" id="btnApoioTop" onclick="toggleApoio()" aria-label="Material de apoio"><i class="em">📚</i></button>
     <span id="tempoTop" onclick="abrirTempo()" title="Gestão de tempo">⏱ <span id="tempoTopTxt">00:00</span></span>
     <button class="tIcone" id="btnRelogioTop" onclick="abrirTempo()" aria-label="Gestão de tempo"><i class="em">⏱</i></button>
@@ -1183,7 +1192,7 @@ function iniciarDock(dockId, opts) {
 
 /* Esqueleto da base: sidebar (desktop) + barra (menu retrátil no celular) +
    gavetas Mais/Métodos + toast. Header padrão fica oculto (modo foco). */
-montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-12' });
+montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-13' });
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){
@@ -1991,7 +2000,7 @@ function htmlEixo(e, prefixo){
     '<button class="cabeca" onclick="toggleEixo(\'' + prefixo + '\',\'' + e.id + '\')">' +
       '<i class="pemoji">' + e.emoji + '</i>' +
       '<span class="nome">' + e.nome + '</span>' +
-      '<span class="estado" id="' + prefixo + '-estado-' + e.id + '">\u2713 Gerado</span>' +
+      '<span class="estado" id="' + prefixo + '-estado-' + e.id + '"></span>' +
       '<span class="seta">\u203a</span>' +
     '</button>' +
     '<div class="corpo"><div class="corpoIn" id="' + prefixo + '-corpo-' + e.id + '">' +
@@ -2047,38 +2056,48 @@ var PR = {
   culturapop: function(t){ return 'Liste 5 refer\u00eancias de cultura pop brasileira (m\u00fasicas, artistas, fen\u00f4menos sociais, s\u00e9ries nacionais) ligadas a "'+t+'". Para cada: refer\u00eancia, contexto e como articular como repert\u00f3rio no ENEM.'; }
 };
 function PROMPT_ENTENDER(t){
-  return 'Voc\u00ea \u00e9 a PROfa da RedaON. Para o tema de reda\u00e7\u00e3o ENEM "' + t + '", produza um briefing curto em 3 blocos, em texto simples com **negrito** nos r\u00f3tulos:\n' +
-    '**Recorte**: qual \u00e9 exatamente o recorte do tema (o que ele pede e o que N\u00c3O pede), em 2-3 frases.\n' +
-    '**O que a banca espera**: diagn\u00f3stico com causas e consequ\u00eancias + proposta de interven\u00e7\u00e3o completa (agente, a\u00e7\u00e3o, meio, finalidade, detalhamento), em 2-3 frases.\n' +
-    '**Armadilhas**: 2-3 erros comuns que fazem o candidato tangenciar ou perder pontos neste tema.\n' +
-    'M\u00e1ximo de 130 palavras no total. Sem introdu\u00e7\u00e3o nem despedida.';
+  return 'Voc\u00ea \u00e9 a PROfa da RedaON. Para o tema de reda\u00e7\u00e3o ENEM "' + t + '", produza um briefing curto em 3 blocos.\n' +
+    'Responda APENAS um JSON v\u00e1lido, sem markdown e sem texto fora dele, exatamente neste formato:\n' +
+    '{"recorte":"<qual \u00e9 exatamente o recorte do tema: o que ele pede e o que N\u00c3O pede, em 2-3 frases>",' +
+    '"banca":"<o que a banca espera: diagn\u00f3stico com causas e consequ\u00eancias + proposta de interven\u00e7\u00e3o completa (agente, a\u00e7\u00e3o, meio, finalidade, detalhamento), em 2-3 frases>",' +
+    '"armadilhas":"<2-3 erros comuns que fazem o candidato tangenciar ou perder pontos neste tema>"}\n' +
+    'M\u00e1ximo de 130 palavras no total. Texto simples dentro dos campos, sem negrito. Sem introdu\u00e7\u00e3o nem despedida.';
 }
 async function gerarEixoReal(id){
   var tema = null;
   try { tema = obterTemaAtual(); } catch(e) {}
-  var pintar = function(html, ok){
+  /* v9-13: o selo passa a dizer DE ONDE veio o material (opcao A).
+     Nao e a mesma coisa para o aluno: o do banco passou pela Profa. Blanche,
+     o da IA saiu agora e ninguem conferiu. "Gerado" escondia a diferenca. */
+  var pintar = function(html, ok, origem){
     ['gv','dk'].forEach(function(p){
       var c = document.getElementById(p + '-corpo-' + id);
       var s = document.getElementById(p + '-estado-' + id);
       if (c) c.innerHTML = html;
-      if (s && ok) s.classList.add('ok');
+      if (!s) return;
+      s.classList.remove('ok','daProfa','daIA');
+      if (!ok) { s.textContent = ''; return; }
+      if (origem === 'profa'){ s.textContent = '\u2713 Da PROfa'; s.classList.add('ok','daProfa'); }
+      else { s.textContent = 'Gerado agora'; s.classList.add('ok','daIA'); }
     });
   };
   if (!tema){
-    pintar('<div class="blocoBriefing"><b>Defina o tema primeiro</b>Escreva o t\u00edtulo da reda\u00e7\u00e3o (ou escolha um tema na biblioteca) para a PROfa preparar este eixo.</div>', false);
+    pintar('<div class="blocoBriefing"><b>Defina o tema primeiro</b>Escreva o t\u00edtulo da reda\u00e7\u00e3o (ou escolha um tema na biblioteca) para a PROfa preparar este eixo.</div>', false, null);
     return;
   }
   var bloqueio = checarTemaSensivel(tema.titulo);
   if (bloqueio){
-    pintar('<div class="blocoBriefing"><b>\ud83d\udee1\ufe0f Tema n\u00e3o processado</b>Identificamos termos sens\u00edveis. Reformule com foco construtivo ou escolha um tema oficial na biblioteca.</div>', false);
+    pintar('<div class="blocoBriefing"><b>\ud83d\udee1\ufe0f Tema n\u00e3o processado</b>Identificamos termos sens\u00edveis. Reformule com foco construtivo ou escolha um tema oficial na biblioteca.</div>', false, null);
     return;
   }
   pintar('<div class="gerando"><span class="giro"></span> A PROfa est\u00e1 preparando este eixo\u2026</div>', false);
   try {
     var texto = null;
+    var origem = 'ia';
     var eixoBanco = (id === 'entender') ? null : id; /* 'entender' n\u00e3o tem cache no banco */
     if (eixoBanco && tema.oficial && tema.id){
       texto = await _buscarMaterialNoBanco(tema.id, eixoBanco);
+      if (texto) origem = 'profa'; /* v9-13: veio do banco, curado */
     }
     if (!texto){
       var prompt = (id === 'entender') ? PROMPT_ENTENDER(tema.titulo)
@@ -2087,9 +2106,9 @@ async function gerarEixoReal(id){
       if (eixoBanco && tema.oficial && tema.id && texto) _salvarMaterialNoBanco(tema.id, eixoBanco, texto);
     }
     eixosGerados[id] = true;
-    pintar((id === 'entender') ? renderEntender(texto) : renderEixoConteudo(texto), true);
+    pintar((id === 'entender') ? renderEntender(texto) : renderEixoConteudo(texto), true, origem);
   } catch(e){
-    pintar('<div class="blocoBriefing"><b>N\u00e3o consegui gerar agora</b>Toque de novo para tentar outra vez. (' + (e && e.message || 'erro') + ')</div>', false);
+    pintar('<p class="erroGerar">N\u00e3o consegui preparar agora. Toque para tentar de novo.</p>', false, null);
   }
 }
 montarEixos('eixosGaveta', 'gv');
@@ -3943,14 +3962,16 @@ function escapeHTML(s){
 var CAMPOS_FICHA = {
   cabeca:   ['fonte','artigo','lei','marco','data','periodo','nome','pensador','corrente','titulo','obra','filme','referencia','pesquisa','cientista','especialista'],
   destaque: ['dado_numerico','dado','texto','descricao','sinopse','conceito','conceito_chave','conclusao','conclusao_principal','ideia','fato','contexto','resumo'],
-  uso:      ['argumento','aplicacao','como_usar','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem']
+  uso:      ['argumento','aplicacao','como_usar','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem'],
+  /* campos internos da curadoria (a Blanche lê no ADM) — nunca vazam para a linha de extras */
+  internos: ['diz','url','fonte_conferida','conferido_por','conferido_em','estado','motivo']
 };
 function _campo(obj, lista){
   for (var i=0;i<lista.length;i++){ var v = obj[lista[i]]; if (typeof v==='string' && v.trim()) return v.trim(); }
   return '';
 }
 function _extras(obj){
-  var usados = CAMPOS_FICHA.cabeca.concat(CAMPOS_FICHA.destaque, CAMPOS_FICHA.uso);
+  var usados = CAMPOS_FICHA.cabeca.concat(CAMPOS_FICHA.destaque, CAMPOS_FICHA.uso, CAMPOS_FICHA.internos);
   var partes = [];
   Object.keys(obj).forEach(function(k){
     if (usados.indexOf(k)>=0) return;
@@ -3973,6 +3994,23 @@ function fichaHTML(item){
   h += '</div>';
   return h;
 }
+/* v9-13: do hub enviado — a curadoria da Profa. Blanche manda.
+   Ficha com estado diferente de 'aprovada' nao chega ao aluno. */
+function _soAprovadas(lista){
+  return lista.filter(function(f){ return !(f && typeof f==='object' && f.estado && f.estado!=='aprovada'); });
+}
+function _chaveParecida(obj, k){
+  var ks = Object.keys(obj), i, n;
+  var alvo = { recorte:['recorte'], banca:['banca','espera'], armadilhas:['armadilha','erro'] }[k];
+  for (i=0;i<ks.length;i++){ n = ks[i].toLowerCase(); for (var j=0;j<alvo.length;j++) if (n.indexOf(alvo[j])>=0) return ks[i]; }
+  return null;
+}
+function _texto(v){
+  if (v == null) return '';
+  if (Array.isArray(v)) return v.map(_texto).filter(Boolean).join(' ');
+  if (typeof v === 'object') return Object.keys(v).map(function(k){ return _texto(v[k]); }).filter(Boolean).join(' ');
+  return String(v).replace(/\*\*/g,'').trim();
+}
 function _achaLista(x){
   if (Array.isArray(x)) return x;
   if (x && typeof x==='object'){
@@ -3982,23 +4020,24 @@ function _achaLista(x){
   return null;
 }
 function renderEixoConteudo(bruto){
-  var limpo = String(bruto == null ? '' : bruto).replace(/```json|```/g,'').trim();
+  var limpo = String(bruto).replace(/```json|```/g,'').trim();
   if (limpo.charAt(0)==='[' || limpo.charAt(0)==='{'){
     try{
       var lista = _achaLista(JSON.parse(limpo));
-      if (lista && lista.length) return lista.map(fichaHTML).join('');
+      if (lista && lista.length){ var la = _soAprovadas(lista); return la.length ? la.map(fichaHTML).join('') : '<p class="emPreparo">Este eixo est\u00e1 sendo refeito. Ele volta assim que a Profa. Blanche aprovar.</p>'; }
     }catch(e){}
     var m = limpo.match(/\[[\s\S]*\]/);
-    if (m){ try{ var l2 = JSON.parse(m[0]); if (Array.isArray(l2) && l2.length) return l2.map(fichaHTML).join(''); }catch(e2){} }
+    if (m){ try{ var l2 = JSON.parse(m[0]); if (Array.isArray(l2) && l2.length){ var l3=_soAprovadas(l2); return l3.length ? l3.map(fichaHTML).join('') : '<p class="emPreparo">Este eixo est\u00e1 sendo refeito. Ele volta assim que a Profa. Blanche aprovar.</p>'; } }catch(e2){} }
   }
-  return mdSimples(limpo);
+  return md(limpo);
 }
 /* Briefing do Entender: JSON {briefing:[{rotulo,texto}]} -> h4 + paragrafo */
 function renderEntender(bruto){
-  var limpo = String(bruto == null ? '' : bruto).replace(/```json|```/g,'').trim();
+  var limpo = String(bruto).replace(/```json|```/g,'').trim();
   if (limpo.charAt(0)==='{' || limpo.charAt(0)==='['){
     try{
-      var lista = _achaLista(JSON.parse(limpo));
+      var obj = JSON.parse(limpo), h = '';
+      var lista = (obj && typeof obj==='object' && !Array.isArray(obj) && _chaveParecida(obj,'recorte')) ? null : _achaLista(obj);
       if (lista && lista.length){
         return lista.map(function(b){
           var rot = (b.rotulo||b.titulo||'').replace(/\*\*/g,'');
@@ -4006,9 +4045,23 @@ function renderEntender(bruto){
           return (rot?'<h4>'+escapeHTML(rot)+'</h4>':'') + (txt?'<p>'+escapeHTML(txt)+'</p>':'');
         }).join('');
       }
+      if (obj && typeof obj==='object' && !Array.isArray(obj)){
+        /* objeto: chaves fixas primeiro (recorte/banca/armadilhas), depois qualquer outra chave que o modelo tenha usado */
+        var ROT = { recorte:'Recorte', banca:'O que a banca espera', armadilhas:'Armadilhas' }, vistas = {};
+        Object.keys(ROT).forEach(function(k){
+          var ch = _chaveParecida(obj, k); if (!ch) return; vistas[ch] = 1;
+          h += '<h4>'+ROT[k]+'</h4><p>'+escapeHTML(_texto(obj[ch]))+'</p>';
+        });
+        Object.keys(obj).forEach(function(ch){
+          if (vistas[ch]) return;
+          var v = _texto(obj[ch]); if (!v) return;
+          h += '<h4>'+escapeHTML(ch.replace(/\*\*/g,''))+'</h4><p>'+escapeHTML(v)+'</p>';
+        });
+        if (h) return h;
+      }
     }catch(e){}
   }
-  return mdSimples(limpo);
+  return md(limpo);
 }
 
 // ─────────────────────────────────────────────────────────────
