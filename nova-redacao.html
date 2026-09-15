@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<title>RedaON · Nova Redação · v9-5</title>
+<title>RedaON · Nova Redação · v9-6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <style>
@@ -316,10 +316,15 @@ header.hApp{ display:none !important; }
   border-right:1px solid #e2ddca; }
 .tituloFaixa .rot span{ writing-mode:vertical-rl; transform:rotate(180deg);
   font-size:.55rem; font-weight:800; letter-spacing:.12em; color:#a89f88; }
-.tituloFaixa input{ flex:1; min-width:0; background:none; border:none; outline:none;
-  padding:.65rem .875rem; font-family:'Caveat',cursive; font-size:1.25rem; font-weight:600;
-  color:#2c3e40; }
-.tituloFaixa input::placeholder{ color:#b6ae97; font-weight:500; }
+/* v9-6: a faixa TEMA vira LEITURA — ate duas linhas, reticencias alem disso.
+   Input de texto nao quebra linha, e por isso a v9-5 nao resolveu: o campo
+   editavel foi para a gaveta e aqui ficou um visor, que pode ter duas linhas
+   e libera o toque para abrir o tema inteiro. */
+.tituloFaixa .temaVisor{ flex:1; min-width:0; cursor:pointer;
+  padding:.6rem .875rem; font-family:'Caveat',cursive; font-size:1.25rem; font-weight:600;
+  line-height:1.3; color:#2c3e40; display:-webkit-box; -webkit-line-clamp:2;
+  -webkit-box-orient:vertical; overflow:hidden; word-break:break-word; }
+.tituloFaixa .temaVisor.vazio{ color:#b6ae97; font-weight:500; }
 /* Alternador de fonte (manuscrita ↔ digitada) */
 .fonteBtn{ flex:0 0 auto; align-self:center; margin-right:.5rem;
   background:#fdfbf4; border:1px solid #d8d2c0; color:#8a8576;
@@ -350,7 +355,7 @@ header.hApp{ display:none !important; }
   background-image:repeating-linear-gradient(transparent,transparent 33px,#d8d2c0 33px,#d8d2c0 34px); }
 #textoRedacao::placeholder{ color:#c3bca6; }
 /* Fonte digitada: mesma letra do app, linhas preservadas */
-.folhaCard.fonteInter .tituloFaixa input{ font-family:Inter,sans-serif; font-size:.95rem; font-weight:700; }
+.folhaCard.fonteInter .tituloFaixa .temaVisor{ font-family:Inter,sans-serif; font-size:.95rem; font-weight:700; line-height:1.4; }
 .folhaCard.fonteInter #textoRedacao{ font-family:Inter,sans-serif; font-size:.95rem; font-weight:400; line-height:34px; }
 
 /* ── APOIO NO DESKTOP: coluna com rolagem própria ── */
@@ -565,25 +570,45 @@ header.hApp{ display:none !important; }
 .notaBloco{ display:flex; align-items:center; justify-content:space-between; gap:.75rem;
   background:var(--surface); border:1px solid rgba(var(--cyanRGB),.35); border-radius:14px;
   padding:.8rem 1rem; margin:.9rem 0 .6rem; }
-.notaBloco .rot{ font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
-.notaBloco .num{ font-size:2.5rem; font-weight:800; color:var(--cyan); line-height:1; }
-.notaBloco .selo{ display:inline-flex; align-items:center; gap:.3rem; font-size:.68rem; font-weight:700;
-  color:var(--green); background:rgba(var(--greenRGB),.12); padding:.35rem .65rem; border-radius:99px; }
+/* v9-6: tipografia do painel — a maioria dos alunos le a correcao AQUI.
+   Aparelho modesto, brilho de sala de aula: 11px nao se le. */
+.notaBloco .rot{ font-size:.7rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+.notaBloco .num{ font-size:3rem; font-weight:800; color:var(--cyan); line-height:1; }
+.notaBloco .selo{ display:inline-flex; align-items:center; gap:.3rem; font-size:.78rem; font-weight:700;
+  color:var(--green); background:rgba(var(--greenRGB),.12); padding:.4rem .7rem; border-radius:99px; }
 .compRow{ display:flex; align-items:flex-start; gap:.7rem; background:var(--surface);
-  border:1px solid rgba(var(--borderRGB),.18); border-radius:12px; padding:.6rem .8rem; margin-bottom:.45rem; }
+  border:1px solid rgba(var(--borderRGB),.18); border-radius:12px; padding:.75rem .85rem; margin-bottom:.55rem; }
 .compRow .cnome{ flex:1; min-width:0; }
-.compRow .cnome b{ display:block; font-size:.76rem; color:var(--text); }
+.compRow .cnome b{ display:block; font-size:.92rem; color:var(--text); }
 /* v9-5: comentario inteiro — quebra em varias linhas e a nota alinha no topo */
-.compRow .cnome span{ display:block; font-size:.7rem; line-height:1.5; color:var(--muted); margin-top:.2rem; }
-.compRow .cnota{ flex:0 0 auto; font-size:1.05rem; font-weight:800; color:var(--purpleSoft); }
+.compRow .cnome span{ display:block; font-size:.95rem; line-height:1.55; color:var(--text2); margin-top:.3rem; }
+.compRow .cnota{ flex:0 0 auto; font-size:1.35rem; font-weight:800; color:var(--purpleSoft); }
 .compRow.atencao{ border-color:rgba(var(--goldRGB),.4); }
 .compRow.atencao .cnota{ color:var(--gold); }
 #painelResultado .acoes{ display:flex; flex-direction:column; gap:.5rem; margin-top:.8rem; }
 #painelResultado .acoes .btn{ width:100%; }
-/* v9-5: GAVETA DO TEMA — le o enunciado inteiro sem disputar o toque com a edicao */
-#gavetaTema .temaTexto{ font-size:.9rem; line-height:1.6; color:var(--text); white-space:pre-wrap;
-  word-break:break-word; max-height:52vh; overflow-y:auto; scrollbar-width:thin; padding:0 .25rem; }
-#gavetaTema .temaVazio{ font-size:.82rem; color:var(--muted); padding:0 .25rem; }
+/* v9-6: LIMPAR A FOLHA — pilula no ⋯ e toast com Desfazer */
+.pilulaLimpar button{ color:var(--red) !important; }
+#toastDesfazer{ display:none; position:fixed; left:50%; transform:translateX(-50%);
+  bottom:calc(1.25rem + env(safe-area-inset-bottom)); z-index:90;
+  align-items:center; gap:.9rem; max-width:min(92vw, 420px);
+  background:var(--surface2); border:1px solid rgba(var(--borderRGB),.35); border-radius:12px;
+  padding:.65rem .8rem .65rem 1rem; box-shadow:0 6px 20px rgba(0,0,0,.28); }
+#toastDesfazer.show{ display:flex; }
+#toastDesfazer span{ flex:1; min-width:0; font-size:.82rem; font-weight:600; color:var(--text); }
+#toastDesfazer button{ flex:0 0 auto; background:none; border:none; cursor:pointer;
+  color:var(--cyan); font-size:.82rem; font-weight:800; padding:.2rem .35rem; font-family:inherit; }
+
+/* v9-6: GAVETA DO TEMA — o tema inteiro, e editavel */
+#temaEdicao{ display:block; width:100%; box-sizing:border-box; resize:none;
+  min-height:5.4rem; max-height:40vh; overflow-y:auto; scrollbar-width:thin;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.35); border-radius:12px;
+  padding:.7rem .8rem; font-family:Inter,sans-serif; font-size:.95rem; line-height:1.55;
+  color:var(--text); outline:none; }
+#temaEdicao:focus{ border-color:rgba(var(--cyanRGB),.55); }
+#temaEdicao::placeholder{ color:var(--muted2); }
+#gavetaTema .temaAcoes{ display:flex; gap:.5rem; margin-top:.7rem; }
+#gavetaTema .temaAcoes .btn{ flex:1; }
 .tituloFaixa .rot{ cursor:pointer; }
 </style>
 <script src="supabase-auth.js"></script>
@@ -594,7 +619,7 @@ header.hApp{ display:none !important; }
   <!-- TOPBAR DO MODO FOCO -->
   <div class="topFoco">
     <button class="voltar" onclick="voltarDaEscrita()" aria-label="Voltar"><span class="material-symbols-outlined">arrow_back</span></button>
-    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-5</span></h1>
+    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-6</span></h1>
     <button class="tIcone" id="btnApoioTop" onclick="toggleApoio()" aria-label="Material de apoio"><i class="em">📚</i></button>
     <span id="tempoTop" onclick="abrirTempo()" title="Gestão de tempo">⏱ <span id="tempoTopTxt">00:00</span></span>
     <button class="tIcone" id="btnRelogioTop" onclick="abrirTempo()" aria-label="Gestão de tempo"><i class="em">⏱</i></button>
@@ -608,8 +633,11 @@ header.hApp{ display:none !important; }
       <section class="folhaCard" id="folhaCard">
         <div id="seloRascunho">&#10003; Rascunho recuperado</div>
         <div class="tituloFaixa">
-          <div class="rot" onclick="abrirTema()" title="Ver o tema completo" role="button" tabindex="0"><span>TEMA</span></div>
-          <input id="tituloRedacao" type="text" maxlength="120" placeholder="Qual é o tema da sua redação?">
+          <div class="rot" onclick="abrirTema()" title="Ver e editar o tema" role="button" tabindex="0"><span>TEMA</span></div>
+          <!-- v9-6: visor de leitura (2 linhas). O toque abre a gaveta, onde o tema é editado. -->
+          <div class="temaVisor vazio" id="temaVisor" onclick="abrirTema()" role="button" tabindex="0" title="Ver e editar o tema">Qual é o tema da sua redação?</div>
+          <!-- fonte da verdade do tema: todo o resto do código lê .value daqui -->
+          <input id="tituloRedacao" type="hidden">
           <button class="fonteBtn" id="btnFonte" onclick="alternarFonteFolha()" title="Alternar letra da folha">Aa</button>
         </div>
         <div id="faixaArquivo">
@@ -657,6 +685,8 @@ header.hApp{ display:none !important; }
 <div id="gavetaAcoes">
   <div class="grip" onclick="fecharAcoes(false)"></div>
   <div class="pilulaApoio"><button onclick="fecharAcoes(false);abrirApoio();"><i class="em" style="font-style:normal;">📚</i> Material de apoio</button></div>
+  <!-- v9-6: limpar a folha num toque, com Desfazer -->
+  <div class="pilulaApoio pilulaLimpar"><button id="btnLimparFolha" onclick="limparFolha()"><i class="em" style="font-style:normal;">🧽</i> Limpar a folha</button></div>
   <div id="casaAcoesGaveta"><div id="blocoAcoes">
     <div class="reguaFina">
       <div id="reguaBarraG"></div>
@@ -678,12 +708,20 @@ header.hApp{ display:none !important; }
 </div>
 
 <!-- GAVETA · GESTÃO DE TEMPO -->
-<!-- GAVETA DO TEMA (v9-5): enunciado inteiro, sem corte -->
+<!-- v9-6: toast com Desfazer (o toast da base é só texto) -->
+<div id="toastDesfazer"><span id="toastDesfazerTxt"></span><button onclick="desfazerLimpar()">Desfazer</button></div>
+
+<!-- GAVETA DO TEMA (v9-6): tema inteiro e editável -->
 <div class="gvBg atrasTudo" id="gavetaTemaBg" onclick="fecharTema()"></div>
 <div class="gv atrasTudo" id="gavetaTema">
-  <div class="grip"></div>
+  <div class="grip" onclick="fecharTema()"></div>
   <p class="tit">Tema da sua redação</p>
-  <div class="temaTexto" id="temaTextoGaveta"></div>
+  <p class="sub">Escreva ou ajuste o tema. Ele vai junto com a correção.</p>
+  <textarea id="temaEdicao" placeholder="Qual é o tema da sua redação?" spellcheck="false"></textarea>
+  <div class="temaAcoes">
+    <button class="btn ghost" onclick="fecharTema()">Cancelar</button>
+    <button class="btn" onclick="salvarTema()">Salvar</button>
+  </div>
 </div>
 
 <div class="gvBg atrasTudo" id="gavetaTempoBg" onclick="fecharGaveta('gavetaTempo')"></div>
@@ -1093,7 +1131,7 @@ function iniciarDock(dockId, opts) {
 
 /* Esqueleto da base: sidebar (desktop) + barra (menu retrátil no celular) +
    gavetas Mais/Métodos + toast. Header padrão fica oculto (modo foco). */
-montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-5' });
+montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-6' });
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){
@@ -1561,8 +1599,70 @@ function zerarTempo(){
   toast('Tempo zerado');
 }
 
-/* ── TEMA COMPLETO EM GAVETA (v9-5) ──
-   Le o tema que esta na folha; sem tema, diz o que fazer. */
+/* ── LIMPAR A FOLHA (v9-6) ──
+   Limpa na hora e oferece Desfazer por 8s. A confirmacao previa vira ruido
+   (o aluno toca no automatico); o arrependimento vem depois de ver a folha vazia.
+   O tema NAO e apagado: quem limpa quer reescrever, quase sempre no mesmo tema. */
+var _folhaAntes = null, _tmDesfazer = null;
+function limparFolha(){
+  var t = textarea.value;
+  if (!t.trim()){ toast('A folha já está vazia'); return; }
+  _folhaAntes = t;
+  textarea.value = '';
+  ajustarAlturaFolha(); atualizarRegua();
+  limparRascunho();                                   /* local */
+  try { _rascunhoNuvem.sujo = true; nuvemSalvarRascunho(); } catch(e) {}  /* nuvem */
+  try { fecharAcoes(false); } catch(e) {}
+  mostrarDesfazer('Folha limpa');
+  try { textarea.focus({ preventScroll:true }); } catch(e) {}
+}
+function mostrarDesfazer(msg){
+  var cx = document.getElementById('toastDesfazer');
+  var tx = document.getElementById('toastDesfazerTxt');
+  if (!cx || !tx) return;
+  tx.textContent = msg;
+  cx.classList.add('show');
+  if (_tmDesfazer) clearTimeout(_tmDesfazer);
+  _tmDesfazer = setTimeout(esconderDesfazer, 8000);
+}
+function esconderDesfazer(){
+  var cx = document.getElementById('toastDesfazer');
+  if (cx) cx.classList.remove('show');
+  if (_tmDesfazer){ clearTimeout(_tmDesfazer); _tmDesfazer = null; }
+  _folhaAntes = null;
+}
+function desfazerLimpar(){
+  if (_folhaAntes === null){ esconderDesfazer(); return; }
+  textarea.value = _folhaAntes;
+  ajustarAlturaFolha(); atualizarRegua(); salvarRascunhoJa();
+  try { _rascunhoNuvem.sujo = true; nuvemSalvarRascunho(); } catch(e) {}
+  esconderDesfazer();
+  toast('\u21a9\ufe0f Texto de volta');
+}
+
+/* ── TEMA (v9-6) ── A faixa mostra ate duas linhas; a gaveta edita o tema inteiro.
+   #tituloRedacao (escondido) segue sendo a fonte da verdade para o resto da tela. */
+function pintarTema(){
+  var visor = document.getElementById('temaVisor');
+  var inp = document.getElementById('tituloRedacao');
+  if (!visor) return;
+  var t = (inp && inp.value ? inp.value : '').trim();
+  if (t){ visor.classList.remove('vazio'); visor.textContent = t; visor.title = t; }
+  else { visor.classList.add('vazio'); visor.textContent = 'Qual é o tema da sua redação?'; visor.title = 'Escolher o tema'; }
+}
+function salvarTema(){
+  var campo = document.getElementById('temaEdicao');
+  var inp = document.getElementById('tituloRedacao');
+  if (!campo || !inp) return;
+  inp.value = String(campo.value || '').replace(/\s+/g, ' ').trim();
+  pintarTema();
+  fecharTema();
+  /* o tema entra na chave do rascunho: regrava para nao perder o vinculo */
+  try { rascunhoDebounced(); } catch(e) {}
+  toast(inp.value ? '\u2713 Tema salvo' : 'Tema em branco');
+}
+
+/* Texto do tema para quem so precisa ler (legenda da gaveta de metodos) */
 function _temaAtualTexto(){
   var inp = document.getElementById('tituloRedacao');
   var t = inp && inp.value ? inp.value.trim() : '';
@@ -1575,12 +1675,12 @@ function _temaAtualTexto(){
   return '';
 }
 function abrirTema(){
-  var alvo = document.getElementById('temaTextoGaveta');
-  if (!alvo) return;
-  var t = _temaAtualTexto();
-  if (t){ alvo.className = 'temaTexto'; alvo.textContent = t; }
-  else { alvo.className = 'temaVazio'; alvo.textContent = 'Você ainda não escolheu o tema. Toque na faixa TEMA da folha para escrever, ou escolha um tema em Temas.'; }
+  var campo = document.getElementById('temaEdicao');
+  if (!campo) return;
+  campo.value = _temaAtualTexto();
   abrirGaveta('gavetaTema');
+  /* espera a gaveta subir antes de chamar o teclado, senao a animacao trava */
+  setTimeout(function(){ try { campo.focus(); campo.setSelectionRange(campo.value.length, campo.value.length); } catch(e) {} }, 260);
 }
 function fecharTema(){ fecharGaveta('gavetaTema'); }
 
@@ -1597,6 +1697,22 @@ function aplicarMetodo(m){
     textarea.focus();
   }
 }
+/* v9-6: separa a linha do tema da transcrição, quando ela vier.
+   Só a primeira linha não vazia conta: "Tema:" no meio da argumentação é
+   texto do aluno, não o tema da folha. */
+function _separarTemaDaTranscricao(txt){
+  var linhas = String(txt || '').split(/\r?\n/);
+  var i = 0;
+  while (i < linhas.length && !linhas[i].trim()) i++;
+  if (i >= linhas.length) return { tema:'', texto: txt };
+  var m = linhas[i].trim().match(/^tema\s*[:\u2013\u2014-]\s*(.{6,240})$/i);
+  if (!m) return { tema:'', texto: txt };
+  var tema = m[1].replace(/\s+/g, ' ').trim().replace(/^["'\u201c]|["'\u201d]$/g, '').trim();
+  if (!tema) return { tema:'', texto: txt };
+  linhas.splice(i, 1);
+  return { tema: tema, texto: linhas.join('\n').replace(/^\s+/, '') };
+}
+
 /* Semântica da produção: transcreve NA ESCOLHA; o aluno revisa o texto na folha.
    Se o OCR falhar/vier curto, mantém o arquivo anexado como fallback do envio. */
 async function aoEscolherArquivo(inp){
@@ -1619,7 +1735,7 @@ async function aoEscolherArquivo(inp){
       arquivoMime = f.type || 'application/pdf';
     }
     document.getElementById('statusArquivo').textContent = 'transcrevendo\u2026';
-    var ocrPrompt = 'Voc\u00ea \u00e9 um transcritor de reda\u00e7\u00f5es do ENEM. Transcreva FIELMENTE todo o texto desta imagem (manuscrito ou impresso). Regras: 1) se a imagem estiver deitada ou de cabe\u00e7a para baixo, gire mentalmente e leia na orienta\u00e7\u00e3o certa; 2) leia linha por linha, do in\u00edcio ao fim, sem pular nenhuma linha e sem juntar frases de linhas diferentes; 3) preserve os par\u00e1grafos (uma linha em branco entre eles) e a ordem original; 4) mantenha exatamente as palavras do aluno, inclusive erros de ortografia, acentua\u00e7\u00e3o e concord\u00e2ncia \u2014 n\u00e3o corrija nada; 5) se houver um t\u00edtulo ou a linha "Tema: ..." no topo, n\u00e3o inclua; 6) se uma palavra estiver ileg\u00edvel, escreva [ileg\u00edvel]. Responda APENAS com o texto transcrito, sem coment\u00e1rios.'; /* v9-30: linha a linha, imagem deitada, sem corrigir */
+    var ocrPrompt = 'Voc\u00ea \u00e9 um transcritor de reda\u00e7\u00f5es do ENEM. Transcreva FIELMENTE todo o texto desta imagem (manuscrito ou impresso). Regras: 1) se a imagem estiver deitada ou de cabe\u00e7a para baixo, gire mentalmente e leia na orienta\u00e7\u00e3o certa; 2) leia linha por linha, do in\u00edcio ao fim, sem pular nenhuma linha e sem juntar frases de linhas diferentes; 3) preserve os par\u00e1grafos (uma linha em branco entre eles) e a ordem original; 4) mantenha exatamente as palavras do aluno, inclusive erros de ortografia, acentua\u00e7\u00e3o e concord\u00e2ncia \u2014 n\u00e3o corrija nada; 5) se no topo houver a linha do tema ("Tema: ...", "Tema \u2014 ..." ou equivalente), devolva-a como PRIMEIRA linha, exatamente no formato "Tema: <texto do tema>", e s\u00f3 ela; um t\u00edtulo criado pelo aluno para a reda\u00e7\u00e3o n\u00e3o \u00e9 tema \u2014 esse n\u00e3o inclua; 6) se uma palavra estiver ileg\u00edvel, escreva [ileg\u00edvel]. Responda APENAS com o texto transcrito, sem coment\u00e1rios.'; /* v9-30: linha a linha, imagem deitada, sem corrigir */
     /* v9-33: duas leituras em paralelo; fica a mais completa (o OCR, quando erra, PULA linhas — a versão mais longa é a mais fiel) */
     var leituras = await Promise.all([geminiOCR(ocrPrompt, arquivoBase64, arquivoMime), geminiOCR(ocrPrompt, arquivoBase64, arquivoMime).catch(function(){ return ''; })]);
     var texto = leituras.map(function(t){ return String(t||'').trim(); }).sort(function(a,b){ return b.length - a.length; })[0];
@@ -1628,12 +1744,24 @@ async function aoEscolherArquivo(inp){
        linha pulada volta, palavra "corrigida" volta ao que o aluno escreveu (o OCR tende a consertar erros do aluno). */
     if (texto && texto.length >= 40) {
       try {
-        var confPrompt = 'Voc\u00ea \u00e9 um conferente de transcri\u00e7\u00e3o. Abaixo est\u00e1 a TRANSCRI\u00c7\u00c3O feita por outro leitor desta mesma imagem de reda\u00e7\u00e3o. Compare a imagem com a transcri\u00e7\u00e3o LINHA POR LINHA e corrija: 1) linha ou trecho da imagem que n\u00e3o est\u00e1 na transcri\u00e7\u00e3o \u2014 acrescente no lugar certo; 2) palavra, acento, v\u00edrgula ou termina\u00e7\u00e3o que na imagem est\u00e1 DIFERENTE da transcri\u00e7\u00e3o \u2014 volte para EXATAMENTE o que est\u00e1 escrito na imagem, mesmo que seja erro de portugu\u00eas do aluno (n\u00e3o corrija o aluno: "n\u00e3o t\u00eam", "por cuidando", "dos do pr\u00f3ximo" ficam como o aluno escreveu); 3) trecho que est\u00e1 na transcri\u00e7\u00e3o mas n\u00e3o na imagem \u2014 remova. Preserve os par\u00e1grafos. N\u00e3o inclua a linha "Tema:". Responda APENAS com a transcri\u00e7\u00e3o final corrigida, sem coment\u00e1rios.\n\nTRANSCRI\u00c7\u00c3O A CONFERIR:\n' + texto;
+        var confPrompt = 'Voc\u00ea \u00e9 um conferente de transcri\u00e7\u00e3o. Abaixo est\u00e1 a TRANSCRI\u00c7\u00c3O feita por outro leitor desta mesma imagem de reda\u00e7\u00e3o. Compare a imagem com a transcri\u00e7\u00e3o LINHA POR LINHA e corrija: 1) linha ou trecho da imagem que n\u00e3o est\u00e1 na transcri\u00e7\u00e3o \u2014 acrescente no lugar certo; 2) palavra, acento, v\u00edrgula ou termina\u00e7\u00e3o que na imagem est\u00e1 DIFERENTE da transcri\u00e7\u00e3o \u2014 volte para EXATAMENTE o que est\u00e1 escrito na imagem, mesmo que seja erro de portugu\u00eas do aluno (n\u00e3o corrija o aluno: "n\u00e3o t\u00eam", "por cuidando", "dos do pr\u00f3ximo" ficam como o aluno escreveu); 3) trecho que est\u00e1 na transcri\u00e7\u00e3o mas n\u00e3o na imagem \u2014 remova. Preserve os par\u00e1grafos. Se a transcri\u00e7\u00e3o come\u00e7ar com a linha "Tema: ...", PRESERVE essa linha como est\u00e1. Responda APENAS com a transcri\u00e7\u00e3o final corrigida, sem coment\u00e1rios.\n\nTRANSCRI\u00c7\u00c3O A CONFERIR:\n' + texto;
         var conferido = String(await geminiOCR(confPrompt, arquivoBase64, arquivoMime) || '').trim();
         /* aceita a confer\u00eancia s\u00f3 se ela n\u00e3o encolheu o texto (confer\u00eancia que corta \u00e9 pior que nenhuma) */
         if (conferido.length >= texto.length * 0.9) { if (conferido !== texto) console.info('[ocr] confer\u00eancia ajustou a transcri\u00e7\u00e3o (' + texto.length + ' \u2192 ' + conferido.length + ')'); texto = conferido; }
         else console.warn('[ocr] confer\u00eancia descartada (encolheu):', texto.length, '\u2192', conferido.length);
       } catch (e) { console.warn('[ocr] confer\u00eancia falhou:', e); }
+    }
+    /* v9-6: o tema da foto preenche a faixa TEMA — com tres travas:
+       so a linha do topo conta, so quando a faixa esta vazia, e o aluno e avisado.
+       Tema escolhido na biblioteca tem tema_id e vale mais que o OCR: nao se mexe. */
+    var _sep = _separarTemaDaTranscricao(texto);
+    var _temaDaFoto = false;
+    if (_sep.tema){
+      texto = _sep.texto;
+      var _inpT = document.getElementById('tituloRedacao');
+      if (_inpT && !String(_inpT.value || '').trim()){
+        _inpT.value = _sep.tema; pintarTema(); _temaDaFoto = true;
+      }
     }
     if (texto && texto.trim().length >= 40){
       textarea.value = texto.trim();
@@ -1641,6 +1769,7 @@ async function aoEscolherArquivo(inp){
       arquivoBase64 = null; arquivoMime = null; /* corre\u00e7\u00e3o parte do texto revisado */
       document.getElementById('faixaArquivo').classList.remove('visivel');
       marcarTextoDaFoto(); /* v9-35: gaveta + faixa de confer\u00eancia */
+      if (_temaDaFoto) setTimeout(function(){ toast('\ud83d\udcf7 O tema veio da foto \u2014 confira na faixa TEMA', 6000); }, 1400);
     } else {
       document.getElementById('statusArquivo').textContent = 'anexado \u2014 transcri\u00e7\u00e3o no envio';
       toast('\u26a0\ufe0f Transcri\u00e7\u00e3o incompleta. Voc\u00ea pode digitar ou enviar mesmo assim.', 6000);
@@ -3772,6 +3901,7 @@ function aplicarTemaNaFolha(tema){
   var inp = document.getElementById('tituloRedacao');
   if (inp && tema && tema.titulo && inp.value.trim() !== tema.titulo) inp.value = tema.titulo;
   if (tema && tema.titulo) window._temaAtual = tema.titulo;
+  try { pintarTema(); } catch(e) {} /* v9-6: o visor da faixa acompanha */
 }
 async function temaPelaUrl(){
   var id = null;
@@ -3801,6 +3931,7 @@ async function temaPelaUrl(){
   try { fonteSalva = localStorage.getItem('redaon-fonte-folha') || 'manuscrita'; } catch(e) {}
   aplicarFonteFolha(fonteSalva);
   try { await temaPelaUrl(); } catch(e) { console.warn('[tema url]', e); }
+  pintarTema(); /* v9-6: a faixa TEMA mostra o tema (ou o convite) desde o primeiro quadro */
   restaurarRascunho();
   restaurarRascunhoNuvem(); /* nuvem: o mais recente vence, sem bloquear a tela */
   ajustarAlturaFolha(); atualizarRegua();
