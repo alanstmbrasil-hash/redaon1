@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v4-0 · sobre aluno-base-v6 (v6-4-2) · correção em caderno de quatro páginas (mockup v9) -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v4-1 · sobre aluno-base-v6 (v6-4-2) · correção em caderno de quatro páginas (mockup v9) -->
 <script>
 (function(){
   var pref='auto';
@@ -102,15 +102,13 @@
 .avisoGrifo{ font-size:.72rem; color:var(--muted); margin:.6rem 0 0; }
 
 /* página 4 · sua nota */
-.notaTopo{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.16); border-radius:1rem; padding:.9rem 1rem; margin-bottom:.7rem; display:flex; align-items:center; gap:.9rem; }
-.notaTopo .n{ font-size:2.5rem; font-weight:900; line-height:1; color:var(--cyan); flex:0 0 auto; }
-.notaTopo .lado{ flex:1; min-width:0; }
-.notaTopo .lado p{ margin:0 0 .4rem; font-size:.78rem; color:var(--muted); line-height:1.45; }
-.notaTopo .lado p:last-child{ margin-bottom:0; }
-.notaTopo .lado b{ color:var(--text); }
+.padrao{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.16); border-radius:1rem; padding:.85rem .95rem; margin-bottom:.7rem; }
+.padrao p.tx{ margin:0 0 .45rem; font-size:.82rem; color:var(--text2); line-height:1.55; }
+.padrao p.tx:last-child{ margin-bottom:0; }
+.padrao b{ color:var(--text); }
 .comp{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.16); border-radius:1rem; padding:.85rem .95rem; margin-bottom:.6rem; }
 .comp .top{ display:flex; align-items:center; gap:.5rem; margin-bottom:.45rem; }
-.comp .cx{ font-size:.72rem; font-weight:900; color:var(--muted); }
+.comp .cx{ font-size:.72rem; font-weight:900; color:var(--text); }
 .comp .tit{ flex:1; font-size:.86rem; font-weight:700; color:var(--text); }
 .comp .pt{ font-size:1.05rem; font-weight:900; }
 .comp.v .pt{ color:var(--green); } .comp.a .pt{ color:var(--notaAmarelo); } .comp.r .pt{ color:var(--red); }
@@ -119,7 +117,9 @@
 .comp.v .barra i{ background:var(--green); } .comp.a .barra i{ background:var(--notaAmarelo); } .comp.r .barra i{ background:var(--red); }
 .comp .fala{ display:flex; gap:.55rem; align-items:flex-start; font-size:.82rem; line-height:1.55; color:var(--text2); }
 .comp .fala .quem{ flex:0 0 26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:.8rem; }
-.comp .fala.ia .quem{ background:rgba(var(--cyanRGB),.14); }
+/* v4-1: o corretor robô (Avatares/corretor-busto) comenta a competência. Embutido: ~4 KB, sem requisição extra.
+   A foto da Profa. Blanche fica reservada para o comentário dela quando validar (Passo 2/3). */
+.comp .fala.ia .quem{ background:rgba(var(--cyanRGB),.14) url(data:image/webp;base64,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) center/cover no-repeat; }
 .comp .fala b{ color:var(--text); }
 .comp .deslize{ margin-top:.5rem; font-size:.78rem; color:var(--muted); }
 .comp .deslize span{ display:block; padding:.3rem 0; border-top:1px solid rgba(var(--borderRGB),.10); }
@@ -139,13 +139,11 @@
 
 /* página 2 · reescrita */
 .reTopo{ font-size:.8rem; color:var(--muted); margin:0 0 .6rem; line-height:1.5; }
-/* página 3 · comparar */
-.cmp{ background:var(--surface); border-left:3px solid var(--cyan); border-radius:.7rem; padding:.75rem .85rem; margin-bottom:.6rem; }
-.cmp .h{ display:flex; justify-content:space-between; align-items:center; margin-bottom:.4rem; }
-.cmp .h b{ font-size:.8rem; color:var(--text); } .cmp .h span{ font-size:.7rem; color:var(--muted); }
-.cmp p{ margin:0 0 .35rem; font-size:.82rem; line-height:1.55; color:var(--text2); }
-.cmp p b{ color:var(--text); }
-.cmp .ficha{ font-size:.74rem; color:var(--muted); }
+/* página 3 · comparar — v4-1: mesmo cartão e mesmo cabeçalho da Sua nota, sem a barra */
+.comp.cmp p{ margin:0 0 .35rem; font-size:.82rem; line-height:1.55; color:var(--text2); }
+.comp.cmp p:last-child{ margin-bottom:0; }
+.comp.cmp p b{ color:var(--text); }
+.comp.cmp .ficha{ font-size:.74rem; color:var(--muted); }
 .aviso{ font-size:.85rem; color:var(--muted); text-align:center; padding:1.5rem 0; line-height:1.55; }
 .aviso.ok{ color:var(--green); }
 .notaTeto{ font-size:.76rem; color:var(--muted); text-align:center; margin-top:.4rem; }
@@ -207,7 +205,7 @@
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v4-0'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v4-1'
   });
 
   var COMP_NOMES=['Norma culta','Repert\u00f3rio','Argumenta\u00e7\u00e3o','Coes\u00e3o','Interven\u00e7\u00e3o'];
@@ -442,24 +440,34 @@
       if(d && typeof d==='object' && typeof d.trecho==='string' && (d.explicacao||d.desvio||d.correcao)){
         trecho=d.trecho; expl=String(d.explicacao||d.desvio||d.correcao);
       } else {
+        /* v4-1: no banco o formato real \u00e9 "trecho - explica\u00e7\u00e3o"; "trecho - Desvio: explica\u00e7\u00e3o" s\u00f3 nos antigos */
         var txt=String(typeof d==='string'?d:(d&&(d.desvio||d.trecho))||JSON.stringify(d));
-        var k=txt.indexOf(' - Desvio:');
+        var k=txt.indexOf(' - ');
         trecho=k>0?txt.slice(0,k):''; expl=k>0?txt.slice(k+3):txt;
       }
       expl=String(expl).replace(/^\s*Desvio:\s*/i,'').trim();
       return { trecho:String(trecho).trim(), expl:expl };
     }).filter(function(d){ return d.trecho || d.expl; });
   }
-  /* Casamento por substring EXATA. S\u00f3 tira espa\u00e7os das pontas e, se o trecho vier entre aspas,
-     tenta o miolo \u2014 que continua sendo exato. Sem correspond\u00eancia aproximada. */
-  function faixaDoTrecho(texto, trecho, usadas){
-    var cands=[trecho];
-    var m=trecho.match(/^["\u201c'\u2018](.+)["\u201d'\u2019]$/);
+  /* Par\u00e1grafos da reda\u00e7\u00e3o. A foto guarda uma quebra no fim de cada linha da folha: se o texto
+     tem linha em branco, par\u00e1grafo \u00e9 a linha em branco e a quebra simples vira espa\u00e7o.
+     Sem nenhuma linha em branco (texto digitado com Enter simples), cada quebra \u00e9 par\u00e1grafo. */
+  function paragrafosRedacao(texto){
+    var t=String(texto||'').replace(/\r\n?/g,'\n');
+    var blocos=/\n[ \t]*\n/.test(t) ? t.split(/\n[ \t]*\n+/) : t.split('\n');
+    return blocos.map(function(p){ return p.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+  }
+  /* Casamento EXATO letra a letra. S\u00f3 o espa\u00e7o \u00e9 flex\u00edvel: quebra de linha ou espa\u00e7o duplo
+     contam como um espa\u00e7o. Se o trecho vier entre aspas, tenta tamb\u00e9m o miolo. Sem aproxima\u00e7\u00e3o. */
+  function faixaDoTrecho(plano, trecho, usadas){
+    var base=trecho.replace(/\s+/g,' ').trim();
+    var cands=[base];
+    var m=base.match(/^["\u201c'\u2018](.+)["\u201d'\u2019]$/);
     if(m) cands.push(m[1].trim());
     for(var c=0;c<cands.length;c++){
       var alvo=cands[c]; if(alvo.length<3) continue;
       var de=0, ix;
-      while((ix=texto.indexOf(alvo,de))>=0){
+      while((ix=plano.indexOf(alvo,de))>=0){
         var fim=ix+alvo.length, choca=usadas.some(function(u){ return ix<u[1] && fim>u[0]; });
         if(!choca) return [ix,fim];
         de=ix+1;
@@ -468,24 +476,26 @@
     return null;
   }
   function textoComGrifos(texto, deslizes){
+    var pars=paragrafosRedacao(texto);
+    var junto=pars.join('\n');               /* \n separa par\u00e1grafos */
+    var plano=junto.replace(/\n/g,' ');       /* mesmo comprimento: os \u00edndices batem */
     var faixas=[];
-    deslizes.forEach(function(d){ if(!d.trecho) return; var f=faixaDoTrecho(texto,d.trecho,faixas); if(f) faixas.push(f); });
+    deslizes.forEach(function(d){ if(!d.trecho) return; var f=faixaDoTrecho(plano,d.trecho,faixas); if(f) faixas.push(f); });
     faixas.sort(function(a,b){ return a[0]-b[0]; });
-    var html='', re=/[^\n]+/g, p;
-    while((p=re.exec(texto))){
-      var ps=p.index, pe=ps+p[0].length;
-      if(!p[0].trim()) continue;
-      var cur=ps, h='';
+    var html='', ps=0;
+    pars.forEach(function(p){
+      var pe=ps+p.length, cur=ps, h='';
       faixas.forEach(function(f){
         var a=Math.max(f[0],ps), b=Math.min(f[1],pe);
         if(a>=b) return;
-        if(a>cur) h+=escapeHtmlSimples(texto.slice(cur,a));
-        h+='<mark onclick="verDeslize()">'+escapeHtmlSimples(texto.slice(a,b))+'</mark>';
+        if(a>cur) h+=escapeHtmlSimples(junto.slice(cur,a));
+        h+='<mark onclick="verDeslize()">'+escapeHtmlSimples(junto.slice(a,b))+'</mark>';
         cur=b;
       });
-      if(cur<pe) h+=escapeHtmlSimples(texto.slice(cur,pe));
-      html+='<p>'+h.replace(/^\s+/,'')+'</p>';
-    }
+      if(cur<pe) h+=escapeHtmlSimples(junto.slice(cur,pe));
+      html+='<p>'+h+'</p>';
+      ps=pe+1;
+    });
     return { html:html, grifos:faixas.length };
   }
   /* tocar num grifo leva \u00e0 C1, na p\u00e1gina da nota */
@@ -539,7 +549,7 @@
           +(m.por_que?'<p><b>Por que melhora:</b> '+escapeHtmlSimples(nomearReescrita(m.por_que))+'</p>':'')
           +(m.ficha?'<p class="ficha">Esse repert\u00f3rio est\u00e1 no acervo do tema (ficha '+escapeHtmlSimples(String(m.ficha))+'). Vale estudar.</p>':'');
       } else corpo='<p>'+escapeHtmlSimples(nomearReescrita(m))+'</p>';
-      return '<div class="cmp"><div class="h"><b>C'+(i+1)+'</b><span>'+v+' de 200</span></div>'+corpo+'</div>';
+      return '<div class="comp cmp '+classeComp(v)+'">'+cabComp(v,i)+corpo+'</div>';
     }).join('');
     if(!blocos) return '<p class="aviso ok">\u2713 Todas as compet\u00eancias j\u00e1 est\u00e3o no teto.</p>';
     if(noTeto.length) blocos+='<p class="notaTeto">'+noTeto.join(' e ')+' j\u00e1 '+(noTeto.length>1?'est\u00e3o':'est\u00e1')+' no teto.</p>';
@@ -551,10 +561,10 @@
      Reda\u00e7\u00e3o antiga sem os tr\u00eas campos: l\u00ea analise_completa. Nada existe: o bloco n\u00e3o aparece. */
   function htmlPadrao(t){
     var m=t.match(/^([^.!?\n]{8,}?[.!?])\s+([\s\S]+)$/);
-    if(!m) return paragrafos(t);
+    if(!m) return paragrafos(t,'tx');
     var resto=m[2].split(/\n+/).map(function(l){ return l.trim(); }).filter(Boolean);
-    return '<p><b>'+escapeHtmlSimples(m[1])+'</b> '+escapeHtmlSimples(resto.shift()||'')+'</p>'
-      + resto.map(function(l){ return '<p>'+escapeHtmlSimples(l)+'</p>'; }).join('');
+    return '<p class="tx"><b>'+escapeHtmlSimples(m[1])+'</b> '+escapeHtmlSimples(resto.shift()||'')+'</p>'
+      + resto.map(function(l){ return '<p class="tx">'+escapeHtmlSimples(l)+'</p>'; }).join('');
   }
   function htmlProfessor(){
     if(!atual.rev) return '';
@@ -568,6 +578,10 @@
     return '<div class="profBox"><div class="quem"><span class="material-symbols-outlined" style="font-size:1.1rem;font-variation-settings:\'FILL\' 1;">verified</span>'+escapeHtmlSimples(nome)+'</div>'
       +'<p class="txt">\u201c'+escapeHtmlSimples(texto)+'\u201d</p>'
       +(quando?'<p class="quando">Comentada em '+quando+'</p>':'')+'</div>';
+  }
+  /* cabe\u00e7alho \u00fanico de compet\u00eancia: Sua nota e Comparar */
+  function cabComp(v,i){
+    return '<div class="top"><span class="cx">C'+(i+1)+'</span><span class="tit">'+COMP_NOMES[i]+'</span><span class="pt">'+v+'</span></div>';
   }
   function htmlCompetencias(projeto){
     if(!atual.comp) return '';
@@ -584,10 +598,9 @@
       if(i===2 && projeto){
         extra+='<div class="projeto"><p class="rotBloco">Projeto de texto</p>'+paragrafos(projeto,'tx')+'</div>';
       }
-      return '<div class="comp '+classeComp(v)+'" id="compC'+(i+1)+'">'
-        +'<div class="top"><span class="cx">C'+(i+1)+'</span><span class="tit">'+COMP_NOMES[i]+'</span><span class="pt">'+v+'</span></div>'
+      return '<div class="comp '+classeComp(v)+'" id="compC'+(i+1)+'">'+cabComp(v,i)
         +'<div class="barra"><i style="width:'+Math.max(0,Math.min(100,v/200*100))+'%"></i></div>'
-        +(fb?'<div class="fala ia"><span class="quem">\u{1F916}</span><span>'+escapeHtmlSimples(fb)+'</span></div>':'')
+        +(fb?'<div class="fala ia"><span class="quem" aria-hidden="true"></span><span>'+escapeHtmlSimples(fb)+'</span></div>':'')
         +extra+'</div>';
     }).join('');
   }
@@ -595,8 +608,8 @@
     var j=atual.json||{};
     var padrao=_txt(j.analise_padrao_dominante), projeto=_txt(j.analise_projeto_texto), proximo=_txt(j.analise_proximo_passo);
     var legado=(!padrao && !projeto && !proximo) ? _txt(j.analise_completa) : '';
-    var h='<div class="notaTopo"><span class="n">'+escapeHtmlSimples(atual.nota)+'</span>'
-      +'<div class="lado">'+(padrao?htmlPadrao(padrao):'<p>de 1000</p>')+'</div></div>';
+    /* v4-1 \u00b7 Op\u00e7\u00e3o A (Alan): a nota j\u00e1 est\u00e1 no cabe\u00e7alho \u2014 o topo \u00e9 o padr\u00e3o dominante, na largura toda */
+    var h=padrao?'<div class="padrao"><p class="rotBloco">O que mais pesou na sua nota</p>'+htmlPadrao(padrao)+'</div>':'';
     h+=htmlCompetencias(projeto);
     h+=htmlProfessor();
     if(proximo) h+='<div class="fecho"><p class="rotBloco">Pr\u00f3ximo passo</p>'+paragrafos(proximo,'tx')+'</div>';
