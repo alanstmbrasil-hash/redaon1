@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v4-1 · sobre aluno-base-v6 (v6-4-2) · correção em caderno de quatro páginas (mockup v9) -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v4-2 · sobre aluno-base-v6 (v6-4-2) · correção em caderno de quatro páginas (mockup v9) -->
 <script>
 (function(){
   var pref='auto';
@@ -139,7 +139,7 @@
 
 /* página 2 · reescrita */
 .reTopo{ font-size:.8rem; color:var(--muted); margin:0 0 .6rem; line-height:1.5; }
-/* página 3 · comparar — v4-1: mesmo cartão e mesmo cabeçalho da Sua nota, sem a barra */
+/* página 3 · comparar — mesmo cartão, cabeçalho e barra da Sua nota */
 .comp.cmp p{ margin:0 0 .35rem; font-size:.82rem; line-height:1.55; color:var(--text2); }
 .comp.cmp p:last-child{ margin-bottom:0; }
 .comp.cmp p b{ color:var(--text); }
@@ -205,7 +205,7 @@
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v4-1'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v4-2'
   });
 
   var COMP_NOMES=['Norma culta','Repert\u00f3rio','Argumenta\u00e7\u00e3o','Coes\u00e3o','Interven\u00e7\u00e3o'];
@@ -579,9 +579,10 @@
       +'<p class="txt">\u201c'+escapeHtmlSimples(texto)+'\u201d</p>'
       +(quando?'<p class="quando">Comentada em '+quando+'</p>':'')+'</div>';
   }
-  /* cabe\u00e7alho \u00fanico de compet\u00eancia: Sua nota e Comparar */
+  /* cabe\u00e7alho \u00fanico de compet\u00eancia: Sua nota e Comparar (v4-2: a barra faz parte dele) */
   function cabComp(v,i){
-    return '<div class="top"><span class="cx">C'+(i+1)+'</span><span class="tit">'+COMP_NOMES[i]+'</span><span class="pt">'+v+'</span></div>';
+    return '<div class="top"><span class="cx">C'+(i+1)+'</span><span class="tit">'+COMP_NOMES[i]+'</span><span class="pt">'+v+'</span></div>'
+      +'<div class="barra"><i style="width:'+Math.max(0,Math.min(100,v/200*100))+'%"></i></div>';
   }
   function htmlCompetencias(projeto){
     if(!atual.comp) return '';
@@ -599,7 +600,6 @@
         extra+='<div class="projeto"><p class="rotBloco">Projeto de texto</p>'+paragrafos(projeto,'tx')+'</div>';
       }
       return '<div class="comp '+classeComp(v)+'" id="compC'+(i+1)+'">'+cabComp(v,i)
-        +'<div class="barra"><i style="width:'+Math.max(0,Math.min(100,v/200*100))+'%"></i></div>'
         +(fb?'<div class="fala ia"><span class="quem" aria-hidden="true"></span><span>'+escapeHtmlSimples(fb)+'</span></div>':'')
         +extra+'</div>';
     }).join('');
