@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<title>RedaON · Nova Redação · v9-13</title>
+<title>RedaON · Nova Redação · v9-14</title>
 <!-- v9-7: CASCATA DE TEMA. Esta tela era a única sem o script de arranque que as
      outras (inicio, temas, plano, minhas-redacoes) já tinham. Sem o atributo
      data-tema no elemento raiz, a regra html[data-tema="claro"] nunca casava e
@@ -532,7 +532,8 @@ header.hApp{ display:none !important; }
 #contadorTexto{ flex:1; min-width:0; font-size:.74rem; font-weight:600; color:var(--muted);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 #contadorTexto b{ font-weight:800; }
-#blocoAcoes .linhaRodape .btn{ width:auto; min-height:40px; padding:0 1.15rem; font-size:.8rem; flex:0 0 auto; }
+/* v9-14: com a Revisão fora, o Enviar respira um pouco mais */
+#blocoAcoes .linhaRodape .btn{ width:auto; min-height:40px; padding:0 1.5rem; font-size:.8rem; flex:0 0 auto; }
 #blocoAcoes .linhaRodape .btn.ghost{ padding:0 .95rem; }
 #gavetaMenu .rotuloNav{ font-size:.6rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
   color:var(--muted); margin:.1rem 0 .4rem; }
@@ -680,7 +681,7 @@ header.hApp{ display:none !important; }
   <!-- TOPBAR DO MODO FOCO -->
   <div class="topFoco">
     <button class="voltar" onclick="voltarDaEscrita()" aria-label="Voltar"><span class="material-symbols-outlined">arrow_back</span></button>
-    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-13</span></h1>
+    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-14</span></h1>
     <button class="tIcone" id="btnApoioTop" onclick="toggleApoio()" aria-label="Material de apoio"><i class="em">📚</i></button>
     <span id="tempoTop" onclick="abrirTempo()" title="Gestão de tempo">⏱ <span id="tempoTopTxt">00:00</span></span>
     <button class="tIcone" id="btnRelogioTop" onclick="abrirTempo()" aria-label="Gestão de tempo"><i class="em">⏱</i></button>
@@ -756,7 +757,13 @@ header.hApp{ display:none !important; }
     <div class="reguaLegenda"><span>0</span><span id="marcoLinhas">7 linhas</span><span class="ok">15–30 ✓</span><span>30</span></div>
     <div class="linhaRodape">
       <span id="contadorTexto">≈ <b>0</b>/30 linhas · 0 palavras</span>
-      <button class="btn ghost" id="btnRevisar" onclick="toast('Modo revisão — em breve ✨')">Revisão</button>
+      <!-- v9-14: botão "Revisão" removido. Era um stub ("em breve") colado no
+           Enviar, e a função que ele prometia não deve existir ANTES do envio:
+           corrigir a ortografia do aluno faria a C1 medir o corretor, não ele.
+           É a mesma decisão que já está no spellcheck="false" da folha e nos
+           prompts de OCR ("mantenha os erros do aluno"). O que Alan quer existe
+           depois da correção: os desvios vêm em _agentes.c1.desvios e o caderno
+           de minhas-redacoes os grifa no próprio texto. -->
       <button class="btn" id="btnEnviar" onclick="enviarPrevia()">Enviar</button>
     </div>
   </div></div>
@@ -1192,7 +1199,7 @@ function iniciarDock(dockId, opts) {
 
 /* Esqueleto da base: sidebar (desktop) + barra (menu retrátil no celular) +
    gavetas Mais/Métodos + toast. Header padrão fica oculto (modo foco). */
-montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-13' });
+montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-14' });
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){
