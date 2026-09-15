@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<title>RedaON · Nova Redação · v9-11</title>
+<title>RedaON · Nova Redação · v9-12</title>
 <!-- v9-7: CASCATA DE TEMA. Esta tela era a única sem o script de arranque que as
      outras (inicio, temas, plano, minhas-redacoes) já tinham. Sem o atributo
      data-tema no elemento raiz, a regra html[data-tema="claro"] nunca casava e
@@ -344,22 +344,22 @@ header.hApp{ display:none !important; }
   border-right:1px solid #e2ddca; }
 .tituloFaixa .rot span{ writing-mode:vertical-rl; transform:rotate(180deg);
   font-size:.55rem; font-weight:800; letter-spacing:.12em; color:#a89f88; }
-/* v9-6: a faixa TEMA vira LEITURA — ate duas linhas, reticencias alem disso.
-   Input de texto nao quebra linha, e por isso a v9-5 nao resolveu: o campo
-   editavel foi para a gaveta e aqui ficou um visor, que pode ter duas linhas
-   e libera o toque para abrir o tema inteiro.
-
-   v9-11: o clamp sozinho NAO segurava. Como o visor e item flex de uma faixa
-   com align-items:stretch, o -webkit-box reporta a altura do conteudo INTEIRO:
-   a faixa crescia para caber 3 linhas, sobrava espaco na caixa, o clamp nao
-   cortava nada e o tema invadia a folha. A max-height de duas linhas resolve
-   por medida — o clamp fica por conta das reticencias, nao do corte. */
-.tituloFaixa .temaVisor{ flex:1; min-width:0; cursor:pointer;
-  padding:.6rem .875rem; font-family:'Caveat',cursive; font-size:1.25rem; font-weight:600;
-  line-height:1.3; color:#2c3e40; display:-webkit-box; -webkit-line-clamp:2;
-  -webkit-box-orient:vertical; overflow:hidden; word-break:break-word;
-  max-height:2.6em; box-sizing:content-box; }
-.tituloFaixa .temaVisor.vazio{ color:#b6ae97; font-weight:500; }
+/* v9-12: TERCEIRA tentativa, e agora por construcao em vez de por regra.
+   O que falhou antes: o clamp vivia no proprio item flex da faixa. Com
+   align-items:stretch o item e esticado ate a altura da linha do flex, que o
+   -webkit-box calcula pelo conteudo INTEIRO — a caixa ficava grande, o clamp
+   punha as reticencias na 2a linha e a 3a aparecia igual, por baixo. A
+   max-height em em da v9-11 nao venceu essa esticada.
+   Agora sao dois elementos: o visor e um item flex comum (block, overflow
+   hidden) e o clamp acontece num span DENTRO dele, que nao e item flex de
+   nada e tem max-height em PIXEL — 2 x o line-height, sem conta de em. */
+.tituloFaixa .temaVisor{ flex:1; min-width:0; cursor:pointer; overflow:hidden;
+  padding:.55rem .875rem; display:block; }
+.tituloFaixa .temaVisor .temaLinhas{ display:-webkit-box; -webkit-line-clamp:2;
+  -webkit-box-orient:vertical; overflow:hidden; max-height:52px;
+  font-family:'Caveat',cursive; font-size:1.25rem; font-weight:600; line-height:26px;
+  color:#2c3e40; word-break:break-word; }
+.tituloFaixa .temaVisor.vazio .temaLinhas{ color:#b6ae97; font-weight:500; }
 /* Alternador de fonte (manuscrita ↔ digitada) */
 .fonteBtn{ flex:0 0 auto; align-self:center; margin-right:.5rem;
   background:#fdfbf4; border:1px solid #d8d2c0; color:#8a8576;
@@ -390,7 +390,7 @@ header.hApp{ display:none !important; }
   background-image:repeating-linear-gradient(transparent,transparent 33px,#d8d2c0 33px,#d8d2c0 34px); }
 #textoRedacao::placeholder{ color:#c3bca6; }
 /* Fonte digitada: mesma letra do app, linhas preservadas */
-.folhaCard.fonteInter .tituloFaixa .temaVisor{ font-family:Inter,sans-serif; font-size:.95rem; font-weight:700; line-height:1.4; max-height:2.8em; }
+.folhaCard.fonteInter .tituloFaixa .temaVisor .temaLinhas{ font-family:Inter,sans-serif; font-size:.95rem; font-weight:700; line-height:22px; max-height:44px; }
 .folhaCard.fonteInter #textoRedacao{ font-family:Inter,sans-serif; font-size:.95rem; font-weight:400; line-height:34px; }
 
 /* ── APOIO NO DESKTOP: coluna com rolagem própria ── */
@@ -671,7 +671,7 @@ header.hApp{ display:none !important; }
   <!-- TOPBAR DO MODO FOCO -->
   <div class="topFoco">
     <button class="voltar" onclick="voltarDaEscrita()" aria-label="Voltar"><span class="material-symbols-outlined">arrow_back</span></button>
-    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-11</span></h1>
+    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-12</span></h1>
     <button class="tIcone" id="btnApoioTop" onclick="toggleApoio()" aria-label="Material de apoio"><i class="em">📚</i></button>
     <span id="tempoTop" onclick="abrirTempo()" title="Gestão de tempo">⏱ <span id="tempoTopTxt">00:00</span></span>
     <button class="tIcone" id="btnRelogioTop" onclick="abrirTempo()" aria-label="Gestão de tempo"><i class="em">⏱</i></button>
@@ -687,7 +687,7 @@ header.hApp{ display:none !important; }
         <div class="tituloFaixa">
           <div class="rot" onclick="abrirTema()" title="Ver e editar o tema" role="button" tabindex="0"><span>TEMA</span></div>
           <!-- v9-6: visor de leitura (2 linhas). O toque abre a gaveta, onde o tema é editado. -->
-          <div class="temaVisor vazio" id="temaVisor" onclick="abrirTema()" role="button" tabindex="0" title="Ver e editar o tema">Qual é o tema da sua redação?</div>
+          <div class="temaVisor vazio" id="temaVisor" onclick="abrirTema()" role="button" tabindex="0" title="Ver e editar o tema"><span class="temaLinhas" id="temaLinhas">Qual é o tema da sua redação?</span></div>
           <!-- fonte da verdade do tema: todo o resto do código lê .value daqui -->
           <input id="tituloRedacao" type="hidden">
           <button class="fonteBtn" id="btnFonte" onclick="alternarFonteFolha()" title="Alternar letra da folha">Aa</button>
@@ -1183,7 +1183,7 @@ function iniciarDock(dockId, opts) {
 
 /* Esqueleto da base: sidebar (desktop) + barra (menu retrátil no celular) +
    gavetas Mais/Métodos + toast. Header padrão fica oculto (modo foco). */
-montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-11' });
+montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-12' });
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){
@@ -1709,11 +1709,12 @@ function desfazerLimpar(){
    #tituloRedacao (escondido) segue sendo a fonte da verdade para o resto da tela. */
 function pintarTema(){
   var visor = document.getElementById('temaVisor');
+  var linhas = document.getElementById('temaLinhas');
   var inp = document.getElementById('tituloRedacao');
-  if (!visor) return;
+  if (!visor || !linhas) return;
   var t = (inp && inp.value ? inp.value : '').trim();
-  if (t){ visor.classList.remove('vazio'); visor.textContent = t; visor.title = t; }
-  else { visor.classList.add('vazio'); visor.textContent = 'Qual é o tema da sua redação?'; visor.title = 'Escolher o tema'; }
+  if (t){ visor.classList.remove('vazio'); linhas.textContent = t; visor.title = t; }
+  else { visor.classList.add('vazio'); linhas.textContent = 'Qual é o tema da sua redação?'; visor.title = 'Escolher o tema'; }
 }
 /* v9-7: a URL tambem ressuscitava o tema. ?tema=<uuid> faz temaPelaUrl() buscar
    o tema no banco a cada carregamento, por cima do que o aluno decidiu. */
@@ -1805,6 +1806,15 @@ function aplicarMetodo(m){
 /* v9-6: separa a linha do tema da transcrição, quando ela vier.
    Só a primeira linha não vazia conta: "Tema:" no meio da argumentação é
    texto do aluno, não o tema da folha. */
+/* v9-12: o modelo devolve o rotulo junto ("TEMA: A RESPONSABILIDADE..."), porque
+   ele esta escrito na folha. O rotulo e a marca de onde o tema comeca, nao parte
+   do tema: sai aqui, num lugar so, para os dois caminhos de extracao. */
+function _semRotuloTema(s){
+  return String(s || '')
+    .replace(/^\s*tema\s*[:\u2013\u2014-]\s*/i, '')
+    .replace(/^\s*tema\s+(?=[a-z\u00c0-\u00ff])/i, '')
+    .trim();
+}
 /* v9-9: o tema agora vem entre [[TEMA]] e [[/TEMA]], e nao mais "a primeira linha".
    A v9-8 falhou porque dependia de adivinhar onde o enunciado terminava: o tema
    manuscrito ocupa varias linhas e, quando escrito em MAIUSCULAS, a trava de
@@ -1817,7 +1827,7 @@ function _separarTemaDaTranscricao(txt){
   /* 1 · marcadores (caminho principal) */
   var m = t.match(/\[\[\s*TEMA\s*\]\]([\s\S]*?)\[\[\s*\/\s*TEMA\s*\]\]/i);
   if (m){
-    var tema = m[1].replace(/\s+/g, ' ').trim().replace(/^["'\u201c]|["'\u201d]$/g, '').trim();
+    var tema = _semRotuloTema(m[1].replace(/\s+/g, ' ').trim().replace(/^["'\u201c]|["'\u201d]$/g, ''));
     var resto = (t.slice(0, m.index) + t.slice(m.index + m[0].length)).replace(/^\s+/, '');
     if (tema.length >= 6) return { tema: tema, texto: resto };
     return { tema: '', texto: resto };
@@ -1828,7 +1838,7 @@ function _separarTemaDaTranscricao(txt){
     var depois = t.slice(ab.index + ab[0].length);
     var corte = depois.search(/\n\s*\n/);
     var bruto = corte >= 0 ? depois.slice(0, corte) : depois.split(/\r?\n/)[0];
-    var t2 = bruto.replace(/\[\[\s*\/?\s*TEMA\s*\]\]/gi, '').replace(/\s+/g, ' ').trim();
+    var t2 = _semRotuloTema(bruto.replace(/\[\[\s*\/?\s*TEMA\s*\]\]/gi, '').replace(/\s+/g, ' '));
     var sobra = (t.slice(0, ab.index) + (corte >= 0 ? depois.slice(corte) : depois.slice(bruto.length))).replace(/^\s+/, '');
     if (t2.length >= 6) return { tema: t2, texto: sobra };
   }
@@ -2017,9 +2027,32 @@ function toggleEixo(prefixo, id){
 }
 
 /* ── Geração REAL do eixo (adaptador RAG da produção p/ a UI nova) ── */
-var PROMPT_ENTENDER = function(t){
-  return 'Voc\u00ea \u00e9 a PROfa da RedaON. Para o tema de reda\u00e7\u00e3o ENEM: "' + t + '", produza EXATAMENTE 3 blocos curtos em portugu\u00eas:\n**RECORTE:** [2 linhas \u2014 o que o tema pede de verdade e o que fica de fora]\n**O QUE A BANCA ESPERA:** [3 linhas \u2014 diagn\u00f3stico com causas, consequ\u00eancias e proposta de interven\u00e7\u00e3o completa]\n**ARMADILHAS:** [2 linhas \u2014 os erros de recorte/tangenciamento mais prov\u00e1veis]\nSem introdu\u00e7\u00e3o, sem despedida.';
+/* v9-12: PROMPTS TRANSPLANTADOS DO HUB (PR e PROMPT_ENTENDER).
+   Era a causa raiz do "fora de padrao": os PROMPTS_MATERIAL desta tela eram os
+   antigos e pediam "ARGUMENTO 1 / USE AGORA / ENTENDA / COMO CONECTAR", com
+   preambulo do modelo ("Ola! Sou a PROfa...") e linha de "---". O hub pede itens
+   listados e curtos, que o renderizador transforma em ficha.
+   Mais grave: as duas telas gravam o material na MESMA tabela do banco. Com
+   prompts diferentes, o cache ficava com dois formatos misturados, e o aluno via
+   um de cada vez sem motivo aparente. Mesmo prompt nas duas telas = um formato. */
+var PR = {
+  legislacao: function(t){ return 'Liste os 5 principais artigos da Constitui\u00e7\u00e3o Federal e leis relevantes para o tema: "'+t+'". Para cada: n\u00famero, nome e aplica\u00e7\u00e3o ao tema em 1 frase. Use marcadores.'; },
+  historia: function(t){ return 'Explique o contexto hist\u00f3rico de "'+t+'" com 5 marcos temporais numerados. Cada: data/per\u00edodo, fato e relev\u00e2ncia para o Brasil.'; },
+  especialistas: function(t){ return 'Liste 5 especialistas (fil\u00f3sofos/soci\u00f3logos) relevantes para "'+t+'". Para cada: nome, \u00e1rea, obra principal e 1 ideia aplic\u00e1vel ao ENEM.'; },
+  atualidades: function(t){ return 'Liste 5 dados estat\u00edsticos recentes (IBGE, OMS, ONU) sobre "'+t+'". Para cada: fonte, dado num\u00e9rico e como usar como argumento.'; },
+  literatura: function(t){ return 'Liste 5 obras liter\u00e1rias (brasileiras e mundiais) que dialogam com o tema "'+t+'". Para cada: t\u00edtulo, autor, breve descri\u00e7\u00e3o e como usar como repert\u00f3rio no ENEM.'; },
+  filosofia: function(t){ return 'Liste 5 pensadores ou correntes filos\u00f3ficas relevantes para "'+t+'". Para cada: nome do pensador/corrente, conceito-chave e como aplicar ao tema de forma articulada (sem repert\u00f3rio de bolso).'; },
+  cinema: function(t){ return 'Liste 5 filmes, document\u00e1rios ou s\u00e9ries que abordam "'+t+'". Para cada: t\u00edtulo, ano, breve sinopse e como usar como repert\u00f3rio argumentativo.'; },
+  ciencia: function(t){ return 'Liste 5 pesquisas, descobertas cient\u00edficas ou cientistas relevantes para "'+t+'". Para cada: pesquisa/cientista, conclus\u00e3o principal e aplica\u00e7\u00e3o ao tema.'; },
+  culturapop: function(t){ return 'Liste 5 refer\u00eancias de cultura pop brasileira (m\u00fasicas, artistas, fen\u00f4menos sociais, s\u00e9ries nacionais) ligadas a "'+t+'". Para cada: refer\u00eancia, contexto e como articular como repert\u00f3rio no ENEM.'; }
 };
+function PROMPT_ENTENDER(t){
+  return 'Voc\u00ea \u00e9 a PROfa da RedaON. Para o tema de reda\u00e7\u00e3o ENEM "' + t + '", produza um briefing curto em 3 blocos, em texto simples com **negrito** nos r\u00f3tulos:\n' +
+    '**Recorte**: qual \u00e9 exatamente o recorte do tema (o que ele pede e o que N\u00c3O pede), em 2-3 frases.\n' +
+    '**O que a banca espera**: diagn\u00f3stico com causas e consequ\u00eancias + proposta de interven\u00e7\u00e3o completa (agente, a\u00e7\u00e3o, meio, finalidade, detalhamento), em 2-3 frases.\n' +
+    '**Armadilhas**: 2-3 erros comuns que fazem o candidato tangenciar ou perder pontos neste tema.\n' +
+    'M\u00e1ximo de 130 palavras no total. Sem introdu\u00e7\u00e3o nem despedida.';
+}
 async function gerarEixoReal(id){
   var tema = null;
   try { tema = obterTemaAtual(); } catch(e) {}
@@ -2048,7 +2081,8 @@ async function gerarEixoReal(id){
       texto = await _buscarMaterialNoBanco(tema.id, eixoBanco);
     }
     if (!texto){
-      var prompt = (id === 'entender') ? PROMPT_ENTENDER(tema.titulo) : PROMPTS_MATERIAL[id](tema.titulo);
+      var prompt = (id === 'entender') ? PROMPT_ENTENDER(tema.titulo)
+                 : (PR[id](tema.titulo) + '\n\nUse markdown leve. Portugu\u00eas.');
       texto = await geminiGenerate(prompt, null, null, null, { responseMimeType: 'text/plain' });
       if (eixoBanco && tema.oficial && tema.id && texto) _salvarMaterialNoBanco(tema.id, eixoBanco, texto);
     }
@@ -3876,70 +3910,8 @@ ${FORMATO_JSON_MELHORIAS}`;
 
 const TODAS_CATEGORIAS = ['legislacao','historia','especialistas','atualidades','literatura','filosofia','cinema','ciencia','culturapop'];
 
-const PROMPTS_MATERIAL = {
-  legislacao:   (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Legislação para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
-**ARGUMENTO [número]:**
-**USE AGORA:** [frase pronta para inserir na redação, conectada ao tema]
-**ENTENDA:** [3 linhas — qual lei/artigo, o que determina, contexto]
-**COMO CONECTAR:** [como ligar ao argumento da redação]
-Foque em: Constituição Federal, leis específicas, tratados internacionais. Português, direto ao ponto.`,
-
-  historia:     (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de História para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
-**ARGUMENTO [número]:**
-**USE AGORA:** [frase pronta para inserir na redação, conectada ao tema]
-**ENTENDA:** [3 linhas — período, fato histórico, impacto]
-**COMO CONECTAR:** [como ligar ao argumento da redação]
-Foque em: marcos temporais, fatos históricos brasileiros e mundiais relevantes. Português, direto ao ponto.`,
-
-  especialistas:(t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Especialistas para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
-**ARGUMENTO [número]:**
-**USE AGORA:** [frase pronta para inserir na redação com o nome do especialista]
-**ENTENDA:** [3 linhas — quem é, qual obra/conceito, o que defende]
-**COMO CONECTAR:** [como ligar ao argumento da redação]
-Foque em: filósofos, sociólogos, antropólogos, pesquisadores. Inclua brasileiros sempre que possível. Português, direto ao ponto.`,
-
-  atualidades:  (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Atualidades para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
-**ARGUMENTO [número]:**
-**USE AGORA:** [frase pronta com dado numérico e fonte para inserir na redação]
-**ENTENDA:** [3 linhas — fonte, dado completo, contexto]
-**COMO CONECTAR:** [como usar como evidência na redação]
-Foque em: dados IBGE, ONU, OMS, Fórum Econômico Mundial, relatórios recentes. Português, direto ao ponto.`,
-
-  literatura:   (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Literatura para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
-**ARGUMENTO [número]:**
-**USE AGORA:** [frase pronta mencionando a obra e o argumento que ela sustenta]
-**ENTENDA:** [3 linhas — título, autor, o que a obra revela sobre o tema — o aluno não precisa ter lido]
-**COMO CONECTAR:** [como ligar ao argumento da redação]
-Foque em: obras brasileiras e internacionais relevantes para o ENEM. Inclua literatura africana e indígena quando pertinente. Português, direto ao ponto.`,
-
-  filosofia:    (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Filosofia para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
-**ARGUMENTO [número]:**
-**USE AGORA:** [frase pronta com o nome do filósofo e o conceito aplicado ao tema]
-**ENTENDA:** [3 linhas — quem é o filósofo, qual conceito-chave, como se aplica ao tema]
-**COMO CONECTAR:** [como ligar ao argumento da redação]
-Foque em: filósofos brasileiros (Ailton Krenak, Marilena Chaui, Milton Santos) e clássicos. Explique o conceito de forma simples. Português, direto ao ponto.`,
-
-  cinema:       (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Cinema e Arte para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
-**ARGUMENTO [número]:**
-**USE AGORA:** [frase pronta mencionando a obra cultural e o argumento que ela sustenta]
-**ENTENDA:** [3 linhas — título, criador/diretor, o que a obra aborda sobre o tema]
-**COMO CONECTAR:** [como usar como repertório aceito pelo ENEM]
-Foque em: filmes, séries, músicas, obras de arte, documentários. O aluno não precisa ter assistido — precisa entender o argumento. Português, direto ao ponto.`,
-
-  ciencia:      (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Ciência e Dados para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
-**ARGUMENTO [número]:**
-**USE AGORA:** [frase pronta com dado científico e fonte para inserir na redação]
-**ENTENDA:** [3 linhas — fonte, pesquisa ou estudo, dado completo e contexto]
-**COMO CONECTAR:** [como usar como evidência científica na redação]
-Foque em: pesquisas acadêmicas, relatórios científicos, índices de desenvolvimento. Inclua fontes brasileiras. Português, direto ao ponto.`,
-
-  culturapop:   (t) => `Você é a PROfa da RedaON. Gere 4 argumentos de Cultura Pop para o tema: "${t}". Para cada argumento use EXATAMENTE este formato:
-**ARGUMENTO [número]:**
-**USE AGORA:** [frase pronta mencionando a referência pop e o argumento que ela sustenta]
-**ENTENDA:** [3 linhas — qual referência, por que é relevante, como se relaciona ao tema]
-**COMO CONECTAR:** [como usar como repertório aceito pelo ENEM]
-Foque em: séries, games, eventos culturais, redes sociais, fenômenos contemporâneos aceitos pelo ENEM. Português, direto ao ponto.`,
-};
+/* v9-12: PROMPTS_MATERIAL removido — substituido pelo PR do hub (acima).
+   Era ele que produzia o formato ARGUMENTO/USE AGORA/ENTENDA/COMO CONECTAR. */
 
 /* v9-8: as cores estavam FIXAS no tema escuro (#e1e2eb, #c8c4d7, #45edee).
    No tema claro isso virava texto quase branco sobre fundo claro: ilegivel.
