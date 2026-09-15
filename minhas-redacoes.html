@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
-<!-- RedaON · Portal do Aluno · Minhas Redações · v3-16 · sobre aluno-base-v6 · Reescrita com plano + acervo + gabarito, Comparar em campos -->
+<!-- RedaON · Portal do Aluno · Minhas Redações · v4-0 · sobre aluno-base-v6 (v6-4-2) · correção em caderno de quatro páginas (mockup v9) -->
 <script>
 (function(){
   var pref='auto';
@@ -15,20 +15,23 @@
   document.documentElement.setAttribute('data-tema-pref',pref);
 })();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link href="aluno-base-v6.css" rel="stylesheet"/>
 <style>
   /* amarelo de nota (não é o dourado de conquista) */
   :root{ --notaAmarelo:#f5d547; --notaAmareloRGB:245,213,71; }
   html[data-tema="claro"]{ --notaAmarelo:#b98a00; --notaAmareloRGB:185,138,0; }
+  /* v4-0: a faixa de páginas é sticky. Com overflow-x:hidden em html e body, o body vira
+     contêiner de rolagem e o sticky deixa de prender. clip corta igual sem criar contêiner. */
+  @supports (overflow:clip){ html, body{ overflow-x:clip; } }
+
 /* ===== Só o que é próprio de MINHAS REDAÇÕES ===== */
-.abaBtn{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem .5rem;border:none;border-radius:.65rem;background:transparent;color:var(--muted);font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;}
-.abaBtn .ic{font-size:.95rem;line-height:1;font-style:normal;}
-.abaBtn.ativa{background:var(--cyan);color:var(--onCyan);}
 .abaBtnM{flex:1 1 0;min-width:0;padding:.55rem .2rem;border:none;border-radius:.65rem;background:transparent;color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:inherit;text-align:center;}
 .abaBtnM.ativa{background:var(--cyan);color:var(--onCyan);}
 @media(max-width:359px){.abaBtnM{font-size:.66rem;padding:.5rem .1rem;}}
+.trilho{display:flex;gap:.3rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:.8rem;padding:.25rem;overflow-x:auto;scrollbar-width:none;}
+.trilho::-webkit-scrollbar{display:none;}
 
 /* LISTA */
 .gridLista{display:grid;grid-template-columns:1fr;gap:.7rem;}
@@ -53,68 +56,107 @@
 .vazio{grid-column:1/-1;text-align:center;color:var(--muted);font-size:.85rem;padding:2.5rem 0;line-height:1.6;}
 .spinner{width:38px;height:38px;border:3px solid var(--surface2);border-top-color:var(--cyan);border-radius:50%;animation:girar .8s linear infinite;margin:2rem auto;}
 @keyframes girar{to{transform:rotate(360deg);}}
+@media(max-width:1023px) and (orientation:portrait){ #filtrosTopoLista{display:none;} }
+@media(min-width:1024px), (max-width:1023px) and (orientation:landscape){ #dockLista{display:none!important;} }
 
-/* CORREÇÃO */
-.fichaTopo{background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:1rem;padding:.9rem 1.1rem;margin-bottom:1rem;}
-.fichaLinha{display:flex;align-items:center;gap:.75rem;}
-.fichaLinha .rot{font-size:.64rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
-.fichaLinha .nota{font-size:1.9rem;font-weight:800;color:var(--cyan);line-height:1.05;}
-.seloValid{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;padding:.28rem .65rem;border-radius:99px;white-space:nowrap;max-width:45vw;overflow:hidden;text-overflow:ellipsis;}
-.seloValid.sim{color:var(--green);background:rgba(var(--greenRGB),.14);}
-.seloValid.nao{color:var(--gold);background:rgba(var(--goldRGB),.14);}
-@media(max-width:359px){.seloValid{font-size:.62rem;padding:.25rem .5rem;}}
-.chipsRow{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.8rem;}
-.chipComp{font-size:.72rem;font-weight:700;padding:.3rem .6rem;border-radius:.5rem;white-space:nowrap;cursor:pointer;border:none;font-family:inherit;}
-@media(max-width:1023px){.chipsRow{gap:.3rem;flex-wrap:nowrap;}.chipComp{flex:1;text-align:center;font-size:.68rem;padding:.32rem .2rem;}}
-.caGrid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;align-items:start;}
-.caGrid>*{min-width:0;}
-.caBox{background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:1rem;padding:1.1rem 1.25rem;}
-.caHeader{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;}
-.caHeader .trilho{flex:1 1 auto;width:100%;}
-.trilho{display:flex;gap:.3rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.2);border-radius:.8rem;padding:.25rem;overflow-x:auto;scrollbar-width:none;}
-.trilho::-webkit-scrollbar{display:none;}
-.folha{font-family:Georgia,serif;font-size:.92rem;line-height:1.9;color:var(--text2);text-align:justify;white-space:pre-wrap;}
-.compItem{background:var(--sunken);border:1px solid rgba(var(--borderRGB),.18);border-radius:.8rem;padding:.7rem .85rem;margin-bottom:.6rem;}
-.compItem .cab{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-bottom:.35rem;}
-.compItem .nm{font-size:.78rem;font-weight:700;color:var(--text);}
-.compItem .vl{font-size:.8rem;font-weight:800;}
-.compItem .tx{font-size:.78rem;color:var(--text2);line-height:1.5;}
-.barraBg{height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:.35rem 0 .5rem;}
-.barraFill{height:100%;border-radius:99px;}
-.profBox{border:1px solid rgba(var(--greenRGB),.35);background:rgba(var(--greenRGB),.06);border-radius:.8rem;padding:.85rem;margin-bottom:.7rem;}
+/* ══════════ CORREÇÃO · o caderno de páginas (mockup v9) ══════════
+   Redação → Reescrita → Comparar → Sua nota. Só a página à vista existe no DOM:
+   com as quatro lado a lado, todas herdavam a altura da mais alta. */
+#viewCorrecao{ max-width:760px; margin:0 auto; }
+.cabRed{ display:flex; align-items:flex-start; gap:.6rem; margin-bottom:.7rem; }
+.cabRed .voltar{ width:2.25rem; height:2.25rem; flex:0 0 auto; border-radius:.7rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.25); color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.cabRed .voltar .material-symbols-outlined{ font-size:1.25rem; }
+.cabRed .txt{ flex:1; min-width:0; }
+.cabRed .tema{ font-size:1.05rem; font-weight:800; line-height:1.3; margin:0 0 .2rem; color:var(--text); overflow-wrap:anywhere; }
+.cabRed .meta{ font-size:.75rem; color:var(--muted); display:flex; gap:.4rem; flex-wrap:wrap; align-items:center; }
+.cabRed .selo{ font-size:.62rem; font-weight:900; padding:.15rem .45rem; border-radius:.4rem; text-transform:none; letter-spacing:0; border:0; }
+.cabRed .selo.val{ background:rgba(var(--greenRGB),.14); color:var(--green); }
+/* aguardando a professora: neutro — dourado é só de conquista do aluno */
+.cabRed .selo.esp{ background:rgba(var(--borderRGB),.14); color:var(--text2); }
+.cabRed .notaCab{ font-size:.78rem; font-weight:900; color:var(--cyan); white-space:nowrap; }
+
+/* faixa de páginas */
+.paginas{ display:flex; gap:.3rem; background:var(--surface2); border-radius:.8rem; padding:.25rem; margin-bottom:.8rem; position:sticky; top:0; z-index:9; }
+.pg{ flex:1 1 0; min-width:0; border:0; border-radius:.62rem; background:transparent; color:var(--muted); cursor:pointer;
+  font-family:inherit; font-size:.72rem; font-weight:800; padding:.5rem .2rem; display:flex; flex-direction:column; align-items:center; gap:.15rem; white-space:nowrap; }
+.pg i{ font-style:normal; font-size:.95rem; line-height:1; }
+.pg i.gr{ font-size:1.2rem; }
+.pg.on{ background:var(--cyan); color:var(--onCyan); }
+@media(min-width:641px){ .paginas{ max-width:560px; } }
+@media(min-width:1024px){ .paginas{ top:64px; } }
+
+/* o caderno */
+.caderno{ position:relative; overflow:hidden; }
+.folha{ width:100%; }
+.folha.entra{ animation:desliza .22s ease-out; }
+.folha.entraTras{ animation:deslizaTras .22s ease-out; }
+@keyframes desliza{ from{ transform:translateX(26px); opacity:.4; } to{ transform:none; opacity:1; } }
+@keyframes deslizaTras{ from{ transform:translateX(-26px); opacity:.4; } to{ transform:none; opacity:1; } }
+@media (prefers-reduced-motion:reduce){ .folha.entra, .folha.entraTras{ animation:none; } }
+
+/* página 1 · a redação */
+.papel{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.16); border-radius:1rem; padding:1rem; }
+.papel p{ font-size:.92rem; line-height:1.85; margin:0 0 .8rem; color:var(--text); text-align:justify; overflow-wrap:break-word; }
+.papel p:last-child{ margin-bottom:0; }
+.papel mark{ background:rgba(var(--redRGB),.18); color:inherit; border-radius:.2rem; padding:0 .1rem; cursor:pointer; }
+.avisoGrifo{ font-size:.72rem; color:var(--muted); margin:.6rem 0 0; }
+
+/* página 4 · sua nota */
+.notaTopo{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.16); border-radius:1rem; padding:.9rem 1rem; margin-bottom:.7rem; display:flex; align-items:center; gap:.9rem; }
+.notaTopo .n{ font-size:2.5rem; font-weight:900; line-height:1; color:var(--cyan); flex:0 0 auto; }
+.notaTopo .lado{ flex:1; min-width:0; }
+.notaTopo .lado p{ margin:0 0 .4rem; font-size:.78rem; color:var(--muted); line-height:1.45; }
+.notaTopo .lado p:last-child{ margin-bottom:0; }
+.notaTopo .lado b{ color:var(--text); }
+.comp{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.16); border-radius:1rem; padding:.85rem .95rem; margin-bottom:.6rem; }
+.comp .top{ display:flex; align-items:center; gap:.5rem; margin-bottom:.45rem; }
+.comp .cx{ font-size:.72rem; font-weight:900; color:var(--muted); }
+.comp .tit{ flex:1; font-size:.86rem; font-weight:700; color:var(--text); }
+.comp .pt{ font-size:1.05rem; font-weight:900; }
+.comp.v .pt{ color:var(--green); } .comp.a .pt{ color:var(--notaAmarelo); } .comp.r .pt{ color:var(--red); }
+.comp .barra{ height:5px; border-radius:99px; background:rgba(var(--borderRGB),.14); overflow:hidden; margin-bottom:.55rem; }
+.comp .barra i{ display:block; height:100%; border-radius:99px; }
+.comp.v .barra i{ background:var(--green); } .comp.a .barra i{ background:var(--notaAmarelo); } .comp.r .barra i{ background:var(--red); }
+.comp .fala{ display:flex; gap:.55rem; align-items:flex-start; font-size:.82rem; line-height:1.55; color:var(--text2); }
+.comp .fala .quem{ flex:0 0 26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:.8rem; }
+.comp .fala.ia .quem{ background:rgba(var(--cyanRGB),.14); }
+.comp .fala b{ color:var(--text); }
+.comp .deslize{ margin-top:.5rem; font-size:.78rem; color:var(--muted); }
+.comp .deslize span{ display:block; padding:.3rem 0; border-top:1px solid rgba(var(--borderRGB),.10); }
+.comp .deslize i{ font-style:italic; color:var(--text2); }
+.comp .projeto{ margin-top:.6rem; padding-top:.55rem; border-top:1px dashed rgba(var(--borderRGB),.22); }
+.rotBloco{ font-size:.66rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin:0 0 .35rem; }
+.comp .projeto p.tx, .fecho p.tx{ font-size:.82rem; line-height:1.55; color:var(--text2); margin:0 0 .45rem; }
+.comp .projeto p.tx:last-child, .fecho p.tx:last-child{ margin-bottom:0; }
+.fecho{ background:var(--surface); border:1px solid rgba(var(--cyanRGB),.28); border-radius:1rem; padding:.85rem .95rem; margin:.2rem 0 .6rem; }
+.fecho .rotBloco{ color:var(--cyan); }
+.profBox{border:1px solid rgba(var(--greenRGB),.35);background:rgba(var(--greenRGB),.06);border-radius:1rem;padding:.85rem .95rem;margin-bottom:.6rem;}
 .profBox .quem{display:flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:700;color:var(--green);margin-bottom:.4rem;}
 .profBox .txt{font-size:.85rem;color:var(--text2);line-height:1.6;font-style:italic;white-space:pre-wrap;}
-@media(min-width:1024px){
-  .caGrid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);}
-  .caBox.rolavel{max-height:calc(100vh - 20rem);min-height:20rem;overflow-y:auto;}
-}
-@media(max-width:1023px){.caColDireita{display:none;}}
-@media(max-width:1023px) and (orientation:portrait){
-  #caHeaderLeitura{display:none;}
-  #filtrosTopoLista{display:none;}
-}
-@media(min-width:1024px), (max-width:1023px) and (orientation:landscape){
-  #dockLista{display:none!important;}
-  #dockCorrecao{display:none!important;}
-}
+.profBox .quando{font-size:.68rem;color:var(--muted);margin-top:.5rem;}
+.comp.pisca{ animation:pisca 1.2s ease-out; }
+@keyframes pisca{ 0%,40%{ border-color:rgba(var(--redRGB),.6); } 100%{ border-color:rgba(var(--borderRGB),.16); } }
 
-/* COMPARAR */
-.cmpBarra{display:flex;align-items:center;justify-content:center;gap:1.25rem;padding:1rem;margin-bottom:1.1rem;background:linear-gradient(135deg,rgba(var(--cyanRGB),.06),rgba(var(--greenRGB),.06));border:1px solid rgba(var(--greenRGB),.2);border-radius:.875rem;flex-wrap:wrap;}
-.cmpCx{text-align:center;min-width:0;}
-.cmpLbl{font-size:.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;}
-.cmpVal{font-size:1.75rem;font-weight:900;line-height:1;}
-.cmpValTxt{font-size:.78rem;font-weight:700;color:var(--green);line-height:1.3;}
-.cmpSeta{color:var(--muted);font-size:1.4rem;flex:0 0 auto;}
-.cmpIntro{font-family:Georgia,serif;font-size:1rem;line-height:1.6;color:var(--text2);margin-bottom:1.2rem;text-align:center;font-style:italic;}
-.cmpBloco{margin-bottom:1rem;padding:1rem 1.15rem;background:var(--bg);border-left:4px solid var(--cyan);border-radius:0 .75rem .75rem 0;}
-.cmpCab{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;}
-.cmpTit{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;}
-.cmpPill{font-size:.68rem;font-weight:800;padding:.15rem .5rem;border-radius:.4rem;white-space:nowrap;}
-.cmpTxt{font-family:Georgia,serif;font-size:1.02rem;line-height:1.75;color:var(--text);}
-.cmpAviso{font-size:.72rem;color:var(--muted);text-align:center;margin-top:1rem;padding-top:.8rem;border-top:1px solid rgba(var(--borderRGB),.15);}
+/* página 2 · reescrita */
+.reTopo{ font-size:.8rem; color:var(--muted); margin:0 0 .6rem; line-height:1.5; }
+/* página 3 · comparar */
+.cmp{ background:var(--surface); border-left:3px solid var(--cyan); border-radius:.7rem; padding:.75rem .85rem; margin-bottom:.6rem; }
+.cmp .h{ display:flex; justify-content:space-between; align-items:center; margin-bottom:.4rem; }
+.cmp .h b{ font-size:.8rem; color:var(--text); } .cmp .h span{ font-size:.7rem; color:var(--muted); }
+.cmp p{ margin:0 0 .35rem; font-size:.82rem; line-height:1.55; color:var(--text2); }
+.cmp p b{ color:var(--text); }
+.cmp .ficha{ font-size:.74rem; color:var(--muted); }
+.aviso{ font-size:.85rem; color:var(--muted); text-align:center; padding:1.5rem 0; line-height:1.55; }
+.aviso.ok{ color:var(--green); }
+.notaTeto{ font-size:.76rem; color:var(--muted); text-align:center; margin-top:.4rem; }
 
-/* Geração sob demanda (Reescrita/Comparar) — v3-7 */
-.spinnerRed{ width:34px; height:34px; border:3px solid rgba(var(--cyanRGB),.22); border-top-color:var(--cyan); border-radius:50%; animation:girarRed .9s linear infinite; }
+/* Geração ao chegar na página (Reescrita/Comparar) */
+.gerando{ text-align:center; padding:2.2rem 1rem; }
+.gerando .t1{ font-size:.9rem; font-weight:700; color:var(--text); }
+.gerando .t2{ font-size:.78rem; color:var(--muted); line-height:1.5; margin-top:.3rem; }
+.erroGer{ text-align:center; padding:2rem 1rem; }
+.erroGer p{ font-size:.85rem; color:var(--muted); line-height:1.55; margin-bottom:.9rem; }
+.spinnerRed{ width:34px; height:34px; margin:0 auto .9rem; border:3px solid rgba(var(--cyanRGB),.22); border-top-color:var(--cyan); border-radius:50%; animation:girarRed .9s linear infinite; }
 @keyframes girarRed{ to{ transform:rotate(360deg); } }
 .btnTentar{ min-height:44px; padding:.6rem 1.2rem; border-radius:.7rem; background:var(--surface2); color:var(--text); border:1px solid rgba(var(--borderRGB),.3); font-family:inherit; font-size:.82rem; font-weight:800; cursor:pointer; }
 </style>
@@ -136,48 +178,17 @@
       <div class="gridLista" id="gridLista"><div class="spinner" style="grid-column:1/-1;"></div></div>
     </div>
 
-    <!-- VISÃO 2: CORREÇÃO -->
+    <!-- VISÃO 2: CORREÇÃO · caderno -->
     <div id="viewCorrecao" style="display:none;">
-      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
-        <button onclick="voltarLista()" style="width:2.5rem;height:2.5rem;border-radius:.75rem;background:var(--surface);border:1px solid rgba(var(--borderRGB),.25);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
-          <span class="material-symbols-outlined">arrow_back</span>
-        </button>
-        <div style="flex:1;min-width:0;">
-          <h1 id="coTitulo" style="font-size:1.1rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></h1>
-          <p id="coCtx" style="font-size:.74rem;color:var(--muted);"></p>
+      <div class="cabRed">
+        <button class="voltar" type="button" onclick="voltarLista()" aria-label="Voltar para a lista"><span class="material-symbols-outlined">arrow_back</span></button>
+        <div class="txt">
+          <p class="tema" id="coTema"></p>
+          <p class="meta" id="coMeta"></p>
         </div>
       </div>
-
-      <div class="fichaTopo">
-        <div class="fichaLinha">
-          <div style="flex:0 0 auto;">
-            <p class="rot">Nota RedaON</p>
-            <p class="nota" id="coNota">&mdash;</p>
-          </div>
-          <span class="seloValid nao" id="coSelo"></span>
-        </div>
-        <div class="chipsRow" id="coChips"></div>
-      </div>
-
-      <div class="caGrid">
-        <div>
-          <div class="caHeader" id="caHeaderLeitura">
-            <div class="trilho" id="trilhoAbas" style="overflow:visible;">
-              <button class="abaBtn ativa" data-aba="original" onclick="trocarAba('original')"><i class="ic">&#128196;</i>Original</button>
-              <button class="abaBtn" data-aba="analise" onclick="trocarAba('analise')"><i class="ic">&#128202;</i>An&aacute;lise</button>
-              <button class="abaBtn" data-aba="reescrita" onclick="trocarAba('reescrita')"><i class="ic">&#10024;</i>Reescrita</button>
-              <button class="abaBtn" data-aba="comparar" onclick="trocarAba('comparar')"><i class="ic">&#8644;</i>Comparar</button>
-            </div>
-          </div>
-          <div class="caBox rolavel" id="abaConteudo"></div>
-        </div>
-        <div class="caColDireita">
-          <div class="caHeader">
-            <p style="flex:1;font-size:.78rem;color:var(--text2);line-height:1.3;">Sua nota, crit&eacute;rio a crit&eacute;rio, com o que fazer para subir.</p>
-          </div>
-          <div class="caBox rolavel" id="painelDireita"></div>
-        </div>
-      </div>
+      <div class="paginas" id="paginas" role="tablist"></div>
+      <div class="caderno" id="caderno"></div>
     </div>
 
   </div>
@@ -188,31 +199,6 @@
   <div class="trilho" id="trilhoFiltros" style="overflow:visible;"></div>
 </div>
 
-<!-- DOCK CORREÇÃO -->
-<div class="dockPolegar" id="dockCorrecao">
-  <div style="display:flex;gap:.5rem;">
-    <button class="filtroBtn" id="btnRedacaoM" style="flex:1 1 0;" onclick="alternarGvExc('gvRedacao')">&#128196; Reda&ccedil;&atilde;o<span class="seta" style="font-size:.6rem;opacity:.7;">&#9662;</span></button>
-    <button class="filtroBtn" id="btnNotaM" style="flex:1 1 0;" onclick="alternarGvExc('gvNota')">&#128202; Sua nota</button>
-  </div>
-</div>
-
-<!-- GAVETA: REDAÇÃO (seletor de modo) -->
-<div class="gvBg atras" id="gvRedacaoBg" onclick="fecharGaveta('gvRedacao');marcarBtnDock();"></div>
-<div class="gv atras" id="gvRedacao">
-  <div class="grip"></div>
-  <p class="tit">Ver sua reda&ccedil;&atilde;o</p>
-  <p class="sub">Escolha como quer visualizar. O conte&uacute;do aparece na tela.</p>
-  <div id="listaModos"></div>
-</div>
-
-<!-- GAVETA: SUA NOTA -->
-<div class="gvBg atras" id="gvNotaBg" onclick="fecharGaveta('gvNota');marcarBtnDock();"></div>
-<div class="gv atras" id="gvNota">
-  <div class="grip"></div>
-  <p class="tit">Sua nota</p>
-  <div id="gvNotaConteudo"></div>
-</div>
-
 <script src="supabase-auth.js"></script>
 <script src="prompts-reescrita.js?v=2-3"></script>
 <script src="aluno-base-v6.js"></script>
@@ -221,35 +207,26 @@
 
   montarEsqueleto({
     ativo:'redacoes', titulo:'Minhas Reda\u00e7\u00f5es', icone:'auto_stories',
-    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v3-16'
+    sino:false, versao:'aluno \u00b7 reda\u00e7\u00f5es \u00b7 v4-0'
   });
 
-  var NOMES=['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
+  var COMP_NOMES=['Norma culta','Repert\u00f3rio','Argumenta\u00e7\u00e3o','Coes\u00e3o','Interven\u00e7\u00e3o'];
   var FILTROS=[{id:'todas',r:'Todas'},{id:'corrigidas',r:'Corrigidas'},{id:'validadas',r:'Validadas'}];
-  var MODOS=[
-   {id:'original', ico:'\u{1F4C4}', r:'Original',  d:'Seu texto, como voc\u00ea escreveu'},
-   {id:'analise',  ico:'\u{1F4CA}', r:'An\u00e1lise',   d:'Pontos fortes e o que d\u00e1 pra subir'},
-   {id:'reescrita',ico:'\u2728',    r:'Reescrita', d:'Sua reda\u00e7\u00e3o buscando a nota mil'},
-   {id:'comparar', ico:'\u21c4',    r:'Comparar',  d:'O que mudaria, compet\u00eancia a compet\u00eancia'}
+  /* balan\u00e7a como emoji, igual aos outros \u00edcones das abas (mockup v9) */
+  var PAGINAS=[
+   {id:'texto', ic:'\u{1F4C4}', r:'Reda\u00e7\u00e3o'},
+   {id:'re',    ic:'\u2728', r:'Reescrita'},
+   {id:'cmp',   ic:'\u2696\ufe0f', r:'Comparar', grande:true},
+   {id:'nota',  ic:'\u{1F4CA}', r:'Sua nota'}
   ];
-  var REDACOES=[], atual=null, correcaoAtual=null, filtroAtivo='todas', abaAtual='original';
+  var PG_TEXTO=0, PG_RE=1, PG_CMP=2, PG_NOTA=3;
+  var REDACOES=[], atual=null, filtroAtivo='todas', pagAtual=0;
 
-  /* Régua de cores (Alan, 11/09/2026): 0–79 vermelho · 80–120 amarelo · 121–200 verde. Dourado é só de conquista (200 no Início). */
+  /* R\u00e9gua de cores (Alan, 11/09/2026): 0\u201379 vermelho \u00b7 80\u2013120 amarelo \u00b7 121\u2013200 verde. Dourado \u00e9 s\u00f3 de conquista (200 no In\u00edcio). */
   function corComp(v){ return v>=121?'var(--green)':(v>=80?'var(--notaAmarelo)':'var(--red)'); }
-  function alternarGvExc(id){
-    var g=document.getElementById(id);
-    if(g && g.classList.contains('open')){ fecharGaveta(id); marcarBtnDock(); return; }
-    ['gvRedacao','gvNota'].forEach(function(o){ if(o!==id) fecharGaveta(o); });
-    abrirGaveta(id); marcarBtnDock();
-  }
-  function marcarBtnDock(){
-    var r=document.getElementById('gvRedacao'), n=document.getElementById('gvNota');
-    var br=document.getElementById('btnRedacaoM'), bn=document.getElementById('btnNotaM');
-    if(br) br.classList.toggle('ativo', !!(r && r.classList.contains('open')));
-    if(bn) bn.classList.toggle('ativo', !!(n && n.classList.contains('open')));
-  }
+  function classeComp(v){ return v>=121?'v':(v>=80?'a':'r'); }
 
-  // ─── Carga da lista (mesma consulta da produção) ───
+  // \u2500\u2500\u2500 Carga da lista (mesma consulta da produ\u00e7\u00e3o) \u2500\u2500\u2500
   async function carregarRedacoes(){
     var grid=document.getElementById('gridLista');
     try{
@@ -282,6 +259,7 @@
     var nota=r.nota_final||c.nota_total||null;
     var rev=c.revisao_professor||null;
     var validada=!!(rev && rev.visivel_aluno!==false);
+    var criada=new Date(r.created_at);
     // Reescrita: 4 partes no correcao_json
     var partes=[j.redacao_nota_1000_intro,j.redacao_nota_1000_dev1,j.redacao_nota_1000_dev2,j.redacao_nota_1000_conclusao]
       .filter(function(p){ return p && String(p).trim().length>20; });
@@ -295,18 +273,17 @@
     return {
       id:r.id, titulo:titulo, temaId:r.tema_id||null,
       correcaoId:c.id||null, json:j, chamadas:(j.chamadas||{}),
-      data:new Date(r.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}),
+      data:criada.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}),
+      dataCurta:criada.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}),
       texto:r.texto||'', nota:nota, comp:comp,
       status:(nota&&comp)?(validada?'validada':'corrigida'):'corrigindo',
-      feedbackGeral:c.feedback_geral||null,
       feedbackComp:[c.feedback_c1,c.feedback_c2,c.feedback_c3,c.feedback_c4,c.feedback_c5],
-      pontosFortes:c.pontos_fortes||'', pontosMelhorar:c.pontos_melhorar||'',
       reescrita:partes.length?partes.join('\n\n'):null,
-      comparar:cmp, rev:validada?rev:null
+      comparar:cmp, rev:validada?rev:null, erro:{}
     };
   }
 
-  // ─── Lista ───
+  // \u2500\u2500\u2500 Lista \u2500\u2500\u2500
   function renderFiltros(){
     var html=FILTROS.map(function(f){
       return '<button class="abaBtnM'+(f.id===filtroAtivo?' ativa':'')+'" onclick="setFiltro(\''+f.id+'\')">'+f.r+'</button>';
@@ -324,7 +301,7 @@
     document.getElementById('contagem').textContent=lista.length+(lista.length===1?' reda\u00e7\u00e3o':' reda\u00e7\u00f5es');
     var g=document.getElementById('gridLista');
     if(!lista.length){
-      g.innerHTML='<p class="vazio">'+(REDACOES.length?'Nenhuma reda\u00e7\u00e3o nesse filtro.':'Voc\u00ea ainda n\u00e3o enviou nenhuma reda\u00e7\u00e3o.<br>Toque em \u270F\uFE0F Escrever para come\u00e7ar.')+'</p>';
+      g.innerHTML='<p class="vazio">'+(REDACOES.length?'Nenhuma reda\u00e7\u00e3o nesse filtro.':'Voc\u00ea ainda n\u00e3o enviou nenhuma reda\u00e7\u00e3o.<br>Toque em \u270f\ufe0f Escrever para come\u00e7ar.')+'</p>';
       return;
     }
     g.innerHTML=lista.map(function(r,i){
@@ -335,7 +312,7 @@
       var mini=r.comp?'<div class="miniComp">'+r.comp.map(function(v){return '<span style="background:'+corComp(v)+';"></span>';}).join('')+'</div>'
                      :'<span style="font-size:10px;color:var(--muted);">a IA est\u00e1 corrigindo</span>';
       var clique=(r.nota&&r.comp)?' onclick="abrirCorrecao(\''+r.id+'\')"'
-        :' onclick="toast(\'Sua corre\\u00e7\\u00e3o fica pronta em segundos \\u2014 j\\u00e1 volta\')" style="opacity:.65;"';
+        :' onclick="toast(\'Sua corre\u00e7\u00e3o fica pronta em segundos \u2014 j\u00e1 volta\')" style="opacity:.65;"';
       return '<div class="rCard'+(i===0&&r.nota?' destaque':'')+'"'+clique+'>'
         +'<div class="topo">'+selo+nota+'</div>'
         +'<p class="tit">'+escapeHtmlSimples(r.titulo)+'</p>'
@@ -343,45 +320,246 @@
     }).join('');
   }
 
-  // ─── Correção ───
+  // \u2500\u2500\u2500 Corre\u00e7\u00e3o \u00b7 abrir e voltar \u2500\u2500\u2500
   function abrirCorrecao(id){
-    atual=REDACOES.filter(function(r){return r.id===id;})[0];
-    if(!atual) return;
+    var alvo=REDACOES.filter(function(r){return r.id===id;})[0];
+    if(!alvo) return;
+    atual=alvo;
     document.getElementById('viewLista').style.display='none';
     document.getElementById('viewCorrecao').style.display='block';
     document.getElementById('dockLista').classList.remove('on');
-    document.getElementById('dockCorrecao').classList.add('on');
-    document.getElementById('coTitulo').textContent=atual.titulo;
-    document.getElementById('coCtx').textContent='Enviada em '+atual.data;
-    document.getElementById('coNota').textContent=atual.nota||'\u2014';
-    var s=document.getElementById('coSelo');
-    if(atual.status==='validada'){ s.className='seloValid sim'; s.textContent='\u2713 Validada'; }
-    else{ s.className='seloValid nao'; s.textContent='\u23f3 Corrigida'; }
-    document.getElementById('coChips').innerHTML=(atual.comp||[]).map(function(v,i){
-      return '<button class="chipComp" style="color:'+corComp(v)+';background:rgba(var(--borderRGB),.12);" onclick="toast(\''+NOMES[i].replace(/'/g,'')+': '+v+'/200\')">C'+(i+1)+' '+v+'</button>';
-    }).join('');
-    renderPainel(); renderModos(); trocarAba('original');
-    window.scrollTo(0,0);
+    document.body.classList.remove('temDock');   /* sem dock na corre\u00e7\u00e3o: n\u00e3o reserva a folga dela */
+    document.getElementById('coTema').textContent=atual.titulo;
+    /* Nota total pequena ao lado do selo (Alan): \u00e9 a primeira coisa que o aluno procura. */
+    document.getElementById('coMeta').innerHTML='<span>enviada em '+atual.dataCurta+'</span><span>\u00b7</span>'
+      +(atual.status==='validada'
+        ?'<span class="selo val">validada pela professora</span>'
+        :'<span class="selo esp">corrigida pela IA</span>')
+      +'<span class="notaCab">nota '+escapeHtmlSimples(atual.nota)+'</span>';
+    montarPaginas();
+    pintarFolha(PG_TEXTO);   /* abre na Reda\u00e7\u00e3o */
   }
   function voltarLista(){
+    atual=null;
     document.getElementById('viewCorrecao').style.display='none';
     document.getElementById('viewLista').style.display='block';
-    document.getElementById('dockCorrecao').classList.remove('on');
+    document.getElementById('caderno').innerHTML='';
     document.getElementById('dockLista').classList.add('on');
-    ['gvRedacao','gvNota'].forEach(fecharGaveta); marcarBtnDock();
+    document.body.classList.add('temDock');
+    acordarDock();
     window.scrollTo(0,0);
   }
+  function correcaoVisivel(){ var v=document.getElementById('viewCorrecao'); return !!(atual && v && v.style.display!=='none'); }
 
-  function linhas(txt){
-    return String(txt||'').split(/\r?\n/)
-      .map(function(l){ return l.replace(/^[\u2022\-\*]\s*/,'').trim(); })
-      .filter(function(l){ return l.length>2; });
+  // \u2500\u2500\u2500 Caderno \u00b7 faixa de p\u00e1ginas e troca \u2500\u2500\u2500
+  function montarPaginas(){
+    document.getElementById('paginas').innerHTML=PAGINAS.map(function(p,i){
+      return '<button class="pg" type="button" role="tab" onclick="irPara('+i+')"><i'+(p.grande?' class="gr"':'')+'>'+p.ic+'</i>'+p.r+'</button>';
+    }).join('');
+  }
+  function marcarPaginas(){
+    var bs=document.querySelectorAll('#paginas .pg');
+    for(var i=0;i<bs.length;i++){ bs[i].className='pg'+(i===pagAtual?' on':''); bs[i].setAttribute('aria-selected', i===pagAtual?'true':'false'); }
+  }
+  var FOLHAS=[folhaTexto, folhaRe, folhaCmp, folhaNota];
+  /* pinta apenas a p\u00e1gina pedida: a altura passa a ser sempre a dela */
+  function pintarFolha(i, dir, semRolar){
+    if(!atual) return;
+    pagAtual=i;
+    var c=document.getElementById('caderno');
+    c.innerHTML='<div class="folha">'+FOLHAS[i]()+'</div>';
+    var f=c.firstElementChild;
+    if(f && dir) f.className+=(dir>0?' entra':' entraTras');
+    marcarPaginas();
+    if(!semRolar) window.scrollTo(0,0);
+    /* Reescrita e Comparar geram sozinhas quando a p\u00e1gina aparece (decis\u00e3o de Alan) */
+    if(i===PG_RE && !atual.reescrita && atual.texto && !atual.erro.re) gerarReescrita(atual);
+    if(i===PG_CMP && !temComparacao(atual) && atual.texto && !atual.erro.cmp) gerarComparacao(atual);
+  }
+  function irPara(i, dir){
+    if(!atual) return;
+    if(dir===undefined) dir = i>pagAtual ? 1 : (i<pagAtual ? -1 : 0);
+    pintarFolha(i, dir);
+  }
+  function vizinha(passo){ return (pagAtual+passo+FOLHAS.length)%FOLHAS.length; }   /* d\u00e1 a volta nas duas pontas */
+
+  /* passar a folha: arrasto lateral. S\u00f3 vira quando o dedo anda mais para o lado do que para cima \u2014
+     a leitura vertical do texto nunca troca de p\u00e1gina sem querer. */
+  (function(){
+    var c=document.getElementById('caderno'); if(!c) return;
+    var x0=null, y0=null, dx=0, dy=0;
+    c.addEventListener('touchstart', function(e){ if(e.touches.length!==1){ x0=null; return; } x0=e.touches[0].clientX; y0=e.touches[0].clientY; dx=0; dy=0; }, {passive:true});
+    c.addEventListener('touchmove', function(e){
+      if(x0===null) return;
+      dx=e.touches[0].clientX-x0; dy=e.touches[0].clientY-y0;
+    }, {passive:true});
+    c.addEventListener('touchend', function(){
+      if(x0===null) return; x0=null;
+      if(Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)*1.5) return;
+      irPara(vizinha(dx<0?1:-1), dx<0?1:-1);
+    }, {passive:true});
+    c.addEventListener('touchcancel', function(){ x0=null; }, {passive:true});
+    document.addEventListener('keydown', function(e){
+      if(!correcaoVisivel()) return;
+      var t=e.target, tag=t&&t.tagName;
+      if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable)) return;
+      if(e.altKey||e.ctrlKey||e.metaKey) return;
+      if(e.key==='ArrowRight'){ irPara(vizinha(1),1); }
+      else if(e.key==='ArrowLeft'){ irPara(vizinha(-1),-1); }
+    });
+  })();
+
+  // \u2500\u2500\u2500 Utilidades de texto \u2500\u2500\u2500
+  function _txt(v){
+    if(v===null || v===undefined) return '';
+    if(typeof v==='string') return v.trim();
+    if(Array.isArray(v)) return v.map(_txt).filter(Boolean).join('\n\n');
+    if(typeof v==='object'){
+      var pref=v.texto||v.descricao||v.explicacao||v.analise;
+      if(typeof pref==='string') return ((typeof v.titulo==='string' && v.titulo.trim())?v.titulo.trim()+'. ':'')+pref.trim();
+      return Object.keys(v).map(function(k){ return typeof v[k]==='string'?v[k].trim():''; }).filter(Boolean).join('\n\n');
+    }
+    return String(v).trim();
+  }
+  function paragrafos(t, classe){
+    return String(t||'').split(/\n+/).map(function(l){ return l.trim(); }).filter(Boolean)
+      .map(function(l){ return '<p'+(classe?' class="'+classe+'"':'')+'>'+escapeHtmlSimples(l)+'</p>'; }).join('');
+  }
+  /* Conven\u00e7\u00e3o de nomenclatura: "Reescrita" \u00e9 o nome do recurso (\u00d7 Original).
+     Corrige na leitura os textos antigos da IA que dizem "reda\u00e7\u00e3o nota 1000". */
+  function nomearReescrita(t){
+    return String(t)
+      .replace(/(reda\u00e7\u00e3o|vers\u00e3o)\s+(reescrita\s+)?nota\s+(1000|mil)/gi,'Reescrita')
+      .replace(/nota\s+1000/gi,'nota m\u00e1xima');
+  }
+
+  // \u2500\u2500\u2500 Deslizes da C1 \u00b7 _agentes.c1.desvios no formato "trecho - Desvio: explica\u00e7\u00e3o" \u2500\u2500\u2500
+  function deslizesC1(r){
+    var desv=(r.json&&r.json._agentes&&r.json._agentes.c1&&r.json._agentes.c1.desvios)||[];
+    if(!Array.isArray(desv)) return [];
+    return desv.map(function(d){
+      var trecho='', expl='';
+      if(d && typeof d==='object' && typeof d.trecho==='string' && (d.explicacao||d.desvio||d.correcao)){
+        trecho=d.trecho; expl=String(d.explicacao||d.desvio||d.correcao);
+      } else {
+        var txt=String(typeof d==='string'?d:(d&&(d.desvio||d.trecho))||JSON.stringify(d));
+        var k=txt.indexOf(' - Desvio:');
+        trecho=k>0?txt.slice(0,k):''; expl=k>0?txt.slice(k+3):txt;
+      }
+      expl=String(expl).replace(/^\s*Desvio:\s*/i,'').trim();
+      return { trecho:String(trecho).trim(), expl:expl };
+    }).filter(function(d){ return d.trecho || d.expl; });
+  }
+  /* Casamento por substring EXATA. S\u00f3 tira espa\u00e7os das pontas e, se o trecho vier entre aspas,
+     tenta o miolo \u2014 que continua sendo exato. Sem correspond\u00eancia aproximada. */
+  function faixaDoTrecho(texto, trecho, usadas){
+    var cands=[trecho];
+    var m=trecho.match(/^["\u201c'\u2018](.+)["\u201d'\u2019]$/);
+    if(m) cands.push(m[1].trim());
+    for(var c=0;c<cands.length;c++){
+      var alvo=cands[c]; if(alvo.length<3) continue;
+      var de=0, ix;
+      while((ix=texto.indexOf(alvo,de))>=0){
+        var fim=ix+alvo.length, choca=usadas.some(function(u){ return ix<u[1] && fim>u[0]; });
+        if(!choca) return [ix,fim];
+        de=ix+1;
+      }
+    }
+    return null;
+  }
+  function textoComGrifos(texto, deslizes){
+    var faixas=[];
+    deslizes.forEach(function(d){ if(!d.trecho) return; var f=faixaDoTrecho(texto,d.trecho,faixas); if(f) faixas.push(f); });
+    faixas.sort(function(a,b){ return a[0]-b[0]; });
+    var html='', re=/[^\n]+/g, p;
+    while((p=re.exec(texto))){
+      var ps=p.index, pe=ps+p[0].length;
+      if(!p[0].trim()) continue;
+      var cur=ps, h='';
+      faixas.forEach(function(f){
+        var a=Math.max(f[0],ps), b=Math.min(f[1],pe);
+        if(a>=b) return;
+        if(a>cur) h+=escapeHtmlSimples(texto.slice(cur,a));
+        h+='<mark onclick="verDeslize()">'+escapeHtmlSimples(texto.slice(a,b))+'</mark>';
+        cur=b;
+      });
+      if(cur<pe) h+=escapeHtmlSimples(texto.slice(cur,pe));
+      html+='<p>'+h.replace(/^\s+/,'')+'</p>';
+    }
+    return { html:html, grifos:faixas.length };
+  }
+  /* tocar num grifo leva \u00e0 C1, na p\u00e1gina da nota */
+  function verDeslize(){
+    irPara(PG_NOTA);
+    var el=document.getElementById('compC1');
+    if(!el) return;
+    var pgs=document.getElementById('paginas');
+    var topo=(pgs?pgs.getBoundingClientRect().bottom:0)+8;
+    window.scrollTo(0, Math.max(0, window.pageYOffset+el.getBoundingClientRect().top-topo));
+    el.classList.remove('pisca'); void el.offsetWidth; el.classList.add('pisca');
+  }
+
+  // \u2500\u2500\u2500 P\u00e1gina 1 \u00b7 Reda\u00e7\u00e3o \u2500\u2500\u2500
+  function folhaTexto(){
+    if(!atual.texto || !String(atual.texto).trim()) return '<p class="aviso">Texto n\u00e3o dispon\u00edvel.</p>';
+    var g=textoComGrifos(String(atual.texto), deslizesC1(atual));
+    return '<div class="papel">'+g.html+'</div>'
+      +(g.grifos?'<p class="avisoGrifo">Os trechos grifados s\u00e3o os deslizes que a PROfa apontou. Toque em um deles para ver a corre\u00e7\u00e3o na p\u00e1gina da nota.</p>':'');
+  }
+
+  // \u2500\u2500\u2500 P\u00e1gina 2 \u00b7 Reescrita \u2500\u2500\u2500
+  function folhaRe(){
+    if(atual.reescrita){
+      return '<p class="reTopo">A sua reda\u00e7\u00e3o no n\u00edvel que voc\u00ea vai alcan\u00e7ar \u2014 com os seus repert\u00f3rios, o seu tema, a sua voz. O que entrou de novo vem do acervo da semana.</p>'
+        +'<div class="papel">'+paragrafos(atual.reescrita)+'</div>';
+    }
+    if(!atual.texto) return '<p class="aviso">A reescrita ainda n\u00e3o est\u00e1 dispon\u00edvel para esta reda\u00e7\u00e3o.</p>';
+    if(atual.erro.re) return blocoErro(atual.erro.re, "tentarDeNovo('re')");
+    return blocoGerando('Reescrevendo sua reda\u00e7\u00e3o\u2026','A PROfa est\u00e1 planejando com o acervo do tema e aplicando os crit\u00e9rios do INEP nas cinco compet\u00eancias. Leva cerca de 40 segundos.');
+  }
+
+  // \u2500\u2500\u2500 P\u00e1gina 3 \u00b7 Comparar \u2500\u2500\u2500
+  function temComparacao(r){ return Object.keys(r.comparar||{}).length>0; }
+  function folhaCmp(){
+    if(!temComparacao(atual)){
+      if(!atual.texto) return '<p class="aviso">A compara\u00e7\u00e3o compet\u00eancia a compet\u00eancia ainda n\u00e3o est\u00e1 dispon\u00edvel para esta reda\u00e7\u00e3o.</p>';
+      if(atual.erro.cmp) return blocoErro(atual.erro.cmp, "tentarDeNovo('cmp')");
+      if(!atual.reescrita) return blocoGerando('Reescrevendo sua reda\u00e7\u00e3o\u2026','Antes de comparar, a PROfa escreve a Reescrita: planeja com o acervo do tema e aplica os crit\u00e9rios do INEP. Leva cerca de 40 segundos, e a compara\u00e7\u00e3o vem logo depois.');
+      return blocoGerando('Comparando as duas vers\u00f5es\u2026','A PROfa est\u00e1 explicando o que mudou em cada compet\u00eancia e apontando as fichas do acervo. Leva cerca de 30 segundos.');
+    }
+    var noTeto=[];
+    var blocos=atual.comp.map(function(v,i){
+      if(v>=200){ noTeto.push('C'+(i+1)); return ''; }
+      var m=atual.comparar[i];
+      if(!m) return '';
+      var corpo;
+      if(typeof m==='object'){ /* Na sua reda\u00e7\u00e3o / Na Reescrita / Por que melhora / ficha do acervo */
+        corpo=(m.original?'<p><b>Na sua reda\u00e7\u00e3o:</b> \u201c'+escapeHtmlSimples(m.original)+'\u201d</p>':'')
+          +(m.reescrita?'<p><b>Na Reescrita:</b> \u201c'+escapeHtmlSimples(m.reescrita)+'\u201d</p>':'')
+          +(m.por_que?'<p><b>Por que melhora:</b> '+escapeHtmlSimples(nomearReescrita(m.por_que))+'</p>':'')
+          +(m.ficha?'<p class="ficha">Esse repert\u00f3rio est\u00e1 no acervo do tema (ficha '+escapeHtmlSimples(String(m.ficha))+'). Vale estudar.</p>':'');
+      } else corpo='<p>'+escapeHtmlSimples(nomearReescrita(m))+'</p>';
+      return '<div class="cmp"><div class="h"><b>C'+(i+1)+'</b><span>'+v+' de 200</span></div>'+corpo+'</div>';
+    }).join('');
+    if(!blocos) return '<p class="aviso ok">\u2713 Todas as compet\u00eancias j\u00e1 est\u00e3o no teto.</p>';
+    if(noTeto.length) blocos+='<p class="notaTeto">'+noTeto.join(' e ')+' j\u00e1 '+(noTeto.length>1?'est\u00e3o':'est\u00e1')+' no teto.</p>';
+    return blocos;
+  }
+
+  // \u2500\u2500\u2500 P\u00e1gina 4 \u00b7 Sua nota \u2500\u2500\u2500
+  /* 1 nota \u00b7 2 padr\u00e3o dominante \u00b7 3 cinco compet\u00eancias (projeto de texto dentro da C3) \u00b7 4 pr\u00f3ximo passo.
+     Reda\u00e7\u00e3o antiga sem os tr\u00eas campos: l\u00ea analise_completa. Nada existe: o bloco n\u00e3o aparece. */
+  function htmlPadrao(t){
+    var m=t.match(/^([^.!?\n]{8,}?[.!?])\s+([\s\S]+)$/);
+    if(!m) return paragrafos(t);
+    var resto=m[2].split(/\n+/).map(function(l){ return l.trim(); }).filter(Boolean);
+    return '<p><b>'+escapeHtmlSimples(m[1])+'</b> '+escapeHtmlSimples(resto.shift()||'')+'</p>'
+      + resto.map(function(l){ return '<p>'+escapeHtmlSimples(l)+'</p>'; }).join('');
   }
   function htmlProfessor(){
-    if(!atual.rev) return '<p style="font-size:.74rem;color:var(--muted);line-height:1.5;margin-bottom:.8rem;padding-bottom:.7rem;border-bottom:1px solid rgba(var(--borderRGB),.15);">\u{1F4AC} Seu professor ainda n\u00e3o comentou esta reda\u00e7\u00e3o.</p>';
-    var rev=atual.rev;
-    var texto=rev.comentario_geral||'';
-    if(!texto.trim()) return '<p style="font-size:.74rem;color:var(--green);line-height:1.5;margin-bottom:.8rem;padding-bottom:.7rem;border-bottom:1px solid rgba(var(--greenRGB),.25);">\u2713 Seu professor revisou esta corre\u00e7\u00e3o.</p>';
+    if(!atual.rev) return '';
+    var rev=atual.rev, texto=_txt(rev.comentario_geral);
+    if(!texto) return '';
     var quando='';
     if(rev.data||rev.revisado_em){
       try{ quando=new Date(rev.data||rev.revisado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}); }catch(e){}
@@ -389,81 +567,50 @@
     var nome=rev.professor_nome||'Seu professor';
     return '<div class="profBox"><div class="quem"><span class="material-symbols-outlined" style="font-size:1.1rem;font-variation-settings:\'FILL\' 1;">verified</span>'+escapeHtmlSimples(nome)+'</div>'
       +'<p class="txt">\u201c'+escapeHtmlSimples(texto)+'\u201d</p>'
-      +(quando?'<p style="font-size:.68rem;color:var(--muted);margin-top:.5rem;">Comentada em '+quando+'</p>':'')+'</div>';
+      +(quando?'<p class="quando">Comentada em '+quando+'</p>':'')+'</div>';
   }
-  function htmlCompetencias(){
+  function htmlCompetencias(projeto){
     if(!atual.comp) return '';
+    var desl=deslizesC1(atual);
     return atual.comp.map(function(v,i){
-      var fb=atual.feedbackComp[i]||'';
-      return '<div class="compItem"><div class="cab"><span class="nm">'+NOMES[i]+'</span><span class="vl" style="color:'+corComp(v)+'">'+v+'/200</span></div>'
-        +'<div class="barraBg"><div class="barraFill" style="width:'+(v/200*100)+'%;background:'+corComp(v)+'"></div></div>'
-        +(fb?'<p class="tx">'+escapeHtmlSimples(fb)+'</p>':'')+'</div>';
+      var fb=_txt(atual.feedbackComp[i]);
+      var extra='';
+      if(i===0 && desl.length){
+        extra='<div class="deslize">'+desl.map(function(d){
+          var tr=d.trecho.length>170?d.trecho.slice(0,170)+'\u2026':d.trecho;
+          return '<span>'+(tr?'\u201c<i>'+escapeHtmlSimples(tr)+'</i>\u201d \u2014 ':'')+escapeHtmlSimples(d.expl)+'</span>';
+        }).join('')+'</div>';
+      }
+      if(i===2 && projeto){
+        extra+='<div class="projeto"><p class="rotBloco">Projeto de texto</p>'+paragrafos(projeto,'tx')+'</div>';
+      }
+      return '<div class="comp '+classeComp(v)+'" id="compC'+(i+1)+'">'
+        +'<div class="top"><span class="cx">C'+(i+1)+'</span><span class="tit">'+COMP_NOMES[i]+'</span><span class="pt">'+v+'</span></div>'
+        +'<div class="barra"><i style="width:'+Math.max(0,Math.min(100,v/200*100))+'%"></i></div>'
+        +(fb?'<div class="fala ia"><span class="quem">\u{1F916}</span><span>'+escapeHtmlSimples(fb)+'</span></div>':'')
+        +extra+'</div>';
     }).join('');
   }
-  function renderPainel(){
-    var c=htmlProfessor()+htmlCompetencias();
-    var a=document.getElementById('painelDireita');   if(a) a.innerHTML=c;
-    var b=document.getElementById('gvNotaConteudo');  if(b) b.innerHTML=c;
-  }
-  function renderModos(){
-    var lm=document.getElementById('listaModos');
-    if(!lm) return;
-    lm.innerHTML=MODOS.map(function(m){
-      var sel=(m.id===abaAtual);
-      return '<a class="pill'+(sel?' sel':'')+'" onclick="escolherModo(\''+m.id+'\')">'
-        +'<span style="font-size:1.15rem;">'+m.ico+'</span>'
-        +'<span style="min-width:0;"><span style="display:block;">'+m.r+'</span>'
-        +'<span style="display:block;font-size:.68rem;font-weight:400;color:var(--muted);">'+m.d+'</span></span>'
-        +'<i class="fim"'+(sel?'':' style="opacity:0;"')+'>\u2713</i></a>';
-    }).join('');
-  }
-  function escolherModo(id){ trocarAba(id); fecharGaveta('gvRedacao'); marcarBtnDock(); }
-
-  function rotulo(t){ return '<p style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem;">'+t+'</p>'; }
-  /* Convenção de nomenclatura: "Reescrita" é o nome do recurso (× Original).
-     Corrige na leitura os textos antigos da IA que dizem "redação nota 1000". */
-  function nomearReescrita(t){
-    return String(t)
-      .replace(/(reda\u00e7\u00e3o|vers\u00e3o)\s+(reescrita\s+)?nota\s+(1000|mil)/gi,'Reescrita')
-      .replace(/nota\s+1000/gi,'nota m\u00e1xima');
-  }
-  function montarComparar(){
-    var barra='<div class="cmpBarra">'
-      +'<div class="cmpCx"><p class="cmpLbl">Vers\u00e3o Original</p><p class="cmpVal" style="color:'+corComp(atual.nota/5)+';">'+atual.nota+'</p></div>'
-      +'<span class="cmpSeta">\u2192</span>'
-      +'<div class="cmpCx"><p class="cmpLbl">Vers\u00e3o Reescrita</p><p class="cmpValTxt">crit\u00e9rios do INEP aplicados</p></div></div>';
-    var temAlgum=Object.keys(atual.comparar||{}).length>0;
-    if(!temAlgum) return barra+'<p style="font-size:.85rem;color:var(--muted);text-align:center;padding:1.5rem 0;">A compara\u00e7\u00e3o compet\u00eancia a compet\u00eancia ainda n\u00e3o est\u00e1 dispon\u00edvel para esta reda\u00e7\u00e3o.</p>';
-    var intro='<p class="cmpIntro">Veja o que mudaria na sua reda\u00e7\u00e3o \u2014 compet\u00eancia por compet\u00eancia:</p>';
-    var noTeto=[];
-    var blocos=atual.comp.map(function(v,i){
-      if(v>=200){ noTeto.push('C'+(i+1)); return ''; }
-      var txt=atual.comparar[i];
-      if(!txt) return '';
-      var cor=corComp(v);
-      var corpo;
-      if(typeof txt==='object'){ /* v3-8: Na sua redação / Na Reescrita / Por que melhora / ficha do acervo */
-        corpo=(txt.original?'<p class="cmpTxt"><b>Na sua reda\u00e7\u00e3o:</b> \u201c'+escapeHtmlSimples(txt.original)+'\u201d</p>':'')
-          +(txt.reescrita?'<p class="cmpTxt"><b>Na Reescrita:</b> \u201c'+escapeHtmlSimples(txt.reescrita)+'\u201d</p>':'')
-          +(txt.por_que?'<p class="cmpTxt"><b>Por que melhora:</b> '+escapeHtmlSimples(nomearReescrita(txt.por_que))+'</p>':'')
-          +(txt.ficha?'<p class="cmpTxt" style="font-size:.78rem;color:var(--muted);">Esse repert\u00f3rio est\u00e1 no acervo do tema (ficha '+escapeHtmlSimples(String(txt.ficha))+'). Vale estudar.</p>':'');
-      } else corpo='<p class="cmpTxt">'+escapeHtmlSimples(nomearReescrita(txt))+'</p>';
-      return '<div class="cmpBloco" style="border-left-color:'+cor+';">'
-        +'<div class="cmpCab"><span class="cmpTit" style="color:'+cor+';">'+NOMES[i]+'</span>'
-        +'<span class="cmpPill" style="background:rgba(var(--borderRGB),.14);color:'+cor+';">'+v+' de 200</span></div>'
-        +corpo+'</div>';
-    }).join('');
-    if(!blocos) blocos='<p style="font-size:.85rem;color:var(--green);text-align:center;padding:1.5rem 0;">\u2713 Todas as compet\u00eancias j\u00e1 est\u00e3o no teto.</p>';
-    else if(noTeto.length) blocos+='<p style="font-size:.76rem;color:var(--muted);text-align:center;margin-top:.4rem;">'+noTeto.join(' e ')+' j\u00e1 '+(noTeto.length>1?'est\u00e3o':'est\u00e1')+' no teto.</p>';
-    return barra+intro+blocos+'<p class="cmpAviso">A reescrita aplica os crit\u00e9rios do INEP. A nota final depende da avalia\u00e7\u00e3o da banca.</p>';
+  function folhaNota(){
+    var j=atual.json||{};
+    var padrao=_txt(j.analise_padrao_dominante), projeto=_txt(j.analise_projeto_texto), proximo=_txt(j.analise_proximo_passo);
+    var legado=(!padrao && !projeto && !proximo) ? _txt(j.analise_completa) : '';
+    var h='<div class="notaTopo"><span class="n">'+escapeHtmlSimples(atual.nota)+'</span>'
+      +'<div class="lado">'+(padrao?htmlPadrao(padrao):'<p>de 1000</p>')+'</div></div>';
+    h+=htmlCompetencias(projeto);
+    h+=htmlProfessor();
+    if(proximo) h+='<div class="fecho"><p class="rotBloco">Pr\u00f3ximo passo</p>'+paragrafos(proximo,'tx')+'</div>';
+    else if(legado) h+='<div class="fecho"><p class="rotBloco">An\u00e1lise completa</p>'+paragrafos(legado,'tx')+'</div>';
+    return h;
   }
 
-
-  /* ═══ GERAÇÃO SOB DEMANDA · Chamadas 3 e 4 ═══
-     A correção grava chamadas.redacao_nota_1000 e .melhorias_por_competencia
-     como 'pendente' (Cenário B: não gerar o que ninguém vai ler). Quem dispara
-     a geração é ESTA tela, quando o aluno abre a aba. Ao terminar, grava no
-     correcao_json e marca 'completa' — da próxima vez abre instantâneo. */
+  /* \u2550\u2550\u2550 GERA\u00c7\u00c3O AO CHEGAR NA P\u00c1GINA \u00b7 Chamadas 3 e 4 \u2550\u2550\u2550
+     A corre\u00e7\u00e3o grava chamadas.redacao_nota_1000 e .melhorias_por_competencia como 'pendente'.
+     Quem dispara \u00e9 ESTA tela, quando a p\u00e1gina Reescrita ou Comparar aparece (deslize, toque ou tecla).
+     Ao terminar, grava no correcao_json e marca 'completa' \u2014 da pr\u00f3xima vez abre instant\u00e2neo.
+     v4-0: a trava _gerando guarda a promessa por reda\u00e7\u00e3o. Como s\u00f3 a p\u00e1gina \u00e0 vista existe no DOM,
+     a gera\u00e7\u00e3o nunca escreve na tela: guarda o resultado na reda\u00e7\u00e3o e repinta s\u00f3 se o aluno
+     ainda estiver naquela reda\u00e7\u00e3o e numa p\u00e1gina que dependa dele. */
   var _gerando = {};
 
   async function geminiTexto(prompt){
@@ -490,189 +637,149 @@
       try{ return JSON.parse(tol); }catch(e2){ throw new Error('JSON da IA inv\u00e1lido: '+(e2 && e2.message)); }
     }
   }
-  async function salvarNoCorrecaoJson(campos, chamada){
-    if(!atual || !atual.correcaoId) throw new Error('Corre\u00e7\u00e3o sem id \u2014 nada gravado'); /* v3-14: antes retornava em sil\u00eancio */
-    var novo = Object.assign({}, atual.json || {}, campos);
-    novo.chamadas = Object.assign({}, atual.chamadas || {});
+  async function salvarNoCorrecaoJson(alvo, campos, chamada){
+    if(!alvo || !alvo.correcaoId) throw new Error('Corre\u00e7\u00e3o sem id \u2014 nada gravado'); /* v3-14: antes retornava em sil\u00eancio */
+    var novo = Object.assign({}, alvo.json || {}, campos);
+    novo.chamadas = Object.assign({}, alvo.chamadas || {});
     novo.chamadas[chamada] = 'completa';
-    var res = await dbFetch(SUPABASE_URL+'/rest/v1/correcoes?id=eq.'+atual.correcaoId+'&select=id', {
+    var res = await dbFetch(SUPABASE_URL+'/rest/v1/correcoes?id=eq.'+alvo.correcaoId+'&select=id', {
       method:'PATCH',
       headers:{ 'Prefer':'return=representation' },
       body: JSON.stringify({ correcao_json: novo })
     });
     if(!res.ok) throw new Error('N\u00e3o consegui salvar o resultado ('+res.status+')');
     var linhas = []; try{ linhas = await res.json(); }catch(e){}
-    if(Array.isArray(linhas) && linhas.length === 0) throw new Error('Grava\u00e7\u00e3o n\u00e3o atingiu a corre\u00e7\u00e3o (permiss\u00e3o?) \u2014 id '+atual.correcaoId);
-    atual.json = novo; atual.chamadas = novo.chamadas;
+    if(Array.isArray(linhas) && linhas.length === 0) throw new Error('Grava\u00e7\u00e3o n\u00e3o atingiu a corre\u00e7\u00e3o (permiss\u00e3o?) \u2014 id '+alvo.correcaoId);
+    alvo.json = novo; alvo.chamadas = novo.chamadas;
   }
   function blocoGerando(titulo, sub){
-    return '<div style="text-align:center;padding:2.2rem 1rem;">'
-      +'<div class="spinnerRed" style="margin:0 auto .9rem;"></div>'
-      +'<p style="font-size:.9rem;font-weight:700;color:var(--text);">'+titulo+'</p>'
-      +'<p style="font-size:.78rem;color:var(--muted);line-height:1.5;margin-top:.3rem;">'+sub+'</p></div>';
+    return '<div class="gerando"><div class="spinnerRed"></div><p class="t1">'+titulo+'</p><p class="t2">'+sub+'</p></div>';
   }
   function blocoErro(msg, fn){
-    return '<div style="text-align:center;padding:2rem 1rem;">'
-      +'<p style="font-size:.85rem;color:var(--muted);line-height:1.55;margin-bottom:.9rem;">'+escapeHtmlSimples(msg)+'</p>'
-      +'<button class="btnTentar" onclick="'+fn+'">Tentar de novo</button></div>';
+    return '<div class="erroGer"><p>'+escapeHtmlSimples(msg)+'</p><button class="btnTentar" type="button" onclick="'+fn+'">Tentar de novo</button></div>';
   }
-
-  /* v3-8 · Reescrita em duas etapas: PLANO (escolhe do acervo e do gabarito) → TEXTO (a partir do plano) → guardas por código.
-     Se uma guarda falhar, refaz o texto uma vez com a lista de falhas; se ainda falhar em item grave, tenta o plano de novo. */
-  async function gerarReescrita(){
-    if(_gerando.reescrita) return;
-    if(!atual || !atual.texto){ return; }
-    _gerando.reescrita = true;
-    var c = document.getElementById('abaConteudo');
-    c.innerHTML = rotulo('Reescrita') + blocoGerando('Reescrevendo sua reda\u00e7\u00e3o\u2026','A PROfa est\u00e1 planejando com o acervo do tema e aplicando os crit\u00e9rios do INEP nas cinco compet\u00eancias. Leva cerca de 40 segundos.');
-    try{
-      var tema = atual.titulo || 'n\u00e3o informado';
-      var ac = await redaonCarregarAcervo(atual.temaId);
-      var diag = redaonTextoDiagnostico(atual.json);
-      /* 1) plano */
-      var pPlano = REDAON_PROMPT_PLANO + '\n\nTema: ' + tema + diag + redaonTextoFichas(ac) + redaonTextoGabarito(ac) + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno:\n' + atual.texto;
-      var plano;
-      try{ plano = jsonDaIA(await geminiTexto(pPlano)); }
-      catch(ePl){ console.warn('[reescrita] plano falhou, tentando de novo:', ePl); plano = jsonDaIA(await geminiTexto(pPlano + '\n\nATEN\u00c7\u00c3O: a resposta anterior n\u00e3o era JSON v\u00e1lido. Responda SOMENTE o objeto JSON, sem texto antes ou depois.')); }
-      /* 2) texto a partir do plano */
-      var base = REDAON_PROMPT_REESCRITA + '\n\nTema: ' + tema + '\n\nPLANO (siga \u00e0 risca):\n' + JSON.stringify(plano) + redaonFichasReferenciadas(ac, plano) + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno (para manter a voz):\n' + atual.texto;
-      var j = redaonCorrigirNomes(jsonDaIA(await geminiTexto(base)));
-      var falhas = redaonChecarReescrita(j, plano, ac);
-      /* v3-15: at\u00e9 duas tentativas de corre\u00e7\u00e3o; fica a vers\u00e3o com MENOS falhas graves (repert\u00f3rio do aluno sumiu / texto longo) */
-      var grave = function(fs){ return fs.filter(function(f){ return /repert\u00f3rio do aluno|longo demais/.test(f); }).length; };
-      for(var tent = 1; tent <= 2 && falhas.length; tent++){
-        console.warn('[reescrita] guardas (tentativa '+tent+'):', falhas);
-        var jN = redaonCorrigirNomes(jsonDaIA(await geminiTexto(base + '\n\nA VERS\u00c3O ANTERIOR FALHOU NESTES PONTOS (corrija TODOS, obrigatoriamente, sem mudar o resto):\n- ' + falhas.join('\n- ') + (grave(falhas) ? '\n\nLEMBRETE: o repert\u00f3rio do aluno (obras, personagens, ditado) tem que aparecer nomeado, e o texto inteiro tem no m\u00e1ximo 2.600 caracteres.' : ''))));
-        var fN = redaonChecarReescrita(jN, plano, ac);
-        if(grave(fN) < grave(falhas) || (grave(fN) === grave(falhas) && fN.length <= falhas.length)) { j = jN; falhas = fN; }
-      }
-      /* v3-16: se s\u00f3 sobrou o tamanho, uma passagem dedicada de corte (pedido \u00fanico, o modelo obedece melhor) */
-      if(falhas.length && falhas.every(function(f){ return /longo demais/.test(f); }) && typeof REDAON_PROMPT_CORTE !== 'undefined'){
-        try{
-          var jC = redaonCorrigirNomes(jsonDaIA(await geminiTexto(REDAON_PROMPT_CORTE + '\n\nREESCRITA A REDUZIR:\n' + redaonTextoReescrita(j))));
-          var fC = redaonChecarReescrita(jC, plano, ac);
-          if(!grave(fC) || redaonTextoReescrita(jC).length < redaonTextoReescrita(j).length) { j = jC; falhas = fC; }
-        }catch(eC){ console.warn('[reescrita] corte falhou:', eC); }
-      }
-      if(falhas.length) console.warn('[reescrita] guardas finais:', falhas);
-      var partes = [j.redacao_nota_1000_intro, j.redacao_nota_1000_dev1, j.redacao_nota_1000_dev2, j.redacao_nota_1000_conclusao]
-        .filter(function(p){ return p && String(p).trim().length > 20; });
-      if(partes.length < 4) throw new Error('A IA n\u00e3o devolveu a reescrita completa');
-      /* v3-9: mostra primeiro, grava depois — se a gravação falhar, o aluno vê o texto e o console registra o motivo */
-      atual.reescrita = partes.join('\n\n');
-      atual.plano = plano;
-      if(abaAtual === 'reescrita') trocarAba('reescrita');
-      try{ await salvarNoCorrecaoJson({
-        redacao_nota_1000_intro: j.redacao_nota_1000_intro,
-        redacao_nota_1000_dev1: j.redacao_nota_1000_dev1,
-        redacao_nota_1000_dev2: j.redacao_nota_1000_dev2,
-        redacao_nota_1000_conclusao: j.redacao_nota_1000_conclusao,
-        elementos_c5_reescrita: j.elementos_c5 || null,
-        plano_reescrita: plano,
-        reescrita_guardas: falhas.length ? falhas : null,
-        reescrita_versao: 'v2-3'
-      }, 'redacao_nota_1000'); }
-      catch(e2){ console.error('[redacoes] reescrita gerada mas N\u00c3O gravada:', e2); }
-    }catch(err){
-      console.error('[redacoes] reescrita:', err);
-      if(abaAtual === 'reescrita'){
-        c.innerHTML = rotulo('Reescrita') + blocoErro('N\u00e3o consegui gerar a reescrita agora. Confira sua internet e tente de novo.'+(err && err.message ? ' ('+String(err.message).slice(0,140)+')' : ''), 'gerarReescrita()');
-      }
-    }
-    _gerando.reescrita = false;
+  /* repinta a p\u00e1gina \u00e0 vista s\u00f3 se ela pertence a esta reda\u00e7\u00e3o e depende do que terminou */
+  function repintarSe(alvo){
+    if(atual!==alvo || !correcaoVisivel()) return;
+    if(pagAtual===PG_RE || pagAtual===PG_CMP) pintarFolha(pagAtual, 0, true);
   }
-
-  async function gerarComparacao(){
-    if(_gerando.comparar) return;
+  function tentarDeNovo(tipo){
     if(!atual) return;
-    if(!atual.reescrita){ await gerarReescrita(); if(!atual.reescrita) return; }
-    _gerando.comparar = true;
-    var c = document.getElementById('abaConteudo');
-    c.innerHTML = rotulo('Comparar') + blocoGerando('Comparando as duas versões\u2026','A PROfa est\u00e1 explicando o que mudou em cada compet\u00eancia e apontando as fichas do acervo. Leva cerca de 30 segundos.');
-    try{
-      var planoTxt = (atual.plano || (atual.json && atual.json.plano_reescrita)) ? '\n\nPLANO DA REESCRITA (com fichas usadas):\n' + JSON.stringify(atual.plano || atual.json.plano_reescrita) : '';
-      var prompt = REDAON_PROMPT_COMPARACAO
-        + '\n\nTema: ' + (atual.titulo || 'n\u00e3o informado')
-        + redaonTextoDiagnostico(atual.json) + planoTxt
-        + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno:\n' + atual.texto
-        + '\n\nREESCRITA:\n' + atual.reescrita;
-      var j = jsonDaIA(await geminiTexto(prompt));
-      var campos = {}, achou = false, cmp = {};
-      ['c1','c2','c3','c4','c5'].forEach(function(k,i){
-        var m = j['melhoria_'+k];
-        if(m && typeof m==='object' && (m.reescrita || m.por_que)){ /* v3-8: campos separados */
-          var o = { original:String(m.original||'').trim(), reescrita:String(m.reescrita||'').trim(), por_que:String(m.por_que||'').trim(), ficha:m.ficha?String(m.ficha).trim():null, mantido:m.mantido===true };
-          campos['melhoria_'+k] = o; cmp[i] = o; achou = true;
-        } else if(m && String(m).trim().length > 5){ campos['melhoria_'+k] = String(m).trim(); cmp[i] = String(m).trim(); achou = true; }
-      });
-      if(!achou) throw new Error('A IA não devolveu a comparação');
-      await salvarNoCorrecaoJson(campos, 'melhorias_por_competencia');
-      atual.comparar = cmp;
-      if(abaAtual === 'comparar') trocarAba('comparar');
-    }catch(err){
-      console.error('[redacoes] comparação:', err);
-      if(abaAtual === 'comparar'){
-        c.innerHTML = rotulo('Comparar') + blocoErro('Não consegui gerar a comparação agora. Confira sua internet e tente de novo.', 'gerarComparacao()');
-      }
-    }
-    _gerando.comparar = false;
+    delete atual.erro[tipo];
+    if(tipo==='cmp') delete atual.erro.re;   /* Comparar refaz a Reescrita se ela tiver sido o problema */
+    pintarFolha(pagAtual, 0, true);
   }
 
-  function trocarAba(a){
-    if(!atual) return;      // guarda: aba sem redação aberta
-    abaAtual=a;
-    document.querySelectorAll('#trilhoAbas .abaBtn').forEach(function(b){ b.classList.toggle('ativa',b.dataset.aba===a); });
-    renderModos();
-    var c=document.getElementById('abaConteudo');
-    if(a==='original'){
-      c.innerHTML=rotulo('Sua reda\u00e7\u00e3o')+'<p class="folha">'+escapeHtmlSimples(atual.texto||'Texto n\u00e3o dispon\u00edvel.')+'</p>';
-    } else if(a==='analise'){
-      var fortes=linhas(atual.pontosFortes), melhorar=linhas(atual.pontosMelhorar);
-      var html=rotulo('Pontos fortes e a melhorar');
-      if(atual.feedbackGeral) html+='<p style="font-size:.86rem;line-height:1.65;color:var(--text2);background:rgba(var(--cyanRGB),.07);border:1px solid rgba(var(--cyanRGB),.22);border-radius:.7rem;padding:.7rem .85rem;margin-bottom:.9rem;">'+escapeHtmlSimples(atual.feedbackGeral)+'</p>';
-      if(!fortes.length&&!melhorar.length&&!atual.feedbackGeral){
-        html+='<p style="font-size:.85rem;color:var(--muted);text-align:center;padding:1.5rem 0;">A an\u00e1lise detalhada ainda n\u00e3o est\u00e1 dispon\u00edvel para esta reda\u00e7\u00e3o.</p>';
+  /* v3-8 \u00b7 Reescrita em duas etapas: PLANO (escolhe do acervo e do gabarito) \u2192 TEXTO (a partir do plano) \u2192 guardas por c\u00f3digo.
+     Se uma guarda falhar, refaz o texto; se ainda falhar em item grave, fica a vers\u00e3o com menos falhas. */
+  function gerarReescrita(alvo){
+    var chave='re:'+alvo.id;
+    if(_gerando[chave]) return _gerando[chave];
+    if(!alvo.texto) return Promise.resolve();
+    _gerando[chave] = (async function(){
+      try{
+        var tema = alvo.titulo || 'n\u00e3o informado';
+        var ac = await redaonCarregarAcervo(alvo.temaId);
+        var diag = redaonTextoDiagnostico(alvo.json);
+        /* 1) plano */
+        var pPlano = REDAON_PROMPT_PLANO + '\n\nTema: ' + tema + diag + redaonTextoFichas(ac) + redaonTextoGabarito(ac) + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno:\n' + alvo.texto;
+        var plano;
+        try{ plano = jsonDaIA(await geminiTexto(pPlano)); }
+        catch(ePl){ console.warn('[reescrita] plano falhou, tentando de novo:', ePl); plano = jsonDaIA(await geminiTexto(pPlano + '\n\nATEN\u00c7\u00c3O: a resposta anterior n\u00e3o era JSON v\u00e1lido. Responda SOMENTE o objeto JSON, sem texto antes ou depois.')); }
+        /* 2) texto a partir do plano */
+        var base = REDAON_PROMPT_REESCRITA + '\n\nTema: ' + tema + '\n\nPLANO (siga \u00e0 risca):\n' + JSON.stringify(plano) + redaonFichasReferenciadas(ac, plano) + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno (para manter a voz):\n' + alvo.texto;
+        var j = redaonCorrigirNomes(jsonDaIA(await geminiTexto(base)));
+        var falhas = redaonChecarReescrita(j, plano, ac);
+        /* v3-15: at\u00e9 duas tentativas de corre\u00e7\u00e3o; fica a vers\u00e3o com MENOS falhas graves (repert\u00f3rio do aluno sumiu / texto longo) */
+        var grave = function(fs){ return fs.filter(function(f){ return /repert\u00f3rio do aluno|longo demais/.test(f); }).length; };
+        for(var tent = 1; tent <= 2 && falhas.length; tent++){
+          console.warn('[reescrita] guardas (tentativa '+tent+'):', falhas);
+          var jN = redaonCorrigirNomes(jsonDaIA(await geminiTexto(base + '\n\nA VERS\u00c3O ANTERIOR FALHOU NESTES PONTOS (corrija TODOS, obrigatoriamente, sem mudar o resto):\n- ' + falhas.join('\n- ') + (grave(falhas) ? '\n\nLEMBRETE: o repert\u00f3rio do aluno (obras, personagens, ditado) tem que aparecer nomeado, e o texto inteiro tem no m\u00e1ximo 2.600 caracteres.' : ''))));
+          var fN = redaonChecarReescrita(jN, plano, ac);
+          if(grave(fN) < grave(falhas) || (grave(fN) === grave(falhas) && fN.length <= falhas.length)) { j = jN; falhas = fN; }
+        }
+        /* v3-16: se s\u00f3 sobrou o tamanho, uma passagem dedicada de corte (pedido \u00fanico, o modelo obedece melhor) */
+        if(falhas.length && falhas.every(function(f){ return /longo demais/.test(f); }) && typeof REDAON_PROMPT_CORTE !== 'undefined'){
+          try{
+            var jC = redaonCorrigirNomes(jsonDaIA(await geminiTexto(REDAON_PROMPT_CORTE + '\n\nREESCRITA A REDUZIR:\n' + redaonTextoReescrita(j))));
+            var fC = redaonChecarReescrita(jC, plano, ac);
+            if(!grave(fC) || redaonTextoReescrita(jC).length < redaonTextoReescrita(j).length) { j = jC; falhas = fC; }
+          }catch(eC){ console.warn('[reescrita] corte falhou:', eC); }
+        }
+        if(falhas.length) console.warn('[reescrita] guardas finais:', falhas);
+        var partes = [j.redacao_nota_1000_intro, j.redacao_nota_1000_dev1, j.redacao_nota_1000_dev2, j.redacao_nota_1000_conclusao]
+          .filter(function(p){ return p && String(p).trim().length > 20; });
+        if(partes.length < 4) throw new Error('A IA n\u00e3o devolveu a reescrita completa');
+        /* v3-9: mostra primeiro, grava depois \u2014 se a grava\u00e7\u00e3o falhar, o aluno v\u00ea o texto e o console registra o motivo */
+        alvo.reescrita = partes.join('\n\n');
+        alvo.plano = plano;
+        repintarSe(alvo);
+        try{ await salvarNoCorrecaoJson(alvo, {
+          redacao_nota_1000_intro: j.redacao_nota_1000_intro,
+          redacao_nota_1000_dev1: j.redacao_nota_1000_dev1,
+          redacao_nota_1000_dev2: j.redacao_nota_1000_dev2,
+          redacao_nota_1000_conclusao: j.redacao_nota_1000_conclusao,
+          elementos_c5_reescrita: j.elementos_c5 || null,
+          plano_reescrita: plano,
+          reescrita_guardas: falhas.length ? falhas : null,
+          reescrita_versao: 'v2-3'
+        }, 'redacao_nota_1000'); }
+        catch(e2){ console.error('[redacoes] reescrita gerada mas N\u00c3O gravada:', e2); }
+      }catch(err){
+        console.error('[redacoes] reescrita:', err);
+        alvo.erro.re = 'N\u00e3o consegui gerar a reescrita agora. Confira sua internet e tente de novo.'+(err && err.message ? ' ('+String(err.message).slice(0,140)+')' : '');
+        repintarSe(alvo);
+      }finally{
+        delete _gerando[chave];
       }
-      html+=fortes.map(function(t){
-        return '<div style="border-left:2px solid var(--green);padding-left:.7rem;margin-bottom:.7rem;">'
-          +'<p style="font-size:.74rem;font-weight:700;color:var(--green);margin-bottom:.1rem;">\u2713 Ponto forte</p>'
-          +'<p style="font-size:.85rem;color:var(--text2);line-height:1.55;">'+escapeHtmlSimples(t)+'</p></div>';
-      }).join('');
-      html+=melhorar.map(function(t){
-        return '<div style="border-left:2px solid var(--gold);padding-left:.7rem;margin-bottom:.7rem;">'
-          +'<p style="font-size:.74rem;font-weight:700;color:var(--gold);margin-bottom:.1rem;">\u2197 A melhorar</p>'
-          +'<p style="font-size:.85rem;color:var(--text2);line-height:1.55;">'+escapeHtmlSimples(t)+'</p></div>';
-      }).join('');
-      /* v3-10 · Deslizes de escrita: o agente C1 já lista os desvios com o trecho e a corre\u00e7\u00e3o — agora o aluno v\u00ea */
-      var desv=(atual.json&&atual.json._agentes&&atual.json._agentes.c1&&atual.json._agentes.c1.desvios)||[];
-      if(Array.isArray(desv)&&desv.length){
-        html+='<p style="font-size:.74rem;font-weight:700;color:var(--muted);margin:1rem 0 .4rem;text-transform:uppercase;letter-spacing:.04em;">Deslizes de escrita apontados (C1)</p>';
-        html+=desv.map(function(d){
-          var txt=String(typeof d==='string'?d:(d.desvio||d.trecho||JSON.stringify(d))), k=txt.indexOf(' - Desvio:'), trecho=k>0?txt.slice(0,k):'', expl=k>0?txt.slice(k+3):txt;
-          if(trecho.length>170) trecho=trecho.slice(0,170)+'\u2026';
-          return '<div style="border-left:2px solid rgba(var(--borderRGB),.6);padding-left:.7rem;margin-bottom:.6rem;">'
-            +(trecho?'<p style="font-size:.78rem;color:var(--muted);line-height:1.5;font-style:italic;">\u201c'+escapeHtmlSimples(trecho)+'\u201d</p>':'')
-            +'<p style="font-size:.85rem;color:var(--text2);line-height:1.55;">'+escapeHtmlSimples(expl)+'</p></div>';
-        }).join('');
-      }
-      c.innerHTML=html;
-    } else if(a==='reescrita'){
-      // Sob demanda: sem reescrita no banco, gera agora (só quando o aluno pede).
-      if(!atual.reescrita && atual.texto && !_gerando.reescrita){ gerarReescrita(); return; }
-      if(!atual.reescrita && _gerando.reescrita){ c.innerHTML=rotulo('Reescrita')+blocoGerando('Reescrevendo sua reda\u00e7\u00e3o\u2026','A PROfa est\u00e1 aplicando os crit\u00e9rios do INEP nas cinco compet\u00eancias.'); return; }
-      c.innerHTML=rotulo('Reescrita')
-        +(atual.reescrita
-          ? '<p style="font-size:.78rem;color:var(--text2);background:rgba(var(--cyanRGB),.08);border:1px solid rgba(var(--cyanRGB),.25);border-radius:.7rem;padding:.6rem .8rem;margin-bottom:.9rem;">\u2728 Esta \u00e9 a sua reda\u00e7\u00e3o <b>reescrita buscando a nota mil</b> \u2014 mantendo as suas ideias, mas aplicando os crit\u00e9rios do INEP em cada uma das cinco compet\u00eancias.</p><p class="folha">'+escapeHtmlSimples(atual.reescrita)+'</p>'
-          : '<p style="font-size:.85rem;color:var(--muted);text-align:center;padding:1.5rem 0;">A reescrita ainda n\u00e3o est\u00e1 dispon\u00edvel para esta reda\u00e7\u00e3o.</p>');
-    } else {
-      // Sob demanda: comparação depende da reescrita; gera as duas se preciso.
-      var temCmp = Object.keys(atual.comparar||{}).length > 0;
-      if(!temCmp && atual.texto && !_gerando.comparar){ gerarComparacao(); return; }
-      c.innerHTML=montarComparar();
-    }
+    })();
+    return _gerando[chave];
   }
 
-  // ─── ?abrir=<id> vindo da nova-redacao ───
+  /* Comparar gera a Reescrita antes, se ela n\u00e3o existir (aproveita a mesma promessa, sem chamada dupla) */
+  function gerarComparacao(alvo){
+    var chave='cmp:'+alvo.id;
+    if(_gerando[chave]) return _gerando[chave];
+    _gerando[chave] = (async function(){
+      try{
+        if(!alvo.reescrita){
+          await gerarReescrita(alvo);
+          if(!alvo.reescrita){
+            alvo.erro.cmp = alvo.erro.re || 'N\u00e3o consegui gerar a compara\u00e7\u00e3o agora. Confira sua internet e tente de novo.';
+            return;
+          }
+          repintarSe(alvo);   /* troca o aviso de "reescrevendo" pelo de "comparando" */
+        }
+        var planoTxt = (alvo.plano || (alvo.json && alvo.json.plano_reescrita)) ? '\n\nPLANO DA REESCRITA (com fichas usadas):\n' + JSON.stringify(alvo.plano || alvo.json.plano_reescrita) : '';
+        var prompt = REDAON_PROMPT_COMPARACAO
+          + '\n\nTema: ' + (alvo.titulo || 'n\u00e3o informado')
+          + redaonTextoDiagnostico(alvo.json) + planoTxt
+          + '\n\nREDA\u00c7\u00c3O ORIGINAL do aluno:\n' + alvo.texto
+          + '\n\nREESCRITA:\n' + alvo.reescrita;
+        var j = jsonDaIA(await geminiTexto(prompt));
+        var campos = {}, achou = false, cmp = {};
+        ['c1','c2','c3','c4','c5'].forEach(function(k,i){
+          var m = j['melhoria_'+k];
+          if(m && typeof m==='object' && (m.reescrita || m.por_que)){ /* v3-8: campos separados */
+            var o = { original:String(m.original||'').trim(), reescrita:String(m.reescrita||'').trim(), por_que:String(m.por_que||'').trim(), ficha:m.ficha?String(m.ficha).trim():null, mantido:m.mantido===true };
+            campos['melhoria_'+k] = o; cmp[i] = o; achou = true;
+          } else if(m && String(m).trim().length > 5){ campos['melhoria_'+k] = String(m).trim(); cmp[i] = String(m).trim(); achou = true; }
+        });
+        if(!achou) throw new Error('A IA n\u00e3o devolveu a compara\u00e7\u00e3o');
+        await salvarNoCorrecaoJson(alvo, campos, 'melhorias_por_competencia');
+        alvo.comparar = cmp;
+      }catch(err){
+        console.error('[redacoes] compara\u00e7\u00e3o:', err);
+        alvo.erro.cmp = 'N\u00e3o consegui gerar a compara\u00e7\u00e3o agora. Confira sua internet e tente de novo.';
+      }finally{
+        delete _gerando[chave];
+        repintarSe(alvo);
+      }
+    })();
+    return _gerando[chave];
+  }
+
+  // \u2500\u2500\u2500 ?abrir=<id> vindo da nova-redacao ("Ver an\u00e1lise completa") \u2500\u2500\u2500
   function abrirPorParametro(){
     try{
       var p=new URLSearchParams(window.location.search);
@@ -683,11 +790,11 @@
       window.history.replaceState({},'',url.toString());
       var alvo=REDACOES.filter(function(r){return r.id===id;})[0];
       if(alvo && alvo.nota && alvo.comp) abrirCorrecao(id);
-    }catch(e){}
+    }catch(e){ console.warn('[redacoes] abrir por par\u00e2metro:', e); }
   }
 
   function acordarDock(){ if(window.mostrarDock_dockLista) window.mostrarDock_dockLista(); }
-  iniciarDock('dockLista',{ protegidaPor:['gvRedacao','gvNota'] });
+  iniciarDock('dockLista',{ protegidaPor:[] });
   renderFiltros();
   carregarRedacoes();
 </script>
