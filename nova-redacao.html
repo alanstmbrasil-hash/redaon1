@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<title>RedaON · Nova Redação · v9-8</title>
+<title>RedaON · Nova Redação · v9-11</title>
 <!-- v9-7: CASCATA DE TEMA. Esta tela era a única sem o script de arranque que as
      outras (inicio, temas, plano, minhas-redacoes) já tinham. Sem o atributo
      data-tema no elemento raiz, a regra html[data-tema="claro"] nunca casava e
@@ -237,12 +237,18 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 .pill.sel .fim { color:var(--cyan); font-weight:900; }
 
 /* ===== TOAST ===== */
-#toast{ position:fixed; bottom:104px; left:50%; transform:translateX(-50%) translateY(20px);
-  background:var(--surface2); color:var(--text); font-size:12px; padding:9px 16px; border-radius:999px;
-  border:1px solid rgba(var(--borderRGB),.3); opacity:0; transition:.25s; z-index:70;
-  white-space:nowrap; max-width:92vw; overflow:hidden; text-overflow:ellipsis; }
+/* v9-9: nesta tela o toast some. O fundo era var(--surface2) e a folha e clara
+   FIXA (cores de papel): no tema claro, claro sobre claro = invisivel. Aqui ele
+   ganha contraste proprio, independente do tema, e sobe para a metade de baixo
+   da tela, longe do dock e do teclado. Vale so para a nova-redacao; as outras
+   telas nao tem folha de papel e seguem com o toast da base. */
+#toast{ position:fixed; bottom:38%; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#1b2a2b; color:#f4f7f7; font-size:.82rem; font-weight:600;
+  padding:.7rem 1.1rem; border-radius:14px; border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 10px 28px rgba(0,0,0,.35); opacity:0; transition:.25s; z-index:95;
+  max-width:min(88vw, 420px); text-align:center; white-space:normal; line-height:1.4; }
 #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-@media(min-width:1024px){ #toast{ bottom:32px; } }
+@media(min-width:1024px){ #toast{ bottom:42%; } }
 
 /* ===== MODAL ===== */
 .modalFundo { display:none; position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.6); align-items:center; justify-content:center; padding:1rem; }
@@ -330,7 +336,9 @@ header.hApp{ display:none !important; }
   box-shadow:0 4px 16px rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14);
   opacity:0; pointer-events:none; transition:opacity .3s ease, transform .3s ease; }
 #seloRascunho.show{ opacity:1; transform:translateX(-50%) scale(1); }
-.tituloFaixa{ flex:0 0 auto; display:flex; align-items:stretch;
+/* v9-11: overflow:hidden na faixa — rede de seguranca para nada do tema
+   escapar por cima do texto da folha, como aconteceu no aparelho. */
+.tituloFaixa{ flex:0 0 auto; display:flex; align-items:stretch; overflow:hidden;
   background:#f6f2e6; border-bottom:2px dashed #d8d2c0; }
 .tituloFaixa .rot{ flex:0 0 auto; display:flex; align-items:center; padding:0 .5rem;
   border-right:1px solid #e2ddca; }
@@ -339,11 +347,18 @@ header.hApp{ display:none !important; }
 /* v9-6: a faixa TEMA vira LEITURA — ate duas linhas, reticencias alem disso.
    Input de texto nao quebra linha, e por isso a v9-5 nao resolveu: o campo
    editavel foi para a gaveta e aqui ficou um visor, que pode ter duas linhas
-   e libera o toque para abrir o tema inteiro. */
+   e libera o toque para abrir o tema inteiro.
+
+   v9-11: o clamp sozinho NAO segurava. Como o visor e item flex de uma faixa
+   com align-items:stretch, o -webkit-box reporta a altura do conteudo INTEIRO:
+   a faixa crescia para caber 3 linhas, sobrava espaco na caixa, o clamp nao
+   cortava nada e o tema invadia a folha. A max-height de duas linhas resolve
+   por medida — o clamp fica por conta das reticencias, nao do corte. */
 .tituloFaixa .temaVisor{ flex:1; min-width:0; cursor:pointer;
   padding:.6rem .875rem; font-family:'Caveat',cursive; font-size:1.25rem; font-weight:600;
   line-height:1.3; color:#2c3e40; display:-webkit-box; -webkit-line-clamp:2;
-  -webkit-box-orient:vertical; overflow:hidden; word-break:break-word; }
+  -webkit-box-orient:vertical; overflow:hidden; word-break:break-word;
+  max-height:2.6em; box-sizing:content-box; }
 .tituloFaixa .temaVisor.vazio{ color:#b6ae97; font-weight:500; }
 /* Alternador de fonte (manuscrita ↔ digitada) */
 .fonteBtn{ flex:0 0 auto; align-self:center; margin-right:.5rem;
@@ -375,7 +390,7 @@ header.hApp{ display:none !important; }
   background-image:repeating-linear-gradient(transparent,transparent 33px,#d8d2c0 33px,#d8d2c0 34px); }
 #textoRedacao::placeholder{ color:#c3bca6; }
 /* Fonte digitada: mesma letra do app, linhas preservadas */
-.folhaCard.fonteInter .tituloFaixa .temaVisor{ font-family:Inter,sans-serif; font-size:.95rem; font-weight:700; line-height:1.4; }
+.folhaCard.fonteInter .tituloFaixa .temaVisor{ font-family:Inter,sans-serif; font-size:.95rem; font-weight:700; line-height:1.4; max-height:2.8em; }
 .folhaCard.fonteInter #textoRedacao{ font-family:Inter,sans-serif; font-size:.95rem; font-weight:400; line-height:34px; }
 
 /* ── APOIO NO DESKTOP: coluna com rolagem própria ── */
@@ -419,6 +434,23 @@ header.hApp{ display:none !important; }
 .eixoItem .corpoIn .blocoBriefing{ margin-bottom:.55rem; }
 .eixoItem .corpoIn .blocoBriefing b{ display:block; font-size:.68rem; text-transform:uppercase;
   letter-spacing:.05em; color:var(--cyan); margin-bottom:.15rem; }
+/* v9-9: FICHAS DO MATERIAL DE APOIO — mesmas regras do hub-preparacao.html,
+   copiadas tal e qual para as duas telas nao divergirem. O material e o mesmo
+   conteudo; ler de dois jeitos diferentes atrapalha o aluno. */
+.eixoItem .corpoIn h4{ font-size:.68rem; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--cyan); margin:.55rem 0 .15rem; }
+.eixoItem .corpoIn p{ margin:.25rem 0; }
+.mdli{ padding-left:1rem; margin:.2rem 0; }
+.erroGerar{ font-size:.74rem; color:var(--red); padding:.4rem 0; }
+.repItem{ padding:.65rem .7rem; margin:.55rem 0; background:var(--surface2);
+  border-left:3px solid rgba(var(--cyanRGB),.55); border-radius:0 10px 10px 0; overflow:hidden; }
+.repFonte{ font-size:.66rem; font-weight:800; color:var(--cyan); letter-spacing:.02em; margin-bottom:.25rem; }
+.repDado{ font-size:.79rem; font-weight:600; color:var(--text); line-height:1.55; }
+.repUsoZona{ margin:.55rem -.7rem -.65rem; padding:.5rem .7rem .65rem; background:rgba(var(--cyanRGB),.06); }
+.repUsoRot{ display:flex; align-items:center; gap:.35rem; font-size:.72rem; font-weight:600;
+  color:var(--text2); margin-bottom:.15rem; }
+.repUsoRot .lapis{ font-size:1rem; font-style:normal; }
+.repUsoTxt{ font-size:.73rem; color:var(--text2); line-height:1.55; }
 
 /* ── FIO DE PROGRESSO (permanente, 4px — toque mostra os números) ── */
 #fioProgresso{ flex:0 0 auto; position:relative; height:4px; background:rgba(var(--borderRGB),.22); cursor:pointer; }
@@ -639,7 +671,7 @@ header.hApp{ display:none !important; }
   <!-- TOPBAR DO MODO FOCO -->
   <div class="topFoco">
     <button class="voltar" onclick="voltarDaEscrita()" aria-label="Voltar"><span class="material-symbols-outlined">arrow_back</span></button>
-    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-8</span></h1>
+    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-11</span></h1>
     <button class="tIcone" id="btnApoioTop" onclick="toggleApoio()" aria-label="Material de apoio"><i class="em">📚</i></button>
     <span id="tempoTop" onclick="abrirTempo()" title="Gestão de tempo">⏱ <span id="tempoTopTxt">00:00</span></span>
     <button class="tIcone" id="btnRelogioTop" onclick="abrirTempo()" aria-label="Gestão de tempo"><i class="em">⏱</i></button>
@@ -666,7 +698,7 @@ header.hApp{ display:none !important; }
           <span id="statusArquivo" style="flex:0 0 auto;font-size:.66rem;color:#8a8576;">transcrevendo…</span>
           <button onclick="removerArquivoPrevia()" aria-label="Remover arquivo"><span class="material-symbols-outlined" style="font-size:1rem;">close</span></button>
         </div>
-        <div id="faixaConferir" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Texto vindo da foto \u2014 confira antes de enviar</span></div>
+        <div id="faixaConferir" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Texto vindo da foto — confira antes de enviar</span></div>
         <div class="areaFolha" id="areaFolha">
           <textarea id="textoRedacao" placeholder="Comece a escrever sua redação aqui… (pode colar um texto pronto)" spellcheck="false"></textarea>
         </div>
@@ -766,7 +798,7 @@ header.hApp{ display:none !important; }
 <div class="gv atrasTudo" id="gavetaConferir">
   <div class="grip"></div>
   <p class="tit">Transcrevemos a sua foto</p>
-  <p class="txt">A leitura pode trocar uma palavra, um acento ou uma v\u00edrgula. Leia a folha e corrija o que n\u00e3o estiver como voc\u00ea escreveu \u2014 a nota \u00e9 do seu texto, n\u00e3o do texto da foto.</p>
+  <p class="txt">A leitura pode trocar uma palavra, um acento ou uma vírgula. Leia a folha e corrija o que não estiver como você escreveu — a nota é do seu texto, não do texto da foto.</p>
   <button class="btnOk" onclick="fecharConferir()">Vou conferir</button>
 </div>
 
@@ -1151,7 +1183,7 @@ function iniciarDock(dockId, opts) {
 
 /* Esqueleto da base: sidebar (desktop) + barra (menu retrátil no celular) +
    gavetas Mais/Métodos + toast. Header padrão fica oculto (modo foco). */
-montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-8' });
+montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-11' });
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){
@@ -1319,7 +1351,20 @@ document.addEventListener('visibilitychange', function(){ if (document.hidden){ 
 window.addEventListener('pagehide', function(){ salvarRascunhoJa(); nuvemSalvarRascunho(); });
 var areaFolha = document.getElementById('areaFolha');
 
-function voltarDaEscrita(){ toast('Prévia: voltaria para a tela anterior'); }
+/* v9-9: a seta de voltar nunca funcionou — era um stub da fase de prototipo,
+   que so mostrava um toast. Agora grava o rascunho e volta de verdade: usa o
+   historico quando o aluno chegou por dentro do app (Temas, Hub, Inicio, Plano)
+   e cai no Inicio quando a folha foi o primeiro endereco aberto. */
+function voltarDaEscrita(){
+  try { salvarRascunhoJa(); nuvemSalvarRascunho(); } catch(e) {}
+  var deDentro = false;
+  try {
+    deDentro = (history.length > 1) && !!document.referrer &&
+               new URL(document.referrer).origin === location.origin;
+  } catch(e) {}
+  if (deDentro) history.back();
+  else location.href = 'inicio.html';
+}
 
 /* ── EXCLUSIVIDADE ENTRE GAVETAS ──
    Abrir uma gaveta fecha as demais. Sem isso, uma gaveta pode abrir
@@ -1760,30 +1805,58 @@ function aplicarMetodo(m){
 /* v9-6: separa a linha do tema da transcrição, quando ela vier.
    Só a primeira linha não vazia conta: "Tema:" no meio da argumentação é
    texto do aluno, não o tema da folha. */
+/* v9-9: o tema agora vem entre [[TEMA]] e [[/TEMA]], e nao mais "a primeira linha".
+   A v9-8 falhou porque dependia de adivinhar onde o enunciado terminava: o tema
+   manuscrito ocupa varias linhas e, quando escrito em MAIUSCULAS, a trava de
+   "continuacao comeca em minuscula" barrava a segunda linha. Marcador delimita sem
+   adivinhacao, em qualquer numero de linhas e em qualquer caixa.
+   O caminho "Tema:" fica como reserva, para quando o modelo ignorar o marcador. */
 function _separarTemaDaTranscricao(txt){
-  var linhas = String(txt || '').split(/\r?\n/);
+  var t = String(txt || '');
+
+  /* 1 · marcadores (caminho principal) */
+  var m = t.match(/\[\[\s*TEMA\s*\]\]([\s\S]*?)\[\[\s*\/\s*TEMA\s*\]\]/i);
+  if (m){
+    var tema = m[1].replace(/\s+/g, ' ').trim().replace(/^["'\u201c]|["'\u201d]$/g, '').trim();
+    var resto = (t.slice(0, m.index) + t.slice(m.index + m[0].length)).replace(/^\s+/, '');
+    if (tema.length >= 6) return { tema: tema, texto: resto };
+    return { tema: '', texto: resto };
+  }
+  /* marcador de abertura sem o de fechamento: pega ate a linha em branco */
+  var ab = t.match(/\[\[\s*TEMA\s*\]\]/i);
+  if (ab){
+    var depois = t.slice(ab.index + ab[0].length);
+    var corte = depois.search(/\n\s*\n/);
+    var bruto = corte >= 0 ? depois.slice(0, corte) : depois.split(/\r?\n/)[0];
+    var t2 = bruto.replace(/\[\[\s*\/?\s*TEMA\s*\]\]/gi, '').replace(/\s+/g, ' ').trim();
+    var sobra = (t.slice(0, ab.index) + (corte >= 0 ? depois.slice(corte) : depois.slice(bruto.length))).replace(/^\s+/, '');
+    if (t2.length >= 6) return { tema: t2, texto: sobra };
+  }
+
+  /* 2 · reserva: a linha "Tema: ..." do formato antigo, com a continuacao */
+  var linhas = t.split(/\r?\n/);
   var i = 0;
   while (i < linhas.length && !linhas[i].trim()) i++;
   if (i >= linhas.length) return { tema:'', texto: txt };
-  var m = linhas[i].trim().match(/^tema\s*[:\u2013\u2014-]\s*(.{6,240})$/i);
-  if (!m) return { tema:'', texto: txt };
-  var tema = m[1].replace(/\s+/g, ' ').trim().replace(/^["'\u201c]|["'\u201d]$/g, '').trim();
-  if (!tema) return { tema:'', texto: txt };
-  /* v9-8: o tema escrito a mao ocupa duas ou mais linhas, e o OCR as devolve
-     separadas. Absorve a continuacao com trava dupla: a linha do tema nao pode
-     terminar em pontuacao final, e a seguinte tem de comecar em minuscula.
-     Paragrafo de redacao comeca em maiuscula, entao nao ha como comer o texto. */
+  var mm = linhas[i].trim().match(/^tema\s*[:\u2013\u2014-]\s*(.{6,240})$/i);
+  if (!mm) return { tema:'', texto: txt };
+  var tema2 = mm[1].replace(/\s+/g, ' ').trim().replace(/^["'\u201c]|["'\u201d]$/g, '').trim();
+  if (!tema2) return { tema:'', texto: txt };
   var fim = i + 1;
-  while (fim < linhas.length && tema.length < 240){
+  while (fim < linhas.length && tema2.length < 240){
     var seg = linhas[fim];
-    if (!seg || !seg.trim()) break;                       /* linha em branco: acabou */
-    if (/[.!?:;]$/.test(tema)) break;                     /* tema ja fechou */
-    if (!/^[a-z\u00e0-\u00fc("'\u201c]/.test(seg.trim())) break; /* nao e continuacao */
-    tema = (tema + ' ' + seg.trim()).replace(/\s+/g, ' ').trim();
+    if (!seg || !seg.trim()) break;            /* linha em branco: acabou */
+    if (/[.!?:;]$/.test(tema2)) break;         /* tema ja fechou */
+    var s = seg.trim();
+    /* continuacao: minuscula, OU o tema todo em MAIUSCULAS e a linha tambem */
+    var minuscula = /^[a-z\u00e0-\u00fc("'\u201c]/.test(s);
+    var ambosCaixaAlta = (tema2 === tema2.toUpperCase()) && (s === s.toUpperCase());
+    if (!minuscula && !ambosCaixaAlta) break;
+    tema2 = (tema2 + ' ' + s).replace(/\s+/g, ' ').trim();
     fim++;
   }
   linhas.splice(i, fim - i);
-  return { tema: tema, texto: linhas.join('\n').replace(/^\s+/, '') };
+  return { tema: tema2, texto: linhas.join('\n').replace(/^\s+/, '') };
 }
 
 /* Semântica da produção: transcreve NA ESCOLHA; o aluno revisa o texto na folha.
@@ -1808,7 +1881,7 @@ async function aoEscolherArquivo(inp){
       arquivoMime = f.type || 'application/pdf';
     }
     document.getElementById('statusArquivo').textContent = 'transcrevendo\u2026';
-    var ocrPrompt = 'Voc\u00ea \u00e9 um transcritor de reda\u00e7\u00f5es do ENEM. Transcreva FIELMENTE todo o texto desta imagem (manuscrito ou impresso). Regras: 1) se a imagem estiver deitada ou de cabe\u00e7a para baixo, gire mentalmente e leia na orienta\u00e7\u00e3o certa; 2) leia linha por linha, do in\u00edcio ao fim, sem pular nenhuma linha e sem juntar frases de linhas diferentes; 3) preserve os par\u00e1grafos (uma linha em branco entre eles) e a ordem original; 4) mantenha exatamente as palavras do aluno, inclusive erros de ortografia, acentua\u00e7\u00e3o e concord\u00e2ncia \u2014 n\u00e3o corrija nada; 5) se no topo houver a linha do tema ("Tema: ...", "Tema \u2014 ..." ou equivalente), devolva-a como PRIMEIRA linha, exatamente no formato "Tema: <texto do tema>"; o tema costuma ocupar DUAS OU MAIS linhas na imagem \u2014 junte todas numa \u00danica linha, at\u00e9 o fim do enunciado, sem cortar no fim da linha escrita; um t\u00edtulo criado pelo aluno para a reda\u00e7\u00e3o n\u00e3o \u00e9 tema \u2014 esse n\u00e3o inclua; 6) se uma palavra estiver ileg\u00edvel, escreva [ileg\u00edvel]. Responda APENAS com o texto transcrito, sem coment\u00e1rios.'; /* v9-30: linha a linha, imagem deitada, sem corrigir */
+    var ocrPrompt = 'Voc\u00ea \u00e9 um transcritor de reda\u00e7\u00f5es do ENEM. Transcreva FIELMENTE todo o texto desta imagem (manuscrito ou impresso). Regras: 1) se a imagem estiver deitada ou de cabe\u00e7a para baixo, gire mentalmente e leia na orienta\u00e7\u00e3o certa; 2) leia linha por linha, do in\u00edcio ao fim, sem pular nenhuma linha e sem juntar frases de linhas diferentes; 3) preserve os par\u00e1grafos (uma linha em branco entre eles) e a ordem original; 4) mantenha exatamente as palavras do aluno, inclusive erros de ortografia, acentua\u00e7\u00e3o e concord\u00e2ncia \u2014 n\u00e3o corrija nada; 5) se no topo houver o tema (marcado por "Tema", "TEMA:", "Tema \u2014" ou equivalente), devolva-o ANTES do texto, na primeira linha, entre os marcadores [[TEMA]] e [[/TEMA]], assim: [[TEMA]]enunciado completo do tema[[/TEMA]]. O tema quase sempre ocupa DUAS OU MAIS linhas escritas e pode estar em MAI\u00daSCULAS: junte todas as linhas do enunciado dentro dos marcadores, do come\u00e7o ao fim, sem cortar no fim de uma linha e sem incluir nada do primeiro par\u00e1grafo. Um t\u00edtulo criado pelo aluno para a reda\u00e7\u00e3o n\u00e3o \u00e9 tema \u2014 esse n\u00e3o inclua; 6) se uma palavra estiver ileg\u00edvel, escreva [ileg\u00edvel]. Responda APENAS com o texto transcrito, sem coment\u00e1rios.'; /* v9-30: linha a linha, imagem deitada, sem corrigir */
     /* v9-33: duas leituras em paralelo; fica a mais completa (o OCR, quando erra, PULA linhas — a versão mais longa é a mais fiel) */
     var leituras = await Promise.all([geminiOCR(ocrPrompt, arquivoBase64, arquivoMime), geminiOCR(ocrPrompt, arquivoBase64, arquivoMime).catch(function(){ return ''; })]);
     var texto = leituras.map(function(t){ return String(t||'').trim(); }).sort(function(a,b){ return b.length - a.length; })[0];
@@ -1817,7 +1890,7 @@ async function aoEscolherArquivo(inp){
        linha pulada volta, palavra "corrigida" volta ao que o aluno escreveu (o OCR tende a consertar erros do aluno). */
     if (texto && texto.length >= 40) {
       try {
-        var confPrompt = 'Voc\u00ea \u00e9 um conferente de transcri\u00e7\u00e3o. Abaixo est\u00e1 a TRANSCRI\u00c7\u00c3O feita por outro leitor desta mesma imagem de reda\u00e7\u00e3o. Compare a imagem com a transcri\u00e7\u00e3o LINHA POR LINHA e corrija: 1) linha ou trecho da imagem que n\u00e3o est\u00e1 na transcri\u00e7\u00e3o \u2014 acrescente no lugar certo; 2) palavra, acento, v\u00edrgula ou termina\u00e7\u00e3o que na imagem est\u00e1 DIFERENTE da transcri\u00e7\u00e3o \u2014 volte para EXATAMENTE o que est\u00e1 escrito na imagem, mesmo que seja erro de portugu\u00eas do aluno (n\u00e3o corrija o aluno: "n\u00e3o t\u00eam", "por cuidando", "dos do pr\u00f3ximo" ficam como o aluno escreveu); 3) trecho que est\u00e1 na transcri\u00e7\u00e3o mas n\u00e3o na imagem \u2014 remova. Preserve os par\u00e1grafos. Se a transcri\u00e7\u00e3o come\u00e7ar com a linha "Tema: ...", PRESERVE essa linha como est\u00e1. Responda APENAS com a transcri\u00e7\u00e3o final corrigida, sem coment\u00e1rios.\n\nTRANSCRI\u00c7\u00c3O A CONFERIR:\n' + texto;
+        var confPrompt = 'Voc\u00ea \u00e9 um conferente de transcri\u00e7\u00e3o. Abaixo est\u00e1 a TRANSCRI\u00c7\u00c3O feita por outro leitor desta mesma imagem de reda\u00e7\u00e3o. Compare a imagem com a transcri\u00e7\u00e3o LINHA POR LINHA e corrija: 1) linha ou trecho da imagem que n\u00e3o est\u00e1 na transcri\u00e7\u00e3o \u2014 acrescente no lugar certo; 2) palavra, acento, v\u00edrgula ou termina\u00e7\u00e3o que na imagem est\u00e1 DIFERENTE da transcri\u00e7\u00e3o \u2014 volte para EXATAMENTE o que est\u00e1 escrito na imagem, mesmo que seja erro de portugu\u00eas do aluno (n\u00e3o corrija o aluno: "n\u00e3o t\u00eam", "por cuidando", "dos do pr\u00f3ximo" ficam como o aluno escreveu); 3) trecho que est\u00e1 na transcri\u00e7\u00e3o mas n\u00e3o na imagem \u2014 remova. Preserve os par\u00e1grafos. Se a transcri\u00e7\u00e3o come\u00e7ar com [[TEMA]]...[[/TEMA]], PRESERVE esse trecho inteiro e inalterado, com os marcadores. Responda APENAS com a transcri\u00e7\u00e3o final corrigida, sem coment\u00e1rios.\n\nTRANSCRI\u00c7\u00c3O A CONFERIR:\n' + texto;
         var conferido = String(await geminiOCR(confPrompt, arquivoBase64, arquivoMime) || '').trim();
         /* aceita a confer\u00eancia s\u00f3 se ela n\u00e3o encolheu o texto (confer\u00eancia que corta \u00e9 pior que nenhuma) */
         if (conferido.length >= texto.length * 0.9) { if (conferido !== texto) console.info('[ocr] confer\u00eancia ajustou a transcri\u00e7\u00e3o (' + texto.length + ' \u2192 ' + conferido.length + ')'); texto = conferido; }
@@ -1840,6 +1913,8 @@ async function aoEscolherArquivo(inp){
         pintarTema(); _temaDaFoto = true;
       }
     }
+    /* v9-9: marcador orfao (modelo devolveu so um lado) nao vai para a folha */
+    if (texto) texto = texto.replace(/\[\[\s*\/?\s*TEMA\s*\]\]/gi, '').replace(/^\s+/, '');
     if (texto && texto.trim().length >= 40){
       textarea.value = texto.trim();
       ajustarAlturaFolha(); atualizarRegua(); rascunhoDebounced();
@@ -1978,7 +2053,7 @@ async function gerarEixoReal(id){
       if (eixoBanco && tema.oficial && tema.id && texto) _salvarMaterialNoBanco(tema.id, eixoBanco, texto);
     }
     eixosGerados[id] = true;
-    pintar(renderMaterial(texto), true);
+    pintar((id === 'entender') ? renderEntender(texto) : renderEixoConteudo(texto), true);
   } catch(e){
     pintar('<div class="blocoBriefing"><b>N\u00e3o consegui gerar agora</b>Toque de novo para tentar outra vez. (' + (e && e.message || 'erro') + ')</div>', false);
   }
@@ -3872,73 +3947,96 @@ Foque em: séries, games, eventos culturais, redes sociais, fenômenos contempor
    Tamanhos tambem subiram: este material se le na mao, no celular. */
 function mdSimples(t) {
   return String(t == null ? '' : t)
-    .replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--text)">$1</strong>')
-    .replace(/^## (.*)/gm,'<p style="font-size:.9rem;font-weight:700;color:var(--text);margin:.55rem 0 .2rem">$1</p>')
-    .replace(/^[-•] (.*)/gm,'<p style="padding-left:.75rem;margin:.25rem 0;font-size:.87rem;color:var(--text2);line-height:1.55">• $1</p>')
-    .replace(/^(\d+)\. (.*)/gm,'<p style="padding-left:.75rem;margin:.3rem 0;font-size:.87rem;color:var(--text2);line-height:1.55"><strong style="color:var(--cyan)">$1.</strong> $2</p>')
-    .replace(/\n\n/g,'<br/>').replace(/\n/g,'<br/>');
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^#{1,3} (.*)/gm,'<h4>$1</h4>')
+    .replace(/^[-—•] (.*)/gm,'<p class="mdli">• $1</p>')
+    .replace(/^(\d+)\. (.*)/gm,'<p class="mdli"><strong>$1.</strong> $2</p>')
+    .replace(/\n\n/g,'<br/><br/>')
+    .replace(/\n/g,'<br/>');
 }
 
-/* v9-8: MATERIAL SALVO NO BANCO VEM EM JSON.
-   'entender' nao tem cache (eixoBanco = null), por isso so ele saia formatado:
-   vinha do Gemini em markdown. Os outros vinham do banco em JSON e mdSimples,
-   que so entende markdown, cuspia as chaves cruas na tela do aluno.
-   Este renderizador e generico de proposito: as chaves mudam de eixo para eixo
-   (legislacao tem numero/nome/aplicacao, atualidades tem fonte/dado_numerico/
-   argumento), e a Fabrica de Conteudo pode mudar o formato sem quebrar a tela. */
-var _ROTULOS_MATERIAL = {
-  numero:'Lei', nome:'Norma', aplicacao:'Aplica\u00e7\u00e3o', fonte:'Fonte',
-  dado_numerico:'Dado', dado:'Dado', argumento:'Como argumentar',
-  use_agora:'Use agora', entenda:'Entenda', como_conectar:'Como conectar',
-  autor:'Autor', obra:'Obra', conceito:'Conceito', citacao:'Cita\u00e7\u00e3o',
-  periodo:'Per\u00edodo', fato:'Fato', impacto:'Impacto', titulo:'T\u00edtulo'
-};
-function _rotuloMaterial(k){
-  if (_ROTULOS_MATERIAL[k]) return _ROTULOS_MATERIAL[k];
-  var t = String(k).replace(/[_\-]+/g, ' ').trim();
-  return t.charAt(0).toUpperCase() + t.slice(1);
-}
-function _blocoMaterial(obj){
-  if (obj == null) return '';
-  if (typeof obj !== 'object') return '<div class="blocoBriefing">' + escapeHtmlSimples(String(obj)) + '</div>';
-  var partes = '', vistos = [];
-  Object.keys(obj).forEach(function(k){
-    var v = obj[k];
-    if (v == null || v === '') return;
-    if (Array.isArray(v)) v = v.join(' \u00b7 ');
-    else if (typeof v === 'object') v = Object.keys(v).map(function(kk){ return v[kk]; }).join(' \u00b7 ');
-    var txt = String(v).trim();
-    /* o banco repete conteudo entre campos (numero e nome da lei, p.ex.):
-       um bloco por valor, para o aluno nao ler a mesma coisa duas vezes */
-    for (var n = 0; n < vistos.length; n++){
-      if (vistos[n] === txt || vistos[n].indexOf(txt) === 0 || txt.indexOf(vistos[n]) === 0) return;
-    }
-    vistos.push(txt);
-    partes += '<div class="blocoBriefing"><b>' + escapeHtmlSimples(_rotuloMaterial(k)) + '</b>' +
-              escapeHtmlSimples(txt) + '</div>';
+/* v9-9: RENDER DO MATERIAL — transplantado do hub-preparacao.html (renderEixoConteudo,
+   renderEntender, fichaHTML, CAMPOS_FICHA), para as duas telas mostrarem o mesmo
+   material do mesmo jeito. O meu renderizador da v9-8 lia o JSON, mas inventava um
+   formato proprio: rotulo e valor em lista. O do hub e melhor e ja esta validado —
+   ficha com a FONTE em cima, o DADO em destaque e a zona "Como usar na redacao".
+
+   Os 9 prompts variam de campos; CAMPOS_FICHA mapeia os equivalentes para as tres
+   camadas da ficha. Campo que nao esta em nenhuma lista entra como extra na cabeca. */
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
-  return partes;
 }
-function renderMaterial(texto){
-  var t = String(texto == null ? '' : texto).trim();
-  if (!t) return '';
-  /* o banco as vezes guarda o JSON dentro de uma cerca ```json */
-  var cru = t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-  if (cru.charAt(0) === '[' || cru.charAt(0) === '{'){
-    try {
-      var d = JSON.parse(cru);
-      var lista = Array.isArray(d) ? d : [d];
-      var html = '';
-      lista.forEach(function(item){ html += _blocoMaterial(item); });
-      if (html) return html;
-    } catch(e) {
-      /* JSON quebrado: o aluno nao pode ver chaves cruas na tela.
-         Quem precisa depurar ve o conteudo no console. */
-      console.warn('[material] JSON invalido no banco:', e && e.message, cru.slice(0, 200));
-      return '<div class="blocoBriefing"><b>Material indispon\u00edvel</b>Este eixo est\u00e1 salvo num formato que n\u00e3o consegui ler. Toque de novo para gerar de novo.</div>';
-    }
+var CAMPOS_FICHA = {
+  cabeca:   ['fonte','artigo','lei','marco','data','periodo','nome','pensador','corrente','titulo','obra','filme','referencia','pesquisa','cientista','especialista'],
+  destaque: ['dado_numerico','dado','texto','descricao','sinopse','conceito','conceito_chave','conclusao','conclusao_principal','ideia','fato','contexto','resumo'],
+  uso:      ['argumento','aplicacao','como_usar','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem']
+};
+function _campo(obj, lista){
+  for (var i=0;i<lista.length;i++){ var v = obj[lista[i]]; if (typeof v==='string' && v.trim()) return v.trim(); }
+  return '';
+}
+function _extras(obj){
+  var usados = CAMPOS_FICHA.cabeca.concat(CAMPOS_FICHA.destaque, CAMPOS_FICHA.uso);
+  var partes = [];
+  Object.keys(obj).forEach(function(k){
+    if (usados.indexOf(k)>=0) return;
+    var v = obj[k];
+    if (typeof v==='string' && v.trim()) partes.push(v.trim());
+  });
+  return partes.join(' \u00b7 ');
+}
+function fichaHTML(item){
+  if (typeof item === 'string') return '<div class="repItem"><p class="repDado">'+escapeHTML(item)+'</p></div>';
+  var cab = _campo(item, CAMPOS_FICHA.cabeca);
+  var dado = _campo(item, CAMPOS_FICHA.destaque);
+  var uso = _campo(item, CAMPOS_FICHA.uso);
+  var extra = _extras(item);
+  if (!dado && extra){ dado = extra; extra = ''; }
+  var h = '<div class="repItem">';
+  if (cab)  h += '<p class="repFonte">'+escapeHTML(cab)+(extra?' \u00b7 '+escapeHTML(extra):'')+'</p>';
+  if (dado) h += '<p class="repDado">'+escapeHTML(dado)+'</p>';
+  if (uso)  h += '<div class="repUsoZona"><p class="repUsoRot"><i class="lapis">\u270F\uFE0F</i>Como usar na reda\u00e7\u00e3o</p><p class="repUsoTxt">'+escapeHTML(uso)+'</p></div>';
+  h += '</div>';
+  return h;
+}
+function _achaLista(x){
+  if (Array.isArray(x)) return x;
+  if (x && typeof x==='object'){
+    var ks = Object.keys(x);
+    for (var i=0;i<ks.length;i++){ if (Array.isArray(x[ks[i]])) return x[ks[i]]; }
   }
-  return mdSimples(t);
+  return null;
+}
+function renderEixoConteudo(bruto){
+  var limpo = String(bruto == null ? '' : bruto).replace(/```json|```/g,'').trim();
+  if (limpo.charAt(0)==='[' || limpo.charAt(0)==='{'){
+    try{
+      var lista = _achaLista(JSON.parse(limpo));
+      if (lista && lista.length) return lista.map(fichaHTML).join('');
+    }catch(e){}
+    var m = limpo.match(/\[[\s\S]*\]/);
+    if (m){ try{ var l2 = JSON.parse(m[0]); if (Array.isArray(l2) && l2.length) return l2.map(fichaHTML).join(''); }catch(e2){} }
+  }
+  return mdSimples(limpo);
+}
+/* Briefing do Entender: JSON {briefing:[{rotulo,texto}]} -> h4 + paragrafo */
+function renderEntender(bruto){
+  var limpo = String(bruto == null ? '' : bruto).replace(/```json|```/g,'').trim();
+  if (limpo.charAt(0)==='{' || limpo.charAt(0)==='['){
+    try{
+      var lista = _achaLista(JSON.parse(limpo));
+      if (lista && lista.length){
+        return lista.map(function(b){
+          var rot = (b.rotulo||b.titulo||'').replace(/\*\*/g,'');
+          var txt = b.texto||b.conteudo||'';
+          return (rot?'<h4>'+escapeHTML(rot)+'</h4>':'') + (txt?'<p>'+escapeHTML(txt)+'</p>':'');
+        }).join('');
+      }
+    }catch(e){}
+  }
+  return mdSimples(limpo);
 }
 
 // ─────────────────────────────────────────────────────────────
