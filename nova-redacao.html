@@ -3,7 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<title>RedaON · Nova Redação · v9-6</title>
+<title>RedaON · Nova Redação · v9-7</title>
+<!-- v9-7: CASCATA DE TEMA. Esta tela era a única sem o script de arranque que as
+     outras (inicio, temas, plano, minhas-redacoes) já tinham. Sem o atributo
+     data-tema no elemento raiz, a regra html[data-tema="claro"] nunca casava e
+     valia o :root, que é o escuro: a folha não denunciava (cores de papel são
+     fixas), mas a tela de correção usa --bgRGB e aparecia escura no tema claro.
+     Roda antes do CSS para o primeiro quadro já sair na cor certa, sem piscar. -->
+<script>
+(function(){
+  var pref = 'auto';
+  try { pref = localStorage.getItem('redaon-tema') || 'auto'; } catch(e) {}
+  var efetivo = pref;
+  if (pref === 'auto') {
+    var claroNoSistema = false;
+    try { claroNoSistema = window.matchMedia('(prefers-color-scheme: light)').matches; } catch(e) {}
+    efetivo = claroNoSistema ? 'claro' : 'escuro';
+  }
+  document.documentElement.setAttribute('data-tema', efetivo);
+  document.documentElement.setAttribute('data-tema-pref', pref);
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <style>
@@ -619,7 +639,7 @@ header.hApp{ display:none !important; }
   <!-- TOPBAR DO MODO FOCO -->
   <div class="topFoco">
     <button class="voltar" onclick="voltarDaEscrita()" aria-label="Voltar"><span class="material-symbols-outlined">arrow_back</span></button>
-    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-6</span></h1>
+    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-7</span></h1>
     <button class="tIcone" id="btnApoioTop" onclick="toggleApoio()" aria-label="Material de apoio"><i class="em">📚</i></button>
     <span id="tempoTop" onclick="abrirTempo()" title="Gestão de tempo">⏱ <span id="tempoTopTxt">00:00</span></span>
     <button class="tIcone" id="btnRelogioTop" onclick="abrirTempo()" aria-label="Gestão de tempo"><i class="em">⏱</i></button>
@@ -1131,7 +1151,7 @@ function iniciarDock(dockId, opts) {
 
 /* Esqueleto da base: sidebar (desktop) + barra (menu retrátil no celular) +
    gavetas Mais/Métodos + toast. Header padrão fica oculto (modo foco). */
-montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-6' });
+montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-7' });
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){
@@ -1650,16 +1670,51 @@ function pintarTema(){
   if (t){ visor.classList.remove('vazio'); visor.textContent = t; visor.title = t; }
   else { visor.classList.add('vazio'); visor.textContent = 'Qual é o tema da sua redação?'; visor.title = 'Escolher o tema'; }
 }
+/* v9-7: a URL tambem ressuscitava o tema. ?tema=<uuid> faz temaPelaUrl() buscar
+   o tema no banco a cada carregamento, por cima do que o aluno decidiu. */
+function _limparTemaDaURL(){
+  try {
+    var u = new URL(window.location.href);
+    if (!u.searchParams.has('tema')) return;
+    u.searchParams.delete('tema');
+    history.replaceState(null, '', u.pathname + (u.search ? u.search : '') + u.hash);
+  } catch(e) {}
+}
+function _temaDaSessao(){
+  try { return JSON.parse(sessionStorage.getItem('tema_selecionado') || 'null'); } catch(e) { return null; }
+}
+/* v9-7: o que o aluno salva aqui e a palavra final.
+   Antes, salvarTema so escrevia no campo escondido e a sessao ficava intocada —
+   no arranque seguinte temaPelaUrl() lia tema_selecionado e reaplicava o tema
+   antigo. Apagar a copia nao servia de nada com a fonte no lugar. */
 function salvarTema(){
   var campo = document.getElementById('temaEdicao');
   var inp = document.getElementById('tituloRedacao');
   if (!campo || !inp) return;
-  inp.value = String(campo.value || '').replace(/\s+/g, ' ').trim();
+  var novo = String(campo.value || '').replace(/\s+/g, ' ').trim();
+  var sess = _temaDaSessao();
+  var oficial = !!(sess && sess.id && sess.titulo && sess.titulo.trim() === novo);
+  inp.value = novo;
+  if (!novo){
+    /* apagou: cai a copia, a sessao e o parametro da URL */
+    try { definirTemaSelecionado(null); } catch(e) {}
+    window._temaAtual = null;
+    _limparTemaDaURL();
+  } else if (oficial){
+    /* abriu a gaveta, nao mudou nada e salvou: o vinculo com o tema do banco fica */
+    window._temaAtual = novo;
+  } else {
+    /* reescreveu: passa a ser tema livre e perde o tema_id (e o material de apoio) */
+    if (sess && sess.id){ try { definirTemaSelecionado(null); } catch(e) {} _limparTemaDaURL(); }
+    window._temaAtual = novo;
+  }
   pintarTema();
   fecharTema();
   /* o tema entra na chave do rascunho: regrava para nao perder o vinculo */
   try { rascunhoDebounced(); } catch(e) {}
-  toast(inp.value ? '\u2713 Tema salvo' : 'Tema em branco');
+  if (!novo) toast('Tema apagado');
+  else if (sess && sess.id && !oficial) toast('\u2713 Tema salvo \u2014 agora \u00e9 tema livre, sem material de apoio', 4200);
+  else toast('\u2713 Tema salvo');
 }
 
 /* Texto do tema para quem so precisa ler (legenda da gaveta de metodos) */
@@ -1760,7 +1815,10 @@ async function aoEscolherArquivo(inp){
       texto = _sep.texto;
       var _inpT = document.getElementById('tituloRedacao');
       if (_inpT && !String(_inpT.value || '').trim()){
-        _inpT.value = _sep.tema; pintarTema(); _temaDaFoto = true;
+        _inpT.value = _sep.tema; window._temaAtual = _sep.tema;
+        try { definirTemaSelecionado(null); } catch(e) {} /* v9-7: tema da foto e livre */
+        _limparTemaDaURL();
+        pintarTema(); _temaDaFoto = true;
       }
     }
     if (texto && texto.trim().length >= 40){
