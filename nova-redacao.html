@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<title>RedaON · Nova Redação · v9-7</title>
+<title>RedaON · Nova Redação · v9-8</title>
 <!-- v9-7: CASCATA DE TEMA. Esta tela era a única sem o script de arranque que as
      outras (inicio, temas, plano, minhas-redacoes) já tinham. Sem o atributo
      data-tema no elemento raiz, a regra html[data-tema="claro"] nunca casava e
@@ -639,7 +639,7 @@ header.hApp{ display:none !important; }
   <!-- TOPBAR DO MODO FOCO -->
   <div class="topFoco">
     <button class="voltar" onclick="voltarDaEscrita()" aria-label="Voltar"><span class="material-symbols-outlined">arrow_back</span></button>
-    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-7</span></h1>
+    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-8</span></h1>
     <button class="tIcone" id="btnApoioTop" onclick="toggleApoio()" aria-label="Material de apoio"><i class="em">📚</i></button>
     <span id="tempoTop" onclick="abrirTempo()" title="Gestão de tempo">⏱ <span id="tempoTopTxt">00:00</span></span>
     <button class="tIcone" id="btnRelogioTop" onclick="abrirTempo()" aria-label="Gestão de tempo"><i class="em">⏱</i></button>
@@ -1151,7 +1151,7 @@ function iniciarDock(dockId, opts) {
 
 /* Esqueleto da base: sidebar (desktop) + barra (menu retrátil no celular) +
    gavetas Mais/Métodos + toast. Header padrão fica oculto (modo foco). */
-montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-7' });
+montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-8' });
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){
@@ -1704,8 +1704,13 @@ function salvarTema(){
     /* abriu a gaveta, nao mudou nada e salvou: o vinculo com o tema do banco fica */
     window._temaAtual = novo;
   } else {
-    /* reescreveu: passa a ser tema livre e perde o tema_id (e o material de apoio) */
-    if (sess && sess.id){ try { definirTemaSelecionado(null); } catch(e) {} _limparTemaDaURL(); }
+    /* v9-8: reescreveu -> vira tema LIVRE, e a sessao passa a guardar esse tema
+       livre (id:null). Antes eu so removia a chave, e no recarregar o tema oficial
+       voltava por outro caminho; agora a decisao do aluno e o que esta gravado,
+       e de quebra o tema digitado a mao sobrevive ao recarregar, o que nunca
+       acontecia. Sem tema_id: perde o material de apoio curado, como avisa o toast. */
+    try { definirTemaSelecionado({ id:null, titulo:novo, oficial:false }); } catch(e) {}
+    _limparTemaDaURL();
     window._temaAtual = novo;
   }
   pintarTema();
@@ -1764,7 +1769,20 @@ function _separarTemaDaTranscricao(txt){
   if (!m) return { tema:'', texto: txt };
   var tema = m[1].replace(/\s+/g, ' ').trim().replace(/^["'\u201c]|["'\u201d]$/g, '').trim();
   if (!tema) return { tema:'', texto: txt };
-  linhas.splice(i, 1);
+  /* v9-8: o tema escrito a mao ocupa duas ou mais linhas, e o OCR as devolve
+     separadas. Absorve a continuacao com trava dupla: a linha do tema nao pode
+     terminar em pontuacao final, e a seguinte tem de comecar em minuscula.
+     Paragrafo de redacao comeca em maiuscula, entao nao ha como comer o texto. */
+  var fim = i + 1;
+  while (fim < linhas.length && tema.length < 240){
+    var seg = linhas[fim];
+    if (!seg || !seg.trim()) break;                       /* linha em branco: acabou */
+    if (/[.!?:;]$/.test(tema)) break;                     /* tema ja fechou */
+    if (!/^[a-z\u00e0-\u00fc("'\u201c]/.test(seg.trim())) break; /* nao e continuacao */
+    tema = (tema + ' ' + seg.trim()).replace(/\s+/g, ' ').trim();
+    fim++;
+  }
+  linhas.splice(i, fim - i);
   return { tema: tema, texto: linhas.join('\n').replace(/^\s+/, '') };
 }
 
@@ -1790,7 +1808,7 @@ async function aoEscolherArquivo(inp){
       arquivoMime = f.type || 'application/pdf';
     }
     document.getElementById('statusArquivo').textContent = 'transcrevendo\u2026';
-    var ocrPrompt = 'Voc\u00ea \u00e9 um transcritor de reda\u00e7\u00f5es do ENEM. Transcreva FIELMENTE todo o texto desta imagem (manuscrito ou impresso). Regras: 1) se a imagem estiver deitada ou de cabe\u00e7a para baixo, gire mentalmente e leia na orienta\u00e7\u00e3o certa; 2) leia linha por linha, do in\u00edcio ao fim, sem pular nenhuma linha e sem juntar frases de linhas diferentes; 3) preserve os par\u00e1grafos (uma linha em branco entre eles) e a ordem original; 4) mantenha exatamente as palavras do aluno, inclusive erros de ortografia, acentua\u00e7\u00e3o e concord\u00e2ncia \u2014 n\u00e3o corrija nada; 5) se no topo houver a linha do tema ("Tema: ...", "Tema \u2014 ..." ou equivalente), devolva-a como PRIMEIRA linha, exatamente no formato "Tema: <texto do tema>", e s\u00f3 ela; um t\u00edtulo criado pelo aluno para a reda\u00e7\u00e3o n\u00e3o \u00e9 tema \u2014 esse n\u00e3o inclua; 6) se uma palavra estiver ileg\u00edvel, escreva [ileg\u00edvel]. Responda APENAS com o texto transcrito, sem coment\u00e1rios.'; /* v9-30: linha a linha, imagem deitada, sem corrigir */
+    var ocrPrompt = 'Voc\u00ea \u00e9 um transcritor de reda\u00e7\u00f5es do ENEM. Transcreva FIELMENTE todo o texto desta imagem (manuscrito ou impresso). Regras: 1) se a imagem estiver deitada ou de cabe\u00e7a para baixo, gire mentalmente e leia na orienta\u00e7\u00e3o certa; 2) leia linha por linha, do in\u00edcio ao fim, sem pular nenhuma linha e sem juntar frases de linhas diferentes; 3) preserve os par\u00e1grafos (uma linha em branco entre eles) e a ordem original; 4) mantenha exatamente as palavras do aluno, inclusive erros de ortografia, acentua\u00e7\u00e3o e concord\u00e2ncia \u2014 n\u00e3o corrija nada; 5) se no topo houver a linha do tema ("Tema: ...", "Tema \u2014 ..." ou equivalente), devolva-a como PRIMEIRA linha, exatamente no formato "Tema: <texto do tema>"; o tema costuma ocupar DUAS OU MAIS linhas na imagem \u2014 junte todas numa \u00danica linha, at\u00e9 o fim do enunciado, sem cortar no fim da linha escrita; um t\u00edtulo criado pelo aluno para a reda\u00e7\u00e3o n\u00e3o \u00e9 tema \u2014 esse n\u00e3o inclua; 6) se uma palavra estiver ileg\u00edvel, escreva [ileg\u00edvel]. Responda APENAS com o texto transcrito, sem coment\u00e1rios.'; /* v9-30: linha a linha, imagem deitada, sem corrigir */
     /* v9-33: duas leituras em paralelo; fica a mais completa (o OCR, quando erra, PULA linhas — a versão mais longa é a mais fiel) */
     var leituras = await Promise.all([geminiOCR(ocrPrompt, arquivoBase64, arquivoMime), geminiOCR(ocrPrompt, arquivoBase64, arquivoMime).catch(function(){ return ''; })]);
     var texto = leituras.map(function(t){ return String(t||'').trim(); }).sort(function(a,b){ return b.length - a.length; })[0];
@@ -1816,7 +1834,8 @@ async function aoEscolherArquivo(inp){
       var _inpT = document.getElementById('tituloRedacao');
       if (_inpT && !String(_inpT.value || '').trim()){
         _inpT.value = _sep.tema; window._temaAtual = _sep.tema;
-        try { definirTemaSelecionado(null); } catch(e) {} /* v9-7: tema da foto e livre */
+        /* v9-8: tema da foto e livre, e fica gravado para sobreviver ao recarregar */
+        try { definirTemaSelecionado({ id:null, titulo:_sep.tema, oficial:false }); } catch(e) {}
         _limparTemaDaURL();
         pintarTema(); _temaDaFoto = true;
       }
@@ -1959,7 +1978,7 @@ async function gerarEixoReal(id){
       if (eixoBanco && tema.oficial && tema.id && texto) _salvarMaterialNoBanco(tema.id, eixoBanco, texto);
     }
     eixosGerados[id] = true;
-    pintar(mdSimples(texto), true);
+    pintar(renderMaterial(texto), true);
   } catch(e){
     pintar('<div class="blocoBriefing"><b>N\u00e3o consegui gerar agora</b>Toque de novo para tentar outra vez. (' + (e && e.message || 'erro') + ')</div>', false);
   }
@@ -3847,13 +3866,79 @@ Foque em: pesquisas acadêmicas, relatórios científicos, índices de desenvolv
 Foque em: séries, games, eventos culturais, redes sociais, fenômenos contemporâneos aceitos pelo ENEM. Português, direto ao ponto.`,
 };
 
+/* v9-8: as cores estavam FIXAS no tema escuro (#e1e2eb, #c8c4d7, #45edee).
+   No tema claro isso virava texto quase branco sobre fundo claro: ilegivel.
+   Agora usa as variaveis, entao cai na cascata do redaon-tema como o resto.
+   Tamanhos tambem subiram: este material se le na mao, no celular. */
 function mdSimples(t) {
-  return t
-    .replace(/\*\*(.*?)\*\*/g,'<strong style="color:#e1e2eb">$1</strong>')
-    .replace(/^## (.*)/gm,'<p style="font-size:.82rem;font-weight:700;color:#e1e2eb;margin:.5rem 0 .2rem">$1</p>')
-    .replace(/^[-•] (.*)/gm,'<p style="padding-left:.75rem;margin:.2rem 0;font-size:.78rem;color:#c8c4d7;line-height:1.5">• $1</p>')
-    .replace(/^(\d+)\. (.*)/gm,'<p style="padding-left:.75rem;margin:.25rem 0;font-size:.78rem;color:#c8c4d7;line-height:1.5"><strong style="color:#45edee">$1.</strong> $2</p>')
+  return String(t == null ? '' : t)
+    .replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--text)">$1</strong>')
+    .replace(/^## (.*)/gm,'<p style="font-size:.9rem;font-weight:700;color:var(--text);margin:.55rem 0 .2rem">$1</p>')
+    .replace(/^[-•] (.*)/gm,'<p style="padding-left:.75rem;margin:.25rem 0;font-size:.87rem;color:var(--text2);line-height:1.55">• $1</p>')
+    .replace(/^(\d+)\. (.*)/gm,'<p style="padding-left:.75rem;margin:.3rem 0;font-size:.87rem;color:var(--text2);line-height:1.55"><strong style="color:var(--cyan)">$1.</strong> $2</p>')
     .replace(/\n\n/g,'<br/>').replace(/\n/g,'<br/>');
+}
+
+/* v9-8: MATERIAL SALVO NO BANCO VEM EM JSON.
+   'entender' nao tem cache (eixoBanco = null), por isso so ele saia formatado:
+   vinha do Gemini em markdown. Os outros vinham do banco em JSON e mdSimples,
+   que so entende markdown, cuspia as chaves cruas na tela do aluno.
+   Este renderizador e generico de proposito: as chaves mudam de eixo para eixo
+   (legislacao tem numero/nome/aplicacao, atualidades tem fonte/dado_numerico/
+   argumento), e a Fabrica de Conteudo pode mudar o formato sem quebrar a tela. */
+var _ROTULOS_MATERIAL = {
+  numero:'Lei', nome:'Norma', aplicacao:'Aplica\u00e7\u00e3o', fonte:'Fonte',
+  dado_numerico:'Dado', dado:'Dado', argumento:'Como argumentar',
+  use_agora:'Use agora', entenda:'Entenda', como_conectar:'Como conectar',
+  autor:'Autor', obra:'Obra', conceito:'Conceito', citacao:'Cita\u00e7\u00e3o',
+  periodo:'Per\u00edodo', fato:'Fato', impacto:'Impacto', titulo:'T\u00edtulo'
+};
+function _rotuloMaterial(k){
+  if (_ROTULOS_MATERIAL[k]) return _ROTULOS_MATERIAL[k];
+  var t = String(k).replace(/[_\-]+/g, ' ').trim();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+function _blocoMaterial(obj){
+  if (obj == null) return '';
+  if (typeof obj !== 'object') return '<div class="blocoBriefing">' + escapeHtmlSimples(String(obj)) + '</div>';
+  var partes = '', vistos = [];
+  Object.keys(obj).forEach(function(k){
+    var v = obj[k];
+    if (v == null || v === '') return;
+    if (Array.isArray(v)) v = v.join(' \u00b7 ');
+    else if (typeof v === 'object') v = Object.keys(v).map(function(kk){ return v[kk]; }).join(' \u00b7 ');
+    var txt = String(v).trim();
+    /* o banco repete conteudo entre campos (numero e nome da lei, p.ex.):
+       um bloco por valor, para o aluno nao ler a mesma coisa duas vezes */
+    for (var n = 0; n < vistos.length; n++){
+      if (vistos[n] === txt || vistos[n].indexOf(txt) === 0 || txt.indexOf(vistos[n]) === 0) return;
+    }
+    vistos.push(txt);
+    partes += '<div class="blocoBriefing"><b>' + escapeHtmlSimples(_rotuloMaterial(k)) + '</b>' +
+              escapeHtmlSimples(txt) + '</div>';
+  });
+  return partes;
+}
+function renderMaterial(texto){
+  var t = String(texto == null ? '' : texto).trim();
+  if (!t) return '';
+  /* o banco as vezes guarda o JSON dentro de uma cerca ```json */
+  var cru = t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  if (cru.charAt(0) === '[' || cru.charAt(0) === '{'){
+    try {
+      var d = JSON.parse(cru);
+      var lista = Array.isArray(d) ? d : [d];
+      var html = '';
+      lista.forEach(function(item){ html += _blocoMaterial(item); });
+      if (html) return html;
+    } catch(e) {
+      /* JSON quebrado: o aluno nao pode ver chaves cruas na tela.
+         Quem precisa depurar ve o conteudo no console. */
+      console.warn('[material] JSON invalido no banco:', e && e.message, cru.slice(0, 200));
+      return '<div class="blocoBriefing"><b>Material indispon\u00edvel</b>Este eixo est\u00e1 salvo num formato que n\u00e3o consegui ler. Toque de novo para gerar de novo.</div>';
+    }
+  }
+  return mdSimples(t);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -3954,7 +4039,7 @@ async function _salvarMaterialNoBanco(temaId, eixo, conteudo) {
 var SEL_TEMA_URL = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de';
 function aplicarTemaNaFolha(tema){
   try {
-    if (tema && tema.id) sessionStorage.setItem('tema_selecionado', JSON.stringify(tema));
+    if (tema && (tema.id || (tema.titulo && String(tema.titulo).trim()))) sessionStorage.setItem('tema_selecionado', JSON.stringify(tema));
   } catch(e) {}
   var inp = document.getElementById('tituloRedacao');
   if (inp && tema && tema.titulo && inp.value.trim() !== tema.titulo) inp.value = tema.titulo;
@@ -3974,10 +4059,12 @@ async function temaPelaUrl(){
       console.warn('[tema url] tema não encontrado ou inativo:', id);
     } catch(e) { console.warn('[tema url]', e); }
   }
-  /* sem URL (ou falha): o tema da sessão preenche a faixa */
+  /* sem URL (ou falha): o tema da sessão preenche a faixa.
+     v9-8: aceita tema sem id (tema livre que o aluno escreveu ou que veio da
+     foto). Antes exigia t.id, e por isso tema escrito a mao nunca voltava. */
   try {
     var s = sessionStorage.getItem('tema_selecionado');
-    if (s) { var t = JSON.parse(s); if (t && t.id) aplicarTemaNaFolha(t); }
+    if (s) { var t = JSON.parse(s); if (t && (t.id || (t.titulo && String(t.titulo).trim()))) aplicarTemaNaFolha(t); }
   } catch(e) {}
 }
 
