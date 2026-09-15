@@ -1,5 +1,5 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-4-1 (24/08/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-4-2 (15/09/2026)
    v6-1: Aparência sai do menu Mais e da sidebar (decisão A6 — tema em
    dois lugares: sol/lua do topo + tela Configurações). Ícones/textos
    de tema remanescentes atualizam só se existirem no DOM.
@@ -166,7 +166,19 @@ function definirTemaSelecionado(tema) {
   var el = document.getElementById('metodoTema');
   if (el) el.textContent = tema && tema.titulo ? 'Tema: ' + tema.titulo : 'Escolha o tema depois, na folha';
 }
-function abrirMetodos() { fecharMais(); abrirGaveta('gavetaMetodos'); }
+/* v6-4-2: Escrever vai DIRETO para a folha e a gaveta de métodos abre lá dentro.
+   Motivo: navegador não abre seletor de arquivo sem gesto do usuário — depois de
+   navegar, o clique programático no input é ignorado em silêncio (iOS e Chrome).
+   Dentro da própria nova-redacao continua abrindo a gaveta, sem recarregar a folha.
+   O nome fica: os seis chamadores em quatro telas não mudam, e o
+   definirTemaSelecionado(tema) que todos rodam antes sobrevive à navegação. */
+function abrirMetodos() {
+  fecharMais();
+  var naFolha = !!document.getElementById('textoRedacao') ||
+                /nova-redacao(-[\w-]+)?\.html$/i.test(location.pathname);
+  if (naFolha) { abrirGaveta('gavetaMetodos'); return; }
+  location.href = 'nova-redacao.html';
+}
 function fecharMetodos() { fecharGaveta('gavetaMetodos'); limparFundosOrfaos(); }
 function toggleMetodos() {
   var g = document.getElementById('gavetaMetodos');

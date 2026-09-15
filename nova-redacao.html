@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<title>RedaON · Nova Redação · v9-4</title>
+<title>RedaON · Nova Redação · v9-5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <style>
@@ -258,15 +258,20 @@ header.hApp{ display:none !important; }
 #main-content{ display:flex; flex-direction:column; height:100vh; height:100dvh; }
 
 /* Topbar do modo foco */
+/* v9-5: min-height no lugar de height fixo — o cabecalho cresce o necessario
+   quando o titulo ocupa duas linhas, sem empurrar a folha para fora da tela. */
 .topFoco{ flex:0 0 auto; display:flex; align-items:center; gap:.5rem;
-  height:52px; padding:0 .75rem; background:var(--bg);
+  min-height:52px; padding:.3rem .75rem; background:var(--bg);
   border-bottom:1px solid rgba(var(--borderRGB),.15); position:relative; z-index:60; }
 .topFoco .tIcone.on{ color:var(--cyan); background:rgba(var(--cyanRGB),.14); }
 .topFoco .voltar{ background:none; border:none; color:var(--text2); cursor:pointer;
   display:flex; align-items:center; padding:.4rem; border-radius:.5rem; }
 .topFoco .voltar:hover{ background:var(--surface2); }
+/* v9-5: o titulo quebra em ATE DUAS linhas; reticencias so se passar disso.
+   O flex:1 / min-width:0 fica, para nao quebrar o alinhamento do voltar e dos icones. */
 .topFoco h1{ flex:1; min-width:0; font-size:.95rem; font-weight:800; color:var(--text);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; cursor:pointer; }
 .topFoco h1 .vtag{ font-size:.58rem; font-weight:700; color:var(--muted2);
   letter-spacing:.04em; margin-left:.4rem; vertical-align:middle; }
 .topFoco .tIcone{ width:2.4rem; height:2.4rem; border-radius:50%; background:none; border:none;
@@ -564,16 +569,22 @@ header.hApp{ display:none !important; }
 .notaBloco .num{ font-size:2.5rem; font-weight:800; color:var(--cyan); line-height:1; }
 .notaBloco .selo{ display:inline-flex; align-items:center; gap:.3rem; font-size:.68rem; font-weight:700;
   color:var(--green); background:rgba(var(--greenRGB),.12); padding:.35rem .65rem; border-radius:99px; }
-.compRow{ display:flex; align-items:center; gap:.7rem; background:var(--surface);
-  border:1px solid rgba(var(--borderRGB),.18); border-radius:12px; padding:.55rem .8rem; margin-bottom:.45rem; }
+.compRow{ display:flex; align-items:flex-start; gap:.7rem; background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.18); border-radius:12px; padding:.6rem .8rem; margin-bottom:.45rem; }
 .compRow .cnome{ flex:1; min-width:0; }
 .compRow .cnome b{ display:block; font-size:.76rem; color:var(--text); }
-.compRow .cnome span{ font-size:.68rem; color:var(--muted); }
+/* v9-5: comentario inteiro — quebra em varias linhas e a nota alinha no topo */
+.compRow .cnome span{ display:block; font-size:.7rem; line-height:1.5; color:var(--muted); margin-top:.2rem; }
 .compRow .cnota{ flex:0 0 auto; font-size:1.05rem; font-weight:800; color:var(--purpleSoft); }
 .compRow.atencao{ border-color:rgba(var(--goldRGB),.4); }
 .compRow.atencao .cnota{ color:var(--gold); }
 #painelResultado .acoes{ display:flex; flex-direction:column; gap:.5rem; margin-top:.8rem; }
 #painelResultado .acoes .btn{ width:100%; }
+/* v9-5: GAVETA DO TEMA — le o enunciado inteiro sem disputar o toque com a edicao */
+#gavetaTema .temaTexto{ font-size:.9rem; line-height:1.6; color:var(--text); white-space:pre-wrap;
+  word-break:break-word; max-height:52vh; overflow-y:auto; scrollbar-width:thin; padding:0 .25rem; }
+#gavetaTema .temaVazio{ font-size:.82rem; color:var(--muted); padding:0 .25rem; }
+.tituloFaixa .rot{ cursor:pointer; }
 </style>
 <script src="supabase-auth.js"></script>
 </head>
@@ -583,7 +594,7 @@ header.hApp{ display:none !important; }
   <!-- TOPBAR DO MODO FOCO -->
   <div class="topFoco">
     <button class="voltar" onclick="voltarDaEscrita()" aria-label="Voltar"><span class="material-symbols-outlined">arrow_back</span></button>
-    <h1>Nova Redação<span class="vtag">v9-4</span></h1>
+    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-5</span></h1>
     <button class="tIcone" id="btnApoioTop" onclick="toggleApoio()" aria-label="Material de apoio"><i class="em">📚</i></button>
     <span id="tempoTop" onclick="abrirTempo()" title="Gestão de tempo">⏱ <span id="tempoTopTxt">00:00</span></span>
     <button class="tIcone" id="btnRelogioTop" onclick="abrirTempo()" aria-label="Gestão de tempo"><i class="em">⏱</i></button>
@@ -597,7 +608,7 @@ header.hApp{ display:none !important; }
       <section class="folhaCard" id="folhaCard">
         <div id="seloRascunho">&#10003; Rascunho recuperado</div>
         <div class="tituloFaixa">
-          <div class="rot"><span>TEMA</span></div>
+          <div class="rot" onclick="abrirTema()" title="Ver o tema completo" role="button" tabindex="0"><span>TEMA</span></div>
           <input id="tituloRedacao" type="text" maxlength="120" placeholder="Qual é o tema da sua redação?">
           <button class="fonteBtn" id="btnFonte" onclick="alternarFonteFolha()" title="Alternar letra da folha">Aa</button>
         </div>
@@ -667,6 +678,14 @@ header.hApp{ display:none !important; }
 </div>
 
 <!-- GAVETA · GESTÃO DE TEMPO -->
+<!-- GAVETA DO TEMA (v9-5): enunciado inteiro, sem corte -->
+<div class="gvBg atrasTudo" id="gavetaTemaBg" onclick="fecharTema()"></div>
+<div class="gv atrasTudo" id="gavetaTema">
+  <div class="grip"></div>
+  <p class="tit">Tema da sua redação</p>
+  <div class="temaTexto" id="temaTextoGaveta"></div>
+</div>
+
 <div class="gvBg atrasTudo" id="gavetaTempoBg" onclick="fecharGaveta('gavetaTempo')"></div>
 <div class="gv atrasTudo" id="gavetaTempo">
   <div class="grip"></div>
@@ -1074,7 +1093,7 @@ function iniciarDock(dockId, opts) {
 
 /* Esqueleto da base: sidebar (desktop) + barra (menu retrátil no celular) +
    gavetas Mais/Métodos + toast. Header padrão fica oculto (modo foco). */
-montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-4' });
+montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-5' });
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){
@@ -1084,8 +1103,24 @@ montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle',
     var m = href.match(/metodo=(\w+)/);
     if (m && mapa[m[1]]) { p.removeAttribute('href'); p.setAttribute('onclick', 'fecharMetodos();' + mapa[m[1]]); }
   });
+})();
+
+/* v9-5: a legenda da gaveta de métodos conta onde o aluno está:
+   com texto na folha avisa que nada se perde; sem texto, mostra o tema. */
+function atualizarLegendaMetodos(){
   var sub = document.getElementById('metodoTema');
-  if (sub) sub.textContent = 'Você pode trocar de método sem perder o texto';
+  if (!sub) return;
+  var temTexto = !!(textarea && textarea.value && textarea.value.trim());
+  if (temTexto){ sub.textContent = 'Você pode trocar de método sem perder o texto'; return; }
+  var t = (typeof _temaAtualTexto === 'function') ? _temaAtualTexto() : '';
+  sub.textContent = t ? ('Tema: ' + t) : 'Escolha o tema depois, na folha';
+}
+/* A base leva o botão Escrever até aqui; dentro da folha ele abre a gaveta.
+   O envelope só atualiza a legenda antes de abrir. */
+(function envolverAbrirMetodos(){
+  var base = window.abrirMetodos;
+  if (typeof base !== 'function') return;
+  window.abrirMetodos = function(){ try { atualizarLegendaMetodos(); } catch(e) {} base(); };
 })();
 
 var textarea = document.getElementById('textoRedacao');
@@ -1377,10 +1412,23 @@ function mostrarNumeros(){
 }
 
 /* ── Auto-altura da folha (o textarea cresce; quem rola é a areaFolha) ── */
+/* v9-5: guarda a rolagem e o cursor antes do height='auto'.
+   O 'auto' encolhe o textarea por um instante; como quem rola e a .areaFolha,
+   a area de rolagem encolhe junto e o navegador clampa o scrollTop para o topo.
+   Devolver a posicao depois de fixar a altura final resolve na origem. */
 function ajustarAlturaFolha(){
+  var topo = areaFolha.scrollTop;
+  var noTexto = (document.activeElement === textarea);
+  var selIni = noTexto ? textarea.selectionStart : null;
+  var selFim = noTexto ? textarea.selectionEnd   : null;
   textarea.style.height = 'auto';
   var minimo = areaFolha.clientHeight - 12;
   textarea.style.height = Math.max(textarea.scrollHeight, minimo) + 'px';
+  if (areaFolha.scrollTop !== topo) areaFolha.scrollTop = topo;
+  if (noTexto && selIni !== null &&
+      (textarea.selectionStart !== selIni || textarea.selectionEnd !== selFim)) {
+    try { textarea.setSelectionRange(selIni, selFim); } catch(e) {}
+  }
 }
 
 /* ── RÉGUA: linhas equivalentes à folha oficial (~70 caracteres/linha) ── */
@@ -1512,6 +1560,29 @@ function zerarTempo(){
   document.getElementById('btnRelogioTop').classList.remove('escondido');
   toast('Tempo zerado');
 }
+
+/* ── TEMA COMPLETO EM GAVETA (v9-5) ──
+   Le o tema que esta na folha; sem tema, diz o que fazer. */
+function _temaAtualTexto(){
+  var inp = document.getElementById('tituloRedacao');
+  var t = inp && inp.value ? inp.value.trim() : '';
+  if (t) return t;
+  if (window._temaAtual) return String(window._temaAtual).trim();
+  try {
+    var s = sessionStorage.getItem('tema_selecionado');
+    if (s) { var o = JSON.parse(s); if (o && o.titulo) return String(o.titulo).trim(); }
+  } catch(e) {}
+  return '';
+}
+function abrirTema(){
+  var alvo = document.getElementById('temaTextoGaveta');
+  if (!alvo) return;
+  var t = _temaAtualTexto();
+  if (t){ alvo.className = 'temaTexto'; alvo.textContent = t; }
+  else { alvo.className = 'temaVazio'; alvo.textContent = 'Você ainda não escolheu o tema. Toque na faixa TEMA da folha para escrever, ou escolha um tema em Temas.'; }
+  abrirGaveta('gavetaTema');
+}
+function fecharTema(){ fecharGaveta('gavetaTema'); }
 
 /* ── MÉTODO DE ENVIO (?metodo= e gaveta pelo 📷) ── */
 function aplicarMetodo(m){
@@ -1791,12 +1862,12 @@ function falharCorrecaoVisual(msg){
 
 /* ── Resultado REAL no painel da HQ ── */
 var NOMES_COMP = ['C1 \u00b7 Norma culta','C2 \u00b7 Repert\u00f3rio','C3 \u00b7 Argumenta\u00e7\u00e3o','C4 \u00b7 Coes\u00e3o','C5 \u00b7 Interven\u00e7\u00e3o'];
-function _fraseCurta(t){
+/* v9-5: o painel pos-correcao mostra o comentario INTEIRO de cada competencia.
+   Motivo de Alan: o aluno acha que leu o comentario sobre a nota dele e leu pela
+   metade. A .caixa do resultado ja rola (max-height + overflow-y:auto). */
+function _comentarioInteiro(t){
   t = String(t || '').replace(/\s+/g,' ').trim();
-  if (!t) return '';
-  var p = t.indexOf('. ');
-  if (p > 20 && p < 90) return t.slice(0, p + 1);
-  return t.length > 88 ? t.slice(0, 85) + '\u2026' : t;
+  return t ? escapeHtmlSimples(t) : '';
 }
 function renderResultadoV4(d){
   var comps = Array.isArray(d.competencias) ? d.competencias : [];
@@ -1808,7 +1879,7 @@ function renderResultadoV4(d){
   for (var i = 0; i < 5; i++){
     var c = comps[i] || {};
     h += '<div class="compRow' + (i === menor ? ' atencao' : '') + '">' +
-      '<div class="cnome"><b>' + NOMES_COMP[i] + '</b><span>' + _fraseCurta(c.feedback) + '</span></div>' +
+      '<div class="cnome"><b>' + NOMES_COMP[i] + '</b><span>' + _comentarioInteiro(c.feedback) + '</span></div>' +
       '<span class="cnota">' + (Number(c.nota) || 0) + '</span></div>';
   }
   h += '<div class="acoes">' +
@@ -3733,12 +3804,22 @@ async function temaPelaUrl(){
   restaurarRascunho();
   restaurarRascunhoNuvem(); /* nuvem: o mais recente vence, sem bloquear a tela */
   ajustarAlturaFolha(); atualizarRegua();
-  var metodo = 'digitar';
+  /* v9-5: sem ?metodo= a gaveta de métodos abre AQUI DENTRO, para que o toque em
+     "Tirar foto"/"Enviar imagem"/"Enviar documento" seja um gesto real do aluno —
+     navegador não abre seletor de arquivo em clique programático depois de navegar.
+     Com ?metodo=digitar (Início e Plano) entra direto na folha, sem toque extra.
+     O setTimeout(450) que tentava disparar o input na chegada saiu: era ele que
+     fazia a câmera não abrir, em silêncio, no iOS e no Chrome. */
+  var metodoURL = null;
   try {
     var p = new URLSearchParams(window.location.search).get('metodo');
-    if (p === 'imagem' || p === 'pdf' || p === 'digitar') metodo = p;
+    if (p === 'digitar' || p === 'foto' || p === 'imagem' || p === 'pdf') metodoURL = p;
   } catch(e) {}
-  if (metodo !== 'digitar') setTimeout(function(){ aplicarMetodo(metodo); }, 450);
+  /* Rascunho restaurado: o aluno ja escolheu o metodo e esta no meio do texto —
+     abrir a gaveta ali seria um toque a mais para voltar a escrever. */
+  var jaTemTexto = !!(textarea && textarea.value && textarea.value.trim());
+  if (metodoURL === 'digitar' || jaTemTexto){ try { textarea.focus({ preventScroll:true }); } catch(e) {} }
+  else if (typeof abrirMetodos === 'function'){ abrirMetodos(); }
 })();
 window.addEventListener('resize', ajustarAlturaFolha);
 </script>
