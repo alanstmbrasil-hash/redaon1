@@ -6,8 +6,9 @@
 <title>RedaON | Início v5-4</title>
 <!-- RedaON · Portal do Aluno · Início · v5-4 · sobre aluno-base-v6 -->
 <!-- v5-4 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
-<!-- v4-18 (16/09/2026): cards do ciclo: frase e linha de apoio usam a largura toda do card (saem os limites de 14ch e 22ch) -->
-<!-- v4-17 (16/09/2026): cards do ciclo: linha de apoio em branco cheio e negrito; rodapé abaixo do botão sai de todos os cards (dado `rod` fica no objeto, sem uso) -->
+<!-- v4-19 (16/09/2026): desktop/tablet: fileira à esquerda (Headspace), card pelas duas medidas, setas nas pontas com volta, barra "Início" fora, Status ao lado do nome; tablet em pé em largura cheia; medida do card também na abertura -->
+<!-- v4-18 (16/09/2026): frase e linha de apoio na largura toda do card -->
+<!-- v4-17 (16/09/2026): linha de apoio em branco cheio e negrito; rodapé abaixo do botão sai de todos os cards -->
 <!-- v4-10 (07/09/2026): celular: personagem cabe pela largura do slot (sem corte), balão sem ícone e mais estreito, saudação sem ✍️ e limitada à esquerda do personagem; tablet em pé: balão e slot reaproximados -->
 <!-- v4-8 (07/09/2026): galeria com 7 personagens (Ben, Alice, Profa. Blanche Oiê, Profa. Blanche Sorrindo, Corretor, Reescritor, Feliz) -->
 <!-- v4-7 (07/09/2026): desktop/tablet deitado em duas colunas de grid: esquerda = saudação + balão + Seu Status; direita = personagem do topo ao pé do status (380px). Sem sobreposição, sem buraco entre balão e status -->
@@ -285,42 +286,56 @@
   .cardCiclo{ height:100%; }
   #heroCard .avisoDots{ bottom:8px; }
 }
-/* ── tablet e desktop: card central em destaque ── */
+/* ── tablet e desktop (≥641) · v4-19 (16/09/2026): fileira à esquerda, padrão Headspace ──
+   · cards do mesmo tamanho, começam à esquerda, o último cortado na borda direita (sem laterais vazias)
+   · tamanho pelas duas medidas: o maior card que cabe na altura da janela E deixa 3 inteiros na largura (3:4)
+   · setas nas pontas da fileira; a do fim volta ao primeiro; somem quando todos cabem
+   · barra "Início" fora; Status ao lado do nome (desktop/tablet deitado) ou abaixo (tablet em pé)
+   · tablet em pé: largura cheia, um card grande + pedaço do próximo */
 @media(min-width:641px){
-  #heroCard{ zoom:1 !important; display:block !important; grid-template-columns:none !important;
-    grid-template-areas:none !important; max-width:none !important; padding:0 !important; column-gap:0 !important; }
-  #heroCard .hcCab{ width:100% !important; margin:0 0 12px !important; align-items:center; }
-  #heroCard .hcNome .n{ font-size:22px !important; } #heroCard .hcNome .n span{ font-size:22px !important; }
+  header.hApp{ display:none !important; }
+  #main-content{ max-width:none !important; }
+  #conteudo{ max-width:none !important; padding:16px 0 12px 24px !important; }
+  #heroCard{ zoom:1 !important; display:grid !important; grid-template-columns:auto minmax(0,1fr) !important;
+    grid-template-areas:"cab status" "balao balao" !important; column-gap:28px; row-gap:0; align-items:center;
+    max-width:none !important; padding:0 24px 0 0 !important; margin:0; overflow:visible; }
+  #heroCard .hcCab{ grid-area:cab; width:auto !important; margin:0 !important; align-items:center; }
+  #heroCard .hcNome .n{ font-size:22px !important; color:var(--text); font-weight:800; }
+  #heroCard .hcNome .n span{ display:inline !important; font-size:22px !important; }
   #heroCard .hcNome .s{ display:none !important; }
-  #heroCard .hcStatus{ grid-area:auto !important; width:100% !important; margin:0 0 16px !important;
-    padding:0 !important; background:transparent; border:0; }
+  #heroCard .hcStatus{ grid-area:status; width:auto !important; max-width:440px; justify-self:end;
+    margin:0 !important; padding:0 !important; background:transparent; border:0; }
   #heroCard .hcAba{ display:none !important; }
-  #heroCard .hcTiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-  #heroCard .hcTile{ min-height:62px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:14px; }
-  #heroCard .hcTile .l{ font-size:12px; } #heroCard .hcTile .tv b{ font-size:20px; }
+  #heroCard .hcTiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  #heroCard .hcTile{ min-height:54px; padding:8px 10px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:14px; }
+  #heroCard .hcTile .l{ font-size:11px; } #heroCard .hcTile .tv b{ font-size:18px; }
   #heroCard .hcComps{ display:none !important; }
-  #heroCard .avisoTrack{ gap:20px; align-items:center; padding:14px 0 18px; }
-  .cardCiclo{ aspect-ratio:3/4; min-height:0; border-radius:26px;
-    transition:transform .28s ease, opacity .28s ease, filter .28s ease;
-    transform:scale(.86); opacity:.55; filter:saturate(.85); }
-  .cardCiclo.centro{ transform:scale(1); opacity:1; filter:none; box-shadow:0 10px 34px rgba(0,0,0,.16); }
-  #heroCard .avisoTrack::before, #heroCard .avisoTrack::after{ content:''; flex:0 0 auto; }
+  #heroCard .balao{ grid-area:balao; margin-top:14px !important; }
+  #heroCard .avisoCard{ position:relative; }
+  #heroCard .avisoTrack{ gap:16px; align-items:flex-start; padding:4px 24px 4px 0; scroll-padding-left:0; }
+  #heroCard .avisoTrack::before, #heroCard .avisoTrack::after{ display:none; }
+  .cardCiclo{ flex:0 0 var(--wCiclo,340px); width:var(--wCiclo,340px); height:var(--hCiclo,453px); min-height:0;
+    aspect-ratio:auto; border-radius:26px; scroll-snap-align:start; transform:none; opacity:1; filter:none; }
+  .cardCiclo.centro{ box-shadow:none; }
   #heroCard .avisoDots{ position:static !important; padding:10px 0 0 !important; }
-  #heroCard .avisoDots span{ background:var(--muted); opacity:.4; }
-  #heroCard .avisoDots span.on{ background:var(--cyan); opacity:1; }
-  #setasCiclo{ display:flex; justify-content:center; gap:14px; margin-top:2px; }
-  #setasCiclo button{ width:44px; height:44px; border-radius:50%; border:1px solid rgba(var(--borderRGB),.24);
-    background:var(--surface); color:var(--text); font-size:19px; font-family:inherit; cursor:pointer; line-height:1; }
+  #heroCard .avisoDots span{ background:var(--muted); opacity:.4; width:7px; height:7px; border-radius:4px; transition:width .2s; }
+  #heroCard .avisoDots span.on{ background:var(--cyan); opacity:1; width:22px; }
+  #setasCiclo{ display:block; }
+  #setasCiclo button{ position:absolute; top:calc(var(--hCiclo,453px) / 2 + 4px); transform:translateY(-50%); z-index:5;
+    width:44px; height:44px; border-radius:50%; border:1px solid rgba(var(--borderRGB),.24);
+    background:var(--surface); color:var(--text); font-size:22px; font-family:inherit; cursor:pointer; line-height:1;
+    box-shadow:0 2px 10px rgba(0,0,0,.18); }
+  #setasCiclo button:first-child{ left:-14px; } #setasCiclo button:last-child{ right:10px; }
   #setasCiclo button:hover{ background:var(--surface2); }
+  #heroCard .avisoCard.cabe #setasCiclo, #heroCard .avisoCard.cabe .avisoDots{ display:none !important; }
 }
-@media(min-width:641px) and (max-width:1023px){
-  #main-content{ max-width:720px; margin-left:auto; margin-right:auto; }
-  .cardCiclo{ flex:0 0 62%; }
-  #heroCard .avisoTrack::before, #heroCard .avisoTrack::after{ width:19%; }
+/* tablet em pé: nome em cima, Status abaixo (como no celular), um card + pedaço do próximo */
+@media(min-width:641px) and (max-width:1023px) and (orientation:portrait){
+  #heroCard{ grid-template-columns:minmax(0,1fr) !important; grid-template-areas:"cab" "status" "balao" !important; row-gap:12px; }
+  #heroCard .hcStatus{ max-width:none; justify-self:stretch; }
+  #heroCard .hcTiles{ gap:8px; }
 }
 @media(min-width:1024px){
-  .cardCiclo{ flex:0 0 38%; }
-  #heroCard .avisoTrack::before, #heroCard .avisoTrack::after{ width:31%; }
   #heroCard .hcNome .n{ font-size:26px !important; } #heroCard .hcNome .n span{ font-size:26px !important; }
 }
 </style>
@@ -461,7 +476,7 @@
     titulo: 'In\u00edcio',
     icone:  'edit_note',
     sino:   true,
-    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-18'
+    versao: 'aluno \u00b7 in\u00edcio \u00b7 v4-19'
   });
 
   // Sauda\u00e7\u00e3o
@@ -860,13 +875,14 @@
       track._t = setTimeout(function(){ marcarCentro(); }, 90);
     }, { passive:true });
     marcarCentro();
+    medirCiclo(true);   /* v4-19: mede na abertura (antes só media ao redimensionar) */
   }
 
   /* mede o espaço livre UMA vez; só refaz ao girar o aparelho (não na barra do navegador) */
   var _larguraMedida = 0;
   function medirCiclo(forcar){
     if (!window.matchMedia('(max-width:640px)').matches) {
-      document.documentElement.style.removeProperty('--alturaCiclo'); return;
+      document.documentElement.style.removeProperty('--alturaCiclo'); medirFileira(); return;
     }
     if (!forcar && _larguraMedida === window.innerWidth) return;   /* mesma orientação: não remede */
     _larguraMedida = window.innerWidth;
@@ -882,13 +898,37 @@
   /* só orientação muda a medida */
   window.addEventListener('orientationchange', function(){ setTimeout(function(){ medirCiclo(true); }, 260); });
   window.addEventListener('resize', function(){ medirCiclo(false); });
+  /* ── v4-19 · tablet/desktop: tamanho do card pelas duas medidas ──
+     altura: o que sobra na janela (nome, Status, pontos, dock e respiros descontados)
+     largura: 3 cards inteiros + pedaço do 4º (desktop/tablet deitado) ou 1 card + pedaço (tablet em pé) */
+  function medirFileira(){
+    var track = document.getElementById('avisoTrack'), card = document.getElementById('avisoCard');
+    if (!track || !card) return;
+    function h(sel){ var e = document.querySelector(sel); return e ? e.getBoundingClientRect().height : 0; }
+    var alt = document.documentElement.clientHeight, doc = document.documentElement;
+    var emPe = window.matchMedia('(max-width:1023px) and (orientation:portrait)').matches;
+    var cabecalho = emPe ? (h('#heroCard .hcCab') + h('#heroCard .hcStatus') + 12) : Math.max(h('#heroCard .hcCab'), h('#heroCard .hcStatus'));
+    var dock = h('#barraInferior'); if (dock) dock += 12;
+    var usado = 16 + cabecalho + 14 + 8 + 24 + dock + 12 + 18;     /* padding topo · cab · balão · track · pontos · dock · pé · respiro */
+    var hLivre = Math.max(300, alt - usado);
+    var gap = 16, larguraTrack = track.clientWidth - 24, w;
+    if (emPe) w = larguraTrack - 64;
+    else w = Math.floor((larguraTrack - 2 * gap - 44) / 3);
+    w = Math.min(w, Math.floor(hLivre * 3 / 4)); w = Math.max(240, w);
+    var hC = Math.round(w * 4 / 3);
+    doc.style.setProperty('--wCiclo', w + 'px'); doc.style.setProperty('--hCiclo', hC + 'px');
+    var n = cardsNaTela().length, cabe = (n * w + (n - 1) * gap) <= larguraTrack + 24;
+    card.classList.toggle('cabe', cabe);
+    if (typeof marcarCentro === 'function') marcarCentro();
+  }
   function cardsNaTela(){ return Array.prototype.slice.call(document.querySelectorAll('.cardCiclo')); }
   function marcarCentro(){
     var track = document.getElementById('avisoTrack'), dots = document.getElementById('avisoDots');
     if (!track) return;
-    var meio = track.scrollLeft + track.clientWidth / 2, melhor = null, dist = 1e9;
+    var largo = window.matchMedia('(min-width:641px)').matches;
+    var meio = largo ? (track.scrollLeft + 8) : (track.scrollLeft + track.clientWidth / 2), melhor = null, dist = 1e9;
     cardsNaTela().forEach(function(c){
-      var d = Math.abs((c.offsetLeft + c.offsetWidth / 2) - meio);
+      var d = Math.abs((largo ? c.offsetLeft : (c.offsetLeft + c.offsetWidth / 2)) - meio);
       if (d < dist){ dist = d; melhor = c; }
     });
     cardsNaTela().forEach(function(c){ c.classList.toggle('centro', c === melhor); });
@@ -900,10 +940,11 @@
     if (!track || !cs.length) return;
     var atual = cs.findIndex(function(c){ return c.classList.contains('centro'); });
     if (atual < 0) atual = 0;
-    var i = atual + dir;
-    if (i < 0) i = cs.length - 1; else if (i >= cs.length) i = 0;   /* dá a volta */
-    var alvo = cs[i].offsetLeft - (track.clientWidth - cs[i].offsetWidth) / 2;
-    track.scrollTo({ left: Math.max(0, alvo), behavior:'smooth' });
+    var max = track.scrollWidth - track.clientWidth, alvo;
+    if (dir > 0 && track.scrollLeft >= max - 6) alvo = 0;               /* no fim: volta ao primeiro */
+    else if (dir < 0 && track.scrollLeft <= 6) alvo = max;             /* no começo: vai ao fim */
+    else { var i = Math.min(cs.length - 1, Math.max(0, atual + dir)); alvo = cs[i].offsetLeft; }
+    track.scrollTo({ left: Math.max(0, Math.min(max, alvo)), behavior:'smooth' });
     setTimeout(marcarCentro, 380);
   }
   /* elástico no celular: passar do último volta ao primeiro (decisão ao SOLTAR o dedo,

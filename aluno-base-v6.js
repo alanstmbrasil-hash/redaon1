@@ -1,5 +1,6 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-4-2 (15/09/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-5 (16/09/2026)
+   v6-5: Aparência volta à sidebar (seção Mais), igual ao menu Mais do celular.
    v6-1: Aparência sai do menu Mais e da sidebar (decisão A6 — tema em
    dois lugares: sol/lua do topo + tela Configurações). Ícones/textos
    de tema remanescentes atualizam só se existirem no DOM.
@@ -217,6 +218,7 @@ function montarEsqueleto(cfg) {
         '<a class="nav-item" href="evolucao.html" title="Evolu\u00e7\u00e3o"><i class="em">\u{1F4C8}</i><span class="tx">Evolu\u00e7\u00e3o</span></a>' +
         '<a class="nav-item" href="plano.html" title="Plano de estudos"><i class="em">\u{1F4C5}</i><span class="tx">Plano de estudos</span></a>' +
         '<a class="' + navClasse('voce-on') + '" href="voce-on.html" title="Voc\u00ea ON"><i class="em">\u{1F3AC}</i><span class="tx">Voc\u00ea <span class="marcaON">ON</span></span></a>' +
+        '<a class="nav-item" onclick="alternarTema()" style="cursor:pointer;" title="Apar\u00eancia"><i class="em" id="iconeTemaSide">\u{1F313}</i><span class="tx" id="txtTemaSide">Apar\u00eancia</span></a>' +
         '<p class="nav-section-label"><span>Conta</span></p>' +
         '<a class="nav-item" href="configuracoes.html" title="Configura\u00e7\u00f5es"><i class="em">\u2699\uFE0F</i><span class="tx">Configura\u00e7\u00f5es</span></a>' +
         '<a class="nav-item" onclick="authLogout()" style="cursor:pointer;color:var(--red);margin-top:.3rem;" title="Sair"><i class="em">\u{1F6AA}</i><span class="tx">Sair</span></a>' +
@@ -231,6 +233,7 @@ function montarEsqueleto(cfg) {
       '<p class="sideVersao">' + (cfg.versao || 'aluno') + '</p>' +
     '</aside>';
   while (topo.firstChild) body.insertBefore(topo.firstChild, body.firstChild);
+  aplicarIconeTema();
 
   /* Header dentro do main-content */
   var main = document.getElementById('main-content');
