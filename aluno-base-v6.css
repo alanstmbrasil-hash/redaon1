@@ -270,3 +270,10 @@ html[data-tema="claro"]{ --marcaON:var(--cyan); }
 .perfilAluno .avt .fe{ width:1.4em; height:1.4em; display:block; }
 /* com foto de perfil (o Início põe background-image inline), o ícone some */
 .perfilAluno .avt[style*="background-image"] .fe{ display:none; }
+
+/* ═══ v6-6 (16/09/2026) ═══
+   Círculo do "Escrever" na barra de baixo: no tema claro usa a mesma cor do tema escuro
+   (o verde-escuro #0a8c8d deixava o lápis desfocado). A legenda "Escrever" segue a cor do tema. */
+html[data-tema="claro"] #barraInferior .fabWrap .fab{ background:#45edee; box-shadow:0 4px 14px rgba(69,237,238,.45); }
+/* ícone preenchido por feHidratar() num elemento [data-fe] sem classe própria de ícone */
+[data-fe] > .fe{ vertical-align:-.2em; }

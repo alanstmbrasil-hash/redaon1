@@ -6,6 +6,7 @@
 <title>RedaON | Início v5-4</title>
 <!-- RedaON · Portal do Aluno · Início · v5-4 · sobre aluno-base-v6 -->
 <!-- v5-4 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
+<!-- v4-20 (16/09/2026): ícones Fluent Emoji (base v6-6): avatar, caixas, gaveta do cartão, cards e aviso de turma; caixa "Redações" vira "Enviadas" com o ícone de livros do menu; "escrever" usa o lápis. Avisos (toast) seguem em texto até a 3ª leva. -->
 <!-- v4-19 (16/09/2026): desktop/tablet: fileira à esquerda (Headspace), card pelas duas medidas, setas nas pontas com volta, barra "Início" fora, Status ao lado do nome; tablet em pé em largura cheia; medida do card também na abertura -->
 <!-- v4-18 (16/09/2026): frase e linha de apoio na largura toda do card -->
 <!-- v4-17 (16/09/2026): linha de apoio em branco cheio e negrito; rodapé abaixo do botão sai de todos os cards -->
@@ -47,6 +48,10 @@
   .hcAv{ position:relative; width:46px; height:46px; border-radius:50%; background:var(--surface2) center/cover no-repeat; border:2px solid var(--surface); box-shadow:0 0 0 1px rgba(var(--borderRGB),.22); display:flex; align-items:center; justify-content:center; font-size:22px; flex:0 0 auto; cursor:pointer; }
   .hcAv .selo{ position:absolute; right:-5px; bottom:-5px; width:20px; height:20px; border-radius:50%; background:var(--cyan); color:var(--onCyan); border:2px solid var(--bg); display:flex; align-items:center; justify-content:center; }
   .hcAv .selo svg{ width:11px; height:11px; }
+  /* v4-20 · ícones Fluent (preenchidos pela base) */
+  .hcAv .avIco{ display:flex; width:64%; height:64%; font-style:normal; } .hcAv .avIco .fe{ width:100%; height:100%; vertical-align:0; }
+  .hcAv[style*="background-image"] .avIco{ display:none; }
+  .hcTile .tv i .fe{ display:block; width:100%; height:100%; vertical-align:0; }
   .hcNome{ min-width:0; }
   /* saudação N1 (07/09): "Boa tarde," pequeno em cima; nome inteiro embaixo, nunca corta */
   .hcNome .n{ margin:0; font-size:13px; font-weight:700; line-height:1.1; color:var(--muted); }
@@ -348,7 +353,7 @@
     <!-- Cartão do Início · padrão único (v4-5) -->
     <div class="heroCard" id="heroCard">
       <div class="hcCab">
-        <div class="hcAv" id="avatarCard" onclick="abrirGaveta('gavetaCard')" title="Trocar fotos">&#129333;&#8205;&#127891;<span class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span></div>
+        <div class="hcAv" id="avatarCard" onclick="abrirGaveta('gavetaCard')" title="Trocar fotos"><i class="avIco" data-fe="estudante"></i><span class="selo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span></div>
         <div class="hcNome"><p class="n" id="saudacaoLinha">Ol&aacute;, <span style="color:var(--cyan);">Estudante</span></p><p class="s" id="linhaCard">Sua central da RedaON</p></div>
       </div>
       <div class="balao"><div class="avisoCard" id="avisoCard"><div class="avisoTrack" id="avisoTrack"></div><div class="avisoDots" id="avisoDots"></div>
@@ -357,9 +362,9 @@
       <div class="hcStatus" id="hcStatus">
         <p class="hcAba">Seu Status</p>
         <div class="hcTiles">
-          <div class="hcTile"><span class="l">M&eacute;dia</span><div class="tv"><i>&#128202;</i><b id="mMedia">&mdash;</b></div></div>
-          <div class="hcTile"><span class="l">Reda&ccedil;&otilde;es</span><div class="tv"><i>&#128218;</i><b id="mRedacoes">&mdash;</b></div></div>
-          <div class="hcTile"><span class="l">Pontos</span><div class="tv"><i>&#127942;</i><b id="mPontos">&mdash;</b></div></div>
+          <div class="hcTile"><span class="l">M&eacute;dia</span><div class="tv"><i data-fe="graficoBarras"></i><b id="mMedia">&mdash;</b></div></div>
+          <div class="hcTile"><span class="l">Enviadas</span><div class="tv"><i data-fe="livros"></i><b id="mRedacoes">&mdash;</b></div></div>
+          <div class="hcTile"><span class="l">Pontos</span><div class="tv"><i data-fe="trofeu"></i><b id="mPontos">&mdash;</b></div></div>
         </div>
         <div class="hcComps" id="hcComps">
         <div class="cc" id="ccC1"><span>C1</span><b>&mdash;</b></div>
@@ -375,17 +380,17 @@
     <div id="indicadorTurmas" class="hidden" style="display:none;"></div>
 
     <div id="bannerEntrarTurma" class="hidden">
-      <p>&#127979; <b>Entre na sua turma</b> com o c&oacute;digo que sua professora passou.</p>
+      <p><span data-fe="escola"></span> <b>Entre na sua turma</b> com o c&oacute;digo que sua professora passou.</p>
       <button class="btnTurma" onclick="abrirModalEntrarTurma()">Entrar</button>
     </div>
 
     <div class="sec" id="secMelhoria"><span class="secL"><span class="bar"></span>Para a sua melhoria</span></div>
     <p id="subMelhoria" style="font-size:.62rem;color:var(--muted);margin:-.3rem 0 .55rem .55rem;">muda conforme você evolui</p>
     <div class="carrA" id="gradeMelhoria">
-      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">📚</div><h4>Repertório da semana</h4><p>no Hub de Preparação</p></div>
-      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">🎯</div><h4>Teste rápido</h4><p>quiz no Hub de Preparação</p></div>
-      <div class="aCard" onclick="window.location.href='minhas-redacoes.html'"><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">📝</div><h4>Estude sua Reescrita</h4><p>sua última redação, buscando a nota mil</p></div>
-      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">✨</div><h4>Materiais para você</h4><p>da sua professora ou da PROfa</p></div>
+      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);" data-fe="livros"></div><h4>Repertório da semana</h4><p>no Hub de Preparação</p></div>
+      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);" data-fe="alvo"></div><h4>Teste rápido</h4><p>quiz no Hub de Preparação</p></div>
+      <div class="aCard" onclick="window.location.href='minhas-redacoes.html'"><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);" data-fe="memo"></div><h4>Estude sua Reescrita</h4><p>sua última redação, buscando a nota mil</p></div>
+      <div class="aCard" onclick="window.location.href='hub-preparacao.html'"><div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);" data-fe="brilhos"></div><h4>Materiais para você</h4><p>da sua professora ou da PROfa</p></div>
     </div>
 
     <div class="sec" id="secVitrine"><span class="secL"><span class="bar"></span>Aprenda com a RedaON</span></div>
@@ -405,13 +410,13 @@
   <div class="grip"></div>
   <p class="tit">Seu cart&atilde;o</p>
   <p class="sub">Escolha um personagem da galeria ou use suas fotos.</p>
-  <a class="pill" onclick="abrirApelido()"><i class="pemoji">&#128172;</i>Como quer ser chamado?<i class="fim" id="apelidoAtual" style="opacity:.7;font-size:.78rem;font-weight:600;"></i></a>
-  <a class="pill" onclick="abrirGaleria()"><i class="pemoji">&#127917;</i>Personagem da galeria<i class="fim">&#8250;</i></a>
-  <a class="pill" id="pillEnqAvatar" onclick="abrirEnquadre('avatar')"><i class="pemoji">&#128207;</i>Enquadrar personagem<i class="fim">&#8250;</i></a>
-  <a class="pill" onclick="escolherFoto()"><i class="pemoji">&#128444;&#65039;</i>Trocar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
-  <a class="pill" id="pillEnqCartao" onclick="abrirEnquadre('cartao')"><i class="pemoji">&#128207;</i>Enquadrar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
-  <a class="pill" onclick="escolherPerfil()"><i class="pemoji">&#128100;</i>Trocar foto da bolinha<i class="fim">&#8250;</i></a>
-  <a class="pill" id="pillEnqPerfil" onclick="abrirEnquadre('perfil')"><i class="pemoji">&#128207;</i>Enquadrar foto da bolinha<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="abrirApelido()"><i class="pemoji" data-fe="balao"></i>Como quer ser chamado?<i class="fim" id="apelidoAtual" style="opacity:.7;font-size:.78rem;font-weight:600;"></i></a>
+  <a class="pill" onclick="abrirGaleria()"><i class="pemoji" data-fe="mascaras"></i>Personagem da galeria<i class="fim">&#8250;</i></a>
+  <a class="pill" id="pillEnqAvatar" onclick="abrirEnquadre('avatar')"><i class="pemoji" data-fe="regua"></i>Enquadrar personagem<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="escolherFoto()"><i class="pemoji" data-fe="quadro"></i>Trocar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
+  <a class="pill" id="pillEnqCartao" onclick="abrirEnquadre('cartao')"><i class="pemoji" data-fe="regua"></i>Enquadrar foto do cart&atilde;o<i class="fim">&#8250;</i></a>
+  <a class="pill" onclick="escolherPerfil()"><i class="pemoji" data-fe="silhueta"></i>Trocar foto da bolinha<i class="fim">&#8250;</i></a>
+  <a class="pill" id="pillEnqPerfil" onclick="abrirEnquadre('perfil')"><i class="pemoji" data-fe="regua"></i>Enquadrar foto da bolinha<i class="fim">&#8250;</i></a>
 </div>
 <div class="gvBg atrasBarra" id="gavetaApelidoBg" onclick="fecharGaveta('gavetaApelido')"></div>
 <div class="gv atrasBarra" id="gavetaApelido">
@@ -430,7 +435,7 @@
   <p class="tit">Personagem da galeria</p>
   <p class="sub">Aparece no seu cart&atilde;o inicial.</p>
   <div id="listaGaleria"></div>
-  <a class="pill" onclick="usarMinhaFoto()"><i class="pemoji">&#128444;&#65039;</i>Usar minha foto no cart&atilde;o<i class="fim" id="ckMinhaFoto" style="opacity:0;">&#10003;</i></a>
+  <a class="pill" onclick="usarMinhaFoto()"><i class="pemoji" data-fe="quadro"></i>Usar minha foto no cart&atilde;o<i class="fim" id="ckMinhaFoto" style="opacity:0;">&#10003;</i></a>
 </div>
 <div id="enqFundo">
   <div id="enqPalco">
@@ -827,25 +832,25 @@
   async function cicloVazio(){
     var temaSem = null; try { temaSem = await temaDaSemanaInicio(); } catch(e) {}
     CICLO = [
-      { emo:'\u{1F4DA}', img:'card-tema.webp', tt:'Tema da Semana',
+      { emo:'livros', img:'card-tema.webp', tt:'Tema da Semana',
         frase: temaSem ? temaSem.titulo : 'Escolha um tema para come\u00e7ar',
         apoio:'material de apoio com fonte, para estudar antes de escrever',
         cta: temaSem ? 'Preparar' : 'Ver temas', rod:'15 minutos por dia',
         url: temaSem ? ('hub-preparacao.html?tema=' + encodeURIComponent(temaSem.id)) : 'temas.html' },
-      { emo:'\u270D\uFE0F', img:'card-blanche.webp', tt:'Vamos l\u00e1!', frase:'Sua primeira reda\u00e7\u00e3o',
+      { emo:'lapis', img:'card-blanche.webp', tt:'Vamos l\u00e1!', frase:'Sua primeira reda\u00e7\u00e3o',
         apoio:'escreva, tire uma foto ou digite \u2014 a corre\u00e7\u00e3o sai em segundos',
         cta:'Come\u00e7ar agora', rod:'', url:'nova-redacao.html?metodo=digitar' + (temaSem ? '&tema=' + encodeURIComponent(temaSem.id) : '') },
-      { emo:'\u{1F4DD}', img:'card-redacao.webp', tt:'Sua reda\u00e7\u00e3o', frase:'A corre\u00e7\u00e3o aparece aqui',
+      { emo:'memo', img:'card-redacao.webp', tt:'Sua reda\u00e7\u00e3o', frase:'A corre\u00e7\u00e3o aparece aqui',
         apoio:'envie sua reda\u00e7\u00e3o e veja onde ganhou e onde perdeu ponto', cta:'Escrever', rod:'',
         url:'nova-redacao.html?metodo=digitar' },
-      { emo:'\u{1F3AC}', img:'card-voceon.webp', tt:'Voc\u00ea ON', frase:'As 5 compet\u00eancias em 6 minutos',
+      { emo:'claquete', img:'card-voceon.webp', tt:'Voc\u00ea ON', frase:'As 5 compet\u00eancias em 6 minutos',
         apoio:'a estrutura da reda\u00e7\u00e3o, do come\u00e7o ao fim', cta:'Assistir', rod:'Base', url:'voce-on.html' },
-      { emo:'\u{1F4C8}', img:'card-evolucao.webp', tt:'Sua evolu\u00e7\u00e3o', frase:'Sua evolu\u00e7\u00e3o come\u00e7a agora',
+      { emo:'grafico', img:'card-evolucao.webp', tt:'Sua evolu\u00e7\u00e3o', frase:'Sua evolu\u00e7\u00e3o come\u00e7a agora',
         apoio:'cada reda\u00e7\u00e3o enviada vira um ponto no seu gr\u00e1fico', cta:'Ver evolu\u00e7\u00e3o', rod:'', url:'evolucao.html' }
     ];
     var semTurma = false;
     try { var ts = await dbGetMinhasTurmas(); semTurma = !(ts && ts.length); } catch(e) {}
-    if (semTurma) CICLO.unshift({ emo:'\u{1F3EB}', img:'card-blanche.webp', tt:'Sua turma',
+    if (semTurma) CICLO.unshift({ emo:'escola', img:'card-blanche.webp', tt:'Sua turma',
       frase:'A Profa. Blanche est\u00e1 te esperando',
       apoio:'use o c\u00f3digo que sua professora passou para entrar na turma',
       cta:'Entrar', rod:'leva 10 segundos', url:'configuracoes.html#turma' });
@@ -858,7 +863,7 @@
       + '<img class="bg" src="img/' + c.img + '" alt="" loading="' + (i === 0 ? 'eager' : 'lazy') + '"/>'
       + '<span class="veu"></span>'
       + (c.selo ? '<span class="selo">' + escapeHtmlSimples(c.selo) + '</span>' : '')
-      + '<div class="top"><span class="emo">' + c.emo + '</span><p class="tt">' + escapeHtmlSimples(c.tt).replace(/\bON\b/g, '<span class="onCard">ON</span>') + '</p></div>'
+      + '<div class="top"><span class="emo">' + feIcone(c.emo) + '</span><p class="tt">' + escapeHtmlSimples(c.tt).replace(/\bON\b/g, '<span class="onCard">ON</span>') + '</p></div>'
       + '<p class="frase">' + escapeHtmlSimples(c.frase) + '</p>'
       + '<p class="apoio">' + escapeHtmlSimples(c.apoio) + '</p>'
       + '<span class="espaco"></span>'
@@ -1076,18 +1081,18 @@
         var dMat = mat.tema_id ? ('hub-preparacao.html?tema=' + encodeURIComponent(mat.tema_id)) : 'hub-preparacao.html';
         var selo = (mat.selo === 'validado') ? '<span class="et val">\u2713 validado</span>' : '<span class="et ia">IA</span>';
         var fonteTxt = (matFonte === 'redaon') ? 'da PROfa, sua mentora' : 'da sua professora';
-        var fonteIco = (matFonte === 'redaon') ? '\u2728' : '\uD83E\uDDD1\u200D\uD83C\uDFEB';
+        var fonteIco = (matFonte === 'redaon') ? feIcone('brilhos') : feIcone('professor');
         cards.push('<div class="aCard" onclick="window.location.href=\'' + dMat + '\'">' + selo + '<div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">' + fonteIco + '</div><h4>' + escapeHtmlSimples(mat.nome) + '</h4><p>' + fonteTxt + '</p></div>');
       }
-      cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><span class="et tm">tema</span><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">\uD83D\uDCDA</div><h4>Repert\u00f3rio da semana</h4><p>' + (tema ? escapeHtmlSimples(tema.titulo) : 'no Hub de Prepara\u00e7\u00e3o') + '</p></div>');
-      cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><span class="et ia">quiz</span><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">\uD83C\uDFAF</div><h4>Teste r\u00e1pido' + (foco ? ' de ' + foco : '') + '</h4><p>no Hub de Prepara\u00e7\u00e3o</p></div>');
+      cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><span class="et tm">tema</span><div class="ic" style="background:rgba(var(--cyanRGB),.14);color:var(--cyan);">' + feIcone('livros') + '</div><h4>Repert\u00f3rio da semana</h4><p>' + (tema ? escapeHtmlSimples(tema.titulo) : 'no Hub de Prepara\u00e7\u00e3o') + '</p></div>');
+      cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><span class="et ia">quiz</span><div class="ic" style="background:rgba(var(--goldRGB),.16);color:var(--gold);">' + feIcone('alvo') + '</div><h4>Teste r\u00e1pido' + (foco ? ' de ' + foco : '') + '</h4><p>no Hub de Prepara\u00e7\u00e3o</p></div>');
       if (temRedacao){
-        cards.push('<div class="aCard" onclick="window.location.href=\'minhas-redacoes.html\'"><span class="et tm">sua</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">\uD83D\uDCDD</div><h4>Estude sua Reescrita</h4><p>sua \u00faltima reda\u00e7\u00e3o, buscando a nota mil</p></div>');
+        cards.push('<div class="aCard" onclick="window.location.href=\'minhas-redacoes.html\'"><span class="et tm">sua</span><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">' + feIcone('memo') + '</div><h4>Estude sua Reescrita</h4><p>sua \u00faltima reda\u00e7\u00e3o, buscando a nota mil</p></div>');
       } else {
-        cards.push('<div class="aCard" onclick="window.location.href=\'nova-redacao.html?metodo=digitar\'"><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">\uD83D\uDD8B\uFE0F</div><h4>Sua primeira reda\u00e7\u00e3o</h4><p>escreva para destravar a Reescrita</p></div>');
+        cards.push('<div class="aCard" onclick="window.location.href=\'nova-redacao.html?metodo=digitar\'"><div class="ic" style="background:rgba(var(--purpleRGB),.18);color:var(--purpleSoft);">' + feIcone('lapis') + '</div><h4>Sua primeira reda\u00e7\u00e3o</h4><p>escreva para destravar a Reescrita</p></div>');
       }
       if (!mat){
-        cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">\u2728</div><h4>Materiais para voc\u00ea</h4><p>da sua professora ou da PROfa \u2014 aparecem aqui</p></div>');
+        cards.push('<div class="aCard" onclick="window.location.href=\'' + destinoHub + '\'"><div class="ic" style="background:rgba(var(--greenRGB),.14);color:var(--green);">' + feIcone('brilhos') + '</div><h4>Materiais para voc\u00ea</h4><p>da sua professora ou da PROfa \u2014 aparecem aqui</p></div>');
       }
       grade.innerHTML = cards.slice(0,4).join('');
     }catch(e){ console.warn('[grade melhoria]', e); }
@@ -1205,14 +1210,14 @@
       try { var ts = await dbGetMinhasTurmas(); semTurma = !(ts && ts.length); } catch(e) {}
 
       CICLO = [
-        { chave:'tema', emo:'\u{1F4DA}', img:'card-tema.webp', tt:'Tema da Semana',
+        { chave:'tema', emo:'livros', img:'card-tema.webp', tt:'Tema da Semana',
           frase: temaSem ? temaSem.titulo : 'Escolha um tema para come\u00e7ar',
           apoio: fichas ? (fichas + ' fichas com fonte para estudar antes de escrever') : 'material de apoio com fonte, para estudar antes de escrever',
           cta: temaSem ? 'Preparar' : 'Ver temas',
           rod: '15 minutos por dia',
           url: temaSem ? ('hub-preparacao.html?tema=' + encodeURIComponent(temaSem.id)) : 'temas.html' },
 
-        { chave:'vamos', emo:'\u270D\uFE0F', img: totalRedacoes ? 'card-vamos.webp' : 'card-blanche.webp', tt:'Vamos l\u00e1!',
+        { chave:'vamos', emo:'lapis', img: totalRedacoes ? 'card-vamos.webp' : 'card-blanche.webp', tt:'Vamos l\u00e1!',
           frase: totalRedacoes ? 'Escrever a reda\u00e7\u00e3o da semana' : 'Sua primeira reda\u00e7\u00e3o',
           apoio: totalRedacoes ? 'voc\u00ea j\u00e1 estudou o repert\u00f3rio \u2014 agora \u00e9 com voc\u00ea'
                                : 'escreva, tire uma foto ou digite \u2014 a corre\u00e7\u00e3o sai em segundos',
@@ -1220,7 +1225,7 @@
           rod: temaSem ? 'tema da semana j\u00e1 selecionado' : '',
           url: 'nova-redacao.html?metodo=digitar' + (temaSem ? '&tema=' + encodeURIComponent(temaSem.id) : '') },
 
-        { chave:'redacao', emo:'\u{1F4DD}', img:'card-redacao.webp', tt:'Sua reda\u00e7\u00e3o',
+        { chave:'redacao', emo:'memo', img:'card-redacao.webp', tt:'Sua reda\u00e7\u00e3o',
           frase: ult ? (ult.total + ' pontos' + (temReescrita ? ', com a Reescrita pronta' : '')) : 'A corre\u00e7\u00e3o aparece aqui',
           apoio: ult ? 'melhorias, compara\u00e7\u00e3o e o coment\u00e1rio da professora'
                      : 'envie sua reda\u00e7\u00e3o e veja onde ganhou e onde perdeu ponto',
@@ -1229,19 +1234,19 @@
           selo: validada ? 'validada' : null,
           url: ult ? 'minhas-redacoes.html' : 'nova-redacao.html?metodo=digitar' },
 
-        { chave:'voceon', emo:'\u{1F3AC}', img:'card-voceon.webp', tt:'Voc\u00ea ON',
+        { chave:'voceon', emo:'claquete', img:'card-voceon.webp', tt:'Voc\u00ea ON',
           frase: focoTxt ? ('Como o corretor l\u00ea a ' + focoTxt.split(' ')[0]) : 'As 5 compet\u00eancias em 6 minutos',
           apoio: focoTxt ? 'v\u00eddeo curto sobre a compet\u00eancia que mais te segura' : 'a estrutura da reda\u00e7\u00e3o, do come\u00e7o ao fim',
           cta:'Assistir', rod:'Corre\u00e7\u00e3o Guiada', url:'voce-on.html' },
 
-        { chave:'evolucao', emo:'\u{1F4C8}', img:'card-evolucao.webp', tt:'Sua evolu\u00e7\u00e3o',
+        { chave:'evolucao', emo:'grafico', img:'card-evolucao.webp', tt:'Sua evolu\u00e7\u00e3o',
           frase: totalRedacoes > 1 ? ((evolucao >= 0 ? '+' : '') + evolucao + ' pontos desde a \u00faltima')
                                    : 'Sua evolu\u00e7\u00e3o come\u00e7a agora',
           apoio: totalRedacoes ? (totalRedacoes + (totalRedacoes > 1 ? ' reda\u00e7\u00f5es enviadas' : ' reda\u00e7\u00e3o enviada') + ' \u00b7 m\u00e9dia ' + media + (focoTxt ? ' \u00b7 reforce a ' + focoTxt : ''))
                               : 'cada reda\u00e7\u00e3o enviada vira um ponto no seu gr\u00e1fico',
           cta:'Ver evolu\u00e7\u00e3o', rod: melhorNota ? ('sua melhor: ' + melhorNota) : '', url:'evolucao.html' }
       ];
-      if (semTurma) CICLO.unshift({ chave:'turma', emo:'\u{1F3EB}', img:'card-blanche.webp', tt:'Sua turma',
+      if (semTurma) CICLO.unshift({ chave:'turma', emo:'escola', img:'card-blanche.webp', tt:'Sua turma',
         frase:'A Profa. Blanche est\u00e1 te esperando',
         apoio:'use o c\u00f3digo que sua professora passou para entrar na turma',
         cta:'Entrar', rod:'leva 10 segundos', url:'configuracoes.html#turma' });
@@ -1273,7 +1278,7 @@
           return '<b>' + escapeHtmlSimples(t.nome) + '</b>' + (escola ? ' (' + escapeHtmlSimples(escola) + ')' : '') + prof;
         }).join(' &nbsp;\u00B7&nbsp; ');
         var mais = turmas.length > 2 ? ' &nbsp;+' + (turmas.length - 2) : '';
-        var htmlTurmas = '\u{1F3EB} ' + principais + mais;
+        var htmlTurmas = feIcone('escola') + ' ' + principais + mais;
         if (indicador) { indicador.innerHTML = htmlTurmas; indicador.classList.remove('hidden'); }
         if (indicadorM) { indicadorM.innerHTML = htmlTurmas; indicadorM.classList.remove('hidden'); }
         if (banner) banner.classList.add('hidden');
