@@ -248,6 +248,9 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
   box-shadow:0 10px 28px rgba(0,0,0,.35); opacity:0; transition:.25s; z-index:95;
   max-width:min(88vw, 420px); text-align:center; white-space:normal; line-height:1.4; }
 #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+/* v9-36 (17/09/2026): o aviso nunca captura toques — invisível (opacity:0) ele seguia por cima da pílula
+   "Material de apoio" na gaveta do ⋯ e engolia o toque no celular */
+#toast{ pointer-events:none; }
 @media(min-width:1024px){ #toast{ bottom:42%; } }
 
 /* ===== MODAL ===== */

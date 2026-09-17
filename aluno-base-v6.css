@@ -281,3 +281,8 @@ html[data-tema="claro"] #barraInferior .fabWrap .fab{ background:#45edee; box-sh
 /* ═══ v6-7 (17/09/2026) · cabeçalho fora de todas as telas ═══
    A base não cria mais o header.hApp; a regra abaixo protege telas que ainda tragam um. */
 header.hApp{ display:none !important; }
+
+/* ═══ v6-8 (17/09/2026) · aviso (toast) nunca captura toques ═══
+   Invisível (opacity:0) ele continuava por cima do que estivesse atrás e engolia o toque —
+   foi o que travou o "Material de apoio" na Nova redação. */
+#toast{ pointer-events:none; }

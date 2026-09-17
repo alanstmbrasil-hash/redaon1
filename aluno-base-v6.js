@@ -1,5 +1,6 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-7 (17/09/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-8 (17/09/2026)
+   v6-8: o aviso (toast) deixa de capturar toques quando está invisível (regra no CSS).
    v6-7: cabeçalho (header.hApp) removido de todas as telas; no computador as telas
    seguem com os próprios títulos e o menu lateral marca a tela ativa.
    v6-6: Aparência volta ao menu lateral (seção Conta) e à gaveta Mais com ícone do
