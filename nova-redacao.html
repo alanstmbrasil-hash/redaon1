@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-<title>RedaON · Nova Redação · v9-37</title>
+<title>RedaON · Nova Redação</title>
 <!-- v9-7: CASCATA DE TEMA. Esta tela era a única sem o script de arranque que as
      outras (inicio, temas, plano, minhas-redacoes) já tinham. Sem o atributo
      data-tema no elemento raiz, a regra html[data-tema="claro"] nunca casava e
@@ -274,6 +274,28 @@ html[data-tema="claro"] #barraInferior .fabWrap .fab{ background:#45edee; box-sh
 .cxAcao b{ font-size:.72rem; line-height:1.15; font-weight:700; color:var(--text); }
 .cxAcao.limpar b{ color:var(--red); }
 .cxAcoesDesk{ display:none; }
+/* v9-38 · cabeçalho do Material de apoio em faixa (coluna do computador) */
+.colApoio .cabApoio{ flex:0 0 auto; display:flex; align-items:flex-start; gap:.7rem; margin-bottom:.75rem;
+  background:rgba(var(--cyanRGB),.10); border:1px solid rgba(var(--cyanRGB),.22); border-radius:14px; padding:.75rem .85rem; }
+.colApoio .cabApoio .quadIco{ width:44px; height:44px; border-radius:12px; background:var(--surface);
+  display:grid; place-items:center; box-shadow:0 1px 3px rgba(var(--borderRGB),.14); flex:0 0 auto; }
+.colApoio .cabApoio .quadIco .fe{ width:28px; height:28px; vertical-align:0; }
+.colApoio .cabApoio .txt{ min-width:0; display:block; }
+.colApoio .cabApoio b{ display:block; font-size:1.05rem; font-weight:800; color:var(--text); line-height:1.2; }
+.colApoio .cabApoio .sub{ display:block; font-size:.73rem; color:var(--text2); margin-top:3px; line-height:1.35; }
+.colApoio .cabApoio .acao{ display:block; font-size:.73rem; color:var(--cyan); font-weight:700; margin-top:2px; line-height:1.35; }
+/* v9-38 · barra de baixo: ícones de 28px na mesma altura, e o "Mais" em SVG */
+@media(max-width:1023px){
+  #barraInferior { padding:6px 6px 8px; }
+  #barraInferior a { gap:1px; padding:2px 2px; }
+  #barraInferior .bEmoji { font-size:23.4px; }
+  #barraInferior .bEmoji .icoMais { width:28px; height:28px; display:block; fill:currentColor; }
+}
+@media(max-width:359px){
+  #barraInferior a { font-size:9px; }
+  #barraInferior .bEmoji { font-size:20px; }
+  #barraInferior .bEmoji .icoMais { width:24px; height:24px; }
+}
 @media(min-width:1024px){
   #blocoAcoes .cxAcoesDesk{ display:flex; gap:8px; flex:0 0 auto; }
   #blocoAcoes .cxAcoesDesk .cxAcao{ min-height:52px; width:88px; padding:6px 4px; }
@@ -713,7 +735,7 @@ header.hApp{ display:none !important; }
   <!-- TOPBAR DO MODO FOCO -->
   <div class="topFoco">
     <button class="voltar" onclick="voltarDaEscrita()" aria-label="Voltar"><span class="material-symbols-outlined">arrow_back</span></button>
-    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação<span class="vtag">v9-37</span></h1>
+    <h1 onclick="abrirTema()" title="Ver o tema completo">Nova Redação</h1>
     <button class="tIcone" id="btnApoioTop" onclick="toggleApoio()" aria-label="Material de apoio"><i class="em" data-fe="livros"></i></button>
     <span id="tempoTop" onclick="abrirTempo()" title="Gestão de tempo"><span data-fe="cronometro"></span> <span id="tempoTopTxt">00:00</span></span>
     <button class="tIcone" id="btnRelogioTop" onclick="abrirTempo()" aria-label="Gestão de tempo"><i class="em" data-fe="cronometro"></i></button>
@@ -751,8 +773,13 @@ header.hApp{ display:none !important; }
 
       <!-- APOIO · DESKTOP (coluna com rolagem própria) -->
       <aside class="colApoio">
-        <p class="cab"><i class="em" data-fe="livros"></i> Material de apoio</p>
-        <p class="legenda">Selecionado pela PROfa para este tema. Toque para abrir.</p>
+        <!-- v9-38: cabeçalho em faixa, três linhas -->
+        <div class="cabApoio">
+          <span class="quadIco" data-fe="livros"></span>
+          <span class="txt"><b>Material de apoio</b>
+            <span class="sub">Selecionado especialmente para este tema.</span>
+            <span class="acao">Clique em um eixo para abrir.</span></span>
+        </div>
         <div class="rolagem"><div id="eixosDesktop"></div></div>
         <!-- D2 · ações no pé da coluna (só tablet em modo desktop) -->
         <div id="acoesLateral"></div>
@@ -863,7 +890,7 @@ header.hApp{ display:none !important; }
 <div class="gv atrasTudo" id="gavetaApoio">
   <div class="grip"></div>
   <p class="tit"><span data-fe="livros"></span> Material de apoio</p>
-  <p class="sub">Selecionado pela PROfa para este tema</p>
+  <p class="sub">Selecionado especialmente para este tema</p>
   <div id="eixosGaveta"></div>
 </div>
 
@@ -1137,7 +1164,6 @@ function montarEsqueleto(cfg) {
           '<span style="display:block;font-size:.65rem;color:var(--muted);">Portal do Aluno</span>' +
         '</div>' +
       '</div>' +
-      '<p class="sideVersao">' + (cfg.versao || 'aluno') + '</p>' +
     '</aside>';
   while (topo.firstChild) body.insertBefore(topo.firstChild, body.firstChild);
 
@@ -1189,7 +1215,7 @@ function montarEsqueleto(cfg) {
       '<a' + barraClasse('temas') + ' href="temas.html"><i class="bEmoji">' + feIcone('prancheta') + '</i>Temas</a>' +
       '<a class="fabWrap" onclick="toggleMetodos()"><span class="fab"><i class="bEmoji" style="font-size:20px;">' + feIcone('lapis') + '</i></span><span class="fabCap">Escrever</span></a>' +
       '<a' + barraClasse('redacoes') + ' href="minhas-redacoes.html"><i class="bEmoji">' + feIcone('livros') + '</i>Reda\u00e7\u00f5es</a>' +
-      '<a id="bMais" onclick="toggleMais()"><i class="bEmoji">\u2630</i>Mais</a>' +
+      '<a id="bMais" onclick="toggleMais()"><i class="bEmoji"><svg class="icoMais" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="2.6" rx="1.3"/><rect x="3" y="10.7" width="18" height="2.6" rx="1.3"/><rect x="3" y="16.4" width="18" height="2.6" rx="1.3"/></svg></i>Mais</a>' +
     '</nav>' +
     '<div id="toast"></div>';
   while (fim.firstChild) body.appendChild(fim.firstChild);
@@ -1284,7 +1310,7 @@ function iniciarDock(dockId, opts) {
 
 /* Esqueleto da base: sidebar (desktop) + barra (menu retrátil no celular) +
    gavetas Mais/Métodos + toast. Header padrão fica oculto (modo foco). */
-montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle', versao:'tela 4 v9-37' });
+montarEsqueleto({ ativo:'escrever', titulo:'Nova Redação', icone:'add_circle' });  /* v9-38: versão não aparece na tela */
 
 /* Na PRÓPRIA tela, escolher método na gaveta não recarrega a página */
 (function reencaixarGavetaMetodos(){

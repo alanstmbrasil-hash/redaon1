@@ -286,3 +286,18 @@ header.hApp{ display:none !important; }
    Invisível (opacity:0) ele continuava por cima do que estivesse atrás e engolia o toque —
    foi o que travou o "Material de apoio" na Nova redação. */
 #toast{ pointer-events:none; }
+
+/* ═══ v6-9 (17/09/2026) · barra de baixo ═══
+   Ícones de 28px sem crescer a barra: a folga vem do padding do item e do vão até o nome.
+   O "Mais" agora é SVG, no mesmo tamanho e peso dos coloridos. */
+@media(max-width:1023px){
+  #barraInferior { padding:6px 6px 8px; }
+  #barraInferior a { gap:1px; padding:2px 2px; }
+  #barraInferior .bEmoji { font-size:23.4px; }   /* .fe = 1.2em = 28px */
+  #barraInferior .bEmoji .icoMais { width:28px; height:28px; display:block; fill:currentColor; }
+}
+@media(max-width:359px){
+  #barraInferior a { font-size:9px; }
+  #barraInferior .bEmoji { font-size:20px; }
+  #barraInferior .bEmoji .icoMais { width:24px; height:24px; }
+}
