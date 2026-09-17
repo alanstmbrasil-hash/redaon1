@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
+<!-- v4-4 (17/09/2026): linha de cima com desenho, situação e data à esquerda e nota + pastilhas no canto direito,
+     as pastilhas alinhadas com a base do desenho; nota a 32 px; o tema desceu e ocupa a caixa inteira, sem corte. -->
 <!-- v4-3 (17/09/2026): cards com figura à esquerda (robôs = corrigida pela IA, Profa. Blanche = validada),
      situação sem ampulheta, nota à direita sem o rótulo "nota", etiqueta "Corrigida" em verde-água (o dourado
      é só conquista) e ícones Fluent nas abas da correção. As figuras são recortes provisórios das ilustrações. -->
@@ -40,12 +42,16 @@
 .gridLista{display:grid;grid-template-columns:1fr;gap:.7rem;}
 @media(min-width:641px){.gridLista{grid-template-columns:repeat(2,1fr);}}
 @media(min-width:1024px){.gridLista{grid-template-columns:repeat(3,1fr);}}
-.rCard{background:var(--surface);border:1px solid rgba(var(--borderRGB),.18);border-radius:14px;padding:.8rem .9rem;cursor:pointer;display:flex;align-items:center;gap:.7rem;transition:border-color .2s;}
+.rCard{background:var(--surface);border:1px solid rgba(var(--borderRGB),.18);border-radius:14px;padding:.8rem .9rem;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;transition:border-color .2s;}
+.rCard .linhaTopo{display:flex;align-items:stretch;gap:.7rem;min-height:62px;}
+.rCard .colSelo{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding-top:.2rem;}
+.rCard .colSelo .data{margin-top:.45rem;}
+.rCard .andando{font-size:10px;color:var(--muted);margin-top:.35rem;}
 .rFig{width:58px;height:62px;border-radius:12px;overflow:hidden;flex:0 0 auto;border:1px solid rgba(var(--borderRGB),.18);background:var(--surface2);}
 .rFig img{width:100%;height:100%;object-fit:cover;display:block;}
 .rFig.semFoto{display:grid;place-items:center;}
 .rFig.semFoto .fe{width:26px;height:26px;vertical-align:0;}
-.rMeio{flex:1;min-width:0;}
+
 .rCard:hover{border-color:rgba(var(--cyanRGB),.4);}
 .rCard.destaque{border-color:rgba(var(--cyanRGB),.45);}
 .rCard .topo{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.5rem;}
@@ -53,14 +59,14 @@
 .selo.validada{color:var(--green);background:rgba(var(--greenRGB),.12);border:1px solid rgba(var(--greenRGB),.3);}
 .selo.corrigida{color:var(--cyan);background:rgba(var(--cyanRGB),.12);border:1px solid rgba(var(--cyanRGB),.3);} /* v4-3: dourado é só conquista */
 .selo.analise{color:var(--muted);background:rgba(var(--borderRGB),.12);border:1px solid rgba(var(--borderRGB),.25);}
-.rNota{text-align:right;flex:0 0 auto;}
-.rNota .v{font-size:1.5rem;font-weight:900;line-height:1;color:var(--cyan);}
-.rNota .l{font-size:8.5px;text-transform:uppercase;font-weight:700;color:var(--muted);display:block;margin-top:1px;}
-.rCard .tit{font-size:13.5px;font-weight:700;line-height:1.35;color:var(--text);margin:.35rem 0 .4rem;}
+.rNota{flex:0 0 auto;margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;text-align:right;}
+.rNota .v{font-size:2rem;font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--cyan);}
+
+.rCard .tit{font-size:13.5px;font-weight:700;line-height:1.35;color:var(--text);margin:.55rem 0 0;}
 .rCard .pe{display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
 .rCard .data{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.miniComp{display:flex;gap:3px;flex:0 0 auto;}
-.miniComp span{width:14px;height:4px;border-radius:99px;background:var(--surface2);}
+.miniComp{display:flex;gap:3px;flex:0 0 auto;justify-content:flex-end;margin-bottom:1px;}
+.miniComp span{width:16px;height:5px;border-radius:99px;background:var(--surface2);}
 .vazio{grid-column:1/-1;text-align:center;color:var(--muted);font-size:.85rem;padding:2.5rem 0;line-height:1.6;}
 .spinner{width:38px;height:38px;border:3px solid var(--surface2);border-top-color:var(--cyan);border-radius:50%;animation:girar .8s linear infinite;margin:2rem auto;}
 @keyframes girar{to{transform:rotate(360deg);}}
@@ -322,17 +328,18 @@
       var figura=r.status==='validada'?'<div class="rFig"><img src="'+IMG_VALIDADA+'" alt="" loading="lazy"></div>'
                 :r.status==='corrigida'?'<div class="rFig"><img src="'+IMG_CORRIGIDA+'" alt="" loading="lazy"></div>'
                 :'<div class="rFig semFoto">'+feIcone('engrenagem')+'</div>';
-      var nota=r.nota?'<div class="rNota"><span class="v">'+r.nota+'</span></div>':'';
-      var mini=r.comp?'<div class="miniComp">'+r.comp.map(function(v){return '<span style="background:'+corComp(v)+';"></span>';}).join('')+'</div>'
-                     :'<span style="font-size:10px;color:var(--muted);">a IA est\u00e1 corrigindo</span>';
+      var mini=r.comp?'<div class="miniComp">'+r.comp.map(function(v){return '<span style="background:'+corComp(v)+';"></span>';}).join('')+'</div>':'';
+      var nota=r.nota?'<div class="rNota"><span class="v">'+r.nota+'</span>'+mini+'</div>':'';
+      var andando=r.comp?'':'<span class="andando">a IA est\u00e1 corrigindo</span>';
       var clique=(r.nota&&r.comp)?' onclick="abrirCorrecao(\''+r.id+'\')"'
         :' onclick="toast(\'Sua corre\u00e7\u00e3o fica pronta em segundos \u2014 j\u00e1 volta\')" style="opacity:.65;"';
+      /* v4-4: linha de cima = desenho + (situação, data) + (nota, pastilhas alinhadas ao pé do desenho);
+         embaixo, o tema com a caixa inteira para correr livre. */
       return '<div class="rCard'+(i===0&&r.nota?' destaque':'')+'"'+clique+'>'
-        +figura
-        +'<div class="rMeio">'+selo
-        +'<p class="tit">'+escapeHtmlSimples(r.titulo)+'</p>'
-        +'<div class="pe"><span class="data">'+r.data+'</span>'+mini+'</div></div>'
-        +nota+'</div>';
+        +'<div class="linhaTopo">'+figura
+        +'<div class="colSelo">'+selo+'<span class="data">'+r.data+'</span>'+andando+'</div>'
+        +nota+'</div>'
+        +'<p class="tit">'+escapeHtmlSimples(r.titulo)+'</p></div>';
     }).join('');
   }
 
