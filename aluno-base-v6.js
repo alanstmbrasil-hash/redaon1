@@ -1,5 +1,7 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-6 (16/09/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-7 (17/09/2026)
+   v6-7: cabeçalho (header.hApp) removido de todas as telas; no computador as telas
+   seguem com os próprios títulos e o menu lateral marca a tela ativa.
    v6-6: Aparência volta ao menu lateral (seção Conta) e à gaveta Mais com ícone do
    estado atual (sol = claro · lua = escuro · meio a meio = automático); círculo do
    Escrever no tema claro usa a cor do tema escuro; ícones [data-fe] do HTML estático
@@ -304,20 +306,8 @@ function montarEsqueleto(cfg) {
       if (t.indexOf('prepara') === 0) return 'preparacao';
       return '';
     }
-    var hd = document.createElement('header');
-    hd.className = 'hApp';
-    hd.innerHTML =
-      '<div style="display:flex;align-items:center;gap:.5rem;">' +
-        '<button id="btnHamburger" onclick="toggleSidebar()" aria-label="Abrir menu"><span class="material-symbols-outlined">menu</span></button>' +
-        '<div style="display:flex;align-items:center;gap:.5rem;">' +
-          '<span class="material-symbols-outlined" style="color:var(--cyan);font-variation-settings:\'FILL\' 1;">' + (cfg.icone || 'edit_note') + '</span>' +
-          '<h2 style="font-size:1.1rem;font-weight:800;color:var(--text);">' + rotuloON(cfg.titulo || 'RedaON') + '</h2>' +
-        '</div>' +
-      '</div>' +
-      '<div style="display:flex;align-items:center;gap:.25rem;">' +
-        '<button id="btnTema" onclick="alternarTema()" title="Alternar tema" aria-label="Alternar tema"><span class="material-symbols-outlined" id="iconeTema">light_mode</span></button>' +
-      '</div>';
-    main.insertBefore(hd, main.firstChild);
+    /* v6-7: o cabeçalho (header.hApp) saiu de todas as telas, em todas as larguras.
+       O menu lateral marca onde o aluno está e já traz a Aparência. */
 
     /* linha fina das telas de dentro do "Mais" (só no celular e no tablet vertical) */
     if (!noDock) {
@@ -330,7 +320,7 @@ function montarEsqueleto(cfg) {
         '<span class="pgTit">' + rotuloON(cfg.titulo || '') + '</span>';
       var cont = document.getElementById('conteudo');
       if (cont) cont.insertBefore(ph, cont.firstChild);
-      else main.insertBefore(ph, hd.nextSibling);
+      else main.insertBefore(ph, main.firstChild);
       /* a tela já tinha o próprio título repetido logo abaixo — esconde no celular */
       document.documentElement.classList.add('temPgHead');
     }

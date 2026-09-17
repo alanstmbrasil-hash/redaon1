@@ -277,3 +277,7 @@ html[data-tema="claro"]{ --marcaON:var(--cyan); }
 html[data-tema="claro"] #barraInferior .fabWrap .fab{ background:#45edee; box-shadow:0 4px 14px rgba(69,237,238,.45); }
 /* ícone preenchido por feHidratar() num elemento [data-fe] sem classe própria de ícone */
 [data-fe] > .fe{ vertical-align:-.2em; }
+
+/* ═══ v6-7 (17/09/2026) · cabeçalho fora de todas as telas ═══
+   A base não cria mais o header.hApp; a regra abaixo protege telas que ainda tragam um. */
+header.hApp{ display:none !important; }

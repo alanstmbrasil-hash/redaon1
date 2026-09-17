@@ -6,6 +6,7 @@
 <title>RedaON | Início v5-4</title>
 <!-- RedaON · Portal do Aluno · Início · v5-4 · sobre aluno-base-v6 -->
 <!-- v5-4 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
+<!-- v4-21 (17/09/2026): pontinhos do carrossel no tablet/computador em "janela acesa" — acendem os pontos de todos os cards inteiros na tela (no fim, os últimos); celular sem mudança. -->
 <!-- v4-20 (16/09/2026): ícones Fluent Emoji (base v6-6): avatar, caixas, gaveta do cartão, cards e aviso de turma; caixa "Redações" vira "Enviadas" com o ícone de livros do menu; "escrever" usa o lápis. Avisos (toast) seguem em texto até a 3ª leva. -->
 <!-- v4-19 (16/09/2026): desktop/tablet: fileira à esquerda (Headspace), card pelas duas medidas, setas nas pontas com volta, barra "Início" fora, Status ao lado do nome; tablet em pé em largura cheia; medida do card também na abertura -->
 <!-- v4-18 (16/09/2026): frase e linha de apoio na largura toda do card -->
@@ -325,6 +326,7 @@
   #heroCard .avisoDots{ position:static !important; padding:10px 0 0 !important; }
   #heroCard .avisoDots span{ background:var(--muted); opacity:.4; width:7px; height:7px; border-radius:4px; transition:width .2s; }
   #heroCard .avisoDots span.on{ background:var(--cyan); opacity:1; width:22px; }
+  #heroCard .avisoDots span.jan{ background:var(--cyan); opacity:1; } /* v4-21 */
   #setasCiclo{ display:block; }
   #setasCiclo button{ position:absolute; top:calc(var(--hCiclo,453px) / 2 + 4px); transform:translateY(-50%); z-index:5;
     width:44px; height:44px; border-radius:50%; border:1px solid rgba(var(--borderRGB),.24);
@@ -938,7 +940,18 @@
     });
     cardsNaTela().forEach(function(c){ c.classList.toggle('centro', c === melhor); });
     var i = cardsNaTela().indexOf(melhor);
-    if (dots) dots.querySelectorAll('span').forEach(function(s, j){ s.className = (j === i ? 'on' : ''); });
+    /* v4-21 · tablet/computador: "janela acesa" — um ponto por card, acesos os de todos os cards inteiros na tela */
+    var vistos = [];
+    if (largo){
+      var tr = track.getBoundingClientRect();
+      cardsNaTela().forEach(function(c, j){
+        var r = c.getBoundingClientRect();
+        if (r.width && r.left >= tr.left - 4 && r.right <= tr.right + 4) vistos.push(j);
+      });
+    }
+    if (dots) dots.querySelectorAll('span').forEach(function(s, j){
+      s.className = vistos.length ? (vistos.indexOf(j) >= 0 ? 'jan' : '') : (j === i ? 'on' : '');
+    });
   }
   function andarCiclo(dir){
     var track = document.getElementById('avisoTrack'), cs = cardsNaTela();
