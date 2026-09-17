@@ -257,3 +257,16 @@ header.hApp { position:sticky; top:0; z-index:40; display:flex; align-items:cent
 :root{ --marcaON:var(--cyan); }            /* mesma cor do "Escrever" do dock e do ON do logotipo */
 html[data-tema="claro"]{ --marcaON:var(--cyan); }
 .marcaON{ color:var(--marcaON); font-weight:900; letter-spacing:.01em; }
+
+
+/* ═══ v6-5 · ícones Fluent Emoji (16/09/2026) ═══
+   Fluent Emoji © Microsoft Corporation · licença MIT.
+   A imagem ocupa o lugar do emoji: tamanho em em, herdado do font-size de cada ícone
+   (.em, .pemoji, .bEmoji, .pgIco, .avt), então os ajustes de tamanho existentes continuam valendo. */
+.fe{ display:inline-block; width:1.2em; height:1.2em; vertical-align:-.2em; object-fit:contain;
+  pointer-events:none; -webkit-user-select:none; user-select:none; -webkit-user-drag:none; }
+.nav-item .em .fe, .pill .pemoji .fe, #barraInferior .bEmoji .fe, .pgHead .pgIco .fe{ display:block; margin:0 auto; }
+.pill .pemoji{ display:inline-flex; align-items:center; justify-content:center; }
+.perfilAluno .avt .fe{ width:1.4em; height:1.4em; display:block; }
+/* com foto de perfil (o Início põe background-image inline), o ícone some */
+.perfilAluno .avt[style*="background-image"] .fe{ display:none; }
