@@ -4,6 +4,10 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
+<!-- v5-2 (18/09/2026): no computador e no tablet a coluna e os chips ficam centralizados, com folga nas
+     laterais; arrastar de lado na lista troca entre Todas, Corrigidas e Validadas. -->
+<!-- v5-2 (18/09/2026): arrastar de lado na lista troca entre Todas, Corrigidas e Validadas (menu ao
+     alcance do polegar); "Corrigida pela IA" vira "Corrigida pela RedaON". -->
 <!-- v5-1 (18/09/2026): no cartão herói fica só "Ver correção" (o segundo botão volta com o Lego);
      a lista passa a ter uma coluna em qualquer largura, com largura de leitura no computador — em duas ou
      três colunas as caixas ficavam desencontradas; os chips de filtro rolam de lado em celular, tablet e
@@ -52,7 +56,8 @@
 .gridLista{display:grid;grid-template-columns:1fr;gap:.7rem;}
 /* v5-1: uma coluna em qualquer largura. Em duas ou tr\u00eas colunas o cart\u00e3o her\u00f3i e as linhas
    compactas ficavam com alturas diferentes e sobrava buraco branco no computador. */
-@media(min-width:641px){ .gridLista{ max-width:760px; } }
+/* v5-2: no computador e no tablet a coluna fica centralizada, com folga nas laterais */
+@media(min-width:641px){ .gridLista, .cabLista, .chips{ max-width:760px; margin-left:auto; margin-right:auto; } }
 .rCard{background:var(--surface);border:1px solid rgba(var(--borderRGB),.18);border-radius:14px;padding:.8rem .9rem;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;transition:border-color .2s;}
 .rCard .linhaTopo{display:flex;align-items:stretch;gap:.7rem;min-height:62px;}
 .rCard .colSelo{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding-top:.2rem;}
@@ -196,12 +201,12 @@ body{
     var(--bg);
   background-attachment:fixed;
 }
-.cabLista{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 .7rem;max-width:760px;}
+.cabLista{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 .7rem;}
 .cabLista h1{margin:0;font-size:21px;font-weight:600;letter-spacing:-.01em;color:var(--text);}
 .cabLista #contagem{font-size:12.5px;color:var(--muted);}
 .chips{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
   -webkit-overflow-scrolling:touch;margin:0 -1rem 1rem;padding:2px 1rem;}
-@media(min-width:641px){ .chips{ max-width:760px; margin-left:0; margin-right:0; padding-left:0; padding-right:0; } }
+@media(min-width:641px){ .chips{ padding-left:0; padding-right:0; justify-content:center; justify-content:safe center; } }
 .chips::-webkit-scrollbar{display:none;}
 .chip{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;font-family:inherit;font-size:12.5px;font-weight:500;
   color:var(--text2);background:var(--surface);border:1px solid rgba(var(--borderRGB),.14);border-radius:99px;
@@ -216,6 +221,7 @@ body{
 .hEst{flex:1;min-width:0;padding-top:.15rem;}
 .sit{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--cyan);}
 .sit i{width:7px;height:7px;border-radius:50%;background:var(--cyan);}
+.sit b{font-weight:700;letter-spacing:.01em;}
 .sit.val{color:var(--green);} .sit.val i{background:var(--green);}
 .sit.and{color:var(--muted);} .sit.and i{background:var(--muted);}
 .hEst .data{display:block;font-size:12px;color:var(--muted);margin-top:3px;}
@@ -400,6 +406,31 @@ body{
     var c=document.getElementById('chipsFiltro'); if(c) c.innerHTML=html;
   }
   function setFiltro(f){ filtroAtivo=f; renderFiltros(); renderLista(); }
+  /* v5-2 · arrastar de lado troca o filtro, para o menu seguir ao alcance do polegar.
+     S\u00f3 vale quando o gesto \u00e9 claramente horizontal e n\u00e3o come\u00e7a na pr\u00f3pria fileira de chips,
+     que rola sozinha. */
+  function passarFiltro(dir){
+    var i=0; FILTROS.forEach(function(f,k){ if(f.id===filtroAtivo) i=k; });
+    var j=i+dir; if(j<0||j>=FILTROS.length) return;
+    setFiltro(FILTROS[j].id);
+    var c=document.querySelector('.chip.on'); if(c && c.scrollIntoView) c.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  }
+  (function(){
+    var x0=null,y0=null,valendo=false;
+    var alvo=document.getElementById('viewLista');
+    if(!alvo) return;
+    alvo.addEventListener('touchstart',function(e){
+      if(e.touches.length!==1 || (e.target.closest && e.target.closest('.chips'))){ valendo=false; return; }
+      x0=e.touches[0].clientX; y0=e.touches[0].clientY; valendo=true;
+    },{passive:true});
+    alvo.addEventListener('touchend',function(e){
+      if(!valendo || x0===null) return;
+      var t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
+      valendo=false; x0=null;
+      if(Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.6) return;
+      passarFiltro(dx<0?1:-1);
+    },{passive:true});
+  })();
   function renderLista(){
     var lista=REDACOES.filter(function(r){
       if(filtroAtivo==='validadas') return r.status==='validada';
@@ -428,7 +459,7 @@ body{
   }
   function situacaoDe(r){
     if(r.status==='validada') return '<span class="sit val"><i></i>Validada pela professora</span>';
-    if(r.status==='corrigida') return '<span class="sit"><i></i>Corrigida pela IA</span>';
+    if(r.status==='corrigida') return '<span class="sit"><i></i>Corrigida pela <b>RedaON</b></span>';
     return '<span class="sit and"><i></i>Corrigindo\u2026</span>';
   }
   function eixoDe(r){ return r.eixo ? '<span class="eixo">'+escapeHtmlSimples(r.eixo)+'</span>' : ''; }
