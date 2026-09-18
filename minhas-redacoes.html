@@ -4,6 +4,10 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
+<!-- v5-1 (18/09/2026): no cartão herói fica só "Ver correção" (o segundo botão volta com o Lego);
+     a lista passa a ter uma coluna em qualquer largura, com largura de leitura no computador — em duas ou
+     três colunas as caixas ficavam desencontradas; os chips de filtro rolam de lado em celular, tablet e
+     computador. -->
 <!-- v5-0 (18/09/2026): piloto do redesenho. Fundo com aquarela nos cantos (gradientes, sem imagem e sem
      desfoque), título em caixa normal, filtros em chips que rolam de lado com os personagens (dupla, robô,
      Profa.), cartão herói para a última redação corrigida (eixo do tema, dica da competência mais fraca e as
@@ -46,8 +50,9 @@
 
 /* LISTA */
 .gridLista{display:grid;grid-template-columns:1fr;gap:.7rem;}
-@media(min-width:641px){.gridLista{grid-template-columns:repeat(2,1fr);}}
-@media(min-width:1024px){.gridLista{grid-template-columns:repeat(3,1fr);}}
+/* v5-1: uma coluna em qualquer largura. Em duas ou tr\u00eas colunas o cart\u00e3o her\u00f3i e as linhas
+   compactas ficavam com alturas diferentes e sobrava buraco branco no computador. */
+@media(min-width:641px){ .gridLista{ max-width:760px; } }
 .rCard{background:var(--surface);border:1px solid rgba(var(--borderRGB),.18);border-radius:14px;padding:.8rem .9rem;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;transition:border-color .2s;}
 .rCard .linhaTopo{display:flex;align-items:stretch;gap:.7rem;min-height:62px;}
 .rCard .colSelo{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding-top:.2rem;}
@@ -76,7 +81,7 @@
 .vazio{grid-column:1/-1;text-align:center;color:var(--muted);font-size:.85rem;padding:2.5rem 0;line-height:1.6;}
 .spinner{width:38px;height:38px;border:3px solid var(--surface2);border-top-color:var(--cyan);border-radius:50%;animation:girar .8s linear infinite;margin:2rem auto;}
 @keyframes girar{to{transform:rotate(360deg);}}
-@media(max-width:1023px) and (orientation:portrait){ #filtrosTopoLista{display:none;} }
+/* v5-1: os chips de filtro moram no topo em qualquer largura e rolam de lado */
 @media(min-width:1024px), (max-width:1023px) and (orientation:landscape){ #dockLista{display:none!important;} }
 
 /* ══════════ CORREÇÃO · o caderno de páginas (mockup v9) ══════════
@@ -191,10 +196,12 @@ body{
     var(--bg);
   background-attachment:fixed;
 }
-.cabLista{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 .7rem;}
+.cabLista{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 .7rem;max-width:760px;}
 .cabLista h1{margin:0;font-size:21px;font-weight:600;letter-spacing:-.01em;color:var(--text);}
 .cabLista #contagem{font-size:12.5px;color:var(--muted);}
-.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -1rem 1rem;padding:2px 1rem;}
+.chips{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;margin:0 -1rem 1rem;padding:2px 1rem;}
+@media(min-width:641px){ .chips{ max-width:760px; margin-left:0; margin-right:0; padding-left:0; padding-right:0; } }
 .chips::-webkit-scrollbar{display:none;}
 .chip{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;font-family:inherit;font-size:12.5px;font-weight:500;
   color:var(--text2);background:var(--surface);border:1px solid rgba(var(--borderRGB),.14);border-radius:99px;
@@ -447,7 +454,6 @@ body{
       +dicaDe(r)
       +'<div class="hAcoes">'
         +'<button type="button" class="bt" onclick="abrirCorrecao(\''+r.id+'\')">Ver corre\u00e7\u00e3o</button>'
-        +'<button type="button" class="bt sec" onclick="abrirReconstruir(\''+r.id+'\')">Reconstruir</button>'
       +'</div></div>';
   }
   function linhaRedacao(r){
@@ -459,8 +465,7 @@ body{
       +(r.nota?'<div class="lNota">'+r.nota+(r.status==='validada'?'<small>Validada</small>':'')+'</div>':'')
       +'</div>';
   }
-  /* "Reconstruir" abre, por enquanto, a Reescrita que j\u00e1 existe; no futuro abre o Lego da Reda\u00e7\u00e3o */
-  function abrirReconstruir(id){ abrirCorrecao(id); irPara(PG_RE); }
+  /* v5-1: o cart\u00e3o tem s\u00f3 "Ver corre\u00e7\u00e3o". O segundo bot\u00e3o volta quando o Lego da Reda\u00e7\u00e3o existir. */
 
   // \u2500\u2500\u2500 Corre\u00e7\u00e3o \u00b7 abrir e voltar \u2500\u2500\u2500
   function abrirCorrecao(id){
