@@ -359,8 +359,10 @@ body.aquarela{
 .hTema{ margin:.6rem 0 0; padding:0 16px; font-size:15px; font-weight:600; line-height:1.35; color:var(--text); }
 .hEixo{ padding:12px 16px 0; }
 .hAcoes{ display:flex; gap:10px; padding:14px 16px 16px; }
-.hAcoes .bt{ flex:1; font-family:inherit; font-size:13.5px; font-weight:600; padding:11px 0; border:0;
-  border-radius:13px; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
+.hAcoes{ align-items:center; }
+.hAcoes .bt{ flex:1 1 0; min-width:0; height:46px; padding:0; display:flex; align-items:center; justify-content:center;
+  font-family:inherit; font-size:13.5px; font-weight:600; border:0; border-radius:13px;
+  background:var(--cyan); color:var(--onCyan); cursor:pointer; }
 .hAcoes .bt.sec{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 .hAcoes .bt:active{ transform:scale(.98); }
 

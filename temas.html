@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-1 (18/09/2026): o toque no tema abre a capa cheia (selos, título sobre a imagem, dados, Escrever,
+     Preparar, Salvar e o resumo do tema quando existir material_apoio do eixo "entender"); a aba de
+     favoritos passa a se chamar "Salvos", com o aviso falando a mesma língua; os dois botões do herói
+     ficam do mesmo tamanho. -->
 <!-- v4-0 (18/09/2026): Temas com o kit do redesenho. Fundo aquarela, título em caixa normal, cinco abas em
      chips com carrossel (Todos, RedaON, Prova principal, Outras aplicações, Meus temas), Campo e Busca logo
      abaixo, cartão herói escolhido por regra (Tema da Semana não escrito > mais recente não escrito do campo
@@ -104,8 +108,10 @@
 .hPe{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:12px 16px 0; font-size:12px; color:var(--muted); }
 .hPe .jaFiz{ font-weight:600; color:var(--green); }
 .hAcoesT{ display:flex; gap:10px; padding:14px 16px 16px; }
-.hAcoesT .bt{ flex:1; font-family:inherit; font-size:13.5px; font-weight:600; padding:11px 0; border:0;
-  border-radius:13px; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
+.hAcoesT{ align-items:center; }
+.hAcoesT .bt{ flex:1 1 0; min-width:0; height:46px; padding:0; display:flex; align-items:center; justify-content:center;
+  font-family:inherit; font-size:13.5px; font-weight:600; line-height:1.2; border:0; border-radius:13px;
+  background:var(--cyan); color:var(--onCyan); cursor:pointer; }
 .hAcoesT .bt.sec{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 /* linha do tema */
 .gridTemas{ display:flex; flex-direction:column; gap:.6rem; }
@@ -126,6 +132,37 @@
 .tPin .fe{ width:20px; height:20px; vertical-align:0; }
 .tPin.on{ opacity:1; background:rgba(var(--cyanRGB),.12); }
 @media(min-width:641px){ .hTit{ font-size:20px; } .capaHeroi{ min-height:240px; } }
+
+/* v4-1 · capa cheia do tema */
+body.semRolar{ overflow:hidden; }
+.telaTema{ position:fixed; inset:0; z-index:90; background:var(--bg); overflow-y:auto;
+  transform:translateY(100%); transition:transform .28s ease; }
+.telaTema.on{ transform:translateY(0); }
+.telaTema #ttCorpo{ max-width:760px; margin:0 auto; }
+.ttCapa{ position:relative; min-height:260px; display:flex; flex-direction:column; justify-content:flex-end;
+  padding:16px 18px 18px; }
+.ttCapa .scrim{ position:absolute; left:0; right:0; top:20%; bottom:0;
+  background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.32) 45%, rgba(0,0,0,.70) 100%); }
+.ttVoltar{ position:absolute; top:14px; left:14px; width:36px; height:36px; border:0; border-radius:50%;
+  background:rgba(0,0,0,.38); color:#fff; font-size:22px; line-height:1; cursor:pointer; z-index:3; font-family:inherit; }
+.ttSalvar{ position:absolute; top:14px; right:14px; border:0; border-radius:99px; padding:8px 14px;
+  background:rgba(0,0,0,.38); color:#fff; font-size:12px; font-weight:600; cursor:pointer; z-index:3; font-family:inherit; }
+.ttSalvar.on{ background:#fff; color:#0a4a4b; }
+.ttCapa .hTit{ font-size:20px; }
+.ttCorpoInt{ padding:16px 18px 40px; }
+.ttMeta{ margin:0 0 14px; font-size:12.5px; color:var(--muted); }
+.ttCarregando{ font-size:12.5px; color:var(--muted); }
+.ttSinopse{ margin:16px 0 12px; font-size:14px; line-height:1.5; color:var(--text2); }
+.ttSinopse.vazio{ color:var(--muted); }
+.briefing{ display:flex; gap:10px; align-items:flex-start; background:var(--surface); border-radius:14px;
+  box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:11px 13px; margin-bottom:9px; }
+.briefing .fe{ width:20px; height:20px; flex:0 0 auto; vertical-align:0; }
+.briefing b{ display:block; font-size:12.5px; color:var(--text); margin-bottom:2px; }
+.briefing p{ margin:0; font-size:12.5px; line-height:1.45; color:var(--text2); }
+.ttEixos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.ttEixos span{ font-size:11px; font-weight:600; color:var(--cyan); background:rgba(var(--cyanRGB),.10);
+  padding:3px 9px; border-radius:99px; }
+@media(min-width:641px){ .ttCapa{ min-height:320px; } .ttCapa .hTit{ font-size:24px; } }
 </style>
 </head>
 <body class="aquarela">
@@ -165,6 +202,9 @@
   <p class="tit">Campo</p>
   <div id="gvCampoLista"></div>
 </div>
+
+<!-- v4-1 · CAPA CHEIA DO TEMA -->
+<div class="telaTema" id="telaTema"><div id="ttCorpo"></div></div>
 
 <!-- GAVETA: SUGERIR TEMA -->
 <div class="gvBg" id="gvSugestaoBg" onclick="fecharGaveta('gvSugestao')"></div>
@@ -209,7 +249,7 @@
     { id:'redaon',    rotulo:'RedaON' },
     { id:'principal', rotulo:'Prova principal' },
     { id:'outras',    rotulo:'Outras aplica\u00e7\u00f5es' },
-    { id:'meus',      rotulo:'Meus temas' }
+    { id:'meus',      rotulo:'Salvos' }
   ];
   /* campos: id do banco, nome de tela e as duas cores da capa composta (a arte entra depois) */
   var CAMPOS = [
@@ -350,8 +390,91 @@
         + '<button class="bt sec" onclick="event.stopPropagation();prepararTema(\''+t.id+'\')">Preparar</button>'
       + '</div></div>';
   }
-  /* a capa cheia entra na etapa seguinte; por ora o toque no card leva para preparar */
-  function abrirTema(id){ prepararTema(id); }
+  /* ─── v4-1 · capa cheia do tema (a "capa de filme") ─── */
+  var _apoioCache = {};
+  function temaPorId(id){ for (var i=0;i<TEMAS.length;i++){ if (TEMAS[i].id===id) return TEMAS[i]; } return null; }
+  var NOME_EIXO = { legislacao:'Legisla\u00e7\u00e3o', historia:'Hist\u00f3ria', especialistas:'Especialistas',
+    atualidades:'Atualidades e dados', literatura:'Literatura', filosofia:'Filosofia', cinema:'Cinema',
+    ciencia:'Ci\u00eancia', culturapop:'Cultura pop' };
+  async function buscarApoio(temaId){
+    if (_apoioCache[temaId]) return _apoioCache[temaId];
+    var fora = { entender:null, fichas:0, eixos:[] };
+    try {
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/material_apoio?tema_id=eq.' + temaId
+        + '&select=eixo,conteudo,estado', {});
+      if (res.ok) {
+        (await res.json()).forEach(function(m){
+          if (m.eixo === 'entender') { fora.entender = m.conteudo; return; }
+          var n = Array.isArray(m.conteudo) ? m.conteudo.length : 0;
+          if (n) { fora.fichas += n; fora.eixos.push({ eixo:m.eixo, n:n }); }
+        });
+      }
+    } catch(e) { console.warn('[temas] apoio', e); }
+    _apoioCache[temaId] = fora;
+    return fora;
+  }
+  function blocoBriefing(ico, titulo, texto){
+    if (!texto) return '';
+    return '<div class="briefing">' + feIcone(ico) + '<div><b>' + titulo + '</b><p>'
+      + escapeHtmlSimples(String(texto)) + '</p></div></div>';
+  }
+  async function abrirTema(id){
+    var t = temaPorId(id); if (!t) return;
+    var feito = MEUS_FEITOS[id];
+    var fav = MEUS_TEMAS_IDS.indexOf(id) >= 0;
+    var cores = coresCampo(t.campo);
+    var fundo = t.capa_url
+      ? 'background-image:url(' + t.capa_url + ');background-size:cover;background-position:center;'
+      : 'background:linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ');';
+    var tela = document.getElementById('telaTema');
+    document.getElementById('ttCorpo').innerHTML =
+      '<div class="ttCapa" style="' + fundo + '"><span class="scrim"></span>'
+      + '<button class="ttVoltar" onclick="fecharTema()" aria-label="Voltar">\u2039</button>'
+      + '<button class="ttSalvar' + (fav?' on':'') + '" id="ttSalvar" onclick="alternarFavorito(\''+id+'\', this)">'
+        + (fav?'Salvo':'Salvar') + '</button>'
+      + '<div class="hSelos">' + (t.semana_de?'<span class="dest">Tema da semana</span>':'')
+        + '<span>' + escapeHtmlSimples(nomeCampo(t.campo)) + '</span>'
+        + (feito?'<span>j\u00e1 escrevi' + (feito.nota?' \u00b7 '+feito.nota:'') + '</span>':'')
+      + '</div>'
+      + '<p class="hTit">' + escapeHtmlSimples(t.titulo) + '</p></div>'
+      + '<div class="ttCorpoInt">'
+        + '<p class="ttMeta">' + aplicacaoRotulo(t)
+          + (t.nivel?(' \u00b7 n\u00edvel ' + escapeHtmlSimples(String(t.nivel).toLowerCase())):'')
+          + ' <span id="ttFichas"></span></p>'
+        + '<div class="hAcoesT">'
+          + '<button class="bt" onclick="escreverTema(\''+id+'\')">Escrever</button>'
+          + '<button class="bt sec" onclick="prepararTema(\''+id+'\')">Preparar</button>'
+        + '</div>'
+        + '<div id="ttBriefing"><p class="ttCarregando">Buscando o resumo do tema\u2026</p></div>'
+      + '</div>';
+    tela.classList.add('on');
+    document.body.classList.add('semRolar');
+    var ap = await buscarApoio(id);
+    var fichas = document.getElementById('ttFichas');
+    if (fichas) fichas.textContent = ap.fichas ? ('\u00b7 ' + ap.fichas + (ap.fichas===1?' ficha':' fichas') + ' em ' + ap.eixos.length + (ap.eixos.length===1?' eixo':' eixos')) : '';
+    var alvo = document.getElementById('ttBriefing'); if (!alvo) return;
+    var e = ap.entender;
+    if (e && (e.recorte || e.banca || e.armadilhas)) {
+      alvo.innerHTML = '<p class="ttSinopse">' + escapeHtmlSimples(e.recorte || '') + '</p>'
+        + blocoBriefing('alvo','O que a banca espera', e.banca)
+        + blocoBriefing('escudo','Armadilhas', e.armadilhas);
+    } else {
+      alvo.innerHTML = '<p class="ttSinopse vazio">O resumo deste tema ainda est\u00e1 em prepara\u00e7\u00e3o. '
+        + 'Toque em Preparar para ver o material e o "Entender o tema".</p>';
+    }
+    if (ap.eixos.length) {
+      alvo.innerHTML += '<div class="ttEixos">' + ap.eixos.map(function(x){
+        return '<span>' + (NOME_EIXO[x.eixo] || x.eixo) + ' \u00b7 ' + x.n + '</span>';
+      }).join('') + '</div>';
+    }
+  }
+  function fecharTema(){
+    document.getElementById('telaTema').classList.remove('on');
+    document.body.classList.remove('semRolar');
+  }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && document.getElementById('telaTema').classList.contains('on')) fecharTema();
+  });
 
   // ─── Abas: chips com carrossel, do kit da base ───
   var _trilhoAbas = null;
@@ -454,7 +577,7 @@
     var grid = document.getElementById('gridTemas');
     var btnMais = document.getElementById('btnMais');
     if (lista.length === 0) {
-      var msgs = { meus: 'Voc\u00ea ainda n\u00e3o salvou nenhum tema.<br>Toque no alfinete dos cards para salvar.' };
+      var msgs = { meus: 'Voc\u00ea ainda n\u00e3o salvou nenhum tema.<br>Toque no alfinete dos cards para guardar aqui.' };
       grid.innerHTML = '<p class="vazio">' + (msgs[abaAtiva] || 'Nenhum tema neste filtro.<br>Tente outro campo ou outra aba.') + '</p>';
       btnMais.classList.add('hidden');
       return;
@@ -494,12 +617,20 @@
     definirTemaSelecionado(t);
     window.location.href = 'hub-preparacao.html';
   }
+  /* v4-1 · "Salvos" é do aluno. O que o professor destinar vira outra aba, quando existir. */
   function alternarFavorito(id, el){
     var i = MEUS_TEMAS_IDS.indexOf(id);
-    if (i >= 0) { MEUS_TEMAS_IDS.splice(i, 1); if (el) el.classList.remove('on'); toast('Removido dos seus temas'); }
-    else { MEUS_TEMAS_IDS.push(id); if (el) el.classList.add('on'); toast('\u{1F4CC} Tema salvo nos seus favoritos!'); }
+    var salvou = (i < 0);
+    if (salvou) MEUS_TEMAS_IDS.push(id); else MEUS_TEMAS_IDS.splice(i, 1);
+    if (el){
+      el.classList.toggle('on', salvou);
+      if (el.id === 'ttSalvar') el.textContent = salvou ? 'Salvo' : 'Salvar';
+    }
+    var bt = document.getElementById('ttSalvar');
+    if (bt && bt !== el){ bt.classList.toggle('on', salvou); bt.textContent = salvou ? 'Salvo' : 'Salvar'; }
+    toast(salvou ? 'Tema guardado em Salvos' : 'Tema retirado de Salvos');
     try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS)); } catch(e) {}
-    if (abaAtiva === 'meus') renderTemas();
+    renderTemas();
   }
 
   // ─── Sugerir tema ───
