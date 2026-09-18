@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-8 (18/09/2026): marca de versão no console e no atributo data-tela do <html>, para conferir em
+     segundos se o arquivo publicado é o novo. -->
 <!-- v4-7 (18/09/2026): Meus Temas passa a morar no banco (tabela temas_salvos), então abre em qualquer
      aparelho; o que estava só no navegador sobe na primeira abertura e a cópia local segue como resposta
      imediata e apoio sem rede. Abas na ordem Todos, RedaON, Meus Temas, ENEM Principal, ENEM Especiais,
@@ -281,6 +283,12 @@ body.semRolar{ overflow:hidden; }
 <script src="aluno-base-v6.js"></script>
 <script>
   if (typeof authGuard === 'function') { authGuard('aluno'); }
+
+  /* v4-8 · marca de versão para conferir se o arquivo no ar é o novo, sem poluir a tela.
+     No computador: F12, aba Console. No celular: dá para ver em chrome://inspect ou pelo
+     nome das abas (Todos, RedaON, Meus Temas, ENEM Principal, ENEM Especiais). */
+  console.info('RedaON · temas v4-8 · ' + new Date().toISOString().slice(0,10));
+  document.documentElement.setAttribute('data-tela', 'temas v4-8');
 
   // Professor que abrir esta página vai para o portal dele (decisão 6A)
   (function(){
