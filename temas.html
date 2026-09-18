@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-7 (18/09/2026): Meus Temas passa a morar no banco (tabela temas_salvos), então abre em qualquer
+     aparelho; o que estava só no navegador sobe na primeira abertura e a cópia local segue como resposta
+     imediata e apoio sem rede. Abas na ordem Todos, RedaON, Meus Temas, ENEM Principal, ENEM Especiais,
+     abrindo em Todos. -->
 <!-- v4-6 (18/09/2026): no computador os três cartões ficam lado a lado, sem rolagem lateral; a capa cheia
      deixa o menu lateral e a barra de baixo à vista; texto de chamada revisado; o disquete substitui a
      prancheta na lista; faxina de ids repetidos em Meus Temas (era o que travava o tema de teste);
@@ -297,17 +301,59 @@ body.semRolar{ overflow:hidden; }
   var TEMAS = [];
   var TEMA_SEMANA = null;
   var MEUS_TEMAS_IDS = [];
+  /* v4-7 · Meus Temas agora mora no banco (tabela temas_salvos), então abre em qualquer
+     aparelho. O que estava só no navegador é levado para o banco na primeira abertura, e o
+     navegador segue como cópia local, para a tela responder na hora e funcionar sem rede. */
   try { MEUS_TEMAS_IDS = JSON.parse(localStorage.getItem('redaon_temas_salvos') || '[]'); } catch(e) {}
-  /* v4-6 · faxina de uma vez: listas antigas podem ter o mesmo id repetido, e aí o tema
-     ficava preso em Meus Temas mesmo depois de desmarcar. */
   (function(){
     var vistos = {}, limpa = [];
     (MEUS_TEMAS_IDS || []).forEach(function(id){ if (id && !vistos[id]) { vistos[id] = true; limpa.push(id); } });
-    if (limpa.length !== (MEUS_TEMAS_IDS || []).length) {
-      MEUS_TEMAS_IDS = limpa;
-      try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(limpa)); } catch(e) {}
-    } else { MEUS_TEMAS_IDS = limpa; }
+    MEUS_TEMAS_IDS = limpa;
+    try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(limpa)); } catch(e) {}
   })();
+  function guardarLocal(){
+    try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS)); } catch(e) {}
+  }
+  function alunoId(){ try { return (typeof authGetUserId === 'function') ? authGetUserId() : null; } catch(e) { return null; } }
+  async function carregarMeusTemas(){
+    var uid = alunoId(); if (!uid) return;
+    try {
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos?aluno_id=eq.' + uid
+        + '&select=tema_id,origem&order=criado_em.desc', {});
+      if (!res.ok) return;                         /* sem rede, fica com a cópia local */
+      var doBanco = (await res.json()).map(function(r){ return r.tema_id; });
+      /* leva para o banco o que existia só neste aparelho */
+      var soLocal = MEUS_TEMAS_IDS.filter(function(id){ return doBanco.indexOf(id) < 0; });
+      if (soLocal.length) {
+        try {
+          await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos', {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
+            body: JSON.stringify(soLocal.map(function(id){ return { aluno_id:uid, tema_id:id, origem:'aluno' }; }))
+          });
+        } catch(e) { console.warn('[temas] subir salvos', e); }
+      }
+      var juntos = {}, lista = [];
+      doBanco.concat(soLocal).forEach(function(id){ if (id && !juntos[id]) { juntos[id] = true; lista.push(id); } });
+      MEUS_TEMAS_IDS = lista;
+      guardarLocal();
+    } catch(e) { console.warn('[temas] meus temas', e); }
+  }
+  async function gravarSalvo(id, salvou){
+    var uid = alunoId(); if (!uid) return;
+    try {
+      if (salvou) {
+        await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({ aluno_id:uid, tema_id:id, origem:'aluno' })
+        });
+      } else {
+        await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos?aluno_id=eq.' + uid
+          + '&tema_id=eq.' + id + '&origem=eq.aluno', { method:'DELETE' });
+      }
+    } catch(e) { console.warn('[temas] gravar salvo', e); }
+  }
   /* v4-0 · cinco abas. A aplicação de cada tema aparece como selo no próprio card. */
   /* v4-5 · ordem e nomes decididos com o Alan. O RedaON leva a marca dentro da cápsula. */
   var LOGO_R = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -315,11 +361,11 @@ body.semRolar{ overflow:hidden; }
     + '<rect width="40" height="40" rx="11" fill="#0a8c8d"/>'
     + '<text x="20" y="28" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="800" fill="#fff">R</text></svg>');
   var ABAS = [
+    { id:'todos',     rotulo:'Todos' },
     { id:'redaon',    rotulo:'RedaON', avatar:LOGO_R },
     { id:'meus',      rotulo:'Meus Temas' },
     { id:'principal', rotulo:'ENEM Principal' },
-    { id:'outras',    rotulo:'ENEM Especiais' },
-    { id:'todos',     rotulo:'Todos' }
+    { id:'outras',    rotulo:'ENEM Especiais' }
   ];
   /* campos: id do banco, nome de tela e as duas cores da capa composta (a arte entra depois) */
   var CAMPOS = [
@@ -339,7 +385,7 @@ body.semRolar{ overflow:hidden; }
   ];
   var MEUS_FEITOS = {};   /* tema_id -> { nota } do que o aluno já escreveu */
   var HEROI_ID = null;
-  var abaAtiva = 'redaon';
+  var abaAtiva = 'todos';
   var campoAtivo = 'todos';
   var textoBusca = '';
   var LIMITE = 12, mostrando = 12;
@@ -376,6 +422,7 @@ body.semRolar{ overflow:hidden; }
         return hoje >= ini && hoje < fim;
       }) || null;
       await carregarFeitos();
+      await carregarMeusTemas();
       montarHeroi();
       renderGvCampo();
       renderTemas();
@@ -735,7 +782,8 @@ body.semRolar{ overflow:hidden; }
     var bt = document.getElementById('ttSalvar');
     if (bt && bt !== el) bt.classList.toggle('on', salvou);
     toast(salvou ? 'Tema salvo em Meus Temas' : 'Tema retirado de Meus Temas');
-    try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS)); } catch(e) {}
+    guardarLocal();
+    gravarSalvo(id, salvou);      /* o banco é atualizado em segundo plano */
     renderTemas();
   }
 
