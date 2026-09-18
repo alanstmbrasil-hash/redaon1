@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-6 (18/09/2026): no computador os três cartões ficam lado a lado, sem rolagem lateral; a capa cheia
+     deixa o menu lateral e a barra de baixo à vista; texto de chamada revisado; o disquete substitui a
+     prancheta na lista; faxina de ids repetidos em Meus Temas (era o que travava o tema de teste);
+     texto de chamada na versão curta. -->
 <!-- v4-5 (18/09/2026): abas na ordem RedaON (com a marca na cápsula), Meus Temas, ENEM Principal, ENEM
      Especiais e Todos; o disquete fica vivo e a caixa muda de cor quando salvo, com aviso "Tema salvo em
      Meus Temas"; corrigido o tema que entrava em Meus Temas e não saía (id duplicado na lista); o texto de
@@ -148,8 +152,11 @@
 
 /* v4-1 · capa cheia do tema */
 body.semRolar{ overflow:hidden; }
-.telaTema{ position:fixed; inset:0; z-index:90; background:var(--bg); overflow-y:auto;
+.telaTema{ position:fixed; inset:0; z-index:43; background:var(--bg); overflow-y:auto;
   transform:translateY(100%); transition:transform .28s ease; }
+/* v4-6 · no computador a capa cheia respeita o menu lateral; no celular deixa a barra de baixo à vista */
+@media(min-width:1024px){ .telaTema{ left:232px; } }
+@media(max-width:1023px){ .telaTema .ttAcoes{ margin-bottom:96px; } }
 .telaTema.on{ transform:translateY(0); }
 .telaTema #ttCorpo{ max-width:760px; margin:0 auto; width:100%; }
 .ttCapa{ position:relative; min-height:340px; display:flex; flex-direction:column; justify-content:flex-end;
@@ -179,6 +186,13 @@ body.semRolar{ overflow:hidden; }
 .ttCarr::-webkit-scrollbar{ display:none; }
 .ttCx{ flex:0 0 63%; scroll-snap-align:start; background:var(--surface); border-radius:16px;
   box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:12px 13px; cursor:pointer; }
+@media(min-width:641px){
+  /* v4-6: no computador e no tablet os três cabem na tela; o texto quebra e o cartão cresce para baixo */
+  .ttCarr{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; overflow:visible;
+    margin:16px 0 0; padding:0; }
+  .ttCx{ flex:none; }
+  .ttCx span{ font-size:12px; }
+}
 .ttCx .fe{ width:24px; height:24px; display:block; margin-bottom:7px; vertical-align:0; }
 .ttCx b{ display:block; font-size:13px; color:var(--text); margin-bottom:6px; }
 .ttCx span{ display:block; position:relative; padding-left:9px; font-size:11.5px; line-height:1.35;
@@ -284,6 +298,16 @@ body.semRolar{ overflow:hidden; }
   var TEMA_SEMANA = null;
   var MEUS_TEMAS_IDS = [];
   try { MEUS_TEMAS_IDS = JSON.parse(localStorage.getItem('redaon_temas_salvos') || '[]'); } catch(e) {}
+  /* v4-6 · faxina de uma vez: listas antigas podem ter o mesmo id repetido, e aí o tema
+     ficava preso em Meus Temas mesmo depois de desmarcar. */
+  (function(){
+    var vistos = {}, limpa = [];
+    (MEUS_TEMAS_IDS || []).forEach(function(id){ if (id && !vistos[id]) { vistos[id] = true; limpa.push(id); } });
+    if (limpa.length !== (MEUS_TEMAS_IDS || []).length) {
+      MEUS_TEMAS_IDS = limpa;
+      try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(limpa)); } catch(e) {}
+    } else { MEUS_TEMAS_IDS = limpa; }
+  })();
   /* v4-0 · cinco abas. A aplicação de cada tema aparece como selo no próprio card. */
   /* v4-5 · ordem e nomes decididos com o Alan. O RedaON leva a marca dentro da cápsula. */
   var LOGO_R = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -501,10 +525,10 @@ body.semRolar{ overflow:hidden; }
           + '<button class="btSalvar' + (fav?' on':'') + '" id="ttSalvar" onclick="alternarFavorito(\''+id+'\', this)"'
             + ' aria-label="Salvar em Salvos" title="Salvar em Salvos">' + feIcone('disquete') + '</button>'
         + '</div>'
-        + '<p class="ttChamada">Antes de escrever, vale a pena clicar em <b>Preparar</b> em nossos materiais '
-          + 'especialmente feitos para voc\u00ea e que ir\u00e3o te ajudar a ' + feIcone('lampada') + ' <b>Entender o tema</b>, '
-          + 'te deixar com excelentes argumentos com o nosso ' + feIcone('livros') + ' <b>Material de apoio</b> '
-          + 'e fixar o conhecimento com nossas ' + feIcone('alvo') + ' <b>Atividades</b>.</p>'
+        + '<p class="ttChamada">Antes de <b>Escrever</b>, se <b>Preparar</b> ajuda: '
+          + feIcone('lampada') + ' <b>Entender o tema</b>, juntar argumentos no '
+          + feIcone('livros') + ' <b>Material de apoio</b> e treinar nas '
+          + feIcone('alvo') + ' <b>Atividades</b>.</p>'
         + '<div class="ttCarr" id="ttCarr"></div>'
         /* v4-5 · os botões vêm DEPOIS dos materiais, para o aluno ver o que existe antes de decidir */
         + '<div class="ttAcoes">'
@@ -674,8 +698,8 @@ body.semRolar{ overflow:hidden; }
           + ' <b class="eixo' + (t.campo?'':' vazio') + '">' + escapeHtmlSimples(nomeCampo(t.campo)) + '</b>'
           + (feito ? '<b class="jaFiz">j\u00e1 escrevi' + (feito.nota?' \u00b7 '+feito.nota:'') + '</b>' : '')
         + '</span></div>'
-        + '<button class="tPin' + (fav ? ' on' : '') + '" onclick="event.stopPropagation();alternarFavorito(\'' + t.id + '\', this)" aria-label="Salvar em Meus temas">'
-        + feIcone('prancheta') + '</button>'
+        + '<button class="tPin' + (fav ? ' on' : '') + '" onclick="event.stopPropagation();alternarFavorito(\'' + t.id + '\', this)" aria-label="Salvar em Meus Temas">'
+        + feIcone('disquete') + '</button>'
         + '</div>';
     }).join('');
     btnMais.classList.toggle('hidden', lista.length <= mostrando);
