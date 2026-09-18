@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-2 (18/09/2026): nomes de tela para os eixos 'argumentos' e 'intervencao', que existem no banco e
+     apareciam como apelido cru na capa cheia. -->
 <!-- v4-1 (18/09/2026): o toque no tema abre a capa cheia (selos, título sobre a imagem, dados, Escrever,
      Preparar, Salvar e o resumo do tema quando existir material_apoio do eixo "entender"); a aba de
      favoritos passa a se chamar "Salvos", com o aviso falando a mesma língua; os dois botões do herói
@@ -393,9 +395,11 @@ body.semRolar{ overflow:hidden; }
   /* ─── v4-1 · capa cheia do tema (a "capa de filme") ─── */
   var _apoioCache = {};
   function temaPorId(id){ for (var i=0;i<TEMAS.length;i++){ if (TEMAS[i].id===id) return TEMAS[i]; } return null; }
+  /* v4-2: o banco tem também 'argumentos' e 'intervencao' (fora dos nove eixos de repertório) */
   var NOME_EIXO = { legislacao:'Legisla\u00e7\u00e3o', historia:'Hist\u00f3ria', especialistas:'Especialistas',
     atualidades:'Atualidades e dados', literatura:'Literatura', filosofia:'Filosofia', cinema:'Cinema',
-    ciencia:'Ci\u00eancia', culturapop:'Cultura pop' };
+    ciencia:'Ci\u00eancia', culturapop:'Cultura pop', argumentos:'Argumentos', intervencao:'Interven\u00e7\u00e3o',
+    entender:'Entender o tema' };
   async function buscarApoio(temaId){
     if (_apoioCache[temaId]) return _apoioCache[temaId];
     var fora = { entender:null, fichas:0, eixos:[] };
