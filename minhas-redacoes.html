@@ -4,6 +4,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
+<!-- v5-4 (18/09/2026): o conteúdo passa a entrar pelo lado certo (faltava obrigar o navegador a desenhar
+     a posição inicial); os filtros dão a volta, como o carrossel do Início; no computador entram setas ‹ ›
+     ao lado dos chips e as setas do teclado também passam; os chips ficam centralizados na largura do cartão. -->
 <!-- v5-3 (18/09/2026): o arrastar de lado ganha o movimento de carrossel do Início — o conteúdo
      acompanha o dedo, sai e o novo entra do outro lado, com efeito elástico nas pontas; o gesto passa a
      valer na tela toda da lista, inclusive abaixo dos cartões, que era onde ele parava de responder em
@@ -210,8 +213,13 @@ body{
 .cabLista{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 .7rem;}
 .cabLista h1{margin:0;font-size:21px;font-weight:600;letter-spacing:-.01em;color:var(--text);}
 .cabLista #contagem{font-size:12.5px;color:var(--muted);}
+.linhaChips{display:flex;align-items:center;gap:6px;max-width:760px;margin:0 auto 1rem;}
+.setaF{display:none;flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid rgba(var(--borderRGB),.14);
+  background:var(--surface);color:var(--text2);font-size:20px;line-height:1;cursor:pointer;font-family:inherit;}
+.setaF:hover{background:rgba(var(--cyanRGB),.10);color:var(--cyan);}
+@media(min-width:641px){ .setaF{display:block;} .chips{justify-content:safe center;} }
 .chips{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;margin:0 -1rem 1rem;padding:2px 1rem;}
+  -webkit-overflow-scrolling:touch;margin:0 -1rem;padding:2px 1rem;flex:1 1 auto;min-width:0;}
 @media(min-width:641px){ .chips{ padding-left:0; padding-right:0; justify-content:center; justify-content:safe center; } }
 .chips::-webkit-scrollbar{display:none;}
 .chip{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;font-family:inherit;font-size:12.5px;font-weight:500;
@@ -276,7 +284,11 @@ body{
         <h1>Suas reda&ccedil;&otilde;es</h1>
         <span id="contagem"></span>
       </div>
-      <div class="chips" id="chipsFiltro"></div>
+      <div class="linhaChips">
+        <button type="button" class="setaF" id="setaEsq" onclick="passarFiltro(-1)" aria-label="Filtro anterior">&#8249;</button>
+        <div class="chips" id="chipsFiltro"></div>
+        <button type="button" class="setaF" id="setaDir" onclick="passarFiltro(1)" aria-label="Pr\u00f3ximo filtro">&#8250;</button>
+      </div>
       <div class="gridLista" id="gridLista"><div class="spinner" style="grid-column:1/-1;"></div></div>
     </div>
 
@@ -427,8 +439,7 @@ body{
   }
   function seguirDedo(dx){
     var g=pistaLista(); if(!g||_anim) return;
-    var i=indiceFiltro(), fim=(dx<0 && i===FILTROS.length-1)||(dx>0 && i===0);
-    var d=Math.max(-90,Math.min(90,dx*(fim?0.18:0.45)));
+    var d=Math.max(-90,Math.min(90,dx*0.45));
     g.style.transition='none';
     g.style.transform='translateX('+d+'px)';
     g.style.opacity=String(Math.max(.55,1-Math.abs(d)/240));
@@ -440,10 +451,16 @@ body{
     g.style.opacity='1';
   }
   function passarFiltro(dir){
-    var i=indiceFiltro(), j=i+dir;
+    if(_anim) return;
+    var i=indiceFiltro();
+    /* v5-4: d\u00e1 a volta, como o carrossel do In\u00edcio: depois do \u00faltimo vem o primeiro */
+    var j=(i+dir+FILTROS.length)%FILTROS.length;
+    irParaFiltro(j,dir);
+  }
+  function irParaFiltro(j,dir){
     var g=pistaLista();
-    if(j<0||j>=FILTROS.length){ soltarDedo(); return; }      /* ponta: volta sozinho */
-    if(!g){ setFiltro(FILTROS[j].id); centralizarChip(); return; }
+    if(_anim) return;
+    if(!g || FILTROS[j].id===filtroAtivo){ setFiltro(FILTROS[j].id); centralizarChip(); return; }
     _anim=true;
     g.style.transition='transform .16s ease, opacity .16s ease';
     g.style.transform='translateX('+(dir>0?-110:110)+'px)';
@@ -451,24 +468,32 @@ body{
     setTimeout(function(){
       setFiltro(FILTROS[j].id);
       centralizarChip();
+      /* p\u00f5e o conte\u00fado do outro lado SEM transi\u00e7\u00e3o e obriga o navegador a desenhar essa posi\u00e7\u00e3o
+         (o void offsetWidth). Sem isso o card voltava pelo mesmo lado por onde saiu. */
       g.style.transition='none';
       g.style.transform='translateX('+(dir>0?110:-110)+'px)';
       g.style.opacity='0';
-      requestAnimationFrame(function(){
-        g.style.transition='transform .22s ease, opacity .22s ease';
-        g.style.transform='translateX(0)';
-        g.style.opacity='1';
-        setTimeout(function(){ _anim=false; g.style.transition=''; }, 240);
-      });
+      void g.offsetWidth;
+      g.style.transition='transform .22s ease, opacity .22s ease';
+      g.style.transform='translateX(0)';
+      g.style.opacity='1';
+      setTimeout(function(){ _anim=false; g.style.transition=''; }, 240);
     },160);
   }
-  /* o toque nos chips tamb\u00e9m passa com o mesmo movimento */
+  /* o toque nos chips tamb\u00e9m passa com o mesmo movimento, num movimento s\u00f3 */
   function setFiltroChip(id){
-    var i=indiceFiltro(), j=0; FILTROS.forEach(function(f,k){ if(f.id===id) j=k; });
+    var i=indiceFiltro(), j=i; FILTROS.forEach(function(f,k){ if(f.id===id) j=k; });
     if(j===i) return;
-    passarFiltro(j>i?1:-1);
-    if(Math.abs(j-i)>1){ setTimeout(function(){ passarFiltro(j>i?1:-1); }, 200); }
+    irParaFiltro(j, j>i?1:-1);
   }
+  /* v5-4 · no computador as setas do teclado tamb\u00e9m passam os filtros */
+  document.addEventListener('keydown',function(e){
+    var lista=document.getElementById('viewLista');
+    if(!lista || lista.style.display==='none') return;
+    if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key==='ArrowRight') passarFiltro(1);
+    else if(e.key==='ArrowLeft') passarFiltro(-1);
+  });
   (function(){
     /* o gesto vale na tela inteira da lista, inclusive na parte vazia embaixo dos cart\u00f5es */
     var x0=null,y0=null,valendo=false,horizontal=false;
@@ -497,7 +522,7 @@ body{
       if(!valendo || x0===null){ return; }
       var t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
       valendo=false; x0=null;
-      if(!horizontal || Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.6){ soltarDedo(); return; }
+      if(!horizontal || Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.6){ soltarDedo(); return; }   /* arrasto curto: volta ao lugar */
       passarFiltro(dx<0?1:-1);
     },{passive:true});
     alvo.addEventListener('touchcancel',function(){ valendo=false; x0=null; soltarDedo(); },{passive:true});
