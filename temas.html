@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-4 (18/09/2026): capa cheia refeita — imagem de 340 px com apenas o selo e o tema; campo na linha de
+     dados junto do ENEM e do grupo; Salvar como ícone de disquete que fica marcado; chamada que convida a
+     ver o material; três cartões rolando de lado (Entender o tema, Material de apoio, Atividades) com prévia
+     do que tem dentro; Escrever e Preparar no rodapé, para o aluno ver o material antes de decidir. -->
+<!-- v4-3 (18/09/2026): corrigida a leitura do material. A coluna conteudo é texto com JSON dentro, e eu
+     tratava como lista, então a contagem de fichas e a fileira de eixos não apareciam na capa cheia. -->
 <!-- v4-2 (18/09/2026): nomes de tela para os eixos 'argumentos' e 'intervencao', que existem no banco e
      apareciam como apelido cru na capa cheia. -->
 <!-- v4-1 (18/09/2026): o toque no tema abre a capa cheia (selos, título sobre a imagem, dados, Escrever,
@@ -138,20 +144,47 @@
 /* v4-1 · capa cheia do tema */
 body.semRolar{ overflow:hidden; }
 .telaTema{ position:fixed; inset:0; z-index:90; background:var(--bg); overflow-y:auto;
-  transform:translateY(100%); transition:transform .28s ease; }
+  display:flex; flex-direction:column; transform:translateY(100%); transition:transform .28s ease; }
 .telaTema.on{ transform:translateY(0); }
-.telaTema #ttCorpo{ max-width:760px; margin:0 auto; }
-.ttCapa{ position:relative; min-height:260px; display:flex; flex-direction:column; justify-content:flex-end;
+.telaTema #ttCorpo{ max-width:760px; margin:0 auto; width:100%; flex:1 0 auto; display:flex; flex-direction:column; }
+.ttCorpoInt{ flex:1 0 auto; }
+.ttCapa{ position:relative; min-height:340px; display:flex; flex-direction:column; justify-content:flex-end;
   padding:16px 18px 18px; }
 .ttCapa .scrim{ position:absolute; left:0; right:0; top:20%; bottom:0;
   background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.32) 45%, rgba(0,0,0,.70) 100%); }
 .ttVoltar{ position:absolute; top:14px; left:14px; width:36px; height:36px; border:0; border-radius:50%;
   background:rgba(0,0,0,.38); color:#fff; font-size:22px; line-height:1; cursor:pointer; z-index:3; font-family:inherit; }
-.ttSalvar{ position:absolute; top:14px; right:14px; border:0; border-radius:99px; padding:8px 14px;
-  background:rgba(0,0,0,.38); color:#fff; font-size:12px; font-weight:600; cursor:pointer; z-index:3; font-family:inherit; }
-.ttSalvar.on{ background:#fff; color:#0a4a4b; }
+/* v4-4 · Salvar é ícone, na linha dos dados, e fica marcado quando salvo */
+.ttDados{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12.5px; color:var(--muted); }
+.ttDados b{ color:var(--text); font-weight:600; }
+.ttDados b.campoTx{ color:var(--cyan); }
+.btSalvar{ flex:0 0 auto; width:40px; height:40px; border:1px solid rgba(var(--borderRGB),.14); border-radius:12px;
+  background:var(--surface); display:grid; place-items:center; cursor:pointer; }
+.btSalvar .fe{ width:22px; height:22px; vertical-align:0; opacity:.55; }
+.btSalvar.on{ background:rgba(var(--cyanRGB),.14); border-color:transparent; box-shadow:inset 0 0 0 1.5px var(--cyan); }
+.btSalvar.on .fe{ opacity:1; }
 .ttCapa .hTit{ font-size:20px; }
-.ttCorpoInt{ padding:16px 18px 40px; }
+.ttCorpoInt{ padding:16px 18px 24px; }
+/* v4-4 · chamada e carrossel dos três cartões */
+.ttChamada{ margin:14px 0 0; font-size:13.5px; line-height:1.5; color:var(--text2); }
+.ttCarr{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
+  margin:14px -18px 0; padding:2px 18px 4px; }
+.ttCarr::-webkit-scrollbar{ display:none; }
+.ttCx{ flex:0 0 63%; scroll-snap-align:start; background:var(--surface); border-radius:16px;
+  box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:12px 13px; cursor:pointer; }
+.ttCx .fe{ width:24px; height:24px; display:block; margin-bottom:7px; vertical-align:0; }
+.ttCx b{ display:block; font-size:13px; color:var(--text); margin-bottom:6px; }
+.ttCx span{ display:block; position:relative; padding-left:9px; font-size:11.5px; line-height:1.35;
+  color:var(--muted); margin-bottom:4px; }
+.ttCx span:before{ content:""; position:absolute; left:0; top:6px; width:3px; height:3px; border-radius:50%; background:var(--cyan); }
+/* v4-4 · os botões vão para o rodapé, para o aluno ver o material antes de decidir */
+.ttRodape{ position:sticky; bottom:0; background:var(--bg); border-top:1px solid rgba(var(--borderRGB),.12);
+  padding:12px 18px calc(12px + env(safe-area-inset-bottom)); }
+.ttRodapeIn{ display:flex; align-items:center; gap:10px; max-width:760px; margin:0 auto; }
+.ttRodapeIn .bt{ flex:1 1 0; min-width:0; height:48px; display:flex; align-items:center; justify-content:center;
+  border:0; border-radius:13px; background:var(--cyan); color:var(--onCyan); font-family:inherit;
+  font-size:14px; font-weight:600; cursor:pointer; }
+.ttRodapeIn .bt.sec{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 .ttMeta{ margin:0 0 14px; font-size:12.5px; color:var(--muted); }
 .ttCarregando{ font-size:12.5px; color:var(--muted); }
 .ttSinopse{ margin:16px 0 12px; font-size:14px; line-height:1.5; color:var(--text2); }
@@ -161,10 +194,11 @@ body.semRolar{ overflow:hidden; }
 .briefing .fe{ width:20px; height:20px; flex:0 0 auto; vertical-align:0; }
 .briefing b{ display:block; font-size:12.5px; color:var(--text); margin-bottom:2px; }
 .briefing p{ margin:0; font-size:12.5px; line-height:1.45; color:var(--text2); }
-.ttEixos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.ttRot{ margin:18px 0 8px; font-size:12.5px; color:var(--muted); }
+.ttEixos{ display:flex; flex-wrap:wrap; gap:6px; }
 .ttEixos span{ font-size:11px; font-weight:600; color:var(--cyan); background:rgba(var(--cyanRGB),.10);
   padding:3px 9px; border-radius:99px; }
-@media(min-width:641px){ .ttCapa{ min-height:320px; } .ttCapa .hTit{ font-size:24px; } }
+@media(min-width:641px){ .ttCapa{ min-height:400px; } .ttCapa .hTit{ font-size:24px; } .ttCx{ flex:0 0 42%; } }
 </style>
 </head>
 <body class="aquarela">
@@ -400,6 +434,13 @@ body.semRolar{ overflow:hidden; }
     atualidades:'Atualidades e dados', literatura:'Literatura', filosofia:'Filosofia', cinema:'Cinema',
     ciencia:'Ci\u00eancia', culturapop:'Cultura pop', argumentos:'Argumentos', intervencao:'Interven\u00e7\u00e3o',
     entender:'Entender o tema' };
+  /* v4-3 · a coluna conteudo é TEXTO com JSON dentro, então precisa de JSON.parse.
+     Era por isso que a contagem de fichas e a fileira de eixos não apareciam. */
+  function lerConteudo(c){
+    if (c == null) return null;
+    if (typeof c === 'object') return c;
+    try { return JSON.parse(c); } catch(e) { return null; }
+  }
   async function buscarApoio(temaId){
     if (_apoioCache[temaId]) return _apoioCache[temaId];
     var fora = { entender:null, fichas:0, eixos:[] };
@@ -408,10 +449,12 @@ body.semRolar{ overflow:hidden; }
         + '&select=eixo,conteudo,estado', {});
       if (res.ok) {
         (await res.json()).forEach(function(m){
-          if (m.eixo === 'entender') { fora.entender = m.conteudo; return; }
-          var n = Array.isArray(m.conteudo) ? m.conteudo.length : 0;
+          var dado = lerConteudo(m.conteudo);
+          if (m.eixo === 'entender') { fora.entender = dado; return; }
+          var n = Array.isArray(dado) ? dado.length : (dado ? 1 : 0);
           if (n) { fora.fichas += n; fora.eixos.push({ eixo:m.eixo, n:n }); }
         });
+        fora.eixos.sort(function(a,b){ return b.n - a.n; });
       }
     } catch(e) { console.warn('[temas] apoio', e); }
     _apoioCache[temaId] = fora;
@@ -430,47 +473,75 @@ body.semRolar{ overflow:hidden; }
     var fundo = t.capa_url
       ? 'background-image:url(' + t.capa_url + ');background-size:cover;background-position:center;'
       : 'background:linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ');';
+    var grupo = !t.ano_enem ? 'RedaON'
+      : ((t.aplicacao||'').toLowerCase()==='regular' ? 'Prova principal' : 'Outras aplica\u00e7\u00f5es');
     var tela = document.getElementById('telaTema');
     document.getElementById('ttCorpo').innerHTML =
+      /* v4-4 · sobre a imagem, só o selo e o tema. O campo desceu para a linha de dados. */
       '<div class="ttCapa" style="' + fundo + '"><span class="scrim"></span>'
       + '<button class="ttVoltar" onclick="fecharTema()" aria-label="Voltar">\u2039</button>'
-      + '<button class="ttSalvar' + (fav?' on':'') + '" id="ttSalvar" onclick="alternarFavorito(\''+id+'\', this)">'
-        + (fav?'Salvo':'Salvar') + '</button>'
-      + '<div class="hSelos">' + (t.semana_de?'<span class="dest">Tema da semana</span>':'')
-        + '<span>' + escapeHtmlSimples(nomeCampo(t.campo)) + '</span>'
+      + ((t.semana_de || feito) ? ('<div class="hSelos">'
+        + (t.semana_de?'<span class="dest">Tema da semana</span><span>'+semanaRotulo(t)+'</span>':'')
         + (feito?'<span>j\u00e1 escrevi' + (feito.nota?' \u00b7 '+feito.nota:'') + '</span>':'')
-      + '</div>'
+        + '</div>') : '')
       + '<p class="hTit">' + escapeHtmlSimples(t.titulo) + '</p></div>'
       + '<div class="ttCorpoInt">'
-        + '<p class="ttMeta">' + aplicacaoRotulo(t)
-          + (t.nivel?(' \u00b7 n\u00edvel ' + escapeHtmlSimples(String(t.nivel).toLowerCase())):'')
-          + ' <span id="ttFichas"></span></p>'
-        + '<div class="hAcoesT">'
-          + '<button class="bt" onclick="escreverTema(\''+id+'\')">Escrever</button>'
-          + '<button class="bt sec" onclick="prepararTema(\''+id+'\')">Preparar</button>'
+        + '<div class="ttDados"><span><b>' + aplicacaoRotulo(t) + '</b> \u00b7 ' + grupo
+          + ' \u00b7 <b class="campoTx">' + escapeHtmlSimples(nomeCampo(t.campo)) + '</b></span>'
+          + '<button class="btSalvar' + (fav?' on':'') + '" id="ttSalvar" onclick="alternarFavorito(\''+id+'\', this)"'
+            + ' aria-label="Salvar em Salvos" title="Salvar em Salvos">' + feIcone('disquete') + '</button>'
         + '</div>'
-        + '<div id="ttBriefing"><p class="ttCarregando">Buscando o resumo do tema\u2026</p></div>'
-      + '</div>';
+        + '<p class="ttChamada" id="ttChamada">Antes de escrever, veja o que preparamos para este tema.</p>'
+        + '<div class="ttCarr" id="ttCarr"></div>'
+      + '</div>'
+      + '<div class="ttRodape"><div class="ttRodapeIn">'
+        + '<button class="bt" onclick="escreverTema(\''+id+'\')">Escrever</button>'
+        + '<button class="bt sec" onclick="prepararTema(\''+id+'\')">Preparar</button>'
+      + '</div></div>';
     tela.classList.add('on');
     document.body.classList.add('semRolar');
+    tela.scrollTop = 0;
     var ap = await buscarApoio(id);
-    var fichas = document.getElementById('ttFichas');
-    if (fichas) fichas.textContent = ap.fichas ? ('\u00b7 ' + ap.fichas + (ap.fichas===1?' ficha':' fichas') + ' em ' + ap.eixos.length + (ap.eixos.length===1?' eixo':' eixos')) : '';
-    var alvo = document.getElementById('ttBriefing'); if (!alvo) return;
-    var e = ap.entender;
-    if (e && (e.recorte || e.banca || e.armadilhas)) {
-      alvo.innerHTML = '<p class="ttSinopse">' + escapeHtmlSimples(e.recorte || '') + '</p>'
-        + blocoBriefing('alvo','O que a banca espera', e.banca)
-        + blocoBriefing('escudo','Armadilhas', e.armadilhas);
-    } else {
-      alvo.innerHTML = '<p class="ttSinopse vazio">O resumo deste tema ainda est\u00e1 em prepara\u00e7\u00e3o. '
-        + 'Toque em Preparar para ver o material e o "Entender o tema".</p>';
+    montarCartoes(id, ap);
+  }
+  /* v4-4 · os três cartões rolam de lado e dizem o que tem dentro de cada parte */
+  function montarCartoes(id, ap){
+    var alvo = document.getElementById('ttCarr'); if (!alvo) return;
+    var e = ap.entender || {};
+    var temEntender = !!(e.recorte || e.banca || e.armadilhas);
+    var eixos = ap.eixos.slice(0,3).map(function(x){ return NOME_EIXO[x.eixo] || x.eixo; }).join(', ');
+
+    var chamada = document.getElementById('ttChamada');
+    if (chamada){
+      var partes = [];
+      if (temEntender) partes.push('o recorte que a banca pediu');
+      if (ap.fichas) partes.push(ap.fichas + (ap.fichas===1?' ficha com fonte':' fichas com fonte'));
+      partes.push('atividades das compet\u00eancias');
+      chamada.textContent = 'Antes de escrever, veja ' + partes.join(', ') + '.';
     }
-    if (ap.eixos.length) {
-      alvo.innerHTML += '<div class="ttEixos">' + ap.eixos.map(function(x){
-        return '<span>' + (NOME_EIXO[x.eixo] || x.eixo) + ' \u00b7 ' + x.n + '</span>';
-      }).join('') + '</div>';
+
+    function cartao(ico, titulo, linhas, acao){
+      return '<div class="ttCx" onclick="' + acao + '">' + feIcone(ico)
+        + '<b>' + titulo + '</b>'
+        + linhas.filter(Boolean).map(function(l){ return '<span>' + l + '</span>'; }).join('')
+        + '</div>';
     }
+    var abrir = 'prepararTema(\'' + id + '\')';
+    alvo.innerHTML =
+      cartao('lampada','Entender o tema', temEntender
+        ? [ 'Recorte: o que o tema pede e o que n\u00e3o pede',
+            e.banca ? 'O que a banca espera na corre\u00e7\u00e3o' : '',
+            e.armadilhas ? 'Armadilhas que fazem perder ponto' : '' ]
+        : [ 'Recorte: o que o tema pede e o que n\u00e3o pede',
+            'O que a banca espera na corre\u00e7\u00e3o',
+            'Armadilhas que fazem perder ponto' ], abrir)
+      + cartao('livros','Material de apoio', ap.fichas
+        ? [ ap.fichas + (ap.fichas===1?' ficha':' fichas') + ' em ' + ap.eixos.length + (ap.eixos.length===1?' eixo':' eixos'),
+            eixos, 'Cada uma com fonte e como usar' ]
+        : [ 'Reposit\u00f3rio de repert\u00f3rio do tema', 'Com fonte e como usar na reda\u00e7\u00e3o',
+            'Em prepara\u00e7\u00e3o pela PROfa' ], abrir)
+      + cartao('alvo','Atividades',
+        [ 'Flashcards do tema', 'Quiz das compet\u00eancias', 'Foco no que puxa sua nota para baixo' ], abrir);
   }
   function fecharTema(){
     document.getElementById('telaTema').classList.remove('on');
@@ -628,10 +699,9 @@ body.semRolar{ overflow:hidden; }
     if (salvou) MEUS_TEMAS_IDS.push(id); else MEUS_TEMAS_IDS.splice(i, 1);
     if (el){
       el.classList.toggle('on', salvou);
-      if (el.id === 'ttSalvar') el.textContent = salvou ? 'Salvo' : 'Salvar';
     }
     var bt = document.getElementById('ttSalvar');
-    if (bt && bt !== el){ bt.classList.toggle('on', salvou); bt.textContent = salvou ? 'Salvo' : 'Salvar'; }
+    if (bt && bt !== el) bt.classList.toggle('on', salvou);
     toast(salvou ? 'Tema guardado em Salvos' : 'Tema retirado de Salvos');
     try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS)); } catch(e) {}
     renderTemas();
