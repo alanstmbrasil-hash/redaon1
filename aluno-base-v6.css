@@ -363,7 +363,9 @@ body.aquarela{
 .hAcoes .bt{ flex:1 1 0; min-width:0; height:46px; padding:0; display:flex; align-items:center; justify-content:center;
   font-family:inherit; font-size:13.5px; font-weight:600; border:0; border-radius:13px;
   background:var(--cyan); color:var(--onCyan); cursor:pointer; }
-.hAcoes .bt.sec{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+/* v6-14: o modificador se chamava .sec e colidia com a classe .sec de cabeçalho de seção
+   (que tem margin de 1.25rem), o que empurrava o botão secundário para baixo. */
+.hAcoes .bt.secundario{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 .hAcoes .bt:active{ transform:scale(.98); }
 
 /* situação: ponto de cor + texto */

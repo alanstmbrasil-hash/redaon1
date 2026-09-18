@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-5 (18/09/2026): abas na ordem RedaON (com a marca na cápsula), Meus Temas, ENEM Principal, ENEM
+     Especiais e Todos; o disquete fica vivo e a caixa muda de cor quando salvo, com aviso "Tema salvo em
+     Meus Temas"; corrigido o tema que entrava em Meus Temas e não saía (id duplicado na lista); o texto de
+     chamada ficou fixo, com Preparar, Entender o tema, Material de apoio e Atividades em negrito; Escrever e
+     Preparar passaram para depois dos cartões; o painel de conteúdo sobe na frente da imagem. -->
 <!-- v4-4 (18/09/2026): capa cheia refeita — imagem de 340 px com apenas o selo e o tema; campo na linha de
      dados junto do ENEM e do grupo; Salvar como ícone de disquete que fica marcado; chamada que convida a
      ver o material; três cartões rolando de lado (Entender o tema, Material de apoio, Atividades) com prévia
@@ -120,7 +125,7 @@
 .hAcoesT .bt{ flex:1 1 0; min-width:0; height:46px; padding:0; display:flex; align-items:center; justify-content:center;
   font-family:inherit; font-size:13.5px; font-weight:600; line-height:1.2; border:0; border-radius:13px;
   background:var(--cyan); color:var(--onCyan); cursor:pointer; }
-.hAcoesT .bt.sec{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.hAcoesT .bt.secundario{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 /* linha do tema */
 .gridTemas{ display:flex; flex-direction:column; gap:.6rem; }
 .linhaTema{ display:flex; align-items:center; gap:.75rem; background:var(--surface); border-radius:16px;
@@ -144,12 +149,11 @@
 /* v4-1 · capa cheia do tema */
 body.semRolar{ overflow:hidden; }
 .telaTema{ position:fixed; inset:0; z-index:90; background:var(--bg); overflow-y:auto;
-  display:flex; flex-direction:column; transform:translateY(100%); transition:transform .28s ease; }
+  transform:translateY(100%); transition:transform .28s ease; }
 .telaTema.on{ transform:translateY(0); }
-.telaTema #ttCorpo{ max-width:760px; margin:0 auto; width:100%; flex:1 0 auto; display:flex; flex-direction:column; }
-.ttCorpoInt{ flex:1 0 auto; }
+.telaTema #ttCorpo{ max-width:760px; margin:0 auto; width:100%; }
 .ttCapa{ position:relative; min-height:340px; display:flex; flex-direction:column; justify-content:flex-end;
-  padding:16px 18px 18px; }
+  padding:16px 18px 46px; }   /* v4-5: folga embaixo para o painel subir sem cobrir o título */
 .ttCapa .scrim{ position:absolute; left:0; right:0; top:20%; bottom:0;
   background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.32) 45%, rgba(0,0,0,.70) 100%); }
 .ttVoltar{ position:absolute; top:14px; left:14px; width:36px; height:36px; border:0; border-radius:50%;
@@ -160,15 +164,18 @@ body.semRolar{ overflow:hidden; }
 .ttDados b.campoTx{ color:var(--cyan); }
 .btSalvar{ flex:0 0 auto; width:40px; height:40px; border:1px solid rgba(var(--borderRGB),.14); border-radius:12px;
   background:var(--surface); display:grid; place-items:center; cursor:pointer; }
-.btSalvar .fe{ width:22px; height:22px; vertical-align:0; opacity:.55; }
-.btSalvar.on{ background:rgba(var(--cyanRGB),.14); border-color:transparent; box-shadow:inset 0 0 0 1.5px var(--cyan); }
-.btSalvar.on .fe{ opacity:1; }
+.btSalvar .fe{ width:22px; height:22px; vertical-align:0; }
+.btSalvar.on{ background:var(--cyan); border-color:transparent; }
 .ttCapa .hTit{ font-size:20px; }
-.ttCorpoInt{ padding:16px 18px 24px; }
+/* v4-5 · a imagem fica inteira e o painel sobe na frente dela */
+.ttCorpoInt{ position:relative; margin-top:-26px; padding:20px 18px 34px; background:var(--bg);
+  border-radius:24px 24px 0 0; box-shadow:0 -6px 20px rgba(var(--borderRGB),.10); }
 /* v4-4 · chamada e carrossel dos três cartões */
-.ttChamada{ margin:14px 0 0; font-size:13.5px; line-height:1.5; color:var(--text2); }
+.ttChamada{ margin:14px 0 0; font-size:13.5px; line-height:1.6; color:var(--text2); }
+.ttChamada b{ font-weight:700; color:var(--text); }
+.ttChamada .fe{ width:17px; height:17px; vertical-align:-.25em; }
 .ttCarr{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
-  margin:14px -18px 0; padding:2px 18px 4px; }
+  margin:16px -18px 0; padding:2px 18px 4px; }
 .ttCarr::-webkit-scrollbar{ display:none; }
 .ttCx{ flex:0 0 63%; scroll-snap-align:start; background:var(--surface); border-radius:16px;
   box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:12px 13px; cursor:pointer; }
@@ -178,13 +185,11 @@ body.semRolar{ overflow:hidden; }
   color:var(--muted); margin-bottom:4px; }
 .ttCx span:before{ content:""; position:absolute; left:0; top:6px; width:3px; height:3px; border-radius:50%; background:var(--cyan); }
 /* v4-4 · os botões vão para o rodapé, para o aluno ver o material antes de decidir */
-.ttRodape{ position:sticky; bottom:0; background:var(--bg); border-top:1px solid rgba(var(--borderRGB),.12);
-  padding:12px 18px calc(12px + env(safe-area-inset-bottom)); }
-.ttRodapeIn{ display:flex; align-items:center; gap:10px; max-width:760px; margin:0 auto; }
-.ttRodapeIn .bt{ flex:1 1 0; min-width:0; height:48px; display:flex; align-items:center; justify-content:center;
+.ttAcoes{ display:flex; align-items:stretch; gap:10px; margin-top:20px; }
+.ttAcoes .bt{ flex:1 1 0; min-width:0; height:48px; display:flex; align-items:center; justify-content:center;
   border:0; border-radius:13px; background:var(--cyan); color:var(--onCyan); font-family:inherit;
-  font-size:14px; font-weight:600; cursor:pointer; }
-.ttRodapeIn .bt.sec{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+  font-size:14px; font-weight:600; line-height:1; cursor:pointer; }
+.ttAcoes .bt.secundario{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 .ttMeta{ margin:0 0 14px; font-size:12.5px; color:var(--muted); }
 .ttCarregando{ font-size:12.5px; color:var(--muted); }
 .ttSinopse{ margin:16px 0 12px; font-size:14px; line-height:1.5; color:var(--text2); }
@@ -280,12 +285,17 @@ body.semRolar{ overflow:hidden; }
   var MEUS_TEMAS_IDS = [];
   try { MEUS_TEMAS_IDS = JSON.parse(localStorage.getItem('redaon_temas_salvos') || '[]'); } catch(e) {}
   /* v4-0 · cinco abas. A aplicação de cada tema aparece como selo no próprio card. */
+  /* v4-5 · ordem e nomes decididos com o Alan. O RedaON leva a marca dentro da cápsula. */
+  var LOGO_R = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">'
+    + '<rect width="40" height="40" rx="11" fill="#0a8c8d"/>'
+    + '<text x="20" y="28" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="800" fill="#fff">R</text></svg>');
   var ABAS = [
-    { id:'todos',     rotulo:'Todos' },
-    { id:'redaon',    rotulo:'RedaON' },
-    { id:'principal', rotulo:'Prova principal' },
-    { id:'outras',    rotulo:'Outras aplica\u00e7\u00f5es' },
-    { id:'meus',      rotulo:'Salvos' }
+    { id:'redaon',    rotulo:'RedaON', avatar:LOGO_R },
+    { id:'meus',      rotulo:'Meus Temas' },
+    { id:'principal', rotulo:'ENEM Principal' },
+    { id:'outras',    rotulo:'ENEM Especiais' },
+    { id:'todos',     rotulo:'Todos' }
   ];
   /* campos: id do banco, nome de tela e as duas cores da capa composta (a arte entra depois) */
   var CAMPOS = [
@@ -305,7 +315,7 @@ body.semRolar{ overflow:hidden; }
   ];
   var MEUS_FEITOS = {};   /* tema_id -> { nota } do que o aluno já escreveu */
   var HEROI_ID = null;
-  var abaAtiva = 'todos';
+  var abaAtiva = 'redaon';
   var campoAtivo = 'todos';
   var textoBusca = '';
   var LIMITE = 12, mostrando = 12;
@@ -423,7 +433,7 @@ body.semRolar{ overflow:hidden; }
         + (feito?'<span class="jaFiz">j\u00e1 escrevi'+(feito.nota?' \u00b7 '+feito.nota:'')+'</span>':'')+'</div>'
       + '<div class="hAcoesT">'
         + '<button class="bt" onclick="event.stopPropagation();escreverTema(\''+t.id+'\')">Escrever</button>'
-        + '<button class="bt sec" onclick="event.stopPropagation();prepararTema(\''+t.id+'\')">Preparar</button>'
+        + '<button class="bt secundario" onclick="event.stopPropagation();prepararTema(\''+t.id+'\')">Preparar</button>'
       + '</div></div>';
   }
   /* ─── v4-1 · capa cheia do tema (a "capa de filme") ─── */
@@ -491,13 +501,17 @@ body.semRolar{ overflow:hidden; }
           + '<button class="btSalvar' + (fav?' on':'') + '" id="ttSalvar" onclick="alternarFavorito(\''+id+'\', this)"'
             + ' aria-label="Salvar em Salvos" title="Salvar em Salvos">' + feIcone('disquete') + '</button>'
         + '</div>'
-        + '<p class="ttChamada" id="ttChamada">Antes de escrever, veja o que preparamos para este tema.</p>'
+        + '<p class="ttChamada">Antes de escrever, vale a pena clicar em <b>Preparar</b> em nossos materiais '
+          + 'especialmente feitos para voc\u00ea e que ir\u00e3o te ajudar a ' + feIcone('lampada') + ' <b>Entender o tema</b>, '
+          + 'te deixar com excelentes argumentos com o nosso ' + feIcone('livros') + ' <b>Material de apoio</b> '
+          + 'e fixar o conhecimento com nossas ' + feIcone('alvo') + ' <b>Atividades</b>.</p>'
         + '<div class="ttCarr" id="ttCarr"></div>'
-      + '</div>'
-      + '<div class="ttRodape"><div class="ttRodapeIn">'
-        + '<button class="bt" onclick="escreverTema(\''+id+'\')">Escrever</button>'
-        + '<button class="bt sec" onclick="prepararTema(\''+id+'\')">Preparar</button>'
-      + '</div></div>';
+        /* v4-5 · os botões vêm DEPOIS dos materiais, para o aluno ver o que existe antes de decidir */
+        + '<div class="ttAcoes">'
+          + '<button class="bt" onclick="escreverTema(\''+id+'\')">Escrever</button>'
+          + '<button class="bt secundario" onclick="prepararTema(\''+id+'\')">Preparar</button>'
+        + '</div>'
+      + '</div>';
     tela.classList.add('on');
     document.body.classList.add('semRolar');
     tela.scrollTop = 0;
@@ -510,15 +524,6 @@ body.semRolar{ overflow:hidden; }
     var e = ap.entender || {};
     var temEntender = !!(e.recorte || e.banca || e.armadilhas);
     var eixos = ap.eixos.slice(0,3).map(function(x){ return NOME_EIXO[x.eixo] || x.eixo; }).join(', ');
-
-    var chamada = document.getElementById('ttChamada');
-    if (chamada){
-      var partes = [];
-      if (temEntender) partes.push('o recorte que a banca pediu');
-      if (ap.fichas) partes.push(ap.fichas + (ap.fichas===1?' ficha com fonte':' fichas com fonte'));
-      partes.push('atividades das compet\u00eancias');
-      chamada.textContent = 'Antes de escrever, veja ' + partes.join(', ') + '.';
-    }
 
     function cartao(ico, titulo, linhas, acao){
       return '<div class="ttCx" onclick="' + acao + '">' + feIcone(ico)
@@ -556,7 +561,7 @@ body.semRolar{ overflow:hidden; }
   function montarAbas(){
     _trilhoAbas = trilhoFiltros({
       alvo:'chipsAbas', pista:'pistaTemas', area:'conteudo',
-      itens: ABAS.map(function(a){ return { id:a.id, rotulo:a.rotulo }; }),
+      itens: ABAS.map(function(a){ return { id:a.id, rotulo:a.rotulo, avatar:a.avatar }; }),
       ativo: abaAtiva,
       aoTrocar: function(id){ abaAtiva=id; mostrando=LIMITE; renderGvCampo(); renderTemas(); }
     });
@@ -652,7 +657,7 @@ body.semRolar{ overflow:hidden; }
     var grid = document.getElementById('gridTemas');
     var btnMais = document.getElementById('btnMais');
     if (lista.length === 0) {
-      var msgs = { meus: 'Voc\u00ea ainda n\u00e3o salvou nenhum tema.<br>Toque no alfinete dos cards para guardar aqui.' };
+      var msgs = { meus: 'Voc\u00ea ainda n\u00e3o guardou nenhum tema.<br>Toque no disquete do tema para guardar em Meus Temas.' };
       grid.innerHTML = '<p class="vazio">' + (msgs[abaAtiva] || 'Nenhum tema neste filtro.<br>Tente outro campo ou outra aba.') + '</p>';
       btnMais.classList.add('hidden');
       return;
@@ -694,15 +699,18 @@ body.semRolar{ overflow:hidden; }
   }
   /* v4-1 · "Salvos" é do aluno. O que o professor destinar vira outra aba, quando existir. */
   function alternarFavorito(id, el){
-    var i = MEUS_TEMAS_IDS.indexOf(id);
-    var salvou = (i < 0);
-    if (salvou) MEUS_TEMAS_IDS.push(id); else MEUS_TEMAS_IDS.splice(i, 1);
+    /* v4-5: antes era indexOf + splice, e um id duplicado ficava na lista para sempre.
+       Agora a lista é filtrada e nunca aceita repetido. */
+    var tinha = MEUS_TEMAS_IDS.indexOf(id) >= 0;
+    MEUS_TEMAS_IDS = MEUS_TEMAS_IDS.filter(function(x){ return x !== id; });
+    var salvou = !tinha;
+    if (salvou) MEUS_TEMAS_IDS.push(id);
     if (el){
       el.classList.toggle('on', salvou);
     }
     var bt = document.getElementById('ttSalvar');
     if (bt && bt !== el) bt.classList.toggle('on', salvou);
-    toast(salvou ? 'Tema guardado em Salvos' : 'Tema retirado de Salvos');
+    toast(salvou ? 'Tema salvo em Meus Temas' : 'Tema retirado de Meus Temas');
     try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS)); } catch(e) {}
     renderTemas();
   }
