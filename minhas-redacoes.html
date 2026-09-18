@@ -4,6 +4,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
+<!-- v5-5 (18/09/2026): a tela passa a usar o kit da base v6-11 — o CSS das peças e a função
+     trilhoFiltros(), que traz os chips, o arrastar com carrossel, as setas e o teclado. O arquivo fica
+     só com o que é dele: figuras dos cards, notas, pastilhas e a montagem da lista. -->
 <!-- v5-4 (18/09/2026): o conteúdo passa a entrar pelo lado certo (faltava obrigar o navegador a desenhar
      a posição inicial); os filtros dão a volta, como o carrossel do Início; no computador entram setas ‹ ›
      ao lado dos chips e as setas do teclado também passam; os chips ficam centralizados na largura do cartão. -->
@@ -197,99 +200,32 @@
 @keyframes girarRed{ to{ transform:rotate(360deg); } }
 .btnTentar{ min-height:44px; padding:.6rem 1.2rem; border-radius:.7rem; background:var(--surface2); color:var(--text); border:1px solid rgba(var(--borderRGB),.3); font-family:inherit; font-size:.82rem; font-weight:800; cursor:pointer; }
 
-/* ═══ v5-0 · novo layout da lista (piloto do redesenho) ═══
-   Decisões com Alan: fundo com aquarela nos cantos, título em caixa normal, chips com os
-   personagens rolando de lado, cartão herói para a última redação, linhas compactas para as
-   anteriores, eixo do tema em linha própria. Sem desfoque e sem imagem de fundo: as manchas
-   são gradientes do próprio navegador. */
-body{
-  background:
-    radial-gradient(85% 42% at 0% 0%,   rgba(var(--cyanRGB),.16),  rgba(var(--cyanRGB),0)  65%),
-    radial-gradient(70% 38% at 100% 20%, rgba(var(--goldRGB),.10),  rgba(var(--goldRGB),0)  60%),
-    radial-gradient(90% 42% at 88% 100%, rgba(var(--greenRGB),.13), rgba(var(--greenRGB),0) 62%),
-    var(--bg);
-  background-attachment:fixed;
-}
-.cabLista{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 .7rem;}
-.cabLista h1{margin:0;font-size:21px;font-weight:600;letter-spacing:-.01em;color:var(--text);}
-.cabLista #contagem{font-size:12.5px;color:var(--muted);}
-.linhaChips{display:flex;align-items:center;gap:6px;max-width:760px;margin:0 auto 1rem;}
-.setaF{display:none;flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid rgba(var(--borderRGB),.14);
-  background:var(--surface);color:var(--text2);font-size:20px;line-height:1;cursor:pointer;font-family:inherit;}
-.setaF:hover{background:rgba(var(--cyanRGB),.10);color:var(--cyan);}
-@media(min-width:641px){ .setaF{display:block;} .chips{justify-content:safe center;} }
-.chips{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;margin:0 -1rem;padding:2px 1rem;flex:1 1 auto;min-width:0;}
-@media(min-width:641px){ .chips{ padding-left:0; padding-right:0; justify-content:center; justify-content:safe center; } }
-.chips::-webkit-scrollbar{display:none;}
-.chip{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;font-family:inherit;font-size:12.5px;font-weight:500;
-  color:var(--text2);background:var(--surface);border:1px solid rgba(var(--borderRGB),.14);border-radius:99px;
-  padding:5px 13px 5px 8px;white-space:nowrap;cursor:pointer;}
-.chip.on{background:rgba(var(--cyanRGB),.14);color:var(--cyan);border-color:transparent;font-weight:600;}
-.chip .av{width:22px;height:22px;border-radius:50%;object-fit:cover;}
-.chip .av.dup{width:33px;height:22px;border-radius:0;object-fit:contain;}
-/* cartão herói */
-.heroi{background:var(--surface);border-radius:20px;box-shadow:0 2px 12px rgba(var(--borderRGB),.10);margin-bottom:.9rem;overflow:hidden;}
-.heroi .hTopo{display:flex;align-items:flex-start;gap:.75rem;padding:14px 16px 0;}
-.heroi .rFig{width:64px;height:64px;border-radius:16px;border:0;}
-.hEst{flex:1;min-width:0;padding-top:.15rem;}
-.sit{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--cyan);}
-.sit i{width:7px;height:7px;border-radius:50%;background:var(--cyan);}
-.sit b{font-weight:700;letter-spacing:.01em;}
-.sit.val{color:var(--green);} .sit.val i{background:var(--green);}
-.sit.and{color:var(--muted);} .sit.and i{background:var(--muted);}
-.hEst .data{display:block;font-size:12px;color:var(--muted);margin-top:3px;}
-.hEixo{padding:12px 16px 0;}
-.eixo{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;
-  background:rgba(var(--cyanRGB),.12);color:var(--cyan);}
-.hTema{margin:.6rem 0 0;padding:0 16px;font-size:15px;font-weight:600;line-height:1.35;color:var(--text);}
-.heroi .miniComp{margin-top:6px;}
-.heroi .rNota .v{font-size:34px;font-weight:600;}
-.dica{display:flex;gap:10px;align-items:flex-start;margin:14px 16px 0;background:rgba(var(--goldRGB),.10);border-radius:14px;padding:10px 12px;}
-.dica .fe{width:22px;height:22px;flex:0 0 auto;vertical-align:0;}
-.dica p{margin:0;font-size:12.5px;line-height:1.4;color:var(--text2);}
-.dica b{font-weight:600;color:var(--text);}
-.hAcoes{display:flex;gap:10px;padding:14px 16px 16px;}
-.hAcoes .bt{flex:1;font-family:inherit;font-size:13.5px;font-weight:600;padding:11px 0;border:0;border-radius:13px;
-  background:var(--cyan);color:var(--onCyan);cursor:pointer;}
-.hAcoes .bt.sec{background:rgba(var(--cyanRGB),.12);color:var(--cyan);}
-.hAcoes .bt:active{transform:scale(.98);}
-/* linhas compactas */
-.linhaR{display:flex;align-items:center;gap:.75rem;background:var(--surface);border-radius:16px;
-  box-shadow:0 1px 6px rgba(var(--borderRGB),.07);padding:10px 14px;margin-bottom:.6rem;cursor:pointer;}
-.linhaR .rFig{width:44px;height:44px;border-radius:12px;border:0;}
-.lTxt{flex:1;min-width:0;}
-.lTxt p{margin:0 0 3px;font-size:13.5px;font-weight:500;line-height:1.3;color:var(--text);
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.lPe{font-size:11.5px;color:var(--muted);display:inline-flex;align-items:center;gap:7px;}
-.lPe .eixo{font-size:10.5px;padding:1px 8px;}
-.lNota{flex:0 0 auto;text-align:right;font-size:20px;font-weight:600;color:var(--cyan);line-height:1.1;}
-.lNota small{display:block;font-size:11px;font-weight:500;color:var(--green);}
-/* o dock de filtros saiu: os chips moram no topo */
-#dockLista{display:none!important;}
-@media(min-width:641px){
-  .heroi .hTema{font-size:16px;}
-  .lTxt p{font-size:14px;}
-}
+/* ═══ v5-5 · o que é só desta tela (o resto vem do kit da base v6-11) ═══ */
+.rFig.semFoto{ display:grid; place-items:center; }
+.rFig.semFoto .fe{ width:26px; height:26px; vertical-align:0; }
+.heroi .rNota{ margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; justify-content:space-between; text-align:right; }
+.heroi .rNota .v{ font-size:34px; font-weight:600; letter-spacing:-.01em; color:var(--cyan); line-height:1; }
+.heroi .miniComp{ margin-top:6px; }
+.miniComp{ display:flex; gap:4px; flex:0 0 auto; justify-content:flex-end; margin-bottom:2px; }
+.miniComp span{ width:16px; height:3px; border-radius:99px; background:var(--surface2); }
+.rCard .andando{ font-size:10px; color:var(--muted); margin-top:.35rem; }
+#viewLista{ min-height:70vh; }
+#dockLista{ display:none!important; }
 </style>
 </head>
-<body>
+<body class="aquarela">
 
 <div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
   <div id="conteudo">
 
     <!-- VISÃO 1: LISTA -->
     <div id="viewLista">
-      <div class="cabLista">
+      <div class="cabTela">
         <h1>Suas reda&ccedil;&otilde;es</h1>
-        <span id="contagem"></span>
+        <span class="conta" id="contagem"></span>
       </div>
-      <div class="linhaChips">
-        <button type="button" class="setaF" id="setaEsq" onclick="passarFiltro(-1)" aria-label="Filtro anterior">&#8249;</button>
-        <div class="chips" id="chipsFiltro"></div>
-        <button type="button" class="setaF" id="setaDir" onclick="passarFiltro(1)" aria-label="Pr\u00f3ximo filtro">&#8250;</button>
-      </div>
-      <div class="gridLista" id="gridLista"><div class="spinner" style="grid-column:1/-1;"></div></div>
+      <div id="chipsFiltro"></div>
+      <div class="gridLista colunaTela pista" id="gridLista"><div class="spinner" style="grid-column:1/-1;"></div></div>
     </div>
 
     <!-- VISÃO 2: CORREÇÃO · caderno -->
@@ -416,117 +352,18 @@ body{
   }
 
   // \u2500\u2500\u2500 Lista \u2500\u2500\u2500
-  function renderFiltros(){
-    var html=FILTROS.map(function(f){
-      return '<button type="button" class="chip'+(f.id===filtroAtivo?' on':'')+'" onclick="setFiltroChip(\''+f.id+'\')">'
-        +'<img class="av'+(f.dup?' dup':'')+'" src="'+f.av+'" alt="" loading="lazy">'+f.r+'</button>';
-    }).join('');
-    var c=document.getElementById('chipsFiltro'); if(c) c.innerHTML=html;
+  /* v5-5 · os chips, o arrastar e as setas vêm do kit da base (trilhoFiltros) */
+  var _trilho=null;
+  function montarFiltros(){
+    _trilho=trilhoFiltros({
+      alvo:'chipsFiltro', pista:'gridLista', area:'conteudo',
+      itens:FILTROS.map(function(f){ return { id:f.id, rotulo:f.r, avatar:f.av, dup:!!f.dup }; }),
+      ativo:filtroAtivo,
+      ativoQuando:function(){ var l=document.getElementById('viewLista'); return l && l.style.display!=='none'; },
+      aoTrocar:function(id){ filtroAtivo=id; renderLista(); }
+    });
   }
-  function setFiltro(f){ filtroAtivo=f; renderFiltros(); renderLista(); }
-  /* v5-3 · arrastar de lado troca o filtro, com o movimento de carrossel do Início.
-     O conteúdo acompanha o dedo, sai para o lado e o novo entra do outro lado. Só transform e
-     opacity, que são baratos, sem desfoque. Nas pontas o conteúdo estica e volta (efeito elástico). */
-  var _anim=false;
-  function pistaLista(){ return document.getElementById('gridLista'); }
-  function indiceFiltro(){
-    var i=0; FILTROS.forEach(function(f,k){ if(f.id===filtroAtivo) i=k; });
-    return i;
-  }
-  function centralizarChip(){
-    var c=document.querySelector('.chip.on');
-    if(c && c.scrollIntoView) c.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
-  }
-  function seguirDedo(dx){
-    var g=pistaLista(); if(!g||_anim) return;
-    var d=Math.max(-90,Math.min(90,dx*0.45));
-    g.style.transition='none';
-    g.style.transform='translateX('+d+'px)';
-    g.style.opacity=String(Math.max(.55,1-Math.abs(d)/240));
-  }
-  function soltarDedo(){
-    var g=pistaLista(); if(!g) return;
-    g.style.transition='transform .18s ease, opacity .18s ease';
-    g.style.transform='translateX(0)';
-    g.style.opacity='1';
-  }
-  function passarFiltro(dir){
-    if(_anim) return;
-    var i=indiceFiltro();
-    /* v5-4: d\u00e1 a volta, como o carrossel do In\u00edcio: depois do \u00faltimo vem o primeiro */
-    var j=(i+dir+FILTROS.length)%FILTROS.length;
-    irParaFiltro(j,dir);
-  }
-  function irParaFiltro(j,dir){
-    var g=pistaLista();
-    if(_anim) return;
-    if(!g || FILTROS[j].id===filtroAtivo){ setFiltro(FILTROS[j].id); centralizarChip(); return; }
-    _anim=true;
-    g.style.transition='transform .16s ease, opacity .16s ease';
-    g.style.transform='translateX('+(dir>0?-110:110)+'px)';
-    g.style.opacity='0';
-    setTimeout(function(){
-      setFiltro(FILTROS[j].id);
-      centralizarChip();
-      /* p\u00f5e o conte\u00fado do outro lado SEM transi\u00e7\u00e3o e obriga o navegador a desenhar essa posi\u00e7\u00e3o
-         (o void offsetWidth). Sem isso o card voltava pelo mesmo lado por onde saiu. */
-      g.style.transition='none';
-      g.style.transform='translateX('+(dir>0?110:-110)+'px)';
-      g.style.opacity='0';
-      void g.offsetWidth;
-      g.style.transition='transform .22s ease, opacity .22s ease';
-      g.style.transform='translateX(0)';
-      g.style.opacity='1';
-      setTimeout(function(){ _anim=false; g.style.transition=''; }, 240);
-    },160);
-  }
-  /* o toque nos chips tamb\u00e9m passa com o mesmo movimento, num movimento s\u00f3 */
-  function setFiltroChip(id){
-    var i=indiceFiltro(), j=i; FILTROS.forEach(function(f,k){ if(f.id===id) j=k; });
-    if(j===i) return;
-    irParaFiltro(j, j>i?1:-1);
-  }
-  /* v5-4 · no computador as setas do teclado tamb\u00e9m passam os filtros */
-  document.addEventListener('keydown',function(e){
-    var lista=document.getElementById('viewLista');
-    if(!lista || lista.style.display==='none') return;
-    if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
-    if(e.key==='ArrowRight') passarFiltro(1);
-    else if(e.key==='ArrowLeft') passarFiltro(-1);
-  });
-  (function(){
-    /* o gesto vale na tela inteira da lista, inclusive na parte vazia embaixo dos cart\u00f5es */
-    var x0=null,y0=null,valendo=false,horizontal=false;
-    var alvo=document.getElementById('conteudo') || document.getElementById('viewLista');
-    if(!alvo) return;
-    function naLista(e){
-      var lista=document.getElementById('viewLista');
-      return lista && lista.style.display!=='none';
-    }
-    alvo.addEventListener('touchstart',function(e){
-      valendo=false; horizontal=false;
-      if(e.touches.length!==1 || !naLista(e)) return;
-      if(e.target.closest && e.target.closest('.chips')) return;   /* a fileira de chips rola sozinha */
-      x0=e.touches[0].clientX; y0=e.touches[0].clientY; valendo=true;
-    },{passive:true});
-    alvo.addEventListener('touchmove',function(e){
-      if(!valendo || x0===null) return;
-      var t=e.touches[0], dx=t.clientX-x0, dy=t.clientY-y0;
-      if(!horizontal){
-        if(Math.abs(dy)>14 && Math.abs(dy)>Math.abs(dx)){ valendo=false; soltarDedo(); return; }  /* rolagem normal */
-        if(Math.abs(dx)>14) horizontal=true;
-      }
-      if(horizontal) seguirDedo(dx);
-    },{passive:true});
-    alvo.addEventListener('touchend',function(e){
-      if(!valendo || x0===null){ return; }
-      var t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
-      valendo=false; x0=null;
-      if(!horizontal || Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.6){ soltarDedo(); return; }   /* arrasto curto: volta ao lugar */
-      passarFiltro(dx<0?1:-1);
-    },{passive:true});
-    alvo.addEventListener('touchcancel',function(){ valendo=false; x0=null; soltarDedo(); },{passive:true});
-  })();
+  function setFiltro(f){ if(_trilho) _trilho.ir(f); else { filtroAtivo=f; renderLista(); } }
   function renderLista(){
     var lista=REDACOES.filter(function(r){
       if(filtroAtivo==='validadas') return r.status==='validada';
@@ -549,9 +386,10 @@ body{
   }
   var NOMES_COMP=['Norma culta','Compreender o tema','Argumentar','Coes\u00e3o','Proposta de interven\u00e7\u00e3o'];
   function figuraDe(r){
-    if(r.status==='validada') return '<div class="rFig"><img src="'+IMG_VALIDADA+'" alt="" loading="lazy"></div>';
-    if(r.status==='corrigida') return '<div class="rFig"><img src="'+IMG_CORRIGIDA+'" alt="" loading="lazy"></div>';
-    return '<div class="rFig semFoto">'+feIcone('engrenagem')+'</div>';
+    var cls=arguments[1]||'hFig';
+    if(r.status==='validada') return '<div class="rFig '+cls+'"><img src="'+IMG_VALIDADA+'" alt="" loading="lazy"></div>';
+    if(r.status==='corrigida') return '<div class="rFig '+cls+'"><img src="'+IMG_CORRIGIDA+'" alt="" loading="lazy"></div>';
+    return '<div class="rFig '+cls+' semFoto">'+feIcone('engrenagem')+'</div>';
   }
   function situacaoDe(r){
     if(r.status==='validada') return '<span class="sit val"><i></i>Validada pela professora</span>';
@@ -586,7 +424,7 @@ body{
   function linhaRedacao(r){
     var clique=(r.nota&&r.comp)?' onclick="abrirCorrecao(\''+r.id+'\')"'
       :' onclick="toast(\'Sua corre\u00e7\u00e3o fica pronta em segundos \u2014 j\u00e1 volta\')" style="opacity:.7;"';
-    return '<div class="linhaR"'+clique+'>'+figuraDe(r)
+    return '<div class="linhaR"'+clique+'>'+figuraDe(r,'lFig')
       +'<div class="lTxt"><p>'+escapeHtmlSimples(r.titulo)+'</p>'
       +'<span class="lPe">'+r.data+eixoDe(r)+'</span></div>'
       +(r.nota?'<div class="lNota">'+r.nota+(r.status==='validada'?'<small>Validada</small>':'')+'</div>':'')
@@ -1084,7 +922,7 @@ body{
 
   function acordarDock(){ if(window.mostrarDock_dockLista) window.mostrarDock_dockLista(); }
   iniciarDock('dockLista',{ protegidaPor:[] });
-  renderFiltros();
+  montarFiltros();
   carregarRedacoes();
 </script>
 </body>

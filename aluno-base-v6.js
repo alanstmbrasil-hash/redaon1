@@ -1,5 +1,8 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-10 (18/09/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-11 (18/09/2026)
+   v6-11: kit do redesenho. CSS das peças (fundo aquarela, título, trilho de filtros, cartão
+   herói, linha compacta, selos, dica e botões) e a função trilhoFiltros(), que monta os chips,
+   o arrastar de lado com carrossel, as setas no computador e as setas do teclado.
    v6-10: biblioteca de ícones ganha balanca e lampada (usados em Minhas redações).
    v6-9: ícones da barra de baixo a 28px na mesma altura de barra; o "Mais" deixa de ser
    o caractere \u2630 e passa a SVG no peso dos outros; nenhuma versão aparece na tela
@@ -65,6 +68,133 @@ function feHidratar(raiz) {
 function feIcone(nome) {
   var src = FE_ICONES[nome]; if (!src) return '';
   return '<img class="fe" src="data:image/webp;base64,' + src + '" alt="" draggable="false">';
+}
+
+
+/* ─── Trilho de filtros (v6-11) ───────────────────────────────────────────
+   Monta os chips, o arrastar de lado com o movimento do carrossel, as setas do
+   computador e as setas do teclado. A tela só diz quais são os filtros e o que
+   fazer quando trocar.
+
+   trilhoFiltros({
+     alvo:   'idDaDivQueRecebeOsChips',
+     pista:  'idDoConteudoQueAnda',        // o bloco que desliza na troca
+     itens:  [{ id:'todas', rotulo:'Todas', avatar:'data:image/webp;...', dup:true }, ...],
+     ativo:  'todas',
+     aoTrocar: function(id){ ... }         // a tela redesenha a lista aqui
+   })
+   Devolve { ir:function(id), passar:function(dir), ativo:function() }        */
+function trilhoFiltros(cfg) {
+  var itens = cfg.itens || [];
+  var ativo = cfg.ativo || (itens[0] && itens[0].id);
+  var alvo = document.getElementById(cfg.alvo);
+  if (!alvo || !itens.length) return null;
+  var animando = false;
+
+  function pista() { return document.getElementById(cfg.pista); }
+  function indice(id) { var n = 0; itens.forEach(function (f, k) { if (f.id === (id || ativo)) n = k; }); return n; }
+
+  function desenhar() {
+    var chips = itens.map(function (f, k) {
+      var fig = f.avatar ? '<img class="av' + (f.dup ? ' dup' : '') + '" src="' + f.avatar + '" alt="" loading="lazy">'
+              : (f.icone ? feIcone(f.icone) : '');
+      return '<button type="button" class="chip' + (f.id === ativo ? ' on' : '') + '" data-i="' + k + '">' + fig + f.rotulo + '</button>';
+    }).join('');
+    alvo.innerHTML =
+      '<div class="linhaChips">' +
+        '<button type="button" class="setaF" data-passo="-1" aria-label="Anterior">\u2039</button>' +
+        '<div class="chips">' + chips + '</div>' +
+        '<button type="button" class="setaF" data-passo="1" aria-label="Pr\u00f3ximo">\u203a</button>' +
+      '</div>';
+    alvo.querySelectorAll('.chip').forEach(function (b) {
+      b.onclick = function () { var j = +b.getAttribute('data-i'); ir(itens[j].id); };
+    });
+    alvo.querySelectorAll('.setaF').forEach(function (b) {
+      b.onclick = function () { passar(+b.getAttribute('data-passo')); };
+    });
+  }
+  function centralizarChip() {
+    var c = alvo.querySelector('.chip.on');
+    if (c && c.scrollIntoView) c.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }
+  function seguirDedo(dx) {
+    var g = pista(); if (!g || animando) return;
+    var d = Math.max(-90, Math.min(90, dx * 0.45));
+    g.style.transition = 'none';
+    g.style.transform = 'translateX(' + d + 'px)';
+    g.style.opacity = String(Math.max(.55, 1 - Math.abs(d) / 240));
+  }
+  function soltarDedo() {
+    var g = pista(); if (!g) return;
+    g.style.transition = 'transform .18s ease, opacity .18s ease';
+    g.style.transform = 'translateX(0)';
+    g.style.opacity = '1';
+  }
+  function ir(id, dir) {
+    if (animando || id === ativo) return;
+    var i = indice(), j = indice(id);
+    if (dir === undefined) dir = (j > i ? 1 : -1);
+    var g = pista();
+    function aplicar() { ativo = id; desenhar(); centralizarChip(); if (cfg.aoTrocar) cfg.aoTrocar(id); }
+    if (!g) { aplicar(); return; }
+    animando = true;
+    g.style.transition = 'transform .16s ease, opacity .16s ease';
+    g.style.transform = 'translateX(' + (dir > 0 ? -110 : 110) + 'px)';
+    g.style.opacity = '0';
+    setTimeout(function () {
+      aplicar();
+      /* p\u00f5e do outro lado sem transi\u00e7\u00e3o e obriga o navegador a desenhar essa posi\u00e7\u00e3o,
+         sen\u00e3o o conte\u00fado volta pelo mesmo lado por onde saiu */
+      g.style.transition = 'none';
+      g.style.transform = 'translateX(' + (dir > 0 ? 110 : -110) + 'px)';
+      g.style.opacity = '0';
+      void g.offsetWidth;
+      g.style.transition = 'transform .22s ease, opacity .22s ease';
+      g.style.transform = 'translateX(0)';
+      g.style.opacity = '1';
+      setTimeout(function () { animando = false; g.style.transition = ''; }, 240);
+    }, 160);
+  }
+  function passar(dir) { ir(itens[(indice() + dir + itens.length) % itens.length].id, dir); }   /* d\u00e1 a volta */
+
+  /* arrastar de lado: vale na tela toda, inclusive abaixo dos cart\u00f5es */
+  (function () {
+    var area = document.getElementById(cfg.area || 'conteudo') || document.body;
+    var x0 = null, y0 = null, valendo = false, horizontal = false;
+    function ligado() { return !cfg.ativoQuando || cfg.ativoQuando(); }
+    area.addEventListener('touchstart', function (e) {
+      valendo = false; horizontal = false;
+      if (e.touches.length !== 1 || !ligado()) return;
+      if (e.target.closest && e.target.closest('.chips')) return;
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; valendo = true;
+    }, { passive: true });
+    area.addEventListener('touchmove', function (e) {
+      if (!valendo || x0 === null) return;
+      var t = e.touches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+      if (!horizontal) {
+        if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx)) { valendo = false; soltarDedo(); return; }
+        if (Math.abs(dx) > 14) horizontal = true;
+      }
+      if (horizontal) seguirDedo(dx);
+    }, { passive: true });
+    area.addEventListener('touchend', function (e) {
+      if (!valendo || x0 === null) return;
+      var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+      valendo = false; x0 = null;
+      if (!horizontal || Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.6) { soltarDedo(); return; }
+      passar(dx < 0 ? 1 : -1);
+    }, { passive: true });
+    area.addEventListener('touchcancel', function () { valendo = false; x0 = null; soltarDedo(); }, { passive: true });
+    document.addEventListener('keydown', function (e) {
+      if (!ligado()) return;
+      if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+      if (e.key === 'ArrowRight') passar(1);
+      else if (e.key === 'ArrowLeft') passar(-1);
+    });
+  })();
+
+  desenhar();
+  return { ir: ir, passar: passar, ativo: function () { return ativo; } };
 }
 
 /* ─── Utilidades ─── */
