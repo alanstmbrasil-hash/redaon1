@@ -4,6 +4,10 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
+<!-- v5-3 (18/09/2026): o arrastar de lado ganha o movimento de carrossel do Início — o conteúdo
+     acompanha o dedo, sai e o novo entra do outro lado, com efeito elástico nas pontas; o gesto passa a
+     valer na tela toda da lista, inclusive abaixo dos cartões, que era onde ele parava de responder em
+     "Validadas"; tocar num chip faz o mesmo movimento. -->
 <!-- v5-2 (18/09/2026): no computador e no tablet a coluna e os chips ficam centralizados, com folga nas
      laterais; arrastar de lado na lista troca entre Todas, Corrigidas e Validadas. -->
 <!-- v5-2 (18/09/2026): arrastar de lado na lista troca entre Todas, Corrigidas e Validadas (menu ao
@@ -58,6 +62,8 @@
    compactas ficavam com alturas diferentes e sobrava buraco branco no computador. */
 /* v5-2: no computador e no tablet a coluna fica centralizada, com folga nas laterais */
 @media(min-width:641px){ .gridLista, .cabLista, .chips{ max-width:760px; margin-left:auto; margin-right:auto; } }
+#viewLista{ min-height:70vh; }                      /* v5-3: o arrasto vale tamb\u00e9m na parte vazia */
+.gridLista{ will-change:transform, opacity; }
 .rCard{background:var(--surface);border:1px solid rgba(var(--borderRGB),.18);border-radius:14px;padding:.8rem .9rem;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;transition:border-color .2s;}
 .rCard .linhaTopo{display:flex;align-items:stretch;gap:.7rem;min-height:62px;}
 .rCard .colSelo{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding-top:.2rem;}
@@ -400,36 +406,101 @@ body{
   // \u2500\u2500\u2500 Lista \u2500\u2500\u2500
   function renderFiltros(){
     var html=FILTROS.map(function(f){
-      return '<button type="button" class="chip'+(f.id===filtroAtivo?' on':'')+'" onclick="setFiltro(\''+f.id+'\')">'
+      return '<button type="button" class="chip'+(f.id===filtroAtivo?' on':'')+'" onclick="setFiltroChip(\''+f.id+'\')">'
         +'<img class="av'+(f.dup?' dup':'')+'" src="'+f.av+'" alt="" loading="lazy">'+f.r+'</button>';
     }).join('');
     var c=document.getElementById('chipsFiltro'); if(c) c.innerHTML=html;
   }
   function setFiltro(f){ filtroAtivo=f; renderFiltros(); renderLista(); }
-  /* v5-2 · arrastar de lado troca o filtro, para o menu seguir ao alcance do polegar.
-     S\u00f3 vale quando o gesto \u00e9 claramente horizontal e n\u00e3o come\u00e7a na pr\u00f3pria fileira de chips,
-     que rola sozinha. */
-  function passarFiltro(dir){
+  /* v5-3 · arrastar de lado troca o filtro, com o movimento de carrossel do Início.
+     O conteúdo acompanha o dedo, sai para o lado e o novo entra do outro lado. Só transform e
+     opacity, que são baratos, sem desfoque. Nas pontas o conteúdo estica e volta (efeito elástico). */
+  var _anim=false;
+  function pistaLista(){ return document.getElementById('gridLista'); }
+  function indiceFiltro(){
     var i=0; FILTROS.forEach(function(f,k){ if(f.id===filtroAtivo) i=k; });
-    var j=i+dir; if(j<0||j>=FILTROS.length) return;
-    setFiltro(FILTROS[j].id);
-    var c=document.querySelector('.chip.on'); if(c && c.scrollIntoView) c.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+    return i;
+  }
+  function centralizarChip(){
+    var c=document.querySelector('.chip.on');
+    if(c && c.scrollIntoView) c.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  }
+  function seguirDedo(dx){
+    var g=pistaLista(); if(!g||_anim) return;
+    var i=indiceFiltro(), fim=(dx<0 && i===FILTROS.length-1)||(dx>0 && i===0);
+    var d=Math.max(-90,Math.min(90,dx*(fim?0.18:0.45)));
+    g.style.transition='none';
+    g.style.transform='translateX('+d+'px)';
+    g.style.opacity=String(Math.max(.55,1-Math.abs(d)/240));
+  }
+  function soltarDedo(){
+    var g=pistaLista(); if(!g) return;
+    g.style.transition='transform .18s ease, opacity .18s ease';
+    g.style.transform='translateX(0)';
+    g.style.opacity='1';
+  }
+  function passarFiltro(dir){
+    var i=indiceFiltro(), j=i+dir;
+    var g=pistaLista();
+    if(j<0||j>=FILTROS.length){ soltarDedo(); return; }      /* ponta: volta sozinho */
+    if(!g){ setFiltro(FILTROS[j].id); centralizarChip(); return; }
+    _anim=true;
+    g.style.transition='transform .16s ease, opacity .16s ease';
+    g.style.transform='translateX('+(dir>0?-110:110)+'px)';
+    g.style.opacity='0';
+    setTimeout(function(){
+      setFiltro(FILTROS[j].id);
+      centralizarChip();
+      g.style.transition='none';
+      g.style.transform='translateX('+(dir>0?110:-110)+'px)';
+      g.style.opacity='0';
+      requestAnimationFrame(function(){
+        g.style.transition='transform .22s ease, opacity .22s ease';
+        g.style.transform='translateX(0)';
+        g.style.opacity='1';
+        setTimeout(function(){ _anim=false; g.style.transition=''; }, 240);
+      });
+    },160);
+  }
+  /* o toque nos chips tamb\u00e9m passa com o mesmo movimento */
+  function setFiltroChip(id){
+    var i=indiceFiltro(), j=0; FILTROS.forEach(function(f,k){ if(f.id===id) j=k; });
+    if(j===i) return;
+    passarFiltro(j>i?1:-1);
+    if(Math.abs(j-i)>1){ setTimeout(function(){ passarFiltro(j>i?1:-1); }, 200); }
   }
   (function(){
-    var x0=null,y0=null,valendo=false;
-    var alvo=document.getElementById('viewLista');
+    /* o gesto vale na tela inteira da lista, inclusive na parte vazia embaixo dos cart\u00f5es */
+    var x0=null,y0=null,valendo=false,horizontal=false;
+    var alvo=document.getElementById('conteudo') || document.getElementById('viewLista');
     if(!alvo) return;
+    function naLista(e){
+      var lista=document.getElementById('viewLista');
+      return lista && lista.style.display!=='none';
+    }
     alvo.addEventListener('touchstart',function(e){
-      if(e.touches.length!==1 || (e.target.closest && e.target.closest('.chips'))){ valendo=false; return; }
+      valendo=false; horizontal=false;
+      if(e.touches.length!==1 || !naLista(e)) return;
+      if(e.target.closest && e.target.closest('.chips')) return;   /* a fileira de chips rola sozinha */
       x0=e.touches[0].clientX; y0=e.touches[0].clientY; valendo=true;
     },{passive:true});
-    alvo.addEventListener('touchend',function(e){
+    alvo.addEventListener('touchmove',function(e){
       if(!valendo || x0===null) return;
+      var t=e.touches[0], dx=t.clientX-x0, dy=t.clientY-y0;
+      if(!horizontal){
+        if(Math.abs(dy)>14 && Math.abs(dy)>Math.abs(dx)){ valendo=false; soltarDedo(); return; }  /* rolagem normal */
+        if(Math.abs(dx)>14) horizontal=true;
+      }
+      if(horizontal) seguirDedo(dx);
+    },{passive:true});
+    alvo.addEventListener('touchend',function(e){
+      if(!valendo || x0===null){ return; }
       var t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
       valendo=false; x0=null;
-      if(Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.6) return;
+      if(!horizontal || Math.abs(dx)<60 || Math.abs(dx)<Math.abs(dy)*1.6){ soltarDedo(); return; }
       passarFiltro(dx<0?1:-1);
     },{passive:true});
+    alvo.addEventListener('touchcancel',function(){ valendo=false; x0=null; soltarDedo(); },{passive:true});
   })();
   function renderLista(){
     var lista=REDACOES.filter(function(r){
