@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Minhas Redações</title>
+<!-- v4-5 (17/09/2026): peso das letras e dos números do card: nota 700, tema 600, pastilhas de 3 px. -->
 <!-- v4-4 (17/09/2026): linha de cima com desenho, situação e data à esquerda e nota + pastilhas no canto direito,
      as pastilhas alinhadas com a base do desenho; nota a 32 px; o tema desceu e ocupa a caixa inteira, sem corte. -->
 <!-- v4-3 (17/09/2026): cards com figura à esquerda (robôs = corrigida pela IA, Profa. Blanche = validada),
@@ -55,18 +56,18 @@
 .rCard:hover{border-color:rgba(var(--cyanRGB),.4);}
 .rCard.destaque{border-color:rgba(var(--cyanRGB),.45);}
 .rCard .topo{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.5rem;}
-.selo{font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:.25rem .55rem;border-radius:99px;white-space:nowrap;}
+.selo{font-size:9.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:.25rem .55rem;border-radius:99px;white-space:nowrap;} /* v4-5: peso 700 */
 .selo.validada{color:var(--green);background:rgba(var(--greenRGB),.12);border:1px solid rgba(var(--greenRGB),.3);}
 .selo.corrigida{color:var(--cyan);background:rgba(var(--cyanRGB),.12);border:1px solid rgba(var(--cyanRGB),.3);} /* v4-3: dourado é só conquista */
 .selo.analise{color:var(--muted);background:rgba(var(--borderRGB),.12);border:1px solid rgba(var(--borderRGB),.25);}
 .rNota{flex:0 0 auto;margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;text-align:right;}
-.rNota .v{font-size:2rem;font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--cyan);}
+.rNota .v{font-size:2rem;font-weight:700;line-height:1;letter-spacing:-.01em;color:var(--cyan);} /* v4-5: peso 700 */
 
-.rCard .tit{font-size:13.5px;font-weight:700;line-height:1.35;color:var(--text);margin:.55rem 0 0;}
+.rCard .tit{font-size:13.5px;font-weight:600;line-height:1.35;color:var(--text);margin:.55rem 0 0;} /* v4-5: peso 600 */
 .rCard .pe{display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
 .rCard .data{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.miniComp{display:flex;gap:3px;flex:0 0 auto;justify-content:flex-end;margin-bottom:1px;}
-.miniComp span{width:16px;height:5px;border-radius:99px;background:var(--surface2);}
+.miniComp{display:flex;gap:4px;flex:0 0 auto;justify-content:flex-end;margin-bottom:2px;}
+.miniComp span{width:16px;height:3px;border-radius:99px;background:var(--surface2);} /* v4-5: barra fina */
 .vazio{grid-column:1/-1;text-align:center;color:var(--muted);font-size:.85rem;padding:2.5rem 0;line-height:1.6;}
 .spinner{width:38px;height:38px;border:3px solid var(--surface2);border-top-color:var(--cyan);border-radius:50%;animation:girar .8s linear infinite;margin:2rem auto;}
 @keyframes girar{to{transform:rotate(360deg);}}
