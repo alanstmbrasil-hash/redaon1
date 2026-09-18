@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-10 (18/09/2026): a versão sai do título da aba (o aluno não vê versão); fica só no console e no
+     atributo data-tela. -->
 <!-- v4-9 (18/09/2026): corrigido o desmarcar que voltava do outro aparelho — o banco passa a ser a
      verdade e a lista do navegador não é mais somada a ele (a subida do que existia só no aparelho
      acontece uma vez, na migração). Versão no título da aba, temporária, para conferir o deploy. -->
@@ -38,7 +40,7 @@
      abaixo, cartão herói escolhido por regra (Tema da Semana não escrito > mais recente não escrito do campo
      mais fraco > mais recente não escrito) e lista em linhas com miniatura de capa, selo de campo e selo
      "já escrevi". A dock de filtros saiu. A capa cheia do tema entra na etapa seguinte. -->
-<title>RedaON | Temas · v4-9</title>   <!-- v4-9: versão no título é TEMPORÁRIA, só para conferir o deploy; sai na próxima entrega -->
+<title>RedaON | Temas</title>
 <!-- RedaON · Portal do Aluno · Temas · v3-10 · sobre aluno-base-v6 -->
 <script>
 (function(){
@@ -290,8 +292,8 @@ body.semRolar{ overflow:hidden; }
   /* v4-8 · marca de versão para conferir se o arquivo no ar é o novo, sem poluir a tela.
      No computador: F12, aba Console. No celular: dá para ver em chrome://inspect ou pelo
      nome das abas (Todos, RedaON, Meus Temas, ENEM Principal, ENEM Especiais). */
-  console.info('RedaON · temas v4-9 · ' + new Date().toISOString().slice(0,10));
-  document.documentElement.setAttribute('data-tela', 'temas v4-9');
+  console.info('RedaON · temas v4-10 · ' + new Date().toISOString().slice(0,10));
+  document.documentElement.setAttribute('data-tela', 'temas v4-10');
 
   // Professor que abrir esta página vai para o portal dele (decisão 6A)
   (function(){
