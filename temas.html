@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-9 (18/09/2026): corrigido o desmarcar que voltava do outro aparelho — o banco passa a ser a
+     verdade e a lista do navegador não é mais somada a ele (a subida do que existia só no aparelho
+     acontece uma vez, na migração). Versão no título da aba, temporária, para conferir o deploy. -->
 <!-- v4-8 (18/09/2026): marca de versão no console e no atributo data-tela do <html>, para conferir em
      segundos se o arquivo publicado é o novo. -->
 <!-- v4-7 (18/09/2026): Meus Temas passa a morar no banco (tabela temas_salvos), então abre em qualquer
@@ -35,7 +38,7 @@
      abaixo, cartão herói escolhido por regra (Tema da Semana não escrito > mais recente não escrito do campo
      mais fraco > mais recente não escrito) e lista em linhas com miniatura de capa, selo de campo e selo
      "já escrevi". A dock de filtros saiu. A capa cheia do tema entra na etapa seguinte. -->
-<title>RedaON | Temas</title>
+<title>RedaON | Temas · v4-9</title>   <!-- v4-9: versão no título é TEMPORÁRIA, só para conferir o deploy; sai na próxima entrega -->
 <!-- RedaON · Portal do Aluno · Temas · v3-10 · sobre aluno-base-v6 -->
 <script>
 (function(){
@@ -287,8 +290,8 @@ body.semRolar{ overflow:hidden; }
   /* v4-8 · marca de versão para conferir se o arquivo no ar é o novo, sem poluir a tela.
      No computador: F12, aba Console. No celular: dá para ver em chrome://inspect ou pelo
      nome das abas (Todos, RedaON, Meus Temas, ENEM Principal, ENEM Especiais). */
-  console.info('RedaON · temas v4-8 · ' + new Date().toISOString().slice(0,10));
-  document.documentElement.setAttribute('data-tela', 'temas v4-8');
+  console.info('RedaON · temas v4-9 · ' + new Date().toISOString().slice(0,10));
+  document.documentElement.setAttribute('data-tela', 'temas v4-9');
 
   // Professor que abrir esta página vai para o portal dele (decisão 6A)
   (function(){
@@ -323,28 +326,41 @@ body.semRolar{ overflow:hidden; }
     try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS)); } catch(e) {}
   }
   function alunoId(){ try { return (typeof authGetUserId === 'function') ? authGetUserId() : null; } catch(e) { return null; } }
+  /* v4-9 · quem manda é o banco. Antes eu juntava as duas listas, e o que estava só no
+     aparelho voltava para o banco — por isso o tema desmarcado num lugar ressuscitava no
+     outro. A subida do que existia no navegador acontece UMA vez, na migração. */
+  var CHAVE_MIGRADO = 'redaon_salvos_migrados';
   async function carregarMeusTemas(){
     var uid = alunoId(); if (!uid) return;
     try {
       var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos?aluno_id=eq.' + uid
         + '&select=tema_id,origem&order=criado_em.desc', {});
-      if (!res.ok) return;                         /* sem rede, fica com a cópia local */
+      if (!res.ok) return;                         /* sem rede: segue com a cópia local */
       var doBanco = (await res.json()).map(function(r){ return r.tema_id; });
-      /* leva para o banco o que existia só neste aparelho */
-      var soLocal = MEUS_TEMAS_IDS.filter(function(id){ return doBanco.indexOf(id) < 0; });
-      if (soLocal.length) {
-        try {
-          await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos', {
-            method:'POST',
-            headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
-            body: JSON.stringify(soLocal.map(function(id){ return { aluno_id:uid, tema_id:id, origem:'aluno' }; }))
-          });
-        } catch(e) { console.warn('[temas] subir salvos', e); }
+
+      var migrado = false;
+      try { migrado = localStorage.getItem(CHAVE_MIGRADO) === '1'; } catch(e) {}
+      if (!migrado) {
+        var soLocal = MEUS_TEMAS_IDS.filter(function(id){ return doBanco.indexOf(id) < 0; });
+        if (soLocal.length) {
+          try {
+            await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos', {
+              method:'POST',
+              headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
+              body: JSON.stringify(soLocal.map(function(id){ return { aluno_id:uid, tema_id:id, origem:'aluno' }; }))
+            });
+            doBanco = doBanco.concat(soLocal);
+          } catch(e) { console.warn('[temas] subir salvos', e); }
+        }
+        try { localStorage.setItem(CHAVE_MIGRADO, '1'); } catch(e) {}
       }
-      var juntos = {}, lista = [];
-      doBanco.concat(soLocal).forEach(function(id){ if (id && !juntos[id]) { juntos[id] = true; lista.push(id); } });
-      MEUS_TEMAS_IDS = lista;
+
+      var vistos = {}, lista = [];
+      doBanco.forEach(function(id){ if (id && !vistos[id]) { vistos[id] = true; lista.push(id); } });
+      MEUS_TEMAS_IDS = lista;                      /* o banco é a verdade */
       guardarLocal();
+      renderGvCampo();
+      renderTemas();
     } catch(e) { console.warn('[temas] meus temas', e); }
   }
   async function gravarSalvo(id, salvou){
