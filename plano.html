@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Plano de estudos</title>
+<!-- v1-7 (20/09/2026): o destino de cada tarefa também passa a ser refeito na hora, pelo tema que está valendo. Antes, o link ia gravado com o id do tema do dia em que a semana foi criada: se a Profa. Blanche trocasse o tema, o card levava ao tema antigo — e a tarefa de escrever gravava a redação no tema errado. -->
 <!-- v1-6 (20/09/2026): o texto de cada tarefa passa a ser escrito na hora pela tela, a partir do tipo (e da competência, no exercício). A coluna plano_itens.rotulo continua gravada, mas não manda mais no que aparece — antes, quem já tinha a semana criada continuava vendo o texto antigo. -->
 <!-- v1-5 (20/09/2026): renomeação — a tarefa do dia 2 passa a ser "Flashcards do material de apoio" (antes "Flashcards de repertório"). O nome da C2 ("Tema e repertório") fica como está: é o termo do INEP. -->
 <!-- v1-4 (20/09/2026): renomeação — o rótulo da etapa do dia 1 passa a ser "Material de apoio" (antes "Repertório"). A chave técnica tipo:'repertorio' não muda. -->
@@ -329,14 +330,18 @@ async function atualizarFocoExistente(){
    assim, quando a RedaON muda uma palavra, quem já tem a semana criada vê o texto novo. */
 function rotularItens(){
   var modelo = {};
-  montarTarefas().forEach(function(t){ modelo[t.tipo] = t.rotulo; });
+  montarTarefas().forEach(function(t){ modelo[t.tipo] = t; });
   ITENS.forEach(function(it){
+    var m = modelo[it.tipo];
     if (it.tipo === 'exercicio'){
       var c = it.competencia || FOCO;
       it.rotulo = c ? ('Refor\u00e7o de ' + c + ' \u00b7 ' + NOME_COMP[c]) : 'Refor\u00e7o da sua compet\u00eancia mais fraca';
-    } else if (modelo[it.tipo]) {
-      it.rotulo = modelo[it.tipo];
+    } else if (m) {
+      it.rotulo = m.rotulo;
     }
+    /* v1-7 \u00b7 o destino tamb\u00e9m \u00e9 refeito na hora: o tema da semana pode ter mudado
+       depois que a tarefa foi criada, e o link gravado apontaria para o tema antigo. */
+    if (m && m.destino) it.destino = m.destino;
   });
 }
 /* Redação da semana marca sozinha (P3): existe redação enviada desde segunda? */
