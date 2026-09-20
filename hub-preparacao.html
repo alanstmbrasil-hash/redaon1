@@ -4,6 +4,10 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-7 (20/09/2026): "Monte a intervenção" com quatro passos — conjunção conclusiva (proposta da Profa.
+     Blanche), agente, meio e detalhamento. A opção já vem com o artigo e a frase para antes dele; o artigo
+     sai do campo com_artigo quando existir e, na falta, é deduzido. Fechada a proposta, entra o campo para o
+     aluno escrever o parágrafo com as palavras dele. -->
 <!-- v2-6 (20/09/2026): o "Monte a intervenção" passa a ser um passo por vez, com a frase em construção
      sempre no alto e os botões Voltar e Avançar. A frase grudada não funcionava porque a gaveta tem
      overflow escondido para animar a abertura. -->
@@ -334,6 +338,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .acoesJ button{ flex:1 1 0; height:44px; border:0; border-radius:12px; font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; }
 .acoesJ .j1{ background:var(--cyan); color:var(--onCyan); } .acoesJ .j2{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
 .naoServe{ margin:12px 0 0; font-size:11.5px; color:var(--muted); }
+#jEscrita textarea{ width:100%; font-family:inherit; font-size:13px; line-height:1.5; padding:11px 12px;
+  border-radius:12px; border:1px solid rgba(var(--borderRGB),.18); background:var(--surface2); color:var(--text); resize:vertical; }
 .naoServe b{ color:var(--text); }
 /* cta */
 .ctaPrep{ margin-top:18px; background:var(--surface); border-radius:16px; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:14px; }
@@ -415,8 +421,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-6 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-6');
+console.info('RedaON · preparar v2-7 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-7');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -1014,36 +1020,73 @@ function respQuiz(btn, i, ai){
 }
 
 /* ─────────── Monte a intervenção (competência 5) ───────────
-   v2-6 · um passo por vez, com a frase sempre no alto. A frase grudada (sticky) não funcionava
-   porque a gaveta tem overflow escondido para animar a abertura; com um passo por vez a tela
-   fica curta e o texto em construção nunca sai de vista. */
-var INTERV = null, ESC = { age:null, ins:null, det:null }, PASSO_J = 0;
-var PASSOS_J = [
-  { k:'age', rot:'Quem faz (agente)' },
-  { k:'ins', rot:'Com o quê (meio)' },
-  { k:'det', rot:'Como, onde e com que frequência' }
+   v2-7 · quatro passos: a conjunção conclusiva (proposta da Profa. Blanche), o agente, o meio
+   e o detalhamento. A opção já aparece com o artigo ("ao Ministério Público Federal"), e a
+   frase para antes dele ("Portanto, cabe ___"). Se o item trouxer "com_artigo", ele manda; se
+   não trouxer, a tela deduz, para o material antigo não sair errado. */
+var INTERV = null, PASSO_J = 0;
+var ESC = { conj:null, age:null, ins:null, det:null };
+/* Banco de conjunções conclusivas — só as corretas, o aluno escolhe uma. */
+var CONJUNCOES = [
+  { ref:'CJ-1', texto:'Portanto',        nota:'a mais direta' },
+  { ref:'CJ-2', texto:'Logo',            nota:'curta e formal' },
+  { ref:'CJ-3', texto:'Assim',           nota:'liga sem peso' },
+  { ref:'CJ-4', texto:'Dessa forma',     nota:'retoma o que veio antes' },
+  { ref:'CJ-5', texto:'Desse modo',      nota:'retoma o que veio antes' },
+  { ref:'CJ-6', texto:'Diante disso',    nota:'aponta para o problema exposto' },
+  { ref:'CJ-7', texto:'Em virtude disso',nota:'marca a causa' },
+  { ref:'CJ-8', texto:'Sendo assim',     nota:'tom mais formal' },
+  { ref:'CJ-9', texto:'Por conseguinte', nota:'a mais formal de todas' }
 ];
+var PASSOS_J = [
+  { k:'conj', rot:'Como você conclui' },
+  { k:'age',  rot:'Quem faz (agente)' },
+  { k:'ins',  rot:'Com o quê (meio)' },
+  { k:'det',  rot:'Como, onde e com que frequência' }
+];
+/* dedução do artigo quando a Fábrica ainda não mandou o campo com_artigo */
+var FEM_1a = ['autoridade','agencia','agência','secretaria','secretarias','defensoria','comissao','comissão',
+  'camara','câmara','assembleia','fundacao','fundação','universidade','policia','polícia','prefeitura','uniao','união',
+  'lei','politica','política','base','resolucao','resolução','portaria','constituicao','constituição','norma','rede','central'];
+var PLURAL_1a = ['conselhos','secretarias','ministerios','ministérios','prefeituras','universidades','escolas','redes'];
+function artigoDe(nome, tipo){
+  var p = String(nome || '').trim().split(/\s+/)[0].toLowerCase().replace(/[(),.:]/g,'');
+  var fem = FEM_1a.indexOf(p) >= 0 || (/a$/.test(p) && ['programa','sistema','plano','marco','fundo','problema'].indexOf(p) < 0);
+  var plural = PLURAL_1a.indexOf(p) >= 0 || /s$/.test(p);
+  if (tipo === 'age') return plural ? (fem ? 'às' : 'aos') : (fem ? 'à' : 'ao');
+  return plural ? (fem ? 'das' : 'dos') : (fem ? 'da' : 'do');
+}
+function comArtigo(item, tipo){
+  if (!item) return '';
+  if (item.com_artigo) return item.com_artigo;                 /* o que a Fábrica mandar manda */
+  return artigoDe(item.nome, tipo) + ' ' + item.nome;
+}
 function htmlJogo(){
   return '<div class="jogo">'
     + '<h3>Monte a intervenção</h3>'
-    + '<p class="ex">A proposta precisa de três peças. Escolha uma por vez e veja o texto se formar.</p>'
+    + '<p class="ex">A proposta precisa de quatro peças. Escolha uma por vez e veja o texto se formar.</p>'
     + '<div class="fraseJ" id="jFrase">Sua proposta aparece aqui conforme você escolhe.</div>'
     + '<div id="jVeredito"></div>'
     + '<p class="passoJ" id="jRot"></p>'
     + '<div id="jLista"></div>'
     + '<div class="acoesJ" id="jAcoes"></div>'
+    + '<div id="jEscrita"></div>'
     + '<p class="naoServe"><b>Não vale como meio:</b> ' + ((INTERV && INTERV.nao_serve_como_meio) || ['campanhas de conscientização','políticas públicas','medidas','ações']).join(' \u00b7 ') + '.</p>'
     + '</div>';
 }
 function achar(lista, ref){ for (var i=0;i<(lista||[]).length;i++){ if (lista[i].ref === ref) return lista[i]; } return null; }
+function achaConj(ref){ return achar(CONJUNCOES, ref); }
 function opcoesDoPasso(){
   var p = PASSOS_J[PASSO_J].k;
+  if (p === 'conj') return CONJUNCOES.map(function(c){
+    return { ref:c.ref, titulo:c.texto, pe:c.nota, cabe:true };
+  });
   if (p === 'age') return (INTERV.agentes || []).map(function(a){
-    return { ref:a.ref, titulo:a.nome, pe:'esfera ' + (a.esfera || ''), cabe:true };
+    return { ref:a.ref, titulo:comArtigo(a,'age'), pe:'esfera ' + (a.esfera || ''), cabe:true };
   });
   if (p === 'ins') return (INTERV.instrumentos || []).map(function(x){
     var cabe = !ESC.age || (x.agentes || []).indexOf(ESC.age) >= 0;
-    return { ref:x.ref, titulo:x.nome, pe:(cabe ? 'cabe ao agente escolhido' : 'não é o meio desse agente'), cabe:cabe };
+    return { ref:x.ref, titulo:comArtigo(x,'ins'), pe:(cabe ? 'cabe ao agente escolhido' : 'não é o meio desse agente'), cabe:cabe };
   });
   return (INTERV.detalhamentos || []).map(function(d){
     var cabe = !ESC.ins || (d.combina_com || []).indexOf(ESC.ins) >= 0;
@@ -1054,7 +1097,7 @@ function pintarJogo(){
   if (!INTERV) return;
   var p = PASSOS_J[PASSO_J];
   var rot = document.getElementById('jRot');
-  if (rot) rot.textContent = (PASSO_J+1) + ' \u00b7 ' + p.rot + '  (passo ' + (PASSO_J+1) + ' de 3)';
+  if (rot) rot.textContent = (PASSO_J+1) + ' \u00b7 ' + p.rot + ' (passo ' + (PASSO_J+1) + ' de ' + PASSOS_J.length + ')';
   var alvo = document.getElementById('jLista');
   if (alvo) alvo.innerHTML = opcoesDoPasso().map(function(o){
     return '<button class="opJ' + (ESC[p.k]===o.ref ? ' sel' : '') + (o.cabe ? '' : ' bloq') + '"'
@@ -1066,7 +1109,8 @@ function pintarJogo(){
     var escolhido = !!ESC[p.k];
     var ultimo = (PASSO_J === PASSOS_J.length - 1);
     acoes.innerHTML =
-      (PASSO_J > 0 ? '<button class="j2" onclick="passoJogo(-1)">Voltar</button>' : '<button class="j2" onclick="limparJogo()">Começar de novo</button>')
+      (PASSO_J > 0 ? '<button class="j2" onclick="passoJogo(-1)">Voltar</button>'
+                   : '<button class="j2" onclick="limparJogo()">Começar de novo</button>')
       + (ultimo
           ? '<button class="j1" onclick="conferirJogo()">Conferir a proposta</button>'
           : '<button class="j1"' + (escolhido ? '' : ' disabled style="opacity:.45;"') + ' onclick="passoJogo(1)">Avançar</button>');
@@ -1086,23 +1130,26 @@ function escolherJogo(tipo, ref){
   pintarJogo();
 }
 function montarFraseJogo(){
+  var c = achaConj(ESC.conj);
   var a = achar(INTERV.agentes, ESC.age), i = achar(INTERV.instrumentos, ESC.ins), d = achar(INTERV.detalhamentos, ESC.det);
   var f = document.getElementById('jFrase');
   if (!f) return;
-  if (!a && !i && !d){ f.textContent = 'Sua proposta aparece aqui conforme você escolhe.'; return; }
-  f.innerHTML = 'Cabe a <b>' + (a ? escapeHTML(a.nome) : '\u2026') + '</b> enfrentar o problema, por meio d'
-    + (i ? 'o <b>' + escapeHTML(i.nome) + '</b>' : 'o <b>\u2026</b>')
-    + ', com <b>' + (d ? escapeHTML(d.texto) : '\u2026') + '</b>, a fim de que o direito garantido em lei vire realidade.';
+  if (!c && !a && !i && !d){ f.textContent = 'Sua proposta aparece aqui conforme você escolhe.'; return; }
+  f.innerHTML = '<b>' + (c ? escapeHTML(c.texto) : '\u2026') + '</b>, cabe '
+    + '<b>' + (a ? escapeHTML(comArtigo(a,'age')) : '\u2026') + '</b> enfrentar o problema, por meio '
+    + '<b>' + (i ? escapeHTML(comArtigo(i,'ins')) : '\u2026') + '</b>, com '
+    + '<b>' + (d ? escapeHTML(d.texto) : '\u2026') + '</b>, a fim de que o direito garantido em lei vire realidade.';
 }
 function conferirJogo(){
   var v = document.getElementById('jVeredito');
   var faltam = [];
+  if (!ESC.conj) faltam.push('a conjunção');
   if (!ESC.age) faltam.push('o agente');
   if (!ESC.ins) faltam.push('o meio');
   if (!ESC.det) faltam.push('o detalhamento');
   if (faltam.length){
     v.className = 'veredito meio';
-    v.textContent = 'Falta ' + faltam.join(', ') + '. Sem os três, a proposta fica incompleta e a competência 5 não fecha.';
+    v.textContent = 'Falta ' + faltam.join(', ') + '. Sem todas as peças, a proposta fica incompleta e a competência 5 não fecha.';
     return;
   }
   var i = achar(INTERV.instrumentos, ESC.ins), d = achar(INTERV.detalhamentos, ESC.det);
@@ -1110,18 +1157,35 @@ function conferirJogo(){
   var detCabe  = (d.combina_com || []).indexOf(ESC.ins) >= 0;
   if (meioCabe && detCabe){
     v.className = 'veredito ok';
-    v.textContent = 'Proposta completa: agente, ação, meio, finalidade e detalhamento. É isso que a banca procura na competência 5.';
+    v.textContent = 'Proposta completa: agente, ação, meio, finalidade e detalhamento, ligada ao texto pela conjunção. É isso que a banca procura na competência 5.';
+    mostrarEscrita();
   } else {
     v.className = 'veredito meio';
-    v.textContent = 'Os três estão lá, mas a combinação não se sustenta: '
+    v.textContent = 'As peças estão lá, mas a combinação não se sustenta: '
       + (!meioCabe ? 'esse meio não é do agente que você escolheu' : '')
       + (!meioCabe && !detCabe ? ' e ' : '')
       + (!detCabe ? 'esse detalhamento não é desse meio' : '') + '.';
   }
 }
+/* v2-7 · o modelo não é para copiar: fechada a proposta, o aluno escreve o parágrafo dele */
+function mostrarEscrita(){
+  var z = document.getElementById('jEscrita');
+  if (!z || z.innerHTML) return;
+  z.innerHTML = '<p class="passoJ">Agora escreva com as suas palavras</p>'
+    + '<p class="ex">O texto acima é modelo de estrutura, não de cópia. Escreva o seu parágrafo de proposta usando as peças que você escolheu.</p>'
+    + '<textarea id="jTexto" rows="5" placeholder="Escreva aqui o seu parágrafo de proposta de intervenção…"></textarea>'
+    + '<p class="ex" id="jConta">0 palavra</p>';
+  var t = document.getElementById('jTexto');
+  t.addEventListener('input', function(){
+    var n = (t.value.trim().match(/\S+/g) || []).length;
+    document.getElementById('jConta').textContent = n + (n === 1 ? ' palavra' : ' palavras')
+      + (n >= 40 ? ' \u00b7 bom tamanho para um parágrafo de proposta' : '');
+  });
+}
 function limparJogo(){
-  ESC = { age:null, ins:null, det:null }; PASSO_J = 0;
+  ESC = { conj:null, age:null, ins:null, det:null }; PASSO_J = 0;
   document.getElementById('jVeredito').innerHTML = '';
+  var z = document.getElementById('jEscrita'); if (z) z.innerHTML = '';
   pintarJogo();
 }
 
