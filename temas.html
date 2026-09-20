@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-13 (20/09/2026): o ícone deixa de se separar do nome quando o texto quebra de linha. -->
 <!-- v4-12 (20/09/2026): ajuste do texto da chamada: "se Preparar ajuda a Entender o tema…". -->
 <!-- v4-11 (20/09/2026): a busca deixa de esconder o tema procurado. O cartão herói sai de cena quando
      há busca ou filtro de campo, e nessas horas a lista mostra todos os temas, inclusive o que era o herói.
@@ -196,6 +197,8 @@ body.semRolar{ overflow:hidden; }
 .ttChamada{ margin:14px 0 0; font-size:13.5px; line-height:1.6; color:var(--text2); }
 .ttChamada b{ font-weight:700; color:var(--text); }
 .ttChamada .fe{ width:17px; height:17px; vertical-align:-.25em; }
+/* v4-13 · o ícone nunca se separa do nome na quebra de linha */
+.ttChamada .junto{ white-space:nowrap; }
 .ttCarr{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
   margin:16px -18px 0; padding:2px 18px 4px; }
 .ttCarr::-webkit-scrollbar{ display:none; }
@@ -298,8 +301,8 @@ body.semRolar{ overflow:hidden; }
   /* v4-8 · marca de versão para conferir se o arquivo no ar é o novo, sem poluir a tela.
      No computador: F12, aba Console. No celular: dá para ver em chrome://inspect ou pelo
      nome das abas (Todos, RedaON, Meus Temas, ENEM Principal, ENEM Especiais). */
-  console.info('RedaON · temas v4-12 · ' + new Date().toISOString().slice(0,10));
-  document.documentElement.setAttribute('data-tela', 'temas v4-12');
+  console.info('RedaON · temas v4-13 · ' + new Date().toISOString().slice(0,10));
+  document.documentElement.setAttribute('data-tela', 'temas v4-13');
 
   // Professor que abrir esta página vai para o portal dele (decisão 6A)
   (function(){
@@ -607,9 +610,9 @@ body.semRolar{ overflow:hidden; }
             + ' aria-label="Salvar em Salvos" title="Salvar em Salvos">' + feIcone('disquete') + '</button>'
         + '</div>'
         + '<p class="ttChamada">Antes de <b>Escrever</b>, se <b>Preparar</b> ajuda a '
-          + feIcone('lampada') + ' <b>Entender o tema</b>, juntar argumentos no '
-          + feIcone('livros') + ' <b>Material de apoio</b> e treinar nas '
-          + feIcone('alvo') + ' <b>Atividades</b>.</p>'
+          + '<span class="junto">' + feIcone('lampada') + ' <b>Entender o tema</b></span>, juntar argumentos no '
+          + '<span class="junto">' + feIcone('livros') + ' <b>Material de apoio</b></span> e treinar nas '
+          + '<span class="junto">' + feIcone('alvo') + ' <b>Atividades</b></span>.</p>'
         + '<div class="ttCarr" id="ttCarr"></div>'
         /* v4-5 · os botões vêm DEPOIS dos materiais, para o aluno ver o que existe antes de decidir */
         + '<div class="ttAcoes">'

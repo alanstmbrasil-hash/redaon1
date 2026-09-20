@@ -4,6 +4,12 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-6 (20/09/2026): o "Monte a intervenção" passa a ser um passo por vez, com a frase em construção
+     sempre no alto e os botões Voltar e Avançar. A frase grudada não funcionava porque a gaveta tem
+     overflow escondido para animar a abertura. -->
+<!-- v2-5 (20/09/2026): as três caixas ficam centralizadas, com o ✓ na linha do nome em vez de flutuar por
+     cima do texto; no "Monte a intervenção" a frase sobe para o alto e fica grudada, então o aluno vê o
+     texto sendo montado enquanto escolhe. -->
 <!-- v2-4 (20/09/2026): corrigido o corte do conteúdo à direita (o trilho ganhava 2rem a mais pelas
      margens negativas); ícone e nome na mesma linha nas três caixas; chaves internas do material, como
      "origem", não aparecem mais no Entender o tema. -->
@@ -233,13 +239,14 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 /* v2-1 · as três etapas viram caixas fixas, no estilo das caixas do Início. Só o cartão de
    baixo corre de lado; as caixas ficam paradas e servem de navegação e de estado. */
 .seletorEtapas{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:14px 0 2px; }
-/* v2-4 · ícone e nome na mesma linha, como no resto da RedaON */
-.cxEtapa{ position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:3px;
+/* v2-5 · caixa centralizada: ícone e nome na mesma linha, no meio, estado embaixo, e o ✓ na
+   linha do nome (antes era absoluto e passava por cima do texto). */
+.cxEtapa{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
   background:var(--surface); border:1px solid rgba(var(--borderRGB),.14); border-radius:14px;
-  padding:9px 9px 8px; cursor:pointer; font-family:inherit; text-align:left; min-width:0; }
-.cxEtapa .linhaCx{ display:flex; align-items:center; gap:6px; width:100%; min-width:0; }
+  padding:9px 7px 8px; cursor:pointer; font-family:inherit; text-align:center; min-width:0; }
+.cxEtapa .linhaCx{ display:flex; align-items:center; justify-content:center; gap:5px; width:100%; min-width:0; }
 .cxEtapa .fe{ width:19px; height:19px; vertical-align:0; flex:0 0 auto; }
-.cxEtapa b{ font-size:11px; font-weight:600; line-height:1.15; color:var(--text2); min-width:0; }
+.cxEtapa b{ font-size:10.5px; font-weight:600; line-height:1.2; color:var(--text2); min-width:0; }
 .cxEtapa .fe{ transition:none; }
 /* onde ele está agora: fundo verde-água e nome em destaque */
 .cxEtapa.aqui{ background:rgba(var(--cyanRGB),.12); border-color:transparent; }
@@ -247,12 +254,12 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 /* etapa já concluída: marca verde no canto e nome em verde; a caixa não fica colorida,
    para não competir com a etapa atual */
 .cxEtapa.feita b{ color:var(--green); }
-.cxEtapa .ok{ position:absolute; top:5px; right:6px; width:16px; height:16px; border-radius:50%;
-  background:var(--green); color:#fff; font-size:10px; font-weight:700; line-height:16px; text-align:center; }
+.cxEtapa .ok{ flex:0 0 auto; width:15px; height:15px; border-radius:50%; background:var(--green); color:#fff;
+  font-size:9.5px; font-weight:700; line-height:15px; text-align:center; }
 /* etapa ainda não concluída: o ícone entra apagado, e ganha cor quando ela é concluída */
 .cxEtapa:not(.feita) .fe{ opacity:.55; }
 .cxEtapa.aqui .fe{ opacity:1; }
-.cxEtapa .rot{ font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+.cxEtapa .rot{ display:block; text-align:center; font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
 .cxEtapa.feita .rot{ color:var(--green); }
 .cxEtapa.aqui .rot{ color:var(--cyan); }
 @media(min-width:641px){ .cxEtapa b{ font-size:12.5px; } .cxEtapa .fe{ width:21px; height:21px; } }
@@ -317,7 +324,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .opJ small{ display:block; font-size:10.5px; color:var(--muted); margin-top:2px; }
 .opJ.sel{ border-color:var(--cyan); background:rgba(var(--cyanRGB),.10); }
 .opJ.bloq{ opacity:.45; }
-.fraseJ{ margin-top:14px; background:var(--surface2); border-radius:12px; padding:12px; font-size:13px; line-height:1.55; color:var(--text2); }
+.fraseJ{ margin-top:6px; background:var(--surface2); border-radius:12px; padding:12px; font-size:13px; line-height:1.55; color:var(--text2); }
+.fraseJ{ border:1px solid rgba(var(--cyanRGB),.22); background:var(--surface); }
 .fraseJ b{ color:var(--cyan); }
 .veredito{ margin-top:10px; font-size:12.5px; line-height:1.45; padding:10px 12px; border-radius:12px; }
 .veredito.ok{ background:rgba(var(--greenRGB),.14); color:var(--green); }
@@ -407,8 +415,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-4 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-4');
+console.info('RedaON · preparar v2-6 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-6');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -741,8 +749,8 @@ function pintarEtapas(){
     var feita = passosFeitos[e.passo];
     return '<button type="button" class="cxEtapa' + (i===atual ? ' aqui' : '') + (feita ? ' feita' : '') + '"'
       + ' onclick="irEtapa(' + i + ')">'
-      + (feita ? '<span class="ok">\u2713</span>' : '')
-      + '<span class="linhaCx">' + feIcone(e.ico) + '<b>' + e.rot + '</b></span>'
+      + '<span class="linhaCx">' + feIcone(e.ico) + '<b>' + e.rot + '</b>'
+      + (feita ? '<span class="ok">\u2713</span>' : '') + '</span>'
       + '<span class="rot">' + (feita ? 'feito' : (i===atual ? 'aqui' : 'a fazer')) + '</span></button>';
   }).join('');
   var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
@@ -1005,41 +1013,70 @@ function respQuiz(btn, i, ai){
   if (ex && ex.textContent.trim()) ex.classList.remove('hidden');
 }
 
-/* ─────────── Monte a intervenção (competência 5) ─────────── */
-var INTERV = null, ESC = { age:null, ins:null, det:null };
+/* ─────────── Monte a intervenção (competência 5) ───────────
+   v2-6 · um passo por vez, com a frase sempre no alto. A frase grudada (sticky) não funcionava
+   porque a gaveta tem overflow escondido para animar a abertura; com um passo por vez a tela
+   fica curta e o texto em construção nunca sai de vista. */
+var INTERV = null, ESC = { age:null, ins:null, det:null }, PASSO_J = 0;
+var PASSOS_J = [
+  { k:'age', rot:'Quem faz (agente)' },
+  { k:'ins', rot:'Com o quê (meio)' },
+  { k:'det', rot:'Como, onde e com que frequência' }
+];
 function htmlJogo(){
   return '<div class="jogo">'
     + '<h3>Monte a intervenção</h3>'
-    + '<p class="ex">Escolha quem faz, com o quê e como. A proposta precisa dos três para fechar a competência 5.</p>'
-    + '<p class="passoJ">1 \u00b7 Quem faz (agente)</p><div id="jAge"></div>'
-    + '<p class="passoJ">2 \u00b7 Com o quê (meio)</p><div id="jIns"></div>'
-    + '<p class="passoJ">3 \u00b7 Como, onde e com que frequência</p><div id="jDet"></div>'
+    + '<p class="ex">A proposta precisa de três peças. Escolha uma por vez e veja o texto se formar.</p>'
     + '<div class="fraseJ" id="jFrase">Sua proposta aparece aqui conforme você escolhe.</div>'
     + '<div id="jVeredito"></div>'
-    + '<div class="acoesJ"><button class="j1" onclick="conferirJogo()">Conferir a proposta</button>'
-    + '<button class="j2" onclick="limparJogo()">Começar de novo</button></div>'
+    + '<p class="passoJ" id="jRot"></p>'
+    + '<div id="jLista"></div>'
+    + '<div class="acoesJ" id="jAcoes"></div>'
     + '<p class="naoServe"><b>Não vale como meio:</b> ' + ((INTERV && INTERV.nao_serve_como_meio) || ['campanhas de conscientização','políticas públicas','medidas','ações']).join(' \u00b7 ') + '.</p>'
     + '</div>';
 }
 function achar(lista, ref){ for (var i=0;i<(lista||[]).length;i++){ if (lista[i].ref === ref) return lista[i]; } return null; }
+function opcoesDoPasso(){
+  var p = PASSOS_J[PASSO_J].k;
+  if (p === 'age') return (INTERV.agentes || []).map(function(a){
+    return { ref:a.ref, titulo:a.nome, pe:'esfera ' + (a.esfera || ''), cabe:true };
+  });
+  if (p === 'ins') return (INTERV.instrumentos || []).map(function(x){
+    var cabe = !ESC.age || (x.agentes || []).indexOf(ESC.age) >= 0;
+    return { ref:x.ref, titulo:x.nome, pe:(cabe ? 'cabe ao agente escolhido' : 'não é o meio desse agente'), cabe:cabe };
+  });
+  return (INTERV.detalhamentos || []).map(function(d){
+    var cabe = !ESC.ins || (d.combina_com || []).indexOf(ESC.ins) >= 0;
+    return { ref:d.ref, titulo:d.texto, pe:(cabe ? 'combina com o meio escolhido' : 'não combina com o meio escolhido'), cabe:cabe };
+  });
+}
 function pintarJogo(){
   if (!INTERV) return;
-  var ages = INTERV.agentes || [], inss = INTERV.instrumentos || [], dets = INTERV.detalhamentos || [];
-  document.getElementById('jAge').innerHTML = ages.map(function(a){
-    return '<button class="opJ' + (ESC.age===a.ref?' sel':'') + '" onclick="escolherJogo(\'age\',\'' + a.ref + '\')">'
-      + escapeHTML(a.nome) + '<small>esfera ' + escapeHTML(a.esfera || '') + '</small></button>';
+  var p = PASSOS_J[PASSO_J];
+  var rot = document.getElementById('jRot');
+  if (rot) rot.textContent = (PASSO_J+1) + ' \u00b7 ' + p.rot + '  (passo ' + (PASSO_J+1) + ' de 3)';
+  var alvo = document.getElementById('jLista');
+  if (alvo) alvo.innerHTML = opcoesDoPasso().map(function(o){
+    return '<button class="opJ' + (ESC[p.k]===o.ref ? ' sel' : '') + (o.cabe ? '' : ' bloq') + '"'
+      + ' onclick="escolherJogo(\'' + p.k + '\',\'' + o.ref + '\')">' + escapeHTML(o.titulo)
+      + '<small>' + o.pe + '</small></button>';
   }).join('');
-  document.getElementById('jIns').innerHTML = inss.map(function(x){
-    var cabe = !ESC.age || (x.agentes || []).indexOf(ESC.age) >= 0;
-    return '<button class="opJ' + (ESC.ins===x.ref?' sel':'') + (cabe?'':' bloq') + '" onclick="escolherJogo(\'ins\',\'' + x.ref + '\')">'
-      + escapeHTML(x.nome) + '<small>' + (cabe ? 'cabe ao agente escolhido' : 'não é o meio desse agente') + '</small></button>';
-  }).join('');
-  document.getElementById('jDet').innerHTML = dets.map(function(d){
-    var cabe = !ESC.ins || (d.combina_com || []).indexOf(ESC.ins) >= 0;
-    return '<button class="opJ' + (ESC.det===d.ref?' sel':'') + (cabe?'':' bloq') + '" onclick="escolherJogo(\'det\',\'' + d.ref + '\')">'
-      + escapeHTML(d.texto) + '<small>' + (cabe ? 'combina com o meio escolhido' : 'não combina com o meio escolhido') + '</small></button>';
-  }).join('');
+  var acoes = document.getElementById('jAcoes');
+  if (acoes){
+    var escolhido = !!ESC[p.k];
+    var ultimo = (PASSO_J === PASSOS_J.length - 1);
+    acoes.innerHTML =
+      (PASSO_J > 0 ? '<button class="j2" onclick="passoJogo(-1)">Voltar</button>' : '<button class="j2" onclick="limparJogo()">Começar de novo</button>')
+      + (ultimo
+          ? '<button class="j1" onclick="conferirJogo()">Conferir a proposta</button>'
+          : '<button class="j1"' + (escolhido ? '' : ' disabled style="opacity:.45;"') + ' onclick="passoJogo(1)">Avançar</button>');
+  }
   montarFraseJogo();
+}
+function passoJogo(d){
+  PASSO_J = Math.max(0, Math.min(PASSOS_J.length-1, PASSO_J + d));
+  document.getElementById('jVeredito').innerHTML = '';
+  pintarJogo();
 }
 function escolherJogo(tipo, ref){
   ESC[tipo] = (ESC[tipo] === ref) ? null : ref;
@@ -1083,7 +1120,7 @@ function conferirJogo(){
   }
 }
 function limparJogo(){
-  ESC = { age:null, ins:null, det:null };
+  ESC = { age:null, ins:null, det:null }; PASSO_J = 0;
   document.getElementById('jVeredito').innerHTML = '';
   pintarJogo();
 }
