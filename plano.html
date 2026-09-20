@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Plano de estudos</title>
+<!-- v1-6 (20/09/2026): o texto de cada tarefa passa a ser escrito na hora pela tela, a partir do tipo (e da competência, no exercício). A coluna plano_itens.rotulo continua gravada, mas não manda mais no que aparece — antes, quem já tinha a semana criada continuava vendo o texto antigo. -->
 <!-- v1-5 (20/09/2026): renomeação — a tarefa do dia 2 passa a ser "Flashcards do material de apoio" (antes "Flashcards de repertório"). O nome da C2 ("Tema e repertório") fica como está: é o termo do INEP. -->
 <!-- v1-4 (20/09/2026): renomeação — o rótulo da etapa do dia 1 passa a ser "Material de apoio" (antes "Repertório"). A chave técnica tipo:'repertorio' não muda. -->
 <!-- RedaON · Portal do Aluno · Plano de estudos · produção v1-2 · rotina prepara→fixa→aplica→reflete→trata · dias sugeridos deslizantes · gaveta de descanso (plano_config) -->
@@ -23,7 +24,7 @@
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="aluno-base-v6.css" rel="stylesheet"/>
+<link href="aluno-base-v6.css?v=6-15" rel="stylesheet"/>
 
 <style>
 /* ═══ TELA · Plano de estudos · v1 (produção) ═══ */
@@ -149,7 +150,7 @@
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js"></script>
+<script src="aluno-base-v6.js?v=6-15"></script>
 <script>
 /* ═══ RedaON · Plano de estudos · produção v1-2 (rotina prepara→fixa→aplica→reflete→trata; dia = ORDEM; dias sugeridos deslizantes; plano_config) ═══
    Regra determinística (P1a, custo zero de IA):
@@ -323,6 +324,21 @@ async function atualizarFocoExistente(){
   });
   if (res.ok){ exe.competencia = FOCO; exe.rotulo = rotNovo; toast('Foco de refor\u00e7o atualizado: ' + FOCO); }
 }
+/* v1-6 · o texto de cada tarefa é escrito na hora, a partir do tipo (e da competência, no exercício).
+   A coluna plano_itens.rotulo continua sendo gravada, mas não manda mais no que a tela mostra:
+   assim, quando a RedaON muda uma palavra, quem já tem a semana criada vê o texto novo. */
+function rotularItens(){
+  var modelo = {};
+  montarTarefas().forEach(function(t){ modelo[t.tipo] = t.rotulo; });
+  ITENS.forEach(function(it){
+    if (it.tipo === 'exercicio'){
+      var c = it.competencia || FOCO;
+      it.rotulo = c ? ('Refor\u00e7o de ' + c + ' \u00b7 ' + NOME_COMP[c]) : 'Refor\u00e7o da sua compet\u00eancia mais fraca';
+    } else if (modelo[it.tipo]) {
+      it.rotulo = modelo[it.tipo];
+    }
+  });
+}
 /* Redação da semana marca sozinha (P3): existe redação enviada desde segunda? */
 async function autoMarcarRedacao(uid){
   var item = ITENS.filter(function(i){ return i.tipo==='redacao' && !i.feito_em; })[0];
@@ -495,6 +511,7 @@ function mostrarEstado(id){
     }
 
     await autoMarcarRedacao(uid);
+    rotularItens();
     renderCabecalho();
     renderPlano();
     mostrarEstado('telaPlano');
