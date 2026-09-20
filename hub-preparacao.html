@@ -4,6 +4,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-8 (20/09/2026): as três caixas voltam ao formato de três andares — ícone em cima, nome no meio e
+     estado embaixo, centralizados —, igual no celular e no computador. O ✓ solto saiu: quem diz que está
+     feito é o próprio estado, em verde. -->
 <!-- v2-7 (20/09/2026): "Monte a intervenção" com quatro passos — conjunção conclusiva (proposta da Profa.
      Blanche), agente, meio e detalhamento. A opção já vem com o artigo e a frase para antes dele; o artigo
      sai do campo com_artigo quando existir e, na falta, é deduzido. Fechada a proposta, entra o campo para o
@@ -243,14 +246,13 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 /* v2-1 · as três etapas viram caixas fixas, no estilo das caixas do Início. Só o cartão de
    baixo corre de lado; as caixas ficam paradas e servem de navegação e de estado. */
 .seletorEtapas{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:14px 0 2px; }
-/* v2-5 · caixa centralizada: ícone e nome na mesma linha, no meio, estado embaixo, e o ✓ na
-   linha do nome (antes era absoluto e passava por cima do texto). */
-.cxEtapa{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+/* v2-8 · caixa em três andares, igual no celular e no computador:
+   ícone em cima, nome no meio, estado embaixo — tudo centralizado. */
+.cxEtapa{ display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:4px;
   background:var(--surface); border:1px solid rgba(var(--borderRGB),.14); border-radius:14px;
-  padding:9px 7px 8px; cursor:pointer; font-family:inherit; text-align:center; min-width:0; }
-.cxEtapa .linhaCx{ display:flex; align-items:center; justify-content:center; gap:5px; width:100%; min-width:0; }
-.cxEtapa .fe{ width:19px; height:19px; vertical-align:0; flex:0 0 auto; }
-.cxEtapa b{ font-size:10.5px; font-weight:600; line-height:1.2; color:var(--text2); min-width:0; }
+  padding:10px 6px 9px; cursor:pointer; font-family:inherit; text-align:center; min-width:0; }
+.cxEtapa .fe{ width:22px; height:22px; vertical-align:0; flex:0 0 auto; }
+.cxEtapa b{ display:block; width:100%; font-size:10.5px; font-weight:600; line-height:1.25; color:var(--text2); }
 .cxEtapa .fe{ transition:none; }
 /* onde ele está agora: fundo verde-água e nome em destaque */
 .cxEtapa.aqui{ background:rgba(var(--cyanRGB),.12); border-color:transparent; }
@@ -258,15 +260,14 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 /* etapa já concluída: marca verde no canto e nome em verde; a caixa não fica colorida,
    para não competir com a etapa atual */
 .cxEtapa.feita b{ color:var(--green); }
-.cxEtapa .ok{ flex:0 0 auto; width:15px; height:15px; border-radius:50%; background:var(--green); color:#fff;
-  font-size:9.5px; font-weight:700; line-height:15px; text-align:center; }
+/* o ✓ separado saiu: quem diz que está feito é o próprio estado, em verde */
 /* etapa ainda não concluída: o ícone entra apagado, e ganha cor quando ela é concluída */
 .cxEtapa:not(.feita) .fe{ opacity:.55; }
 .cxEtapa.aqui .fe{ opacity:1; }
 .cxEtapa .rot{ display:block; text-align:center; font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
 .cxEtapa.feita .rot{ color:var(--green); }
 .cxEtapa.aqui .rot{ color:var(--cyan); }
-@media(min-width:641px){ .cxEtapa b{ font-size:12.5px; } .cxEtapa .fe{ width:21px; height:21px; } }
+@media(min-width:641px){ .cxEtapa b{ font-size:12.5px; } .cxEtapa .fe{ width:24px; height:24px; } }
 .trilhoEtapas{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0; padding:12px 0 0; }
 .trilhoEtapas::-webkit-scrollbar{ display:none; }
 /* v2-4 · o painel tem exatamente a largura do trilho. Antes o trilho ganhava 2rem a mais pelas
@@ -421,8 +422,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-7 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-7');
+console.info('RedaON · preparar v2-8 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-8');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -755,9 +756,9 @@ function pintarEtapas(){
     var feita = passosFeitos[e.passo];
     return '<button type="button" class="cxEtapa' + (i===atual ? ' aqui' : '') + (feita ? ' feita' : '') + '"'
       + ' onclick="irEtapa(' + i + ')">'
-      + '<span class="linhaCx">' + feIcone(e.ico) + '<b>' + e.rot + '</b>'
-      + (feita ? '<span class="ok">\u2713</span>' : '') + '</span>'
-      + '<span class="rot">' + (feita ? 'feito' : (i===atual ? 'aqui' : 'a fazer')) + '</span></button>';
+      + feIcone(e.ico)
+      + '<b>' + e.rot + '</b>'
+      + '<span class="rot">' + (feita ? '\u2713 feito' : (i===atual ? 'aqui' : 'a fazer')) + '</span></button>';
   }).join('');
   var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
   var cont = document.getElementById('contaEtapas');
