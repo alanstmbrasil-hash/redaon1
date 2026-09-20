@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-1 (20/09/2026): as três etapas deixam de ser chips que rolam e viram caixas fixas lado a lado,
+     no estilo das caixas do Início; só o cartão de baixo corre de lado. -->
 <!-- v2-0 (18/09/2026): tela refeita. Nome "Preparar", faixa com a capa do tema, três luzes no título,
      três cartões que correm de lado (Entender o tema, Material de apoio, Atividades), Entender já aberto
      com a sinopse, Material só com o que existe no banco (sem gerar por IA), Atividades com flashcards
@@ -224,8 +226,18 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .linhaPrep .troca{ font-size:11px; color:rgba(255,255,255,.9); background:none; border:0; font-family:inherit;
   text-decoration:underline; cursor:pointer; }
 /* etapas */
-.chipsEtapas{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin:0 -1rem 0; padding:12px 1rem 2px; }
-.chipsEtapas::-webkit-scrollbar{ display:none; }
+/* v2-1 · as três etapas viram caixas fixas, no estilo das caixas do Início. Só o cartão de
+   baixo corre de lado; as caixas ficam paradas e servem de navegação e de estado. */
+.seletorEtapas{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:14px 0 2px; }
+.cxEtapa{ position:relative; display:flex; flex-direction:column; align-items:center; gap:5px;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.14); border-radius:14px;
+  padding:10px 6px 9px; cursor:pointer; font-family:inherit; text-align:center; }
+.cxEtapa .fe{ width:22px; height:22px; vertical-align:0; }
+.cxEtapa b{ font-size:11px; font-weight:600; line-height:1.2; color:var(--text2); }
+.cxEtapa.aqui{ background:rgba(var(--cyanRGB),.12); border-color:transparent; }
+.cxEtapa.aqui b{ color:var(--cyan); }
+.cxEtapa .ok{ position:absolute; top:6px; right:7px; font-size:11px; font-weight:700; color:var(--green); }
+@media(min-width:641px){ .cxEtapa b{ font-size:12.5px; } }
 .trilhoEtapas{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -1rem; padding:12px 0 0; }
 .trilhoEtapas::-webkit-scrollbar{ display:none; }
 .painelEtapa{ flex:0 0 100%; scroll-snap-align:center; padding:0 1rem; }
@@ -304,7 +316,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .setasEtapas{ display:none; }
 @media(min-width:641px){
   .faixaTema{ min-height:210px; }
-  .cabTelaPrep, .trilhoEtapas, .chipsEtapas, .ctaPrep{ max-width:760px; margin-left:auto; margin-right:auto; }
+  .cabTelaPrep, .trilhoEtapas, .seletorEtapas, .ctaPrep{ max-width:760px; margin-left:auto; margin-right:auto; }
   .fc{ flex:0 0 42%; }
 }
 </style>
@@ -336,7 +348,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
       </div>
     </div>
 
-    <div class="chipsEtapas" id="chipsEtapas"></div>
+    <div class="seletorEtapas" id="seletorEtapas"></div>
 
     <div class="trilhoEtapas" id="trilhoEtapas">
       <!-- 1 · ENTENDER O TEMA -->
@@ -375,8 +387,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-0 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-0');
+console.info('RedaON · preparar v2-1 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-1');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -705,9 +717,10 @@ function pintarEtapas(){
     return '<button class="lz' + (passosFeitos[e.passo] ? ' on' : '') + (i===atual ? ' aqui' : '') + '"'
       + ' onclick="irEtapa(' + i + ')" title="' + e.rot + '" aria-label="' + e.rot + '">' + feIcone(e.ico) + '</button>';
   }).join('');
-  document.getElementById('chipsEtapas').innerHTML = ETAPAS.map(function(e,i){
-    return '<button class="chip' + (i===atual ? ' on' : '') + '" onclick="irEtapa(' + i + ')">'
-      + feIcone(e.ico) + e.rot + (passosFeitos[e.passo] ? ' \u2713' : '') + '</button>';
+  document.getElementById('seletorEtapas').innerHTML = ETAPAS.map(function(e,i){
+    return '<button type="button" class="cxEtapa' + (i===atual ? ' aqui' : '') + '" onclick="irEtapa(' + i + ')">'
+      + (passosFeitos[e.passo] ? '<span class="ok">\u2713</span>' : '')
+      + feIcone(e.ico) + '<b>' + e.rot + '</b></button>';
   }).join('');
   ['Entender','Material','Atividades'].forEach(function(n,i){
     var el = document.getElementById('fz'+n);
@@ -1052,7 +1065,7 @@ function trocarTemaHub(){
 function modoConvite(){
   document.getElementById('conviteTema').classList.remove('hidden');
   document.getElementById('faixaTema').classList.add('hidden');
-  document.getElementById('chipsEtapas').classList.add('hidden');
+  document.getElementById('seletorEtapas').classList.add('hidden');
   document.getElementById('trilhoEtapas').classList.add('hidden');
 }
 
