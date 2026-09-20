@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-11 (20/09/2026): a busca deixa de esconder o tema procurado. O cartão herói sai de cena quando
+     há busca ou filtro de campo, e nessas horas a lista mostra todos os temas, inclusive o que era o herói.
+     O Enter do teclado fecha o teclado sem recarregar. -->
 <!-- v4-10 (18/09/2026): a versão sai do título da aba (o aluno não vê versão); fica só no console e no
      atributo data-tela. -->
 <!-- v4-9 (18/09/2026): corrigido o desmarcar que voltava do outro aparelho — o banco passa a ser a
@@ -243,7 +246,9 @@ body.semRolar{ overflow:hidden; }
       <button class="fbTema busca" onclick="abrirBusca()">&#128269; Buscar</button>
     </div>
     <div class="linhaBusca colunaTela" id="linhaBusca">
-      <input id="buscaTopo" placeholder="Buscar tema, ano ou campo" oninput="sincronizarBusca(this.value)"/>
+      <input id="buscaTopo" type="search" enterkeyhint="search" placeholder="Buscar tema, ano ou campo"
+             oninput="sincronizarBusca(this.value)"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"/>
       <button class="fbTema" onclick="limparBusca()">Fechar</button>
     </div>
     <div class="pista colunaTela" id="pistaTemas">
@@ -292,8 +297,8 @@ body.semRolar{ overflow:hidden; }
   /* v4-8 · marca de versão para conferir se o arquivo no ar é o novo, sem poluir a tela.
      No computador: F12, aba Console. No celular: dá para ver em chrome://inspect ou pelo
      nome das abas (Todos, RedaON, Meus Temas, ENEM Principal, ENEM Especiais). */
-  console.info('RedaON · temas v4-10 · ' + new Date().toISOString().slice(0,10));
-  document.documentElement.setAttribute('data-tela', 'temas v4-10');
+  console.info('RedaON · temas v4-11 · ' + new Date().toISOString().slice(0,10));
+  document.documentElement.setAttribute('data-tela', 'temas v4-11');
 
   // Professor que abrir esta página vai para o portal dele (decisão 6A)
   (function(){
@@ -509,8 +514,10 @@ body.semRolar{ overflow:hidden; }
     }
     return TEMA_SEMANA ? { t:TEMA_SEMANA, selo:'Tema da semana' } : null;
   }
+  function heroiEscondido(){ return !!textoBusca || campoAtivo !== 'todos'; }
   function montarHeroi(){
     var alvo=document.getElementById('heroiTema'); if(!alvo) return;
+    if (heroiEscondido()){ alvo.innerHTML=''; return; }
     var h=escolherHeroi();
     if (!h){ alvo.innerHTML=''; HEROI_ID=null; return; }
     var t=h.t, feito=MEUS_FEITOS[t.id];
@@ -692,7 +699,7 @@ body.semRolar{ overflow:hidden; }
     var nome = id==='todos' ? 'Campo' : (id==='sem' ? 'Sem campo' : nomeCampo(id));
     document.getElementById('lblCampo').textContent = nome;
     document.getElementById('btCampo').classList.toggle('ativo', id!=='todos');
-    renderGvCampo(); fecharGaveta('gvCampo'); renderTemas();
+    renderGvCampo(); fecharGaveta('gvCampo'); montarHeroi(); renderTemas();
   }
   function toggleGvCampo(){ toggleGaveta('gvCampo'); }
 
@@ -704,11 +711,12 @@ body.semRolar{ overflow:hidden; }
   function limparBusca(){
     var l=document.getElementById('linhaBusca'); l.classList.remove('aberta');
     var i=document.getElementById('buscaTopo'); if(i) i.value='';
-    textoBusca=''; mostrando=LIMITE; renderTemas();
+    textoBusca=''; mostrando=LIMITE; montarHeroi(); renderTemas();
   }
   function sincronizarBusca(v){
     textoBusca = (v || '').toLowerCase().trim();
     mostrando = LIMITE;
+    montarHeroi();
     renderTemas();
   }
 
@@ -734,8 +742,10 @@ body.semRolar{ overflow:hidden; }
             || (t.aplicacao || '').toLowerCase().indexOf(textoBusca) >= 0;
       });
     }
-    /* v4-0 · o herói não se repete na lista, e o que ele já escreveu vai para o fim */
-    if (!op.ignorarHeroi && HEROI_ID) lista = lista.filter(function(t){ return t.id !== HEROI_ID; });
+    /* v4-11 · o herói só é retirado da lista quando ele está aparecendo. Ao buscar ou ao
+       filtrar por campo, o cartão grande sai de cena e a lista precisa mostrar tudo —
+       antes o tema buscado desaparecia justamente por ser o herói. */
+    if (!op.ignorarHeroi && HEROI_ID && !heroiEscondido()) lista = lista.filter(function(t){ return t.id !== HEROI_ID; });
     lista.sort(function(a,b){
       var fa = jaEscreveu(a)?1:0, fb = jaEscreveu(b)?1:0;
       if (fa !== fb) return fa - fb;

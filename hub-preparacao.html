@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-2 (20/09/2026): as luzes do título saíram. No título fica só a conta "x de 3", e o estado mora nas
+     três caixas, com três leituras: "aqui" (fundo verde-água), "feito" (marca verde) e "a fazer" (cinza). -->
 <!-- v2-1 (20/09/2026): as três etapas deixam de ser chips que rolam e viram caixas fixas lado a lado,
      no estilo das caixas do Início; só o cartão de baixo corre de lado. -->
 <!-- v2-0 (18/09/2026): tela refeita. Nome "Preparar", faixa com a capa do tema, três luzes no título,
@@ -212,12 +214,9 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .faixaTema .scrim{ position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.20),rgba(0,0,0,.58)); }
 .topoPrep{ position:relative; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
 .topoPrep h1{ margin:0; font-size:20px; font-weight:600; color:#fff; letter-spacing:-.01em; }
-.luzes{ display:flex; gap:7px; }
-.lz{ width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.22); display:grid; place-items:center;
-  border:0; cursor:pointer; padding:0; }
-.lz .fe{ width:17px; height:17px; vertical-align:0; opacity:.5; filter:grayscale(1); }
-.lz.on{ background:#fff; } .lz.on .fe{ opacity:1; filter:none; }
-.lz.aqui{ box-shadow:0 0 0 2px #fff; }
+/* v2-2 · as luzes saíram: o estado mora nas caixas, e aqui fica só a conta da preparação */
+.contaEtapas{ font-size:11.5px; font-weight:600; color:#fff; background:rgba(0,0,0,.32);
+  padding:4px 11px; border-radius:99px; white-space:nowrap; }
 .temaPrep{ position:relative; margin:0; font-size:16px; font-weight:700; line-height:1.28; color:#fff;
   text-shadow:0 1px 8px rgba(0,0,0,.45); }
 .linhaPrep{ position:relative; display:flex; gap:6px; align-items:center; margin-top:8px; flex-wrap:wrap; }
@@ -234,9 +233,21 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
   padding:10px 6px 9px; cursor:pointer; font-family:inherit; text-align:center; }
 .cxEtapa .fe{ width:22px; height:22px; vertical-align:0; }
 .cxEtapa b{ font-size:11px; font-weight:600; line-height:1.2; color:var(--text2); }
+.cxEtapa .fe{ transition:none; }
+/* onde ele está agora: fundo verde-água e nome em destaque */
 .cxEtapa.aqui{ background:rgba(var(--cyanRGB),.12); border-color:transparent; }
 .cxEtapa.aqui b{ color:var(--cyan); }
-.cxEtapa .ok{ position:absolute; top:6px; right:7px; font-size:11px; font-weight:700; color:var(--green); }
+/* etapa já concluída: marca verde no canto e nome em verde; a caixa não fica colorida,
+   para não competir com a etapa atual */
+.cxEtapa.feita b{ color:var(--green); }
+.cxEtapa .ok{ position:absolute; top:5px; right:6px; width:16px; height:16px; border-radius:50%;
+  background:var(--green); color:#fff; font-size:10px; font-weight:700; line-height:16px; text-align:center; }
+/* etapa ainda não concluída: o ícone entra apagado, e ganha cor quando ela é concluída */
+.cxEtapa:not(.feita) .fe{ opacity:.55; }
+.cxEtapa.aqui .fe{ opacity:1; }
+.cxEtapa .rot{ font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+.cxEtapa.feita .rot{ color:var(--green); }
+.cxEtapa.aqui .rot{ color:var(--cyan); }
 @media(min-width:641px){ .cxEtapa b{ font-size:12.5px; } }
 .trilhoEtapas{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -1rem; padding:12px 0 0; }
 .trilhoEtapas::-webkit-scrollbar{ display:none; }
@@ -339,7 +350,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
       <span class="scrim"></span>
       <div class="topoPrep">
         <h1>Preparar</h1>
-        <div class="luzes" id="luzes"></div>
+        <span class="contaEtapas" id="contaEtapas">0 de 3</span>
       </div>
       <p class="temaPrep" id="temaPrep"></p>
       <div class="linhaPrep">
@@ -387,8 +398,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-1 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-1');
+console.info('RedaON · preparar v2-2 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-2');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -713,15 +724,19 @@ function preencherFaixa(){
   document.getElementById('ctaPrep').classList.remove('hidden');
 }
 function pintarEtapas(){
-  document.getElementById('luzes').innerHTML = ETAPAS.map(function(e,i){
-    return '<button class="lz' + (passosFeitos[e.passo] ? ' on' : '') + (i===atual ? ' aqui' : '') + '"'
-      + ' onclick="irEtapa(' + i + ')" title="' + e.rot + '" aria-label="' + e.rot + '">' + feIcone(e.ico) + '</button>';
-  }).join('');
+  /* v2-2 · a caixa diz três coisas sem poluir: onde ele está (fundo verde-água),
+     o que já concluiu (marca verde e a palavra "feito") e o que falta (cinza, "a fazer"). */
   document.getElementById('seletorEtapas').innerHTML = ETAPAS.map(function(e,i){
-    return '<button type="button" class="cxEtapa' + (i===atual ? ' aqui' : '') + '" onclick="irEtapa(' + i + ')">'
-      + (passosFeitos[e.passo] ? '<span class="ok">\u2713</span>' : '')
-      + feIcone(e.ico) + '<b>' + e.rot + '</b></button>';
+    var feita = passosFeitos[e.passo];
+    return '<button type="button" class="cxEtapa' + (i===atual ? ' aqui' : '') + (feita ? ' feita' : '') + '"'
+      + ' onclick="irEtapa(' + i + ')">'
+      + (feita ? '<span class="ok">\u2713</span>' : '')
+      + feIcone(e.ico) + '<b>' + e.rot + '</b>'
+      + '<span class="rot">' + (feita ? 'feito' : (i===atual ? 'aqui' : 'a fazer')) + '</span></button>';
   }).join('');
+  var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
+  var cont = document.getElementById('contaEtapas');
+  if (cont) cont.textContent = n + ' de 3';
   ['Entender','Material','Atividades'].forEach(function(n,i){
     var el = document.getElementById('fz'+n);
     if (!el) return;
