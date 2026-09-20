@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Preparação</title>
+<title>RedaON | Preparar</title>
+<!-- v2-0 (18/09/2026): tela refeita. Nome "Preparar", faixa com a capa do tema, três luzes no título,
+     três cartões que correm de lado (Entender o tema, Material de apoio, Atividades), Entender já aberto
+     com a sinopse, Material só com o que existe no banco (sem gerar por IA), Atividades com flashcards
+     tirados das fichas e o jogo "Monte a intervenção" (competência 5), Quiz e Resumo mostrados como em
+     preparação até a Fábrica produzir, e a luz só acende no botão de concluir. -->
 <!-- RedaON · Portal do Aluno · Hub de Preparação · produção v1-14 (quatro estados · selo RedaON · prévia · só fichas aprovadas · Entender em JSON fixo · v1-14) · sobre aluno-base-v6 -->
 <script>
 (function(){
@@ -197,455 +202,221 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .repUsoTxt{ font-size:.73rem; color:var(--text2); line-height:1.55; }
 </style>
 
-</head>
-<body>
 
+<style>
+/* ═══ Preparar · v2-0 · o que é só desta tela (o resto vem do kit da base) ═══ */
+.faixaTema{ position:relative; min-height:170px; display:flex; flex-direction:column; justify-content:flex-end;
+  padding:14px 16px 16px; margin:-1rem -1rem 0; }
+.faixaTema .scrim{ position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.20),rgba(0,0,0,.58)); }
+.topoPrep{ position:relative; display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.topoPrep h1{ margin:0; font-size:20px; font-weight:600; color:#fff; letter-spacing:-.01em; }
+.luzes{ display:flex; gap:7px; }
+.lz{ width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.22); display:grid; place-items:center;
+  border:0; cursor:pointer; padding:0; }
+.lz .fe{ width:17px; height:17px; vertical-align:0; opacity:.5; filter:grayscale(1); }
+.lz.on{ background:#fff; } .lz.on .fe{ opacity:1; filter:none; }
+.lz.aqui{ box-shadow:0 0 0 2px #fff; }
+.temaPrep{ position:relative; margin:0; font-size:16px; font-weight:700; line-height:1.28; color:#fff;
+  text-shadow:0 1px 8px rgba(0,0,0,.45); }
+.linhaPrep{ position:relative; display:flex; gap:6px; align-items:center; margin-top:8px; flex-wrap:wrap; }
+.linhaPrep .tg{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#fff;
+  background:rgba(0,0,0,.32); padding:3px 9px; border-radius:99px; }
+.linhaPrep .troca{ font-size:11px; color:rgba(255,255,255,.9); background:none; border:0; font-family:inherit;
+  text-decoration:underline; cursor:pointer; }
+/* etapas */
+.chipsEtapas{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin:0 -1rem 0; padding:12px 1rem 2px; }
+.chipsEtapas::-webkit-scrollbar{ display:none; }
+.trilhoEtapas{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -1rem; padding:12px 0 0; }
+.trilhoEtapas::-webkit-scrollbar{ display:none; }
+.painelEtapa{ flex:0 0 100%; scroll-snap-align:center; padding:0 1rem; }
+.cabEtapa{ display:flex; align-items:center; gap:8px; margin:0 2px 10px; }
+.cabEtapa .fe{ width:22px; height:22px; vertical-align:0; }
+.cabEtapa b{ font-size:15px; color:var(--text); }
+.cabEtapa .fz{ margin-left:auto; font-size:11px; color:var(--muted); }
+.cabEtapa .fz.ok{ color:var(--green); font-weight:600; }
+.cxPrep{ background:var(--surface); border-radius:16px; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:14px; }
+.sinPrep{ margin:0 0 10px; font-size:13.5px; line-height:1.5; color:var(--text2); }
+.blPrep{ display:flex; gap:10px; align-items:flex-start; background:var(--surface2); border-radius:12px; padding:10px 12px; margin-bottom:8px; }
+.blPrep .fe{ width:19px; height:19px; flex:0 0 auto; vertical-align:0; }
+.blPrep b{ display:block; font-size:12.5px; color:var(--text); margin-bottom:2px; }
+.blPrep p{ margin:0; font-size:12px; line-height:1.45; color:var(--text2); }
+.btConcluir{ width:100%; margin-top:6px; border:0; border-radius:12px; background:rgba(var(--greenRGB),.14);
+  color:var(--green); font-family:inherit; font-size:13px; font-weight:600; padding:11px 0; cursor:pointer; }
+.btConcluir.feito{ background:rgba(var(--greenRGB),.24); }
+.linPrep{ display:flex; align-items:center; gap:11px; background:var(--surface); border-radius:14px;
+  box-shadow:0 1px 6px rgba(var(--borderRGB),.06); padding:11px 13px; margin-bottom:8px; cursor:pointer; }
+.linPrep .fe{ width:23px; height:23px; flex:0 0 auto; vertical-align:0; }
+.linPrep .tx{ flex:1; min-width:0; }
+.linPrep b{ display:block; font-size:13px; color:var(--text); }
+.linPrep span{ font-size:11px; color:var(--muted); }
+.linPrep i.seta{ margin-left:auto; color:var(--muted); font-style:normal; }
+.linPrep.nova{ outline:1.5px dashed rgba(var(--cyanRGB),.5); }
+.linPrep.espera{ opacity:.7; cursor:default; }
+.selEspera{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--gold);
+  background:rgba(var(--goldRGB),.14); padding:2px 8px; border-radius:99px; }
+.gavetaMat{ max-height:0; overflow:hidden; transition:max-height .28s ease; }
+.gavetaMat.aberta{ max-height:2600px; }
+.gavetaIn{ padding:4px 2px 10px; }
+/* fichas */
+.repItem{ background:var(--surface); border-radius:14px; box-shadow:0 1px 6px rgba(var(--borderRGB),.06);
+  padding:12px 13px; margin-bottom:8px; }
+.repFonte{ margin:0 0 5px; font-size:11.5px; font-weight:600; color:var(--cyan); }
+.repDado{ margin:0; font-size:12.5px; line-height:1.5; color:var(--text2); }
+.repUsoZona{ margin-top:9px; background:var(--surface2); border-radius:11px; padding:9px 11px; }
+.repUsoRot{ margin:0 0 3px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+.repUsoTxt{ margin:0; font-size:12px; line-height:1.45; color:var(--text); }
+.emPreparo{ font-size:12.5px; color:var(--muted); margin:2px 2px 10px; }
+/* flashcards */
+.fcTrilho{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:2px 0 6px; }
+.fcTrilho::-webkit-scrollbar{ display:none; }
+.fc{ flex:0 0 78%; scroll-snap-align:center; min-height:150px; background:var(--surface); border-radius:16px;
+  box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:14px; cursor:pointer; display:flex; flex-direction:column; justify-content:center; }
+.fc .fcRot{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 6px; }
+.fc p{ margin:0; font-size:13px; line-height:1.45; color:var(--text); }
+.fc .fcTexto{ white-space:pre-line; }
+.fc.virado{ background:rgba(var(--cyanRGB),.10); }
+/* monte a intervenção */
+.jogo{ background:var(--surface); border-radius:16px; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:14px; margin-top:4px; }
+.jogo h3{ margin:0 0 4px; font-size:14px; color:var(--text); }
+.jogo p.ex{ margin:0 0 10px; font-size:12px; color:var(--muted); }
+.passoJ{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:12px 0 6px; }
+.opJ{ display:block; width:100%; text-align:left; font-family:inherit; font-size:12.5px; line-height:1.4; color:var(--text);
+  background:var(--surface2); border:1.5px solid transparent; border-radius:12px; padding:10px 12px; margin-bottom:7px; cursor:pointer; }
+.opJ small{ display:block; font-size:10.5px; color:var(--muted); margin-top:2px; }
+.opJ.sel{ border-color:var(--cyan); background:rgba(var(--cyanRGB),.10); }
+.opJ.bloq{ opacity:.45; }
+.fraseJ{ margin-top:14px; background:var(--surface2); border-radius:12px; padding:12px; font-size:13px; line-height:1.55; color:var(--text2); }
+.fraseJ b{ color:var(--cyan); }
+.veredito{ margin-top:10px; font-size:12.5px; line-height:1.45; padding:10px 12px; border-radius:12px; }
+.veredito.ok{ background:rgba(var(--greenRGB),.14); color:var(--green); }
+.veredito.meio{ background:rgba(var(--goldRGB),.14); color:var(--gold); }
+.acoesJ{ display:flex; align-items:center; gap:9px; margin-top:12px; }
+.acoesJ button{ flex:1 1 0; height:44px; border:0; border-radius:12px; font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; }
+.acoesJ .j1{ background:var(--cyan); color:var(--onCyan); } .acoesJ .j2{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.naoServe{ margin:12px 0 0; font-size:11.5px; color:var(--muted); }
+.naoServe b{ color:var(--text); }
+/* cta */
+.ctaPrep{ margin-top:18px; background:var(--surface); border-radius:16px; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:14px; }
+.ctaPrep .t{ margin:0; font-size:14px; font-weight:700; color:var(--text); }
+.ctaPrep .s{ margin:3px 0 10px; font-size:11.5px; color:var(--muted); }
+.btEscrever{ width:100%; border:0; border-radius:13px; background:var(--cyan); color:var(--onCyan);
+  font-family:inherit; font-size:13.5px; font-weight:600; padding:12px 0; cursor:pointer; }
+.setasEtapas{ display:none; }
+@media(min-width:641px){
+  .faixaTema{ min-height:210px; }
+  .cabTelaPrep, .trilhoEtapas, .chipsEtapas, .ctaPrep{ max-width:760px; margin-left:auto; margin-right:auto; }
+  .fc{ flex:0 0 42%; }
+}
+</style>
+</head>
+
+<body class="aquarela">
 
 <div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
-<div id="conteudo">
+  <div id="conteudo">
 
-  <!-- Prévia da equipe pedagógica (?previa=1) -->
-  <div class="faixaPrevia hidden" id="faixaPrevia"><span>👁️</span><span>Prévia · o aluno ainda não vê</span></div>
+    <!-- CONVITE: nenhum tema resolvido pela cascata -->
+    <div class="cxPrep hidden" id="conviteTema" style="margin-top:1rem;">
+      <p class="t" style="margin:0;font-size:14px;font-weight:700;">Escolha um tema para se preparar</p>
+      <p class="s" style="margin:4px 0 10px;font-size:12px;color:var(--muted);">A preparação acontece em cima de um tema. Vá à biblioteca e escolha o seu.</p>
+      <button class="btEscrever" onclick="window.location.href='temas.html'">Escolher um tema</button>
+    </div>
 
-  <!-- CONVITE (A7 degrau 5): sem tema em nenhum degrau da cascata -->
-  <div class="card cardCTA hidden" id="conviteTema" style="margin-top:1.1rem;">
-    <p class="t">Escolha um tema para se preparar 🎯</p>
-    <p class="s">A preparação acontece em cima de um tema. Vá à biblioteca e escolha o seu.</p>
-    <button class="btnEscrever" onclick="window.location.href='temas.html'">Escolher um tema</button>
-  </div>
-
-  <!-- CABEÇALHO + PROGRESSO -->
-  <div class="duplaTopo">
-    <div>
-      <p class="rotuloTopo">Preparação para o tema</p>
-      <p class="tituloTema" id="tituloTema"></p>
-      <div class="linhaTema">
-        <span class="tagTema" id="tagTema"></span>
-        <span class="tagTema" style="background:rgba(var(--cyanRGB),.1);color:var(--cyan);" id="tagFonte"></span>
-        <button class="trocarTema" onclick="trocarTemaHub()">Trocar tema</button>
+    <!-- FAIXA COM A CAPA DO TEMA -->
+    <div class="faixaTema hidden" id="faixaTema">
+      <span class="scrim"></span>
+      <div class="topoPrep">
+        <h1>Preparar</h1>
+        <div class="luzes" id="luzes"></div>
+      </div>
+      <p class="temaPrep" id="temaPrep"></p>
+      <div class="linhaPrep">
+        <span class="tg" id="tgFonte"></span><span class="tg" id="tgCampo"></span>
+        <button class="troca" onclick="trocarTemaHub()">Trocar tema</button>
       </div>
     </div>
-    <div class="card cardProgresso">
-      <div class="topoP" style="margin-bottom:.85rem;"><span class="rotP">SUA PREPARAÇÃO</span><span class="numP"><span id="pFeitos">0</span>/3</span></div>
-      <div class="estrada">
-        <div class="no" id="no-entender"><i class="ic">💡</i>Entender</div>
-        <div class="segT"><i id="segT1"></i></div>
-        <div class="no" id="no-repertorio"><i class="ic">📚</i>Repertório</div>
-        <div class="segT"><i id="segT2"></i></div>
-        <div class="no" id="no-estudio"><i class="ic">🧠</i>Estúdio</div>
-        <div class="segT"><i id="segT3"></i></div>
-        <div class="no destino" id="no-escrever"><i class="ic">✏️</i>Escrever</div>
-      </div>
+
+    <div class="chipsEtapas" id="chipsEtapas"></div>
+
+    <div class="trilhoEtapas" id="trilhoEtapas">
+      <!-- 1 · ENTENDER O TEMA -->
+      <section class="painelEtapa">
+        <div class="cabEtapa" data-fe="lampada"><b>Entender o tema</b><span class="fz" id="fzEntender"></span></div>
+        <div id="boxEntender"><p class="emPreparo">Abrindo o resumo do tema…</p></div>
+      </section>
+      <!-- 2 · MATERIAL DE APOIO -->
+      <section class="painelEtapa">
+        <div class="cabEtapa" data-fe="livros"><b>Material de apoio</b><span class="fz" id="fzMaterial"></span></div>
+        <div id="blocoProfessora" class="hidden">
+          <p class="emPreparo" style="font-weight:600;color:var(--text);">Da sua professora</p>
+          <div id="listaProfessora"></div>
+        </div>
+        <div id="listaEixos"><p class="emPreparo">Buscando o material deste tema…</p></div>
+        <div id="acoesMaterial"></div>
+      </section>
+      <!-- 3 · ATIVIDADES -->
+      <section class="painelEtapa">
+        <div class="cabEtapa" data-fe="alvo"><b>Atividades</b><span class="fz" id="fzAtividades"></span></div>
+        <div id="listaAtividades"></div>
+        <div id="acoesAtividades"></div>
+      </section>
     </div>
-  </div>
 
-  <!-- 1 · ENTENDER O TEMA -->
-  <div class="card secCaixa"><span class="bar"></span>Entender o tema</div>
-  <div class="eixoItem entender" id="eixo-entender">
-    <button class="cabeca" onclick="toggleEixo('entender')">
-      <i class="pemoji">💡</i><span class="nome">Recorte · o que a banca espera · armadilhas</span>
-      <span class="estado" id="estado-entender">pronto</span><i class="seta">›</i>
-    </button>
-    <div class="corpo"><div class="corpoIn" id="corpo-entender"></div></div>
-  </div>
-
-  <!-- 2 · REPERTÓRIO -->
-  <div class="card secCaixa"><span class="bar"></span>Repertório</div>
-  <button class="btnGerarTudo" id="btnGerarTudo" onclick="gerarTudo()">⚡ Gerar todo o repertório</button>
-  <p class="rotuloCurado">Relevantes para este tema</p>
-  <div id="listaRelevantes"></div>
-  <button class="btnVerTodos" id="btnVerTodos" onclick="verTodos()">Ver todos os eixos</button>
-  <div id="listaOutros" class="hidden"></div>
-
-  <!-- 3 · ESTÚDIO -->
-  <div class="card secCaixa"><span class="bar"></span>Estúdio</div>
-  <div id="blocoDisponibilizados">
-    <p class="rotuloCurado" style="margin-top:.1rem;">Disponibilizados para você</p>
-    <div id="listaDisponibilizados"></div>
-  </div>
-  <p class="rotuloCurado">Acervo do tema</p>
-  <div class="duplaEstudio">
-    <div>
-      <div class="matWrap" id="mat-resumo">
-        <div class="matItem"><i class="memoji">📄</i><div class="info"><p class="nm">Resumo do tema</p><p class="ds">Síntese para revisar antes de escrever</p></div><button class="btnAbrir" onclick="abrirMat('resumo')">Abrir</button></div>
-        <div class="painelMat"><div class="painelIn" id="painel-resumo"></div></div>
-      </div>
-      <div class="matWrap" id="mat-flash">
-        <div class="matItem"><i class="memoji">🃏</i><div class="info"><p class="nm">Flashcards</p><p class="ds">Cartões de revisão — toque para virar</p></div><button class="btnAbrir" onclick="abrirMat('flash')">Abrir</button></div>
-        <div class="painelMat"><div class="painelIn" id="painel-flash"></div></div>
-      </div>
+    <div class="ctaPrep hidden" id="ctaPrep">
+      <p class="t">Pronto para escrever?</p>
+      <p class="s">Você explorou o tema. Hora de colocar em prática.</p>
+      <button class="btEscrever" onclick="irEscreverHub()">Estou pronto — Escrever</button>
     </div>
-    <div>
-      <div class="matWrap" id="mat-quiz">
-        <div class="matItem"><i class="memoji">❓</i><div class="info"><p class="nm">Quiz do tema</p><p class="ds">Questões estilo ENEM</p></div><button class="btnAbrir" onclick="abrirMat('quiz')">Abrir</button></div>
-        <div class="painelMat"><div class="painelIn" id="painel-quiz"></div></div>
-      </div>
-      <button class="atalhoEstudio" onclick="mostrarEmBreve('Mais formatos do Estúdio')">✨ Mais formatos no IA Estúdio →</button>
-    </div>
-  </div>
 
-  <!-- 4 · CTA -->
-  <div class="card cardCTA">
-    <p class="t">Pronto para escrever? ✍️</p>
-    <p class="s">Você explorou o tema. Hora de colocar em prática.</p>
-    <button class="btnEscrever" id="ctaEscrever" onclick="abrirMetodos()">Estou pronto — Escrever</button>
-  </div>
-
-</div>
-</div>
-
-<!-- Mini-conquista (sobe ao centro a cada etapa, atualiza a trilha e some) -->
-<div class="miniVeu" id="miniVeu">
-  <div class="miniCard">
-    <p class="miniRot" id="miniRot">Etapa concluída!</p>
-    <div class="estrada">
-      <div class="no" id="m-entender"><i class="ic">💡</i>Entender</div>
-      <div class="segT"><i id="mSeg1"></i></div>
-      <div class="no" id="m-repertorio"><i class="ic">📚</i>Repertório</div>
-      <div class="segT"><i id="mSeg2"></i></div>
-      <div class="no" id="m-estudio"><i class="ic">🧠</i>Estúdio</div>
-      <div class="segT"><i id="mSeg3"></i></div>
-      <div class="no destino" id="m-escrever"><i class="ic">✏️</i>Escrever</div>
-    </div>
-  </div>
-</div>
-
-<!-- Conquista central (sobe ao completar 3/3) -->
-<div class="veu" id="veuConquista" onclick="if(event.target.id==='veuConquista')this.classList.remove('show')">
-  <div class="conquista">
-    <i class="circulao">✏️</i>
-    <span class="rotConq">Preparação completa!</span>
-    <button class="btnConq" onclick="event.stopPropagation();document.getElementById('veuConquista').classList.remove('show');abrirMetodos();">Estou pronto — Escrever</button>
-    <span class="dicaFechar">toque fora para continuar na página</span>
   </div>
 </div>
 
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js"></script>
 <script>
-/* ═══ RedaON · Hub de Preparação · produção v1-14 (quatro estados · selo RedaON · prévia · só fichas aprovadas · Entender em JSON fixo · v1-14) ═══ */
-/* ── Prévia da Profa. Blanche: hub-preparacao.html?tema=<id>&previa=1 ──
-   Abre o tema mesmo inativo e sem exigir perfil de aluno. Quem não passa em
-   eh_pedagogica() cai no fluxo normal do aluno. */
-var PREVIA = false;
-try{ PREVIA = new URLSearchParams(window.location.search).get('previa') === '1'; }catch(e){}
-if (typeof authGuard === 'function') { PREVIA ? authGuard() : authGuard('aluno'); }
+if (typeof authGuard === 'function') { authGuard('aluno'); }
+console.info('RedaON · preparar v2-0 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-0');
 
-montarEsqueleto({
-  ativo:  '',
-  titulo: 'Preparação',
-  icone:  'auto_stories',
-  sino:   true,
-  versao: 'aluno \u00b7 prepara\u00e7\u00e3o \u00b7 v1-14'
-});
+montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
+feHidratar(document);
 
-/* ───────────────────────────────────────────────────────────────
-   ESTADO GLOBAL DA TELA
-   ─────────────────────────────────────────────────────────────── */
-var TEMA = null;          /* objeto do tema resolvido pela cascata A7 */
-var TEMA_ID = null;       /* uuid quando tema oficial (habilita cache + preparacoes) */
-var TITULO = '';
-var TEMA_EH_SEMANA = false;
-var PREPARACAO = null;    /* linha de `preparacoes` deste aluno×tema, se existir */
-
-var ORDEM_PASSOS = ['entender','repertorio','estudio'];
-var passosFeitos = { entender:false, repertorio:false, estudio:false };
-var ROTULOS_MINI = { entender:'Voc\u00ea entendeu o tema! \uD83D\uDCA1', repertorio:'Repert\u00f3rio no bolso! \uD83D\uDCDA', estudio:'Est\u00fadio explorado! \uD83E\uDDE0' };
-
-/* Declaração explícita: o ALUNO marca a conclusão no fim do conteúdo.
-   O dourado é declaração dele, nunca chancela nossa. Flashcards/quiz seguem por interação real. */
-var ROTULO_CONCLUIR = { entender:'Entendi o tema', repertorio:'Repert\u00f3rio anotado', estudio:'Revis\u00e3o feita' };
-function htmlConcluir(passo, rotulo){
-  if (passosFeitos[passo]) return '';
-  return '<button class="btnConcluir" data-passo="'+passo+'" onclick="concluirEtapa(\''+passo+'\')">\u2713 '+(rotulo||ROTULO_CONCLUIR[passo])+'</button>';
-}
-function concluirEtapa(passo){ marcarPassoHub(passo); }
-
-/* ───────────────────────────────────────────────────────────────
-   ESTRADA — S1 (corre até a porta) + L1 (avanço contíguo) + mini-conquista
-   (lógica idêntica à prévia v1-6 aprovada)
-   ─────────────────────────────────────────────────────────────── */
-function _fronteira(){
-  var k = 0;
-  while (k < 3 && passosFeitos[ORDEM_PASSOS[k]]) k++;
-  return k;
-}
-function _pintarTrilha(prefixo, atrasoBase){
-  var k = _fronteira(), atraso = atrasoBase || 350;
-  for (var i = 1; i <= k; i++){
-    (function(seg, quando){
-      if (seg && seg.style.width !== '100%') setTimeout(function(){ seg.style.width = '100%'; }, quando);
-    })(document.getElementById(prefixo+i), atraso);
-    atraso += 300;
-  }
-  return atraso;
-}
-function marcarPassoHub(p){
-  if (passosFeitos[p] === undefined || passosFeitos[p]) return;
-  passosFeitos[p] = true;
-  var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
-  gravarDeclaracao(p, n === 3);
-  /* card fixo do topo: sempre em dia, pra consulta a qualquer momento */
-  var no = document.getElementById('no-'+p);
-  no.classList.add('ouro','pulsa');
-  setTimeout(function(){ no.classList.remove('pulsa'); }, 1300);
-  document.getElementById('pFeitos').textContent = n;
-  _pintarTrilha('segT');
-  /* botões de conclusão desta etapa viram estado feito */
-  document.querySelectorAll('.btnConcluir[data-passo="'+p+'"]').forEach(function(b){
-    b.disabled = true; b.classList.add('feito'); b.textContent = '\u2713 Conclu\u00eddo';
-  });
-  /* mini-conquista central: a recompensa vai até o aluno, onde ele estiver */
-  mostrarMini(p, n === 3);
-}
-var _miniTimer = null;
-function mostrarMini(p, completo){
-  var veu = document.getElementById('miniVeu');
-  clearTimeout(_miniTimer);
-  veu.classList.remove('saindo');
-  veu.classList.add('show');
-  document.getElementById('miniRot').textContent = ROTULOS_MINI[p];
-  ORDEM_PASSOS.forEach(function(k){
-    if (passosFeitos[k] && k !== p) document.getElementById('m-'+k).classList.add('ouro');
-  });
-  setTimeout(function(){
-    var no = document.getElementById('m-'+p);
-    no.classList.add('ouro','pulsa');
-    setTimeout(function(){ no.classList.remove('pulsa'); }, 1300);
-  }, 300);
-  var fim = _pintarTrilha('mSeg', 700);
-  if (completo){
-    setTimeout(function(){
-      document.getElementById('m-escrever').classList.add('ouro','pulsa');
-    }, fim + 300);
-    _miniTimer = setTimeout(function(){
-      esconderMini();
-      conquistaPreparacao(0);
-    }, fim + 1500);
-  } else {
-    _miniTimer = setTimeout(esconderMini, fim + 1500);
-  }
-}
-function esconderMini(){
-  var veu = document.getElementById('miniVeu');
-  veu.classList.add('saindo');
-  setTimeout(function(){ veu.classList.remove('show','saindo'); }, 320);
-}
-function conquistaPreparacao(atraso){
-  setTimeout(function(){
-    var d = document.getElementById('no-escrever');
-    d.classList.add('ouro','pulsa');
-    setTimeout(function(){ d.classList.remove('pulsa'); }, 1500);
-    var card = document.querySelector('.cardProgresso');
-    if (card) card.classList.add('ouro');
-    var cta = document.getElementById('ctaEscrever');
-    if (cta) cta.classList.add('ouro');
-    setTimeout(function(){
-      document.getElementById('veuConquista').classList.add('show');
-    }, 600);
-  }, atraso);
-}
-
-/* ───────────────────────────────────────────────────────────────
-   PREPARACOES — memória do Hub (re-hidratação + gravação por declaração)
-   ─────────────────────────────────────────────────────────────── */
-async function carregarPreparacao(){
-  if (!TEMA_ID) return;
-  try {
-    var uid = authGetUserId();
-    if (!uid) return;
-    var url = SUPABASE_URL + '/rest/v1/preparacoes?select=entender_em,repertorio_em,estudio_em,concluida_em&aluno_id=eq.' + uid + '&tema_id=eq.' + TEMA_ID + '&limit=1';
-    var res = await dbFetch(url, {});
-    if (!res.ok) return;
-    var rows = await res.json();
-    if (rows && rows.length) { PREPARACAO = rows[0]; aplicarPreparacaoSalva(PREPARACAO); }
-  } catch(e){ console.warn('[preparacoes] carga:', e); }
-}
-/* Re-hidrata a trilha SEM animação nem conquistas: estado conferível, não festa repetida */
-function aplicarPreparacaoSalva(r){
-  ORDEM_PASSOS.forEach(function(p){
-    if (r[p+'_em']) {
-      passosFeitos[p] = true;
-      var no = document.getElementById('no-'+p);
-      if (no) no.classList.add('ouro');
-    }
-  });
-  var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
-  document.getElementById('pFeitos').textContent = n;
-  var k = _fronteira();
-  for (var i = 1; i <= k; i++){
-    var seg = document.getElementById('segT'+i);
-    if (seg){ seg.style.transition = 'none'; seg.style.width = '100%'; }
-  }
-  if (n === 3){
-    var d = document.getElementById('no-escrever');
-    if (d) d.classList.add('ouro');
-    var seg3 = document.getElementById('segT3');
-    if (seg3){ seg3.style.transition = 'none'; seg3.style.width = '100%'; }
-    var card = document.querySelector('.cardProgresso');
-    if (card) card.classList.add('ouro');
-    var cta = document.getElementById('ctaEscrever');
-    if (cta) cta.classList.add('ouro');
-  }
-}
-function gravarDeclaracao(passo, completou){
-  if (!TEMA_ID) return; /* tema livre: sem memória no banco */
-  try {
-    var uid = authGetUserId();
-    if (!uid) return;
-    var agora = new Date().toISOString();
-    var body = { aluno_id: uid, tema_id: TEMA_ID };
-    body[passo + '_em'] = agora;
-    if (completou) body.concluida_em = agora;
-    dbFetch(SUPABASE_URL + '/rest/v1/preparacoes?on_conflict=aluno_id,tema_id', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify(body)
-    }).catch(function(e){ console.warn('[preparacoes] upsert:', e); });
-  } catch(e){ console.warn('[preparacoes] upsert:', e); }
-}
-
-/* ───────────────────────────────────────────────────────────────
-   MOTOR GEMINI (transplantado da produção antiga — INTOCADO na essência)
-   ─────────────────────────────────────────────────────────────── */
-async function geminiGenerate(prompt) {
-  var res = await fetch('/api/gemini', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-  });
-  var data = await res.json();
-  if (!res.ok) throw new Error((data.error && data.error.message) || 'Erro Gemini');
-  return data.candidates[0].content.parts[0].text;
-}
-
-/* Trava de segurança — palavras/frases bloqueadas (transplantada) */
-var FRASES_BLOQUEADAS_HUB = [
-  'apologia ao nazismo','apologia ao fascismo','apologia ao racismo',
-  'genoc\u00eddio','exterm\u00ednio de',
-  'pornografia infantil','pedofilia','abuso sexual infantil',
-  'incentivo ao suic\u00eddio','apologia ao suic\u00eddio',
-  'ra\u00e7a superior','ra\u00e7a inferior',
-  'matar pessoas','eliminar grupo','inferiorizar',
-  'discurso de \u00f3dio','estupro como solu\u00e7\u00e3o','tortura como solu\u00e7\u00e3o'
+/* ─────────── estado ─────────── */
+var TEMA = null, TEMA_ID = null, TITULO = '', TEMA_EH_SEMANA = false, PREVIA = false;
+var ORDEM_PASSOS = ['entender','repertorio','estudio'];   /* nomes das colunas no banco */
+var ETAPAS = [
+  { passo:'entender',   rot:'Entender o tema',  ico:'lampada' },
+  { passo:'repertorio', rot:'Material de apoio', ico:'livros' },
+  { passo:'estudio',    rot:'Atividades',        ico:'alvo' }
 ];
-function checarTemaSensivelHub(t){
-  if(!t)return null;
-  var lower=t.toLowerCase();
-  for(var i=0;i<FRASES_BLOQUEADAS_HUB.length;i++){ if(lower.indexOf(FRASES_BLOQUEADAS_HUB[i].toLowerCase())>=0) return FRASES_BLOQUEADAS_HUB[i]; }
-  return null;
-}
-function htmlTemaBloqueado(){
-  return '<div class="avisoBloqueio">' +
-    '<p class="tb">\uD83D\uDEE1\uFE0F Tema n\u00e3o p\u00f4de ser processado</p>' +
-    '<p class="sb">Identificamos termos sens\u00edveis no tema. A RedaON foca em temas que respeitam direitos humanos, dignidade e diversidade \u2014 alinhados com as compet\u00eancias oficiais do ENEM (especialmente C5).</p>' +
-    '<p class="sb">Volte \u00e0 <a href="temas.html">Biblioteca de Temas</a> e escolha um tema oficial.</p></div>';
-}
+var passosFeitos = { entender:false, repertorio:false, estudio:false };
+var atual = 0;
+var MATERIAL = {};        /* eixo -> { conteudo, estado, fichas } */
+var PREPARACAO = null;
+var CAMPOS_COR = { trabalho:['#b07d10','#8a5a00'], educacao:['#1f6fb2','#0a8c8d'], saude:['#0f8a4d','#0a8c8d'],
+  cidadania:['#5a4fc4','#1f6fb2'], cultura:['#8a5cc4','#c4488f'], tecnologia:['#0a8c8d','#5a4fc4'],
+  meio_ambiente:['#0f8a4d','#5a8c10'], alimentacao:['#c47a10','#8a9c10'], infancia:['#c4488f','#c47a10'],
+  mulher:['#c4488f','#8a5cc4'], violencia:['#b2452f','#8a2f4a'], envelhecimento:['#b07d10','#0f8a4d'],
+  saneamento:['#1f6fb2','#0f8a4d'] };
+var NOME_CAMPO = { trabalho:'Trabalho', educacao:'Educação', saude:'Saúde', cidadania:'Cidadania', cultura:'Cultura',
+  tecnologia:'Tecnologia', meio_ambiente:'Meio ambiente', alimentacao:'Alimentação', infancia:'Infância',
+  mulher:'Mulher', violencia:'Violência', envelhecimento:'Envelhecimento', saneamento:'Saneamento' };
+var EIXOS_META = [
+  { id:'legislacao',    rot:'Legislação',          ico:'balanca' },
+  { id:'atualidades',   rot:'Atualidades e dados', ico:'graficoBarras' },
+  { id:'especialistas', rot:'Especialistas',       ico:'professor' },
+  { id:'historia',      rot:'História',            ico:'pergaminho' },
+  { id:'filosofia',     rot:'Filosofia',           ico:'cerebro' },
+  { id:'literatura',    rot:'Literatura',          ico:'livroAberto' },
+  { id:'cinema',        rot:'Cinema',              ico:'claquete' },
+  { id:'ciencia',       rot:'Ciência',             ico:'microscopio' },
+  { id:'culturapop',    rot:'Cultura pop',         ico:'fone' },
+  { id:'argumentos',    rot:'Argumentos do tema',  ico:'lampada' }
+];
+</script>
 
-/* Cache RAG por tema — RPCs buscar/salvar_material_apoio (transplantado).
-   Só opera quando TEMA_ID existe (tema oficial da biblioteca). */
-async function _hubQuizCurado(){
-  if(!TEMA_ID) return null;
-  try{
-    var url = SUPABASE_URL + '/rest/v1/materiais?select=conteudo_json' +
-      '&tema_id=eq.' + encodeURIComponent(TEMA_ID) +
-      '&tipo=eq.quiz&origem=eq.redaon&estado=eq.aprovado&publicado=eq.true&limit=1';
-    var res = await dbFetch(url, {});
-    if(!res.ok) return null;
-    var linhas = await res.json();
-    var j = (linhas && linhas[0]) ? linhas[0].conteudo_json : null;
-    if (typeof j === 'string'){ try{ j = JSON.parse(j); }catch(e){ return null; } }
-    return (j && Array.isArray(j.questoes) && j.questoes.length) ? j.questoes : null;
-  }catch(e){ console.warn('[hub quiz curado]', e); return null; }
-}
-
-/* Os nove eixos de repertório passam por material_apoio_aluno, que devolve os
-   quatro estados. As outras chaves de cache (entender, resumo, flashcards, quiz,
-   eixos_relevantes) continuam no caminho antigo. */
-var EIXOS_CURADOS = ['legislacao','historia','especialistas','atualidades','literatura','filosofia','cinema','ciencia','culturapop'];
-
-/* As duas únicas etiquetas que o aluno vê no repertório. */
-var HTML_SELO = '<div class="faixaSelo"><i class="cha">\uD83C\uDF93</i><span>Material selado pela <span class="marca">RedaON</span></span></div>';
-var HTML_IA   = '<div class="faixaIA"><span>\u26A1</span><span>Gerado por IA</span></div>';
-
-/* → { estado, conteudo, selado } · estado null = não existe linha (o hub gera) */
-async function _hubMaterialAluno(eixo){
-  if(!TEMA_ID) return { estado:null, conteudo:null, selado:false };
-  try{
-    var res=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/material_apoio_aluno',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID,p_eixo:eixo})});
-    if(!res.ok) return { estado:null, conteudo:null, selado:false };
-    var linhas=await res.json();
-    var l=(linhas&&linhas.length)?linhas[0]:null;
-    if(!l) return { estado:null, conteudo:null, selado:false };
-    return { estado:l.estado||null, conteudo:l.conteudo||null, selado:l.selado===true };
-  }catch(e){ console.warn('[hub material aluno]',e); return { estado:null, conteudo:null, selado:false }; }
-}
-
-async function _hubBuscarMaterial(eixo){
-  if(!TEMA_ID)return null;
-  if(EIXOS_CURADOS.indexOf(eixo)>=0){
-    var m=await _hubMaterialAluno(eixo);
-    return (typeof m.conteudo==='string'&&m.conteudo.length>30)?m.conteudo:null;
-  }
-  try{
-    var res=await dbFetch(SUPABASE_URL+'/rest/v1/rpc/buscar_material_apoio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID,p_eixo:eixo})});
-    if(!res.ok)return null;
-    var data=await res.json();
-    return (typeof data==='string'&&data.length>30)?data:null;
-  }catch(e){console.warn('[hub buscar]',e);return null;}
-}
-async function _hubSalvarMaterial(eixo,conteudo){
-  if(!TEMA_ID||!conteudo)return;
-  try{
-    await dbFetch(SUPABASE_URL+'/rest/v1/rpc/salvar_material_apoio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_tema_id:TEMA_ID,p_eixo:eixo,p_conteudo:conteudo})});
-  }catch(e){console.warn('[hub salvar]',e);}
-}
-
-/* Prompts de repertório (transplantados; agora funções do título, resolvido em runtime) */
-var PR = {
-  legislacao: function(t){ return 'Liste os 5 principais artigos da Constitui\u00e7\u00e3o Federal e leis relevantes para o tema: "'+t+'". Para cada: n\u00famero, nome e aplica\u00e7\u00e3o ao tema em 1 frase. Use marcadores.'; },
-  historia: function(t){ return 'Explique o contexto hist\u00f3rico de "'+t+'" com 5 marcos temporais numerados. Cada: data/per\u00edodo, fato e relev\u00e2ncia para o Brasil.'; },
-  especialistas: function(t){ return 'Liste 5 especialistas (fil\u00f3sofos/soci\u00f3logos) relevantes para "'+t+'". Para cada: nome, \u00e1rea, obra principal e 1 ideia aplic\u00e1vel ao ENEM.'; },
-  atualidades: function(t){ return 'Liste 5 dados estat\u00edsticos recentes (IBGE, OMS, ONU) sobre "'+t+'". Para cada: fonte, dado num\u00e9rico e como usar como argumento.'; },
-  literatura: function(t){ return 'Liste 5 obras liter\u00e1rias (brasileiras e mundiais) que dialogam com o tema "'+t+'". Para cada: t\u00edtulo, autor, breve descri\u00e7\u00e3o e como usar como repert\u00f3rio no ENEM.'; },
-  filosofia: function(t){ return 'Liste 5 pensadores ou correntes filos\u00f3ficas relevantes para "'+t+'". Para cada: nome do pensador/corrente, conceito-chave e como aplicar ao tema de forma articulada (sem repert\u00f3rio de bolso).'; },
-  cinema: function(t){ return 'Liste 5 filmes, document\u00e1rios ou s\u00e9ries que abordam "'+t+'". Para cada: t\u00edtulo, ano, breve sinopse e como usar como repert\u00f3rio argumentativo.'; },
-  ciencia: function(t){ return 'Liste 5 pesquisas, descobertas cient\u00edficas ou cientistas relevantes para "'+t+'". Para cada: pesquisa/cientista, conclus\u00e3o principal e aplica\u00e7\u00e3o ao tema.'; },
-  culturapop: function(t){ return 'Liste 5 refer\u00eancias de cultura pop brasileira (m\u00fasicas, artistas, fen\u00f4menos sociais, s\u00e9ries nacionais) ligadas a "'+t+'". Para cada: refer\u00eancia, contexto e como articular como repert\u00f3rio no ENEM.'; }
-};
-/* "Entender o tema" — mesmo briefing/pipeline da Tela 4 (cache compartilhado, chave 'entender') */
-function PROMPT_ENTENDER(t){
-  return 'Voc\u00ea \u00e9 a PROfa da RedaON. Para o tema de reda\u00e7\u00e3o ENEM "' + t + '", produza um briefing curto em 3 blocos.\n' +
-    'Responda APENAS um JSON v\u00e1lido, sem markdown e sem texto fora dele, exatamente neste formato:\n' +
-    '{"recorte":"<qual \u00e9 exatamente o recorte do tema: o que ele pede e o que N\u00c3O pede, em 2-3 frases>",' +
-    '"banca":"<o que a banca espera: diagn\u00f3stico com causas e consequ\u00eancias + proposta de interven\u00e7\u00e3o completa (agente, a\u00e7\u00e3o, meio, finalidade, detalhamento), em 2-3 frases>",' +
-    '"armadilhas":"<2-3 erros comuns que fazem o candidato tangenciar ou perder pontos neste tema>"}\n' +
-    'M\u00e1ximo de 130 palavras no total. Texto simples dentro dos campos, sem negrito. Sem introdu\u00e7\u00e3o nem despedida.';
-}
-/* Resumo didático (transplantado; JSON estruturado) */
-function PROMPT_RESUMO(t){
-  return 'Crie um RESUMO DID\u00c1TICO de "'+t+'" para reda\u00e7\u00e3o ENEM.\n' +
-'Retorne APENAS um JSON v\u00e1lido, sem markdown e sem texto adicional, no formato:\n' +
-'{\n' +
-'  "titulo": "'+t+'",\n' +
-'  "resumo_didatico": {\n' +
-'    "problema": "<1-2 frases descrevendo o problema central>",\n' +
-'    "causas": ["<causa 1>", "<causa 2>", "<causa 3>"],\n' +
-'    "consequencias": ["<consequ\u00eancia 1>", "<consequ\u00eancia 2>", "<consequ\u00eancia 3>", "<consequ\u00eancia 4>"],\n' +
-'    "dados_relevantes": ["<dado 1 com fonte se poss\u00edvel>", "<dado 2>", "<dado 3>"],\n' +
-'    "solucoes_propostas": ["<solu\u00e7\u00e3o 1>", "<solu\u00e7\u00e3o 2>", "<solu\u00e7\u00e3o 3>", "<solu\u00e7\u00e3o 4>"]\n' +
-'  }\n' +
-'}\n' +
-'Cada item deve ter 1-2 frases completas, em portugu\u00eas brasileiro. N\u00e3o use markdown dentro dos campos.';
-}
-function PROMPT_FLASH(t){ return 'Crie 8 flashcards sobre "'+t+'" para o ENEM. APENAS JSON: [{"frente":"...","verso":"..."}]'; }
-function PROMPT_QUIZ(t){ return '5 quest\u00f5es ENEM sobre "'+t+'". APENAS JSON: [{"pergunta":"...","alternativas":["A)...","B)...","C)...","D)...","E)..."],"correta":0,"explicacao":"..."}]'; }
-/* M1 — eixos relevantes ao tema (chamada pequena, cacheada como novo tipo no mesmo cache) */
-function PROMPT_EIXOS(t){
-  return 'Para o tema de reda\u00e7\u00e3o ENEM "'+t+'", quais destes eixos de repert\u00f3rio s\u00e3o os MAIS relevantes (escolha exatamente 3): legislacao, historia, especialistas, atualidades, literatura, filosofia, cinema, ciencia, culturapop. Responda APENAS um array JSON com os ids, ex.: ["legislacao","atualidades","filosofia"]';
-}
-
-/* Renderização de texto (transplantada — cores por variável CSS onde a base permite) */
+<script>
+/* ─────────── utilidades reaproveitadas da v1-14 ─────────── */
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function md(t){return String(t)
   .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
@@ -656,26 +427,6 @@ function md(t){return String(t)
   .replace(/^(\d+)\. (.*)/gm,'<p class="mdli"><strong>$1.</strong> $2</p>')
   .replace(/\n\n/g,'<br/><br/>')
   .replace(/\n/g,'<br/>');}
-function renderResumo(raw){
-  var limpo=(raw||'').trim().replace(/^```json|```$|^```/g,'').trim();
-  var dados=null;
-  try{ if(limpo.charAt(0)==='{') dados=JSON.parse(limpo); }catch(e){}
-  if(dados && (dados.resumo_didatico || dados.problema || dados.causas)){
-    var r=dados.resumo_didatico||dados, html='';
-    if(r.problema) html+='<h4>\uD83D\uDCA1 Problema</h4><p>'+escapeHTML(r.problema)+'</p>';
-    function bloco(tt,arr){ if(Array.isArray(arr)&&arr.length){ html+='<h4>'+tt+'</h4>'+arr.map(function(c){return '<p class="mdli">\u2022 '+escapeHTML(c)+'</p>';}).join(''); } }
-    bloco('\uD83D\uDEA9 Causas', r.causas);
-    bloco('\uD83D\uDCC9 Consequ\u00eancias', r.consequencias);
-    bloco('\uD83D\uDCCA Dados relevantes', r.dados_relevantes);
-    bloco('\uD83D\uDEE0\uFE0F Solu\u00e7\u00f5es propostas', r.solucoes_propostas);
-    return html||md(limpo);
-  }
-  return md(limpo);
-}
-
-/* ── M-1 · Render dos eixos: JSON da IA → fichas C3; markdown antigo → md() ──
-   Os 9 prompts PR variam de campos; mapeamos os equivalentes para as três
-   camadas da ficha: cabecinha (fonte) · destaque (dado) · zona "Como usar". */
 var CAMPOS_FICHA = {
   cabeca:   ['fonte','artigo','lei','marco','data','periodo','nome','pensador','corrente','titulo','obra','filme','referencia','pesquisa','cientista','especialista'],
   destaque: ['dado_numerico','dado','texto','descricao','sinopse','conceito','conceito_chave','conclusao','conclusao_principal','ideia','fato','contexto','resumo'],
@@ -697,7 +448,25 @@ function _extras(obj){
   });
   return partes.join(' \u00b7 ');
 }
+/* v2-0 · ficha no contrato da Fábrica (cab, url, dado, diz, como_usar).
+   A render antiga era feita para o JSON que a IA devolvia e não conhecia esses nomes. */
+function fichaFabrica(item){
+  var h = '<div class="repItem">';
+  if (item.cab){
+    h += '<p class="repFonte">' + escapeHTML(item.cab)
+       + (item.url ? ' \u00b7 <a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" style="color:inherit;">abrir fonte</a>' : '')
+       + '</p>';
+  }
+  if (item.dado) h += '<p class="repDado" style="color:var(--muted);font-size:11.5px;margin-bottom:5px;">' + escapeHTML(item.dado) + '</p>';
+  if (item.diz)  h += '<p class="repDado">' + escapeHTML(item.diz) + '</p>';
+  if (item.como_usar){
+    h += '<div class="repUsoZona"><p class="repUsoRot">Como usar na reda\u00e7\u00e3o</p><p class="repUsoTxt">'
+       + escapeHTML(item.como_usar) + '</p></div>';
+  }
+  return h + '</div>';
+}
 function fichaHTML(item){
+  if (item && typeof item === 'object' && (item.cab || item.diz || item.como_usar)) return fichaFabrica(item);
   if (typeof item === 'string') return '<div class="repItem"><p class="repDado">'+escapeHTML(item)+'</p></div>';
   var cab = _campo(item, CAMPOS_FICHA.cabeca);
   var dado = _campo(item, CAMPOS_FICHA.destaque);
@@ -736,6 +505,22 @@ function renderEixoConteudo(bruto){
   return md(limpo);
 }
 /* Briefing do Entender: JSON {briefing:[{rotulo,texto}]} → h4 + parágrafo; markdown → md() */
+function _chaveParecida(obj, k){
+  var ks = Object.keys(obj), i, n;
+  var alvo = { recorte:['recorte'], banca:['banca','espera'], armadilhas:['armadilha','erro'] }[k];
+  for (i=0;i<ks.length;i++){ n = ks[i].toLowerCase(); for (var j=0;j<alvo.length;j++) if (n.indexOf(alvo[j])>=0) return ks[i]; }
+  return null;
+}
+function _texto(v){
+  if (v == null) return '';
+  if (Array.isArray(v)) return v.map(_texto).filter(Boolean).join(' ');
+  if (typeof v === 'object') return Object.keys(v).map(function(k){ return _texto(v[k]); }).filter(Boolean).join(' ');
+  return String(v).replace(/\*\*/g,'').trim();
+}
+
+/* ───────────────────────────────────────────────────────────────
+   EIXOS — M1 (relevantes por tema) + sanfona + geração com cache
+   ─────────────────────────────────────────────────────────────── */
 function renderEntender(bruto){
   var limpo = String(bruto).replace(/```json|```/g,'').trim();
   if (limpo.charAt(0)==='{' || limpo.charAt(0)==='['){
@@ -783,345 +568,67 @@ function _texto(v){
 /* ───────────────────────────────────────────────────────────────
    EIXOS — M1 (relevantes por tema) + sanfona + geração com cache
    ─────────────────────────────────────────────────────────────── */
-var EIXOS_META = [
-  { id:'atualidades',   emoji:'\uD83D\uDCCA', nome:'Atualidades e dados' },
-  { id:'legislacao',    emoji:'\u2696\uFE0F',  nome:'Legisla\u00e7\u00e3o' },
-  { id:'filosofia',     emoji:'\uD83E\uDDE0', nome:'Filosofia' },
-  { id:'historia',      emoji:'\uD83D\uDCDC', nome:'Hist\u00f3ria' },
-  { id:'especialistas', emoji:'\uD83C\uDF93', nome:'Especialistas' },
-  { id:'literatura',    emoji:'\uD83D\uDCD6', nome:'Literatura' },
-  { id:'cinema',        emoji:'\uD83C\uDFAC', nome:'Cinema' },
-  { id:'ciencia',       emoji:'\uD83D\uDD2C', nome:'Ci\u00eancia' },
-  { id:'culturapop',    emoji:'\uD83C\uDFA7', nome:'Cultura Pop' }
+/* Trava de segurança — palavras/frases bloqueadas (transplantada) */
+var FRASES_BLOQUEADAS_HUB = [
+  'apologia ao nazismo','apologia ao fascismo','apologia ao racismo',
+  'genoc\u00eddio','exterm\u00ednio de',
+  'pornografia infantil','pedofilia','abuso sexual infantil',
+  'incentivo ao suic\u00eddio','apologia ao suic\u00eddio',
+  'ra\u00e7a superior','ra\u00e7a inferior',
+  'matar pessoas','eliminar grupo','inferiorizar',
+  'discurso de \u00f3dio','estupro como solu\u00e7\u00e3o','tortura como solu\u00e7\u00e3o'
 ];
-var FALLBACK_RELEVANTES = ['legislacao','atualidades','filosofia']; /* curados fixos da Tela 4 */
-var RELEVANTES = FALLBACK_RELEVANTES.slice();
-var gerado = {};   /* conteúdo já na tela, por eixo/material */
-
-async function carregarEixosRelevantes(){
-  /* M2: a curadoria da equipe VENCE a IA. Se a Profa. Blanche marcou os eixos
-     do tema, são esses — sem chamada ao modelo. */
-  var marcados = Array.isArray(TEMA && TEMA.eixos_relevantes)
-    ? TEMA.eixos_relevantes.filter(function(id){ return EIXOS_META.some(function(e){ return e.id===id; }); })
-    : [];
-  if (marcados.length >= 2){ RELEVANTES = marcados.slice(0,4); return; }
-  try{
-    var bruto = await _hubBuscarMaterial('eixos_relevantes');
-    if(!bruto){
-      var txt = await geminiGenerate(PROMPT_EIXOS(TITULO));
-      bruto = txt.replace(/```json|```/g,'').trim();
-      var m = bruto.match(/\[[\s\S]*\]/); if(m) bruto = m[0];
-      JSON.parse(bruto); /* valida antes de salvar */
-      _hubSalvarMaterial('eixos_relevantes', bruto);
-    }
-    var ids = JSON.parse(String(bruto).replace(/```json|```/g,'').trim());
-    var validos = ids.filter(function(id){ return EIXOS_META.some(function(e){ return e.id===id; }); });
-    if(validos.length >= 2) RELEVANTES = validos.slice(0,4);
-  }catch(e){ console.warn('[M1 eixos] fallback curado:', e); RELEVANTES = FALLBACK_RELEVANTES.slice(); }
+function checarTemaSensivelHub(t){
+  if(!t)return null;
+  var lower=t.toLowerCase();
+  for(var i=0;i<FRASES_BLOQUEADAS_HUB.length;i++){ if(lower.indexOf(FRASES_BLOQUEADAS_HUB[i].toLowerCase())>=0) return FRASES_BLOQUEADAS_HUB[i]; }
+  return null;
 }
-function renderEixos(){
-  var rel='', out='';
-  EIXOS_META.forEach(function(e){
-    var html =
-      '<div class="eixoItem" id="eixo-'+e.id+'">' +
-        '<button class="cabeca" onclick="toggleEixo(\''+e.id+'\')">' +
-          '<i class="pemoji">'+e.emoji+'</i><span class="nome">'+e.nome+'</span>' +
-          '<span class="estado" id="estado-'+e.id+'">pronto</span><i class="seta">\u203a</i>' +
-        '</button>' +
-        '<div class="corpo"><div class="corpoIn" id="corpo-'+e.id+'"></div></div>' +
-      '</div>';
-    if (RELEVANTES.indexOf(e.id) >= 0) rel += html; else out += html;
-  });
-  document.getElementById('listaRelevantes').innerHTML = rel;
-  document.getElementById('listaOutros').innerHTML = '<p class="rotuloCurado">Outros eixos</p>' + out;
-  var btn = document.getElementById('btnVerTodos');
-  btn.textContent = 'Ver todos os eixos (+' + (EIXOS_META.length - RELEVANTES.length) + ')';
-}
-function verTodos(){
-  document.getElementById('listaOutros').classList.remove('hidden');
-  document.getElementById('btnVerTodos').classList.add('hidden');
+function htmlTemaBloqueado(){
+  return '<div class="avisoBloqueio">' +
+    '<p class="tb">\uD83D\uDEE1\uFE0F Tema n\u00e3o p\u00f4de ser processado</p>' +
+    '<p class="sb">Identificamos termos sens\u00edveis no tema. A RedaON foca em temas que respeitam direitos humanos, dignidade e diversidade \u2014 alinhados com as compet\u00eancias oficiais do ENEM (especialmente C5).</p>' +
+    '<p class="sb">Volte \u00e0 <a href="temas.html">Biblioteca de Temas</a> e escolha um tema oficial.</p></div>';
 }
 
-var gerando = {};
-function toggleEixo(id){
-  var item = document.getElementById('eixo-'+id);
-  if (item.classList.contains('aberto')) { item.classList.remove('aberto'); return; }
-  item.classList.add('aberto');
-  if (gerado[id] || gerando[id]) return;
-  gerarEixo(id);
-}
-async function gerarEixo(id, aoTerminar){
-  var passo = (id === 'entender') ? 'entender' : 'repertorio';
-  var box = document.getElementById('corpo-'+id);
-  /* Trava de segurança primeiro — sem gasto de token em tema bloqueado */
-  if (checarTemaSensivelHub(TITULO)) { box.innerHTML = htmlTemaBloqueado(); if(aoTerminar)aoTerminar(); return; }
-  gerando[id] = true;
-  box.innerHTML = '<div class="gerando"><span class="giro"></span>A PROfa est\u00e1 preparando\u2026</div>';
-  try{
-    var texto = null, faixa = '';
-    if (EIXOS_CURADOS.indexOf(id) >= 0){
-      var m = await _hubMaterialAluno(id);
-      /* Em revisão ou em ajustes: a Profa. Blanche ainda está lendo. Não mostra e não gera. */
-      if (m.estado === 'revisao' || m.estado === 'ajustes'){
-        box.innerHTML = '<p class="emPreparo">A Profa. Blanche est\u00e1 lendo este eixo. Ele aparece aqui assim que ela selar.</p>';
-        gerando[id] = false; if (aoTerminar) aoTerminar(); return;
-      }
-      texto = (typeof m.conteudo === 'string' && m.conteudo.length > 30) ? m.conteudo : null;
-      if (texto) faixa = m.selado ? HTML_SELO : HTML_IA;
-    } else {
-      texto = await _hubBuscarMaterial(id);
-    }
-    if (!texto){
-      var prompt = (id === 'entender') ? PROMPT_ENTENDER(TITULO) : (PR[id](TITULO) + '\n\nUse markdown leve. Portugu\u00eas.');
-      texto = await geminiGenerate(prompt);
-      if (TEMA_ID && texto) _hubSalvarMaterial(id, texto);
-      if (EIXOS_CURADOS.indexOf(id) >= 0) faixa = HTML_IA;
-    }
-    box.innerHTML = faixa + (id === 'entender' ? renderEntender(texto) : renderEixoConteudo(texto)) + htmlConcluir(passo);
-    gerado[id] = true;
-    var s = document.getElementById('estado-'+id);
-    if (s) s.classList.add('ok');
-    if (id !== 'entender') _checarRepertorioCompleto();
-  }catch(err){
-    console.warn('[gerarEixo]', id, err);
-    box.innerHTML = '<p class="erroGerar">N\u00e3o consegui preparar agora. Toque para tentar de novo.</p>';
-    var it = document.getElementById('eixo-'+id);
-    if (it) it.classList.remove('aberto');
-  }
-  gerando[id] = false;
-  if (aoTerminar) aoTerminar();
-}
-/* Todos os 9 eixos gerados (por qualquer caminho) → botão vira verde de concluído */
-function _checarRepertorioCompleto(){
-  var todos = EIXOS_META.every(function(e){ return gerado[e.id]; });
-  if (!todos) return;
-  var btn = document.getElementById('btnGerarTudo');
-  btn.textContent = '\u2713 Repert\u00f3rio completo';
-  btn.disabled = true;
-  btn.classList.add('completo');
-}
-function gerarTudo(){
-  if (checarTemaSensivelHub(TITULO)) { toast('Tema com termos sens\u00edveis \u2014 escolha um tema oficial.'); return; }
-  var btn = document.getElementById('btnGerarTudo');
-  btn.disabled = true;
-  var fila = EIXOS_META.filter(function(e){ return !gerado[e.id]; });
-  var total = fila.length, i = 0;
-  (function proxima(){
-    if (i >= total) { _checarRepertorioCompleto(); if(!btn.classList.contains('completo')) btn.disabled = false; return; }
-    var e = fila[i]; i++;
-    btn.textContent = '\u26A1 Gerando\u2026 ' + i + ' de ' + total;
-    if (gerado[e.id] || gerando[e.id]) { proxima(); return; }
-    gerarEixo(e.id, proxima);
-  })();
-}
+/* Cache RAG por tema — RPCs buscar/salvar_material_apoio (transplantado).
+   Só opera quando TEMA_ID existe (tema oficial da biblioteca). */
 
-/* "Entender o tema" usa a mesma sanfona (id fixo no HTML) */
-
-/* ───────────────────────────────────────────────────────────────
-   ESTÚDIO · prateleira 1 — Disponibilizados para você (tabela `materiais`)
-   RLS decide o acesso (redaon global OU professor→turma ativa do aluno)
-   ─────────────────────────────────────────────────────────────── */
-var DISPONIVEIS = [];
-var EMOJI_TIPO = { pdf:'\uD83D\uDCCE', exercicio:'\u270F\uFE0F', resumo:'\uD83D\uDCC4', repertorio:'\uD83D\uDCA1' };
-async function carregarDisponibilizados(){
-  var bloco = document.getElementById('blocoDisponibilizados');
-  if (!TEMA_ID) { bloco.classList.add('hidden'); return; }
-  try{
-    /* v1-10 · mesma porta do Estúdio: ou não é nosso, ou é nosso e está aprovado.
-       O repertório (material_apoio) é filtrado na RPC buscar_material_apoio. */
-    var url = SUPABASE_URL + '/rest/v1/materiais?select=id,nome,tipo,conteudo,arquivo_url,origem,selo,estado,criado_em&tema_id=eq.' + TEMA_ID +
-      '&publicado=eq.true&or=(origem.neq.redaon,estado.eq.aprovado)&order=criado_em.desc';
+/* ─────────── progresso no banco (tabela preparacoes) ─────────── */
+async function carregarPreparacao(){
+  if (!TEMA_ID) return;
+  try {
+    var uid = authGetUserId();
+    if (!uid) return;
+    var url = SUPABASE_URL + '/rest/v1/preparacoes?select=entender_em,repertorio_em,estudio_em,concluida_em&aluno_id=eq.' + uid + '&tema_id=eq.' + TEMA_ID + '&limit=1';
     var res = await dbFetch(url, {});
-    if (!res.ok) throw new Error('materiais ' + res.status);
-    DISPONIVEIS = await res.json();
-  }catch(e){ console.warn('[materiais]', e); DISPONIVEIS = []; }
-  if (!DISPONIVEIS.length) { bloco.classList.add('hidden'); return; }
-  bloco.classList.remove('hidden');
-  document.getElementById('listaDisponibilizados').innerHTML = DISPONIVEIS.map(function(m, i){
-    var emoji = EMOJI_TIPO[(m.tipo||'').toLowerCase()] || '\uD83D\uDCC4';
-    var quem = (m.origem === 'redaon') ? 'Equipe RedaON' : 'Da sua professora';
-    var dt = m.criado_em ? new Date(m.criado_em) : null;
-    var ds = quem + (dt ? ' \u00b7 ' + dt.getDate() + '/' + (dt.getMonth()+1) : '');
-    var selo = (m.selo === 'validado') ? '<span class="selo validado">\u2713 validado</span>' : (m.selo === 'ia' ? '<span class="selo ia">IA</span>' : '');
-    return '<div class="matWrap" id="disp-'+i+'">' +
-      '<div class="matItem"><i class="memoji">'+emoji+'</i>' +
-      '<div class="info"><p class="nm">'+escapeHTML(m.nome)+' '+selo+'</p><p class="ds">'+escapeHTML(ds)+'</p></div>' +
-      '<button class="btnAbrir" onclick="abrirDisp('+i+')">Abrir</button></div>' +
-      '<div class="painelMat"><div class="painelIn" id="painel-disp-'+i+'"></div></div></div>';
-  }).join('');
+    if (!res.ok) return;
+    var rows = await res.json();
+    if (rows && rows.length) { PREPARACAO = rows[0]; aplicarPreparacaoSalva(PREPARACAO); }
+  } catch(e){ console.warn('[preparacoes] carga:', e); }
 }
-function abrirDisp(i){
-  var w = document.getElementById('disp-'+i);
-  w.classList.toggle('aberto');
-  if (!w.classList.contains('aberto')) return;
-  var painel = document.getElementById('painel-disp-'+i);
-  if (!painel.innerHTML){
-    var m = DISPONIVEIS[i];
-    var html = m.conteudo ? md(m.conteudo)
-      : (m.arquivo_url ? '<a class="btnAbrir" style="display:inline-block;text-decoration:none;" href="'+escapeHTML(m.arquivo_url)+'" target="_blank" rel="noopener">Abrir arquivo \u2197</a>'
-      : '<p>Material sem conte\u00fado dispon\u00edvel.</p>');
-    painel.innerHTML = html;
-  }
-  if (!painel.querySelector('.btnConcluir') && !passosFeitos.estudio){
-    painel.insertAdjacentHTML('beforeend', htmlConcluir('estudio', 'Material lido'));
-  }
+function gravarDeclaracao(passo, completou){
+  if (!TEMA_ID) return; /* tema livre: sem memória no banco */
+  try {
+    var uid = authGetUserId();
+    if (!uid) return;
+    var agora = new Date().toISOString();
+    var body = { aluno_id: uid, tema_id: TEMA_ID };
+    body[passo + '_em'] = agora;
+    if (completou) body.concluida_em = agora;
+    dbFetch(SUPABASE_URL + '/rest/v1/preparacoes?on_conflict=aluno_id,tema_id', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(body)
+    }).catch(function(e){ console.warn('[preparacoes] upsert:', e); });
+  } catch(e){ console.warn('[preparacoes] upsert:', e); }
 }
 
 /* ───────────────────────────────────────────────────────────────
-   ESTÚDIO · prateleira 2 — Acervo do tema (cache por tema; 1º toque
-   materializa em silêncio: o aluno nunca "gera", a PROfa "preparou")
+   MOTOR GEMINI (transplantado da produção antiga — INTOCADO na essência)
    ─────────────────────────────────────────────────────────────── */
-var acervoPronto = {};
-var CHAVE_ACERVO = { resumo:'resumo', flash:'flashcards', quiz:'quiz' };
-function abrirMat(id){
-  var w = document.getElementById('mat-'+id);
-  if (w.classList.contains('aberto')) { w.classList.remove('aberto'); return; }
-  w.classList.add('aberto');
-  if (acervoPronto[id] || gerando['mat-'+id]) return;
-  materializarAcervo(id);
-}
-async function materializarAcervo(id){
-  var painel = document.getElementById('painel-'+id);
-  if (checarTemaSensivelHub(TITULO)) { painel.innerHTML = htmlTemaBloqueado(); return; }
-  gerando['mat-'+id] = true;
-  painel.innerHTML = '<div class="gerando"><span class="giro"></span>A PROfa est\u00e1 preparando\u2026</div>';
-  try{
-    var chave = CHAVE_ACERVO[id];
 
-    /* Cascata do quiz: material curado da RedaON vem primeiro. Enquanto a
-       curadoria nao cobrir o tema, cai na geracao de sempre. Quando cobrir,
-       o curado ganha e a geracao por aluno deixa de acontecer. */
-    if (id === 'quiz'){
-      var curado = await _hubQuizCurado();
-      if (curado){
-        painel.innerHTML = renderQuiz(curado);
-        acervoPronto[id] = true;
-        gerando['mat-'+id] = false;
-        return;
-      }
-    }
-
-    var bruto = await _hubBuscarMaterial(chave);
-    if (!bruto){
-      var prompt = (id==='resumo') ? PROMPT_RESUMO(TITULO) : (id==='flash') ? PROMPT_FLASH(TITULO) : PROMPT_QUIZ(TITULO);
-      bruto = await geminiGenerate(prompt);
-      if (TEMA_ID && bruto) _hubSalvarMaterial(chave, bruto);
-    }
-    if (id === 'resumo'){
-      painel.innerHTML = renderResumo(bruto) + htmlConcluir('estudio', 'Revis\u00e3o feita');
-    } else if (id === 'flash'){
-      painel.innerHTML = renderFlash(bruto);
-    } else {
-      painel.innerHTML = renderQuiz(bruto);
-    }
-    acervoPronto[id] = true;
-  }catch(err){
-    console.warn('[acervo]', id, err);
-    painel.innerHTML = '<p class="erroGerar">N\u00e3o consegui preparar agora. Feche e tente de novo.</p>';
-    var wx = document.getElementById('mat-'+id);
-    if (wx) wx.classList.remove('aberto');
-  }
-  gerando['mat-'+id] = false;
-}
-function _parseJsonIA(bruto){
-  var limpo = String(bruto).replace(/```json|```/g,'').trim();
-  var m = limpo.match(/\[[\s\S]*\]/); if(m) limpo = m[0];
-  return JSON.parse(limpo);
-}
-function renderFlash(bruto){
-  var cards = _parseJsonIA(bruto);
-  return '<div class="fcGrid">' + cards.map(function(c){
-    return '<div class="fc" onclick="virarFc(this)" data-v="'+escapeHTML(c.verso)+'">'+escapeHTML(c.frente)+'</div>';
-  }).join('') + '</div>';
-}
-/* Uma questao por vez, gabarito travado no primeiro toque.
-   Aceita o formato curado ({enunciado, comentario}) e o gerado ({pergunta, explicacao}). */
-var _qzL = [], _qzI = 0, _qzOk = 0;
-function _qzNormaliza(q){
-  return {
-    enun: q.enunciado || q.pergunta || '',
-    alts: q.alternativas || [],
-    correta: (typeof q.correta === 'number') ? q.correta : -1,
-    gab: q.comentario || q.explicacao || ''
-  };
-}
-function renderQuiz(bruto){
-  var qs = (typeof bruto === 'string') ? _parseJsonIA(bruto) : bruto;
-  if (qs && !Array.isArray(qs) && Array.isArray(qs.questoes)) qs = qs.questoes;
-  if (!Array.isArray(qs) || !qs.length) return '<p class="erroGerar">Quiz indispon\u00edvel agora.</p>';
-  _qzL = qs.map(_qzNormaliza); _qzI = 0; _qzOk = 0;
-  var topo = '<div class="qzTop"><span class="qzPasso" id="qzPasso">1 de '+_qzL.length+'</span>'+
-    '<div class="qzBarra"><i id="qzFill"></i></div></div>';
-  var blocos = _qzL.map(function(q, i){
-    var alts = q.alts.map(function(a, ai){
-      return '<button class="qOpc" onclick="respQuiz(this,'+i+','+ai+')">'+escapeHTML(a)+'</button>';
-    }).join('');
-    return '<div class="qBloco'+(i===0?' on':'')+'" id="qb'+i+'">'+
-      '<p class="qEnun">'+escapeHTML(q.enun)+'</p>'+alts+
-      '<div class="qGab">\uD83D\uDCA1 '+escapeHTML(q.gab)+'</div>'+
-      '<button class="qzProx" onclick="qzProxima()">'+(i===_qzL.length-1?'Ver resultado':'Pr\u00f3xima')+'</button></div>';
-  }).join('');
-  return topo + blocos + '<div class="qBloco" id="qbFim"></div>';
-}
-function qzBarra(){
-  var f=document.getElementById('qzFill'), p=document.getElementById('qzPasso');
-  if(!f||!p||!_qzL.length) return;
-  var n=Math.min(_qzI+1,_qzL.length);
-  f.style.width=Math.round((n/_qzL.length)*100)+'%';
-  p.textContent=n+' de '+_qzL.length;
-}
-function qzProxima(){
-  var at=document.getElementById('qb'+_qzI);
-  if(at) at.classList.remove('on');
-  _qzI++;
-  if(_qzI < _qzL.length){
-    var px=document.getElementById('qb'+_qzI);
-    if(px) px.classList.add('on');
-    qzBarra();
-    return;
-  }
-  var fim=document.getElementById('qbFim');
-  if(fim){
-    fim.innerHTML='<div class="qzFim"><div class="pl">'+_qzOk+' de '+_qzL.length+'</div>'+
-      '<div class="ds">'+(_qzOk===_qzL.length?'Gabaritou. Hora de escrever.':'Revise o repert\u00f3rio e volte quando quiser.')+'</div></div>';
-    fim.classList.add('on');
-  }
-  var f=document.getElementById('qzFill'); if(f) f.style.width='100%';
-  var p=document.getElementById('qzPasso'); if(p) p.textContent='fim';
-}
-function virarFc(el){
-  var v = el.getAttribute('data-v');
-  el.setAttribute('data-v', el.textContent);
-  el.textContent = v;
-  el.classList.toggle('virado');
-  marcarPassoHub('estudio'); /* interação real */
-}
-function respQuiz(btn, i, ai){
-  var bloco = document.getElementById('qb'+i);
-  if(!bloco || bloco.classList.contains('respondida')) return; /* segundo toque nao muda nada */
-  bloco.classList.add('respondida');
-  var q = _qzL[i], opcs = bloco.querySelectorAll('.qOpc');
-  if(opcs[q.correta]) opcs[q.correta].classList.add('certa');
-  if(ai !== q.correta && opcs[ai]) opcs[ai].classList.add('errada');
-  if(ai === q.correta) _qzOk++;
-  marcarPassoHub('estudio'); /* interação real */
-}
-
-/* ───────────────────────────────────────────────────────────────
-   HANDOFF Hub → escrita: grava o tema ANTES de abrir Métodos
-   (a Tela 4 v9 lê sessionStorage['tema_selecionado'] e pré-preenche)
-   ─────────────────────────────────────────────────────────────── */
-function irEscreverHub(){
-  if (TEMA) definirTemaSelecionado(TEMA);
-  var veu = document.getElementById('veuConquista');
-  if (veu) veu.classList.remove('show');
-  abrirMetodos();
-}
-function trocarTemaHub(){
-  try{ sessionStorage.removeItem('tema_selecionado'); }catch(e){}
-  window.location.href = 'temas.html';
-}
-
+/* ─────────── cascata do tema (igual à v1-14) ─────────── */
 /* ───────────────────────────────────────────────────────────────
    CASCATA A7 — resolução do tema de entrada (NUNCA hardcode)
    (1) indicação da professora quando existir [futuro — sem fonte no banco ainda]
@@ -1176,46 +683,399 @@ async function resolverTema(){
   /* (5) convite */
   return null;
 }
-function preencherCabecalho(){
-  document.getElementById('tituloTema').textContent = TITULO;
-  var tag = document.getElementById('tagTema');
-  tag.textContent = TEMA.categoria || 'Tema';
-  var fonte = document.getElementById('tagFonte');
-  fonte.textContent = TEMA_EH_SEMANA ? 'Tema da Semana' : (TEMA.ano_enem ? 'ENEM ' + TEMA.ano_enem : 'RedaON');
+
+/* ─────────── faixa e etapas ─────────── */
+function corDoCampo(c){ return CAMPOS_COR[c] || ['#0a8c8d','#0f8a4d']; }
+function preencherFaixa(){
+  var faixa = document.getElementById('faixaTema');
+  faixa.classList.remove('hidden');
+  var cores = corDoCampo(TEMA.campo);
+  faixa.style.background = TEMA.capa_url
+    ? 'center/cover no-repeat url(' + TEMA.capa_url + ')'
+    : 'linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ')';
+  document.getElementById('temaPrep').textContent = TITULO;
+  document.getElementById('tgFonte').textContent = TEMA_EH_SEMANA ? 'Tema da semana'
+    : (TEMA.ano_enem ? 'ENEM ' + TEMA.ano_enem : 'RedaON');
+  var tc = document.getElementById('tgCampo');
+  tc.textContent = TEMA.campo ? (NOME_CAMPO[TEMA.campo] || TEMA.campo) : 'Sem campo';
+  document.getElementById('ctaPrep').classList.remove('hidden');
+}
+function pintarEtapas(){
+  document.getElementById('luzes').innerHTML = ETAPAS.map(function(e,i){
+    return '<button class="lz' + (passosFeitos[e.passo] ? ' on' : '') + (i===atual ? ' aqui' : '') + '"'
+      + ' onclick="irEtapa(' + i + ')" title="' + e.rot + '" aria-label="' + e.rot + '">' + feIcone(e.ico) + '</button>';
+  }).join('');
+  document.getElementById('chipsEtapas').innerHTML = ETAPAS.map(function(e,i){
+    return '<button class="chip' + (i===atual ? ' on' : '') + '" onclick="irEtapa(' + i + ')">'
+      + feIcone(e.ico) + e.rot + (passosFeitos[e.passo] ? ' \u2713' : '') + '</button>';
+  }).join('');
+  ['Entender','Material','Atividades'].forEach(function(n,i){
+    var el = document.getElementById('fz'+n);
+    if (!el) return;
+    if (passosFeitos[ETAPAS[i].passo]) { el.textContent = 'feito'; el.classList.add('ok'); }
+  });
+  document.querySelectorAll('.btConcluir').forEach(function(b){
+    var ps = b.getAttribute('data-passo');
+    if (passosFeitos[ps]) { b.classList.add('feito'); b.textContent = '\u2713 Concluído'; }
+  });
+}
+function irEtapa(i){
+  var t = document.getElementById('trilhoEtapas');
+  atual = Math.max(0, Math.min(ETAPAS.length-1, i));
+  t.scrollTo({ left: atual * t.clientWidth, behavior:'smooth' });
+  pintarEtapas();
+}
+(function ligarTrilho(){
+  var t = document.getElementById('trilhoEtapas');
+  t.addEventListener('scroll', function(){
+    var i = Math.round(t.scrollLeft / t.clientWidth);
+    if (i !== atual) { atual = i; pintarEtapas(); }
+  }, { passive:true });
+})();
+/* v2-0 · a luz acende SÓ aqui, no botão de concluir. Virar flashcard ou responder quiz não acende. */
+function concluirEtapa(passo){
+  if (passosFeitos[passo]) return;
+  passosFeitos[passo] = true;
+  var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
+  gravarDeclaracao(passo, n === 3);
+  pintarEtapas();
+  toast(n === 3 ? 'Preparação completa \u2014 hora de escrever' : 'Etapa marcada como feita');
+}
+function htmlConcluir(passo, rotulo){
+  return '<button class="btConcluir" data-passo="' + passo + '" onclick="concluirEtapa(\'' + passo + '\')">' + rotulo + '</button>';
+}
+function aplicarPreparacaoSalva(r){
+  if (!r) return;
+  passosFeitos.entender   = !!r.entender_em;
+  passosFeitos.repertorio = !!r.repertorio_em;
+  passosFeitos.estudio    = !!r.estudio_em;
+  pintarEtapas();
+}
+</script>
+
+<script>
+/* ═══════════ v2-0 · material do banco (sem IA) ═══════════ */
+async function carregarMaterial(){
+  MATERIAL = {};
+  if (!TEMA_ID) return;
+  try{
+    var url = SUPABASE_URL + '/rest/v1/material_apoio?select=eixo,conteudo,estado&tema_id=eq.' + TEMA_ID;
+    var res = await dbFetch(url, {});
+    if (!res.ok) return;
+    (await res.json()).forEach(function(m){
+      if (m.estado && m.estado !== 'aprovado') return;      /* o aluno vê só o que a Profa. selou */
+      MATERIAL[m.eixo] = { conteudo:m.conteudo, estado:m.estado, fichas:fichasDe(m.conteudo) };
+    });
+  }catch(e){ console.warn('[preparar] material', e); }
+}
+function lerConteudo(c){
+  if (c == null) return null;
+  if (typeof c === 'object') return c;
+  var limpo = String(c).replace(/```json|```/g,'').trim();
+  if (limpo.charAt(0) !== '[' && limpo.charAt(0) !== '{') return limpo;
+  try{ return JSON.parse(limpo); }catch(e){ return limpo; }
+}
+function fichasDe(conteudo){
+  var d = lerConteudo(conteudo);
+  var lista = _achaLista(d);
+  if (!lista) return [];
+  return _soAprovadas(lista);
+}
+
+/* ─────────── 1 · Entender o tema (já aberto) ─────────── */
+function montarEntender(){
+  var box = document.getElementById('boxEntender');
+  var m = MATERIAL['entender'];
+  var corpo = '';
+  if (m && m.conteudo){
+    corpo = renderEntender(m.conteudo);
+  } else {
+    corpo = '<p class="emPreparo">O resumo deste tema ainda está em preparação. A Profa. Blanche libera aqui assim que a Fábrica entregar.</p>';
+  }
+  box.innerHTML = '<div class="cxPrep">' + corpo + htmlConcluir('entender', 'Marcar como entendido') + '</div>';
+  pintarEtapas();
+}
+
+/* ─────────── 2 · Material de apoio (só o que existe) ─────────── */
+function montarMaterial(){
+  var alvo = document.getElementById('listaEixos');
+  var comMaterial = EIXOS_META.filter(function(e){ return MATERIAL[e.id] && MATERIAL[e.id].fichas.length; });
+  var total = comMaterial.reduce(function(s,e){ return s + MATERIAL[e.id].fichas.length; }, 0);
+  var fz = document.getElementById('fzMaterial');
+  if (fz && !passosFeitos.repertorio) fz.textContent = total ? (total + (total===1?' ficha':' fichas') + ' \u00b7 ' + comMaterial.length + (comMaterial.length===1?' eixo':' eixos')) : '';
+  if (!comMaterial.length){
+    alvo.innerHTML = '<p class="emPreparo">O material deste tema ainda está em preparação. Assim que a Fábrica entregar e a Profa. Blanche aprovar, ele aparece aqui.</p>';
+    document.getElementById('acoesMaterial').innerHTML = '';
+    return;
+  }
+  alvo.innerHTML = comMaterial.map(function(e){
+    var n = MATERIAL[e.id].fichas.length;
+    return '<div class="linPrep" onclick="abrirEixo(\'' + e.id + '\')">' + feIcone(e.ico)
+      + '<div class="tx"><b>' + e.rot + '</b><span>' + n + (n===1?' ficha':' fichas') + ' com fonte e como usar</span></div>'
+      + '<i class="seta" id="seta-' + e.id + '">\u203a</i></div>'
+      + '<div class="gavetaMat" id="gav-' + e.id + '"><div class="gavetaIn" id="gavIn-' + e.id + '"></div></div>';
+  }).join('');
+  document.getElementById('acoesMaterial').innerHTML =
+    '<div class="cxPrep" style="margin-top:4px;">' + htmlConcluir('repertorio', 'Marcar repertório como visto') + '</div>';
+  pintarEtapas();
+}
+function abrirEixo(id){
+  var gav = document.getElementById('gav-'+id), inn = document.getElementById('gavIn-'+id);
+  if (!gav) return;
+  if (!inn.innerHTML){
+    inn.innerHTML = MATERIAL[id].fichas.map(fichaHTML).join('');
+  }
+  gav.classList.toggle('aberta');
+  var s = document.getElementById('seta-'+id);
+  if (s) s.textContent = gav.classList.contains('aberta') ? '\u2039' : '\u203a';
+}
+
+/* ─────────── material da professora ─────────── */
+async function carregarDaProfessora(){
+  if (!TEMA_ID) return;
+  try{
+    var url = SUPABASE_URL + '/rest/v1/materiais?select=id,nome,tipo,conteudo,arquivo_url,origem,selo,estado,criado_em&tema_id=eq.' + TEMA_ID
+      + '&publicado=eq.true&or=(origem.neq.redaon,estado.eq.aprovado)&order=criado_em.desc';
+    var res = await dbFetch(url, {});
+    if (!res.ok) return;
+    var lista = await res.json();
+    if (!lista.length) return;
+    document.getElementById('blocoProfessora').classList.remove('hidden');
+    document.getElementById('listaProfessora').innerHTML = lista.map(function(m,i){
+      var quem = (m.origem === 'redaon') ? 'Equipe RedaON' : 'Da sua professora';
+      return '<div class="linPrep" onclick="abrirDaProfessora(' + i + ')">' + feIcone('pagina')
+        + '<div class="tx"><b>' + escapeHTML(m.nome || 'Material') + '</b><span>' + quem + '</span></div>'
+        + '<i class="seta">\u203a</i></div>'
+        + '<div class="gavetaMat" id="gavProf-' + i + '"><div class="gavetaIn">'
+        + (m.arquivo_url ? '<a class="btEscrever" style="display:block;text-align:center;text-decoration:none;" href="' + m.arquivo_url + '" target="_blank" rel="noopener">Abrir arquivo</a>'
+                         : '<div class="repItem">' + md(String(m.conteudo || '')) + '</div>')
+        + '</div></div>';
+    }).join('');
+  }catch(e){ console.warn('[preparar] materiais', e); }
+}
+function abrirDaProfessora(i){
+  var g = document.getElementById('gavProf-'+i);
+  if (g) g.classList.toggle('aberta');
+}
+
+/* ─────────── 3 · Atividades ─────────── */
+function montarAtividades(){
+  var alvo = document.getElementById('listaAtividades');
+  var temFlash = EIXOS_META.some(function(e){ return MATERIAL[e.id] && MATERIAL[e.id].fichas.length; });
+  var interv = MATERIAL['intervencao'] ? (_achaLista(lerConteudo(MATERIAL['intervencao'].conteudo)) || [])[0] : null;
+  var temResumo = !!(MATERIAL['resumo'] && MATERIAL['resumo'].conteudo);
+  var temQuiz = !!(MATERIAL['quiz'] && MATERIAL['quiz'].fichas.length);
+  var html = '';
+  /* Resumo */
+  html += linhaAtividade('pagina', 'Resumo do tema', temResumo ? 'Síntese para revisar antes de escrever' : 'Em preparação pela Fábrica', temResumo, 'resumo');
+  /* Flashcards, montados a partir das fichas: zero IA */
+  html += linhaAtividade('cartas', 'Flashcards', temFlash ? 'Cartões tirados das fichas do tema' : 'Aparece quando houver material', temFlash, 'flash');
+  /* Quiz */
+  html += linhaAtividade('pergunta', 'Quiz do tema', temQuiz ? 'Questões no estilo ENEM' : 'Em preparação pela Fábrica', temQuiz, 'quiz');
+  /* Monte a intervenção */
+  html += linhaAtividade('prancheta', 'Monte a intervenção', interv ? 'Competência 5: agente, meio e detalhamento' : 'Aparece quando o gabarito do tema estiver pronto', !!interv, 'interv', true);
+  alvo.innerHTML = html;
+  document.getElementById('acoesAtividades').innerHTML =
+    '<div class="cxPrep" style="margin-top:4px;">' + htmlConcluir('estudio', 'Marcar atividades como feitas') + '</div>';
+  INTERV = interv;
+  pintarEtapas();
+}
+function linhaAtividade(ico, nome, desc, ativa, id, nova){
+  return '<div class="linPrep' + (ativa ? '' : ' espera') + (nova && ativa ? ' nova' : '') + '"'
+    + (ativa ? ' onclick="abrirAtividade(\'' + id + '\')"' : '') + '>' + feIcone(ico)
+    + '<div class="tx"><b>' + nome + '</b><span>' + desc + '</span></div>'
+    + (ativa ? '<i class="seta" id="setaAt-' + id + '">\u203a</i>' : '<span class="selEspera">em breve</span>') + '</div>'
+    + '<div class="gavetaMat" id="gavAt-' + id + '"><div class="gavetaIn" id="gavAtIn-' + id + '"></div></div>';
+}
+function abrirAtividade(id){
+  var gav = document.getElementById('gavAt-'+id), inn = document.getElementById('gavAtIn-'+id);
+  if (!gav) return;
+  if (!inn.innerHTML){
+    if (id === 'resumo') inn.innerHTML = '<div class="repItem">' + md(String(MATERIAL['resumo'].conteudo || '')) + '</div>';
+    if (id === 'flash')  inn.innerHTML = htmlFlashcards();
+    if (id === 'quiz')   inn.innerHTML = htmlQuiz();
+    if (id === 'interv') { inn.innerHTML = htmlJogo(); pintarJogo(); }
+  }
+  gav.classList.toggle('aberta');
+  var s = document.getElementById('setaAt-'+id);
+  if (s) s.textContent = gav.classList.contains('aberta') ? '\u2039' : '\u203a';
+}
+
+/* flashcards feitos das fichas do tema (sem IA) */
+function htmlFlashcards(){
+  var cartoes = [];
+  EIXOS_META.forEach(function(e){
+    var m = MATERIAL[e.id];
+    if (!m) return;
+    m.fichas.forEach(function(f){
+      var cab = _campo(f, CAMPOS_FICHA.cabeca), dado = _campo(f, CAMPOS_FICHA.destaque), uso = _campo(f, CAMPOS_FICHA.uso);
+      if (!cab && !dado) return;
+      cartoes.push({ eixo:e.rot, frente:(cab || e.rot), verso:(dado || '') + (uso ? '\n\nComo usar: ' + uso : '') });
+    });
+  });
+  if (!cartoes.length) return '<p class="emPreparo">Sem fichas para virar cartão ainda.</p>';
+  if (cartoes.length > 12) cartoes = cartoes.slice(0, 12);
+  return '<div class="fcTrilho">' + cartoes.map(function(c,i){
+    return '<div class="fc" onclick="virarFc(this)" data-verso="' + escapeHTML(c.verso) + '" data-frente="' + escapeHTML(c.frente) + '">'
+      + '<p class="fcRot">' + escapeHTML(c.eixo) + ' \u00b7 ' + (i+1) + ' de ' + cartoes.length + '</p>'
+      + '<p class="fcTexto">' + escapeHTML(c.frente) + '</p></div>';
+  }).join('') + '</div><p class="emPreparo">Toque no cartão para virar.</p>';
+}
+/* v2-0 · virar cartão NÃO acende a luz da etapa */
+function virarFc(el){
+  var f = el.getAttribute('data-frente'), v = el.getAttribute('data-verso');
+  var p = el.querySelector('.fcTexto');
+  var mostrandoFrente = !el.classList.contains('virado');
+  p.textContent = mostrandoFrente ? v : f;
+  el.classList.toggle('virado');
+}
+
+/* quiz: só do banco; sem IA */
+function htmlQuiz(){
+  var qs = MATERIAL['quiz'].fichas;
+  if (!qs.length) return '<p class="emPreparo">Quiz em preparação.</p>';
+  return qs.map(function(q,i){
+    var alts = q.alternativas || q.opcoes || [];
+    return '<div class="repItem" id="qz'+i+'"><p class="repDado" style="font-weight:600;">' + escapeHTML(q.pergunta || q.enunciado || '') + '</p>'
+      + alts.map(function(a,ai){
+          return '<button class="opJ" onclick="respQuiz(this,' + i + ',' + ai + ')">' + escapeHTML(String(a)) + '</button>';
+        }).join('')
+      + '<p class="emPreparo hidden" id="qzEx'+i+'">' + escapeHTML(q.explicacao || '') + '</p></div>';
+  }).join('');
+}
+/* v2-0 · responder NÃO acende a luz da etapa */
+function respQuiz(btn, i, ai){
+  var bloco = document.getElementById('qz'+i);
+  if (!bloco || bloco.classList.contains('respondida')) return;
+  bloco.classList.add('respondida');
+  var q = MATERIAL['quiz'].fichas[i];
+  var certa = (q.correta !== undefined) ? q.correta : q.resposta;
+  var opcs = bloco.querySelectorAll('.opJ');
+  if (opcs[certa]) opcs[certa].style.borderColor = 'var(--green)';
+  if (ai !== certa && opcs[ai]) opcs[ai].style.opacity = '.5';
+  var ex = document.getElementById('qzEx'+i);
+  if (ex && ex.textContent.trim()) ex.classList.remove('hidden');
+}
+
+/* ─────────── Monte a intervenção (competência 5) ─────────── */
+var INTERV = null, ESC = { age:null, ins:null, det:null };
+function htmlJogo(){
+  return '<div class="jogo">'
+    + '<h3>Monte a intervenção</h3>'
+    + '<p class="ex">Escolha quem faz, com o quê e como. A proposta precisa dos três para fechar a competência 5.</p>'
+    + '<p class="passoJ">1 \u00b7 Quem faz (agente)</p><div id="jAge"></div>'
+    + '<p class="passoJ">2 \u00b7 Com o quê (meio)</p><div id="jIns"></div>'
+    + '<p class="passoJ">3 \u00b7 Como, onde e com que frequência</p><div id="jDet"></div>'
+    + '<div class="fraseJ" id="jFrase">Sua proposta aparece aqui conforme você escolhe.</div>'
+    + '<div id="jVeredito"></div>'
+    + '<div class="acoesJ"><button class="j1" onclick="conferirJogo()">Conferir a proposta</button>'
+    + '<button class="j2" onclick="limparJogo()">Começar de novo</button></div>'
+    + '<p class="naoServe"><b>Não vale como meio:</b> ' + ((INTERV && INTERV.nao_serve_como_meio) || ['campanhas de conscientização','políticas públicas','medidas','ações']).join(' \u00b7 ') + '.</p>'
+    + '</div>';
+}
+function achar(lista, ref){ for (var i=0;i<(lista||[]).length;i++){ if (lista[i].ref === ref) return lista[i]; } return null; }
+function pintarJogo(){
+  if (!INTERV) return;
+  var ages = INTERV.agentes || [], inss = INTERV.instrumentos || [], dets = INTERV.detalhamentos || [];
+  document.getElementById('jAge').innerHTML = ages.map(function(a){
+    return '<button class="opJ' + (ESC.age===a.ref?' sel':'') + '" onclick="escolherJogo(\'age\',\'' + a.ref + '\')">'
+      + escapeHTML(a.nome) + '<small>esfera ' + escapeHTML(a.esfera || '') + '</small></button>';
+  }).join('');
+  document.getElementById('jIns').innerHTML = inss.map(function(x){
+    var cabe = !ESC.age || (x.agentes || []).indexOf(ESC.age) >= 0;
+    return '<button class="opJ' + (ESC.ins===x.ref?' sel':'') + (cabe?'':' bloq') + '" onclick="escolherJogo(\'ins\',\'' + x.ref + '\')">'
+      + escapeHTML(x.nome) + '<small>' + (cabe ? 'cabe ao agente escolhido' : 'não é o meio desse agente') + '</small></button>';
+  }).join('');
+  document.getElementById('jDet').innerHTML = dets.map(function(d){
+    var cabe = !ESC.ins || (d.combina_com || []).indexOf(ESC.ins) >= 0;
+    return '<button class="opJ' + (ESC.det===d.ref?' sel':'') + (cabe?'':' bloq') + '" onclick="escolherJogo(\'det\',\'' + d.ref + '\')">'
+      + escapeHTML(d.texto) + '<small>' + (cabe ? 'combina com o meio escolhido' : 'não combina com o meio escolhido') + '</small></button>';
+  }).join('');
+  montarFraseJogo();
+}
+function escolherJogo(tipo, ref){
+  ESC[tipo] = (ESC[tipo] === ref) ? null : ref;
+  if (tipo === 'age'){ ESC.ins = null; ESC.det = null; }
+  if (tipo === 'ins'){ ESC.det = null; }
+  document.getElementById('jVeredito').innerHTML = '';
+  pintarJogo();
+}
+function montarFraseJogo(){
+  var a = achar(INTERV.agentes, ESC.age), i = achar(INTERV.instrumentos, ESC.ins), d = achar(INTERV.detalhamentos, ESC.det);
+  var f = document.getElementById('jFrase');
+  if (!f) return;
+  if (!a && !i && !d){ f.textContent = 'Sua proposta aparece aqui conforme você escolhe.'; return; }
+  f.innerHTML = 'Cabe a <b>' + (a ? escapeHTML(a.nome) : '\u2026') + '</b> enfrentar o problema, por meio d'
+    + (i ? 'o <b>' + escapeHTML(i.nome) + '</b>' : 'o <b>\u2026</b>')
+    + ', com <b>' + (d ? escapeHTML(d.texto) : '\u2026') + '</b>, a fim de que o direito garantido em lei vire realidade.';
+}
+function conferirJogo(){
+  var v = document.getElementById('jVeredito');
+  var faltam = [];
+  if (!ESC.age) faltam.push('o agente');
+  if (!ESC.ins) faltam.push('o meio');
+  if (!ESC.det) faltam.push('o detalhamento');
+  if (faltam.length){
+    v.className = 'veredito meio';
+    v.textContent = 'Falta ' + faltam.join(', ') + '. Sem os três, a proposta fica incompleta e a competência 5 não fecha.';
+    return;
+  }
+  var i = achar(INTERV.instrumentos, ESC.ins), d = achar(INTERV.detalhamentos, ESC.det);
+  var meioCabe = (i.agentes || []).indexOf(ESC.age) >= 0;
+  var detCabe  = (d.combina_com || []).indexOf(ESC.ins) >= 0;
+  if (meioCabe && detCabe){
+    v.className = 'veredito ok';
+    v.textContent = 'Proposta completa: agente, ação, meio, finalidade e detalhamento. É isso que a banca procura na competência 5.';
+  } else {
+    v.className = 'veredito meio';
+    v.textContent = 'Os três estão lá, mas a combinação não se sustenta: '
+      + (!meioCabe ? 'esse meio não é do agente que você escolheu' : '')
+      + (!meioCabe && !detCabe ? ' e ' : '')
+      + (!detCabe ? 'esse detalhamento não é desse meio' : '') + '.';
+  }
+}
+function limparJogo(){
+  ESC = { age:null, ins:null, det:null };
+  document.getElementById('jVeredito').innerHTML = '';
+  pintarJogo();
+}
+
+/* ─────────── saída para a escrita ─────────── */
+function irEscreverHub(){
+  if (TEMA) definirTemaSelecionado(TEMA);
+  abrirMetodos();
+}
+function trocarTemaHub(){
+  try{ sessionStorage.removeItem('tema_selecionado'); }catch(e){}
+  window.location.href = 'temas.html';
 }
 function modoConvite(){
   document.getElementById('conviteTema').classList.remove('hidden');
-  document.getElementById('conteudo').classList.add('modoConvite');
+  document.getElementById('faixaTema').classList.add('hidden');
+  document.getElementById('chipsEtapas').classList.add('hidden');
+  document.getElementById('trilhoEtapas').classList.add('hidden');
 }
 
-/* ───────────────────────────────────────────────────────────────
-   INÍCIO
-   ─────────────────────────────────────────────────────────────── */
-async function ehPedagogica(){
-  try{
-    var res = await dbFetch(SUPABASE_URL+'/rest/v1/rpc/eh_pedagogica', {method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
-    if(!res.ok) return false;
-    return (await res.json()) === true;
-  }catch(e){ return false; }
-}
-async function iniciarHub(){
-  if (PREVIA){
-    if (await ehPedagogica()) document.getElementById('faixaPrevia').classList.remove('hidden');
-    else PREVIA = false;
-  }
+/* ─────────── início ─────────── */
+async function iniciarPreparar(){
   TEMA = await resolverTema();
   if (!TEMA){ modoConvite(); return; }
   TEMA_ID = TEMA.id || null;
   TITULO = TEMA.titulo || '';
-  preencherCabecalho();
-  document.getElementById('listaRelevantes').innerHTML = '<div class="gerando"><span class="giro"></span>A PROfa est\u00e1 organizando os eixos\u2026</div>';
-  await carregarPreparacao();          /* re-hidrata a trilha antes de qualquer conteúdo */
-  carregarDisponibilizados();          /* prateleira 1 em paralelo */
-  await carregarEixosRelevantes();     /* M1 (cache/fallback) */
-  renderEixos();
+  if (checarTemaSensivelHub(TITULO)){
+    document.getElementById('boxEntender').innerHTML = htmlTemaBloqueado();
+  }
+  preencherFaixa();
+  pintarEtapas();
+  await carregarPreparacao();
+  await carregarMaterial();
+  montarEntender();
+  montarMaterial();
+  montarAtividades();
+  carregarDaProfessora();
+  feHidratar(document);
 }
-iniciarHub();
-
+iniciarPreparar();
 </script>
 </body>
 </html>
