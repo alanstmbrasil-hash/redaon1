@@ -4,6 +4,11 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-4 (20/09/2026): corrigido o corte do conteúdo à direita (o trilho ganhava 2rem a mais pelas
+     margens negativas); ícone e nome na mesma linha nas três caixas; chaves internas do material, como
+     "origem", não aparecem mais no Entender o tema. -->
+<!-- v2-3 (20/09/2026): o Resumo aceita o formato que a Fábrica entrega (objeto com "texto"), além de
+     texto puro. -->
 <!-- v2-2 (20/09/2026): as luzes do título saíram. No título fica só a conta "x de 3", e o estado mora nas
      três caixas, com três leituras: "aqui" (fundo verde-água), "feito" (marca verde) e "a fazer" (cinza). -->
 <!-- v2-1 (20/09/2026): as três etapas deixam de ser chips que rolam e viram caixas fixas lado a lado,
@@ -228,11 +233,13 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 /* v2-1 · as três etapas viram caixas fixas, no estilo das caixas do Início. Só o cartão de
    baixo corre de lado; as caixas ficam paradas e servem de navegação e de estado. */
 .seletorEtapas{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:14px 0 2px; }
-.cxEtapa{ position:relative; display:flex; flex-direction:column; align-items:center; gap:5px;
+/* v2-4 · ícone e nome na mesma linha, como no resto da RedaON */
+.cxEtapa{ position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:3px;
   background:var(--surface); border:1px solid rgba(var(--borderRGB),.14); border-radius:14px;
-  padding:10px 6px 9px; cursor:pointer; font-family:inherit; text-align:center; }
-.cxEtapa .fe{ width:22px; height:22px; vertical-align:0; }
-.cxEtapa b{ font-size:11px; font-weight:600; line-height:1.2; color:var(--text2); }
+  padding:9px 9px 8px; cursor:pointer; font-family:inherit; text-align:left; min-width:0; }
+.cxEtapa .linhaCx{ display:flex; align-items:center; gap:6px; width:100%; min-width:0; }
+.cxEtapa .fe{ width:19px; height:19px; vertical-align:0; flex:0 0 auto; }
+.cxEtapa b{ font-size:11px; font-weight:600; line-height:1.15; color:var(--text2); min-width:0; }
 .cxEtapa .fe{ transition:none; }
 /* onde ele está agora: fundo verde-água e nome em destaque */
 .cxEtapa.aqui{ background:rgba(var(--cyanRGB),.12); border-color:transparent; }
@@ -248,10 +255,12 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .cxEtapa .rot{ font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
 .cxEtapa.feita .rot{ color:var(--green); }
 .cxEtapa.aqui .rot{ color:var(--cyan); }
-@media(min-width:641px){ .cxEtapa b{ font-size:12.5px; } }
-.trilhoEtapas{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -1rem; padding:12px 0 0; }
+@media(min-width:641px){ .cxEtapa b{ font-size:12.5px; } .cxEtapa .fe{ width:21px; height:21px; } }
+.trilhoEtapas{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0; padding:12px 0 0; }
 .trilhoEtapas::-webkit-scrollbar{ display:none; }
-.painelEtapa{ flex:0 0 100%; scroll-snap-align:center; padding:0 1rem; }
+/* v2-4 · o painel tem exatamente a largura do trilho. Antes o trilho ganhava 2rem a mais pelas
+   margens negativas e o conteúdo do painel saía pela direita da tela. */
+.painelEtapa{ flex:0 0 100%; width:100%; min-width:0; scroll-snap-align:start; padding:0; }
 .cabEtapa{ display:flex; align-items:center; gap:8px; margin:0 2px 10px; }
 .cabEtapa .fe{ width:22px; height:22px; vertical-align:0; }
 .cabEtapa b{ font-size:15px; color:var(--text); }
@@ -290,7 +299,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .repUsoTxt{ margin:0; font-size:12px; line-height:1.45; color:var(--text); }
 .emPreparo{ font-size:12.5px; color:var(--muted); margin:2px 2px 10px; }
 /* flashcards */
-.fcTrilho{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:2px 0 6px; }
+.fcTrilho{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:2px 0 6px; max-width:100%; }
 .fcTrilho::-webkit-scrollbar{ display:none; }
 .fc{ flex:0 0 78%; scroll-snap-align:center; min-height:150px; background:var(--surface); border-radius:16px;
   box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:14px; cursor:pointer; display:flex; flex-direction:column; justify-content:center; }
@@ -398,8 +407,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-2 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-2');
+console.info('RedaON · preparar v2-4 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-4');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -564,8 +573,10 @@ function renderEntender(bruto){
           var ch = _chaveParecida(obj, k); if (!ch) return; vistas[ch] = 1;
           h += '<h4>'+ROT[k]+'</h4><p>'+escapeHTML(_texto(obj[ch]))+'</p>';
         });
+        /* v2-4 · chaves internas nunca aparecem para o aluno (origem, estado, motivo, versao) */
+        var INTERNAS = { origem:1, estado:1, motivo:1, versao:1, id:1, tema:1 };
         Object.keys(obj).forEach(function(ch){
-          if (vistas[ch]) return;
+          if (vistas[ch] || INTERNAS[ch.toLowerCase()]) return;
           var v = _texto(obj[ch]); if (!v) return;
           h += '<h4>'+escapeHTML(ch.replace(/\*\*/g,''))+'</h4><p>'+escapeHTML(v)+'</p>';
         });
@@ -731,7 +742,7 @@ function pintarEtapas(){
     return '<button type="button" class="cxEtapa' + (i===atual ? ' aqui' : '') + (feita ? ' feita' : '') + '"'
       + ' onclick="irEtapa(' + i + ')">'
       + (feita ? '<span class="ok">\u2713</span>' : '')
-      + feIcone(e.ico) + '<b>' + e.rot + '</b>'
+      + '<span class="linhaCx">' + feIcone(e.ico) + '<b>' + e.rot + '</b></span>'
       + '<span class="rot">' + (feita ? 'feito' : (i===atual ? 'aqui' : 'a fazer')) + '</span></button>';
   }).join('');
   var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
@@ -892,7 +903,8 @@ function montarAtividades(){
   var temFlash = EIXOS_META.some(function(e){ return MATERIAL[e.id] && MATERIAL[e.id].fichas.length; });
   var interv = MATERIAL['intervencao'] ? (_achaLista(lerConteudo(MATERIAL['intervencao'].conteudo)) || [])[0] : null;
   var temResumo = !!(MATERIAL['resumo'] && MATERIAL['resumo'].conteudo);
-  var temQuiz = !!(MATERIAL['quiz'] && MATERIAL['quiz'].fichas.length);
+  var temQuizLista = !!(MATERIAL['quiz'] && MATERIAL['quiz'].fichas.length);
+  var temQuiz = temQuizLista;
   var html = '';
   /* Resumo */
   html += linhaAtividade('pagina', 'Resumo do tema', temResumo ? 'Síntese para revisar antes de escrever' : 'Em preparação pela Fábrica', temResumo, 'resumo');
@@ -919,7 +931,12 @@ function abrirAtividade(id){
   var gav = document.getElementById('gavAt-'+id), inn = document.getElementById('gavAtIn-'+id);
   if (!gav) return;
   if (!inn.innerHTML){
-    if (id === 'resumo') inn.innerHTML = '<div class="repItem">' + md(String(MATERIAL['resumo'].conteudo || '')) + '</div>';
+    if (id === 'resumo'){
+      /* v2-3 · o resumo pode vir como texto puro ou como objeto { texto } */
+      var d = lerConteudo(MATERIAL['resumo'].conteudo);
+      var txt = (d && typeof d === 'object') ? (d.texto || d.resumo || '') : String(d || '');
+      inn.innerHTML = '<div class="repItem"><p class="repDado">' + escapeHTML(txt) + '</p></div>';
+    }
     if (id === 'flash')  inn.innerHTML = htmlFlashcards();
     if (id === 'quiz')   inn.innerHTML = htmlQuiz();
     if (id === 'interv') { inn.innerHTML = htmlJogo(); pintarJogo(); }
@@ -936,7 +953,10 @@ function htmlFlashcards(){
     var m = MATERIAL[e.id];
     if (!m) return;
     m.fichas.forEach(function(f){
-      var cab = _campo(f, CAMPOS_FICHA.cabeca), dado = _campo(f, CAMPOS_FICHA.destaque), uso = _campo(f, CAMPOS_FICHA.uso);
+      /* v2-4 · o contrato da Fábrica usa cab/diz/como_usar; o formato antigo usa nome/aplicacao */
+      var cab = f.cab || _campo(f, CAMPOS_FICHA.cabeca);
+      var dado = f.diz || _campo(f, CAMPOS_FICHA.destaque) || f.dado || '';
+      var uso = f.como_usar || _campo(f, CAMPOS_FICHA.uso) || '';
       if (!cab && !dado) return;
       cartoes.push({ eixo:e.rot, frente:(cab || e.rot), verso:(dado || '') + (uso ? '\n\nComo usar: ' + uso : '') });
     });
