@@ -4,6 +4,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-9 (20/09/2026): renomeação — o botão de concluir a etapa passa a dizer "Marcar material de apoio
+     como visto" (antes "Marcar repertório como visto"). Nomes técnicos (coluna repertorio_em, eixo
+     'repertorio', classes .atalhoEstudio/.duplaEstudio) permanecem inalterados de propósito. -->
 <!-- v2-8 (20/09/2026): as três caixas voltam ao formato de três andares — ícone em cima, nome no meio e
      estado embaixo, centralizados —, igual no celular e no computador. O ✓ solto saiu: quem diz que está
      feito é o próprio estado, em verde. -->
@@ -870,7 +873,7 @@ function montarMaterial(){
       + '<div class="gavetaMat" id="gav-' + e.id + '"><div class="gavetaIn" id="gavIn-' + e.id + '"></div></div>';
   }).join('');
   document.getElementById('acoesMaterial').innerHTML =
-    '<div class="cxPrep" style="margin-top:4px;">' + htmlConcluir('repertorio', 'Marcar repertório como visto') + '</div>';
+    '<div class="cxPrep" style="margin-top:4px;">' + htmlConcluir('repertorio', 'Marcar material de apoio como visto') + '</div>';
   pintarEtapas();
 }
 function abrirEixo(id){

@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Plano de estudos</title>
+<!-- v1-4 (20/09/2026): renomeação — o rótulo da etapa do dia 1 passa a ser "Material de apoio" (antes "Repertório"). A chave técnica tipo:'repertorio' não muda. -->
 <!-- RedaON · Portal do Aluno · Plano de estudos · produção v1-2 · rotina prepara→fixa→aplica→reflete→trata · dias sugeridos deslizantes · gaveta de descanso (plano_config) -->
 <script>
 (function(){
@@ -250,7 +251,7 @@ async function focoDoDiagnostico(){
 function montarTarefas(){
   var destinoHub = TEMA ? ('hub-preparacao.html?tema=' + encodeURIComponent(TEMA.id)) : 'hub-preparacao.html';
   var destinoEscr = 'nova-redacao.html?metodo=digitar' + (TEMA ? ('&tema=' + encodeURIComponent(TEMA.id)) : '');
-  var rotRep  = TEMA ? ('Repert\u00f3rio do Tema da Semana') : 'Repert\u00f3rio para sua pr\u00f3xima reda\u00e7\u00e3o';
+  var rotRep  = TEMA ? ('Material de apoio do Tema da Semana') : 'Material de apoio para sua pr\u00f3xima reda\u00e7\u00e3o';
   var rotExe  = FOCO ? ('Refor\u00e7o de ' + FOCO + ' \u00b7 ' + NOME_COMP[FOCO]) : 'Refor\u00e7o da sua compet\u00eancia mais fraca';
   /* Rotina aprovada: prepara \u2192 fixa \u2192 aplica \u2192 reflete \u2192 trata (dia = ORDEM da etapa) */
   return [
