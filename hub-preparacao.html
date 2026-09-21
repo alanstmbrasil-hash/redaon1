@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-16 (21/09/2026): texto do Entender sem conteúdo, aprovado pelo Alan: "O conteúdo deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve." -->
 <!-- v2-15 (21/09/2026): caixa de escrever padronizada centralizada, faltando etapa ou com 3 de 3. -->
 <!-- v2-14 (21/09/2026): (1) o botão discreto se chamava .sec e colidia com a classe .sec do kit
      (cabeçalho de seção, flex), o que jogava o texto para a esquerda — agora é .discreto.
@@ -458,8 +459,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js?v=6-16"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-15 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-15');
+console.info('RedaON · preparar v2-16 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-16');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -1001,7 +1002,7 @@ function montarEntender(){
   if (m && m.conteudo){
     corpo = renderEntender(m.conteudo);
   } else {
-    corpo = '<p class="emPreparo">O resumo deste tema ainda está em preparação. A Profa. Blanche libera aqui assim que a Fábrica entregar.</p>';
+    corpo = '<p class="emPreparo">O conteúdo deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve.</p>';
   }
   box.innerHTML = '<div class="cxPrep">' + corpo
     + (m && m.conteudo ? '<span class="fimEntender" id="fimEntender"></span>' + htmlSelo('entender') : '') + '</div>';
