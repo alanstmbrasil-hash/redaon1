@@ -4,7 +4,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Meu Plano</title>
-<!-- RedaON · Portal do Aluno · Meu Plano · produção v2-0 (21/09/2026)
+<!-- v2-2 (21/09/2026): as estrelas viram série posicional — uma por redação, antiga à esquerda e recente à direita, acesa onde a nota foi 200. -->
+<!-- v2-1 (21/09/2026): as estrelas passavam a contar as redações com 200 na competência (antes 160+).
+     RedaON · Portal do Aluno · Meu Plano · produção v2-0 (21/09/2026)
      Fusão de Plano de estudos + Evolução, aprovada ponto a ponto pelo Alan:
      · nome "Meu Plano", ícone bússola na linha .pgHead (sem caixa)
      · dois cards em rolagem lateral: "Sua semana" e "Como você está"
@@ -15,7 +17,8 @@
        pela Profa. Blanche é o "revisei" da correção, que tem botão.
      · régua de cores igual à do Início: 0-79 vermelho · 80-120 amarelo · 121-199 verde · 200 ouro
      · média das ÚLTIMAS 4 redações (um mês, uma por semana)
-     · troféu aos 200 e até 4 estrelas (semanas em que a competência ficou em 160+)
+     · troféu aos 200 e a série de estrelas das 4 últimas redações, antiga → recente,
+       acesa onde a competência tirou 200 (formato dos "últimos jogos")
      · foco da semana = menor nota da ÚLTIMA redação (regra da Profa. Blanche)
      · descanso padrão: sábado, o aluno troca na gaveta (plano_config)
      Pendências conhecidas (fatias 2 e 3): o Preparar ainda grava as etapas pelo botão antigo,
@@ -224,11 +227,11 @@ html[data-tema="claro"] .nv-ouro .vl, html[data-tema="claro"] .nv-ouro .chev{ co
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js?v=6-16"></script>
 <script>
-console.info('[RedaON] Meu Plano v2-0');
+console.info('[RedaON] Meu Plano v2-2');
 document.documentElement.setAttribute('data-tela','meu-plano');
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-0' });
+montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-2' });
 
 var NOME_COMP = { C1:'Norma culta', C2:'Repertório', C3:'Argumentação', C4:'Coesão', C5:'Intervenção' };
 var NOME_DIA  = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex', 6:'sáb', 7:'dom' };
@@ -413,10 +416,11 @@ function mediaDe(campo, n){
   return Math.round(soma / usa.length);
 }
 function estrelasDe(campo){
-  /* semanas (das 4 últimas redações) em que a competência ficou em 160 ou mais */
-  var n = 0;
-  HIST.slice(0, 4).forEach(function(r){ if ((r[campo] || 0) >= 160) n++; });
-  return n;
+  /* v2-2 · série de resultados, no formato dos últimos jogos: uma estrela por redação,
+     da mais ANTIGA à esquerda para a mais RECENTE à direita. Acende onde tirou 200. */
+  return HIST.slice(0, 4).slice().reverse().map(function(r){
+    return { nota: (r[campo] || 0), acesa: (r[campo] || 0) >= 200 };
+  });
 }
 var ESTRELA = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.6l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/></svg>';
 
@@ -461,10 +465,12 @@ function cardBoletim(){
   ['C1','C2','C3','C4','C5'].forEach(function(c){
     var campo = c.toLowerCase();
     var v = mediaDe(campo, 4);
-    var est = estrelasDe(campo);
+    var serie = estrelasDe(campo);
     var eFoco = (FOCO === c);
-    var estrelasHTML = '<span class="estrelas">';
-    for (var i=1; i<=4; i++) estrelasHTML += ESTRELA.replace('<svg ', '<svg class="' + (i <= est ? 'on' : '') + '" ');
+    var estrelasHTML = '<span class="estrelas" title="uma estrela por redação, da mais antiga à mais recente">';
+    serie.forEach(function(x){
+      estrelasHTML += ESTRELA.replace('<svg ', '<svg class="' + (x.acesa ? 'on' : '') + '" ');
+    });
     estrelasHTML += '</span>';
     h += '<button class="comp ' + nivel(v) + (eFoco ? ' focoC' : '') + '" onclick="abrirFoco(\'' + c + '\')">'
       +   '<span class="l1"><span class="nm">' + c + ' · <em>' + NOME_COMP[c] + '</em></span>'
@@ -477,7 +483,7 @@ function cardBoletim(){
       + '</button>';
   });
   h += '</div>'
-    + '<p class="rodape">As estrelas contam as redações, das 4 últimas, em que a competência ficou em 160 ou mais. '
+    + '<p class="rodape">Cada estrela é uma redação, da mais antiga à esquerda para a mais recente à direita, e acende quando a competência tirou 200. '
     + '<a href="evolucao.html">Ver a minha evolução completa</a></p></div>';
   return h;
 }
