@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Meu Plano</title>
+<!-- v2-4 (21/09/2026): regra A do passo 1 — o Entender só é exigido quando o tema tem Entender aprovado; sem ele, basta o Material de apoio (o aluno não fica travado por falta de conteúdo). -->
 <!-- v2-3 (21/09/2026): fatia 2 — o passo 1 só acende com as duas coisas: Entender o tema aberto E 3 fichas do material de apoio (entender_em && repertorio_em). -->
 <!-- v2-2 (21/09/2026): as estrelas viram série posicional — uma por redação, antiga à esquerda e recente à direita, acesa onde a nota foi 200. -->
 <!-- v2-1 (21/09/2026): as estrelas passavam a contar as redações com 200 na competência (antes 160+).
@@ -228,11 +229,11 @@ html[data-tema="claro"] .nv-ouro .vl, html[data-tema="claro"] .nv-ouro .chev{ co
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js?v=6-16"></script>
 <script>
-console.info('[RedaON] Meu Plano v2-3');
+console.info('[RedaON] Meu Plano v2-4');
 document.documentElement.setAttribute('data-tela','meu-plano');
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-3' });
+montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-4' });
 
 var NOME_COMP = { C1:'Norma culta', C2:'Repertório', C3:'Argumentação', C4:'Coesão', C5:'Intervenção' };
 var NOME_DIA  = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex', 6:'sáb', 7:'dom' };
@@ -246,7 +247,8 @@ var ITENS     = [];        /* plano_itens desta semana */
 var HIST      = [];        /* redações corrigidas, recente → antiga */
 var PREP      = null;      /* linha de preparacoes do tema da semana */
 var ESCREVEU  = false;     /* enviou redação nesta semana? */
-var TEM_EXERC = false;     /* existe exercício publicado da competência do foco? */
+var TEM_EXERC = false;
+var TEM_ENTENDER = true;  /* v2-4 · o tema tem Entender aprovado? sem ele, o passo 1 pede só o Material */     /* existe exercício publicado da competência do foco? */
 var UID       = null;
 
 /* ── datas ── */
@@ -284,7 +286,7 @@ function passos(){
   return [
     { tipo:'repertorio', ico:'lampada', nome:'Entender o tema e o material de apoio',
       onde: TEMA ? ('no Preparar · ' + esc(TEMA.titulo)) : 'no Preparar',
-      dest: destHub, feito: !!(PREP && PREP.entender_em && PREP.repertorio_em) },
+      dest: destHub, feito: passo1Feito() },
     { tipo:'flashcards', ico:'cartas', nome:'Atividades do tema',
       onde:'flashcards, resumo e quiz, no Preparar',
       dest: destHub, feito: !!(PREP && PREP.estudio_em) },
@@ -584,6 +586,16 @@ async function carregarPreparacao(){
     return r.length ? r[0] : null;
   }catch(e){ return null; }
 }
+/* v2-4 · regra A: na dúvida (falha de rede), exige o Entender, como antes */
+async function temEntender(){
+  if (!TEMA) return true;
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/material_apoio?select=id&eixo=eq.entender&estado=eq.aprovado&tema_id=eq.' + TEMA.id + '&limit=1', {});
+    if (!res.ok) return true;
+    return (await res.json()).length > 0;
+  }catch(e){ return true; }
+}
+function passo1Feito(){ return !!(PREP && PREP.repertorio_em && (PREP.entender_em || !TEM_ENTENDER)); }
 async function escreveuNaSemana(){
   try{
     var url = SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + UID
@@ -723,6 +735,7 @@ function mostrar(id){
     TEM_EXERC = await temExercicio(FOCO);
 
     PREP = await carregarPreparacao();
+    TEM_ENTENDER = await temEntender();
     ESCREVEU = await escreveuNaSemana();
 
     ITENS = await carregarItens();
@@ -731,7 +744,7 @@ function mostrar(id){
     /* a redação da semana se marca sozinha */
     if (ESCREVEU && !feitoNoBanco('redacao')) await marcarFeito('redacao');
     /* as etapas do Preparar também: a fatia 2 passa a gravá-las na própria ação do aluno */
-    if (PREP && PREP.entender_em && PREP.repertorio_em && !feitoNoBanco('repertorio')) await marcarFeito('repertorio');
+    if (passo1Feito() && !feitoNoBanco('repertorio')) await marcarFeito('repertorio');
     if (PREP && PREP.estudio_em && !feitoNoBanco('flashcards')) await marcarFeito('flashcards');
 
     desenhar();
