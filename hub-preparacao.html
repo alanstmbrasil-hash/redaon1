@@ -4,6 +4,12 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-12 (21/09/2026): três ajustes aprovados pelo Alan.
+     · Flashcards: a frase abaixo dos cartões mostra a meta desde o início ("Vire pelo menos 5 cartões
+       para concluir · 0 de 5"), conta a cada cartão e vira "✓ concluído".
+     · Monte a intervenção: Voltar/Avançar sobem para logo abaixo da frase em construção, antes da lista.
+     · "Pronto para escrever?" (opção A): faltando etapas, a caixa diz o que falta e o botão fica
+       secundário, "Escrever mesmo assim"; com 3 de 3, volta "Estou pronto — Escrever". -->
 <!-- v2-11 (21/09/2026): Entender o tema passa a concluir quando o aluno rola até o fim do texto
      (um marcador invisível no fim do conteúdo aparece na tela), não mais ao abrir. Enquanto não
      chega, o selo diz "leia até o fim para concluir". O toast sai no fim da leitura. -->
@@ -364,6 +370,10 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .ctaPrep{ margin-top:18px; background:var(--surface); border-radius:16px; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:14px; }
 .ctaPrep .t{ margin:0; font-size:14px; font-weight:700; color:var(--text); }
 .ctaPrep .s{ margin:3px 0 10px; font-size:11.5px; color:var(--muted); }
+/* v2-12 · faltando etapa, o botão fica secundário */
+.btEscrever.sec{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+.fcMeta{ margin:.5rem .1rem 0; font-size:12px; font-weight:600; color:var(--muted); }
+.fcMeta.ok{ color:var(--green); }
 .btEscrever{ width:100%; border:0; border-radius:13px; background:var(--cyan); color:var(--onCyan);
   font-family:inherit; font-size:13.5px; font-weight:600; padding:12px 0; cursor:pointer; }
 .setasEtapas{ display:none; }
@@ -428,9 +438,9 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
     </div>
 
     <div class="ctaPrep hidden" id="ctaPrep">
-      <p class="t">Pronto para escrever?</p>
-      <p class="s">Você explorou o tema. Hora de colocar em prática.</p>
-      <button class="btEscrever" onclick="irEscreverHub()">Estou pronto — Escrever</button>
+      <p class="t" id="ctaT">Pronto para escrever?</p>
+      <p class="s" id="ctaS">Você explorou o tema. Hora de colocar em prática.</p>
+      <button class="btEscrever" id="ctaBt" onclick="irEscreverHub()">Estou pronto — Escrever</button>
     </div>
 
   </div>
@@ -440,8 +450,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js?v=6-16"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-11 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-11');
+console.info('RedaON · preparar v2-12 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-12');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -801,6 +811,8 @@ function pintarEtapas(){
       + '<span class="rot">' + (feita ? '\u2713 feito' : (i===atual ? 'aqui' : 'a fazer')) + '</span></button>';
   }).join('');
   var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
+  pintarCta(n);
+  pintarFcMeta();
   var cont = document.getElementById('contaEtapas');
   if (cont) cont.textContent = n + ' de 3';
   ['Entender','Material','Atividades'].forEach(function(n,i){
@@ -813,6 +825,32 @@ function pintarEtapas(){
     b.textContent = textoSelo(ps);
     b.classList.toggle('ok', !!passosFeitos[ps]);
   });
+}
+/* v2-12 · a caixa de escrever não diz "pronto" quando não está */
+function pintarCta(n){
+  var t = document.getElementById('ctaT'), sub = document.getElementById('ctaS'), bt = document.getElementById('ctaBt');
+  if (!t || !sub || !bt) return;
+  if (n >= 3){
+    t.textContent = 'Pronto para escrever?';
+    sub.textContent = 'Você explorou o tema. Hora de colocar em prática.';
+    bt.textContent = 'Estou pronto \u2014 Escrever';
+    bt.classList.remove('sec');
+    return;
+  }
+  var faltam = ETAPAS.filter(function(e){ return !passosFeitos[e.passo]; }).map(function(e){ return e.rot; });
+  var lista = faltam.length > 1 ? faltam.slice(0,-1).join(', ') + ' e ' + faltam[faltam.length-1] : faltam[0];
+  t.textContent = 'Ainda falta: ' + lista;
+  sub.textContent = 'Você pode escrever agora, mas vai sem ter visto tudo o que preparamos para este tema.';
+  bt.textContent = 'Escrever mesmo assim';
+  bt.classList.add('sec');
+}
+function pintarFcMeta(){
+  var el = document.getElementById('fcMeta');
+  if (!el) return;
+  var meta = metaCartoes(), c = Math.min(PROGRESSO.cartoes.length, meta);
+  if (passosFeitos.estudio && c >= meta){ el.textContent = '\u2713 conclu\u00eddo'; el.classList.add('ok'); return; }
+  el.classList.remove('ok');
+  el.textContent = 'Vire pelo menos ' + plural(meta, 'cart\u00e3o', 'cart\u00f5es') + ' para concluir \u00b7 ' + c + ' de ' + meta;
 }
 function irEtapa(i){
   var t = document.getElementById('trilhoEtapas');
@@ -1079,7 +1117,7 @@ function abrirAtividade(id){
       var txt = (d && typeof d === 'object') ? (d.texto || d.resumo || '') : String(d || '');
       inn.innerHTML = '<div class="repItem"><p class="repDado">' + escapeHTML(txt) + '</p></div>';
     }
-    if (id === 'flash')  inn.innerHTML = htmlFlashcards();
+    if (id === 'flash')  { inn.innerHTML = htmlFlashcards(); pintarFcMeta(); }
     if (id === 'quiz')   inn.innerHTML = htmlQuiz();
     if (id === 'interv') { inn.innerHTML = htmlJogo(); pintarJogo(); }
   }
@@ -1112,7 +1150,7 @@ function htmlFlashcards(){
     return '<div class="fc" onclick="virarFc(this)" data-i="' + i + '" data-verso="' + escapeHTML(c.verso) + '" data-frente="' + escapeHTML(c.frente) + '">'
       + '<p class="fcRot">' + escapeHTML(c.eixo) + ' \u00b7 ' + (i+1) + ' de ' + cartoes.length + '</p>'
       + '<p class="fcTexto">' + escapeHTML(c.frente) + '</p></div>';
-  }).join('') + '</div><p class="emPreparo">Toque no cartão para virar.</p>';
+  }).join('') + '</div><p class="fcMeta" id="fcMeta"></p><p class="emPreparo">Toque no cartão para virar.</p>';
 }
 /* v2-10 · cada cartão distinto virado conta; o 5º conclui as Atividades */
 function virarFc(el){
@@ -1200,9 +1238,9 @@ function htmlJogo(){
     + '<p class="ex">A proposta precisa de quatro peças. Escolha uma por vez e veja o texto se formar.</p>'
     + '<div class="fraseJ" id="jFrase">Sua proposta aparece aqui conforme você escolhe.</div>'
     + '<div id="jVeredito"></div>'
+    + '<div class="acoesJ" id="jAcoes"></div>'
     + '<p class="passoJ" id="jRot"></p>'
     + '<div id="jLista"></div>'
-    + '<div class="acoesJ" id="jAcoes"></div>'
     + '<div id="jEscrita"></div>'
     + '<p class="naoServe"><b>Não vale como meio:</b> ' + ((INTERV && INTERV.nao_serve_como_meio) || ['campanhas de conscientização','políticas públicas','medidas','ações']).join(' \u00b7 ') + '.</p>'
     + '</div>';
