@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Meu Plano</title>
+<!-- v2-5 (21/09/2026): a competência-foco passa a ser a menor MÉDIA das últimas 4 redações, a mesma média do boletim (decisão do Alan). Empate: menor nota da última redação; persistindo, C1→C5. -->
 <!-- v2-4 (21/09/2026): regra A do passo 1 — o Entender só é exigido quando o tema tem Entender aprovado; sem ele, basta o Material de apoio (o aluno não fica travado por falta de conteúdo). -->
 <!-- v2-3 (21/09/2026): fatia 2 — o passo 1 só acende com as duas coisas: Entender o tema aberto E 3 fichas do material de apoio (entender_em && repertorio_em). -->
 <!-- v2-2 (21/09/2026): as estrelas viram série posicional — uma por redação, antiga à esquerda e recente à direita, acesa onde a nota foi 200. -->
@@ -21,7 +22,7 @@
      · média das ÚLTIMAS 4 redações (um mês, uma por semana)
      · troféu aos 200 e a série de estrelas das 4 últimas redações, antiga → recente,
        acesa onde a competência tirou 200 (formato dos "últimos jogos")
-     · foco da semana = menor nota da ÚLTIMA redação (regra da Profa. Blanche)
+     · foco = menor MÉDIA das últimas 4 redações (v2-5; antes era a menor nota da última)
      · descanso padrão: sábado, o aluno troca na gaveta (plano_config)
      Pendências conhecidas (fatias 2 e 3): o Preparar ainda grava as etapas pelo botão antigo,
      e o passo da competência só se marca quando a tela de exercícios existir. -->
@@ -229,11 +230,11 @@ html[data-tema="claro"] .nv-ouro .vl, html[data-tema="claro"] .nv-ouro .chev{ co
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js?v=6-16"></script>
 <script>
-console.info('[RedaON] Meu Plano v2-4');
+console.info('[RedaON] Meu Plano v2-5');
 document.documentElement.setAttribute('data-tela','meu-plano');
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-4' });
+montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-5' });
 
 var NOME_COMP = { C1:'Norma culta', C2:'Repertório', C3:'Argumentação', C4:'Coesão', C5:'Intervenção' };
 var NOME_DIA  = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex', 6:'sáb', 7:'dom' };
@@ -501,7 +502,7 @@ function desenhar(){
 
   var fr = document.getElementById('fraseFoco');
   if (FOCO) {
-    fr.innerHTML = 'Esta semana mira a <b>' + FOCO + ' · ' + NOME_COMP[FOCO] + '</b> — foi onde a sua última redação ficou mais fraca.';
+    fr.innerHTML = 'Esta semana mira a <b>' + FOCO + ' · ' + NOME_COMP[FOCO] + '</b> — é a sua média mais baixa nas últimas redações.';
   } else {
     fr.innerHTML = 'Sua primeira semana de ritmo. Depois da primeira redação corrigida, o plano passa a mirar a competência que mais precisa de você.';
   }
@@ -642,19 +643,18 @@ async function gravarFoco(comp){
   }catch(e){ console.warn('[meu plano] foco', e); }
 }
 
-/* ── foco: menor nota da ÚLTIMA redação (regra da Profa. Blanche);
-      empate resolve pela menor média das últimas 4 ── */
-function focoDaUltima(){
+/* ── v2-5 · foco: menor MÉDIA das últimas 4 redações (a mesma do boletim; com menos de 4,
+      a média das que houver). Empate: menor nota da última redação; persistindo, a ordem C1→C5 ── */
+function focoPelaMedia(){
   if (!HIST.length) return null;
-  var u = HIST[0];
+  var usa = HIST.slice(0, 4), u = HIST[0];
   var cs = ['c1','c2','c3','c4','c5'];
-  var menor = Math.min.apply(null, cs.map(function(c){ return u[c] || 0; }));
-  var empatados = cs.filter(function(c){ return (u[c] || 0) === menor; });
-  if (empatados.length === 1) return empatados[0].toUpperCase();
-  var melhor = empatados[0], val = 1e9;
-  empatados.forEach(function(c){
-    var m = mediaDe(c, 4);
-    if (m < val) { val = m; melhor = c; }
+  var melhor = null, vMed = 1e9, vUlt = 1e9;
+  cs.forEach(function(c){
+    var soma = 0;
+    usa.forEach(function(r){ soma += (r[c] || 0); });
+    var med = soma / usa.length, ult = (u[c] || 0);
+    if (med < vMed || (med === vMed && ult < vUlt)) { melhor = c; vMed = med; vUlt = ult; }
   });
   return melhor.toUpperCase();
 }
@@ -731,7 +731,7 @@ function mostrar(id){
 
     TEMA = await carregarTema();
     HIST = (typeof dbGetHistoricoRedacoes === 'function') ? (await dbGetHistoricoRedacoes(4)) : [];
-    FOCO = focoDaUltima();
+    FOCO = focoPelaMedia();
     TEM_EXERC = await temExercicio(FOCO);
 
     PREP = await carregarPreparacao();
