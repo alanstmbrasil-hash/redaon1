@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-13 (21/09/2026): o aviso "Ainda falta: …" e o texto abaixo dele ficam centralizados na caixa de escrever. -->
 <!-- v2-12 (21/09/2026): três ajustes aprovados pelo Alan.
      · Flashcards: a frase abaixo dos cartões mostra a meta desde o início ("Vire pelo menos 5 cartões
        para concluir · 0 de 5"), conta a cada cartão e vira "✓ concluído".
@@ -372,6 +373,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .ctaPrep .s{ margin:3px 0 10px; font-size:11.5px; color:var(--muted); }
 /* v2-12 · faltando etapa, o botão fica secundário */
 .btEscrever.sec{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+/* v2-13 · o aviso do que falta fica centralizado */
+.ctaPrep.pend .t, .ctaPrep.pend .s{ text-align:center; }
 .fcMeta{ margin:.5rem .1rem 0; font-size:12px; font-weight:600; color:var(--muted); }
 .fcMeta.ok{ color:var(--green); }
 .btEscrever{ width:100%; border:0; border-radius:13px; background:var(--cyan); color:var(--onCyan);
@@ -450,8 +453,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js?v=6-16"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-12 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-12');
+console.info('RedaON · preparar v2-13 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-13');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -835,6 +838,7 @@ function pintarCta(n){
     sub.textContent = 'Você explorou o tema. Hora de colocar em prática.';
     bt.textContent = 'Estou pronto \u2014 Escrever';
     bt.classList.remove('sec');
+    if (bt.parentNode) bt.parentNode.classList.remove('pend');
     return;
   }
   var faltam = ETAPAS.filter(function(e){ return !passosFeitos[e.passo]; }).map(function(e){ return e.rot; });
@@ -843,6 +847,7 @@ function pintarCta(n){
   sub.textContent = 'Você pode escrever agora, mas vai sem ter visto tudo o que preparamos para este tema.';
   bt.textContent = 'Escrever mesmo assim';
   bt.classList.add('sec');
+  if (bt.parentNode) bt.parentNode.classList.add('pend');
 }
 function pintarFcMeta(){
   var el = document.getElementById('fcMeta');
