@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
-<!-- v2-16 (21/09/2026): texto do Entender sem conteúdo, aprovado pelo Alan: "O conteúdo deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve." -->
+<!-- v2-16 (21/09/2026): texto do Entender sem conteúdo (e, no mesmo padrão, o do Material de apoio sem fichas: "O material deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve."), aprovado pelo Alan: "O conteúdo deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve." -->
 <!-- v2-15 (21/09/2026): caixa de escrever padronizada centralizada, faltando etapa ou com 3 de 3. -->
 <!-- v2-14 (21/09/2026): (1) o botão discreto se chamava .sec e colidia com a classe .sec do kit
      (cabeçalho de seção, flex), o que jogava o texto para a esquerda — agora é .discreto.
@@ -1022,7 +1022,7 @@ function montarMaterial(){
   var fz = document.getElementById('fzMaterial');
   if (fz && !passosFeitos.repertorio) fz.textContent = total ? (total + (total===1?' ficha':' fichas') + ' \u00b7 ' + comMaterial.length + (comMaterial.length===1?' eixo':' eixos')) : '';
   if (!comMaterial.length){
-    alvo.innerHTML = '<p class="emPreparo">O material deste tema ainda está em preparação. Assim que a Fábrica entregar e a Profa. Blanche aprovar, ele aparece aqui.</p>';
+    alvo.innerHTML = '<p class="emPreparo">O material deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve.</p>';
     document.getElementById('acoesMaterial').innerHTML = '';
     seloMaterial();
     return;
