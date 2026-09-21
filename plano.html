@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Meu Plano</title>
+<!-- v2-3 (21/09/2026): fatia 2 — o passo 1 só acende com as duas coisas: Entender o tema aberto E 3 fichas do material de apoio (entender_em && repertorio_em). -->
 <!-- v2-2 (21/09/2026): as estrelas viram série posicional — uma por redação, antiga à esquerda e recente à direita, acesa onde a nota foi 200. -->
 <!-- v2-1 (21/09/2026): as estrelas passavam a contar as redações com 200 na competência (antes 160+).
      RedaON · Portal do Aluno · Meu Plano · produção v2-0 (21/09/2026)
@@ -227,11 +228,11 @@ html[data-tema="claro"] .nv-ouro .vl, html[data-tema="claro"] .nv-ouro .chev{ co
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js?v=6-16"></script>
 <script>
-console.info('[RedaON] Meu Plano v2-2');
+console.info('[RedaON] Meu Plano v2-3');
 document.documentElement.setAttribute('data-tela','meu-plano');
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-2' });
+montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-3' });
 
 var NOME_COMP = { C1:'Norma culta', C2:'Repertório', C3:'Argumentação', C4:'Coesão', C5:'Intervenção' };
 var NOME_DIA  = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex', 6:'sáb', 7:'dom' };
@@ -283,7 +284,7 @@ function passos(){
   return [
     { tipo:'repertorio', ico:'lampada', nome:'Entender o tema e o material de apoio',
       onde: TEMA ? ('no Preparar · ' + esc(TEMA.titulo)) : 'no Preparar',
-      dest: destHub, feito: !!(PREP && (PREP.entender_em || PREP.repertorio_em)) },
+      dest: destHub, feito: !!(PREP && PREP.entender_em && PREP.repertorio_em) },
     { tipo:'flashcards', ico:'cartas', nome:'Atividades do tema',
       onde:'flashcards, resumo e quiz, no Preparar',
       dest: destHub, feito: !!(PREP && PREP.estudio_em) },
@@ -730,7 +731,7 @@ function mostrar(id){
     /* a redação da semana se marca sozinha */
     if (ESCREVEU && !feitoNoBanco('redacao')) await marcarFeito('redacao');
     /* as etapas do Preparar também: a fatia 2 passa a gravá-las na própria ação do aluno */
-    if (PREP && (PREP.entender_em || PREP.repertorio_em) && !feitoNoBanco('repertorio')) await marcarFeito('repertorio');
+    if (PREP && PREP.entender_em && PREP.repertorio_em && !feitoNoBanco('repertorio')) await marcarFeito('repertorio');
     if (PREP && PREP.estudio_em && !feitoNoBanco('flashcards')) await marcarFeito('flashcards');
 
     desenhar();

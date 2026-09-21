@@ -4,6 +4,18 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-11 (21/09/2026): Entender o tema passa a concluir quando o aluno rola até o fim do texto
+     (um marcador invisível no fim do conteúdo aparece na tela), não mais ao abrir. Enquanto não
+     chega, o selo diz "leia até o fim para concluir". O toast sai no fim da leitura. -->
+<!-- v2-10 (21/09/2026): fatia 2 do Meu Plano. As etapas se marcam na ação do aluno, pela régua da
+     Profa. Blanche, e os botões "Marcar … como visto/feitas" saíram. No lugar de cada um fica um selo
+     de estado, não clicável, que diz o que falta ou "✓ concluído".
+     · Entender o tema: conclui ao abrir (quando há conteúdo).
+     · Material de apoio: conclui na 3ª ficha distinta que aparece na tela (fichas da Fábrica e
+       materiais da professora contam juntos; se o tema tiver menos de 3, vale o que houver).
+     · Atividades: conclui com qualquer uma das quatro — resumo aberto, 5º cartão virado (distintos),
+       quiz começado (primeira resposta) ou Monte a intervenção aberto.
+     A contagem mora no banco (preparacoes.progresso jsonb) e sobrevive à troca de aparelho. -->
 <!-- v2-9 (20/09/2026): renomeação — o botão de concluir a etapa passa a dizer "Marcar material de apoio
      como visto" (antes "Marcar repertório como visto"). Nomes técnicos (coluna repertorio_em, eixo
      'repertorio', classes .atalhoEstudio/.duplaEstudio) permanecem inalterados de propósito. -->
@@ -287,9 +299,12 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .blPrep .fe{ width:19px; height:19px; flex:0 0 auto; vertical-align:0; }
 .blPrep b{ display:block; font-size:12.5px; color:var(--text); margin-bottom:2px; }
 .blPrep p{ margin:0; font-size:12px; line-height:1.45; color:var(--text2); }
-.btConcluir{ width:100%; margin-top:6px; border:0; border-radius:12px; background:rgba(var(--greenRGB),.14);
-  color:var(--green); font-family:inherit; font-size:13px; font-weight:600; padding:11px 0; cursor:pointer; }
-.btConcluir.feito{ background:rgba(var(--greenRGB),.24); }
+/* v2-10 · selo de estado no lugar do botão de concluir: não é clicável */
+.seloEtapa{ display:block; width:100%; margin-top:6px; border-radius:12px; background:var(--surface2);
+  color:var(--muted); font-size:12.5px; font-weight:600; padding:10px 0; text-align:center; }
+.seloEtapa.ok{ background:rgba(var(--greenRGB),.14); color:var(--green); }
+.fichaVista{ display:block; }
+.fimEntender{ display:block; height:1px; }
 .linPrep{ display:flex; align-items:center; gap:11px; background:var(--surface); border-radius:14px;
   box-shadow:0 1px 6px rgba(var(--borderRGB),.06); padding:11px 13px; margin-bottom:8px; cursor:pointer; }
 .linPrep .fe{ width:23px; height:23px; flex:0 0 auto; vertical-align:0; }
@@ -425,8 +440,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js?v=6-16"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-8 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-8');
+console.info('RedaON · preparar v2-11 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-11');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -443,6 +458,10 @@ var passosFeitos = { entender:false, repertorio:false, estudio:false };
 var atual = 0;
 var MATERIAL = {};        /* eixo -> { conteudo, estado, fichas } */
 var PREPARACAO = null;
+/* v2-10 · régua da Profa. Blanche: a contagem fica no banco (preparacoes.progresso) */
+var PROGRESSO = { fichas:[], cartoes:[] };
+var META_FICHAS = 3, META_CARTOES = 5;
+var TOTAL_FICHAS = 0, TOTAL_CARTOES = 0, PROF_IDS = [];
 var CAMPOS_COR = { trabalho:['#b07d10','#8a5a00'], educacao:['#1f6fb2','#0a8c8d'], saude:['#0f8a4d','#0a8c8d'],
   cidadania:['#5a4fc4','#1f6fb2'], cultura:['#8a5cc4','#c4488f'], tecnologia:['#0a8c8d','#5a4fc4'],
   meio_ambiente:['#0f8a4d','#5a8c10'], alimentacao:['#c47a10','#8a9c10'], infancia:['#c4488f','#c47a10'],
@@ -652,7 +671,7 @@ async function carregarPreparacao(){
   try {
     var uid = authGetUserId();
     if (!uid) return;
-    var url = SUPABASE_URL + '/rest/v1/preparacoes?select=entender_em,repertorio_em,estudio_em,concluida_em&aluno_id=eq.' + uid + '&tema_id=eq.' + TEMA_ID + '&limit=1';
+    var url = SUPABASE_URL + '/rest/v1/preparacoes?select=entender_em,repertorio_em,estudio_em,concluida_em,progresso&aluno_id=eq.' + uid + '&tema_id=eq.' + TEMA_ID + '&limit=1';
     var res = await dbFetch(url, {});
     if (!res.ok) return;
     var rows = await res.json();
@@ -674,6 +693,24 @@ function gravarDeclaracao(passo, completou){
       body: JSON.stringify(body)
     }).catch(function(e){ console.warn('[preparacoes] upsert:', e); });
   } catch(e){ console.warn('[preparacoes] upsert:', e); }
+}
+
+/* v2-10 · a contagem (fichas vistas e cartões virados) grava com folga de 0,8 s */
+var _tProgresso = null;
+function gravarProgresso(){
+  if (!TEMA_ID) return;
+  clearTimeout(_tProgresso);
+  _tProgresso = setTimeout(function(){
+    try {
+      var uid = authGetUserId();
+      if (!uid) return;
+      dbFetch(SUPABASE_URL + '/rest/v1/preparacoes?on_conflict=aluno_id,tema_id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify({ aluno_id: uid, tema_id: TEMA_ID, progresso: PROGRESSO })
+      }).catch(function(e){ console.warn('[preparacoes] progresso:', e); });
+    } catch(e){ console.warn('[preparacoes] progresso:', e); }
+  }, 800);
 }
 
 /* ───────────────────────────────────────────────────────────────
@@ -771,9 +808,10 @@ function pintarEtapas(){
     if (!el) return;
     if (passosFeitos[ETAPAS[i].passo]) { el.textContent = 'feito'; el.classList.add('ok'); }
   });
-  document.querySelectorAll('.btConcluir').forEach(function(b){
+  document.querySelectorAll('.seloEtapa').forEach(function(b){
     var ps = b.getAttribute('data-passo');
-    if (passosFeitos[ps]) { b.classList.add('feito'); b.textContent = '\u2713 Concluído'; }
+    b.textContent = textoSelo(ps);
+    b.classList.toggle('ok', !!passosFeitos[ps]);
   });
 }
 function irEtapa(i){
@@ -789,20 +827,86 @@ function irEtapa(i){
     if (i !== atual) { atual = i; pintarEtapas(); }
   }, { passive:true });
 })();
-/* v2-0 · a luz acende SÓ aqui, no botão de concluir. Virar flashcard ou responder quiz não acende. */
+/* v2-10 · a etapa se marca na ação do aluno, pela régua da Profa. Blanche (não há mais botão) */
 function concluirEtapa(passo){
   if (passosFeitos[passo]) return;
   passosFeitos[passo] = true;
   var n = ORDEM_PASSOS.filter(function(k){ return passosFeitos[k]; }).length;
   gravarDeclaracao(passo, n === 3);
   pintarEtapas();
-  toast(n === 3 ? 'Preparação completa \u2014 hora de escrever' : 'Etapa marcada como feita');
+  var rot = ETAPAS.filter(function(e){ return e.passo === passo; })[0];
+  toast(n === 3 ? 'Preparação completa \u2014 hora de escrever' : ((rot ? rot.rot : 'Etapa') + ': conclu\u00eddo'));
 }
-function htmlConcluir(passo, rotulo){
-  return '<button class="btConcluir" data-passo="' + passo + '" onclick="concluirEtapa(\'' + passo + '\')">' + rotulo + '</button>';
+function metaFichas(){ return Math.min(META_FICHAS, TOTAL_FICHAS + PROF_IDS.length); }
+function metaCartoes(){ return Math.min(META_CARTOES, TOTAL_CARTOES); }
+function plural(n, um, varios){ return n + ' ' + (n === 1 ? um : varios); }
+function textoSelo(passo){
+  if (passosFeitos[passo]) return '\u2713 conclu\u00eddo';
+  if (passo === 'repertorio'){
+    var f = Math.max(1, metaFichas() - PROGRESSO.fichas.length);
+    return 'falta abrir ' + plural(f, 'ficha', 'fichas');
+  }
+  if (passo === 'estudio'){
+    var c = PROGRESSO.cartoes.length;
+    if (c > 0 && c < metaCartoes()) return 'vire mais ' + plural(metaCartoes() - c, 'cart\u00e3o', 'cart\u00f5es');
+    return 'falta fazer 1 atividade';
+  }
+  return 'leia at\u00e9 o fim para concluir';
+}
+function htmlSelo(passo){
+  return '<div class="seloEtapa' + (passosFeitos[passo] ? ' ok' : '') + '" data-passo="' + passo + '">' + textoSelo(passo) + '</div>';
+}
+/* material de apoio: cada ficha distinta conta uma vez */
+function registrarFicha(chave){
+  if (!chave || PROGRESSO.fichas.indexOf(chave) >= 0) return;
+  PROGRESSO.fichas.push(chave);
+  gravarProgresso();
+  if (PROGRESSO.fichas.length >= metaFichas()) concluirEtapa('repertorio');
+  else pintarEtapas();
+}
+/* flashcards: cada cartão distinto virado conta uma vez */
+function registrarCartao(i){
+  if (PROGRESSO.cartoes.indexOf(i) >= 0) return;
+  PROGRESSO.cartoes.push(i);
+  gravarProgresso();
+  if (PROGRESSO.cartoes.length >= metaCartoes()) concluirEtapa('estudio');
+  else pintarEtapas();
+}
+/* a ficha conta quando aparece na tela, dentro do eixo aberto */
+var _obsFichas = null;
+function vigiarFichas(raiz){
+  var els = raiz.querySelectorAll('.fichaVista');
+  if (!('IntersectionObserver' in window)){
+    els.forEach(function(el){ registrarFicha(el.getAttribute('data-ficha')); });
+    return;
+  }
+  if (!_obsFichas) _obsFichas = new IntersectionObserver(function(ents){
+    ents.forEach(function(en){
+      if (!en.isIntersecting) return;
+      registrarFicha(en.target.getAttribute('data-ficha'));
+      _obsFichas.unobserve(en.target);
+    });
+  }, { threshold: 0.5 });
+  els.forEach(function(el){ _obsFichas.observe(el); });
+}
+function vigiarFimEntender(){
+  var fim = document.getElementById('fimEntender');
+  if (!fim) return;
+  if (!('IntersectionObserver' in window)){ concluirEtapa('entender'); return; }
+  var obs = new IntersectionObserver(function(ents){
+    ents.forEach(function(en){
+      if (!en.isIntersecting) return;
+      obs.disconnect();
+      concluirEtapa('entender');
+    });
+  });
+  obs.observe(fim);
 }
 function aplicarPreparacaoSalva(r){
   if (!r) return;
+  var pg = r.progresso || {};
+  PROGRESSO.fichas  = Array.isArray(pg.fichas)  ? pg.fichas  : [];
+  PROGRESSO.cartoes = Array.isArray(pg.cartoes) ? pg.cartoes : [];
   passosFeitos.entender   = !!r.entender_em;
   passosFeitos.repertorio = !!r.repertorio_em;
   passosFeitos.estudio    = !!r.estudio_em;
@@ -849,8 +953,11 @@ function montarEntender(){
   } else {
     corpo = '<p class="emPreparo">O resumo deste tema ainda está em preparação. A Profa. Blanche libera aqui assim que a Fábrica entregar.</p>';
   }
-  box.innerHTML = '<div class="cxPrep">' + corpo + htmlConcluir('entender', 'Marcar como entendido') + '</div>';
+  box.innerHTML = '<div class="cxPrep">' + corpo
+    + (m && m.conteudo ? '<span class="fimEntender" id="fimEntender"></span>' + htmlSelo('entender') : '') + '</div>';
   pintarEtapas();
+  /* v2-11 · abrir e ler: conclui quando o fim do texto aparece na tela */
+  if (m && m.conteudo && !passosFeitos.entender) vigiarFimEntender();
 }
 
 /* ─────────── 2 · Material de apoio (só o que existe) ─────────── */
@@ -858,11 +965,13 @@ function montarMaterial(){
   var alvo = document.getElementById('listaEixos');
   var comMaterial = EIXOS_META.filter(function(e){ return MATERIAL[e.id] && MATERIAL[e.id].fichas.length; });
   var total = comMaterial.reduce(function(s,e){ return s + MATERIAL[e.id].fichas.length; }, 0);
+  TOTAL_FICHAS = total;
   var fz = document.getElementById('fzMaterial');
   if (fz && !passosFeitos.repertorio) fz.textContent = total ? (total + (total===1?' ficha':' fichas') + ' \u00b7 ' + comMaterial.length + (comMaterial.length===1?' eixo':' eixos')) : '';
   if (!comMaterial.length){
     alvo.innerHTML = '<p class="emPreparo">O material deste tema ainda está em preparação. Assim que a Fábrica entregar e a Profa. Blanche aprovar, ele aparece aqui.</p>';
     document.getElementById('acoesMaterial').innerHTML = '';
+    seloMaterial();
     return;
   }
   alvo.innerHTML = comMaterial.map(function(e){
@@ -872,17 +981,27 @@ function montarMaterial(){
       + '<i class="seta" id="seta-' + e.id + '">\u203a</i></div>'
       + '<div class="gavetaMat" id="gav-' + e.id + '"><div class="gavetaIn" id="gavIn-' + e.id + '"></div></div>';
   }).join('');
-  document.getElementById('acoesMaterial').innerHTML =
-    '<div class="cxPrep" style="margin-top:4px;">' + htmlConcluir('repertorio', 'Marcar material de apoio como visto') + '</div>';
+  seloMaterial();
+}
+/* v2-10 · o selo só aparece quando existe o que abrir (fichas da Fábrica ou da professora) */
+function seloMaterial(){
+  var alvo = document.getElementById('acoesMaterial');
+  if (!alvo) return;
+  alvo.innerHTML = (TOTAL_FICHAS + PROF_IDS.length) ? '<div class="cxPrep" style="margin-top:4px;">' + htmlSelo('repertorio') + '</div>' : '';
+  /* se o tema tem menos fichas do que já foram vistas, a meta encolhida já fecha */
+  if (metaFichas() > 0 && PROGRESSO.fichas.length >= metaFichas()) concluirEtapa('repertorio');
   pintarEtapas();
 }
 function abrirEixo(id){
   var gav = document.getElementById('gav-'+id), inn = document.getElementById('gavIn-'+id);
   if (!gav) return;
   if (!inn.innerHTML){
-    inn.innerHTML = MATERIAL[id].fichas.map(fichaHTML).join('');
+    inn.innerHTML = MATERIAL[id].fichas.map(function(f, i){
+      return '<div class="fichaVista" data-ficha="' + id + ':' + i + '">' + fichaHTML(f) + '</div>';
+    }).join('');
   }
   gav.classList.toggle('aberta');
+  if (gav.classList.contains('aberta')) vigiarFichas(inn);
   var s = document.getElementById('seta-'+id);
   if (s) s.textContent = gav.classList.contains('aberta') ? '\u2039' : '\u203a';
 }
@@ -897,6 +1016,8 @@ async function carregarDaProfessora(){
     if (!res.ok) return;
     var lista = await res.json();
     if (!lista.length) return;
+    PROF_IDS = lista.map(function(m, i){ return 'prof:' + (m.id || i); });
+    seloMaterial();
     document.getElementById('blocoProfessora').classList.remove('hidden');
     document.getElementById('listaProfessora').innerHTML = lista.map(function(m,i){
       var quem = (m.origem === 'redaon') ? 'Equipe RedaON' : 'Da sua professora';
@@ -912,7 +1033,9 @@ async function carregarDaProfessora(){
 }
 function abrirDaProfessora(i){
   var g = document.getElementById('gavProf-'+i);
-  if (g) g.classList.toggle('aberta');
+  if (!g) return;
+  g.classList.toggle('aberta');
+  if (g.classList.contains('aberta')) registrarFicha(PROF_IDS[i]);
 }
 
 /* ─────────── 3 · Atividades ─────────── */
@@ -933,8 +1056,9 @@ function montarAtividades(){
   /* Monte a intervenção */
   html += linhaAtividade('prancheta', 'Monte a intervenção', interv ? 'Competência 5: agente, meio e detalhamento' : 'Aparece quando o gabarito do tema estiver pronto', !!interv, 'interv', true);
   alvo.innerHTML = html;
-  document.getElementById('acoesAtividades').innerHTML =
-    '<div class="cxPrep" style="margin-top:4px;">' + htmlConcluir('estudio', 'Marcar atividades como feitas') + '</div>';
+  var algumaAtiva = temResumo || temFlash || temQuiz || !!interv;
+  document.getElementById('acoesAtividades').innerHTML = algumaAtiva
+    ? '<div class="cxPrep" style="margin-top:4px;">' + htmlSelo('estudio') + '</div>' : '';
   INTERV = interv;
   pintarEtapas();
 }
@@ -960,6 +1084,8 @@ function abrirAtividade(id){
     if (id === 'interv') { inn.innerHTML = htmlJogo(); pintarJogo(); }
   }
   gav.classList.toggle('aberta');
+  /* v2-10 · basta abrir o resumo ou o Monte a intervenção */
+  if (gav.classList.contains('aberta') && (id === 'resumo' || id === 'interv')) concluirEtapa('estudio');
   var s = document.getElementById('setaAt-'+id);
   if (s) s.textContent = gav.classList.contains('aberta') ? '\u2039' : '\u203a';
 }
@@ -981,19 +1107,21 @@ function htmlFlashcards(){
   });
   if (!cartoes.length) return '<p class="emPreparo">Sem fichas para virar cartão ainda.</p>';
   if (cartoes.length > 12) cartoes = cartoes.slice(0, 12);
+  TOTAL_CARTOES = cartoes.length;
   return '<div class="fcTrilho">' + cartoes.map(function(c,i){
-    return '<div class="fc" onclick="virarFc(this)" data-verso="' + escapeHTML(c.verso) + '" data-frente="' + escapeHTML(c.frente) + '">'
+    return '<div class="fc" onclick="virarFc(this)" data-i="' + i + '" data-verso="' + escapeHTML(c.verso) + '" data-frente="' + escapeHTML(c.frente) + '">'
       + '<p class="fcRot">' + escapeHTML(c.eixo) + ' \u00b7 ' + (i+1) + ' de ' + cartoes.length + '</p>'
       + '<p class="fcTexto">' + escapeHTML(c.frente) + '</p></div>';
   }).join('') + '</div><p class="emPreparo">Toque no cartão para virar.</p>';
 }
-/* v2-0 · virar cartão NÃO acende a luz da etapa */
+/* v2-10 · cada cartão distinto virado conta; o 5º conclui as Atividades */
 function virarFc(el){
   var f = el.getAttribute('data-frente'), v = el.getAttribute('data-verso');
   var p = el.querySelector('.fcTexto');
   var mostrandoFrente = !el.classList.contains('virado');
   p.textContent = mostrandoFrente ? v : f;
   el.classList.toggle('virado');
+  if (mostrandoFrente) registrarCartao(parseInt(el.getAttribute('data-i'), 10));
 }
 
 /* quiz: só do banco; sem IA */
@@ -1009,11 +1137,12 @@ function htmlQuiz(){
       + '<p class="emPreparo hidden" id="qzEx'+i+'">' + escapeHTML(q.explicacao || '') + '</p></div>';
   }).join('');
 }
-/* v2-0 · responder NÃO acende a luz da etapa */
+/* v2-10 · começar o quiz (a primeira resposta) conclui as Atividades */
 function respQuiz(btn, i, ai){
   var bloco = document.getElementById('qz'+i);
   if (!bloco || bloco.classList.contains('respondida')) return;
   bloco.classList.add('respondida');
+  concluirEtapa('estudio');
   var q = MATERIAL['quiz'].fichas[i];
   var certa = (q.correta !== undefined) ? q.correta : q.resposta;
   var opcs = bloco.querySelectorAll('.opJ');
