@@ -4,6 +4,11 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-15 (21/09/2026): caixa de escrever padronizada centralizada, faltando etapa ou com 3 de 3. -->
+<!-- v2-14 (21/09/2026): (1) o botão discreto se chamava .sec e colidia com a classe .sec do kit
+     (cabeçalho de seção, flex), o que jogava o texto para a esquerda — agora é .discreto.
+     (2) "Ainda falta" só lista etapa que o tema tem como fazer: tema sem Entender, sem material ou sem
+     atividade não cobra essa etapa do aluno (mesma lógica da regra A do Meu Plano). -->
 <!-- v2-13 (21/09/2026): o aviso "Ainda falta: …" e o texto abaixo dele ficam centralizados na caixa de escrever. -->
 <!-- v2-12 (21/09/2026): três ajustes aprovados pelo Alan.
      · Flashcards: a frase abaixo dos cartões mostra a meta desde o início ("Vire pelo menos 5 cartões
@@ -372,9 +377,9 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .ctaPrep .t{ margin:0; font-size:14px; font-weight:700; color:var(--text); }
 .ctaPrep .s{ margin:3px 0 10px; font-size:11.5px; color:var(--muted); }
 /* v2-12 · faltando etapa, o botão fica secundário */
-.btEscrever.sec{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
-/* v2-13 · o aviso do que falta fica centralizado */
-.ctaPrep.pend .t, .ctaPrep.pend .s{ text-align:center; }
+.btEscrever.discreto{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
+/* v2-15 · a caixa de escrever é centralizada nos dois estados (pedido do Alan) */
+.ctaPrep .t, .ctaPrep .s{ text-align:center; }
 .fcMeta{ margin:.5rem .1rem 0; font-size:12px; font-weight:600; color:var(--muted); }
 .fcMeta.ok{ color:var(--green); }
 .btEscrever{ width:100%; border:0; border-radius:13px; background:var(--cyan); color:var(--onCyan);
@@ -453,8 +458,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 <script src="aluno-base-v6.js?v=6-16"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-console.info('RedaON · preparar v2-13 · ' + new Date().toISOString().slice(0,10));
-document.documentElement.setAttribute('data-tela', 'preparar v2-13');
+console.info('RedaON · preparar v2-15 · ' + new Date().toISOString().slice(0,10));
+document.documentElement.setAttribute('data-tela', 'preparar v2-15');
 
 montarEsqueleto({ ativo:'escrever', titulo:'Preparar', icone:'menu_book', sino:false });
 feHidratar(document);
@@ -475,6 +480,8 @@ var PREPARACAO = null;
 var PROGRESSO = { fichas:[], cartoes:[] };
 var META_FICHAS = 3, META_CARTOES = 5;
 var TOTAL_FICHAS = 0, TOTAL_CARTOES = 0, PROF_IDS = [];
+/* v2-14 · o tema tem como fazer cada etapa? (até a carga, supõe que sim) */
+var DISPONIVEL = { entender:true, repertorio:true, estudio:true };
 var CAMPOS_COR = { trabalho:['#b07d10','#8a5a00'], educacao:['#1f6fb2','#0a8c8d'], saude:['#0f8a4d','#0a8c8d'],
   cidadania:['#5a4fc4','#1f6fb2'], cultura:['#8a5cc4','#c4488f'], tecnologia:['#0a8c8d','#5a4fc4'],
   meio_ambiente:['#0f8a4d','#5a8c10'], alimentacao:['#c47a10','#8a9c10'], infancia:['#c4488f','#c47a10'],
@@ -833,20 +840,20 @@ function pintarEtapas(){
 function pintarCta(n){
   var t = document.getElementById('ctaT'), sub = document.getElementById('ctaS'), bt = document.getElementById('ctaBt');
   if (!t || !sub || !bt) return;
-  if (n >= 3){
+  var faltam = ETAPAS.filter(function(e){ return !passosFeitos[e.passo] && DISPONIVEL[e.passo]; }).map(function(e){ return e.rot; });
+  if (!faltam.length){
     t.textContent = 'Pronto para escrever?';
     sub.textContent = 'Você explorou o tema. Hora de colocar em prática.';
     bt.textContent = 'Estou pronto \u2014 Escrever';
-    bt.classList.remove('sec');
+    bt.classList.remove('discreto');
     if (bt.parentNode) bt.parentNode.classList.remove('pend');
     return;
   }
-  var faltam = ETAPAS.filter(function(e){ return !passosFeitos[e.passo]; }).map(function(e){ return e.rot; });
   var lista = faltam.length > 1 ? faltam.slice(0,-1).join(', ') + ' e ' + faltam[faltam.length-1] : faltam[0];
   t.textContent = 'Ainda falta: ' + lista;
   sub.textContent = 'Você pode escrever agora, mas vai sem ter visto tudo o que preparamos para este tema.';
   bt.textContent = 'Escrever mesmo assim';
-  bt.classList.add('sec');
+  bt.classList.add('discreto');
   if (bt.parentNode) bt.parentNode.classList.add('pend');
 }
 function pintarFcMeta(){
@@ -1000,6 +1007,8 @@ function montarEntender(){
     + (m && m.conteudo ? '<span class="fimEntender" id="fimEntender"></span>' + htmlSelo('entender') : '') + '</div>';
   pintarEtapas();
   /* v2-11 · abrir e ler: conclui quando o fim do texto aparece na tela */
+  DISPONIVEL.entender = !!(m && m.conteudo);
+  pintarEtapas();
   if (m && m.conteudo && !passosFeitos.entender) vigiarFimEntender();
 }
 
@@ -1032,6 +1041,7 @@ function seloMaterial(){
   if (!alvo) return;
   alvo.innerHTML = (TOTAL_FICHAS + PROF_IDS.length) ? '<div class="cxPrep" style="margin-top:4px;">' + htmlSelo('repertorio') + '</div>' : '';
   /* se o tema tem menos fichas do que já foram vistas, a meta encolhida já fecha */
+  DISPONIVEL.repertorio = (TOTAL_FICHAS + PROF_IDS.length) > 0;
   if (metaFichas() > 0 && PROGRESSO.fichas.length >= metaFichas()) concluirEtapa('repertorio');
   pintarEtapas();
 }
@@ -1103,6 +1113,7 @@ function montarAtividades(){
   document.getElementById('acoesAtividades').innerHTML = algumaAtiva
     ? '<div class="cxPrep" style="margin-top:4px;">' + htmlSelo('estudio') + '</div>' : '';
   INTERV = interv;
+  DISPONIVEL.estudio = algumaAtiva;
   pintarEtapas();
 }
 function linhaAtividade(ico, nome, desc, ativa, id, nova){
