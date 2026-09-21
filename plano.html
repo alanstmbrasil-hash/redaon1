@@ -3,12 +3,23 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Plano de estudos</title>
-<!-- v1-7 (20/09/2026): o destino de cada tarefa também passa a ser refeito na hora, pelo tema que está valendo. Antes, o link ia gravado com o id do tema do dia em que a semana foi criada: se a Profa. Blanche trocasse o tema, o card levava ao tema antigo — e a tarefa de escrever gravava a redação no tema errado. -->
-<!-- v1-6 (20/09/2026): o texto de cada tarefa passa a ser escrito na hora pela tela, a partir do tipo (e da competência, no exercício). A coluna plano_itens.rotulo continua gravada, mas não manda mais no que aparece — antes, quem já tinha a semana criada continuava vendo o texto antigo. -->
-<!-- v1-5 (20/09/2026): renomeação — a tarefa do dia 2 passa a ser "Flashcards do material de apoio" (antes "Flashcards de repertório"). O nome da C2 ("Tema e repertório") fica como está: é o termo do INEP. -->
-<!-- v1-4 (20/09/2026): renomeação — o rótulo da etapa do dia 1 passa a ser "Material de apoio" (antes "Repertório"). A chave técnica tipo:'repertorio' não muda. -->
-<!-- RedaON · Portal do Aluno · Plano de estudos · produção v1-2 · rotina prepara→fixa→aplica→reflete→trata · dias sugeridos deslizantes · gaveta de descanso (plano_config) -->
+<title>RedaON | Meu Plano</title>
+<!-- RedaON · Portal do Aluno · Meu Plano · produção v2-0 (21/09/2026)
+     Fusão de Plano de estudos + Evolução, aprovada ponto a ponto pelo Alan:
+     · nome "Meu Plano", ícone bússola na linha .pgHead (sem caixa)
+     · dois cards em rolagem lateral: "Sua semana" e "Como você está"
+     · a semana é uma trilha vertical de 5 passos, com ícone Fluent solto (sem círculo)
+       feito = ✅ e texto riscado · hoje = halo ciano e selo "hoje"
+       ficou para trás = despertador, texto e botão em vermelho, selo "em atraso"
+     · nada de "Marcar feito": o estado é lido dos fatos. A única exceção declarada
+       pela Profa. Blanche é o "revisei" da correção, que tem botão.
+     · régua de cores igual à do Início: 0-79 vermelho · 80-120 amarelo · 121-199 verde · 200 ouro
+     · média das ÚLTIMAS 4 redações (um mês, uma por semana)
+     · troféu aos 200 e até 4 estrelas (semanas em que a competência ficou em 160+)
+     · foco da semana = menor nota da ÚLTIMA redação (regra da Profa. Blanche)
+     · descanso padrão: sábado, o aluno troca na gaveta (plano_config)
+     Pendências conhecidas (fatias 2 e 3): o Preparar ainda grava as etapas pelo botão antigo,
+     e o passo da competência só se marca quando a tela de exercícios existir. -->
 <script>
 (function(){
   var pref = 'auto';
@@ -24,506 +35,704 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="aluno-base-v6.css?v=6-15" rel="stylesheet"/>
+<link href="aluno-base-v6.css?v=6-16" rel="stylesheet"/>
 
 <style>
-/* ═══ TELA · Plano de estudos · v1 (produção) ═══ */
-#conteudo{ max-width:680px; margin:0 auto; width:100%; padding:0 .9rem 2rem; }
-.rotuloTopo{ font-size:.66rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 .1rem .1rem; } /* v1-3: espa\u00e7amento igual ao da Evolu\u00e7\u00e3o */
-.tituloTela{ font-family:Georgia,serif; font-size:1.35rem; font-weight:800; line-height:1.3; margin:0 .1rem .15rem; } /* v1-3 */
-.porque{ font-size:.85rem; color:var(--muted); line-height:1.5; margin:0 .1rem .875rem; } /* v1-3 */
-.porque b{ color:var(--cyan); font-weight:800; }
+/* ══ Meu Plano ══ */
+.estado{ display:flex; flex-direction:column; align-items:center; gap:.6rem; padding:3.2rem 1rem;
+  font-size:.88rem; color:var(--muted); text-align:center; }
+.estado .fe{ width:34px; height:34px; }
 
-/* Ouro de conquista: mesmo tom vivo nos dois temas (padrão do Hub) */
-:root, html[data-tema="claro"]{ --ouro:#fabd00; --ouroRGB:250,189,0; }
+.rotTopo{ font-size:.66rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); margin:0 .1rem .18rem; }
+.foco{ font-size:.85rem; color:var(--text2); line-height:1.5; margin:0 .1rem .2rem; }
+.foco b{ color:var(--cyan); }
 
-/* Progresso da semana */
-.cardProg{ background:var(--surface); border:1px solid rgba(var(--borderRGB),.22); border-radius:1rem; padding:.85rem .95rem; margin-bottom:.9rem; display:flex; align-items:center; gap:.75rem; }
-.cardProg .rotP{ font-size:.7rem; font-weight:700; color:var(--muted); }
-.cardProg .trilho{ flex:1; height:8px; border-radius:99px; background:rgba(var(--borderRGB),.25); overflow:hidden; }
-.cardProg .trilho i{ display:block; height:100%; border-radius:99px; background:var(--ouro); transition:width .4s; width:0; }
-.cardProg .numP{ font-size:.95rem; font-weight:800; font-variant-numeric:tabular-nums; }
+/* rolagem lateral dos dois cards */
+.trilhoCards{ display:flex; gap:.75rem; overflow-x:auto; scroll-snap-type:x mandatory;
+  scrollbar-width:none; -ms-overflow-style:none; margin:.85rem -1rem 0; padding:.1rem 1rem .3rem; }
+.trilhoCards::-webkit-scrollbar{ display:none; }
+.cartao{ flex:0 0 100%; scroll-snap-align:center; background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.14); border-radius:1.1rem; padding:.9rem .85rem 1rem; }
+.cabCart{ display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; }
+.cabCart h2{ font-size:.95rem; font-weight:800; margin:0; }
+.cabCart span{ font-size:.72rem; font-weight:700; color:var(--muted); white-space:nowrap; }
+.subCart{ font-size:.75rem; color:var(--muted); line-height:1.45; margin:.15rem 0 .7rem; }
+.pontos{ display:flex; gap:.35rem; justify-content:center; margin:.6rem 0 .2rem; }
+.pontos i{ width:6px; height:6px; border-radius:50%; background:rgba(var(--borderRGB),.28); display:block;
+  transition:width .18s ease, background .18s ease; }
+.pontos i.on{ background:var(--cyan); width:18px; border-radius:99px; }
 
-/* Cards de dia */
-.dia{ display:flex; align-items:center; gap:.75rem; background:var(--surface); border:1px solid rgba(var(--borderRGB),.22); border-radius:1rem; padding:.8rem .9rem; margin-bottom:.55rem; min-height:60px; }
-.dia.navegavel{ cursor:pointer; }
-.dia .icd{ flex:0 0 auto; width:2rem; height:2rem; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; background:var(--surface2); }
-.dia .txts{ flex:1; min-width:0; }
-.dia .rotDia{ display:block; font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
-.dia .tarefa{ display:block; font-size:.85rem; font-weight:600; color:var(--text); margin-top:.1rem; }
-.dia .onde{ display:block; font-size:.68rem; color:var(--muted); margin-top:.15rem; }
-.dia .fimD{ flex:0 0 auto; font-size:.72rem; color:var(--muted); }
-.dia.feito{ opacity:.62; }
-.dia.feito .icd{ background:rgba(var(--greenRGB),.14); }
-.dia.feito .tarefa{ text-decoration:line-through; text-decoration-thickness:1px; }
-.dia.feito .fimD{ color:var(--green); font-weight:800; }
-.dia.hoje{ border-color:rgba(var(--cyanRGB),.5); }
-.dia.hoje .rotDia{ color:var(--cyan); }
-.dia.hoje .icd{ background:rgba(var(--cyanRGB),.14); }
-.dia.descanso .icd{ background:rgba(var(--greenRGB),.1); }
+/* progresso */
+.prog{ display:flex; align-items:center; gap:.6rem; margin-bottom:.75rem; }
+.prog .rot{ font-size:.73rem; font-weight:700; color:var(--muted); }
+.prog .pista{ flex:1; height:7px; border-radius:99px; background:rgba(var(--borderRGB),.16); overflow:hidden; }
+.prog .pista i{ display:block; height:100%; background:var(--cyan); transition:width .3s ease; }
+.prog b{ font-size:.86rem; font-weight:800; font-variant-numeric:tabular-nums; }
 
-.btnFeito{ flex:0 0 auto; min-height:40px; padding:0 .8rem; border-radius:10px; border:1px solid rgba(var(--cyanRGB),.45); background:transparent; color:var(--cyan); font-size:.72rem; font-weight:800; cursor:pointer; font-family:inherit; white-space:nowrap; }
+/* ── trilha da semana ── */
+.passo{ display:flex; gap:.7rem; align-items:flex-start; padding-bottom:.75rem; }
+.passo:last-of-type{ padding-bottom:0; }
+.marca{ flex:0 0 30px; display:flex; flex-direction:column; align-items:center; align-self:stretch; }
+.icoP{ width:30px; height:30px; display:block; flex:0 0 auto; }
+.linha{ flex:1; width:2px; background:rgba(var(--borderRGB),.18); margin:.2rem 0 -.75rem; min-height:13px; }
+.passo:last-of-type .linha{ display:none; }
+.corpoP{ flex:1; min-width:0; padding-top:.2rem; }
+.dia{ font-size:.63rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+.nomeP{ font-size:.86rem; font-weight:700; line-height:1.3; margin:.05rem 0 .1rem; }
+.ondeP{ font-size:.72rem; color:var(--muted); line-height:1.42; }
+.selo{ display:inline-block; font-size:.58rem; font-weight:800; text-transform:uppercase;
+  letter-spacing:.05em; border-radius:99px; padding:2px 8px; margin-left:.35rem; vertical-align:1px; }
+.selo.hoje{ background:var(--cyan); color:var(--onCyan); }
+.selo.atr{ background:var(--red); color:#fff; }
+html[data-tema="escuro"] .selo.atr{ color:#2a0e0e; }
 
-/* Rodapé de transparência */
-.comoMontado{ background:var(--surface2); border:1px solid rgba(var(--borderRGB),.18); border-radius:1rem; padding:.8rem .95rem; margin-top:1rem; }
-.comoMontado .t{ font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:.35rem; }
-.comoMontado p{ font-size:.74rem; color:var(--text2); line-height:1.55; }
-.comoMontado p b{ color:var(--text); }
+.passo.feito .linha{ background:rgba(var(--greenRGB),.35); }
+.passo.feito .nomeP{ color:var(--muted); font-weight:600; text-decoration:line-through; }
+.passo.feito .ondeP{ opacity:.7; }
+.passo.feito .dia{ color:var(--green); }
+.passo.agora .icoP{ border-radius:50%; box-shadow:0 0 0 3px rgba(var(--cyanRGB),.18); }
+.passo.agora .dia{ color:var(--cyan); }
+.passo.agora .corpoP{ background:rgba(var(--cyanRGB),.07); border:1px solid rgba(var(--cyanRGB),.32);
+  border-radius:.8rem; padding:.55rem .7rem; margin-top:-.25rem; }
+.passo.depois .icoP{ opacity:.62; }
+.passo.atraso .linha{ background:rgba(var(--redRGB),.35); margin-top:.25rem; }
+.passo.atraso .dia, .passo.atraso .nomeP, .passo.atraso .ondeP{ color:var(--red); }
+.passo.atraso .nomeP{ font-weight:800; }
 
-/* Estados */
-.estado{ text-align:center; padding:2.2rem 1rem; color:var(--muted); font-size:.82rem; line-height:1.6; }
-.estado .em{ font-size:1.8rem; display:block; margin-bottom:.5rem; }
-.hidden{ display:none !important; }
+.btP{ display:inline-flex; align-items:center; gap:.3rem; margin-top:.5rem; border:0; border-radius:.6rem;
+  font-family:inherit; font-size:.78rem; font-weight:800; padding:.45rem .8rem; cursor:pointer;
+  background:var(--cyan); color:var(--onCyan); min-height:34px; }
+.btP.verm{ background:var(--red); color:#fff; }
+html[data-tema="escuro"] .btP.verm{ color:#2a0e0e; }
+.btP.fantasma{ background:transparent; border:1px solid rgba(var(--borderRGB),.3); color:var(--cyan); }
+.btP .fim{ font-size:.9rem; line-height:1; }
 
-/* Gaveta: dias de descanso */
-.gvDiasBg{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:110; }
-.gvDiasBg.open{ display:block; }
-.gvDias{ display:none; position:fixed; left:0; right:0; bottom:0; z-index:111; background:var(--top);
-  border-top:1px solid rgba(var(--borderRGB),.2); border-radius:20px 20px 0 0;
-  padding:10px 16px 20px; max-width:34rem; margin:0 auto; }
-.gvDias.open{ display:block; }
-.gvGrip{ width:38px; height:4px; border-radius:99px; background:rgba(var(--borderRGB),.45); margin:0 auto 12px; }
-.gvTit{ font-size:1rem; font-weight:800; color:var(--text); margin-bottom:.3rem; }
-.gvSub{ font-size:.72rem; color:var(--muted); line-height:1.5; margin-bottom:.8rem; }
-.optDia{ display:flex; align-items:center; justify-content:space-between; gap:.7rem; min-height:52px; padding:0 .875rem;
-  border-radius:13px; background:var(--surface); color:var(--text); font-size:.85rem; font-weight:600; cursor:pointer;
-  margin-bottom:.5rem; border:1px solid transparent; }
-.optDia .ck{ color:var(--cyan); font-size:1.05rem; font-weight:900; opacity:0; }
-.optDia.sel{ background:rgba(var(--cyanRGB),.13); color:var(--cyan); border-color:rgba(var(--cyanRGB),.4); }
-.optDia.sel .ck{ opacity:1; }
+.livre{ display:flex; gap:.7rem; align-items:center; margin-top:.75rem;
+  border-top:1px solid rgba(var(--borderRGB),.12); padding-top:.7rem; }
+.livre .icoP{ width:26px; height:26px; }
+.livre .nomeP{ margin:0; }
+.livre .link{ color:var(--cyan); cursor:pointer; text-decoration:underline; text-decoration-style:dotted; }
 
-/* Conquista 5/5 (padrão ouro do produto) */
-.veuPlano{ position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:120; display:none; align-items:center; justify-content:center; padding:1.5rem; }
-.veuPlano.show{ display:flex; }
-.conqPlano{ background:var(--top); border:1px solid rgba(var(--ouroRGB),.4); border-radius:1.25rem; padding:1.5rem 1.25rem; text-align:center; max-width:20rem; }
-.conqPlano .circ{ width:3.4rem; height:3.4rem; border-radius:50%; background:rgba(var(--ouroRGB),.16); display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin:0 auto .7rem; }
-.conqPlano .r{ font-size:.95rem; font-weight:800; color:var(--ouro); }
-.conqPlano .s{ font-size:.74rem; color:var(--text2); margin-top:.35rem; line-height:1.5; }
+/* ── boletim ── */
+.notaG{ display:flex; align-items:baseline; gap:.5rem; flex-wrap:wrap; margin-bottom:.7rem; }
+.notaG b{ font-size:1.85rem; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
+.notaG .de{ font-size:.74rem; color:var(--muted); }
+.notaG .var{ font-size:.72rem; font-weight:800; }
+.grafico{ border:1px solid rgba(var(--borderRGB),.14); border-radius:.8rem; padding:.6rem .65rem .35rem; margin-bottom:.8rem; }
+.grafico .cab{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.3rem; }
+.grafico .cab b{ font-size:.77rem; font-weight:800; }
+.grafico .cab span{ font-size:.67rem; color:var(--muted); }
+.grafico svg{ width:100%; height:56px; display:block; }
+.grafico .eixo{ display:flex; justify-content:space-between; font-size:.63rem; color:var(--muted); margin-top:.1rem; }
+
+.ajuda{ display:flex; align-items:center; gap:.35rem; font-size:.71rem; color:var(--muted); margin:0 0 .5rem; }
+.comps{ display:flex; flex-direction:column; gap:.5rem; }
+.comp{ background:var(--bg); border:1px solid rgba(var(--borderRGB),.14); border-radius:.75rem;
+  padding:.55rem .65rem .6rem; cursor:pointer; width:100%; text-align:left; font-family:inherit; }
+.comp .l1{ display:flex; align-items:center; gap:.45rem; margin-bottom:.4rem; }
+.comp .nm{ flex:1; min-width:0; font-size:.8rem; font-weight:700; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.comp .nm em{ font-style:normal; color:var(--text2); font-weight:500; }
+.capsula{ display:inline-flex; align-items:center; gap:.25rem; flex:0 0 auto; font-size:.64rem; font-weight:800;
+  color:var(--text); background:rgba(var(--cyanRGB),.14); border-radius:99px; padding:3px 9px 3px 7px; }
+.capsula .fe{ width:13px; height:13px; }
+.estrelas{ display:inline-flex; gap:3px; flex:0 0 auto; background:rgba(var(--cyanRGB),.14);
+  border-radius:99px; padding:3px 7px; }
+.estrelas svg{ width:12px; height:12px; color:rgba(var(--borderRGB),.30); }
+.estrelas svg.on{ color:#fabd00; }
+.comp .l2{ display:flex; align-items:center; gap:.55rem; }
+.comp .pista{ flex:1; height:8px; border-radius:99px; background:rgba(var(--borderRGB),.14); overflow:hidden; }
+.comp .pista i{ display:block; height:100%; border-radius:99px; }
+.comp .vl{ flex:0 0 32px; text-align:right; font-size:.82rem; font-weight:800; font-variant-numeric:tabular-nums; }
+.comp .chev{ flex:0 0 12px; display:flex; align-items:center; justify-content:center; font-size:.9rem; font-weight:800; }
+/* régua igual à do Início: 0-79 vermelho · 80-120 amarelo · 121-199 verde · 200 ouro */
+.nv-verm .pista i{ background:var(--red); }   .nv-verm .vl, .nv-verm .chev{ color:var(--red); }
+.nv-amar .pista i{ background:var(--orange); }.nv-amar .vl, .nv-amar .chev{ color:var(--orange); }
+.nv-verde .pista i{ background:var(--green); }.nv-verde .vl, .nv-verde .chev{ color:var(--green); }
+.nv-ouro .pista i{ background:#fabd00; }      .nv-ouro .vl, .nv-ouro .chev{ color:#fabd00; }
+html[data-tema="claro"] .nv-ouro .vl, html[data-tema="claro"] .nv-ouro .chev{ color:#9a7a10; }
+.comp.focoC{ border-color:var(--orange); background:rgba(var(--orangeRGB),.06); }
+.selFoco{ font-size:.58rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+  background:var(--orange); color:#fff; border-radius:99px; padding:2px 7px; flex:0 0 auto; }
+.rodape{ font-size:.7rem; color:var(--muted); line-height:1.45; margin-top:.6rem; }
+.rodape a{ color:var(--cyan); }
+
+/* gaveta */
+.gvBg{ position:fixed; inset:0; background:rgba(0,0,0,.5); opacity:0; pointer-events:none;
+  transition:opacity .2s ease; z-index:60; }
+.gvBg.open{ opacity:1; pointer-events:auto; }
+.gv{ position:fixed; left:0; right:0; bottom:0; z-index:61; background:var(--surface);
+  border-radius:1.1rem 1.1rem 0 0; padding:.7rem 1rem 1.4rem; transform:translateY(102%);
+  transition:transform .24s ease; max-height:82vh; overflow-y:auto; }
+.gv.open{ transform:translateY(0); }
+.gvGrip{ width:38px; height:4px; border-radius:99px; background:rgba(var(--borderRGB),.3); margin:.15rem auto .7rem; }
+.gvTit{ font-size:1rem; font-weight:800; margin-bottom:.2rem; }
+.gvSub{ font-size:.78rem; color:var(--muted); line-height:1.45; margin-bottom:.8rem; }
+.opt{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; min-height:46px;
+  border:1px solid rgba(var(--borderRGB),.18); border-radius:.8rem; padding:.6rem .8rem;
+  margin-bottom:.45rem; font-size:.86rem; cursor:pointer; background:var(--bg); color:var(--text); width:100%;
+  font-family:inherit; text-align:left; }
+.opt .ck{ opacity:0; color:var(--cyan); font-weight:800; }
+.opt.sel{ border-color:var(--cyan); background:rgba(var(--cyanRGB),.08); }
+.opt.sel .ck{ opacity:1; }
+
+@media(min-width:641px){
+  .cartao{ flex:0 0 min(420px, 86%); }
+  .nomeP{ font-size:.92rem; }
+}
 </style>
 </head>
 <body>
 <div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
-
 <div id="conteudo">
-  <div class="estado" id="estadoCarregando"><span class="em">📅</span>Montando sua semana…</div>
-  <div class="estado hidden" id="estadoErro"><span class="em">😕</span>Não consegui carregar seu plano agora.<br/>Confira a internet e recarregue a página.</div>
 
-  <div class="hidden" id="telaPlano">
-    <p class="rotuloTopo" id="rotSemana">Semana</p>
-    <p class="tituloTela">Plano da semana</p>
-    <p class="porque" id="fraseFoco"></p>
+  <div class="estado" id="estadoCarregando">Montando a sua semana…</div>
+  <div class="estado hidden" id="estadoErro">Não consegui carregar o seu plano agora.<br/>Confira a internet e recarregue a página.</div>
 
-    <div class="cardProg">
-      <span class="rotP">Progresso</span>
-      <div class="trilho"><i id="barraProg"></i></div>
-      <span class="numP" id="numProg">0/5</span>
-    </div>
-
-    <div id="listaDias"></div>
-
-    <div class="comoMontado">
-      <p class="t">Como este plano foi montado</p>
-      <p id="txtComoMontado"></p>
-    </div>
+  <div class="hidden" id="tela">
+    <p class="rotTopo" id="rotSemana">Semana</p>
+    <p class="foco" id="fraseFoco"></p>
+    <div class="trilhoCards" id="trilhoCards"></div>
+    <div class="pontos" id="pontos"><i class="on"></i><i></i></div>
   </div>
+
 </div>
 </div>
 
-<!-- Gaveta: dias de descanso (padrão do produto) -->
-<div class="gvDiasBg" id="gvDiasBg" onclick="fecharGavetaDias()"></div>
-<div class="gvDias" id="gvDias">
+<!-- gaveta: dias de descanso -->
+<div class="gvBg" id="gvDiasBg" onclick="fecharGaveta('gvDias')"></div>
+<div class="gv" id="gvDias">
   <div class="gvGrip"></div>
-  <p class="gvTit">Quais são seus dias de descanso?</p>
-  <p class="gvSub">O plano sugere os dias das etapas respeitando o seu ritmo. Você pode trocar quando quiser.</p>
-  <div class="optDia sel" data-v="sab_dom" onclick="escolherDescanso(this)"><span>Sábado e domingo</span><span class="ck">✓</span></div>
-  <div class="optDia" data-v="sab" onclick="escolherDescanso(this)"><span>Só sábado</span><span class="ck">✓</span></div>
-  <div class="optDia" data-v="dom" onclick="escolherDescanso(this)"><span>Só domingo</span><span class="ck">✓</span></div>
-  <div class="optDia" data-v="nenhum" onclick="escolherDescanso(this)"><span>Nenhum — estudo todos os dias</span><span class="ck">✓</span></div>
+  <p class="gvTit">Quais são os seus dias de descanso?</p>
+  <p class="gvSub">A RedaON sugere os dias respeitando o seu ritmo. Nenhuma tarefa é presa ao dia: você pode fazer tudo de uma vez.</p>
+  <button class="opt" data-v="sab"     onclick="escolherDescanso(this)"><span>Só sábado</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="sab_dom" onclick="escolherDescanso(this)"><span>Sábado e domingo</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="dom"     onclick="escolherDescanso(this)"><span>Só domingo</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="nenhum"  onclick="escolherDescanso(this)"><span>Nenhum — estudo todos os dias</span><span class="ck">✓</span></button>
 </div>
 
-<div class="veuPlano" id="veuSemana" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="conqPlano">
-    <div class="circ">🏁</div>
-    <p class="r">Semana completa!</p>
-    <p class="s">Você fechou as 5 tarefas. A próxima semana chega segunda-feira, já calibrada pela sua Evolução.</p>
-  </div>
+<!-- gaveta: trocar a competência do foco -->
+<div class="gvBg" id="gvFocoBg" onclick="fecharGaveta('gvFoco')"></div>
+<div class="gv" id="gvFoco">
+  <div class="gvGrip"></div>
+  <p class="gvTit" id="gvFocoTit">Treinar esta competência</p>
+  <p class="gvSub" id="gvFocoSub"></p>
+  <div id="gvFocoOpts"></div>
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-15"></script>
+<script src="aluno-base-v6.js?v=6-16"></script>
 <script>
-/* ═══ RedaON · Plano de estudos · produção v1-2 (rotina prepara→fixa→aplica→reflete→trata; dia = ORDEM; dias sugeridos deslizantes; plano_config) ═══
-   Regra determinística (P1a, custo zero de IA):
-   foco = ?foco=CX da Evolução > pior competência das últimas 8 > nenhum.
-   5 tarefas seg–sex; sáb+dom descanso por natureza (P7);
-   nenhuma tarefa presa ao dia — ✓ aceito a qualquer momento. */
+console.info('[RedaON] Meu Plano v2-0');
+document.documentElement.setAttribute('data-tela','meu-plano');
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-montarEsqueleto({
-  ativo:  '',
-  titulo: 'Plano de estudos',
-  icone:  'calendar_month',
-  sino:   true,
-  versao: 'aluno \u00b7 plano \u00b7 v1-3'
-});
+montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-0' });
 
-var NOME_COMP = { C1:'Norma culta', C2:'Tema e repert\u00f3rio', C3:'Argumenta\u00e7\u00e3o', C4:'Coes\u00e3o', C5:'Interven\u00e7\u00e3o' };
-var NOME_DIA = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex', 6:'s\u00e1b', 7:'dom' };
-var ETAPA_ROT = { repertorio:'prepara', flashcards:'fixa', redacao:'aplica', revisao:'reflete', exercicio:'trata' };
-var DESCANSO = 'sab_dom'; /* preferencia do aluno (plano_config) */
-var ICONE_TIPO = { repertorio:'\uD83D\uDCDA', redacao:'\u270F\uFE0F', revisao:'\uD83D\uDD0D', exercicio:'\uD83C\uDFAF', flashcards:'\uD83C\uDFB4' };
+var NOME_COMP = { C1:'Norma culta', C2:'Repertório', C3:'Argumentação', C4:'Coesão', C5:'Intervenção' };
+var NOME_DIA  = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex', 6:'sáb', 7:'dom' };
+var DIA_LONGO = { 1:'segunda', 2:'terça', 3:'quarta', 4:'quinta', 5:'sexta', 6:'sábado', 7:'domingo' };
 
-var ITENS = [];        /* linhas de plano_itens desta semana */
-var SEMANA_DE = null;  /* 'YYYY-MM-DD' da segunda-feira */
-var FOCO = null;       /* 'C1'..'C5' ou null */
-var ORIGEM_FOCO = '';  /* 'evolucao' | 'diagnostico' | '' */
-var TEMA = null;       /* tema da semana, se houver */
+var SEMANA_DE = null;      /* 'YYYY-MM-DD' da segunda */
+var DESCANSO  = 'sab';     /* padrão definido pela Profa. Blanche; o aluno troca na gaveta */
+var TEMA      = null;      /* tema da semana */
+var FOCO      = null;      /* 'C1'..'C5' */
+var ITENS     = [];        /* plano_itens desta semana */
+var HIST      = [];        /* redações corrigidas, recente → antiga */
+var PREP      = null;      /* linha de preparacoes do tema da semana */
+var ESCREVEU  = false;     /* enviou redação nesta semana? */
+var TEM_EXERC = false;     /* existe exercício publicado da competência do foco? */
+var UID       = null;
 
-function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function pad2(n){ return (n<10?'0':'')+n; }
-function dataISO(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
-function segundaDaSemana(){
-  var d = new Date(); d.setHours(0,0,0,0);
-  var dow = d.getDay();                 /* 0=dom..6=sáb */
-  var recuo = (dow === 0) ? 6 : dow-1;  /* volta até a segunda */
-  d.setDate(d.getDate()-recuo);
-  return d;
+/* ── datas ── */
+function segundaDaSemana(d){
+  var x = d ? new Date(d) : new Date();
+  var n = x.getDay(); var dif = (n === 0 ? -6 : 1 - n);
+  x.setDate(x.getDate() + dif); x.setHours(0,0,0,0); return x;
 }
-function diaHojeSemana(){ var g=new Date().getDay(); return (g===0) ? 7 : g; } /* 1=seg .. 7=dom */
+function dataISO(d){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function diaHoje(){ var n = new Date().getDay(); return n === 0 ? 7 : n; }
 function diasDeDescanso(){
-  if (DESCANSO==='sab') return [6];
-  if (DESCANSO==='dom') return [7];
-  if (DESCANSO==='nenhum') return [];
+  if (DESCANSO === 'sab') return [6];
+  if (DESCANSO === 'dom') return [7];
+  if (DESCANSO === 'nenhum') return [];
   return [6,7];
 }
-/* Dias sugeridos deslizantes: distribui as etapas pendentes, em ordem,
-   pelos dias restantes da semana (de hoje em diante), pulando o descanso. */
-function sugerirDias(itens){
-  var hoje = diaHojeSemana();
-  var descanso = diasDeDescanso();
-  var livres = [];
-  for (var d=hoje; d<=7; d++){ if (descanso.indexOf(d)===-1) livres.push(d); }
-  var mapa = {}; var i=0;
-  itens.forEach(function(item){
-    if (item.feito_em) return;
-    mapa[item.id] = (i < livres.length) ? livres[i] : null;
-    i++;
-  });
+function esc(t){ return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── a régua de cores é a mesma do Início ── */
+function nivel(v){
+  if (v >= 200) return 'nv-ouro';
+  if (v >= 121) return 'nv-verde';
+  if (v >= 80)  return 'nv-amar';
+  return 'nv-verm';
+}
+
+/* ── os cinco passos da semana, na ordem aprovada pela Profa. Blanche ──
+   prontos: o que acende cada um está em `feito`, lido dos fatos. */
+function passos(){
+  var destHub  = TEMA ? ('hub-preparacao.html?tema=' + encodeURIComponent(TEMA.id)) : 'hub-preparacao.html';
+  var destEscr = 'nova-redacao.html?metodo=digitar' + (TEMA ? ('&tema=' + encodeURIComponent(TEMA.id)) : '');
+  var nomeFoco = FOCO ? (FOCO + ' · ' + NOME_COMP[FOCO]) : 'a sua competência mais fraca';
+  return [
+    { tipo:'repertorio', ico:'lampada', nome:'Entender o tema e o material de apoio',
+      onde: TEMA ? ('no Preparar · ' + esc(TEMA.titulo)) : 'no Preparar',
+      dest: destHub, feito: !!(PREP && (PREP.entender_em || PREP.repertorio_em)) },
+    { tipo:'flashcards', ico:'cartas', nome:'Atividades do tema',
+      onde:'flashcards, resumo e quiz, no Preparar',
+      dest: destHub, feito: !!(PREP && PREP.estudio_em) },
+    { tipo:'redacao', ico:'lapis', nome:'Escrever e enviar a redação',
+      onde:'marca sozinha quando você envia',
+      dest: destEscr, feito: ESCREVEU },
+    { tipo:'revisao', ico:'memo', nome:'Revisar a correção e a Reescrita',
+      onde:'em Minhas Redações · Análise e Reescrita',
+      dest:'minhas-redacoes.html', feito: feitoNoBanco('revisao'), botao:'revisei' },
+    { tipo:'exercicio', ico:'alvo', nome:'Treinar ' + nomeFoco,
+      onde: TEM_EXERC ? 'exercício da competência, no Preparar' : 'os exercícios desta competência estão em preparação',
+      dest: destHub, feito: feitoNoBanco('exercicio'), bloqueado: !TEM_EXERC }
+  ];
+}
+function feitoNoBanco(tipo){
+  for (var i=0; i<ITENS.length; i++) if (ITENS[i].tipo === tipo && ITENS[i].feito_em) return true;
+  return false;
+}
+function itemDoTipo(tipo){
+  for (var i=0; i<ITENS.length; i++) if (ITENS[i].tipo === tipo) return ITENS[i];
+  return null;
+}
+
+/* ── dias sugeridos: a ordem dos passos nos dias que não são de descanso ── */
+function diasSugeridos(){
+  var folga = diasDeDescanso();
+  var uteis = [1,2,3,4,5,6,7].filter(function(d){ return folga.indexOf(d) === -1; });
+  var mapa = {};
+  passos().forEach(function(p, i){ mapa[p.tipo] = uteis[i] || uteis[uteis.length-1]; });
   return mapa;
 }
 
-/* ── Tema da Semana (mesmo padrão do Hub) ── */
-var SEL_TEMA = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de';
-async function temaDaSemana(){
-  try{
-    var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=' + SEL_TEMA + '&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=8', {});
-    if(!res.ok) return null;
-    var rows = await res.json();
-    var hoje = new Date(); hoje.setHours(0,0,0,0);
-    for (var i=0;i<rows.length;i++){
-      var t = rows[i];
-      var ini = new Date(t.semana_de + 'T00:00:00');
-      var fim = new Date(ini); fim.setDate(fim.getDate() + 7);
-      if (hoje >= ini && hoje < fim) return t;
+/* ══ CARD 1 · Sua semana ══ */
+function cardSemana(){
+  var ps = passos();
+  var sug = diasSugeridos();
+  var hoje = diaHoje();
+  var feitos = ps.filter(function(p){ return p.feito; }).length;
+
+  var ini = new Date(SEMANA_DE + 'T00:00:00');
+  var fim = new Date(ini); fim.setDate(fim.getDate() + 6);
+  var MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var periodo = ini.getDate() + ' a ' + fim.getDate() + ' de ' + MES[fim.getMonth()];
+
+  var h = '<div class="cartao"><div class="cabCart"><h2>Sua semana</h2><span>' + periodo + '</span></div>'
+    + '<p class="subCart">Os dias são sugestão. Pode fazer tudo hoje e deixar o resto da semana livre.</p>'
+    + '<div class="prog"><span class="rot">Progresso</span>'
+    + '<div class="pista"><i style="width:' + (feitos/ps.length*100) + '%"></i></div>'
+    + '<b>' + feitos + '/' + ps.length + '</b></div>';
+
+  /* Estados, calculados antes de desenhar:
+     · feito
+     · em atraso: não feito e o dia sugerido já passou (regra da Profa. Blanche: no dia seguinte)
+     · agora: o primeiro não feito cujo dia é hoje; se os de hoje já estão feitos, o
+       primeiro pendente adiante vira o "agora" — o aluno pode adiantar quando quiser
+     · depois: o resto */
+  var estados = {};
+  var achouAgora = false;
+  ps.forEach(function(p){
+    var d = sug[p.tipo];
+    if (p.feito) estados[p.tipo] = 'feito';
+    else if (d < hoje) estados[p.tipo] = 'atraso';
+    else if (!achouAgora && d <= hoje) { estados[p.tipo] = 'agora'; achouAgora = true; }
+    else estados[p.tipo] = 'depois';
+  });
+  if (!achouAgora) {
+    for (var k=0; k<ps.length; k++){
+      if (estados[ps[k].tipo] === 'depois') { estados[ps[k].tipo] = 'agora'; break; }
     }
-    return null;
-  }catch(e){ console.warn('[tema da semana]', e); return null; }
-}
-
-/* ── Foco: ?foco=CX da Evolução > diagnóstico (pior média das últimas 8) ── */
-function focoDaURL(){
-  try{
-    var m = (location.search||'').match(/[?&]foco=(C[1-5])/i);
-    return m ? m[1].toUpperCase() : null;
-  }catch(e){ return null; }
-}
-async function focoDoDiagnostico(){
-  try{
-    if (typeof dbGetHistoricoRedacoes !== 'function') return null;
-    var hist = await dbGetHistoricoRedacoes(8);
-    if (!hist || !hist.length) return null;
-    var soma = {c1:0,c2:0,c3:0,c4:0,c5:0}, chaves=['c1','c2','c3','c4','c5'];
-    hist.forEach(function(r){ chaves.forEach(function(k){ soma[k] += (r[k]||0); }); });
-    var pior = chaves.slice().sort(function(a,b){ return soma[a]-soma[b]; })[0];
-    return pior.toUpperCase();
-  }catch(e){ console.warn('[diagnostico]', e); return null; }
-}
-
-/* ── Regra determinística: monta as 5 tarefas da semana ── */
-function montarTarefas(){
-  var destinoHub = TEMA ? ('hub-preparacao.html?tema=' + encodeURIComponent(TEMA.id)) : 'hub-preparacao.html';
-  var destinoEscr = 'nova-redacao.html?metodo=digitar' + (TEMA ? ('&tema=' + encodeURIComponent(TEMA.id)) : '');
-  var rotRep  = TEMA ? ('Material de apoio do Tema da Semana') : 'Material de apoio para sua pr\u00f3xima reda\u00e7\u00e3o';
-  var rotExe  = FOCO ? ('Refor\u00e7o de ' + FOCO + ' \u00b7 ' + NOME_COMP[FOCO]) : 'Refor\u00e7o da sua compet\u00eancia mais fraca';
-  /* Rotina aprovada: prepara \u2192 fixa \u2192 aplica \u2192 reflete \u2192 trata (dia = ORDEM da etapa) */
-  return [
-    { dia:1, tipo:'repertorio', rotulo:rotRep, destino:destinoHub, competencia:null },
-    { dia:2, tipo:'flashcards', rotulo:'Flashcards do material de apoio', destino:destinoHub, competencia:null },
-    { dia:3, tipo:'redacao',    rotulo:'Escrever e enviar uma reda\u00e7\u00e3o', destino:destinoEscr, competencia:null },
-    { dia:4, tipo:'revisao',    rotulo:'Revisar a corre\u00e7\u00e3o da PROfa', destino:'minhas-redacoes.html', competencia:null },
-    { dia:5, tipo:'exercicio',  rotulo:rotExe, destino:destinoHub, competencia:FOCO }
-  ];
-}
-/* \u2500\u2500 Config do descanso (plano_config) \u2500\u2500 */
-async function carregarConfig(uid){
-  try{
-    var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?aluno_id=eq.'+uid+'&select=descanso', {});
-    if (!res.ok) return null;
-    var rows = await res.json();
-    return rows.length ? rows[0].descanso : null;
-  }catch(e){ return null; }
-}
-async function salvarConfig(uid, valor){
-  try{
-    var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?on_conflict=aluno_id', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify({ aluno_id: uid, descanso: valor, atualizado_em: new Date().toISOString() })
-    });
-    return res.ok;
-  }catch(e){ return false; }
-}
-
-/* ── Banco ── */
-async function carregarItens(uid){
-  var url = SUPABASE_URL + '/rest/v1/plano_itens?aluno_id=eq.'+uid+'&semana_de=eq.'+SEMANA_DE+'&order=dia.asc'
-    + '&select=id,dia,tipo,rotulo,destino,competencia,feito_em';
-  var res = await dbFetch(url, {});
-  if (!res.ok) throw new Error('plano_itens ' + res.status);
-  return await res.json();
-}
-async function criarSemana(uid){
-  var corpo = montarTarefas().map(function(t){
-    return { aluno_id:uid, semana_de:SEMANA_DE, dia:t.dia, tipo:t.tipo, rotulo:t.rotulo, destino:t.destino, competencia:t.competencia };
-  });
-  var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_itens', {
-    method:'POST',
-    headers:{ 'Content-Type':'application/json', 'Prefer':'return=representation' },
-    body: JSON.stringify(corpo)
-  });
-  if (!res.ok) throw new Error('criar plano ' + res.status);
-  return await res.json();
-}
-async function marcarFeitoBanco(id){
-  var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_itens?id=eq.'+id, {
-    method:'PATCH',
-    headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
-    body: JSON.stringify({ feito_em: new Date().toISOString() })
-  });
-  return res.ok;
-}
-/* Foco novo vindo da Evolução atualiza o item de exercício da semana corrente */
-async function atualizarFocoExistente(){
-  var exe = ITENS.filter(function(i){ return i.tipo==='exercicio'; })[0];
-  if (!exe || !FOCO || exe.competencia === FOCO || exe.feito_em) return;
-  var rotNovo = 'Refor\u00e7o de ' + FOCO + ' \u00b7 ' + NOME_COMP[FOCO];
-  var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_itens?id=eq.'+exe.id, {
-    method:'PATCH',
-    headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
-    body: JSON.stringify({ competencia: FOCO, rotulo: rotNovo })
-  });
-  if (res.ok){ exe.competencia = FOCO; exe.rotulo = rotNovo; toast('Foco de refor\u00e7o atualizado: ' + FOCO); }
-}
-/* v1-6 · o texto de cada tarefa é escrito na hora, a partir do tipo (e da competência, no exercício).
-   A coluna plano_itens.rotulo continua sendo gravada, mas não manda mais no que a tela mostra:
-   assim, quando a RedaON muda uma palavra, quem já tem a semana criada vê o texto novo. */
-function rotularItens(){
-  var modelo = {};
-  montarTarefas().forEach(function(t){ modelo[t.tipo] = t; });
-  ITENS.forEach(function(it){
-    var m = modelo[it.tipo];
-    if (it.tipo === 'exercicio'){
-      var c = it.competencia || FOCO;
-      it.rotulo = c ? ('Refor\u00e7o de ' + c + ' \u00b7 ' + NOME_COMP[c]) : 'Refor\u00e7o da sua compet\u00eancia mais fraca';
-    } else if (m) {
-      it.rotulo = m.rotulo;
-    }
-    /* v1-7 \u00b7 o destino tamb\u00e9m \u00e9 refeito na hora: o tema da semana pode ter mudado
-       depois que a tarefa foi criada, e o link gravado apontaria para o tema antigo. */
-    if (m && m.destino) it.destino = m.destino;
-  });
-}
-/* Redação da semana marca sozinha (P3): existe redação enviada desde segunda? */
-async function autoMarcarRedacao(uid){
-  var item = ITENS.filter(function(i){ return i.tipo==='redacao' && !i.feito_em; })[0];
-  if (!item) return;
-  try{
-    var url = SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.'+uid+'&created_at=gte.'+SEMANA_DE+'T00:00:00&select=id&limit=1';
-    var res = await dbFetch(url, {});
-    if (!res.ok) return;
-    var rows = await res.json();
-    if (rows.length){
-      var ok = await marcarFeitoBanco(item.id);
-      if (ok) item.feito_em = new Date().toISOString();
-    }
-  }catch(e){ console.warn('[auto redacao]', e); }
-}
-
-/* ── Render ── */
-function ondeAcontece(item){
-  if (item.tipo==='redacao') return 'marcada sozinha quando voc\u00ea envia';
-  if (item.tipo==='revisao') return 'em Minhas Reda\u00e7\u00f5es \u00b7 An\u00e1lise e Reescrita';
-  if (item.tipo==='exercicio') return TEMA ? ('no Hub \u00b7 ' + esc(TEMA.titulo)) : 'no Hub de Prepara\u00e7\u00e3o';
-  return TEMA ? ('no Hub de Prepara\u00e7\u00e3o \u00b7 ' + esc(TEMA.titulo)) : 'no Hub de Prepara\u00e7\u00e3o';
-}
-function renderPlano(){
-  var hoje = diaHojeSemana();
-  var feitos = ITENS.filter(function(i){ return !!i.feito_em; }).length;
-  document.getElementById('numProg').textContent = feitos + '/5';
-  document.getElementById('barraProg').style.width = Math.round(feitos/5*100) + '%';
-
-  var sugestao = sugerirDias(ITENS);
-
-  var h = ITENS.map(function(item){
-    var feito = !!item.feito_em;
-    var diaSug = feito ? null : sugestao[item.id];
-    var ehHoje = (!feito && diaSug === hoje);
-    var cls = 'dia' + (feito ? ' feito' : '') + (ehHoje ? ' hoje' : '') + (feito ? '' : ' navegavel');
-    var etapa = ETAPA_ROT[item.tipo] || '';
-    var rot;
-    if (feito) rot = etapa + ' \u00b7 \u2713';
-    else if (ehHoje) rot = etapa + ' \u00b7 Hoje';
-    else if (diaSug) rot = etapa + ' \u00b7 sug. ' + NOME_DIA[diaSug];
-    else rot = etapa + ' \u00b7 no seu ritmo';
-    var fim;
-    if (feito) fim = '<span class="fimD">\u2713</span>';
-    else if (item.tipo === 'redacao') fim = '<span class="fimD">\u203A</span>';
-    else fim = '<button class="btnFeito" onclick="event.stopPropagation();marcarFeito(\'' + item.id + '\', this)">Marcar feito</button>';
-    var nav = feito ? '' : ' onclick="irPara(\'' + esc(item.destino||'') + '\')"';
-    return '<div class="' + cls + '"' + nav + '>'
-      + '<span class="icd">' + (ICONE_TIPO[item.tipo]||'\uD83D\uDCCC') + '</span>'
-      + '<span class="txts">'
-      +   '<span class="rotDia">' + rot + '</span>'
-      +   '<span class="tarefa">' + esc(item.rotulo) + '</span>'
-      +   '<span class="onde">' + ondeAcontece(item) + '</span>'
-      + '</span>' + fim + '</div>';
-  });
-
-  /* Descanso conforme a escolha do aluno (plano_config); nenhuma tarefa presa ao dia */
-  var descanso = diasDeDescanso();
-  if (descanso.length){
-    var rotD = descanso.map(function(d){ return NOME_DIA[d]; }).join(' \u00b7 ');
-    var tituloD = (descanso.length===2) ? 'Fim de semana livre' : 'Dia livre';
-    var descansoHoje = (descanso.indexOf(hoje) !== -1);
-    h.push('<div class="dia descanso' + (descansoHoje ? ' hoje' : '') + '">'
-      + '<span class="icd">\uD83C\uDF3F</span>'
-      + '<span class="txts">'
-      +   '<span class="rotDia">' + (descansoHoje ? 'Hoje \u00b7 ' : '') + rotD + '</span>'
-      +   '<span class="tarefa">' + tituloD + '</span>'
-      +   '<span class="onde">se quiser adiantar, as tarefas aceitam \u2713 em qualquer dia</span>'
-      + '</span><span class="fimD">\u263A</span></div>');
   }
 
-  document.getElementById('listaDias').innerHTML = h.join('');
+  ps.forEach(function(p){
+    var d = sug[p.tipo];
+    var estado = estados[p.tipo];
+
+    var marca = (estado === 'feito') ? feIcone('feitoBotao')
+              : (estado === 'atraso') ? feIcone('despertador')
+              : feIcone(p.ico);
+    marca = marca.replace('class="fe"', 'class="fe icoP"');
+
+    var rot = NOME_DIA[d] || '';
+    if (estado === 'feito')  rot += ' · feito';
+    if (estado === 'agora')  rot += '<span class="selo hoje">hoje</span>';
+    if (estado === 'atraso') rot += '<span class="selo atr">em atraso</span>';
+
+    var onde = (estado === 'atraso')
+      ? ('era para ' + DIA_LONGO[d] + ' · faça assim que puder')
+      : p.onde;
+
+    var botao = '';
+    if (!p.feito && !p.bloqueado && (estado === 'agora' || estado === 'atraso')) {
+      var cls = 'btP' + (estado === 'atraso' ? ' verm' : '');
+      var txt = (estado === 'atraso') ? 'Fazer agora' : 'Começar';
+      botao = '<button class="' + cls + '" onclick="irPara(\'' + esc(p.dest) + '\')">' + txt + '<span class="fim">›</span></button>';
+    }
+    if (p.botao === 'revisei' && !p.feito) {
+      botao += ' <button class="btP fantasma" onclick="marcarRevisei(this)">Já revisei</button>';
+    }
+
+    h += '<div class="passo ' + estado + '">'
+      +    '<span class="marca">' + marca + '<span class="linha"></span></span>'
+      +    '<div class="corpoP">'
+      +      '<p class="dia">' + rot + '</p>'
+      +      '<p class="nomeP">' + esc(p.nome) + '</p>'
+      +      '<p class="ondeP">' + onde + '</p>'
+      +      botao
+      +    '</div></div>';
+  });
+
+  var folga = diasDeDescanso();
+  if (folga.length) {
+    var nomes = folga.map(function(d){ return DIA_LONGO[d]; }).join(' e ');
+    h += '<div class="livre">' + feIcone('sol').replace('class="fe"','class="fe icoP"')
+      +  '<div><p class="nomeP">' + nomes.charAt(0).toUpperCase() + nomes.slice(1) + ' livre' + (folga.length > 1 ? 's' : '') + '</p>'
+      +  '<p class="ondeP"><span class="link" onclick="abrirGaveta(\'gvDias\')">ajustar meus dias de descanso</span></p></div></div>';
+  } else {
+    h += '<div class="livre">' + feIcone('sol').replace('class="fe"','class="fe icoP"')
+      +  '<div><p class="nomeP">Sem dia de descanso</p>'
+      +  '<p class="ondeP"><span class="link" onclick="abrirGaveta(\'gvDias\')">ajustar meus dias de descanso</span></p></div></div>';
+  }
+  return h + '</div>';
 }
-function renderCabecalho(){
+
+/* ══ CARD 2 · Como você está ══ */
+function mediaDe(campo, n){
+  var usa = HIST.slice(0, n || 4);
+  if (!usa.length) return null;
+  var soma = 0;
+  usa.forEach(function(r){ soma += (r[campo] || 0); });
+  return Math.round(soma / usa.length);
+}
+function estrelasDe(campo){
+  /* semanas (das 4 últimas redações) em que a competência ficou em 160 ou mais */
+  var n = 0;
+  HIST.slice(0, 4).forEach(function(r){ if ((r[campo] || 0) >= 160) n++; });
+  return n;
+}
+var ESTRELA = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.6l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/></svg>';
+
+function cardBoletim(){
+  var usa = HIST.slice(0, 4);
+  var h = '<div class="cartao"><div class="cabCart"><h2>Como você está</h2>'
+    + '<span>' + (usa.length === 1 ? 'sua 1ª redação' : 'últimas ' + usa.length + ' redações') + '</span></div>';
+
+  if (!usa.length) {
+    return h + '<p class="subCart">Assim que a sua primeira redação for corrigida, o seu desempenho aparece aqui, competência por competência.</p></div>';
+  }
+
+  h += '<p class="subCart">Um mês de trabalho, uma redação por semana.</p>';
+
+  var media = mediaDe('total', 4);
+  var varTxt = '';
+  if (usa.length >= 2) {
+    var dif = usa[0].total - usa[1].total;
+    varTxt = '<span class="var" style="color:' + (dif > 0 ? 'var(--green)' : (dif < 0 ? 'var(--red)' : 'var(--muted)')) + '">'
+      + (dif > 0 ? '+' + dif : dif) + ' na última</span>';
+  }
+  h += '<div class="notaG"><b>' + media + '</b><span class="de">média do mês</span>' + varTxt + '</div>';
+
+  /* gráfico: notas das 4, antiga → recente */
+  var notas = usa.slice().reverse().map(function(r){ return r.total; });
+  if (notas.length >= 2) {
+    var W = 300, H = 56, pad = 6, max = 1000;
+    var pts = notas.map(function(v, i){
+      var x = pad + i * ((W - 2*pad) / (notas.length - 1));
+      var y = (H - pad) - (v / max) * (H - 2*pad);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    });
+    var ult = pts[pts.length-1].split(',');
+    h += '<div class="grafico"><div class="cab"><b>Sua nota, redação a redação</b><span>' + notas.length + ' redações</span></div>'
+      + '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-label="evolução da nota">'
+      + '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--cyan)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+      + '<circle cx="' + ult[0] + '" cy="' + ult[1] + '" r="3.6" fill="var(--cyan)"/>'
+      + '</svg><div class="eixo"><span>mais antiga</span><span>agora</span></div></div>';
+  }
+
+  h += '<p class="ajuda">Toque em uma competência para treinar</p><div class="comps">';
+  ['C1','C2','C3','C4','C5'].forEach(function(c){
+    var campo = c.toLowerCase();
+    var v = mediaDe(campo, 4);
+    var est = estrelasDe(campo);
+    var eFoco = (FOCO === c);
+    var estrelasHTML = '<span class="estrelas">';
+    for (var i=1; i<=4; i++) estrelasHTML += ESTRELA.replace('<svg ', '<svg class="' + (i <= est ? 'on' : '') + '" ');
+    estrelasHTML += '</span>';
+    h += '<button class="comp ' + nivel(v) + (eFoco ? ' focoC' : '') + '" onclick="abrirFoco(\'' + c + '\')">'
+      +   '<span class="l1"><span class="nm">' + c + ' · <em>' + NOME_COMP[c] + '</em></span>'
+      +     (v >= 200 ? '<span class="capsula">' + feIcone('trofeu') + '200</span>' : '')
+      +     (eFoco ? '<span class="selFoco">foco</span>' : '')
+      +     estrelasHTML
+      +   '</span>'
+      +   '<span class="l2"><span class="pista"><i style="width:' + Math.min(100, v/200*100) + '%"></i></span>'
+      +     '<span class="vl">' + v + '</span><span class="chev">›</span></span>'
+      + '</button>';
+  });
+  h += '</div>'
+    + '<p class="rodape">As estrelas contam as redações, das 4 últimas, em que a competência ficou em 160 ou mais. '
+    + '<a href="evolucao.html">Ver a minha evolução completa</a></p></div>';
+  return h;
+}
+
+/* ══ render ══ */
+function desenhar(){
   var ini = new Date(SEMANA_DE + 'T00:00:00');
-  var fim = new Date(ini); fim.setDate(fim.getDate()+6);
+  var fim = new Date(ini); fim.setDate(fim.getDate() + 6);
   var MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  var rot = 'Semana de ' + ini.getDate() + ' a ' + fim.getDate() + ' de ' + MES[fim.getMonth()];
-  document.getElementById('rotSemana').textContent = rot;
+  document.getElementById('rotSemana').textContent =
+    'Semana de ' + ini.getDate() + ' a ' + fim.getDate() + ' de ' + MES[fim.getMonth()];
 
   var fr = document.getElementById('fraseFoco');
   if (FOCO) {
-    var motivo = (ORIGEM_FOCO === 'evolucao')
-      ? 'foi voc\u00ea que escolheu na Evolu\u00e7\u00e3o'
-      : '\u00e9 onde sua Evolu\u00e7\u00e3o mostra mais espa\u00e7o para crescer';
-    fr.innerHTML = 'Semana com foco em <b>' + FOCO + ' \u00b7 ' + NOME_COMP[FOCO] + '</b> \u2014 ' + motivo + '.';
+    fr.innerHTML = 'Esta semana mira a <b>' + FOCO + ' · ' + NOME_COMP[FOCO] + '</b> — foi onde a sua última redação ficou mais fraca.';
   } else {
-    fr.innerHTML = 'Sua primeira semana de ritmo. Depois da primeira reda\u00e7\u00e3o corrigida, o plano passa a mirar a sua compet\u00eancia mais fraca.';
+    fr.innerHTML = 'Sua primeira semana de ritmo. Depois da primeira redação corrigida, o plano passa a mirar a competência que mais precisa de você.';
   }
 
-  var partes = [];
-  partes.push(FOCO ? ('do seu foco em <b>' + FOCO + '</b>' + (ORIGEM_FOCO==='evolucao' ? ' (escolhido por voc\u00ea na Evolu\u00e7\u00e3o)' : ' (sua <b>Evolu\u00e7\u00e3o</b>)')) : 'do seu come\u00e7o na RedaON');
-  if (TEMA) partes.push('do <b>Tema da Semana</b> (' + esc(TEMA.titulo) + ')');
-  partes.push('do ritmo de <b>1 reda\u00e7\u00e3o por semana</b>');
-  document.getElementById('txtComoMontado').innerHTML =
-    'A RedaON montou sua semana a partir ' + partes.join(', ') + ', na rotina <b>prepara \u2192 fixa \u2192 aplica \u2192 reflete \u2192 trata</b>. Toda segunda-feira, uma semana nova. Nenhuma tarefa \u00e9 presa ao dia \u2014 o ritmo \u00e9 sugest\u00e3o, a ordem \u00e9 sua. '
-    + '<u style="cursor:pointer;color:var(--cyan);text-decoration:none;border-bottom:1px dotted;" onclick="abrirGavetaDias()">ajustar meus dias de descanso</u>';
+  document.getElementById('trilhoCards').innerHTML = cardSemana() + cardBoletim();
 }
 
-/* ── Gaveta: dias de descanso ── */
-window.abrirGavetaDias = function(){
-  document.querySelectorAll('.optDia').forEach(function(o){
-    o.classList.toggle('sel', o.getAttribute('data-v') === DESCANSO);
+function marcarPonto(){
+  var tr = document.getElementById('trilhoCards');
+  var i = tr.scrollLeft > tr.clientWidth / 2 ? 1 : 0;
+  var ps = document.getElementById('pontos').children;
+  ps[0].className = i === 0 ? 'on' : '';
+  ps[1].className = i === 1 ? 'on' : '';
+}
+
+/* ══ banco ══ */
+async function carregarTema(){
+  try{
+    var url = SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=8';
+    var res = await dbFetch(url, {});
+    if (!res.ok) return null;
+    var linhas = await res.json();
+    var hoje = dataISO(new Date());
+    for (var i=0; i<linhas.length; i++){
+      if (linhas[i].semana_de && linhas[i].semana_de <= hoje) return linhas[i];
+    }
+    return linhas[0] || null;
+  }catch(e){ console.warn('[meu plano] tema', e); return null; }
+}
+async function carregarConfig(){
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?aluno_id=eq.' + UID + '&select=descanso', {});
+    if (!res.ok) return null;
+    var r = await res.json();
+    return r.length ? r[0].descanso : null;
+  }catch(e){ return null; }
+}
+async function salvarConfig(valor){
+  try{
+    await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?on_conflict=aluno_id', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ aluno_id: UID, descanso: valor })
+    });
+  }catch(e){ console.warn('[meu plano] descanso', e); }
+}
+async function carregarItens(){
+  try{
+    var url = SUPABASE_URL + '/rest/v1/plano_itens?aluno_id=eq.' + UID + '&semana_de=eq.' + SEMANA_DE
+      + '&order=dia.asc&select=id,dia,tipo,rotulo,destino,competencia,feito_em';
+    var res = await dbFetch(url, {});
+    if (!res.ok) return [];
+    return await res.json();
+  }catch(e){ console.warn('[meu plano] itens', e); return []; }
+}
+async function criarSemana(){
+  /* a semana nasce com uma linha por passo; rotulo e destino são escritos aqui só para
+     manter o contrato da tabela — quem manda na tela é o código (v1-6/v1-7) */
+  var corpo = passos().map(function(p, i){
+    return { aluno_id: UID, semana_de: SEMANA_DE, dia: i+1, tipo: p.tipo,
+             rotulo: p.nome, destino: p.dest, competencia: (p.tipo === 'exercicio' ? FOCO : null) };
   });
-  document.getElementById('gvDiasBg').classList.add('open');
-  document.getElementById('gvDias').classList.add('open');
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_itens', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Prefer':'return=representation' },
+      body: JSON.stringify(corpo)
+    });
+    if (res.ok) return await res.json();
+    /* o índice único por aluno/semana/dia recusa a segunda criação: releia o que já existe */
+    return await carregarItens();
+  }catch(e){ return await carregarItens(); }
+}
+async function carregarPreparacao(){
+  if (!TEMA) return null;
+  try{
+    var url = SUPABASE_URL + '/rest/v1/preparacoes?select=entender_em,repertorio_em,estudio_em&aluno_id=eq.' + UID
+      + '&tema_id=eq.' + TEMA.id + '&limit=1';
+    var res = await dbFetch(url, {});
+    if (!res.ok) return null;
+    var r = await res.json();
+    return r.length ? r[0] : null;
+  }catch(e){ return null; }
+}
+async function escreveuNaSemana(){
+  try{
+    var url = SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + UID
+      + '&created_at=gte.' + SEMANA_DE + 'T00:00:00&select=id&limit=1';
+    var res = await dbFetch(url, {});
+    if (!res.ok) return false;
+    var r = await res.json();
+    return r.length > 0;
+  }catch(e){ return false; }
+}
+async function temExercicio(comp){
+  if (!comp) return false;
+  try{
+    var url = SUPABASE_URL + '/rest/v1/materiais?tipo=eq.exerc&publicado=eq.true&competencia=eq.' + comp + '&select=id&limit=1';
+    var res = await dbFetch(url, {});
+    if (!res.ok) return false;
+    var r = await res.json();
+    return r.length > 0;
+  }catch(e){ return false; }
+}
+async function marcarFeito(tipo){
+  var item = itemDoTipo(tipo);
+  if (!item) return false;
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_itens?id=eq.' + item.id, {
+      method:'PATCH',
+      headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+      body: JSON.stringify({ feito_em: new Date().toISOString() })
+    });
+    if (res.ok) { item.feito_em = new Date().toISOString(); return true; }
+  }catch(e){ console.warn('[meu plano] marcar', e); }
+  return false;
+}
+async function gravarFoco(comp){
+  var item = itemDoTipo('exercicio');
+  if (!item) return;
+  try{
+    await dbFetch(SUPABASE_URL + '/rest/v1/plano_itens?id=eq.' + item.id, {
+      method:'PATCH',
+      headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+      body: JSON.stringify({ competencia: comp, rotulo: 'Treinar ' + comp + ' · ' + NOME_COMP[comp] })
+    });
+    item.competencia = comp;
+  }catch(e){ console.warn('[meu plano] foco', e); }
+}
+
+/* ── foco: menor nota da ÚLTIMA redação (regra da Profa. Blanche);
+      empate resolve pela menor média das últimas 4 ── */
+function focoDaUltima(){
+  if (!HIST.length) return null;
+  var u = HIST[0];
+  var cs = ['c1','c2','c3','c4','c5'];
+  var menor = Math.min.apply(null, cs.map(function(c){ return u[c] || 0; }));
+  var empatados = cs.filter(function(c){ return (u[c] || 0) === menor; });
+  if (empatados.length === 1) return empatados[0].toUpperCase();
+  var melhor = empatados[0], val = 1e9;
+  empatados.forEach(function(c){
+    var m = mediaDe(c, 4);
+    if (m < val) { val = m; melhor = c; }
+  });
+  return melhor.toUpperCase();
+}
+
+/* ══ interações ══ */
+window.irPara = function(dest){ if (dest) window.location.href = dest; };
+
+window.marcarRevisei = async function(bt){
+  bt.disabled = true;
+  var ok = await marcarFeito('revisao');
+  if (ok) { desenhar(); if (typeof toast === 'function') toast('Revisão marcada. Bom trabalho.'); }
+  else { bt.disabled = false; if (typeof toast === 'function') toast('Não consegui marcar agora. Tente de novo.'); }
 };
-window.fecharGavetaDias = function(){
-  document.getElementById('gvDiasBg').classList.remove('open');
-  document.getElementById('gvDias').classList.remove('open');
+
+window.abrirGaveta = function(id){
+  if (id === 'gvDias') {
+    document.querySelectorAll('#gvDias .opt').forEach(function(o){
+      o.classList.toggle('sel', o.getAttribute('data-v') === DESCANSO);
+    });
+  }
+  document.getElementById(id + 'Bg').classList.add('open');
+  document.getElementById(id).classList.add('open');
+};
+window.fecharGaveta = function(id){
+  document.getElementById(id + 'Bg').classList.remove('open');
+  document.getElementById(id).classList.remove('open');
 };
 window.escolherDescanso = async function(el){
-  var v = el.getAttribute('data-v');
-  document.querySelectorAll('.optDia').forEach(function(o){ o.classList.remove('sel'); });
+  DESCANSO = el.getAttribute('data-v');
+  document.querySelectorAll('#gvDias .opt').forEach(function(o){ o.classList.remove('sel'); });
   el.classList.add('sel');
-  DESCANSO = v;
-  var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
-  if (uid) salvarConfig(uid, v); /* grava em segundo plano */
-  renderPlano();
-  setTimeout(fecharGavetaDias, 180);
+  salvarConfig(DESCANSO);
+  desenhar();
+  setTimeout(function(){ fecharGaveta('gvDias'); }, 180);
 };
 
-/* ── Interações ── */
-window.irPara = function(destino){ if (destino) window.location.href = destino; };
-window.marcarFeito = async function(id, btn){
-  var item = ITENS.filter(function(i){ return String(i.id)===String(id); })[0];
-  if (!item || item.feito_em) return;
-  if (btn){ btn.disabled = true; btn.textContent = '\u2026'; }
-  var ok = await marcarFeitoBanco(id);
-  if (!ok){
-    if (btn){ btn.disabled = false; btn.textContent = 'Marcar feito'; }
-    toast('N\u00e3o consegui salvar. Tente de novo.');
-    return;
-  }
-  item.feito_em = new Date().toISOString();
-  renderPlano();
-  var feitos = ITENS.filter(function(i){ return !!i.feito_em; }).length;
-  if (feitos >= 5) document.getElementById('veuSemana').classList.add('show');
-  else toast('\u2713 Tarefa conclu\u00edda');
+window.abrirFoco = async function(comp){
+  var temEx = await temExercicio(comp);
+  document.getElementById('gvFocoTit').textContent = comp + ' · ' + NOME_COMP[comp];
+  document.getElementById('gvFocoSub').textContent = temEx
+    ? 'Você pode treinar esta competência nesta semana. O passo do treino passa a ser dela.'
+    : 'Os exercícios desta competência ainda estão em preparação. Assim que a Profa. Blanche liberar, o treino aparece aqui.';
+  var opts = '';
+  if (temEx) opts += '<button class="opt" onclick="trocarFoco(\'' + comp + '\')"><span>Treinar ' + comp + ' nesta semana</span><span class="ck">›</span></button>';
+  opts += '<button class="opt" onclick="fecharGaveta(\'gvFoco\')"><span>Voltar</span><span class="ck">›</span></button>';
+  document.getElementById('gvFocoOpts').innerHTML = opts;
+  abrirGaveta('gvFoco');
+};
+window.trocarFoco = async function(comp){
+  FOCO = comp;
+  TEM_EXERC = await temExercicio(comp);
+  await gravarFoco(comp);
+  fecharGaveta('gvFoco');
+  desenhar();
+  if (typeof toast === 'function') toast('O treino da semana agora é ' + comp + '.');
 };
 
-/* ── Carga ── */
-function mostrarEstado(id){
-  ['estadoCarregando','estadoErro','telaPlano'].forEach(function(k){
-    document.getElementById(k).classList.toggle('hidden', k !== id);
+function mostrar(id){
+  ['estadoCarregando','estadoErro','tela'].forEach(function(k){
+    var el = document.getElementById(k);
+    if (el) el.classList.toggle('hidden', k !== id);
   });
 }
+
+/* ══ carga ══ */
 (async function init(){
   try{
-    var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
-    if (!uid) { mostrarEstado('estadoErro'); return; }
+    UID = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+    if (!UID) { mostrar('estadoErro'); return; }
     SEMANA_DE = dataISO(segundaDaSemana());
 
-    var focoURL = focoDaURL();
-    var cfg = await carregarConfig(uid);
-    var primeiraVisita = (cfg === null);
+    var cfg = await carregarConfig();
     if (cfg) DESCANSO = cfg;
-    TEMA = await temaDaSemana();
-    ITENS = await carregarItens(uid);
 
-    if (ITENS.length) {
-      /* semana já montada: foco da URL atualiza o exercício pendente */
-      if (focoURL) { FOCO = focoURL; ORIGEM_FOCO = 'evolucao'; await atualizarFocoExistente(); }
-      var exe = ITENS.filter(function(i){ return i.tipo==='exercicio'; })[0];
-      if (!FOCO && exe && exe.competencia) { FOCO = exe.competencia; ORIGEM_FOCO = 'diagnostico'; }
-    } else {
-      if (focoURL) { FOCO = focoURL; ORIGEM_FOCO = 'evolucao'; }
-      else { FOCO = await focoDoDiagnostico(); ORIGEM_FOCO = FOCO ? 'diagnostico' : ''; }
-      ITENS = await criarSemana(uid);
-    }
+    TEMA = await carregarTema();
+    HIST = (typeof dbGetHistoricoRedacoes === 'function') ? (await dbGetHistoricoRedacoes(4)) : [];
+    FOCO = focoDaUltima();
+    TEM_EXERC = await temExercicio(FOCO);
 
-    await autoMarcarRedacao(uid);
-    rotularItens();
-    renderCabecalho();
-    renderPlano();
-    mostrarEstado('telaPlano');
-    if (primeiraVisita) setTimeout(abrirGavetaDias, 350);
+    PREP = await carregarPreparacao();
+    ESCREVEU = await escreveuNaSemana();
+
+    ITENS = await carregarItens();
+    if (!ITENS.length) ITENS = await criarSemana();
+
+    /* a redação da semana se marca sozinha */
+    if (ESCREVEU && !feitoNoBanco('redacao')) await marcarFeito('redacao');
+    /* as etapas do Preparar também: a fatia 2 passa a gravá-las na própria ação do aluno */
+    if (PREP && (PREP.entender_em || PREP.repertorio_em) && !feitoNoBanco('repertorio')) await marcarFeito('repertorio');
+    if (PREP && PREP.estudio_em && !feitoNoBanco('flashcards')) await marcarFeito('flashcards');
+
+    desenhar();
+    mostrar('tela');
+    document.getElementById('trilhoCards').addEventListener('scroll', marcarPonto);
   }catch(e){
-    console.warn('[plano]', e);
-    mostrarEstado('estadoErro');
+    console.warn('[meu plano]', e);
+    mostrar('estadoErro');
   }
 })();
 </script>
