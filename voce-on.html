@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RedaON | Você ON · v1-0</title>
+<title>RedaON | Você ON</title>
+<!-- v2-0 (22/09/2026): Você ON com dois modos, Vídeos (claquete) e RedaCast (microfone). Estrutura aprovada pelo Alan no mockup v3:
+     "Para você agora" (cartões grandes pela necessidade do aluno: competência-foco → tema da semana → demais), "Continue de onde parou",
+     Shorts em faixa própria, uma faixa por trilha (Bases da Redação, Correção Guiada, Tema da Semana, Rota 1.000), chips como atalho.
+     RedaCast: episódios com a arte do tema como capa, título = nome do tema, chamada embaixo; player com os apresentadores (ilustração
+     provisória) e mini-player que segue tocando dentro desta tela. Lê materiais tipo 'video' e 'audio' (publicados, origem redaon). -->
 <script>
 (function(){ var p='auto'; try{ p=localStorage.getItem('redaon-tema')||'auto'; }catch(e){}
  var e=p; if(p==='auto'){ var c=false; try{ c=window.matchMedia('(prefers-color-scheme: light)').matches; }catch(x){} e=c?'claro':'escuro'; }
@@ -11,165 +16,245 @@
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="aluno-base-v6.css?v=6-16" rel="stylesheet"/>
+<link href="aluno-base-v6.css?v=6-17" rel="stylesheet"/>
 <style>
-/* ══ Você ON · acervo em vídeo ══
-   Gramática emprestada do YouTube: chips de trilha rolando na horizontal, carrossel de
-   "continue de onde parou", lista vertical compacta com miniatura à esquerda e duração no canto.
-   O que NÃO copiamos: sugestões, shorts, canal, próximo vídeo — o aluno vem estudar e voltar. */
-.chips{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin:0 -1rem 14px; padding:2px 1rem 2px; }
-.chips::-webkit-scrollbar{ display:none; }
-.chip{ flex:0 0 auto; border:1px solid rgba(var(--borderRGB),.22); background:var(--surface2); color:var(--text2);
-  border-radius:9px; padding:8px 14px; font-size:13px; font-weight:700; font-family:inherit; white-space:nowrap; }
-.chip.on{ background:var(--cyan); color:var(--onCyan); border-color:var(--cyan); }
-
-.secTit{ display:flex; align-items:baseline; justify-content:space-between; margin:18px 0 10px; }
-.secTit h2{ margin:0; font-size:15px; font-weight:800; color:var(--text); }
-.secTit span{ font-size:12px; color:var(--muted); }
-
-/* continue de onde parou — carrossel, miniatura 16:9 */
-.carr{ display:flex; gap:12px; overflow-x:auto; scrollbar-width:none; margin:0 -1rem; padding:0 1rem 6px; }
-.carr::-webkit-scrollbar{ display:none; }
-.vGrande{ flex:0 0 74%; }
-.vGrande .cap{ width:100%; aspect-ratio:16/9; border-radius:14px; }
-.vGrande h3{ margin:8px 0 2px; font-size:14px; font-weight:700; line-height:1.3; color:var(--text); }
-.vGrande p{ margin:0; font-size:11.5px; color:var(--muted); }
-
-/* lista compacta — miniatura à esquerda */
-.lista{ display:flex; flex-direction:column; gap:12px; }
-.vItem{ display:flex; gap:11px; align-items:flex-start; cursor:pointer; }
-.vItem .cap{ flex:0 0 132px; aspect-ratio:16/9; border-radius:11px; }
-.vItem .txt{ flex:1; min-width:0; padding-top:1px; }
-.vItem h3{ margin:0 0 3px; font-size:13.5px; font-weight:700; line-height:1.32; color:var(--text);
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.vItem p{ margin:0; font-size:11.5px; color:var(--muted); line-height:1.4; }
-
-/* capa: miniatura do YouTube no arquivo real; aqui, marca d'água com play e duração */
-.cap{ position:relative; overflow:hidden; background:linear-gradient(140deg, rgba(var(--cyanRGB),.22), rgba(var(--purpleRGB),.16)); display:grid; place-items:center; }
-.cap.b{ background:linear-gradient(140deg, rgba(var(--cyanRGB),.26), rgba(var(--cyanRGB),.10)); }
-.cap.c{ background:linear-gradient(140deg, rgba(var(--purpleRGB),.24), rgba(var(--purpleRGB),.09)); }
-.cap.a{ background:linear-gradient(140deg, rgba(var(--goldRGB),.22), rgba(var(--orangeRGB),.12)); }
-.cap.r{ background:linear-gradient(140deg, rgba(var(--greenRGB),.22), rgba(var(--greenRGB),.08)); }
-.cap .mini{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-.cap .play{ position:relative; z-index:2;  width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.92); display:grid; place-items:center;
-  box-shadow:0 2px 10px rgba(0,0,0,.18); }
-.cap .play svg{ width:17px; height:17px; margin-left:2px; color:#0a4a4b; }
-.cap .dur{ position:absolute; right:6px; bottom:6px; background:rgba(0,0,0,.74); color:#fff; font-size:10.5px;
-  font-weight:700; padding:2px 6px; border-radius:6px; letter-spacing:.02em; }
-.cap .barra{ position:absolute; left:0; right:0; bottom:0; height:3px; background:rgba(0,0,0,.25); }
-.cap .barra i{ display:block; height:100%; background:var(--cyan); }
-.selo{ display:inline-block; font-size:10px; font-weight:800; padding:2px 7px; border-radius:7px;
-  background:rgba(var(--cyanRGB),.14); color:var(--cyan); margin-right:6px; }
-.vazio{ font-size:12.5px; color:var(--muted); padding:14px 2px; }
-
-/* player: só carrega ao tocar (no arquivo real, o iframe do YouTube entra aqui) */
-.telaVideo{ position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.88); display:none; flex-direction:column; }
+.modos{ display:flex; gap:8px; margin:0 0 12px; }
+.modo{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font:inherit; font-size:13px; font-weight:700; padding:10px 8px; border-radius:14px; border:1px solid rgba(var(--borderRGB),.16); background:var(--surface); color:var(--text2); cursor:pointer; }
+.modo.on{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); border-color:transparent; }
+.modo img.fe{ width:22px; height:22px; display:block; }
+.vChips{ display:flex; gap:6px; margin:0 0 6px; }
+.vChip{ flex:1 1 0; min-width:0; font:inherit; font-size:12px; font-weight:600; color:var(--text2); background:var(--surface); border:1px solid rgba(var(--borderRGB),.14); border-radius:99px; padding:7px 4px; white-space:nowrap; text-align:center; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+.vChip .longo{ display:none; } .vChip .curto{ display:inline; }
+@media(min-width:480px){ .vChip{ flex:0 0 auto; padding:6px 13px; font-size:12.5px; } .vChip .longo{ display:inline; } .vChip .curto{ display:none; } }
+.faixa{ margin-top:16px; }
+.faixa h2{ margin:0 0 8px; font-size:15px; font-weight:800; color:var(--text); display:flex; align-items:baseline; justify-content:space-between; }
+.faixa h2 small{ font-size:12px; color:var(--muted); font-weight:400; }
+.faixa .sub{ margin:-6px 0 8px; font-size:12px; color:var(--muted); }
+.trilho{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -1rem; padding:2px 1rem 6px; -webkit-overflow-scrolling:touch; }
+.trilho::-webkit-scrollbar{ display:none; }
+.trilho>*{ scroll-snap-align:start; flex:0 0 auto; }
+.cap{ position:relative; background:#111; overflow:hidden; }
+.cap img{ width:100%; height:100%; object-fit:cover; display:block; }
+.cap .arte{ position:absolute; inset:0; display:grid; place-items:center; font-size:11px; color:var(--muted); text-align:center; padding:10px; background:linear-gradient(135deg, rgba(var(--cyanRGB),.25), rgba(var(--cyanRGB),.06)); }
+.dur{ position:absolute; right:8px; bottom:8px; font-size:10.5px; font-weight:700; color:#fff; background:rgba(0,0,0,.65); padding:2px 6px; border-radius:6px; }
+.play{ position:absolute; left:50%; top:50%; width:38px; height:38px; margin:-19px 0 0 -19px; border-radius:50%; background:rgba(0,0,0,.55); display:grid; place-items:center; }
+.play svg{ width:18px; height:18px; fill:#fff; margin-left:2px; }
+.barra{ position:absolute; left:0; right:0; bottom:0; height:4px; background:rgba(255,255,255,.35); } .barra i{ display:block; height:100%; background:var(--cyan); }
+.selo{ display:inline-block; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:2px 8px; border-radius:99px; background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+.selo.branco{ background:var(--surface); color:var(--text); border:1px solid rgba(var(--borderRGB),.2); }
+.selo.cast{ background:var(--text); color:var(--bg); }
+.selo.fone{ position:absolute; left:8px; top:8px; }
+.grande{ width:86%; max-width:420px; background:var(--surface); border-radius:20px; overflow:hidden; box-shadow:0 2px 12px rgba(var(--borderRGB),.10); cursor:pointer; }
+.grande .cap{ aspect-ratio:16/9; }
+.grande .scrim{ position:absolute; inset:30% 0 0; background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.72)); }
+.grande .sobre{ position:absolute; left:14px; right:14px; bottom:12px; color:#fff; }
+.grande .sobre .pq{ font-size:11.5px; opacity:.9; margin-bottom:5px; }
+.grande .sobre h3{ margin:0; font-size:16px; font-weight:700; line-height:1.25; text-shadow:0 1px 8px rgba(0,0,0,.4); }
+.grande .sobre .ch{ font-size:11.5px; opacity:.9; margin-top:4px; font-style:italic; }
+.grande .pe{ display:flex; align-items:center; gap:8px; padding:11px 14px 13px; font-size:12px; color:var(--muted); }
+.grande .pe .bt{ margin-left:auto; height:38px; padding:0 16px; border:0; border-radius:12px; background:var(--cyan); color:var(--onCyan); font:inherit; font-size:13px; font-weight:700; }
+.medio{ width:200px; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); cursor:pointer; }
+.medio .cap{ aspect-ratio:16/9; } .medio .cap .play{ width:30px; height:30px; margin:-15px 0 0 -15px; } .medio .cap .play svg{ width:14px; height:14px; }
+.medio .txt{ padding:8px 10px 10px; }
+.medio .txt p{ margin:4px 0 3px; font-size:12.5px; font-weight:600; line-height:1.3; color:var(--text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.medio .pe{ font-size:11px; color:var(--muted); }
+.short{ width:120px; border-radius:14px; overflow:hidden; cursor:pointer; position:relative; }
+.short .cap{ aspect-ratio:9/16; border-radius:14px; } .short .cap .play{ display:none; }
+.short .cap::after{ content:""; position:absolute; inset:45% 0 0; background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.7)); }
+.short .rot{ position:absolute; left:8px; right:8px; bottom:8px; color:#fff; font-size:11.5px; font-weight:700; line-height:1.25; text-shadow:0 1px 6px rgba(0,0,0,.7); }
+.breve{ width:200px; min-height:112px; border:1px dashed rgba(var(--borderRGB),.25); border-radius:16px; display:grid; place-items:center; text-align:center; font-size:12px; color:var(--muted); padding:12px; }
+.cabCast{ display:flex; align-items:center; gap:12px; background:var(--surface); border-radius:18px; padding:10px 14px; margin:0 0 4px; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); }
+.cabCast .txt b{ display:block; font-size:14px; color:var(--text); } .cabCast .txt span{ font-size:12px; color:var(--muted); }
+.cabCast svg{ width:64px; height:44px; flex:none; color:var(--cyan); }
+.vazioTudo{ font-size:13px; color:var(--muted); padding:20px 4px; text-align:center; }
+@media(min-width:1024px){ .grande{ width:440px; } .medio{ width:240px; } .short{ width:150px; } .trilho{ margin:0; padding:2px 0 6px; } }
+.telaVideo{ position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.92); display:none; flex-direction:column; }
 .telaVideo.on{ display:flex; }
-.telaVideo .topo{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:#fff; }
-.telaVideo .topo button{ background:transparent; border:0; color:#fff; font-size:22px; font-family:inherit; line-height:1; }
-.telaVideo .topo b{ font-size:14px; font-weight:700; }
-.telaVideo .quadro{ width:100%; aspect-ratio:16/9; background:#000; display:grid; place-items:center; color:#8ea; font-size:13px; }
-.telaVideo .desc{ color:rgba(255,255,255,.8); font-size:12.5px; padding:14px; line-height:1.5; }
-@media(min-width:641px){
-  .vGrande{ flex:0 0 320px; } .vItem .cap{ flex:0 0 180px; } .vItem h3{ font-size:15px; } .vItem p{ font-size:12.5px; }
-  .telaVideo .quadro{ max-width:900px; margin:0 auto; }
-}
+.telaVideo .tp{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:#fff; }
+.telaVideo .tp button{ background:transparent; border:0; color:#fff; font-size:22px; line-height:1; font-family:inherit; }
+.telaVideo .tp b{ font-size:14px; }
+.telaVideo .quadro{ width:100%; max-width:900px; margin:0 auto; aspect-ratio:16/9; background:#000; }
+.telaVideo .quadro.v{ max-width:min(100vw, 56vh); aspect-ratio:9/16; }
+.telaVideo iframe{ width:100%; height:100%; border:0; display:block; }
+.telaVideo .desc{ color:rgba(255,255,255,.8); font-size:12.5px; padding:14px; max-width:900px; margin:0 auto; }
+.telaAudio{ position:fixed; inset:0; z-index:80; background:var(--bg); display:none; flex-direction:column; }
+.telaAudio.on{ display:flex; }
+.telaAudio .tp{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:var(--text); }
+.telaAudio .tp button{ background:transparent; border:0; color:var(--text); font-size:24px; line-height:1; font-family:inherit; }
+.telaAudio .meio{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 24px; text-align:center; gap:14px; }
+.telaAudio .meio svg{ width:min(80vw,320px); height:auto; color:var(--cyan); }
+.telaAudio .meio h3{ margin:0; font-size:17px; line-height:1.3; color:var(--text); }
+.telaAudio .meio p{ margin:0; font-size:12.5px; color:var(--muted); max-width:36ch; }
+.telaAudio audio{ width:min(90vw,420px); }
+.telaAudio .ia{ font-size:11px; color:var(--muted); padding:0 24px 22px; text-align:center; }
+.mini{ position:fixed; left:12px; right:12px; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:70; display:none; align-items:center; gap:10px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:16px; padding:8px 10px; box-shadow:0 4px 16px rgba(0,0,0,.18); font-size:12.5px; color:var(--text); }
+.mini.on{ display:flex; }
+.mini svg{ width:40px; height:28px; flex:none; color:var(--cyan); }
+.mini .t{ flex:1; min-width:0; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini button{ font:inherit; font-size:12px; font-weight:700; border:0; border-radius:99px; padding:6px 12px; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
+.mini button.x{ background:transparent; color:var(--muted); padding:6px 4px; }
+@media(min-width:1024px){ .mini{ left:auto; right:24px; bottom:24px; width:380px; } }
 </style>
 </head>
 <body>
 <div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
   <div id="conteudo">
-
-    <div class="chips" id="chips"></div>
+    <div class="modos" id="modos"></div>
+    <div class="vChips" id="chips"></div>
     <div id="corpo"></div>
-
   </div>
 </div>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="robos" viewBox="0 0 60 44">
+    <rect x="6" y="30" width="48" height="6" rx="3" fill="currentColor" opacity=".25"/>
+    <rect x="27" y="14" width="6" height="16" rx="2" fill="currentColor" opacity=".55"/><circle cx="30" cy="13" r="4" fill="currentColor" opacity=".55"/>
+    <rect x="7" y="12" width="15" height="14" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="18" r="1.8" fill="currentColor"/><circle cx="17.5" cy="18" r="1.8" fill="currentColor"/><path d="M11.5 22.5q3 2 6 0" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M14.5 12V8" stroke="currentColor" stroke-width="2"/><circle cx="14.5" cy="6.5" r="1.8" fill="currentColor"/>
+    <rect x="38" y="12" width="15" height="14" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="41.5" y="16.5" width="3.5" height="3" rx="1" fill="currentColor"/><rect x="48" y="16.5" width="3.5" height="3" rx="1" fill="currentColor"/><path d="M42 22.5h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M45.5 12V8" stroke="currentColor" stroke-width="2"/><circle cx="45.5" cy="6.5" r="1.8" fill="currentColor"/>
+  </symbol>
+</svg>
+
 <div class="telaVideo" id="telaVideo">
-  <div class="topo"><button onclick="fecharVideo()">&#10005;</button><b id="vTit"></b></div>
-  <div class="quadro" id="vQuadro">aqui entra o player do YouTube</div>
+  <div class="tp"><button onclick="fecharVideo()" aria-label="Fechar">&#10005;</button><b id="vTit"></b></div>
+  <div class="quadro" id="vQuadro"></div>
   <p class="desc" id="vDesc"></p>
 </div>
 
-<script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-16"></script>
-<script>
-montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'smart_display', sino:true, versao:'aluno · você on · mockup v1' });
+<div class="telaAudio" id="telaAudio">
+  <div class="tp"><button onclick="minimizar()" aria-label="Voltar">&#8249;</button><b>RedaCast</b></div>
+  <div class="meio">
+    <svg viewBox="0 0 60 44"><use href="#robos"/></svg>
+    <span class="selo cast">RedaCast</span>
+    <h3 id="aTit"></h3>
+    <p id="aSub"></p>
+    <audio id="aud" controls preload="none"></audio>
+  </div>
+  <p class="ia">Conversa gerada por intelig&ecirc;ncia artificial a partir do material da RedaON e conferida pela Profa. Blanche.</p>
+</div>
+<div class="mini" id="mini"><svg viewBox="0 0 60 44"><use href="#robos"/></svg><span class="t" id="miniT"></span><button onclick="abrirAudioTela()">Abrir</button><button class="x" onclick="pararAudio()" aria-label="Parar">&#10005;</button></div>
 
+<script src="supabase-auth.js"></script>
+<script src="aluno-base-v6.js?v=6-17"></script>
+<script>
+if (typeof authGuard === 'function') { authGuard('aluno'); }
+montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-0' });
+
+/* ids de trilha são os do banco (base, correcao, aposta, rota); os nomes são os aprovados em 22/09/2026 */
 var TRILHAS=[
- {id:'todos', nome:'Todos'},
- {id:'base', nome:'Base', sub:'a estrutura da redação, competência a competência'},
- {id:'correcao', nome:'Correção Guiada', sub:'uma redação corrigida na sua frente'},
- {id:'aposta', nome:'Aposta da Semana', sub:'por que este tema, e como atacá-lo'},
- {id:'rota', nome:'Rota 1.000', sub:'construindo a redação com o material das trilhas'}
+ {id:'base',     nome:'Bases da Reda\u00e7\u00e3o', curto:'Bases',      sub:'a estrutura da reda\u00e7\u00e3o, compet\u00eancia a compet\u00eancia'},
+ {id:'correcao', nome:'Corre\u00e7\u00e3o Guiada',  curto:'Corre\u00e7\u00e3o', sub:'uma reda\u00e7\u00e3o corrigida na sua frente'},
+ {id:'aposta',   nome:'Tema da Semana',   curto:'Tema',       sub:'por que este tema, e como atac\u00e1-lo'},
+ {id:'rota',     nome:'Rota 1.000',       curto:'Rota 1.000', sub:'construindo a reda\u00e7\u00e3o com o material das trilhas'}
 ];
-var VIDEOS=[];
-var filtro='todos';
-var PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-function capa(v,grande){
-  var mini = v.yt ? '<img class="mini" src="https://i.ytimg.com/vi/'+v.yt+'/hqdefault.jpg" alt="" loading="lazy"/>' : '';
-  return '<div class="cap '+v.cap+(grande?' g':'')+'">'+mini+'<span class="play">'+PLAY+'</span>'
-    +''+(v.dur?'<span class="dur">'+v.dur+'</span>':'')+''
-    +(v.progresso?'<span class="barra"><i style="width:'+v.progresso+'%"></i></span>':'')+'</div>';
-}
-function nomeTrilha(id){ for(var i=0;i<TRILHAS.length;i++) if(TRILHAS[i].id===id) return TRILHAS[i].nome; return ''; }
-function item(v,i){
-  return '<div class="vItem" onclick="abrirVideo('+i+')">'+capa(v)
-    +'<div class="txt"><h3>'+(v.novo?'<span class="selo">novo</span>':'')+v.tit+'</h3>'
-    +'<p>'+nomeTrilha(v.t)+' \u00b7 '+v.dur+(v.progresso?' \u00b7 faltam '+(100-v.progresso)+'%':'')+'</p></div></div>';
-}
+var VIDEOS=[], EPIS=[], TEMAS={}, FOCO=null, TEMA_SEMANA=null, MODO='vid', tocando=null;
+var PROG=(function(){ try{ return JSON.parse(localStorage.getItem('redaon-voceon-prog')||'{}'); }catch(e){ return {}; } })();
+function salvarProg(){ try{ localStorage.setItem('redaon-voceon-prog', JSON.stringify(PROG)); }catch(e){} }
+var PLAY='<span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function nome(id){ for(var i=0;i<TRILHAS.length;i++) if(TRILHAS[i].id===id) return TRILHAS[i].nome; return ''; }
+function idYoutube(url){ var m=String(url||'').match(/(?:youtu\.be\/|v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null; }
+function pct(v){ return PROG[v.id] && PROG[v.id].p ? Math.min(99, Math.round(PROG[v.id].p)) : 0; }
+function porque(v){
+  if(v.t==='base' && FOCO && v.comp===FOCO) return 'Sua m\u00e9dia mais baixa \u00e9 em '+FOCO;
+  if(v.t==='aposta' && TEMA_SEMANA && v.temaId===TEMA_SEMANA) return 'Tema da semana';
+  if(v.t==='base' && v.comp) return 'Bases \u00b7 '+v.comp;
+  return nome(v.t); }
+function peso(v){
+  if(v.t==='base' && FOCO && v.comp===FOCO) return 0;
+  if(v.t==='aposta' && TEMA_SEMANA && v.temaId===TEMA_SEMANA) return 1;
+  if(v.t==='aposta') return 2; if(v.t==='base') return 3; return 4; }
+function ord(l){ return l.slice().sort(function(a,b){ return peso(a.v)-peso(b.v) || (b.v.novo?1:0)-(a.v.novo?1:0) || (b.v.criado>a.v.criado?1:-1); }); }
+function capV(v){ var p=pct(v); return '<div class="cap"><img src="https://i.ytimg.com/vi/'+v.yt+'/hqdefault.jpg" alt="" loading="lazy">'+PLAY+(v.dur?'<span class="dur">'+esc(v.dur)+'</span>':'')+(p?'<span class="barra"><i style="width:'+p+'%"></i></span>':'')+'</div>'; }
+function grande(v,i){ var p=pct(v); return '<div class="grande" onclick="abrirVideo('+i+')">'+capV(v).replace(/<\/div>$/,'<div class="scrim"></div><div class="sobre"><div class="pq">'+esc(porque(v))+'</div><h3>'+esc(v.tit)+'</h3>'+(v.chamada?'<div class="ch">'+esc(v.chamada)+'</div>':'')+'</div></div>')+'<div class="pe"><span class="selo">'+esc(nome(v.t))+'</span>'+esc(v.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'<button class="bt">Assistir</button></div></div>'; }
+function medio(v,i){ var p=pct(v); return '<div class="medio" onclick="abrirVideo('+i+')">'+capV(v)+'<div class="txt">'+(v.novo?'<span class="selo branco">novo</span> ':'')+(v.comp?'<span class="selo">'+esc(v.comp)+'</span>':'')+'<p>'+esc(v.tit)+'</p>'+(v.chamada?'<div class="pe" style="color:var(--text2);margin-bottom:3px">'+esc(v.chamada)+'</div>':'')+'<div class="pe">'+esc(v.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'</div></div></div>'; }
+function short(v,i){ return '<div class="short" onclick="abrirVideo('+i+')"><div class="cap"><img src="https://i.ytimg.com/vi/'+v.yt+'/hqdefault.jpg" alt="" loading="lazy">'+(v.dur?'<span class="dur">'+esc(v.dur)+'</span>':'')+'</div><div class="rot">'+esc(v.tit)+'</div></div>'; }
+function capaTema(e){ var t=e.temaId && TEMAS[e.temaId]; return (t && t.capa_url) ? '<img src="'+esc(t.capa_url)+'" alt="" loading="lazy">' : '<div class="arte">'+esc(e.comp?'Compet\u00eancia '+e.comp:'RedaCast')+'</div>'; }
+function capE(e){ var p=pct(e); return '<div class="cap">'+capaTema(e)+'<span class="selo cast fone">RedaCast</span>'+(e.dur?'<span class="dur">'+esc(e.dur)+'</span>':'')+(p?'<span class="barra"><i style="width:'+p+'%"></i></span>':'')+'</div>'; }
+function grandeE(e,i){ var p=pct(e); return '<div class="grande" onclick="abrirAudio('+i+')">'+capE(e).replace(/<\/div>$/,'<div class="scrim"></div><div class="sobre"><div class="pq">'+esc(porque(e))+'</div><h3>'+esc(e.tit)+'</h3>'+(e.chamada?'<div class="ch">'+esc(e.chamada)+'</div>':'')+'</div></div>')+'<div class="pe"><span class="selo">'+esc(nome(e.t))+'</span>'+esc(e.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'<button class="bt">Ouvir</button></div></div>'; }
+function medioE(e,i){ var p=pct(e); return '<div class="medio" onclick="abrirAudio('+i+')">'+capE(e)+'<div class="txt">'+(e.novo?'<span class="selo branco">novo</span> ':'')+(e.comp?'<span class="selo">'+esc(e.comp)+'</span>':'')+'<p>'+esc(e.tit)+'</p>'+(e.chamada?'<div class="pe" style="color:var(--text2);margin-bottom:3px">'+esc(e.chamada)+'</div>':'')+'<div class="pe">'+esc(e.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'</div></div></div>'; }
+function faixa(tit,sub,itens){ return '<div class="faixa"><h2>'+tit+'</h2>'+(sub?'<p class="sub">'+esc(sub)+'</p>':'')+'<div class="trilho">'+itens+'</div></div>'; }
+
 function montar(){
-  document.getElementById('chips').innerHTML=TRILHAS.map(function(t){
-    return '<button class="chip'+(filtro===t.id?' on':'')+'" onclick="filtrar(\''+t.id+'\')">'+t.nome+'</button>';
-  }).join('');
+  document.getElementById('modos').innerHTML=
+    '<button class="modo'+(MODO==='vid'?' on':'')+'" onclick="modo(\'vid\')">'+feIcone('claquete')+'V\u00eddeos</button>'
+   +'<button class="modo'+(MODO==='aud'?' on':'')+'" onclick="modo(\'aud\')">'+feIcone('microfone')+'RedaCast</button>';
+  document.getElementById('chips').innerHTML=TRILHAS.map(function(t){ return '<button class="vChip" onclick="irFaixa(\''+t.id+'\')"><span class="longo">'+esc(t.nome)+'</span><span class="curto">'+esc(t.curto)+'</span></button>'; }).join('');
   var h='';
-  var emCurso=VIDEOS.map(function(v,i){ return {v:v,i:i}; }).filter(function(x){ return x.v.progresso; });
-  if(filtro==='todos' && emCurso.length){
-    h+='<div class="secTit"><h2>Continue de onde parou</h2></div><div class="carr">'
-      +emCurso.map(function(x){
-        return '<div class="vGrande" onclick="abrirVideo('+x.i+')">'+capa(x.v,true)
-          +'<h3>'+x.v.tit+'</h3><p>'+nomeTrilha(x.v.t)+' \u00b7 faltam '+(100-x.v.progresso)+'%</p></div>';
-      }).join('')+'</div>';
+  if(MODO==='vid'){
+    var todos=VIDEOS.map(function(v,i){ return {v:v,i:i}; }), longos=todos.filter(function(x){ return !x.v.curto; }), curtos=todos.filter(function(x){ return x.v.curto; });
+    if(!todos.length) h+='<p class="vazioTudo">Em breve. A Profa. Blanche est\u00e1 gravando os primeiros v\u00eddeos.</p>';
+    else {
+      h+=faixa('Para voc\u00ea agora', null, ord(longos).slice(0,5).map(function(x){ return grande(x.v,x.i); }).join(''));
+      var cont=longos.filter(function(x){ return pct(x.v); }); if(cont.length) h+=faixa('Continue de onde parou', null, cont.map(function(x){ return medio(x.v,x.i); }).join(''));
+      if(curtos.length) h+=faixa('Shorts <small>at\u00e9 1 minuto</small>', null, ord(curtos).map(function(x){ return short(x.v,x.i); }).join(''));
+    }
+    TRILHAS.forEach(function(t){ var l=ord(longos.filter(function(x){ return x.v.t===t.id; }));
+      h+='<div id="f-'+t.id+'">'+faixa(esc(t.nome)+' <small>'+l.length+' v\u00eddeo'+(l.length===1?'':'s')+'</small>', t.sub, l.length? l.map(function(x){ return medio(x.v,x.i); }).join('') : '<div class="breve">Em breve. A Profa. Blanche est\u00e1 gravando.</div>')+'</div>'; });
+  } else {
+    var eps=EPIS.map(function(v,i){ return {v:v,i:i}; });
+    h+='<div class="cabCast"><svg viewBox="0 0 60 44"><use href="#robos"/></svg><div class="txt"><b>RedaCast</b><span>Seu podcast que te aproxima da nota 1.000 \u00b7 d\u00e1 para ouvir com a tela apagada</span></div></div>';
+    if(!eps.length) h+='<p class="vazioTudo">Em breve. O primeiro epis\u00f3dio est\u00e1 sendo conferido.</p>';
+    else {
+      h+=faixa('Para voc\u00ea agora', null, ord(eps).slice(0,5).map(function(x){ return grandeE(x.v,x.i); }).join(''));
+      var contE=eps.filter(function(x){ return pct(x.v); }); if(contE.length) h+=faixa('Continue de onde parou', null, contE.map(function(x){ return medioE(x.v,x.i); }).join(''));
+    }
+    TRILHAS.forEach(function(t){ var l=ord(eps.filter(function(x){ return x.v.t===t.id; }));
+      h+='<div id="f-'+t.id+'">'+faixa(esc(t.nome)+' <small>'+l.length+' epis\u00f3dio'+(l.length===1?'':'s')+'</small>', t.sub, l.length? l.map(function(x){ return medioE(x.v,x.i); }).join('') : '<div class="breve">Em breve. O primeiro epis\u00f3dio est\u00e1 sendo conferido.</div>')+'</div>'; });
   }
-  var trilhas = filtro==='todos' ? TRILHAS.slice(1) : TRILHAS.filter(function(t){ return t.id===filtro; });
-  trilhas.forEach(function(t){
-    var lista=VIDEOS.map(function(v,i){ return {v:v,i:i}; }).filter(function(x){ return x.v.t===t.id; });
-    h+='<div class="secTit"><h2>'+t.nome+'</h2><span>'+lista.length+' v\u00eddeo'+(lista.length===1?'':'s')+'</span></div>';
-    h+= lista.length ? '<div class="lista">'+lista.map(function(x){ return item(x.v,x.i); }).join('')+'</div>'
-                     : '<p class="vazio">Em breve. A Profa. Blanche est\u00e1 gravando.</p>';
-    if(t.sub) h=h.replace('<span>'+lista.length,'<span>'+lista.length);
-  });
   document.getElementById('corpo').innerHTML=h;
 }
-function filtrar(id){ filtro=id; montar(); window.scrollTo({top:0,behavior:'smooth'}); }
-function abrirVideo(i){
-  var v=VIDEOS[i];
-  document.getElementById('vTit').textContent=v.tit;
-  document.getElementById('vDesc').textContent=v.desc;
-  var q=document.getElementById('vQuadro');
-  q.innerHTML = v.yt ? '<iframe src="https://www.youtube-nocookie.com/embed/'+v.yt+'?rel=0&modestbranding=1&playsinline=1&autoplay=1" title="'+(v.tit||'').replace(/"/g,'')+'" frameborder="0" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:0;"></iframe>' : 'v\u00eddeo indispon\u00edvel';
-  document.getElementById('telaVideo').classList.add('on');
-}
-function fecharVideo(){ document.getElementById('telaVideo').classList.remove('on'); document.getElementById('vQuadro').innerHTML=''; /* descarrega o player */ }
+function modo(m){ MODO=m; try{ localStorage.setItem('redaon-voceon-modo',m); }catch(e){} montar(); window.scrollTo({top:0,behavior:'smooth'}); }
+function irFaixa(id){ var el=document.getElementById('f-'+id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
 
-/* ── carrega os vídeos publicados (materiais tipo='video'), na trilha e na ordem do banco ── */
-function idYoutube(url){
-  var m = String(url||'').match(/(?:youtu\.be\/|v=|\/shorts\/|\/embed\/)([A-Za-z0-9_-]{11})/);
-  return m ? m[1] : null;
+function abrirVideo(i){ var v=VIDEOS[i];
+  document.getElementById('vTit').textContent=v.tit; document.getElementById('vDesc').textContent=v.desc||'';
+  var q=document.getElementById('vQuadro'); q.className='quadro'+(v.curto?' v':'');
+  q.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+v.yt+'?autoplay=1&rel=0&modestbranding=1&playsinline=1" title="'+esc(v.tit)+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+  document.getElementById('telaVideo').classList.add('on'); }
+function fecharVideo(){ document.getElementById('telaVideo').classList.remove('on'); document.getElementById('vQuadro').innerHTML=''; }
+
+/* player do RedaCast · mini-player dentro desta tela (levar ao kit é rodada futura) */
+var aud=document.getElementById('aud');
+function abrirAudio(i){ var e=EPIS[i]; tocando=e;
+  document.getElementById('aTit').textContent=e.tit; document.getElementById('aSub').textContent=(e.chamada?e.chamada+' \u00b7 ':'')+(e.desc||'');
+  document.getElementById('miniT').textContent=e.tit;
+  if(aud.getAttribute('src')!==e.url){ aud.src=e.url; var pr=PROG[e.id]; if(pr && pr.s) aud.addEventListener('loadedmetadata', function f(){ aud.removeEventListener('loadedmetadata', f); if(pr.s < aud.duration-5) aud.currentTime=pr.s; }); }
+  abrirAudioTela(); aud.play().catch(function(){});
+  if('mediaSession' in navigator){ try{ navigator.mediaSession.metadata=new MediaMetadata({ title:e.tit, artist:'RedaCast \u00b7 RedaON', album:nome(e.t) });
+    navigator.mediaSession.setActionHandler('play', function(){ aud.play(); }); navigator.mediaSession.setActionHandler('pause', function(){ aud.pause(); }); }catch(x){} }
 }
+function abrirAudioTela(){ document.getElementById('telaAudio').classList.add('on'); document.getElementById('mini').classList.remove('on'); }
+function minimizar(){ document.getElementById('telaAudio').classList.remove('on'); if(tocando && !aud.paused) document.getElementById('mini').classList.add('on'); montar(); }
+function pararAudio(){ aud.pause(); document.getElementById('mini').classList.remove('on'); tocando=null; montar(); }
+aud.addEventListener('timeupdate', function(){ if(!tocando || !aud.duration) return; var p=aud.currentTime/aud.duration*100; PROG[tocando.id]={ s:aud.currentTime, p:(p>=97?0:p) }; if(Math.floor(aud.currentTime)%5===0) salvarProg(); });
+aud.addEventListener('ended', function(){ if(tocando){ PROG[tocando.id]={ s:0, p:0 }; salvarProg(); } document.getElementById('mini').classList.remove('on'); });
+aud.addEventListener('pause', function(){ salvarProg(); });
+
+function linhaMat(m){ var j=m.conteudo_json||{}; return { id:m.id, t:m.trilha||'base', tit:m.nome||'', desc:m.conteudo||'', chamada:j.chamada||'', dur:j.duracao||'', curto:!!j.curto, comp:m.competencia||null, temaId:m.tema_id||null, criado:m.criado_em||'', novo:(new Date()-new Date(m.criado_em))<7*864e5 }; }
 async function carregar(){
+  try{ MODO=localStorage.getItem('redaon-voceon-modo')||'vid'; }catch(e){}
   try{
-    var res = await dbFetch(SUPABASE_URL+'/rest/v1/materiais?tipo=eq.video&publicado=eq.true&select=id,nome,conteudo,arquivo_url,trilha,competencia,tema_id,criado_em&order=criado_em.desc', {});
-    if(!res.ok) throw new Error('falha ao carregar');
-    var linhas = await res.json();
-    VIDEOS = linhas.map(function(m){
-      return { id:m.id, t:m.trilha||'base', yt:idYoutube(m.arquivo_url), tit:m.nome||'', desc:m.conteudo||'',
-               dur:'', cap:({base:'b',correcao:'c',aposta:'a',rota:'r'})[m.trilha]||'b',
-               novo:(new Date() - new Date(m.criado_em)) < 7*864e5 };
-    }).filter(function(v){ return v.yt; });
-  }catch(e){ console.warn('[você on]', e); VIDEOS=[]; }
+    var res=await dbFetch(SUPABASE_URL+'/rest/v1/materiais?tipo=in.(video,audio)&publicado=eq.true&origem=eq.redaon&select=id,nome,tipo,conteudo,arquivo_url,trilha,competencia,tema_id,criado_em,conteudo_json&order=criado_em.desc', {});
+    var linhas=res.ok ? await res.json() : [];
+    VIDEOS=[]; EPIS=[];
+    linhas.forEach(function(m){ var o=linhaMat(m);
+      if(m.tipo==='video'){ o.yt=idYoutube(m.arquivo_url); if(o.yt) VIDEOS.push(o); }
+      else { o.url=m.arquivo_url||''; if(o.url) EPIS.push(o); } });
+    var ids=[]; EPIS.concat(VIDEOS).forEach(function(x){ if(x.temaId && ids.indexOf(x.temaId)<0) ids.push(x.temaId); });
+    if(ids.length){ var r2=await dbFetch(SUPABASE_URL+'/rest/v1/temas?select=id,titulo,capa_url&id=in.('+ids.join(',')+')', {}); (r2.ok?await r2.json():[]).forEach(function(t){ TEMAS[t.id]=t; }); }
+  }catch(e){ console.warn('[você on]', e); }
   montar();
+  /* foco e tema da semana: a mesma regra do Meu Plano; chegam depois e reordenam o "Para você agora" */
+  try{
+    var d=new Date(), hoje=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    var r3=await dbFetch(SUPABASE_URL+'/rest/v1/temas?select=id,semana_de&ativo=eq.true&semana_de=lte.'+hoje+'&order=semana_de.desc&limit=1', {});
+    var ts=r3.ok?await r3.json():[]; if(ts[0]) TEMA_SEMANA=ts[0].id;
+    var hist=(typeof dbGetHistoricoRedacoes==='function') ? await dbGetHistoricoRedacoes(4) : [];
+    if(hist.length){ var cs=['c1','c2','c3','c4','c5'], melhor=null, vMed=1e9, vUlt=1e9;
+      cs.forEach(function(c){ var soma=0; hist.forEach(function(r){ soma+=(r[c]||0); }); var med=soma/hist.length, ult=(hist[0][c]||0); if(med<vMed || (med===vMed && ult<vUlt)){ melhor=c; vMed=med; vUlt=ult; } });
+      FOCO=melhor?melhor.toUpperCase():null; }
+    montar();
+  }catch(e){ console.warn('[você on foco]', e); }
 }
 carregar();
 </script>
