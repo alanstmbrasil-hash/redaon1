@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-17 (21/09/2026, Fatia C): quiz só com as questões aprovadas pela Profa. Blanche e só a partir de 5; eixo em reposição continua mostrando o que já foi aprovado; ficha sem nome de fonte mostra o site da fonte, com "abrir fonte". -->
 <!-- v2-16 (21/09/2026): texto do Entender sem conteúdo (e, no mesmo padrão, o do Material de apoio sem fichas: "O material deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve."), aprovado pelo Alan: "O conteúdo deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve." -->
 <!-- v2-15 (21/09/2026): caixa de escrever padronizada centralizada, faltando etapa ou com 3 de 3. -->
 <!-- v2-14 (21/09/2026): (1) o botão discreto se chamava .sec e colidia com a classe .sec do kit
@@ -542,8 +543,11 @@ function _extras(obj){
    A render antiga era feita para o JSON que a IA devolvia e não conhecia esses nomes. */
 function fichaFabrica(item){
   var h = '<div class="repItem">';
-  if (item.cab){
-    h += '<p class="repFonte">' + escapeHTML(item.cab)
+  /* v2-17 · o nome da fonte vem em "cab" (colar) ou "fonte" (banco); sem nome, mostra o site da fonte */
+  var cabF = String(item.cab || item.fonte || '').trim();
+  if (!cabF && item.url){ try{ cabF = new URL(item.url).hostname.replace(/^www\./,''); }catch(e){} }
+  if (cabF){
+    h += '<p class="repFonte">' + escapeHTML(cabF)
        + (item.url ? ' \u00b7 <a href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener" style="color:inherit;">abrir fonte</a>' : '')
        + '</p>';
   }
@@ -971,12 +975,25 @@ async function carregarMaterial(){
   MATERIAL = {};
   if (!TEMA_ID) return;
   try{
-    var url = SUPABASE_URL + '/rest/v1/material_apoio?select=eixo,conteudo,estado&tema_id=eq.' + TEMA_ID;
+    var url = SUPABASE_URL + '/rest/v1/material_apoio?select=eixo,conteudo,estado,revisao_json&tema_id=eq.' + TEMA_ID;
     var res = await dbFetch(url, {});
     if (!res.ok) return;
     (await res.json()).forEach(function(m){
-      if (m.estado && m.estado !== 'aprovado') return;      /* o aluno vê só o que a Profa. selou */
-      MATERIAL[m.eixo] = { conteudo:m.conteudo, estado:m.estado, fichas:fichasDe(m.conteudo) };
+      /* o aluno vê só o que a Profa. selou · v2-17: eixo em reposição ('ajustes') segue mostrando as fichas já aprovadas;
+         Entender e resumo só inteiros e aprovados; eixo emperrado não aparece */
+      var emp = !!(m.revisao_json && m.revisao_json.emperrado === true);
+      var ajusteVale = (m.estado === 'ajustes' && !emp && m.eixo !== 'entender' && m.eixo !== 'resumo');
+      if (m.estado && m.estado !== 'aprovado' && !ajusteVale) return;
+      var fs = fichasDe(m.conteudo);
+      /* v2-17 · quiz aprovado questão a questão: vai ao ar com 5 ou mais aprovadas (quiz antigo, sem estado por questão, segue como estava) */
+      if (m.eixo === 'quiz'){
+        var bruta = _achaLista(lerConteudo(m.conteudo)) || [];
+        var porQuestao = bruta.some(function(q){ return q && typeof q === 'object' && q.estado; });
+        if (porQuestao && fs.length < 5) return;
+        if (!porQuestao && m.estado !== 'aprovado') return;
+      }
+      if (!fs.length && m.estado === 'ajustes') return;
+      MATERIAL[m.eixo] = { conteudo:m.conteudo, estado:m.estado, fichas:fs };
     });
   }catch(e){ console.warn('[preparar] material', e); }
 }

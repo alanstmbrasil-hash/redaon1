@@ -496,6 +496,18 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
 #admWrap .ficha .veredito.rec{color:var(--red);}
 #admWrap .ficha .veredito .desf{font:inherit; border:none; background:none; color:var(--muted); font-weight:700; cursor:pointer; text-decoration:underline; margin-left:.5rem;}
 #admWrap .fAcs{display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.65rem;}
+/* v3-4 · Fatia C: Entender, resumo, quiz e exercícios */
+#admWrap .faixaT{display:flex; gap:.35rem; margin:.9rem 0 .2rem; flex-wrap:wrap;}
+#admWrap .faixaT span{flex:1 1 0; min-width:68px; text-align:center; font-size:.68rem; font-weight:800; padding:.42rem .3rem; border-radius:10px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); color:var(--text2);}
+#admWrap .faixaT span.ok{background:rgba(var(--greenRGB),.12); border-color:transparent; color:var(--green);}
+#admWrap .baseB{display:flex; flex-wrap:wrap; align-items:center; gap:.3rem; margin-top:.5rem; font-size:.68rem; color:var(--muted);}
+#admWrap .chipB{font:inherit; font-size:.68rem; font-weight:700; padding:.16rem .55rem; border-radius:99px; border:none; background:rgba(var(--cyanRGB),.12); color:var(--cyan); cursor:pointer;}
+#admWrap span.chipB{cursor:default;}
+#admWrap .chipB.x{background:rgba(var(--redRGB),.12); color:var(--red); text-decoration:line-through;}
+#admWrap .altB{font-size:.82rem; line-height:1.45; padding:.42rem .6rem; border-radius:10px; border:1px solid rgba(var(--borderRGB),.2); margin-top:.35rem; color:var(--text2);}
+#admWrap .altB.c{border-color:rgba(var(--greenRGB),.5); background:rgba(var(--greenRGB),.1); color:var(--green); font-weight:700;}
+#admWrap .ficha .veredito.trav{color:var(--muted); display:flex; align-items:center; gap:.3rem;}
+#admWrap .ficha .veredito.rep{color:var(--orange);}
 #admWrap .btn.rec{background:transparent; color:var(--red); border:1px solid rgba(var(--redRGB),.4);}
 #admWrap .repor{margin-top:.7rem;}
 #admWrap .ficha{padding:.85rem 0; border-top:1px solid rgba(var(--borderRGB),.14);}
@@ -815,6 +827,14 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
   <!-- ════════ DECIDIR · TEMA EM FOCO ════════ -->
   <div class="tela" id="t-dtema"><div id="dTemaCorpo"></div></div>
 
+  <!-- ════════ EXERCÍCIOS DAS COMPETÊNCIAS (v3-4) ════════ -->
+  <div class="tela" id="t-comp">
+    <h2 class="t">Exerc&iacute;cios das compet&ecirc;ncias</h2>
+    <p class="s">Banco geral, sem tema: o aluno treina um pouco todo dia de estudo. Voc&ecirc; l&ecirc; quest&atilde;o a quest&atilde;o; o que aprovar entra no treino.</p>
+    <div id="compLista"></div>
+  </div>
+  <div class="tela" id="t-compq"><div id="compCorpo"></div></div>
+
   <div class="tela" id="t-despera"><div class="espera"><div class="p" id="txEspera">Lendo o tema contra os seis crit&eacute;rios&hellip;</div></div></div>
 
   <!-- ════════ DECIDIR · BANCA ════════ -->
@@ -1097,11 +1117,11 @@ function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,
 
 /* ─── navegação: voltar na casa devolve ao portal ─── */
 var pilha=[], telaAtual='t-casa';
-var NOMES={ 't-casa':'Curadoria', 't-lista':'Aprovar materiais', 't-tema':'Ler e aprovar', 't-semanas':'Semanas', 't-agendar':'Agendar', 't-decidir':'Decidir temas', 't-dtema':'Tema em foco', 't-banca':'Como a banca escolhe', 't-despera':'Um instante' };
+var NOMES={ 't-casa':'Curadoria', 't-lista':'Aprovar materiais', 't-tema':'Ler e aprovar', 't-semanas':'Semanas', 't-agendar':'Agendar', 't-decidir':'Decidir temas', 't-dtema':'Tema em foco', 't-banca':'Como a banca escolhe', 't-despera':'Um instante', 't-comp':'Compet\u00eancias', 't-compq':'Quest\u00f5es' };
 function ir(t){ if(telaAtual) pilha.push(telaAtual); mostrar(t); }
 function voltar(){ if(!pilha.length){ if(telaAtual==='t-casa') return; mostrar('t-casa'); return; } mostrar(pilha.pop()); }
 function mostrar(t){
-  if(t==='t-casa') montarCasa(); if(t==='t-lista') montarLista(); if(t==='t-semanas') montarSemanas(); if(t==='t-decidir') dMontarLista(); if(t==='t-banca') montarBanca();
+  if(t==='t-casa') montarCasa(); if(t==='t-lista') montarLista(); if(t==='t-semanas') montarSemanas(); if(t==='t-decidir') dMontarLista(); if(t==='t-banca') montarBanca(); if(t==='t-comp') montarComp(); if(t==='t-compq') renderComp();
   var i,ts=document.querySelectorAll('.tela'); for(i=0;i<ts.length;i++) ts[i].classList.remove('on');
   document.getElementById(t).classList.add('on'); telaAtual=t;
   document.getElementById('hdN').textContent=NOMES[t]||'Curadoria'; document.getElementById('btVoltar').hidden=(t==='t-casa'); window.scrollTo(0,0);
@@ -1113,7 +1133,9 @@ var ICO={
   alerta:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg>',
   chapeu:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5 12 5l10 4.5L12 14 2 9.5z"/><path d="M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5M22 9.5V15"/></svg>',
   lapis:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19.5 7.5a1.4 1.4 0 0 0 0-2l-1-1a1.4 1.4 0 0 0-2 0L5 16l-1 4z"/><path d="M14.5 6.5l3 3"/></svg>',
-  ok:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+  ok:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  cadeado:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>',
+  alvo:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>'
 };
 
 /* ─── acesso: pedagogica ─── */
@@ -1132,7 +1154,12 @@ async function conferirAcesso(){
 }
 
 /* ─── dados reais ─── */
-var EIXOS_ROT={ argumentos:'Argumentos', intervencao:'Interven\u00e7\u00e3o', legislacao:'Legisla\u00e7\u00e3o', historia:'Hist\u00f3ria', especialistas:'Especialistas', atualidades:'Atualidades', literatura:'Literatura', filosofia:'Filosofia', cinema:'Cinema', ciencia:'Ci\u00eancia', culturapop:'Cultura pop' };
+var EIXOS_ROT={ argumentos:'Argumentos', intervencao:'Interven\u00e7\u00e3o', legislacao:'Legisla\u00e7\u00e3o', historia:'Hist\u00f3ria', especialistas:'Especialistas', atualidades:'Atualidades', literatura:'Literatura', filosofia:'Filosofia', cinema:'Cinema', ciencia:'Ci\u00eancia', culturapop:'Cultura pop', entender:'Entender', resumo:'Resumo', quiz:'Quiz' };
+var BLOCOS=['entender','resumo','quiz'], PARTES=['recorte','banca','armadilhas'], RECUS=['recusada','reposicao','substituida'];
+var ROT_P={ recorte:'Recorte', banca:'O que a banca espera', armadilhas:'Armadilhas' };
+var COMP=[['C1','Norma culta'],['C2','Tema e repert\u00f3rio'],['C3','Projeto de texto'],['C4','Coes\u00e3o'],['C5','Interven\u00e7\u00e3o']];
+var EXERC=[], compFoco=null;
+function ehBloco(e){ return BLOCOS.indexOf(e)>=0; }
 var TEMAS=[], MAT={}, AGENDA=[], DECIDIR={ fabrica:0, seus:0 }, temaFoco=null, agTema=null, agSemana=null;
 function porId(id){ for(var i=0;i<TEMAS.length;i++) if(TEMAS[i].id===id) return TEMAS[i]; return null; }
 function rot(e){ return EIXOS_ROT[e]||e; }
@@ -1157,12 +1184,12 @@ var CHAVES={ fonte:['fonte','cab','artigo','lei','marco','data','periodo','nome'
   como_usar:['como_usar','argumento','aplicacao','uso','como_aplicar','relevancia','uso_enem','aplicacao_enem','articulacao_enem','articulacao'] };
 function campo(f,lista){ if(!f||typeof f!=='object') return ''; for(var i=0;i<lista.length;i++){ var v=f[lista[i]]; if(typeof v==='string'&&v.trim()) return v.trim(); } return ''; }
 function estadoFicha(f){ return (f && typeof f==='object' && f.estado) ? f.estado : 'pendente'; }
-function contaFichas(t, es){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++){ if(ehEmperrado(ls[i])) continue; if(ls[i].estado==='criacao'||!ls[i].estado) continue; var fs=fichas(ls[i]); for(var j=0;j<fs.length;j++) if(estadoFicha(fs[j])===es) n++; } return n; }
-function eixosComPendente(t){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++){ if(ehEmperrado(ls[i])||ls[i].estado==='criacao'||!ls[i].estado) continue; var fs=fichas(ls[i]); for(var j=0;j<fs.length;j++) if(estadoFicha(fs[j])==='pendente'){ n++; break; } } return n; }
+function contaFichas(t, es){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++){ if(ehEmperrado(ls[i]) || ehBloco(ls[i].eixo)) continue; if(ls[i].estado==='criacao'||!ls[i].estado) continue; var fs=fichas(ls[i]); for(var j=0;j<fs.length;j++) if(estadoFicha(fs[j])===es) n++; } return n; }
+function eixosComPendente(t){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++){ if(ehEmperrado(ls[i])||ehBloco(ls[i].eixo)||ls[i].estado==='criacao'||!ls[i].estado) continue; var fs=fichas(ls[i]); for(var j=0;j<fs.length;j++) if(estadoFicha(fs[j])==='pendente'){ n++; break; } } return n; }
 function emperradosDe(t){ return linhas(t).filter(function(l){ return ehEmperrado(l); }); }
 function emperradosAbertos(t){ return linhas(t).filter(empAberto).length; }
 function eixosAprovados(t){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++) if(ls[i].estado==='aprovado' && escolhidos(t).indexOf(ls[i].eixo)>=0) n++; return n; }
-function fichasNoAr(t){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++){ if(ls[i].estado!=='aprovado') continue; var fs=fichas(ls[i]); for(var j=0;j<fs.length;j++) if(estadoFicha(fs[j])==='aprovada') n++; } return n; }
+function fichasNoAr(t){ var n=0, ls=linhas(t); for(var i=0;i<ls.length;i++){ if(ls[i].estado!=='aprovado' || ehBloco(ls[i].eixo)) continue; var fs=fichas(ls[i]); for(var j=0;j<fs.length;j++) if(estadoFicha(fs[j])==='aprovada') n++; } return n; }
 function entregueEm(t){ var d='', ls=linhas(t); for(var i=0;i<ls.length;i++){ var r=String(ls[i].revisado_em||''); if(r>d) d=r; } return d?fmt(d.slice(0,10)):'\u2014'; }
 function conferido(l,j){ var f=(Array.isArray(l.fontes)&&l.fontes[j])||{}; var q=f.conferido_por||'', d=f.conferido_em?fmt(String(f.conferido_em).slice(0,10)):''; return (q||d) ? (q+(q&&d?' \u00b7 ':'')+d) : 'sem registro'; }
 
@@ -1198,6 +1225,10 @@ async function carregar(){
     for(i=0;i<ag.length;i++) AGENDA.push({ id:ag[i].id, semana:String(ag[i].semana_de).slice(0,10), tema:ag[i].tema_id, automatico:ag[i].automatico===true });
     await carregarPropostos();
   }catch(e){ console.warn('[pedagogica carregar]', e); }
+  try{
+    var r5 = await dbFetch(SUPABASE_URL+'/rest/v1/materiais?select=id,nome,competencia,estado,publicado,conteudo_json&tipo=eq.exerc&origem=eq.redaon&turma_id=is.null&order=criado_em.asc', {});
+    EXERC = r5.ok ? await r5.json() : [];
+  }catch(e){ console.warn('[pedagogica exercicios]', e); }
   mostrar(telaAtual);
 }
 
@@ -1216,25 +1247,28 @@ function montarCasa(){
   document.getElementById('avisos').innerHTML=av;
 
   var aLer=0, temasLer=0, emp=0;
-  for(i=0;i<TEMAS.length;i++){ var p=contaFichas(TEMAS[i],'pendente'); if(p){ aLer+=p; temasLer++; } emp+=emperradosAbertos(TEMAS[i]); }
+  for(i=0;i<TEMAS.length;i++){ var p=contaFichas(TEMAS[i],'pendente')+pendBlocos(TEMAS[i]); if(p){ aLer+=p; temasLer++; } emp+=emperradosAbertos(TEMAS[i]); }
   var vaga=null, ss=semanas(); for(i=0;i<ss.length;i++) if(!agendaDe(ss[i])){ vaga=ss[i]; break; }
   var nd=DECIDIR.fabrica+DECIDIR.seus, h='';
   h+='<button class="tarefa'+(nd?'':' zero')+'" onclick="abrirDecidir()"><span class="num">'+nd+'</span><span class="cp"><span class="a">Decidir temas</span>'
     +'<span class="b">'+(nd? nd+' esperando sua decis\u00e3o \u00b7 '+DECIDIR.fabrica+' da F\u00e1brica, '+DECIDIR.seus+(DECIDIR.seus===1?' seu':' seus')+'. Aprovar j\u00e1 marca os eixos.' : 'Nenhum tema esperando decis\u00e3o.')+'</span></span><span class="seta">&#8250;</span></button>';
   h+='<button class="tarefa'+(aLer||emp?'':' zero')+'" onclick="ir(\'t-lista\')"><span class="num">'+(aLer||(emp?ICO.alerta:'0'))+'</span><span class="cp"><span class="a">Aprovar materiais de apoio</span>'
-    +'<span class="b">'+(aLer? aLer+' fichas a ler em '+temasLer+(temasLer===1?' tema':' temas') : 'Nada a ler')+(emp? ' \u00b7 '+emp+(emp===1?' emperrado a decidir':' emperrados a decidir'):'')+'</span></span><span class="seta">&#8250;</span></button>';
+    +'<span class="b">'+(aLer? aLer+' para ler em '+temasLer+(temasLer===1?' tema':' temas') : 'Nada a ler')+(emp? ' \u00b7 '+emp+(emp===1?' emperrado a decidir':' emperrados a decidir'):'')+'</span></span><span class="seta">&#8250;</span></button>';
   h+='<button class="tarefa" onclick="ir(\'t-semanas\')"><span class="num">'+ICO.calendario+'</span><span class="cp"><span class="a">Programa\u00e7\u00e3o das semanas</span>'
     +'<span class="b">'+(vaga? 'Pr\u00f3xima data sem tema: segunda, '+fmt(vaga) : 'As pr\u00f3ximas seis semanas t\u00eam tema.')+'</span></span><span class="seta">&#8250;</span></button>';
+  var pq=0, aq=0; for(i=0;i<COMP.length;i++){ pq+=contaQ(COMP[i][0],'pendente'); aq+=contaQ(COMP[i][0],'aprovada'); }
+  h+='<button class="tarefa'+(pq?'':' zero')+'" onclick="ir(\'t-comp\')"><span class="num">'+(pq||ICO.alvo)+'</span><span class="cp"><span class="a">Exerc\u00edcios das compet\u00eancias</span>'
+    +'<span class="b">'+(pq? pq+(pq===1?' quest\u00e3o para ler':' quest\u00f5es para ler') : 'Nada a ler')+' \u00b7 '+aq+(aq===1?' aprovada':' aprovadas')+' no banco</span></span><span class="seta">&#8250;</span></button>';
   document.getElementById('tarefas').innerHTML=h;
 }
 
 /* ═══ APROVAR · LISTA ═══ */
 function montarLista(){
   var h='', i;
-  for(i=0;i<TEMAS.length;i++){ var t=TEMAS[i], p=contaFichas(t,'pendente'), emp=emperradosAbertos(t);
+  for(i=0;i<TEMAS.length;i++){ var t=TEMAS[i], p=contaFichas(t,'pendente')+pendBlocos(t), emp=emperradosAbertos(t);
     if(!p && !emp) continue;
-    var ne=eixosComPendente(t);
-    var b = (p? p+(p===1?' ficha a ler':' fichas a ler')+' em '+ne+(ne===1?' eixo':' eixos') : 'tudo lido');
+    var ne=eixosComPendente(t)+BLOCOS.filter(function(b){ var lb=blocoLinha(t,b); return lb && itensB(lb).some(function(x){ return x.estado==='pendente'; }); }).length;
+    var b = (p? p+' para ler em '+ne+(ne===1?' parte':' partes') : 'tudo lido');
     if(emp) b += ' \u00b7 '+emp+(emp===1?' emperrado a decidir':' emperrados a decidir');
     b += ' \u00b7 entregue em '+entregueEm(t);
     h+='<button class="tarefa" onclick="abrirTema(\''+t.id+'\')"><span class="num">'+(p||ICO.alerta)+'</span><span class="cp">'
@@ -1247,7 +1281,7 @@ function montarLista(){
 function abrirTema(id){ temaFoco=id; renderTema(); ir('t-tema'); }
 function renderTema(){
   var t=porId(temaFoco); if(!t) return; var i,j;
-  var h='<span class="selo">Entregue pelo ADM - F\u00e1brica em '+entregueEm(t)+'</span><div class="enun">'+esc(t.titulo)+'</div>';
+  var h='<span class="selo">Entregue pelo ADM - F\u00e1brica em '+entregueEm(t)+'</span><div class="enun">'+esc(t.titulo)+'</div>'+faixaTema(t);
   var emps=emperradosDe(t);
   for(i=0;i<emps.length;i++){ var em=emps[i], dec=em.revisao_json.decidido;
     if(dec){
@@ -1259,8 +1293,9 @@ function renderTema(){
     }
   }
 
-  h+='<div class="sec" style="margin-top:1.4rem">Leia e decida, ficha a ficha</div>';
-  var ls=linhas(t).filter(function(l){ return !ehEmperrado(l) && l.estado && l.estado!=='criacao'; });
+  h+='<div class="sec" style="margin-top:1.4rem">1 \u00b7 Entender</div>'+cardEntender(t);
+  h+='<div class="sec" style="margin-top:1.4rem">2 \u00b7 Material de apoio</div>';
+  var ls=linhas(t).filter(function(l){ return !ehEmperrado(l) && l.estado && l.estado!=='criacao' && !ehBloco(l.eixo); });
   if(!ls.length) h+='<div class="vazio">Nenhum eixo entregue ainda.</div>';
   for(i=0;i<ls.length;i++){ var ex=ls[i], fs=fichas(ex);
     var apr=0, rec=0, pend=0, rep=0, fh='';
@@ -1305,20 +1340,22 @@ function renderTema(){
       : '<span class="pin '+(apr?'ok':'neutro')+'">'+(apr?apr+' no ar':'nada no ar')+(rep?' \u00b7 \u21BB '+rep+' em reposi\u00e7\u00e3o':'')+(rec?' \u00b7 '+rec+' recusada'+(rec>1?'s':''):'')+'</span>';
     var fora = escolhidos(t).indexOf(ex.eixo)<0 ? ' <span class="pin neutro">fora da encomenda</span>' : '';
     var notaGab = ehGab(ex.eixo) ? '<div class="gabNota"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>'+(ex.eixo==='argumentos' ? 'Gabarito do tema. O aluno n\u00e3o v\u00ea estes eixos: a Reescrita escolhe daqui o argumento de cada par\u00e1grafo. Aprove um a um.' : 'Gabarito do tema. A Reescrita monta a proposta com 1 agente + 1 instrumento + 1 detalhamento daqui. A biblioteca \u00e9 uma ficha s\u00f3: aprovar ou pedir reposi\u00e7\u00e3o com o motivo.')+'</span></div>' : '';
-    h+='<div class="card'+((!pend&&apr)?' ok':'')+(ehGab(ex.eixo)?' gab':'')+'">'
+    h+='<div class="card'+((!pend&&apr)?' ok':'')+(ehGab(ex.eixo)?' gab':'')+'" id="ex-'+ex.eixo+'">'
       +'<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="ct eixo">'+esc(rot(ex.eixo))+'</span>'+fora+pin+'</div>'+notaGab
       +'<div style="margin-top:.4rem">'+fh+'</div>'
       +(rec&&!pend ? '<div class="repor"><button class="btn g sm" onclick="abrirReposicao(\''+ex.id+'\')">Pedir reposi\u00e7\u00e3o do que foi recusado ('+rec+')</button></div>' : '')
       +'</div>';
   }
 
-  var pend2=contaFichas(t,'pendente'), emp=emperradosAbertos(t);
-  if(ls.length && !pend2 && !emp){
+  h+='<div class="sec" style="margin-top:1.4rem">3 \u00b7 Atividades</div>'+cardResumo(t)+cardQuiz(t);
+  var pend2=contaFichas(t,'pendente')+pendBlocos(t), emp=emperradosAbertos(t);
+  if((ls.length || BLOCOS.some(function(bb){ return blocoLinha(t,bb); })) && !pend2 && !emp){
     var apr2=contaFichas(t,'aprovada'), rec2=contaFichas(t,'recusada');
-    h+='<div class="avisoOk"><span class="ic">'+ICO.chapeu+'</span><span><span class="tp">Tudo lido.</span> '+apr2+(apr2===1?' ficha no ar':' fichas no ar')+' com o selo RedaON'+(rec2?' \u00b7 '+rec2+' recusada'+(rec2>1?'s':''):'')+'. Falta dizer em que semana o tema vai ao ar.</span></div>'
-      +'<div class="acoes"><button class="btn ok" onclick="abrirAgendar(\''+t.id+'\')">Agendar este tema</button></div>';
+    h+='<div class="avisoOk"><span class="ic">'+ICO.chapeu+'</span><span><span class="tp">Tudo lido.</span> '+apr2+(apr2===1?' ficha no ar':' fichas no ar')+' com o selo RedaON'+(rec2?' \u00b7 '+rec2+' recusada'+(rec2>1?'s':''):'')+'. '+(entOk(t)?'Falta dizer em que semana o tema vai ao ar.':'')+'</span></div>';
+    if(entOk(t)) h+='<div class="acoes"><button class="btn ok" onclick="abrirAgendar(\''+t.id+'\')">Agendar este tema</button></div>';
   }
-  h+='<div class="rodape">O que voc\u00ea n\u00e3o aprovar, o aluno n\u00e3o v\u00ea. Recusar corta s\u00f3 aquela informa\u00e7\u00e3o, e o motivo fica na ficha. A reposi\u00e7\u00e3o leva apenas o recusado \u2014 o aprovado nunca sai do ar \u2014 com os motivos que voc\u00ea j\u00e1 deu.</div>';
+  if(!entOk(t)) h+='<div class="aviso" style="margin-top:1rem"><span class="ic">'+ICO.cadeado+'</span><span class="mm"><span class="tp">Ainda n\u00e3o pode ser agendado.</span> O tema s\u00f3 vai para as semanas com o Entender aprovado nas tr\u00eas partes'+(blocoLinha(t,'entender')?' ('+entAprov(t)+' de 3 aprovadas).':', e ele ainda est\u00e1 na F\u00e1brica.')+'</span></div>';
+  h+='<div class="rodape">O que voc\u00ea n\u00e3o aprovar, o aluno n\u00e3o v\u00ea. Recusar corta s\u00f3 aquela informa\u00e7\u00e3o, e o motivo fica guardado. Quando uma ficha \u00e9 recusada, o que se apoiava nela trava e volta na reposi\u00e7\u00e3o. O quiz vai ao ar com pelo menos 5 quest\u00f5es aprovadas.</div>';
   document.getElementById('temaCorpo').innerHTML=h;
 }
 function linhaPorId(id){ for(var k in MAT) for(var e in MAT[k]) if(MAT[k][e].id===id) return MAT[k][e]; return null; }
@@ -1340,13 +1377,13 @@ async function decidirFicha(id,j,es){
   fs[j].estado=es; if(es==='aprovada') fs[j].motivo=null;
   try{ await gravarEixo(l); }catch(e){ fs[j]=JSON.parse(antes); toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); renderTema(); return; }
   toast(es==='aprovada' ? 'Aprovada. O aluno j\u00e1 v\u00ea, com o selo RedaON.' : 'Recusada. O aluno n\u00e3o ver\u00e1 esta informa\u00e7\u00e3o.');
-  renderTema();
+  await sincronizarTravas(porId(temaFoco)); renderTema();
 }
 async function desfazerFicha(id,j){
   var l=linhaPorId(id); if(!l) return; var fs=fichas(l), antes=JSON.stringify(fs[j]);
   fs[j].estado='pendente'; fs[j].motivo=null;
   try{ await gravarEixo(l); }catch(e){ fs[j]=JSON.parse(antes); toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); }
-  renderTema();
+  await sincronizarTravas(porId(temaFoco)); renderTema();
 }
 async function decidirEmp(id,acao){
   var l=linhaPorId(id); if(!l) return; var t=porId(temaFoco), uid=authGetUserId(), agora=new Date().toISOString();
@@ -1445,7 +1482,28 @@ async function confirmarGaveta(){
     var fs=fichas(recLinha), antes=JSON.stringify(fs[recFicha]); fs[recFicha].estado='recusada'; fs[recFicha].motivo=m;
     bt.disabled=true;
     try{ await gravarEixo(recLinha); }catch(e){ fs[recFicha]=JSON.parse(antes); bt.disabled=false; toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); return; }
-    bt.disabled=false; fecharGaveta(); toast('Recusada, com o motivo guardado. O aluno n\u00e3o ver\u00e1 esta informa\u00e7\u00e3o.'); renderTema(); return;
+    bt.disabled=false; fecharGaveta(); toast('Recusada, com o motivo guardado. O aluno n\u00e3o ver\u00e1 esta informa\u00e7\u00e3o.'); await sincronizarTravas(porId(temaFoco)); renderTema(); return;
+  }
+  if(modoGav==='recusaB' || modoGav==='recusaQ'){
+    var mb=document.getElementById('gavTexto').value.trim();
+    if(!mb){ toast('Escreva, fale ou escolha o motivo \u2014 ele fica guardado.'); return; }
+    bt.disabled=true;
+    if(modoGav==='recusaB'){
+      var itb=itemB(recLinha,recFicha), antB=JSON.stringify(itb); itb.estado='recusada'; itb.motivo=mb;
+      try{ await gravarBloco(recLinha); }catch(e){ Object.assign(itb, JSON.parse(antB)); bt.disabled=false; toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); return; }
+      bt.disabled=false; fecharGaveta(); toast('Recusada, com o motivo guardado. O aluno n\u00e3o ver\u00e1.'); renderTema(); return;
+    }
+    var qq=qsDe(recLinha)[recFicha], antQ=JSON.stringify(qq); qq.estado='recusada'; qq.motivo=mb;
+    try{ await gravarExerc(recLinha); }catch(e){ Object.assign(qq, JSON.parse(antQ)); bt.disabled=false; toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); return; }
+    bt.disabled=false; fecharGaveta(); toast('Recusada, com o motivo guardado. N\u00e3o entra no treino.'); renderComp(); return;
+  }
+  if(modoGav==='reposicaoB'){
+    var tB=porId(temaFoco), copiaB=JSON.stringify(itensB(repLinha)), nB=0;
+    itensB(repLinha).forEach(function(x){ if(x.estado==='recusada'){ x.estado='reposicao'; nB++; }
+      else if(x.estado==='travada'){ x.estado='reposicao'; x.motivo='A ficha-base foi recusada: '+refsRecusadas(tB,x.base).join(', ')+'.'; nB++; } });
+    bt.disabled=true;
+    try{ await gravarBloco(repLinha); }catch(e){ var vv=JSON.parse(copiaB); itensB(repLinha).forEach(function(x,k){ Object.assign(x, vv[k]); }); bt.disabled=false; toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); return; }
+    bt.disabled=false; fecharGaveta(); toast(nB+(nB===1?' item devolvido':' itens devolvidos')+' \u00e0 F\u00e1brica, cada um com o seu motivo.'); renderTema(); return;
   }
   if(modoGav==='reposicao'){
     var fs2=fichas(repLinha), copia=JSON.stringify(fs2), n=0;
@@ -1454,9 +1512,169 @@ async function confirmarGaveta(){
     try{ await gravarEixo(repLinha); }catch(e){ repLinha._f=JSON.parse(copia); bt.disabled=false; toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); return; }
     bt.disabled=false; fecharGaveta();
     toast(n+(n===1?' ficha devolvida':' fichas devolvidas')+' \u00e0 F\u00e1brica, cada uma com o seu motivo. As aprovadas seguem no ar.');
-    renderTema(); return;
+    await sincronizarTravas(porId(temaFoco)); renderTema(); return;
   }
 }
+
+/* ═══ v3-4 · FATIA C · Entender, resumo e quiz (por parte e por questão) + exercícios das competências ═══ */
+function lerObj(x){ if(x && typeof x==='object') return x; try{ var o=JSON.parse(String(x||'{}')); return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; } }
+function blocoLinha(t,b){ var l=(MAT[t.id]||{})[b]; return (l && l.estado && l.estado!=='criacao' && !ehEmperrado(l)) ? l : null; }
+function metaFontes(l){ if(!l.fontes || typeof l.fontes!=='object' || Array.isArray(l.fontes)) l.fontes={}; return l.fontes; }
+function partesEnt(l){ var fm=metaFontes(l), herd=(l.estado==='aprovado')?'aprovada':'pendente';
+  if(!fm.partes || typeof fm.partes!=='object') fm.partes={};
+  PARTES.forEach(function(p){ var x=fm.partes[p]; if(!x || typeof x!=='object') x=fm.partes[p]={ base:[], estado:herd, motivo:null }; if(!x.estado) x.estado=herd; if(!Array.isArray(x.base)) x.base=[]; });
+  return fm.partes; }
+function resMeta(l){ var fm=metaFontes(l); if(!fm.estado) fm.estado=(l.estado==='aprovado')?'aprovada':'pendente'; if(!Array.isArray(fm.base)) fm.base=[]; return fm; }
+function itensB(l){ if(l.eixo==='entender'){ var ps=partesEnt(l); return PARTES.map(function(p){ return ps[p]; }); }
+  if(l.eixo==='resumo') return [resMeta(l)];
+  return fichas(l).filter(function(q){ return q && typeof q==='object'; }); }
+function itemB(l,k){ if(l.eixo==='entender') return partesEnt(l)[k]; if(l.eixo==='resumo') return resMeta(l); return fichas(l)[k]; }
+function estadoBloco(l){ var es=itensB(l).map(function(x){ return x.estado; }).filter(function(e){ return e!=='substituida'; });
+  var apr=es.filter(function(e){ return e==='aprovada'; }).length, rep=es.filter(function(e){ return e==='reposicao'; }).length;
+  if(rep) return 'ajustes';
+  if(l.eixo==='entender') return apr===3 ? 'aprovado' : 'revisao';
+  if(l.eixo==='resumo') return apr ? 'aprovado' : 'revisao';
+  return apr>=5 ? 'aprovado' : 'revisao'; }
+function pedidosB(l){
+  if(l.eixo==='entender'){ var ps=partesEnt(l); return PARTES.filter(function(p){ return ps[p].estado==='reposicao'; }).map(function(p){ return { parte:p, motivo:ps[p].motivo||'' }; }); }
+  if(l.eixo==='resumo') return [{ parte:'resumo', motivo:resMeta(l).motivo||'' }];
+  var out=[], n=0; fichas(l).forEach(function(q){ if(!q || q.estado==='substituida') return; n++; if(q.estado==='reposicao') out.push({ questao:n, pergunta:q.pergunta||'', motivo:q.motivo||'' }); });
+  return out; }
+async function gravarBloco(l){
+  var est=estadoBloco(l), uid=authGetUserId(), agora=new Date().toISOString();
+  var corpo={ estado:est, revisado_por:uid, revisado_em:agora, revisao_json:(est==='ajustes' ? pedidosB(l) : null) };
+  if(l.eixo==='quiz') corpo.conteudo=JSON.stringify(fichas(l)); else corpo.fontes=l.fontes;
+  if(est==='aprovado'){ if(l.estado!=='aprovado'){ corpo.aprovado_por=uid; corpo.aprovado_em=agora; } }
+  else { corpo.aprovado_por=null; corpo.aprovado_em=null; }
+  var res=await dbFetch(SUPABASE_URL+'/rest/v1/material_apoio?id=eq.'+encodeURIComponent(l.id), { method:'PATCH', body:JSON.stringify(corpo) });
+  if(!res.ok){ var txt=await res.text(); throw new Error(txt||('HTTP '+res.status)); }
+  l.estado=est; l.revisao_json=corpo.revisao_json; l.revisado_em=agora;
+}
+function pendBlocos(t){ var n=0; BLOCOS.forEach(function(b){ var l=blocoLinha(t,b); if(!l) return; itensB(l).forEach(function(x){ if(x.estado==='pendente') n++; }); }); return n; }
+function entAprov(t){ var l=blocoLinha(t,'entender'); if(!l) return 0; var ps=partesEnt(l); return PARTES.filter(function(p){ return ps[p].estado==='aprovada'; }).length; }
+function entOk(t){ var l=blocoLinha(t,'entender'); return !!(l && l.estado==='aprovado'); }
+/* base: "eixo:N" (N-ésima ficha, contando de 1) · "argumentos:ARG-1" · "intervencao:INS-3" · "enunciado" */
+function rotRef(r){ r=String(r); if(r==='enunciado') return 'Enunciado'; var m=/^([a-z]+):(.+)$/.exec(r); if(!m) return r; return (m[1]==='argumentos'||m[1]==='intervencao') ? m[2] : rot(m[1])+' '+m[2]; }
+function refsRecusadas(t, base){ var out=[];
+  (Array.isArray(base)?base:[]).forEach(function(r){ r=String(r); var m=/^([a-z]+):(.+)$/.exec(r); if(!m) return; var e=m[1], x=m[2].trim();
+    var l=(MAT[t.id]||{})[e]; if(!l) return; var fs=fichas(l);
+    if(e==='argumentos'){ var a=fs.filter(function(f){ return f && String(f.ref||'').trim()===x; })[0]; if(a && RECUS.indexOf(estadoFicha(a))>=0) out.push(rotRef(r)); return; }
+    if(e==='intervencao'){ if(/^GER-/i.test(x)) return; if(fs.length && !fs.some(function(f){ return RECUS.indexOf(estadoFicha(f))<0; })) out.push(rotRef(r)); return; }
+    var f=fs[parseInt(x,10)-1]; if(f && RECUS.indexOf(estadoFicha(f))>=0) out.push(rotRef(r)); });
+  return out; }
+async function sincronizarTravas(t){ if(!t) return;
+  for(var i=0;i<BLOCOS.length;i++){ var l=blocoLinha(t,BLOCOS[i]); if(!l) continue; var mudou=false;
+    itensB(l).forEach(function(x){ var rec=refsRecusadas(t,x.base).length;
+      if(rec && (x.estado==='pendente' || x.estado==='aprovada')){ x.estado='travada'; mudou=true; }
+      else if(!rec && x.estado==='travada'){ x.estado='pendente'; mudou=true; } });
+    if(mudou){ try{ await gravarBloco(l); }catch(e){ console.warn('[travas]', e); } } } }
+function irAoEixo(e){ var el=document.getElementById('ex-'+e); if(el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }
+function chipsBase(t, base){ if(!Array.isArray(base) || !base.length) return '';
+  return '<div class="baseB">Vem de'+base.map(function(r){ var m=/^([a-z]+):/.exec(String(r)), x=refsRecusadas(t,[r]).length;
+    return m ? '<button class="chipB'+(x?' x':'')+'" onclick="irAoEixo(\''+m[1]+'\')">'+esc(rotRef(r))+'</button>' : '<span class="chipB">'+esc(rotRef(r))+'</span>'; }).join('')+'</div>'; }
+function clsItem(e){ return 'ficha'+(e==='aprovada'?' aprovada':((e==='recusada'||e==='reposicao'||e==='travada')?' recusada':'')); }
+function kJs(k){ return typeof k==='number' ? String(k) : '\''+k+'\''; }
+function veredB(l,k,it,fnA,fnR,fnD){ var id='\''+l.id+'\'', kk=kJs(k), e=it.estado;
+  if(e==='travada') return '<div class="veredito trav">'+ICO.cadeado+'Travada: a ficha-base foi recusada. Volta na reposi\u00e7\u00e3o.</div>';
+  if(e==='aprovada') return '<div class="veredito ap">'+ICO.chapeu+'Aprovada<button class="desf" onclick="'+fnD+'('+id+','+kk+')">desfazer</button></div>';
+  if(e==='recusada') return '<div class="veredito rec">Recusada \u2014 motivo: '+esc(it.motivo||'')+'<button class="desf" onclick="'+fnD+'('+id+','+kk+')">desfazer</button></div>';
+  if(e==='reposicao') return '<div class="veredito rep">\u21BB Reposi\u00e7\u00e3o pedida \u00e0 F\u00e1brica \u2014 motivo: '+esc(it.motivo||'')+'</div>';
+  return '<div class="fAcs"><button class="btn sm" onclick="'+fnA+'('+id+','+kk+',\'aprovada\')">Aprovar</button><button class="btn rec sm" onclick="'+fnR+'('+id+','+kk+')">Recusar</button></div>'; }
+function cabCard(nome, pin, ok, eixo){ return '<div class="card'+(ok?' ok':'')+'" id="ex-'+eixo+'"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span class="ct eixo">'+nome+'</span>'+pin+'</div>'; }
+function blocoAusente(t,b,nome){ var le=(MAT[t.id]||{})[b];
+  var tx = (le && ehEmperrado(le)) ? 'Emperrou na F\u00e1brica. A decis\u00e3o est\u00e1 no aviso do alto.' : 'Em prepara\u00e7\u00e3o pela F\u00e1brica.'+(b==='entender'?' Sem ele o tema n\u00e3o pode ser agendado.':'');
+  return cabCard(nome,'<span class="pin neutro">ainda n\u00e3o chegou</span>',false,b)+'<div class="cm">'+tx+'</div></div>'; }
+function repBt(l,n){ return '<div class="repor"><button class="btn g sm" onclick="abrirReposicaoB(\''+l.id+'\')">Pedir reposi\u00e7\u00e3o do que foi recusado ('+n+')</button></div>'; }
+function cardEntender(t){ var l=blocoLinha(t,'entender'); if(!l) return blocoAusente(t,'entender','Entender');
+  var ps=partesEnt(l), tx=lerObj(l.conteudo), h='', apr=0, pend=0, rec=0;
+  PARTES.forEach(function(p){ var it=ps[p], e=it.estado; if(e==='aprovada') apr++; else if(e==='pendente') pend++; else if(e==='recusada'||e==='travada') rec++;
+    h+='<div class="'+clsItem(e)+'"><span class="rotZ">'+ROT_P[p]+'</span><div class="pd">'+esc(tx[p]||'')+'</div>'+chipsBase(t,it.base)+veredB(l,p,it,'decidirB','abrirRecusaB','desfazerB')+'</div>'; });
+  var pin = apr===3 ? '<span class="pin ok">'+ICO.chapeu+' aprovado</span>' : '<span class="pin neutro">'+apr+' de 3 aprovadas</span>';
+  return cabCard('Entender',pin,apr===3,'entender')+h+(rec&&!pend?repBt(l,rec):'')+'</div>'; }
+function cardResumo(t){ var l=blocoLinha(t,'resumo'); if(!l) return blocoAusente(t,'resumo','Resumo');
+  var it=resMeta(l), tx=lerObj(l.conteudo), e=it.estado, txt=tx.texto||(typeof l.conteudo==='string'&&l.conteudo.charAt(0)!=='{'?l.conteudo:'');
+  var pin = e==='aprovada' ? '<span class="pin ok">'+ICO.chapeu+' no ar</span>' : '<span class="pin neutro">'+(e==='pendente'?'a ler':(e==='travada'?'travado':(e==='reposicao'?'em reposi\u00e7\u00e3o':'recusado')))+'</span>';
+  return cabCard('Resumo',pin,e==='aprovada','resumo')+'<div class="'+clsItem(e)+'"><div class="pd" style="font-weight:500">'+esc(txt)+'</div>'+chipsBase(t,it.base)+veredB(l,'r',it,'decidirB','abrirRecusaB','desfazerB')+'</div>'
+    +((e==='recusada'||e==='travada')?repBt(l,1):'')+'</div>'; }
+function altsHTML(alts, certa){ return (Array.isArray(alts)?alts:[]).map(function(a,k){ return '<div class="altB'+(k===certa?' c':'')+'">'+String.fromCharCode(97+k)+') '+esc(a)+'</div>'; }).join(''); }
+function cardQuiz(t){ var l=blocoLinha(t,'quiz'); if(!l) return blocoAusente(t,'quiz','Quiz');
+  var qs=fichas(l), h='', n=0, apr=0, pend=0, rec=0;
+  qs.forEach(function(q,j){ if(!q || q.estado==='substituida') return; n++; var e=estadoFicha(q);
+    if(e==='aprovada') apr++; else if(e==='pendente') pend++; else if(e==='recusada'||e==='travada') rec++;
+    h+='<div class="'+clsItem(e)+'"><span class="rotZ">Quest\u00e3o '+n+'</span><div class="pd">'+esc(q.pergunta||q.enunciado||'')+'</div>'+altsHTML(q.alternativas||q.opcoes, (q.correta!==undefined?q.correta:q.resposta))
+      +(q.explicacao?'<div class="pz"><span class="rotZ">Por qu\u00ea</span>'+esc(q.explicacao)+'</div>':'')+chipsBase(t,q.base)+veredB(l,j,q,'decidirB','abrirRecusaB','desfazerB')+'</div>'; });
+  var pin = apr>=5 ? '<span class="pin ok">'+ICO.chapeu+' no ar \u00b7 '+apr+' de '+n+'</span>' : '<span class="pin neutro">'+apr+' de '+n+' aprovadas \u00b7 vai ao ar com 5</span>';
+  return cabCard('Quiz',pin,apr>=5&&!pend,'quiz')+h+(rec&&!pend?repBt(l,rec):'')+'</div>'; }
+function faixaTema(t){
+  var la=contaFichas(t,'aprovada'), lt=la+contaFichas(t,'pendente')+contaFichas(t,'recusada')+contaFichas(t,'reposicao');
+  var le=blocoLinha(t,'entender'), lr=blocoLinha(t,'resumo'), lq=blocoLinha(t,'quiz');
+  var qa=0, qn=0; if(lq) fichas(lq).forEach(function(q){ if(!q || q.estado==='substituida') return; qn++; if(estadoFicha(q)==='aprovada') qa++; });
+  function sp(ok,tx){ return '<span'+(ok?' class="ok"':'')+'>'+tx+'</span>'; }
+  return '<div class="faixaT">'+sp(entOk(t),'Entender '+(le?entAprov(t)+'/3':'\u2014'))+sp(lt&&la===lt,'Fichas '+la+'/'+lt)
+    +sp(lr&&lr.estado==='aprovado','Resumo'+(lr?'':' \u2014'))+sp(qa>=5,'Quiz '+(lq?qa+'/'+qn:'\u2014'))+'</div>'; }
+async function decidirB(id,k,es){ var l=linhaPorId(id); if(!l) return; var t=porId(temaFoco), it=itemB(l,k), antes=JSON.stringify(it);
+  if(es==='aprovada' && refsRecusadas(t,it.base).length){ toast('Travada: a ficha-base foi recusada.'); await sincronizarTravas(t); renderTema(); return; }
+  it.estado=es; if(es==='aprovada') it.motivo=null;
+  try{ await gravarBloco(l); }catch(e){ Object.assign(it, JSON.parse(antes)); toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); renderTema(); return; }
+  toast(l.eixo==='quiz' ? 'Quest\u00e3o aprovada.' : 'Aprovado.'); renderTema(); }
+async function desfazerB(id,k){ var l=linhaPorId(id); if(!l) return; var it=itemB(l,k), antes=JSON.stringify(it);
+  it.estado='pendente'; it.motivo=null;
+  try{ await gravarBloco(l); }catch(e){ Object.assign(it, JSON.parse(antes)); toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); }
+  await sincronizarTravas(porId(temaFoco)); renderTema(); }
+function prepGavMotivo(tit, quais, bt){
+  document.getElementById('gavT').textContent=tit;
+  document.getElementById('gavS').textContent='O motivo fica guardado \u2014 voc\u00ea n\u00e3o precisa lembrar depois. Se pedir reposi\u00e7\u00e3o, \u00e9 este texto que a F\u00e1brica vai ler.';
+  document.getElementById('gavQuais').innerHTML=quais; document.getElementById('btGav').textContent=bt;
+  var ps=document.querySelectorAll('.pillM'); for(var i=0;i<ps.length;i++) ps[i].classList.remove('sel');
+  document.getElementById('gavTexto').value=''; document.getElementById('micDica').textContent=''; document.getElementById('micDica').classList.remove('on');
+  zonasGaveta(['gavS','gavQuais','zonaMotivo','gavAcoes']); abrirGaveta(); }
+function abrirRecusaB(id,k){ var l=linhaPorId(id); if(!l) return; modoGav='recusaB'; recLinha=l; recFicha=k; var it=itemB(l,k), q='';
+  if(l.eixo==='entender') q='<b>'+ROT_P[k]+'</b><br>'+esc(lerObj(l.conteudo)[k]||'');
+  else if(l.eixo==='resumo') q='<b>Resumo do tema</b>';
+  else q='<b>Quest\u00e3o</b><br>'+esc(it.pergunta||'');
+  prepGavMotivo(l.eixo==='quiz'?'Por que recusar esta quest\u00e3o?':'Por que recusar?', q, 'Recusar com este motivo'); }
+function abrirReposicaoB(id){ var l=linhaPorId(id); if(!l) return; modoGav='reposicaoB'; repLinha=l; var t=porId(temaFoco), lin=[], n=0;
+  if(l.eixo==='entender'){ var ps=partesEnt(l); PARTES.forEach(function(p){ var x=ps[p]; if(x.estado==='recusada'||x.estado==='travada') lin.push('<b>'+ROT_P[p]+'</b> \u2014 '+esc(x.estado==='travada'?'a ficha-base foi recusada':(x.motivo||''))); }); }
+  else if(l.eixo==='resumo'){ var r=resMeta(l); lin.push('<b>Resumo</b> \u2014 '+esc(r.estado==='travada'?'a ficha-base foi recusada':(r.motivo||''))); }
+  else fichas(l).forEach(function(q){ if(!q || q.estado==='substituida') return; n++; if(q.estado==='recusada'||q.estado==='travada') lin.push('<b>Quest\u00e3o '+n+'</b> \u2014 '+esc(q.estado==='travada'?'a ficha-base foi recusada':(q.motivo||''))); });
+  document.getElementById('gavT').textContent='Pedir reposi\u00e7\u00e3o \u00e0 F\u00e1brica';
+  document.getElementById('gavS').textContent='S\u00f3 o recusado volta a produzir, com o motivo que voc\u00ea j\u00e1 deu. O que se apoiava em ficha recusada volta junto.';
+  document.getElementById('gavQuais').innerHTML=lin.join('<br>');
+  document.getElementById('btGav').textContent='Devolver '+lin.length+(lin.length===1?' item':' itens')+' \u00e0 F\u00e1brica';
+  zonasGaveta(['gavS','gavQuais','gavAcoes']); abrirGaveta(); }
+/* ─── exercícios das competências ─── */
+function qsDe(r){ return (r && r.conteudo_json && Array.isArray(r.conteudo_json.questoes)) ? r.conteudo_json.questoes : []; }
+function rowPorId(id){ for(var i=0;i<EXERC.length;i++) if(EXERC[i].id===id) return EXERC[i]; return null; }
+function contaQ(c,es){ var n=0; EXERC.forEach(function(r){ if(r.competencia!==c) return; qsDe(r).forEach(function(q){ if((q.estado||'pendente')===es) n++; }); }); return n; }
+async function gravarExerc(r){ var qs=qsDe(r), pend=qs.filter(function(q){ return (q.estado||'pendente')==='pendente'; }).length, apr=qs.filter(function(q){ return q.estado==='aprovada'; }).length;
+  var corpo={ conteudo_json:r.conteudo_json, estado:(!pend && apr)?'aprovado':'revisao', publicado:apr>0, revisado_por:authGetUserId(), revisado_em:new Date().toISOString() };
+  var res=await dbFetch(SUPABASE_URL+'/rest/v1/materiais?id=eq.'+encodeURIComponent(r.id), { method:'PATCH', body:JSON.stringify(corpo) });
+  if(!res.ok){ var txt=await res.text(); throw new Error(txt||('HTTP '+res.status)); }
+  r.estado=corpo.estado; r.publicado=corpo.publicado; }
+function montarComp(){ var h='';
+  COMP.forEach(function(c){ var p=contaQ(c[0],'pendente'), a=contaQ(c[0],'aprovada'), rc=contaQ(c[0],'recusada'), tot=p+a+rc;
+    h+='<button class="tarefa'+(p?'':' zero')+'" onclick="abrirComp(\''+c[0]+'\')"><span class="num">'+p+'</span><span class="cp"><span class="a">'+c[0]+' \u00b7 '+c[1]+'</span>'
+      +'<span class="b">'+(tot ? a+(a===1?' aprovada':' aprovadas')+(p?' \u00b7 '+p+' para ler':'')+(rc?' \u00b7 '+rc+(rc===1?' recusada':' recusadas'):'') : 'Nenhuma quest\u00e3o ainda. Elas chegam pela F\u00e1brica.')+'</span></span><span class="seta">&#8250;</span></button>'; });
+  document.getElementById('compLista').innerHTML=h; }
+function abrirComp(c){ compFoco=c; ir('t-compq'); }
+function renderComp(){ var c=null; COMP.forEach(function(x){ if(x[0]===compFoco) c=x; }); if(!c) return;
+  var h='<span class="selo">Banco geral \u00b7 sem tema</span><div class="enun">'+c[0]+' \u00b7 '+c[1]+'</div>', n=0;
+  EXERC.forEach(function(r){ if(r.competencia!==c[0]) return; qsDe(r).forEach(function(q,j){ n++; var e=q.estado||'pendente';
+    var fontes=(Array.isArray(q.fontes)?q.fontes:[]).filter(function(f){ return f && /^https?:\/\//.test(String(f.url||'')); });
+    h+='<div class="card"><div class="'+clsItem(e)+'"><span class="rotZ">Quest\u00e3o '+n+'</span><div class="pd">'+esc(q.enunciado||'')+'</div>'+altsHTML(q.alternativas, q.correta)
+      +(q.comentario?'<div class="pz"><span class="rotZ">Coment\u00e1rio para o aluno</span>'+esc(q.comentario)+'</div>':'')
+      +(fontes.length?'<div class="conf">Fonte: '+fontes.map(function(f){ return '<a href="'+esc(f.url)+'" target="_blank" rel="noopener">abrir</a>'+(f.conferido_por?' \u00b7 conferida por <b>'+esc(f.conferido_por)+'</b>':''); }).join(' \u00b7 ')+'</div>':'')
+      +veredB({ id:r.id },j,{ estado:e, motivo:q.motivo },'decidirQ','abrirRecusaQ','desfazerQ')+'</div></div>'; }); });
+  if(!n) h+='<div class="vazio" style="margin-top:1rem">Nenhuma quest\u00e3o de '+c[0]+' ainda. Elas chegam pela F\u00e1brica.</div>';
+  h+='<div class="rodape">O que voc\u00ea aprovar entra no treino di\u00e1rio do aluno. O que recusar n\u00e3o aparece, e o motivo fica guardado.</div>';
+  document.getElementById('compCorpo').innerHTML=h; }
+async function decidirQ(id,j,es){ var r=rowPorId(id); if(!r) return; var q=qsDe(r)[j], antes=JSON.stringify(q);
+  q.estado=es; if(es!=='recusada') q.motivo=null;
+  try{ await gravarExerc(r); }catch(e){ Object.assign(q, JSON.parse(antes)); toast('N\u00e3o consegui gravar. Tente de novo.'); console.warn(e); }
+  renderComp(); }
+async function desfazerQ(id,j){ await decidirQ(id,j,'pendente'); }
+function abrirRecusaQ(id,j){ var r=rowPorId(id); if(!r) return; modoGav='recusaQ'; recLinha=r; recFicha=j;
+  prepGavMotivo('Por que recusar esta quest\u00e3o?', '<b>Quest\u00e3o</b><br>'+esc(qsDe(r)[j].enunciado||''), 'Recusar com este motivo'); }
 
 /* ═══ SEMANAS ═══ */
 var ORDENS={ naousados:'N\u00e3o usados primeiro', alfabetica:'Ordem alfab\u00e9tica', usados:'Utilizados, por data de uso', entrada:'Data de entrada na RedaON' };
@@ -1486,6 +1704,7 @@ function montarSemanas(){
       +'<span class="pin '+(n?'ok':(t?'esp':'neutro'))+'">'+(n?ICO.chapeu+' '+n+' fichas no ar':(t?'sem material aprovado':'sem tema'))+'</span></div>'
       +(t?'<div class="ct" style="margin-top:.4rem">'+esc(t.titulo)+'</div>':'<div class="cm" style="margin-top:.4rem">Nenhum tema programado</div>')
       +(a&&a.automatico?'<div class="cm">Repetido pela rotina de segunda \u2014 sem tema novo aprovado.</div>':'')
+      +(t&&!entOk(t)?'<div class="cm" style="color:var(--orange)">Falta o Entender aprovado. Se n\u00e3o chegar a tempo, o tema vai ao ar sem ele.</div>':'')
       /* Tirar desta semana (11/09/2026): só a linha da agenda sai; tema e fichas ficam. Confirmação em linha. */
       +(t&&!(a&&a.automatico)?'<div class="tirar" id="tirar-'+lista[i].d+'"><button class="btn g sm" onclick="pedirTirar(\''+lista[i].d+'\')">Tirar desta semana</button></div>':'')
       +'</div>';
@@ -1494,6 +1713,8 @@ function montarSemanas(){
   var h2='', ordenados=ordenar(TEMAS.filter(function(x){ return eixosAprovados(x)>0; }));
   document.getElementById('ordemAtual').textContent=ORDENS[ordemAtual];
   for(i=0;i<ordenados.length;i++){ var tt=ordenados[i], ea=eixosAprovados(tt), uso=rotuloUso(tt.id);
+    if(!entOk(tt)){ h2+='<button class="tarefa zero" onclick="abrirTema(\''+tt.id+'\')"><span class="num">'+ICO.cadeado+'</span><span class="cp"><span class="a">'+esc(tt.titulo)+'</span>'
+      +'<span class="b">'+(blocoLinha(tt,'entender') ? 'Falta aprovar o Entender \u00b7 '+entAprov(tt)+' de 3 partes aprovadas' : 'Falta o Entender: ainda est\u00e1 na F\u00e1brica')+'</span></span><span class="seta">&#8250;</span></button>'; continue; }
     h2+='<button class="tarefa'+(uso?' usado':'')+'" onclick="abrirAgendar(\''+tt.id+'\')"><span class="num">'+(uso?ICO.calendario:ea)+'</span><span class="cp"><span class="a">'+esc(tt.titulo)+'</span>'
       +'<span class="b">'+ea+' de '+escolhidos(tt).length+' eixos com material aprovado \u00b7 '+fichasNoAr(tt)+' fichas no ar \u00b7 entrou em '+fmt(entrou(tt))+(uso?'<br><span class="uso">'+esc(uso)+'</span>':'')+'</span></span><span class="seta">&#8250;</span></button>';
   }
@@ -1533,6 +1754,7 @@ async function tirarDaSemana(semana){
 /* ═══ AGENDAR ═══ */
 function abrirAgendar(id){
   agTema=porId(id); if(!agTema) return; agSemana=null;
+  if(!entOk(agTema)){ abrirTema(agTema.id); toast('Aprove o Entender antes de agendar.'); return; }
   var ea=eixosAprovados(agTema), alvo=escolhidos(agTema).length, n=fichasNoAr(agTema), emp=linhas(agTema).filter(empAberto);
   var h='<span class="selo">Com material aprovado</span><div class="enun">'+esc(agTema.titulo)+'</div>'
     +'<div class="linhas"><div class="linha"><div class="k">Categoria</div><div class="v">'+esc(agTema.categoria||'\u2014')+'</div></div>'
@@ -1557,6 +1779,7 @@ function verComoAluno(){ if(agTema) window.open('hub-preparacao.html?tema='+enco
 var agConfirmaDup=null;
 async function gravar(){
   if(!agSemana){ toast('Escolha a semana primeiro.'); return; }
+  if(!entOk(agTema)){ toast('Aprove o Entender antes de agendar.'); return; }
   var bt=document.getElementById('btGravar');
   /* Duplicidade (11/09/2026): o mesmo tema já em outra semana pede um segundo toque antes de gravar de novo */
   var outras=AGENDA.filter(function(x){ return x.tema===agTema.id && x.semana!==agSemana; });
