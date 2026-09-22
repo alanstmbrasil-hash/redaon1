@@ -4,7 +4,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Você ON</title>
-<!-- v2-0 (22/09/2026): Você ON com dois modos, Vídeos (claquete) e RedaCast (microfone). Estrutura aprovada pelo Alan no mockup v3:
+<!-- v2-2 (22/09/2026): capa do episódio usa a versão larga do tema (arquivo -larga) quando existe.
+     v2-1 (22/09/2026): arte definitiva do RedaCast (os dois robôs da RedaON): cena no player e no cabeçalho do modo, selo no canto dos cartões e no mini-player.
+     v2-0 (22/09/2026): Você ON com dois modos, Vídeos (claquete) e RedaCast (microfone). Estrutura aprovada pelo Alan no mockup v3:
      "Para você agora" (cartões grandes pela necessidade do aluno: competência-foco → tema da semana → demais), "Continue de onde parou",
      Shorts em faixa própria, uma faixa por trilha (Bases da Redação, Correção Guiada, Tema da Semana, Rota 1.000), chips como atalho.
      RedaCast: episódios com a arte do tema como capa, título = nome do tema, chamada embaixo; player com os apresentadores (ilustração
@@ -34,7 +36,7 @@
 .trilho::-webkit-scrollbar{ display:none; }
 .trilho>*{ scroll-snap-align:start; flex:0 0 auto; }
 .cap{ position:relative; background:#111; overflow:hidden; }
-.cap img{ width:100%; height:100%; object-fit:cover; display:block; }
+.cap img{ width:100%; height:100%; object-fit:cover; object-position:center bottom; display:block; }
 .cap .arte{ position:absolute; inset:0; display:grid; place-items:center; font-size:11px; color:var(--muted); text-align:center; padding:10px; background:linear-gradient(135deg, rgba(var(--cyanRGB),.25), rgba(var(--cyanRGB),.06)); }
 .dur{ position:absolute; right:8px; bottom:8px; font-size:10.5px; font-weight:700; color:#fff; background:rgba(0,0,0,.65); padding:2px 6px; border-radius:6px; }
 .play{ position:absolute; left:50%; top:50%; width:38px; height:38px; margin:-19px 0 0 -19px; border-radius:50%; background:rgba(0,0,0,.55); display:grid; place-items:center; }
@@ -43,7 +45,8 @@
 .selo{ display:inline-block; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:2px 8px; border-radius:99px; background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
 .selo.branco{ background:var(--surface); color:var(--text); border:1px solid rgba(var(--borderRGB),.2); }
 .selo.cast{ background:var(--text); color:var(--bg); }
-.selo.fone{ position:absolute; left:8px; top:8px; }
+.seloR{ position:absolute; right:6px; bottom:6px; width:44px; height:44px; border-radius:50%; background:rgba(253,251,244,.92); padding:3px; box-shadow:0 1px 4px rgba(0,0,0,.25); object-fit:contain; }
+.grande .seloR{ width:56px; height:56px; bottom:auto; top:10px; }
 .grande{ width:86%; max-width:420px; background:var(--surface); border-radius:20px; overflow:hidden; box-shadow:0 2px 12px rgba(var(--borderRGB),.10); cursor:pointer; }
 .grande .cap{ aspect-ratio:16/9; }
 .grande .scrim{ position:absolute; inset:30% 0 0; background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.72)); }
@@ -65,7 +68,7 @@
 .breve{ width:200px; min-height:112px; border:1px dashed rgba(var(--borderRGB),.25); border-radius:16px; display:grid; place-items:center; text-align:center; font-size:12px; color:var(--muted); padding:12px; }
 .cabCast{ display:flex; align-items:center; gap:12px; background:var(--surface); border-radius:18px; padding:10px 14px; margin:0 0 4px; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); }
 .cabCast .txt b{ display:block; font-size:14px; color:var(--text); } .cabCast .txt span{ font-size:12px; color:var(--muted); }
-.cabCast svg{ width:64px; height:44px; flex:none; color:var(--cyan); }
+.cabCast img{ width:96px; height:54px; flex:none; border-radius:10px; object-fit:cover; }
 .vazioTudo{ font-size:13px; color:var(--muted); padding:20px 4px; text-align:center; }
 @media(min-width:1024px){ .grande{ width:440px; } .medio{ width:240px; } .short{ width:150px; } .trilho{ margin:0; padding:2px 0 6px; } }
 .telaVideo{ position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.92); display:none; flex-direction:column; }
@@ -82,14 +85,14 @@
 .telaAudio .tp{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:var(--text); }
 .telaAudio .tp button{ background:transparent; border:0; color:var(--text); font-size:24px; line-height:1; font-family:inherit; }
 .telaAudio .meio{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 24px; text-align:center; gap:14px; }
-.telaAudio .meio svg{ width:min(80vw,320px); height:auto; color:var(--cyan); }
+.telaAudio .meio img.cena{ width:min(92vw,560px); height:auto; border-radius:18px; box-shadow:0 4px 18px rgba(0,0,0,.18); }
 .telaAudio .meio h3{ margin:0; font-size:17px; line-height:1.3; color:var(--text); }
 .telaAudio .meio p{ margin:0; font-size:12.5px; color:var(--muted); max-width:36ch; }
 .telaAudio audio{ width:min(90vw,420px); }
 .telaAudio .ia{ font-size:11px; color:var(--muted); padding:0 24px 22px; text-align:center; }
 .mini{ position:fixed; left:12px; right:12px; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:70; display:none; align-items:center; gap:10px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:16px; padding:8px 10px; box-shadow:0 4px 16px rgba(0,0,0,.18); font-size:12.5px; color:var(--text); }
 .mini.on{ display:flex; }
-.mini svg{ width:40px; height:28px; flex:none; color:var(--cyan); }
+.mini img{ width:36px; height:36px; flex:none; border-radius:50%; object-fit:contain; background:rgba(253,251,244,.9); }
 .mini .t{ flex:1; min-width:0; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .mini button{ font:inherit; font-size:12px; font-weight:700; border:0; border-radius:99px; padding:6px 12px; background:var(--cyan); color:var(--onCyan); cursor:pointer; }
 .mini button.x{ background:transparent; color:var(--muted); padding:6px 4px; }
@@ -105,14 +108,7 @@
   </div>
 </div>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="robos" viewBox="0 0 60 44">
-    <rect x="6" y="30" width="48" height="6" rx="3" fill="currentColor" opacity=".25"/>
-    <rect x="27" y="14" width="6" height="16" rx="2" fill="currentColor" opacity=".55"/><circle cx="30" cy="13" r="4" fill="currentColor" opacity=".55"/>
-    <rect x="7" y="12" width="15" height="14" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="18" r="1.8" fill="currentColor"/><circle cx="17.5" cy="18" r="1.8" fill="currentColor"/><path d="M11.5 22.5q3 2 6 0" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M14.5 12V8" stroke="currentColor" stroke-width="2"/><circle cx="14.5" cy="6.5" r="1.8" fill="currentColor"/>
-    <rect x="38" y="12" width="15" height="14" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="41.5" y="16.5" width="3.5" height="3" rx="1" fill="currentColor"/><rect x="48" y="16.5" width="3.5" height="3" rx="1" fill="currentColor"/><path d="M42 22.5h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M45.5 12V8" stroke="currentColor" stroke-width="2"/><circle cx="45.5" cy="6.5" r="1.8" fill="currentColor"/>
-  </symbol>
-</svg>
+
 
 <div class="telaVideo" id="telaVideo">
   <div class="tp"><button onclick="fecharVideo()" aria-label="Fechar">&#10005;</button><b id="vTit"></b></div>
@@ -123,21 +119,20 @@
 <div class="telaAudio" id="telaAudio">
   <div class="tp"><button onclick="minimizar()" aria-label="Voltar">&#8249;</button><b>RedaCast</b></div>
   <div class="meio">
-    <svg viewBox="0 0 60 44"><use href="#robos"/></svg>
-    <span class="selo cast">RedaCast</span>
+    <img class="cena" src="img/redacast-cena.webp" alt="RedaCast: os dois apresentadores da RedaON">
     <h3 id="aTit"></h3>
     <p id="aSub"></p>
     <audio id="aud" controls preload="none"></audio>
   </div>
   <p class="ia">Conversa gerada por intelig&ecirc;ncia artificial a partir do material da RedaON e conferida pela Profa. Blanche.</p>
 </div>
-<div class="mini" id="mini"><svg viewBox="0 0 60 44"><use href="#robos"/></svg><span class="t" id="miniT"></span><button onclick="abrirAudioTela()">Abrir</button><button class="x" onclick="pararAudio()" aria-label="Parar">&#10005;</button></div>
+<div class="mini" id="mini"><img src="avatares/redacast-selo.webp" alt=""><span class="t" id="miniT"></span><button onclick="abrirAudioTela()">Abrir</button><button class="x" onclick="pararAudio()" aria-label="Parar">&#10005;</button></div>
 
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js?v=6-17"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-0' });
+montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-2' });
 
 /* ids de trilha são os do banco (base, correcao, aposta, rota); os nomes são os aprovados em 22/09/2026 */
 var TRILHAS=[
@@ -168,8 +163,10 @@ function capV(v){ var p=pct(v); return '<div class="cap"><img src="https://i.yti
 function grande(v,i){ var p=pct(v); return '<div class="grande" onclick="abrirVideo('+i+')">'+capV(v).replace(/<\/div>$/,'<div class="scrim"></div><div class="sobre"><div class="pq">'+esc(porque(v))+'</div><h3>'+esc(v.tit)+'</h3>'+(v.chamada?'<div class="ch">'+esc(v.chamada)+'</div>':'')+'</div></div>')+'<div class="pe"><span class="selo">'+esc(nome(v.t))+'</span>'+esc(v.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'<button class="bt">Assistir</button></div></div>'; }
 function medio(v,i){ var p=pct(v); return '<div class="medio" onclick="abrirVideo('+i+')">'+capV(v)+'<div class="txt">'+(v.novo?'<span class="selo branco">novo</span> ':'')+(v.comp?'<span class="selo">'+esc(v.comp)+'</span>':'')+'<p>'+esc(v.tit)+'</p>'+(v.chamada?'<div class="pe" style="color:var(--text2);margin-bottom:3px">'+esc(v.chamada)+'</div>':'')+'<div class="pe">'+esc(v.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'</div></div></div>'; }
 function short(v,i){ return '<div class="short" onclick="abrirVideo('+i+')"><div class="cap"><img src="https://i.ytimg.com/vi/'+v.yt+'/hqdefault.jpg" alt="" loading="lazy">'+(v.dur?'<span class="dur">'+esc(v.dur)+'</span>':'')+'</div><div class="rot">'+esc(v.tit)+'</div></div>'; }
-function capaTema(e){ var t=e.temaId && TEMAS[e.temaId]; return (t && t.capa_url) ? '<img src="'+esc(t.capa_url)+'" alt="" loading="lazy">' : '<div class="arte">'+esc(e.comp?'Compet\u00eancia '+e.comp:'RedaCast')+'</div>'; }
-function capE(e){ var p=pct(e); return '<div class="cap">'+capaTema(e)+'<span class="selo cast fone">RedaCast</span>'+(e.dur?'<span class="dur">'+esc(e.dur)+'</span>':'')+(p?'<span class="barra"><i style="width:'+p+'%"></i></span>':'')+'</div>'; }
+/* capa do tema: nos cartões deitados, usa a versão larga (mesmo nome + "-larga") quando existir; senão, a vertical alinhada pela base */
+function capaTema(e){ var t=e.temaId && TEMAS[e.temaId]; if(t && t.capa_url){ var v=esc(t.capa_url), l=v.replace(/\.(webp|jpg|png)$/,'-larga.$1');
+    return '<img src="'+l+'" alt="" loading="lazy" onerror="this.onerror=null;this.src=\''+v+'\'">'; } return '<div class="arte">'+esc(e.comp?'Compet\u00eancia '+e.comp:'RedaCast')+'</div>'; }
+function capE(e){ var p=pct(e); return '<div class="cap">'+capaTema(e)+'<img class="seloR" src="avatares/redacast-selo.webp" alt="RedaCast">'+(e.dur?'<span class="dur">'+esc(e.dur)+'</span>':'')+(p?'<span class="barra"><i style="width:'+p+'%"></i></span>':'')+'</div>'; }
 function grandeE(e,i){ var p=pct(e); return '<div class="grande" onclick="abrirAudio('+i+')">'+capE(e).replace(/<\/div>$/,'<div class="scrim"></div><div class="sobre"><div class="pq">'+esc(porque(e))+'</div><h3>'+esc(e.tit)+'</h3>'+(e.chamada?'<div class="ch">'+esc(e.chamada)+'</div>':'')+'</div></div>')+'<div class="pe"><span class="selo">'+esc(nome(e.t))+'</span>'+esc(e.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'<button class="bt">Ouvir</button></div></div>'; }
 function medioE(e,i){ var p=pct(e); return '<div class="medio" onclick="abrirAudio('+i+')">'+capE(e)+'<div class="txt">'+(e.novo?'<span class="selo branco">novo</span> ':'')+(e.comp?'<span class="selo">'+esc(e.comp)+'</span>':'')+'<p>'+esc(e.tit)+'</p>'+(e.chamada?'<div class="pe" style="color:var(--text2);margin-bottom:3px">'+esc(e.chamada)+'</div>':'')+'<div class="pe">'+esc(e.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'</div></div></div>'; }
 function faixa(tit,sub,itens){ return '<div class="faixa"><h2>'+tit+'</h2>'+(sub?'<p class="sub">'+esc(sub)+'</p>':'')+'<div class="trilho">'+itens+'</div></div>'; }
@@ -192,7 +189,7 @@ function montar(){
       h+='<div id="f-'+t.id+'">'+faixa(esc(t.nome)+' <small>'+l.length+' v\u00eddeo'+(l.length===1?'':'s')+'</small>', t.sub, l.length? l.map(function(x){ return medio(x.v,x.i); }).join('') : '<div class="breve">Em breve. A Profa. Blanche est\u00e1 gravando.</div>')+'</div>'; });
   } else {
     var eps=EPIS.map(function(v,i){ return {v:v,i:i}; });
-    h+='<div class="cabCast"><svg viewBox="0 0 60 44"><use href="#robos"/></svg><div class="txt"><b>RedaCast</b><span>Seu podcast que te aproxima da nota 1.000 \u00b7 d\u00e1 para ouvir com a tela apagada</span></div></div>';
+    h+='<div class="cabCast"><img src="img/redacast-cena.webp" alt=""><div class="txt"><b>RedaCast</b><span>Seu podcast que te aproxima da nota 1.000 \u00b7 d\u00e1 para ouvir com a tela apagada</span></div></div>';
     if(!eps.length) h+='<p class="vazioTudo">Em breve. O primeiro epis\u00f3dio est\u00e1 sendo conferido.</p>';
     else {
       h+=faixa('Para voc\u00ea agora', null, ord(eps).slice(0,5).map(function(x){ return grandeE(x.v,x.i); }).join(''));

@@ -805,7 +805,7 @@ function preencherFaixa(){
   faixa.classList.remove('hidden');
   var cores = corDoCampo(TEMA.campo);
   faixa.style.background = TEMA.capa_url
-    ? 'center/cover no-repeat url(' + TEMA.capa_url + ')'
+    ? 'center bottom/cover no-repeat url(' + TEMA.capa_url + ')'
     : 'linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ')';
   document.getElementById('temaPrep').textContent = TITULO;
   document.getElementById('tgFonte').textContent = TEMA_EH_SEMANA ? 'Tema da semana'

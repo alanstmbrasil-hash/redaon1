@@ -529,7 +529,7 @@ body.semRolar{ overflow:hidden; }
     /* selos e título por cima da capa, como no desenho aprovado */
     var cores=coresCampo(t.campo);
     var fundo = t.capa_url
-      ? 'background-image:url('+t.capa_url+');background-size:cover;background-position:center;'
+      ? 'background-image:url('+t.capa_url+');background-size:cover;background-position:center bottom;'
       : 'background:linear-gradient(140deg,'+cores[0]+','+cores[1]+');';
     alvo.innerHTML='<div class="heroiTema" onclick="abrirTema(\''+t.id+'\')">'
       + '<div class="capaHeroi" style="'+fundo+'"><span class="scrim"></span>'
@@ -589,7 +589,7 @@ body.semRolar{ overflow:hidden; }
     var fav = MEUS_TEMAS_IDS.indexOf(id) >= 0;
     var cores = coresCampo(t.campo);
     var fundo = t.capa_url
-      ? 'background-image:url(' + t.capa_url + ');background-size:cover;background-position:center;'
+      ? 'background-image:url(' + t.capa_url + ');background-size:cover;background-position:center bottom;'
       : 'background:linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ');';
     var grupo = !t.ano_enem ? 'RedaON'
       : ((t.aplicacao||'').toLowerCase()==='regular' ? 'Prova principal' : 'Outras aplica\u00e7\u00f5es');
