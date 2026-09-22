@@ -4,7 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Você ON</title>
-<!-- v2-2 (22/09/2026): capa do episódio usa a versão larga do tema (arquivo -larga) quando existe.
+<!-- v2-3 (22/09/2026): selo dos robôs no tamanho certo nos cartões médios; título do cartão grande em até 2 linhas.
+     v2-2 (22/09/2026): capa do episódio usa a versão larga do tema (arquivo -larga) quando existe.
      v2-1 (22/09/2026): arte definitiva do RedaCast (os dois robôs da RedaON): cena no player e no cabeçalho do modo, selo no canto dos cartões e no mini-player.
      v2-0 (22/09/2026): Você ON com dois modos, Vídeos (claquete) e RedaCast (microfone). Estrutura aprovada pelo Alan no mockup v3:
      "Para você agora" (cartões grandes pela necessidade do aluno: competência-foco → tema da semana → demais), "Continue de onde parou",
@@ -45,14 +46,14 @@
 .selo{ display:inline-block; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:2px 8px; border-radius:99px; background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
 .selo.branco{ background:var(--surface); color:var(--text); border:1px solid rgba(var(--borderRGB),.2); }
 .selo.cast{ background:var(--text); color:var(--bg); }
-.seloR{ position:absolute; right:6px; bottom:6px; width:44px; height:44px; border-radius:50%; background:rgba(253,251,244,.92); padding:3px; box-shadow:0 1px 4px rgba(0,0,0,.25); object-fit:contain; }
-.grande .seloR{ width:56px; height:56px; bottom:auto; top:10px; }
+.cap img.seloR{ position:absolute; right:6px; bottom:6px; width:44px; height:44px; border-radius:50%; background:rgba(253,251,244,.92); padding:3px; box-shadow:0 1px 4px rgba(0,0,0,.25); object-fit:contain; }
+.grande .cap img.seloR{ width:56px; height:56px; bottom:auto; top:10px; }
 .grande{ width:86%; max-width:420px; background:var(--surface); border-radius:20px; overflow:hidden; box-shadow:0 2px 12px rgba(var(--borderRGB),.10); cursor:pointer; }
 .grande .cap{ aspect-ratio:16/9; }
 .grande .scrim{ position:absolute; inset:30% 0 0; background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.72)); }
 .grande .sobre{ position:absolute; left:14px; right:14px; bottom:12px; color:#fff; }
 .grande .sobre .pq{ font-size:11.5px; opacity:.9; margin-bottom:5px; }
-.grande .sobre h3{ margin:0; font-size:16px; font-weight:700; line-height:1.25; text-shadow:0 1px 8px rgba(0,0,0,.4); }
+.grande .sobre h3{ margin:0; font-size:16px; font-weight:700; line-height:1.25; text-shadow:0 1px 8px rgba(0,0,0,.4); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .grande .sobre .ch{ font-size:11.5px; opacity:.9; margin-top:4px; font-style:italic; }
 .grande .pe{ display:flex; align-items:center; gap:8px; padding:11px 14px 13px; font-size:12px; color:var(--muted); }
 .grande .pe .bt{ margin-left:auto; height:38px; padding:0 16px; border:0; border-radius:12px; background:var(--cyan); color:var(--onCyan); font:inherit; font-size:13px; font-weight:700; }
@@ -119,20 +120,20 @@
 <div class="telaAudio" id="telaAudio">
   <div class="tp"><button onclick="minimizar()" aria-label="Voltar">&#8249;</button><b>RedaCast</b></div>
   <div class="meio">
-    <img class="cena" src="img/redacast-cena.webp" alt="RedaCast: os dois apresentadores da RedaON">
+    <img class="cena" src="img/redacast-cena.webp?v=23" alt="RedaCast: os dois apresentadores da RedaON">
     <h3 id="aTit"></h3>
     <p id="aSub"></p>
     <audio id="aud" controls preload="none"></audio>
   </div>
   <p class="ia">Conversa gerada por intelig&ecirc;ncia artificial a partir do material da RedaON e conferida pela Profa. Blanche.</p>
 </div>
-<div class="mini" id="mini"><img src="avatares/redacast-selo.webp" alt=""><span class="t" id="miniT"></span><button onclick="abrirAudioTela()">Abrir</button><button class="x" onclick="pararAudio()" aria-label="Parar">&#10005;</button></div>
+<div class="mini" id="mini"><img src="avatares/redacast-selo.webp?v=23" alt=""><span class="t" id="miniT"></span><button onclick="abrirAudioTela()">Abrir</button><button class="x" onclick="pararAudio()" aria-label="Parar">&#10005;</button></div>
 
 <script src="supabase-auth.js"></script>
 <script src="aluno-base-v6.js?v=6-17"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-2' });
+montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-3' });
 
 /* ids de trilha são os do banco (base, correcao, aposta, rota); os nomes são os aprovados em 22/09/2026 */
 var TRILHAS=[
@@ -166,7 +167,7 @@ function short(v,i){ return '<div class="short" onclick="abrirVideo('+i+')"><div
 /* capa do tema: nos cartões deitados, usa a versão larga (mesmo nome + "-larga") quando existir; senão, a vertical alinhada pela base */
 function capaTema(e){ var t=e.temaId && TEMAS[e.temaId]; if(t && t.capa_url){ var v=esc(t.capa_url), l=v.replace(/\.(webp|jpg|png)$/,'-larga.$1');
     return '<img src="'+l+'" alt="" loading="lazy" onerror="this.onerror=null;this.src=\''+v+'\'">'; } return '<div class="arte">'+esc(e.comp?'Compet\u00eancia '+e.comp:'RedaCast')+'</div>'; }
-function capE(e){ var p=pct(e); return '<div class="cap">'+capaTema(e)+'<img class="seloR" src="avatares/redacast-selo.webp" alt="RedaCast">'+(e.dur?'<span class="dur">'+esc(e.dur)+'</span>':'')+(p?'<span class="barra"><i style="width:'+p+'%"></i></span>':'')+'</div>'; }
+function capE(e){ var p=pct(e); return '<div class="cap">'+capaTema(e)+'<img class="seloR" src="avatares/redacast-selo.webp?v=23" alt="RedaCast">'+(e.dur?'<span class="dur">'+esc(e.dur)+'</span>':'')+(p?'<span class="barra"><i style="width:'+p+'%"></i></span>':'')+'</div>'; }
 function grandeE(e,i){ var p=pct(e); return '<div class="grande" onclick="abrirAudio('+i+')">'+capE(e).replace(/<\/div>$/,'<div class="scrim"></div><div class="sobre"><div class="pq">'+esc(porque(e))+'</div><h3>'+esc(e.tit)+'</h3>'+(e.chamada?'<div class="ch">'+esc(e.chamada)+'</div>':'')+'</div></div>')+'<div class="pe"><span class="selo">'+esc(nome(e.t))+'</span>'+esc(e.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'<button class="bt">Ouvir</button></div></div>'; }
 function medioE(e,i){ var p=pct(e); return '<div class="medio" onclick="abrirAudio('+i+')">'+capE(e)+'<div class="txt">'+(e.novo?'<span class="selo branco">novo</span> ':'')+(e.comp?'<span class="selo">'+esc(e.comp)+'</span>':'')+'<p>'+esc(e.tit)+'</p>'+(e.chamada?'<div class="pe" style="color:var(--text2);margin-bottom:3px">'+esc(e.chamada)+'</div>':'')+'<div class="pe">'+esc(e.dur)+(p?' \u00b7 faltam '+(100-p)+'%':'')+'</div></div></div>'; }
 function faixa(tit,sub,itens){ return '<div class="faixa"><h2>'+tit+'</h2>'+(sub?'<p class="sub">'+esc(sub)+'</p>':'')+'<div class="trilho">'+itens+'</div></div>'; }
@@ -189,7 +190,7 @@ function montar(){
       h+='<div id="f-'+t.id+'">'+faixa(esc(t.nome)+' <small>'+l.length+' v\u00eddeo'+(l.length===1?'':'s')+'</small>', t.sub, l.length? l.map(function(x){ return medio(x.v,x.i); }).join('') : '<div class="breve">Em breve. A Profa. Blanche est\u00e1 gravando.</div>')+'</div>'; });
   } else {
     var eps=EPIS.map(function(v,i){ return {v:v,i:i}; });
-    h+='<div class="cabCast"><img src="img/redacast-cena.webp" alt=""><div class="txt"><b>RedaCast</b><span>Seu podcast que te aproxima da nota 1.000 \u00b7 d\u00e1 para ouvir com a tela apagada</span></div></div>';
+    h+='<div class="cabCast"><img src="img/redacast-cena.webp?v=23" alt=""><div class="txt"><b>RedaCast</b><span>Seu podcast que te aproxima da nota 1.000 \u00b7 d\u00e1 para ouvir com a tela apagada</span></div></div>';
     if(!eps.length) h+='<p class="vazioTudo">Em breve. O primeiro epis\u00f3dio est\u00e1 sendo conferido.</p>';
     else {
       h+=faixa('Para voc\u00ea agora', null, ord(eps).slice(0,5).map(function(x){ return grandeE(x.v,x.i); }).join(''));
