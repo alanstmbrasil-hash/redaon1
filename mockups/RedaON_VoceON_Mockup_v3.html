@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-tema="claro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RedaON · Você ON · mockup v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{ --bg:#fdfbf4; --sunken:#f2ede0; --surface:#fff; --surface2:#f6f2e6; --text:#0a4a4b; --text2:#3a5556; --muted:#8a8576;
+  --borderRGB:10,74,75; --cyan:#0a8c8d; --cyanRGB:10,140,141; --onCyan:#fff; }
+[data-tema="escuro"]{ --bg:#10131a; --sunken:#0b0e14; --surface:#1d2026; --surface2:#272a31; --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0;
+  --borderRGB:71,69,84; --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020; }
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--bg); color:var(--text); font:14px/1.5 Inter, system-ui, sans-serif; }
+.ferr{ position:fixed; right:10px; bottom:10px; z-index:9; display:flex; gap:6px; }
+.ferr button{ font:inherit; font-size:11px; font-weight:700; padding:7px 10px; border-radius:99px; border:1px solid rgba(var(--borderRGB),.25); background:var(--surface); color:var(--text2); box-shadow:0 2px 8px rgba(0,0,0,.15); }
+#conteudo{ max-width:760px; margin:0 auto; padding:14px 16px 90px; }
+@media(min-width:1000px){ #conteudo{ max-width:1100px; padding:26px 40px 60px; } }
+/* cabeçalho como o das telas do "Mais" */
+.pgHead{ display:flex; align-items:center; gap:.45rem; margin:0 0 .7rem; }
+.pgVoltar{ width:34px; height:34px; flex:none; border:1px solid rgba(var(--borderRGB),.18); background:var(--surface); color:var(--text); border-radius:50%; font-size:20px; line-height:1; font-family:inherit; display:grid; place-items:center; padding:0 2px 2px 0; }
+.pgIco img{ width:24px; height:24px; display:block; }
+.pgTit{ font-size:1.05rem; font-weight:800; }
+.marcaON{ color:var(--cyan); font-weight:900; }
+@media(min-width:1000px){ .pgVoltar{ display:none; } .pgTit{ font-size:21px; } }
+/* modos: Vídeos / RedaCast */
+.modos{ display:flex; gap:8px; margin:0 0 12px; }
+.modo{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font:inherit; font-size:13px; font-weight:700; padding:10px 8px; border-radius:14px; border:1px solid rgba(var(--borderRGB),.16); background:var(--surface); color:var(--text2); }
+.modo.on{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); border-color:transparent; }
+.modo img,.modo svg{ width:22px; height:22px; display:block; }
+.modo .robos{ width:30px; height:22px; }
+#corpo.aud .soVid, #corpo.vid .soAud{ display:none; }
+/* episódio (RedaCast) */
+.selo.cast{ background:var(--text); color:var(--bg); }
+[data-tema="escuro"] .selo.cast{ background:#fff; color:#10131a; }
+.epi .cap{ background:var(--surface2); }
+.epi .cap .arte{ position:absolute; inset:0; display:grid; place-items:center; font-size:11px; color:var(--muted); text-align:center; padding:10px; background:linear-gradient(135deg, rgba(var(--cyanRGB),.25), rgba(var(--cyanRGB),.06)); }
+.epi .cap .fone{ position:absolute; left:8px; top:8px; }
+.cabCast{ display:flex; align-items:center; gap:12px; background:var(--surface); border-radius:18px; padding:10px 14px; margin:0 0 4px; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); }
+.cabCast .txt b{ display:block; font-size:14px; } .cabCast .txt span{ font-size:12px; color:var(--muted); }
+.cabCast svg{ width:64px; height:44px; flex:none; }
+/* player de áudio */
+.telaAudio{ position:fixed; inset:0; z-index:80; background:var(--bg); display:none; flex-direction:column; }
+.telaAudio.on{ display:flex; }
+.telaAudio .tp{ display:flex; align-items:center; gap:10px; padding:12px 14px; }
+.telaAudio .tp button{ background:transparent; border:0; color:var(--text); font-size:22px; line-height:1; font-family:inherit; }
+.telaAudio .meio{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 24px; text-align:center; gap:14px; }
+.telaAudio .meio svg{ width:min(80vw,320px); height:auto; }
+.telaAudio .meio h3{ margin:0; font-size:17px; line-height:1.3; }
+.telaAudio .meio p{ margin:0; font-size:12.5px; color:var(--muted); max-width:34ch; }
+.telaAudio audio{ width:min(90vw,420px); }
+.telaAudio .ia{ font-size:11px; color:var(--muted); padding:0 24px 22px; text-align:center; }
+/* mini-player (segue tocando ao navegar) */
+.mini{ position:fixed; left:12px; right:12px; bottom:16px; z-index:70; display:none; align-items:center; gap:10px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:16px; padding:8px 10px; box-shadow:0 4px 16px rgba(0,0,0,.18); font-size:12.5px; }
+.mini.on{ display:flex; }
+.mini svg{ width:40px; height:28px; flex:none; }
+.mini .t{ flex:1; min-width:0; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini button{ font:inherit; font-size:12px; font-weight:700; border:0; border-radius:99px; padding:6px 12px; background:var(--cyan); color:var(--onCyan); }
+.mini button.x{ background:transparent; color:var(--muted); padding:6px 4px; }
+/* chips como atalho */
+.chips{ display:flex; gap:6px; margin:0 0 6px; }
+.chip{ flex:1 1 0; min-width:0; font:inherit; font-size:12px; font-weight:600; color:var(--text2); background:var(--surface); border:1px solid rgba(var(--borderRGB),.14); border-radius:99px; padding:7px 4px; white-space:nowrap; text-align:center; overflow:hidden; text-overflow:ellipsis; }
+.chip .longo{ display:none; } .chip .curto{ display:inline; }
+@media(min-width:480px){ .chip{ flex:0 0 auto; padding:6px 13px; font-size:12.5px; } .chip .longo{ display:inline; } .chip .curto{ display:none; } }
+html.semChips .chips{ display:none; }
+/* faixas */
+.faixa{ margin-top:16px; }
+.faixa h2{ margin:0 0 8px; font-size:15px; font-weight:700; display:flex; align-items:baseline; justify-content:space-between; }
+.faixa h2 small{ font-size:12px; color:var(--muted); font-weight:400; }
+.faixa .sub{ margin:-6px 0 8px; font-size:12px; color:var(--muted); }
+.trilho{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -16px; padding:2px 16px 6px; -webkit-overflow-scrolling:touch; }
+.trilho::-webkit-scrollbar{ display:none; }
+.trilho>*{ scroll-snap-align:start; flex:0 0 auto; }
+.cap{ position:relative; background:#111; overflow:hidden; }
+.cap img{ width:100%; height:100%; object-fit:cover; display:block; }
+.dur{ position:absolute; right:8px; bottom:8px; font-size:10.5px; font-weight:700; color:#fff; background:rgba(0,0,0,.65); padding:2px 6px; border-radius:6px; }
+.play{ position:absolute; left:50%; top:50%; width:38px; height:38px; margin:-19px 0 0 -19px; border-radius:50%; background:rgba(0,0,0,.55); display:grid; place-items:center; }
+.play svg{ width:18px; height:18px; fill:#fff; margin-left:2px; }
+.barra{ position:absolute; left:0; right:0; bottom:0; height:4px; background:rgba(255,255,255,.35); } .barra i{ display:block; height:100%; background:var(--cyan); }
+.selo{ display:inline-block; font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:2px 8px; border-radius:99px; background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+.selo.branco{ background:#fff; color:#0a4a4b; }
+/* cartão grande (destaque) */
+.grande{ width:86%; max-width:420px; background:var(--surface); border-radius:20px; overflow:hidden; box-shadow:0 2px 12px rgba(var(--borderRGB),.10); cursor:pointer; }
+.grande .cap{ aspect-ratio:16/9; }
+.grande .scrim{ position:absolute; inset:30% 0 0; background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.72)); }
+.grande .sobre{ position:absolute; left:14px; right:14px; bottom:12px; color:#fff; }
+.grande .sobre .pq{ font-size:11.5px; opacity:.9; margin-bottom:5px; }
+.grande .sobre h3{ margin:0; font-size:17px; font-weight:700; line-height:1.25; text-shadow:0 1px 8px rgba(0,0,0,.4); }
+.grande .pe{ display:flex; align-items:center; gap:8px; padding:11px 14px 13px; font-size:12px; color:var(--muted); }
+.grande .pe .bt{ margin-left:auto; height:38px; padding:0 16px; border:0; border-radius:12px; background:var(--cyan); color:var(--onCyan); font:inherit; font-size:13px; font-weight:700; }
+/* cartão médio (trilhas) */
+.medio{ width:200px; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); cursor:pointer; }
+.medio .cap{ aspect-ratio:16/9; } .medio .cap .play{ width:30px; height:30px; margin:-15px 0 0 -15px; } .medio .cap .play svg{ width:14px; height:14px; }
+.medio .txt{ padding:8px 10px 10px; }
+.medio .txt p{ margin:4px 0 3px; font-size:12.5px; font-weight:600; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.medio .pe{ font-size:11px; color:var(--muted); }
+/* short (em pé) */
+.short{ width:120px; border-radius:14px; overflow:hidden; cursor:pointer; position:relative; }
+.short .cap{ aspect-ratio:9/16; border-radius:14px; }
+.short .cap .play{ display:none; }
+.short .rot{ position:absolute; left:8px; right:8px; bottom:8px; color:#fff; font-size:11.5px; font-weight:700; line-height:1.25; text-shadow:0 1px 6px rgba(0,0,0,.7); }
+.short .cap::after{ content:""; position:absolute; inset:45% 0 0; background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.7)); }
+/* em breve */
+.breve{ width:200px; min-height:112px; border:1px dashed rgba(var(--borderRGB),.25); border-radius:16px; display:grid; place-items:center; text-align:center; font-size:12px; color:var(--muted); padding:12px; }
+@media(min-width:1000px){ .grande{ width:440px; } .medio{ width:240px; } .short{ width:150px; } .trilho{ margin:0; padding:2px 0 6px; } }
+/* player */
+.telaVideo{ position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.94); display:none; flex-direction:column; }
+.telaVideo.on{ display:flex; }
+.telaVideo .tp{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:#fff; }
+.telaVideo .tp button{ background:transparent; border:0; color:#fff; font-size:22px; line-height:1; font-family:inherit; }
+.telaVideo .tp b{ font-size:14px; }
+.telaVideo .quadro{ width:100%; max-width:900px; margin:0 auto; aspect-ratio:16/9; background:#000; }
+.telaVideo .quadro.v{ max-width:min(100vw, 56vh); aspect-ratio:9/16; }
+.telaVideo iframe{ width:100%; height:100%; border:0; display:block; }
+.telaVideo .desc{ color:rgba(255,255,255,.8); font-size:12.5px; padding:14px; max-width:900px; margin:0 auto; }
+</style>
+</head>
+<body>
+<div id="conteudo">
+  <div class="pgHead"><button class="pgVoltar">&#8249;</button><span class="pgIco"><img src="data:image/webp;base64,UklGRmgEAABXRUJQVlA4WAoAAAAQAAAARwAARwAAQUxQSCkBAAABkGzbtmlX60OiP1DVLpll27Zt27ZtJyX72bZxsB5P9t6xWouICYDzTcP4ubk6w8NWdv89/tvjEFU9+4mSFQ9H5jMBD1zPXvjNn0j0HluqEx9FJK7CjGrXSwGpBrHR/FRA6v30ht+JyOBWvjadyic8svjASQFoWq3wyOKnRWegmr/+GRn8vpMElI0/Iv1n4ylAX+kbUn4/GwpsNiDNb+uhwO4CMfFVrwEwPUPm06IeMF9zIOHTogscShtJ4rM+ezi0Cv971ucIh/s+Is7EaMHht8nRgtNpDR7KARIzh2PuPKjjzd88x/GCRJ6TyAsSeY7juJ8ry8vLyw0kNvFQLpGYufal8MjwOxzRJGD/MNzXIiIzxd6oFpC29vLy8sqrZNDFwsLCwgnOVgEAVlA4IBgDAACQEACdASpIAEgAPj0YikOiIaEXCXaQIAPEoAzw0aPM4CWcL88PozMlH/cnBQPwAgQI+Z3BviEvLmWwcCVkEk756UxXFSA0A+GkG7easpIF/vTuI8VMXxDRBopwhsMq7ZNFPNNBsDI0q0sde/FyBD44SdyeaWJq6yudQSWEP2fvajDLHP8mSlbOLhwvlcAA/v4PH//mm//80Ff/+YkcPW2D+aL8X4b8fsXmWMdvC3jldjN6PGZdZWAaBJHhj1uu6Z46hydjm8wVM0vpsDLPM3T92pI2d5bc9/VYFp7V/FOgDMgpNVANM6D1ATeeHC+zCKli6aTH3P5KgdYm1uw9y88hR4boAXnpHlgcVnSrB8yv6Aww7IOECJPVnrgAV8CDW/Q5gPjnVIHfvDrn/id2oD3VFk+yST/n668ze8NXodNmw/+vczed8B0vWTf8FqsTHxs8W5uSHbZPpn6N2a557UaQYU3zA50B5ymaP6BGH4lwBKRQd31j5SdKK32EFH3YrRJgTxRVn8hb7edkhRivRABsx+hdotPf4eGV6DVA4DZiYiOGuKzP17Mrzr7MmMq79umDyjEna64cquA5PhNxPHBiBdxE+Iby61F9mjAg84OLXZ/43h7YMA1PObGCpngAQfgRuDXvv/dYighFS/KBA+jqDZYVyHYqtj//Aq9PYRRfSXgVyKXCNY/2BOI+Sx6H/3HNp8vShz/8orlcyGDcgVLxPn/ykqgHRcARuXZbCEL0O0IvKEpPuAuQpzgFWv5yQLD7yXrpAkGI/oyVAOCo3OK8TT3+Vw/RaCtNk8GogSTaa1c2EziUhMOOpGePRKhj5/qg27bdf7avCqzM7g0JYyTBe4k/WYdADesY70h0IKkMFAFdWsPYVeiFO8LCqY7zYgSjMvw1b1q+fA1RDuSIw+x4NL2GRqNwFi0Brwhq1XgW4p3ne+pv//BXk54FkqTXcE8yXcuWuBv/YWtgErYtgzz/VidpqMHWfz2VXAA0iS3W41b3CLv/tiltZI0mFNgCT0MNtVtHK0EwDQWfqYgl3ckbse9AWkAAAAA=" alt=""></span><span class="pgTit">Você <span class="marcaON">ON</span></span></div>
+  <div class="modos">
+    <button class="modo on" id="mVid" onclick="modo('vid')"><img src="data:image/webp;base64,UklGRmgEAABXRUJQVlA4WAoAAAAQAAAARwAARwAAQUxQSCkBAAABkGzbtmlX60OiP1DVLpll27Zt27ZtJyX72bZxsB5P9t6xWouICYDzTcP4ubk6w8NWdv89/tvjEFU9+4mSFQ9H5jMBD1zPXvjNn0j0HluqEx9FJK7CjGrXSwGpBrHR/FRA6v30ht+JyOBWvjadyic8svjASQFoWq3wyOKnRWegmr/+GRn8vpMElI0/Iv1n4ylAX+kbUn4/GwpsNiDNb+uhwO4CMfFVrwEwPUPm06IeMF9zIOHTogscShtJ4rM+ezi0Cv971ucIh/s+Is7EaMHht8nRgtNpDR7KARIzh2PuPKjjzd88x/GCRJ6TyAsSeY7juJ8ry8vLyw0kNvFQLpGYufal8MjwOxzRJGD/MNzXIiIzxd6oFpC29vLy8sqrZNDFwsLCwgnOVgEAVlA4IBgDAACQEACdASpIAEgAPj0YikOiIaEXCXaQIAPEoAzw0aPM4CWcL88PozMlH/cnBQPwAgQI+Z3BviEvLmWwcCVkEk756UxXFSA0A+GkG7easpIF/vTuI8VMXxDRBopwhsMq7ZNFPNNBsDI0q0sde/FyBD44SdyeaWJq6yudQSWEP2fvajDLHP8mSlbOLhwvlcAA/v4PH//mm//80Ff/+YkcPW2D+aL8X4b8fsXmWMdvC3jldjN6PGZdZWAaBJHhj1uu6Z46hydjm8wVM0vpsDLPM3T92pI2d5bc9/VYFp7V/FOgDMgpNVANM6D1ATeeHC+zCKli6aTH3P5KgdYm1uw9y88hR4boAXnpHlgcVnSrB8yv6Aww7IOECJPVnrgAV8CDW/Q5gPjnVIHfvDrn/id2oD3VFk+yST/n668ze8NXodNmw/+vczed8B0vWTf8FqsTHxs8W5uSHbZPpn6N2a557UaQYU3zA50B5ymaP6BGH4lwBKRQd31j5SdKK32EFH3YrRJgTxRVn8hb7edkhRivRABsx+hdotPf4eGV6DVA4DZiYiOGuKzP17Mrzr7MmMq79umDyjEna64cquA5PhNxPHBiBdxE+Iby61F9mjAg84OLXZ/43h7YMA1PObGCpngAQfgRuDXvv/dYighFS/KBA+jqDZYVyHYqtj//Aq9PYRRfSXgVyKXCNY/2BOI+Sx6H/3HNp8vShz/8orlcyGDcgVLxPn/ykqgHRcARuXZbCEL0O0IvKEpPuAuQpzgFWv5yQLD7yXrpAkGI/oyVAOCo3OK8TT3+Vw/RaCtNk8GogSTaa1c2EziUhMOOpGePRKhj5/qg27bdf7avCqzM7g0JYyTBe4k/WYdADesY70h0IKkMFAFdWsPYVeiFO8LCqY7zYgSjMvw1b1q+fA1RDuSIw+x4NL2GRqNwFi0Brwhq1XgW4p3ne+pv//BXk54FkqTXcE8yXcuWuBv/YWtgErYtgzz/VidpqMHWfz2VXAA0iS3W41b3CLv/tiltZI0mFNgCT0MNtVtHK0EwDQWfqYgl3ckbse9AWkAAAAA=" alt="">Vídeos</button>
+    <button class="modo" id="mAud" onclick="modo('aud')"><svg class="robos" viewBox="0 0 60 44"><use href="#robos"/></svg>RedaCast</button>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div id="corpo" class="vid"></div>
+</div>
+<div class="ferr"><button onclick="var h=document.documentElement; h.setAttribute('data-tema', h.getAttribute('data-tema')==='claro'?'escuro':'claro')">claro / escuro</button><button onclick="document.documentElement.classList.toggle('semChips')">com / sem chips</button></div>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="robos" viewBox="0 0 60 44">
+    <rect x="6" y="30" width="48" height="6" rx="3" fill="currentColor" opacity=".25"/>
+    <rect x="27" y="14" width="6" height="16" rx="2" fill="currentColor" opacity=".55"/><circle cx="30" cy="13" r="4" fill="currentColor" opacity=".55"/>
+    <rect x="7" y="12" width="15" height="14" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="18" r="1.8" fill="currentColor"/><circle cx="17.5" cy="18" r="1.8" fill="currentColor"/><path d="M11.5 22.5q3 2 6 0" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M14.5 12V8" stroke="currentColor" stroke-width="2"/><circle cx="14.5" cy="6.5" r="1.8" fill="currentColor"/>
+    <rect x="38" y="12" width="15" height="14" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="41.5" y="16.5" width="3.5" height="3" rx="1" fill="currentColor"/><rect x="48" y="16.5" width="3.5" height="3" rx="1" fill="currentColor"/><path d="M42 22.5h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M45.5 12V8" stroke="currentColor" stroke-width="2"/><circle cx="45.5" cy="6.5" r="1.8" fill="currentColor"/>
+  </symbol>
+</svg>
+<div class="telaAudio" id="telaAudio">
+  <div class="tp"><button onclick="minimizar()">&#8249;</button><b>RedaCast</b></div>
+  <div class="meio">
+    <svg viewBox="0 0 60 44" style="color:var(--cyan)"><use href="#robos"/></svg>
+    <span class="selo cast">RedaCast</span>
+    <h3 id="aTit"></h3>
+    <p id="aSub"></p>
+    <audio id="aud" controls preload="none"></audio>
+  </div>
+  <p class="ia">Conversa gerada por inteligência artificial a partir do material da RedaON e conferida pela Profa. Blanche. Ilustração dos apresentadores: provisória, até a arte da Fábrica de Artes.</p>
+</div>
+<div class="mini" id="mini"><svg viewBox="0 0 60 44" style="color:var(--cyan)"><use href="#robos"/></svg><span class="t" id="miniT"></span><button onclick="abrirAudioTela()">Abrir</button><button class="x" onclick="pararAudio()">&#10005;</button></div>
+<div class="telaVideo" id="telaVideo">
+  <div class="tp"><button onclick="fecharVideo()">&#10005;</button><b id="vTit"></b></div>
+  <div class="quadro" id="vQuadro"></div>
+  <p class="desc" id="vDesc"></p>
+</div>
+<script>
+/* o aluno de exemplo: foco em C4 (menor média das últimas redações); tema da semana: estigma das doenças mentais */
+var ALUNO={ foco:'C4', nomeFoco:'C4 · Coesão', tema:'O estigma associado às doenças mentais' };
+var TRILHAS=[
+ {id:'base', nome:'Base', sub:'a estrutura da redação, competência a competência'},
+ {id:'correcao', nome:'Correção Guiada', curto:'Correção', sub:'uma redação corrigida na sua frente'},
+ {id:'aposta', nome:'Aposta da Semana', curto:'Aposta', sub:'por que este tema, e como atacá-lo'},
+ {id:'rota', nome:'Rota 1.000', sub:'construindo a redação com o material das trilhas'}
+];
+/* material tipo='video': trilha, competência (na Base), curto=true para Short. Só o 1º toca de verdade; os outros são exemplo. */
+var VIDEOS=[
+ {yt:'RcRSKaKpXu8', t:'base', comp:'C4', tit:'Coesão: os conectivos que a banca quer ver', dur:'8:40', novo:true, real:true, desc:'Vídeo de teste. No produto, este seria o vídeo da Base sobre a competência-foco do aluno.'},
+ {yt:'RcRSKaKpXu8', t:'base', comp:'C1', tit:'Norma culta: os cinco erros que mais custam ponto', dur:'6:10', progresso:40, desc:'Exemplo.'},
+ {yt:'RcRSKaKpXu8', t:'base', comp:'C5', tit:'Proposta de intervenção completa em 4 passos', dur:'9:20', desc:'Exemplo.'},
+ {yt:'RcRSKaKpXu8', t:'aposta', tit:'Estigma das doenças mentais: por que este tema', dur:'5:30', novo:true, desc:'Exemplo.'},
+ {yt:'RcRSKaKpXu8', t:'correcao', tit:'Corrigindo uma redação nota 680 ao vivo', dur:'10:00', desc:'Exemplo.'},
+ {yt:'RcRSKaKpXu8', t:'base', comp:'C4', curto:true, tit:'"Portanto" não é "por tanto"', dur:'0:45', desc:'Short de exemplo.'},
+ {yt:'RcRSKaKpXu8', t:'base', comp:'C1', curto:true, tit:'Crase antes de palavra feminina', dur:'0:38', desc:'Short de exemplo.'},
+ {yt:'RcRSKaKpXu8', t:'base', comp:'C5', curto:true, tit:'"Campanha de conscientização" não é meio', dur:'0:50', desc:'Short de exemplo.'}
+];
+/* episódios do RedaCast: um por tema (arte do tema como capa) + episódios de competência; url do áudio: no produto, Supabase Storage */
+var EPIS=[
+ {t:'aposta', tema:'Perspectivas acerca do envelhecimento na sociedade brasileira', tit:'Envelhecimento: o que a banca quer ver', dur:'12:40', novo:true, url:'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav', desc:'Episódio 1 · gerado no NotebookLM e conferido pela Profa. Blanche.'},
+ {t:'base', comp:'C4', tema:'', tit:'Coesão: conectivo não é enfeite', dur:'9:10', progresso:55, url:'', desc:'Exemplo.'},
+ {t:'correcao', tema:'', tit:'Uma redação 680 vira 920: o que mudou', dur:'11:00', url:'', desc:'Exemplo.'}
+];
+var MODO='vid', tocando=null;
+function modo(m){ MODO=m; document.getElementById('mVid').classList.toggle('on',m==='vid'); document.getElementById('mAud').classList.toggle('on',m==='aud'); montar(); window.scrollTo(0,0); }
+var PLAY='<span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
+function nome(id){ for(var i=0;i<TRILHAS.length;i++) if(TRILHAS[i].id===id) return TRILHAS[i].nome; return ''; }
+function cap(v){ return '<div class="cap"><img src="https://i.ytimg.com/vi/'+v.yt+'/hqdefault.jpg" alt="" loading="lazy">'+PLAY+'<span class="dur">'+v.dur+'</span>'+(v.progresso?'<span class="barra"><i style="width:'+v.progresso+'%"></i></span>':'')+'</div>'; }
+function capEpi(e){ return '<div class="cap"><div class="arte">'+(e.tema?'arte do tema<br><b>'+e.tema+'</b>':'arte da competência '+(e.comp||''))+'</div><span class="selo cast fone">RedaCast</span><span class="dur">'+e.dur+'</span>'+(e.progresso?'<span class="barra"><i style="width:'+e.progresso+'%"></i></span>':'')+'</div>'; }
+function grandeEpi(e,i){ return '<div class="grande epi" onclick="abrirAudio('+i+')">'+capEpi(e).replace('</div>','<div class="scrim"></div><div class="sobre"><div class="pq">'+porque(e)+'</div><h3>'+e.tit+'</h3></div></div>')+'<div class="pe"><span class="selo">'+nome(e.t)+'</span>'+e.dur+(e.progresso?' · faltam '+(100-e.progresso)+'%':'')+'<button class="bt">Ouvir</button></div></div>'; }
+function medioEpi(e,i){ return '<div class="medio epi" onclick="abrirAudio('+i+')">'+capEpi(e)+'<div class="txt">'+(e.novo?'<span class="selo branco" style="border:1px solid rgba(var(--borderRGB),.2)">novo</span> ':'')+(e.comp?'<span class="selo">'+e.comp+'</span>':'')+'<p>'+e.tit+'</p><div class="pe">'+e.dur+(e.progresso?' · faltam '+(100-e.progresso)+'%':'')+'</div></div></div>'; }
+function porque(v){ if(v.t==='base'&&v.comp===ALUNO.foco) return 'Sua média mais baixa é em '+ALUNO.nomeFoco; if(v.t==='aposta') return 'Tema da semana'; if(v.t==='base') return 'Base · '+v.comp; return nome(v.t); }
+function grande(v,i){ return '<div class="grande" onclick="abrirVideo('+i+')">'+cap(v).replace('</div>','<div class="scrim"></div><div class="sobre"><div class="pq">'+porque(v)+'</div><h3>'+v.tit+'</h3></div></div>')+'<div class="pe"><span class="selo">'+nome(v.t)+'</span>'+v.dur+(v.progresso?' · faltam '+(100-v.progresso)+'%':'')+'<button class="bt">Assistir</button></div></div>'; }
+function medio(v,i){ return '<div class="medio" onclick="abrirVideo('+i+')">'+cap(v)+'<div class="txt">'+(v.novo?'<span class="selo branco" style="border:1px solid rgba(var(--borderRGB),.2)">novo</span> ':'')+(v.comp?'<span class="selo">'+v.comp+'</span>':'')+'<p>'+v.tit+'</p><div class="pe">'+v.dur+(v.progresso?' · faltam '+(100-v.progresso)+'%':'')+'</div></div></div>'; }
+function short(v,i){ return '<div class="short" onclick="abrirVideo('+i+')"><div class="cap"><img src="https://i.ytimg.com/vi/'+v.yt+'/hqdefault.jpg" alt=""><span class="dur">'+v.dur+'</span></div><div class="rot">'+v.tit+'</div></div>'; }
+function peso(v){ if(v.t==='base'&&v.comp===ALUNO.foco) return 0; if(v.t==='aposta') return 1; if(v.t==='base') return 2; return 3; }
+function ord(l){ return l.slice().sort(function(a,b){ return peso(a.v)-peso(b.v) || (b.v.novo?1:0)-(a.v.novo?1:0); }); }
+function faixa(tit,sub,itens){ return '<div class="faixa"><h2>'+tit+'</h2>'+(sub?'<p class="sub">'+sub+'</p>':'')+'<div class="trilho">'+itens+'</div></div>'; }
+function montar(){
+  var trilhas=TRILHAS.map(function(t){ return '<button class="chip" onclick="document.getElementById(\'f-'+t.id+'\').scrollIntoView({behavior:\'smooth\',block:\'start\'})"><span class="longo">'+t.nome+'</span><span class="curto">'+(t.curto||t.nome)+'</span></button>'; }).join('');
+  document.getElementById('chips').innerHTML=trilhas;
+  var corpo=document.getElementById('corpo'); corpo.className=MODO; var h='';
+  if(MODO==='vid'){
+    var todos=VIDEOS.map(function(v,i){ return {v:v,i:i}; }), longos=todos.filter(function(x){ return !x.v.curto; }), curtos=todos.filter(function(x){ return x.v.curto; });
+    h+=faixa('Para você agora', null, ord(longos).slice(0,5).map(function(x){ return grande(x.v,x.i); }).join(''));
+    var cont=longos.filter(function(x){ return x.v.progresso; }); if(cont.length) h+=faixa('Continue de onde parou', null, cont.map(function(x){ return medio(x.v,x.i); }).join(''));
+    if(curtos.length) h+=faixa('Shorts <small>até 1 minuto</small>', null, ord(curtos).map(function(x){ return short(x.v,x.i); }).join(''));
+    TRILHAS.forEach(function(t){ var l=ord(longos.filter(function(x){ return x.v.t===t.id; }));
+      h+='<div id="f-'+t.id+'">'+faixa(t.nome+' <small>'+l.length+' vídeo'+(l.length===1?'':'s')+'</small>', t.sub, l.length? l.map(function(x){ return medio(x.v,x.i); }).join('') : '<div class="breve">Em breve. A Profa. Blanche está gravando.</div>')+'</div>'; });
+  } else {
+    var eps=EPIS.map(function(v,i){ return {v:v,i:i}; });
+    h+='<div class="cabCast"><svg viewBox="0 0 60 44" style="color:var(--cyan)"><use href="#robos"/></svg><div class="txt"><b>RedaCast</b><span>Seu podcast que te aproxima da nota 1.000 · dá para ouvir com a tela apagada</span></div></div>';
+    h+=faixa('Para você agora', null, ord(eps).slice(0,5).map(function(x){ return grandeEpi(x.v,x.i); }).join(''));
+    var contE=eps.filter(function(x){ return x.v.progresso; }); if(contE.length) h+=faixa('Continue de onde parou', null, contE.map(function(x){ return medioEpi(x.v,x.i); }).join(''));
+    TRILHAS.forEach(function(t){ var l=ord(eps.filter(function(x){ return x.v.t===t.id; }));
+      h+='<div id="f-'+t.id+'">'+faixa(t.nome+' <small>'+l.length+' episódio'+(l.length===1?'':'s')+'</small>', t.sub, l.length? l.map(function(x){ return medioEpi(x.v,x.i); }).join('') : '<div class="breve">Em breve. O primeiro episódio está sendo conferido.</div>')+'</div>'; });
+  }
+  corpo.innerHTML=h;
+}
+function abrirAudio(i){ var e=EPIS[i]; tocando=e;
+  document.getElementById('aTit').textContent=e.tit; document.getElementById('aSub').textContent=(e.tema?e.tema+' · ':'')+e.desc;
+  var a=document.getElementById('aud'); if(a.getAttribute('src')!==e.url){ a.src=e.url; }
+  document.getElementById('miniT').textContent=e.tit;
+  if(!e.url){ alert('Episódio de exemplo, sem áudio. Só o episódio do envelhecimento toca.'); return; }
+  abrirAudioTela(); a.play().catch(function(){});
+}
+function abrirAudioTela(){ document.getElementById('telaAudio').classList.add('on'); document.getElementById('mini').classList.remove('on'); }
+function minimizar(){ document.getElementById('telaAudio').classList.remove('on'); var a=document.getElementById('aud'); if(tocando && !a.paused) document.getElementById('mini').classList.add('on'); }
+function pararAudio(){ var a=document.getElementById('aud'); a.pause(); document.getElementById('mini').classList.remove('on'); tocando=null; }
+function abrirVideo(i){ var v=VIDEOS[i];
+  document.getElementById('vTit').textContent=v.tit;
+  var q=document.getElementById('vQuadro'); q.className='quadro'+(v.curto?' v':'');
+  q.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+v.yt+'?autoplay=1&rel=0&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+  document.getElementById('vDesc').innerHTML='<span class="selo" style="background:rgba(255,255,255,.15);color:#fff;margin-right:6px">'+nome(v.t)+'</span>'+v.desc+(v.real?'':' (Toca o mesmo vídeo de teste.)');
+  document.getElementById('telaVideo').classList.add('on'); }
+function fecharVideo(){ document.getElementById('telaVideo').classList.remove('on'); document.getElementById('vQuadro').innerHTML=''; }
+montar();
+</script>
+</body>
+</html>
