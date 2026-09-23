@@ -4,7 +4,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Você ON</title>
-<!-- v2-5 (23/09/2026): player do RedaCast no estilo dos streamings: cena grande, barra larga para arrastar, voltar/avançar 10 s,
+<!-- v2-6 (23/09/2026): o player deixa o dock à vista; o episódio passa para as outras telas pelo mini-player do kit (v6-18) e volta a esta
+     tela retomando do mesmo segundo.
+     v2-5 (23/09/2026): player do RedaCast no estilo dos streamings: cena grande, barra larga para arrastar, voltar/avançar 10 s,
      play central, velocidade 1×–2×, ícone do microfone no topo; controles de pular também na tela de bloqueio.
      v2-4 (23/09/2026): aceita ?ep=<id>&volta=<página> — abre o episódio direto (atalho do Material de apoio) e a seta do player volta para lá.
      v2-3 (22/09/2026): selo dos robôs no tamanho certo nos cartões médios; título do cartão grande em até 2 linhas.
@@ -84,8 +86,9 @@
 .telaVideo .quadro.v{ max-width:min(100vw, 56vh); aspect-ratio:9/16; }
 .telaVideo iframe{ width:100%; height:100%; border:0; display:block; }
 .telaVideo .desc{ color:rgba(255,255,255,.8); font-size:12.5px; padding:14px; max-width:900px; margin:0 auto; }
-.telaAudio{ position:fixed; inset:0; z-index:80; background:var(--bg); display:none; flex-direction:column; }
+.telaAudio{ position:fixed; top:0; left:0; right:0; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:43; background:var(--bg); display:none; flex-direction:column; }
 .telaAudio.on{ display:flex; }
+@media(min-width:1024px){ .telaAudio{ bottom:0; left:232px; } #sidebar.mini ~ .telaAudio{ left:62px; } }
 .telaAudio .tp{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:var(--text); }
 .telaAudio .tp button{ background:transparent; border:0; color:var(--text); font-size:24px; line-height:1; font-family:inherit; }
 .telaAudio .tp img.fe{ width:24px; height:24px; }
@@ -157,10 +160,10 @@
 <div class="mini" id="mini"><img src="avatares/redacast-selo.webp?v=23" alt=""><span class="t" id="miniT"></span><button onclick="abrirAudioTela()">Abrir</button><button class="x" onclick="pararAudio()" aria-label="Parar">&#10005;</button></div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-17"></script>
+<script src="aluno-base-v6.js?v=6-18"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-5' });
+montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-6' });
 
 /* ids de trilha são os do banco (base, correcao, aposta, rota); os nomes são os aprovados em 22/09/2026 */
 var TRILHAS=[
@@ -244,6 +247,7 @@ function abrirAudio(i){ var e=EPIS[i]; tocando=e;
   document.getElementById('aTit').textContent=e.tit; document.getElementById('aSub').textContent=e.chamada||'';
   document.getElementById('miniT').textContent=e.tit;
   if(aud.getAttribute('src')!==e.url){ aud.src=e.url; var pr=PROG[e.id]; if(pr && pr.s) aud.addEventListener('loadedmetadata', function f(){ aud.removeEventListener('loadedmetadata', f); if(pr.s < aud.duration-5) aud.currentTime=pr.s; }); }
+  aud.playbackRate=VELS[velI]; document.getElementById('pVel').textContent=String(VELS[velI]).replace('.',',')+'\u00d7';
   abrirAudioTela(); aud.play().catch(function(){});
   if('mediaSession' in navigator){ try{ navigator.mediaSession.metadata=new MediaMetadata({ title:e.tit, artist:'RedaCast \u00b7 RedaON', album:nome(e.t) });
     navigator.mediaSession.setActionHandler('play', function(){ aud.play(); }); navigator.mediaSession.setActionHandler('pause', function(){ aud.pause(); });
@@ -253,7 +257,12 @@ function abrirAudioTela(){ document.getElementById('telaAudio').classList.add('o
 var PARAM = new URLSearchParams(location.search), EP_ALVO = PARAM.get('ep'), VOLTA = PARAM.get('volta');
 if (VOLTA && !/^hub-preparacao\.html/.test(VOLTA)) VOLTA = null;
 function minimizar(){ if (VOLTA){ salvarProg(); location.href = VOLTA; return; } document.getElementById('telaAudio').classList.remove('on'); if(tocando && !aud.paused) document.getElementById('mini').classList.add('on'); montar(); }
-function pararAudio(){ aud.pause(); document.getElementById('mini').classList.remove('on'); tocando=null; montar(); }
+function gravarCast(){ if(!tocando || !window.redaCastEstado) return; redaCastEstado.gravar({ id:tocando.id, url:tocando.url, tit:tocando.tit, t:aud.currentTime||0, dur:aud.duration||0, tocando:!aud.paused, rate:aud.playbackRate||1 }); }
+var ultCast=0;
+aud.addEventListener('play', gravarCast); aud.addEventListener('pause', gravarCast);
+aud.addEventListener('timeupdate', function(){ var n=Date.now(); if(n-ultCast>3000){ ultCast=n; gravarCast(); } });
+window.addEventListener('pagehide', gravarCast);
+function pararAudio(){ if(window.redaCastEstado) redaCastEstado.limpar(); aud.pause(); document.getElementById('mini').classList.remove('on'); tocando=null; montar(); }
 /* v2-5 · controles próprios */
 var ICO_PLAY='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>', ICO_PAUSA='<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
 var VELS=[1,1.25,1.5,2], velI=0, arrastando=false;
@@ -276,7 +285,7 @@ function trocarVel(){ velI=(velI+1)%VELS.length; aud.playbackRate=VELS[velI]; do
   pintarPlayer();
 })();
 aud.addEventListener('timeupdate', function(){ pintarPlayer(); if(!tocando || !aud.duration) return; var p=aud.currentTime/aud.duration*100; PROG[tocando.id]={ s:aud.currentTime, p:(p>=97?0:p) }; if(Math.floor(aud.currentTime)%5===0) salvarProg(); });
-aud.addEventListener('ended', function(){ if(tocando){ PROG[tocando.id]={ s:0, p:0 }; salvarProg(); } document.getElementById('mini').classList.remove('on'); });
+aud.addEventListener('ended', function(){ if(window.redaCastEstado) redaCastEstado.limpar(); if(tocando){ PROG[tocando.id]={ s:0, p:0 }; salvarProg(); } document.getElementById('mini').classList.remove('on'); });
 aud.addEventListener('pause', function(){ salvarProg(); });
 
 function linhaMat(m){ var j=m.conteudo_json||{}; return { id:m.id, t:m.trilha||'base', tit:m.nome||'', desc:m.conteudo||'', chamada:j.chamada||'', dur:j.duracao||'', curto:!!j.curto, comp:m.competencia||null, temaId:m.tema_id||null, criado:m.criado_em||'', novo:(new Date()-new Date(m.criado_em))<7*864e5 }; }
@@ -307,7 +316,14 @@ async function carregar(){
   }catch(e){ console.warn('[você on foco]', e); }
 }
 /* atalho vindo do Preparar: abre o episódio pedido */
-function abrirPedido(){ if (!EP_ALVO) return; for (var i=0;i<EPIS.length;i++){ if (EPIS[i].id===EP_ALVO){ if (MODO!=='aud'){ MODO='aud'; montar(); } abrirAudio(i); return; } } }
+function retomarCast(){ var st = window.redaCastEstado ? redaCastEstado.ler() : null; if(!st || !st.id) return null;
+  if (st.t){ PROG[st.id] = { s:st.t, p:(st.dur? st.t/st.dur*100 : 0) }; }
+  if (st.rate){ for(var k=0;k<VELS.length;k++) if(VELS[k]===st.rate){ velI=k; } }
+  return st; }
+function abrirPedido(){ var st = retomarCast();
+  if (!EP_ALVO){ if(st){ for(var j=0;j<EPIS.length;j++){ if(EPIS[j].id===st.id){ tocando=EPIS[j]; document.getElementById('miniT').textContent=tocando.tit;
+        aud.src=tocando.url; aud.addEventListener('loadedmetadata', function f(){ aud.removeEventListener('loadedmetadata', f); if(st.t < aud.duration-3) aud.currentTime=st.t; aud.playbackRate=VELS[velI]; }, { once:true });
+        document.getElementById('mini').classList.add('on'); if(st.tocando) aud.play().catch(function(){}); return; } } } return; } for (var i=0;i<EPIS.length;i++){ if (EPIS[i].id===EP_ALVO){ if (MODO!=='aud'){ MODO='aud'; montar(); } abrirAudio(i); return; } } }
 carregar();
 </script>
 </body>

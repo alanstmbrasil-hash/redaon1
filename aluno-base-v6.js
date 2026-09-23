@@ -1,5 +1,7 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-17 (22/09/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-18 (23/09/2026)
+   v6-18: mini-player do RedaCast em todas as telas do aluno (fora a Você ON, que tem o player, e o Escrever, que pausa):
+          o episódio passa de uma tela para outra pela chave redaon-cast e retoma do segundo em que estava.
    v6-17: biblioteca ganha play e microfone; a Você ON passa a usar o play no menu Mais e no cabeçalho (a claquete fica para o modo Vídeos).
    v6-15: biblioteca ganha cartas, cerebro, fone, livroAberto, microscopio, pergaminho e pergunta
    (eixos do Material de apoio e atividades da tela Preparar).
@@ -606,3 +608,81 @@ function iniciarDock(dockId, opts) {
   });
   mostrar();
 }
+
+
+/* ===================================================================
+   v6-18 · MINI-PLAYER DO REDACAST (acima do dock, em todas as telas)
+   Estado em localStorage 'redaon-cast': { id, url, tit, t, dur, tocando, rate }
+   A Você ON grava o estado; aqui ele é retomado. O Escrever marca tocando=false.
+   =================================================================== */
+(function(){
+  var CHAVE = 'redaon-cast';
+  function ler(){ try{ return JSON.parse(localStorage.getItem(CHAVE) || 'null'); }catch(e){ return null; } }
+  function gravar(o){ try{ localStorage.setItem(CHAVE, JSON.stringify(o)); }catch(e){} }
+  function limpar(){ try{ localStorage.removeItem(CHAVE); }catch(e){} }
+  window.redaCastEstado = { ler:ler, gravar:gravar, limpar:limpar };
+  if (/voce-on\.html/.test(location.pathname)) return;
+
+  var ICO_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+  var ICO_PAUSA = '<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+  var st = null, a = null, el = null, ultimo = 0;
+
+  function css(){
+    if (document.getElementById('castMiniCss')) return;
+    var e = document.createElement('style'); e.id = 'castMiniCss';
+    e.textContent =
+      '#castMini{ position:fixed; left:12px; right:12px; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:43; display:flex; align-items:center; gap:10px;'
+      + ' background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); border-radius:16px; padding:10px 10px 8px; box-shadow:0 4px 16px rgba(0,0,0,.18); color:var(--text); max-width:560px; margin:0 auto; cursor:pointer; }'
+      + '#castMini .prog{ position:absolute; left:14px; right:14px; top:3px; height:3px; border-radius:2px; background:rgba(var(--borderRGB),.25); overflow:hidden; }'
+      + '#castMini .prog i{ display:block; height:100%; width:0; background:var(--cyan); }'
+      + '#castMini img{ width:40px; height:40px; flex:none; border-radius:50%; background:#fdfbf4; object-fit:contain; padding:2px; }'
+      + '#castMini .tx{ flex:1; min-width:0; }'
+      + '#castMini .tx b{ display:block; font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }'
+      + '#castMini .tx span{ display:block; font-size:11.5px; color:var(--muted); }'
+      + '#castMini .pp{ width:38px; height:38px; flex:none; border-radius:50%; border:0; background:var(--cyan); color:var(--onCyan); display:grid; place-items:center; cursor:pointer; }'
+      + '#castMini .pp svg{ width:17px; height:17px; fill:currentColor; }'
+      + '#castMini .x{ flex:none; background:transparent; border:0; color:var(--muted); font-size:20px; line-height:1; padding:6px; cursor:pointer; font-family:inherit; }'
+      + 'body.comCast #conteudo{ padding-bottom:170px; }'
+      + '@media(min-width:1024px){ #castMini{ left:auto; right:24px; bottom:24px; width:380px; margin:0; } body.comCast #conteudo{ padding-bottom:110px; } }';
+    document.head.appendChild(e);
+  }
+  function fmt(t){ t = Math.max(0, Math.floor(t || 0)); return Math.floor(t/60) + ':' + String(t%60).padStart(2,'0'); }
+  function salvar(){ if (!st || !a) return; st.t = a.currentTime || st.t || 0; st.dur = a.duration || st.dur || 0; st.tocando = !a.paused; gravar(st); }
+  function pintar(){
+    if (!el) return;
+    el.querySelector('.pp').innerHTML = a.paused ? ICO_PLAY : ICO_PAUSA;
+    var d = a.duration || st.dur || 0, c = a.currentTime || st.t || 0;
+    el.querySelector('.prog i').style.width = (d ? Math.min(100, c/d*100) : 0) + '%';
+    el.querySelector('.tx span').textContent = 'RedaCast \u00b7 ' + fmt(c);
+  }
+  function montar(){
+    css();
+    el = document.createElement('div'); el.id = 'castMini'; el.setAttribute('role','button');
+    el.innerHTML = '<span class="prog"><i></i></span><img src="avatares/redacast-selo.webp?v=23" alt=""><div class="tx"><b></b><span></span></div>'
+      + '<button class="pp" aria-label="Tocar ou pausar"></button><button class="x" aria-label="Parar">&times;</button>';
+    el.querySelector('.tx b').textContent = st.tit || 'RedaCast';
+    document.body.appendChild(el); document.body.classList.add('comCast');
+    el.addEventListener('click', function(ev){
+      if (ev.target.closest('.pp')){ if (a.paused) a.play().catch(function(){}); else a.pause(); return; }
+      if (ev.target.closest('.x')){ a.pause(); limpar(); el.remove(); document.body.classList.remove('comCast'); st = null; return; }
+      salvar(); location.href = 'voce-on.html?ep=' + encodeURIComponent(st.id) + '&abrir=1';
+    });
+    a = new Audio(); a.preload = 'auto'; a.src = st.url;
+    a.addEventListener('loadedmetadata', function(){ if (st.t && st.t < a.duration - 3) a.currentTime = st.t; if (st.rate) a.playbackRate = st.rate; pintar(); });
+    ['play','pause','ended'].forEach(function(ev){ a.addEventListener(ev, function(){ salvar(); pintar(); }); });
+    a.addEventListener('timeupdate', function(){ pintar(); var n = Date.now(); if (n - ultimo > 3000){ ultimo = n; salvar(); } });
+    a.addEventListener('ended', function(){ limpar(); if (el){ el.remove(); document.body.classList.remove('comCast'); } });
+    window.addEventListener('pagehide', salvar);
+    if ('mediaSession' in navigator){ try{
+      navigator.mediaSession.metadata = new MediaMetadata({ title: st.tit || 'RedaCast', artist:'RedaCast \u00b7 RedaON' });
+      navigator.mediaSession.setActionHandler('play', function(){ a.play(); });
+      navigator.mediaSession.setActionHandler('pause', function(){ a.pause(); });
+      navigator.mediaSession.setActionHandler('seekbackward', function(){ a.currentTime = Math.max(0, a.currentTime - 10); });
+      navigator.mediaSession.setActionHandler('seekforward', function(){ a.currentTime = Math.min((a.duration||0) - 0.5, a.currentTime + 10); });
+    }catch(x){} }
+    pintar();
+    if (st.tocando){ var pr = a.play(); if (pr && pr.catch) pr.catch(function(){ st.tocando = false; pintar(); }); }
+  }
+  function iniciar(){ st = ler(); if (!st || !st.url || !st.id) return; montar(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
+})();
