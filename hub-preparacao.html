@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-20 (23/09/2026): o tema aberto aqui fica gravado no aparelho como "tema em trabalho"; a Nova redação abre com ele. -->
 <!-- v2-19 (23/09/2026): faixa do RedaCast no topo do Material de apoio (selo dos robôs, "Descontraído, leve e cheio de informação sobre o tema",
      "Escute antes de ler"), tocável inteira, abre o player na Você ON e volta para cá; não conta como ficha. Vídeos e áudios saem da lista
      de material da professora, e o título "Da sua professora" saiu. -->
@@ -476,7 +477,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-18"></script>
+<script src="aluno-base-v6.js?v=6-19"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 console.info('RedaON · preparar v2-16 · ' + new Date().toISOString().slice(0,10));
@@ -1487,6 +1488,9 @@ async function iniciarPreparar(){
   if (!TEMA){ modoConvite(); return; }
   TEMA_ID = TEMA.id || null;
   TITULO = TEMA.titulo || '';
+  /* v2-20: o tema estudado aqui vira o "tema em trabalho" do aluno: a Nova redação abre com ele
+     (gravado no aparelho, sobrevive a fechar o app). Na prévia da ADM não grava. */
+  if (TEMA_ID && TITULO && !PREVIA){ try { localStorage.setItem('redaon-tema-trabalho', JSON.stringify({ id:TEMA_ID, titulo:TITULO })); } catch(e) {} }
   if (checarTemaSensivelHub(TITULO)){
     document.getElementById('boxEntender').innerHTML = htmlTemaBloqueado();
   }

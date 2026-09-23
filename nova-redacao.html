@@ -315,7 +315,7 @@ html[data-tema="claro"] #barraInferior .fabWrap .fab{ background:#45edee; box-sh
 
 </style>
 <style id="css-tela4">
-/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id · v9-33 foto deitada vira retrato a 2000px, OCR em duas leituras · v9-34 passagem de conferência (foto + transcrição) · v9-35 gaveta e faixa "confira o texto da foto", Conferir e enviar ═══════════
+/* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id · v9-33 foto deitada vira retrato a 2000px, OCR em duas leituras · v9-34 passagem de conferência (foto + transcrição) · v9-35 gaveta e faixa "confira o texto da foto", Conferir e enviar · v9-39 "Tirar foto" de volta na gaveta, \u2713 no último método, tema em trabalho do Preparar, Material de apoio só do banco (sem IA) ═══════════
    A PÁGINA NÃO ROLA: a redação rola dentro da folha e o material
    de apoio rola dentro da própria coluna. */
 
@@ -488,6 +488,13 @@ header.hApp{ display:none !important; }
 .eixoItem .corpoIn .blocoBriefing{ margin-bottom:.55rem; }
 .eixoItem .corpoIn .blocoBriefing b{ display:block; font-size:.68rem; text-transform:uppercase;
   letter-spacing:.05em; color:var(--cyan); margin-bottom:.15rem; }
+/* v9-39: avisos e carregando do Material de apoio, fora dos eixos */
+#eixosGaveta > .gerando, #eixosDesktop > .gerando{ display:flex; align-items:center; gap:.5rem; padding:.8rem .25rem; color:var(--muted); font-size:.78rem; }
+#eixosGaveta > .blocoBriefing, #eixosDesktop > .blocoBriefing{ padding:.85rem .95rem; border:1px solid rgba(var(--borderRGB),.25); border-radius:13px;
+  font-size:.8rem; color:var(--text2); line-height:1.55; }
+#eixosGaveta > .blocoBriefing b, #eixosDesktop > .blocoBriefing b{ display:flex; align-items:center; gap:.35rem; font-size:.7rem; text-transform:uppercase;
+  letter-spacing:.05em; color:var(--cyan); margin-bottom:.25rem; }
+#eixosGaveta > .blocoBriefing .fe, #eixosDesktop > .blocoBriefing .fe{ width:16px; height:16px; }
 /* v9-9: FICHAS DO MATERIAL DE APOIO — mesmas regras do hub-preparacao.html,
    copiadas tal e qual para as duas telas nao divergirem. O material e o mesmo
    conteudo; ler de dois jeitos diferentes atrapalha o aluno. */
@@ -1000,6 +1007,7 @@ var FE_ICONES = {
   lampada:'UklGRoAEAABXRUJQVlA4WAoAAAAQAAAARwAARwAAQUxQSHgBAAABkKNt27FHT9SnNDagPptIdmBVtm3bNjtbY9u2zW/mGf7v997PNygjYgLof29ex9zezvZ2c6usstWH/PsPF4bElFxm1afjqRLST7OZj6rx6l+xyato/QabfjURao51XkgAajC08HGc9I+seRrmBmsvAhlh/cdBngNwJUQ7Ix6HuADBmQgfMboB6hlzH8AMyGuAYyCcq+8oSoW+5yil+q6jVOg7jJKr7xAK6e8GeQOQB7ICQM8xGhH2MBIQSiAWCfIMQhpGCcASgR7V9ioDhW7p6iDYlPd65gm49L2OEwQ9oeFCPBaNm3Y+ktBHTTofSfjbprzKIIl3zKgmkeUmnCCh+9QqpDQrHSOxz1Xq5CyqxMmpVbhMgj/aNirI471tm4LW2PYPvnJuKnCIZUy6WAV/sIzXQgIvfVVZIqG7rJwvJeiVYRFEN1W+bFkFG1Kq36o8SRYyw8qxJLRb6b2vFCKn/YYtL4JJdv4vbjiT/Hxm3vQhSwxwpv/BVlA4IOICAABQEwCdASpIAEgAPj0cikOiIaEWaZ2YIAPEsgBqYuB/APxA2c/nn5Fc4Xth4E5gQwHYD+k+zPeOf8l1EfMV5uXQzf1XrPfQA8sr9sfgn/bD/of7r2pPUAKRA2LjGKuUvhYqeL/uIWqTbJVU8qvNpoxGSOR/8blodXeAoQ0/+prmZJVIkxTM4LMFTe11Wx5fq0fuk+PPIIumWl4rjWhHywlQNEQAAP7+0C4/9wHP//y0w+4F+wshpP13Gp6ybRgPrP+TcixVVyZkVS6eqDVSZJDDgZ34hSj3fv5JE2jt4B+7ovzsF4P1QeV9lX6yd9umJhIek5b69Oo1pUSRJNxMnRps7f/jECuWoCymceG1VvjMdiOBrkbZ//wXgbZS+ix7Z/Yaa3MQWEfYSw8hZWWe6ZGy5C0r+PUlg+Q4GzNl3uEKmFOO8dT+EbOVcLXl4bUqwTWaq0O46Oi5LRihDWVJmZguXFag1BQBfG/yQjzsey1rOoadn3ILAyInMA7diIbiNfXqLtW2xsxHZrnV9WJdudvB2hCbIda+YtUmi0gsMszpI8lxcDpB4NpTvBryOnMyMQx2eR8rjl8d/Z4fFtSOSaXPbo86Izqyo3/UCJOAPiShbx/3x9l/cD/hpvGsVWPc5y1qByrL9CcFAa1PxKiv7bSGTbbyVZHe6iOuQdVRtJuf5ISXPfEcUzzG5P6Yl3ttisS69og65z3qqqnTr9GNKLfuVqn12//zqsLFlJ4ReJIFPrJqssj3bazit/cFEL/232DXmHltUAy59HTgDoXmY9wblXXuOYqgHWPk9Tx3QyfZw/5AUtGi9FjiJOmT47ooGJD5ZKuVeT7wQ4wm+vgceiBmPegGlMo/JMYwUxGOFCjz8LPeP64iuMUUWQyhmDrKPMeuyyYQcm+ZKReJg/kAmciHPnJD9qQrqJAEKidgRwMmFITc5BswaHDO/yB4ujq/e6AQMgZqll0RKao4Viwx96AAAAA=',
   livroAberto:'UklGRgQDAABXRUJQVlA4WAoAAAAQAAAARwAARwAAQUxQSLAAAAABgGJt27Lo/SN7IZPIsgC35IlDJJHYAMlhCVSSe3OH5j4+E9/Rl/cf9xMREwC/GXvayDhOax7x1hbImNLzKK6QOQEATWTeyhgE6QHZg1BH9hPhKEFSQP4bN4qYPcqZQzEnYmDSSpJ38CW35YQovmwfofrCKoTlC1sQLl7Y6atx8e+YU8LihU0JtRdWIwRemJ+g7L2oqooA4DLotMzW00dO1VpmncEMz9VyjojnFviwA1ZQOCAuAgAAUA4AnQEqSABIAD45FodDIiENxnJIEAHCUAaIBOqWPZN5iIKehf9M8QB+oHq6dFV1QHoAfpn6Sf7IfCb5MZGG6FJfwNolz+ALjTSWXqxLATbvm71MOnCDxrYjW8cnn6FF4bg6gXE/xXgTt9corFlYqzs3bnGZ85jtdMGAAP7+pTYD8zS/z38SIqqbikC+/cdq3u8bOihI+v9l+dx8q/79/8Cmp+yY9E64GQJyEB8XsNYXP57jH2K8v6Q+PnOhH4sB5VJ2/5oh0B3/nNRX+/mB0p6dPdVf++wz1CD3uk+CqwXgTASpeU8dxG7V5pDZo/aU2k+P89d/xY/c/9jFvH0j4T/0TKJ4+8gkAxdf+BuV6WM5/LxY9uHsO4Is//xDWQfcRqt3BIUShkJ11C60l1BhlhmxVMb8ATUpHRv61ldhqS8B3FVoZuFFok9cMDGJjf7v10NtZfpQn5jCGL720ZLgGcMauby7iD1zPl8EZJmlVE5BWymSQDgtlfgla3PnlFudbDfiR0RosiHwunc76Rpt5ggV07ffE+C96WoAuI0UOolZkVULhtgjpBqrKLgps956vDsVeui66m7EQ6vNgnNuH4n7iJ8IFfw5ORn/me02/5nsH3tXUnOFoLPkon2P2Wkp5uJDxdmMvC0P5OBZkLriJNG/bw5/9/Z9uK3h4z1/pNS/4xN8nxlxvnVTyN8b/0AaO/caxBu08U//05LCHlaIFx8NCnvxWVAtijqvEAAA',
   microscopio:'UklGRlwFAABXRUJQVlA4WAoAAAAQAAAARwAARwAAQUxQSCICAAABkKttt2k786g/1b6EUyMpU+4LiG6Ate2kslHZRmfbto1ja+EPxhxzzDHCLiIcuI2kSM4xQ+/cvcH9j7T2yeHqX8I6AG1jfwEDUvzsdKW5ZtA6qg2dv/2hrjXx4KTdKe/+dZ6rVl7Cr6uVGGi+B5LPPxwy2t9EoObuN5U2znaFoGeH0XEdwj208RACnSZOQpSFw10ye0ye6xc5uAuZPotHEHqmL5fara4dQq0Gl4m7s17Za0R0e6GqDkS1b4wiRPZ4lJoXsdA63fQgC+wMfRg25WgL/J6MVfJBYob70QHm5i+U3Bb4TF/Q/EZ4bdFRL7gR85LOedrG2myOqxzTddAOaFgTPr2ff1VvQBunYGFI21rHG99HrVAwK7BkCn6bTlEXSxR2x7y/ADceXD8seVXjQJstVDjYfLvov4iLAHB7kZP2hFoYM6vLCk6lA9R2maK3rPVXsZA6KNMfXvM0zKbOC1/UGX93ukpt/Xgsvckm5m/RyGgVPmlDmfXoYCHScu5i6YVnmAuLkdurL6IJ5ML4ydvqz21M/e8ACpN3k1ru4pqH+MlbACp6uy6+iZ6829QDx2UzefNALXZcJpM3+jF117GZTN55UBscm8XknQH1xfEZTN5meEJrvPrkjTkMz1knlaWJpJTZ5eRlZTnzOsjLysPSBEYlWUAPDOtl9Sb4RXYdMNXDXg/8Gke9MFbn67ZWz5z5Yqurk9HVYXrLOvdPnQNWUDggFAMAANATAJ0BKkgASAA+PRiKQ6IhoRepXiQgA8SgDQxFFPR7h8oHVf/N+BjneIjuAP4B/lP1u6+DfK/QA8sb2Hv2f/ZT2WP//nJf8rOm0vfmNKJgWIYNWGlaeWMWiwUA6IFDGRDpEBeZEjBM+eDGqik6CbGoOHtAzcbbRCCDO/4a5dlIfL8Q2kVYaVJFOMYg6WSg9NuvzTYYA6G/hVeh7PJbOnb7H4JCMstoAP7+0B1//6HD4dObLg45L9uC+YuBRo9DbkcjX595qqT++mHjOJ4AdzFy89f6RWZXuzLwaMMkUIP/KGZ3NSII+yhuDYXaOH+hnQM86C3JbN2zxnM1l3UthaaTgPZVNZ/4deuRNLfT/mK1Sxktd8Rn+B7KoEAZCkhKLXCe1BfjgJWVl9Bc1cwzZ6w650P86GsB88ygbUuv5l+a7UEjujBvpE0R7XcU2ElRawrfV32yPX2Mu6UcpgrPLH/w6bQD7H5xWNyl2LEWseP9oki/5/6/QkeFXn+qHgjJduLiF7F7Cev+3r658f9O/avK1xds5LbN7JNYLlVVEx4dopYtVSYI+84cvXonvjcdv4EIO1OwxMtWlkZVL/vDLVEDGkhyk9eY4Y0mc5VL1jZc/Gl8xVODoqqUeTRUzJPafPRkwqd/F7/74FgaE0IQIimmnEHDfTkt4PYs7kEBa+lZXZdOi/eOI3icbjX5ag4fceJ/czHErb/1//PG2mJD6qxwvky7LKm1wmUlGHB06IEAN/H5EybCojktOuzjQe42zJEl6p/LqCIfhVPJfP0Ju5l+I987Q/z/ImG17jLSn5XpTR86jTdGfRmPPbwJ+8cRR92Qw/lmTVbAr1GvW5dvyAsXsy/0d9fKb9YZ+mbnSSwvtfUgQg5UBe56oV+08IvW/cecVYIfbvKEyoDWgwEVQXKorQEYrarLtJlVNSBBklJ6zN///qDC6s0zr2E8agooqgk/vetVM+s78BOOX+jNprc2nb7IcPMUUjYXfWvMeJrba/KJfEQHEcWlv++pLPvy6OKSf6OM02rUGw38ynOb87BSgAAA',
+  galeria:'UklGRkwEAABXRUJQVlA4WAoAAAAQAAAARwAARwAAQUxQSLYAAAABcBxJkqNgIIERBD5o5QVeYMpprZ/8T6H7xd3EziBfETEBg6/ocL+csh4928VgHe46IOLkoxNCPh56IODioBd8HjYI4HEwQQInT1W3QGRAeePvIxSjpCrEqMVo3o5ajEq9hqpU7/E1u1DVYlzEMNQ7fyynj6WlOopRvn/Nx1JLV4lRq1dJ14jRqldKdxLj/Lpqqrt6VyINDEMSAyxDAhtMw14e2IY9AjAOOxVgnXWYHJiPn303AVZQOCBwAwAAUBUAnQEqSABIAD5RJI9Fo6IhEKZ8OAUEtgBfmvq/OemO+P0vkZt/vEPP5GD7Af0fSJ8Svpd+Y3ztPSB/qvUA/tH/A9YD/gewv6Fflj/sz8KX7n/sl7QCgMH0A/uaF3XaybzR8GoM/s4XrBpoaInpyAOxzjIxAtcmf8lHd7lbdtFapyvqGUnQCkosrPEcwcjdgve07hHgeN8z7hmykFXnT7dGNwhUVI79cM7h66HHSz81uAAA/sLmZ9HWH18tuWxWg2TU4bqPCPIQHnoQ/ltl/vqelueuwMAPYxxk2hdPbG+hx0IPxm7qWjawGhUD2AqPtmNHZqtS9iZZBNFFoB5KSx85HF1Qv5f283IwibSyZtw2ze+xdPjjbzuRwvT//3rL/tVfUefOu6po8x38ZAOAuFTkyOazJPOA5KyoqnqCGH+sFbWPZpvmCpAtolyDfiwtXiw4EEGvCdEL41GKVe6hjLRPSvlfrBNDm9Hoho8nUN6SbN7M3ACs4pnjQ4EQyoLvVK58j0npbxKYmguSaVKRzPEeEXWftO03mW2BLJ/2cmmnGmIwJvv84k/e8TbgiGFXPhnzmsB83ek/OFSM1yI2zAZ5K6ofyNRPgK7Xd/wj1P8yYPCBP12yHc7iOB3Lgd17QPM+qdtNtlCLKmzfGxrdp3RVOCxIsEntxXi3vhOI+zwl/ZWZjL86u5QCfRJhPbGBwVK6WWOwJyL5gZzvjcZyReO2jy2rIsDHWdIlp6xZKITb2/yS+MoOQX8xmydZShd+l7/6BqV+KnXHCfgLFs3LQ4wG5XzvVIZyHSZ4j+jIL0m+GXiAfNTAEVw4ItzHGkes0umpNtvvx5eZR7fQdkLz9s1L+p3xUPfoGjLoxZpho4jFV3RZ+dURP12Vk2ESAKEjd2KybHY2VB3ILqQz44sNrylhhR7Mj4loVFv00T/3i9fD2JXCLJVmIn/ezxPclGHFu1xOlUvmn8EdkCPbpypRuRIHzeqUqe0hugbhUG+Aq4Cyw8plkyAYxmkediarSmRN7aO4LbM/cFN2Ct443a82urJfnqh3F558wdko1X9XP4NO4kOXota2d9iWdzes3mq93X2OzYHV5HbDeDPoca6sKWvjoIcXwG5ksG0uhYa0B2txQoVIFgwAXhMQ9oLp+sYgDq00nhP8zcVMkTBNroAAAA==',
   pergaminho:'UklGRnwDAABXRUJQVlA4WAoAAAAQAAAARwAARwAAQUxQSMkAAAABgGNt2/Ho20OWkC5LyALsZGyjZWsb67CNJZidbfOtPrzPsJoTERMg/kwtGRUVA9vINaayLomITh8J+K3bSBFJ74CIegxYSX7yikSFeh0KtAO1pTevsgFFdo41rEKtBZUtrDwt5WysbI4MrAyOVKxUjkSsRI44rDiOKFaUI4wV5vBj+f9dFeUIYiVxRLEyOOKx8jmSsKRmHF+GWPkEg4YKP4HbkGiGKxPGy6+gHqsFZ/Hg2PTC2tHlxfnZyfHR4cG+8cX5Rpv4KwUAVlA4IIwCAADwDwCdASpIAEgAPjkYikMiIaEXCjcgIAOEoA0I2u3P5Ofnb/NdN9gH2k+ot03fMB55fSAf1XzQPYA5639ZPhR/bj9gPaAKYOCtH5dtAWTx5Av1GSTMvhcSu1mJBEaPoqLX8j0hgamIG0egXaRd09OydOYJ6Ra2r4QKGbLkT/ZuFa11DO7Ype+AAP6uMRunHcntQW2LpogXvn/rtTPpO22gdBmhG50R6q0XfvhsI1vwe1M6q202nWi3z0dPfXULZm9bD1s42HRI+n9Mbh8hv7OWtJe2vWJcQq0FSv/Vp5mf3rY1JK42Ugf8PkN6q9tAwTS3hpNL24Y54pRlNMOI0aQrhsDtMfKsmb8mdRr6js53aHX2/49b/id+os8wzRImA/au9j89//P/4N//1wUxmRyf/kToXW0Fu+G0cXMUgO4cJg2dFWO8C40k8Ia2j2ya0eTArunNItC8pce+a6lFy1CPweR7W3F3eTVeVZ1le1c0Alh/Y+piMyAGEfWjys3QOkI7d5PM2fFqr0qjm9VHJ92ACw6Kmb6w1oWn0bKw6OA6hJ48jegTEDZj1/upbVWCqCfDAm6DHodO29b4CY5+FT2Wc5J6m7zXClDBYUDjGwHtT54dkgnlQLH1E1HMPzQ//iDngWzmCHRGmrViFWJJ7VrQk4ZnNCieDj3m0RiWM+T/H1y+fCs1YJoA+Y6Tk2ai0+8xgj89JatK70/CQi9l35z9uhK9yBYvSH15U4wwzDn35YpkE+sVwEYaRk2OdNNlUGu4JKRHXvpfeCjxWezQDXqhOCfFHA7oI2rqt7qiSCPf2xNg4/4DmjfYXvdB79L5wVhqokVgUI69B3GSv2BfcmBX6ZMhRsRwk1roaeAA'
 };
 function feIcone(nome) {
@@ -1117,8 +1125,19 @@ function definirTemaSelecionado(tema) {
   var el = document.getElementById('metodoTema');
   if (el) el.textContent = tema && tema.titulo ? 'Tema: ' + tema.titulo : 'Escolha o tema depois, na folha';
 }
-function abrirMetodos() { fecharMais(); abrirGaveta('gavetaMetodos'); }
+function abrirMetodos() { fecharMais(); marcarMetodoUsado(); abrirGaveta('gavetaMetodos'); }
 function fecharMetodos() { fecharGaveta('gavetaMetodos'); limparFundosOrfaos(); }
+/* v6-19: o último método usado ganha o \u2713 ciano (ordem fixa, nada muda de lugar);
+   sem histórico, Digitar na folha vem marcado. Chave no aparelho: redaon-metodo. */
+function marcarMetodoUsado(){
+  var ult = 'digitar';
+  try { var v = localStorage.getItem('redaon-metodo'); if (v === 'foto' || v === 'imagem' || v === 'pdf' || v === 'digitar') ult = v; } catch(e) {}
+  document.querySelectorAll('#gavetaMetodos a.pill[data-metodo]').forEach(function(p){
+    var on = p.getAttribute('data-metodo') === ult;
+    p.classList.toggle('sel', on);
+    var f = p.querySelector('.fim'); if (f) f.textContent = on ? '\u2713' : '\u203a';
+  });
+}
 function toggleMetodos() {
   var g = document.getElementById('gavetaMetodos');
   if (g && g.classList.contains('open')) fecharMetodos(); else abrirMetodos();
@@ -1206,9 +1225,10 @@ function montarEsqueleto(cfg) {
       '<div class="grip"></div>' +
       '<p class="tit">Como voc\u00ea quer fazer sua reda\u00e7\u00e3o?</p>' +
       '<p class="sub" id="metodoTema">Escolha o tema depois, na folha</p>' +
-      '<a class="pill" style="background:rgba(var(--cyanRGB),.12);color:var(--cyan);border-color:rgba(var(--cyanRGB),.35);" href="nova-redacao.html?metodo=digitar"><i class="pemoji">' + feIcone('lapis') + '</i>Digitar na folha <span style="font-size:.7rem;color:var(--muted);font-weight:400;">recomendado</span><i class="fim">\u203A</i></a>' +
-      '<a class="pill" href="nova-redacao.html?metodo=imagem"><i class="pemoji" style="color:var(--purpleSoft);">' + feIcone('camera') + '</i>Enviar imagem<i class="fim">\u203A</i></a>' +
-      '<a class="pill" href="nova-redacao.html?metodo=pdf"><i class="pemoji" style="color:var(--gold);">' + feIcone('pagina') + '</i>Enviar documento<i class="fim">\u203A</i></a>' +
+      '<a class="pill" data-metodo="digitar" href="nova-redacao.html?metodo=digitar"><i class="pemoji">' + feIcone('lapis') + '</i>Digitar na folha <span style="font-size:.7rem;color:var(--muted);font-weight:400;">recomendado</span><i class="fim">\u203A</i></a>' +
+      '<a class="pill" data-metodo="foto" href="nova-redacao.html?metodo=foto"><i class="pemoji">' + feIcone('camera') + '</i>Tirar foto<i class="fim">\u203A</i></a>' +
+      '<a class="pill" data-metodo="imagem" href="nova-redacao.html?metodo=imagem"><i class="pemoji">' + feIcone('galeria') + '</i>Enviar imagem<i class="fim">\u203A</i></a>' +
+      '<a class="pill" data-metodo="pdf" href="nova-redacao.html?metodo=pdf"><i class="pemoji">' + feIcone('pagina') + '</i>Enviar documento<i class="fim">\u203A</i></a>' +
     '</div>' +
     '<nav id="barraInferior">' +
       '<a' + barraClasse('inicio') + ' href="inicio.html"><i class="bEmoji">' + feIcone('casa') + '</i>In\u00edcio</a>' +
@@ -1845,8 +1865,10 @@ function limparTema(){
   var inp = document.getElementById('tituloRedacao');
   var t = inp && inp.value ? inp.value.trim() : '';
   if (!t){ toast('O tema j\u00e1 est\u00e1 vazio'); return; }
+  var _trab = null; try { _trab = localStorage.getItem('redaon-tema-trabalho'); } catch(e) {}
   _temaAntes = { valor: inp.value, sessao: sessionStorage.getItem('tema_selecionado'),
-                 atual: window._temaAtual, url: window.location.href };
+                 atual: window._temaAtual, url: window.location.href, trabalho: _trab };
+  try { localStorage.removeItem('redaon-tema-trabalho'); } catch(e) {}
   inp.value = '';
   try { definirTemaSelecionado(null); } catch(e) {}
   window._temaAtual = null;
@@ -1863,6 +1885,7 @@ function desfazerLimparTema(){
   var inp = document.getElementById('tituloRedacao');
   if (inp) inp.value = a.valor;
   try { if (a.sessao) sessionStorage.setItem('tema_selecionado', a.sessao); else sessionStorage.removeItem('tema_selecionado'); } catch(e) {}
+  try { if (a.trabalho) localStorage.setItem('redaon-tema-trabalho', a.trabalho); } catch(e) {}
   window._temaAtual = a.atual;
   try { if (a.url !== window.location.href) history.replaceState(null, '', a.url); } catch(e) {}
   pintarTema();
@@ -1873,7 +1896,7 @@ function desfazerLimparTema(){
 }
 function reiniciarEixos(){
   eixosGerados = {};
-  try { montarEixos('eixosGaveta', 'gv'); montarEixos('eixosDesktop', 'dk'); } catch(e) {}
+  try { carregarApoio(); } catch(e) {} /* v9-39: relê do banco para o tema atual */
 }
 
 /* ── TEMA (v9-6) ── A faixa mostra ate duas linhas; a gaveta edita o tema inteiro.
@@ -1912,6 +1935,7 @@ function salvarTema(){
   var sess = _temaDaSessao();
   var oficial = !!(sess && sess.id && sess.titulo && sess.titulo.trim() === novo);
   inp.value = novo;
+  if (!novo || !oficial){ try { localStorage.removeItem('redaon-tema-trabalho'); } catch(e) {} } /* v9-39 */
   if (!novo){
     /* apagou: cai a copia, a sessao e o parametro da URL */
     try { definirTemaSelecionado(null); } catch(e) {}
@@ -1932,6 +1956,7 @@ function salvarTema(){
   }
   pintarTema();
   fecharTema();
+  reiniciarEixos(); /* v9-39: o Material de apoio acompanha o tema */
   /* o tema entra na chave do rascunho: regrava para nao perder o vinculo */
   try { rascunhoDebounced(); } catch(e) {}
   if (!novo) toast('Tema apagado');
@@ -1963,6 +1988,7 @@ function fecharTema(){ fecharGaveta('gavetaTema'); }
 
 /* ── MÉTODO DE ENVIO (?metodo= e gaveta pelo 📷) ── */
 function aplicarMetodo(m){
+  try { if (m === 'digitar' || m === 'foto' || m === 'imagem' || m === 'pdf') localStorage.setItem('redaon-metodo', m); } catch(e) {}
   if (m === 'foto' || m === 'imagem' || m === 'pdf'){
     var inp = document.getElementById('inputArquivo');
     inp.accept = (m === 'pdf') ? 'application/pdf' : 'image/*';
@@ -2157,124 +2183,72 @@ var EIXOS = [
     conteudo:'A m\u00fasica <b>"O Tr\u00e2nsito"</b> e memes sobre o busão lotado: repert\u00f3rio leve que, bem amarrado, humaniza a introdu\u00e7\u00e3o.' }
 ];
 var eixosGerados = {};
-function htmlEixo(e, prefixo){
+/* v9-39 · Material de apoio SÓ do banco, igual ao Preparar: o aluno vê o que a
+   Profa. Blanche aprovou, e nada é gerado nem gravado pela IA nesta tela.
+   (Antes: Entender sempre gerado na hora; eixo sem ficha era gerado pela Gemini e
+   GRAVADO no banco como rascunho, ocupando a vaga da ficha da Fábrica.)
+   Eixo sem material aprovado não aparece. Tema livre não tem material de apoio. */
+var APOIO = {}, _apoioVez = 0;
+function htmlEixo(e, prefixo, corpo){
   return '<div class="eixoItem" id="' + prefixo + '-' + e.id + '">' +
     '<button class="cabeca" onclick="toggleEixo(\'' + prefixo + '\',\'' + e.id + '\')">' +
       '<i class="pemoji">' + feIcone(e.emoji) + '</i>' +
       '<span class="nome">' + e.nome + '</span>' +
-      '<span class="estado" id="' + prefixo + '-estado-' + e.id + '"></span>' +
+      '<span class="estado ok daProfa" id="' + prefixo + '-estado-' + e.id + '">\u2713 Da PROfa</span>' +
       '<span class="seta">\u203a</span>' +
     '</button>' +
-    '<div class="corpo"><div class="corpoIn" id="' + prefixo + '-corpo-' + e.id + '">' +
-      '<div class="gerando"><span class="material-symbols-outlined" style="font-size:1rem;">pending</span> Toque para gerar com base no seu tema</div>' +
-    '</div></div>' +
+    '<div class="corpo"><div class="corpoIn" id="' + prefixo + '-corpo-' + e.id + '">' + corpo + '</div></div>' +
   '</div>';
 }
-function montarEixos(alvoId, prefixo){
+function _avisoApoio(tit, txt){ return '<div class="blocoBriefing"><b>' + tit + '</b>' + txt + '</div>'; }
+function montarEixos(alvoId, prefixo, estado){
   var alvo = document.getElementById(alvoId);
-  var curados = EIXOS.filter(function(e){ return e.curado; });
-  var resto   = EIXOS.filter(function(e){ return !e.curado; });
-  var h = htmlEixo(ENTENDER, prefixo).replace('class="eixoItem"', 'class="eixoItem entender"');
-  h += '<p class="rotuloCurado">Para este tema</p>';
-  curados.forEach(function(e){ h += htmlEixo(e, prefixo); });
-  h += '<div id="' + prefixo + '-maisEixos" class="hidden">';
-  h += '<p class="rotuloCurado" style="margin-top:.7rem;">Todos os eixos</p>';
-  resto.forEach(function(e){ h += htmlEixo(e, prefixo); });
-  h += '</div>';
-  h += '<button class="btn ghost" id="' + prefixo + '-verTodos" style="width:100%;min-height:44px;font-size:.8rem;" onclick="verTodosEixos(\'' + prefixo + '\')">Ver todos os eixos \u203a</button>';
+  if (!alvo) return;
+  if (estado === 'carregando'){ alvo.innerHTML = '<div class="gerando"><span class="giro"></span> Buscando o material deste tema\u2026</div>'; return; }
+  if (estado === 'semTema' || !estado){ alvo.innerHTML = _avisoApoio('Escolha um tema da RedaON', 'O material de apoio acompanha os temas da RedaON. Com tema livre, a folha fica s\u00f3 com voc\u00ea.'); return; }
+  if (estado === 'bloqueado'){ alvo.innerHTML = _avisoApoio(feIcone('escudo') + ' Tema n\u00e3o processado', 'Identificamos termos sens\u00edveis. Reformule com foco construtivo ou escolha um tema oficial na biblioteca.'); return; }
+  var h = '';
+  if (APOIO.entender) h += htmlEixo(ENTENDER, prefixo, renderEntender(APOIO.entender)).replace('class="eixoItem"', 'class="eixoItem entender"');
+  var comMaterial = EIXOS.filter(function(e){ return APOIO[e.id]; });
+  if (comMaterial.length){
+    h += '<p class="rotuloCurado">Para este tema</p>';
+    comMaterial.forEach(function(e){ h += htmlEixo(e, prefixo, renderEixoConteudo(APOIO[e.id])); });
+  }
+  if (!h) h = _avisoApoio('Material em preparo', 'O material deste tema ainda est\u00e1 com a professora. Assim que ela aprovar, ele aparece aqui.');
   alvo.innerHTML = h;
-}
-function verTodosEixos(prefixo){
-  document.getElementById(prefixo + '-maisEixos').classList.remove('hidden');
-  document.getElementById(prefixo + '-verTodos').classList.add('hidden');
 }
 function toggleEixo(prefixo, id){
   var item = document.getElementById(prefixo + '-' + id);
-  var abrindo = !item.classList.contains('aberto');
-  item.classList.toggle('aberto');
-  if (abrindo && !eixosGerados[id]){
-    gerarEixoReal(id); /* v9-4: banco (cache) \u2192 Gemini \u2192 salva p/ pr\u00f3ximos alunos */
-  }
+  if (item) item.classList.toggle('aberto');
 }
-
-/* ── Geração REAL do eixo (adaptador RAG da produção p/ a UI nova) ── */
-/* v9-12: PROMPTS TRANSPLANTADOS DO HUB (PR e PROMPT_ENTENDER).
-   Era a causa raiz do "fora de padrao": os PROMPTS_MATERIAL desta tela eram os
-   antigos e pediam "ARGUMENTO 1 / USE AGORA / ENTENDA / COMO CONECTAR", com
-   preambulo do modelo ("Ola! Sou a PROfa...") e linha de "---". O hub pede itens
-   listados e curtos, que o renderizador transforma em ficha.
-   Mais grave: as duas telas gravam o material na MESMA tabela do banco. Com
-   prompts diferentes, o cache ficava com dois formatos misturados, e o aluno via
-   um de cada vez sem motivo aparente. Mesmo prompt nas duas telas = um formato. */
-var PR = {
-  legislacao: function(t){ return 'Liste os 5 principais artigos da Constitui\u00e7\u00e3o Federal e leis relevantes para o tema: "'+t+'". Para cada: n\u00famero, nome e aplica\u00e7\u00e3o ao tema em 1 frase. Use marcadores.'; },
-  historia: function(t){ return 'Explique o contexto hist\u00f3rico de "'+t+'" com 5 marcos temporais numerados. Cada: data/per\u00edodo, fato e relev\u00e2ncia para o Brasil.'; },
-  especialistas: function(t){ return 'Liste 5 especialistas (fil\u00f3sofos/soci\u00f3logos) relevantes para "'+t+'". Para cada: nome, \u00e1rea, obra principal e 1 ideia aplic\u00e1vel ao ENEM.'; },
-  atualidades: function(t){ return 'Liste 5 dados estat\u00edsticos recentes (IBGE, OMS, ONU) sobre "'+t+'". Para cada: fonte, dado num\u00e9rico e como usar como argumento.'; },
-  literatura: function(t){ return 'Liste 5 obras liter\u00e1rias (brasileiras e mundiais) que dialogam com o tema "'+t+'". Para cada: t\u00edtulo, autor, breve descri\u00e7\u00e3o e como usar como repert\u00f3rio no ENEM.'; },
-  filosofia: function(t){ return 'Liste 5 pensadores ou correntes filos\u00f3ficas relevantes para "'+t+'". Para cada: nome do pensador/corrente, conceito-chave e como aplicar ao tema de forma articulada (sem repert\u00f3rio de bolso).'; },
-  cinema: function(t){ return 'Liste 5 filmes, document\u00e1rios ou s\u00e9ries que abordam "'+t+'". Para cada: t\u00edtulo, ano, breve sinopse e como usar como repert\u00f3rio argumentativo.'; },
-  ciencia: function(t){ return 'Liste 5 pesquisas, descobertas cient\u00edficas ou cientistas relevantes para "'+t+'". Para cada: pesquisa/cientista, conclus\u00e3o principal e aplica\u00e7\u00e3o ao tema.'; },
-  culturapop: function(t){ return 'Liste 5 refer\u00eancias de cultura pop brasileira (m\u00fasicas, artistas, fen\u00f4menos sociais, s\u00e9ries nacionais) ligadas a "'+t+'". Para cada: refer\u00eancia, contexto e como articular como repert\u00f3rio no ENEM.'; }
-};
-function PROMPT_ENTENDER(t){
-  return 'Voc\u00ea \u00e9 a PROfa da RedaON. Para o tema de reda\u00e7\u00e3o ENEM "' + t + '", produza um briefing curto em 3 blocos.\n' +
-    'Responda APENAS um JSON v\u00e1lido, sem markdown e sem texto fora dele, exatamente neste formato:\n' +
-    '{"recorte":"<qual \u00e9 exatamente o recorte do tema: o que ele pede e o que N\u00c3O pede, em 2-3 frases>",' +
-    '"banca":"<o que a banca espera: diagn\u00f3stico com causas e consequ\u00eancias + proposta de interven\u00e7\u00e3o completa (agente, a\u00e7\u00e3o, meio, finalidade, detalhamento), em 2-3 frases>",' +
-    '"armadilhas":"<2-3 erros comuns que fazem o candidato tangenciar ou perder pontos neste tema>"}\n' +
-    'M\u00e1ximo de 130 palavras no total. Texto simples dentro dos campos, sem negrito. Sem introdu\u00e7\u00e3o nem despedida.';
-}
-async function gerarEixoReal(id){
+async function carregarApoio(){
+  var vez = ++_apoioVez;
+  APOIO = {};
   var tema = null;
   try { tema = obterTemaAtual(); } catch(e) {}
-  /* v9-13: o selo passa a dizer DE ONDE veio o material (opcao A).
-     Nao e a mesma coisa para o aluno: o do banco passou pela Profa. Blanche,
-     o da IA saiu agora e ninguem conferiu. "Gerado" escondia a diferenca. */
-  var pintar = function(html, ok, origem){
-    ['gv','dk'].forEach(function(p){
-      var c = document.getElementById(p + '-corpo-' + id);
-      var s = document.getElementById(p + '-estado-' + id);
-      if (c) c.innerHTML = html;
-      if (!s) return;
-      s.classList.remove('ok','daProfa','daIA');
-      if (!ok) { s.textContent = ''; return; }
-      if (origem === 'profa'){ s.textContent = '\u2713 Da PROfa'; s.classList.add('ok','daProfa'); }
-      else { s.textContent = 'Gerado agora'; s.classList.add('ok','daIA'); }
-    });
-  };
-  if (!tema){
-    pintar('<div class="blocoBriefing"><b>Defina o tema primeiro</b>Escreva o t\u00edtulo da reda\u00e7\u00e3o (ou escolha um tema na biblioteca) para a PROfa preparar este eixo.</div>', false, null);
-    return;
-  }
-  var bloqueio = checarTemaSensivel(tema.titulo);
-  if (bloqueio){
-    pintar('<div class="blocoBriefing"><b>' + feIcone('escudo') + ' Tema n\u00e3o processado</b>Identificamos termos sens\u00edveis. Reformule com foco construtivo ou escolha um tema oficial na biblioteca.</div>', false, null);
-    return;
-  }
-  pintar('<div class="gerando"><span class="giro"></span> A PROfa est\u00e1 preparando este eixo\u2026</div>', false);
+  var pintar = function(estado){ montarEixos('eixosGaveta', 'gv', estado); montarEixos('eixosDesktop', 'dk', estado); };
+  if (!tema || !tema.id){ pintar('semTema'); return; }
+  if (checarTemaSensivel(tema.titulo)){ pintar('bloqueado'); return; }
+  pintar('carregando');
+  var achado = {};
   try {
-    var texto = null;
-    var origem = 'ia';
-    var eixoBanco = (id === 'entender') ? null : id; /* 'entender' n\u00e3o tem cache no banco */
-    if (eixoBanco && tema.oficial && tema.id){
-      texto = await _buscarMaterialNoBanco(tema.id, eixoBanco);
-      if (texto) origem = 'profa'; /* v9-13: veio do banco, curado */
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/material_apoio?select=eixo,conteudo,estado,revisao_json&tema_id=eq.' + encodeURIComponent(tema.id), {});
+    if (res.ok){
+      (await res.json()).forEach(function(m){
+        if (!m || !m.conteudo) return;
+        /* mesma régua do Preparar: aprovado; eixo em reposição mostra as fichas já
+           aprovadas; Entender só inteiro e aprovado; eixo emperrado não aparece */
+        var emp = !!(m.revisao_json && m.revisao_json.emperrado === true);
+        var ajusteVale = (m.estado === 'ajustes' && !emp && m.eixo !== 'entender');
+        if (m.estado !== 'aprovado' && !ajusteVale) return;
+        achado[m.eixo] = m.conteudo;
+      });
     }
-    if (!texto){
-      var prompt = (id === 'entender') ? PROMPT_ENTENDER(tema.titulo)
-                 : (PR[id](tema.titulo) + '\n\nUse markdown leve. Portugu\u00eas.');
-      texto = await geminiGenerate(prompt, null, null, null, { responseMimeType: 'text/plain' });
-      if (eixoBanco && tema.oficial && tema.id && texto) _salvarMaterialNoBanco(tema.id, eixoBanco, texto);
-    }
-    eixosGerados[id] = true;
-    pintar((id === 'entender') ? renderEntender(texto) : renderEixoConteudo(texto), true, origem);
-  } catch(e){
-    pintar('<p class="erroGerar">N\u00e3o consegui preparar agora. Toque para tentar de novo.</p>', false, null);
-  }
+  } catch(e){ console.warn('[apoio] banco', e); }
+  if (vez !== _apoioVez) return; /* o tema mudou no meio da busca */
+  APOIO = achado;
+  pintar('pronto');
 }
-montarEixos('eixosGaveta', 'gv');
-montarEixos('eixosDesktop', 'dk');
 
 /* ── ENVIO (prévia: progresso simulado → redirect) ── */
 var ETAPAS = ['Lendo seu texto\u2026', 'Avaliando as compet\u00eancias C1 a C5\u2026', 'Conferindo a norma culta\u2026', 'Analisando repert\u00f3rio e argumenta\u00e7\u00e3o\u2026', 'Fechando a sua nota\u2026'];
@@ -4300,19 +4274,7 @@ async function _buscarMaterialNoBanco(temaId, eixo) {
   }
 }
 
-async function _salvarMaterialNoBanco(temaId, eixo, conteudo) {
-  if (!temaId || !conteudo) return;
-  try {
-    const url = `${SUPABASE_URL}/rest/v1/rpc/salvar_material_apoio`;
-    await dbFetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_tema_id: temaId, p_eixo: eixo, p_conteudo: conteudo })
-    });
-  } catch (e) {
-    console.warn('[salvar material] erro:', e);
-  }
-}
+/* v9-39: _salvarMaterialNoBanco saiu — esta tela não grava material no banco. */
 
 
 /* ═══════════ FIM DO MOTOR TRANSPLANTADO ═══════════ */
@@ -4349,7 +4311,14 @@ async function temaPelaUrl(){
      foto). Antes exigia t.id, e por isso tema escrito a mao nunca voltava. */
   try {
     var s = sessionStorage.getItem('tema_selecionado');
-    if (s) { var t = JSON.parse(s); if (t && (t.id || (t.titulo && String(t.titulo).trim()))) aplicarTemaNaFolha(t); }
+    if (s) { var t = JSON.parse(s); if (t && (t.id || (t.titulo && String(t.titulo).trim()))) { aplicarTemaNaFolha(t); return; } }
+  } catch(e) {}
+  /* v9-39: sem URL e sem sessão, a folha abre com o tema que o aluno está estudando
+     no Preparar (gravado no aparelho, sobrevive a fechar o app). Sai quando ele apaga
+     o tema ou troca por outro por conta própria. */
+  try {
+    var w = JSON.parse(localStorage.getItem('redaon-tema-trabalho') || 'null');
+    if (w && w.id && w.titulo) aplicarTemaNaFolha(w);
   } catch(e) {}
 }
 
@@ -4363,6 +4332,7 @@ async function temaPelaUrl(){
   try { await temaPelaUrl(); } catch(e) { console.warn('[tema url]', e); }
   pintarTema(); /* v9-6: a faixa TEMA mostra o tema (ou o convite) desde o primeiro quadro */
   restaurarRascunho();
+  try { carregarApoio(); } catch(e) {} /* v9-39: Material de apoio do banco para o tema da folha */
   restaurarRascunhoNuvem(); /* nuvem: o mais recente vence, sem bloquear a tela */
   ajustarAlturaFolha(); atualizarRegua();
   /* v9-5: sem ?metodo= a gaveta de métodos abre AQUI DENTRO, para que o toque em
