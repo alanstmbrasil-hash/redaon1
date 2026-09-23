@@ -4,6 +4,9 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-19 (23/09/2026): faixa do RedaCast no topo do Material de apoio (selo dos robôs, "Descontraído, leve e cheio de informação sobre o tema",
+     "Escute antes de ler"), tocável inteira, abre o player na Você ON e volta para cá; não conta como ficha. Vídeos e áudios saem da lista
+     de material da professora, e o título "Da sua professora" saiu. -->
 <!-- v2-18 (22/09/2026): botão "Ouvir" no Entender o tema e no Resumo. O áudio é gerado por voz de IA (Gemini, uma voz), lendo o texto aprovado,
      e fica no balde redacast com o nome <id do tema>-entender.<ext> e <id do tema>-resumo.<ext> (m4a, mp3 ou wav). Sem arquivo, o botão não aparece. -->
 <!-- v2-17 (21/09/2026, Fatia C): quiz só com as questões aprovadas pela Profa. Blanche e só a partir de 5; eixo em reposição continua mostrando o que já foi aprovado; ficha sem nome de fonte mostra o site da fonte, com "abrir fonte". -->
@@ -309,6 +312,14 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .cabEtapa b{ font-size:15px; color:var(--text); }
 .cabEtapa .fz{ margin-left:auto; font-size:11px; color:var(--muted); }
 /* v2-18 · ouvir */
+.faixaCast{ display:flex; align-items:center; gap:12px; background:var(--surface); border:1.5px solid rgba(var(--cyanRGB),.28); border-radius:16px; padding:12px 12px 12px 10px; margin:0 0 12px; cursor:pointer; }
+.faixaCast .seloCast{ width:56px; height:56px; flex:0 0 auto; border-radius:50%; background:#fdfbf4; border:1px solid rgba(var(--borderRGB),.14); padding:3px; object-fit:contain; }
+.faixaCast .tx{ flex:1; min-width:0; }
+.faixaCast .tx b{ display:block; font-size:15px; font-weight:800; color:var(--text); }
+.faixaCast .tx span{ display:block; font-size:12.5px; line-height:1.35; color:var(--text2); margin-top:2px; }
+.faixaCast .tx small{ display:block; font-size:11.5px; color:var(--muted); margin-top:4px; }
+.faixaCast .play{ width:36px; height:36px; flex:0 0 auto; border-radius:50%; background:var(--cyan); display:grid; place-items:center; }
+.faixaCast .play svg{ width:15px; height:15px; fill:var(--onCyan); margin-left:2px; }
 .btOuvir{ display:inline-flex; align-items:center; gap:7px; font:inherit; font-size:12.5px; font-weight:700; color:var(--cyan); background:rgba(var(--cyanRGB),.12); border:0; border-radius:99px; padding:7px 13px 7px 9px; margin:0 0 10px; cursor:pointer; }
 .btOuvir img.fe{ width:18px; height:18px; }
 .btOuvir.tocando{ background:var(--cyan); color:var(--onCyan); }
@@ -440,8 +451,8 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
       <!-- 2 · MATERIAL DE APOIO -->
       <section class="painelEtapa">
         <div class="cabEtapa" data-fe="livros"><b>Material de apoio</b><span class="fz" id="fzMaterial"></span></div>
+        <div id="faixaCast"></div>
         <div id="blocoProfessora" class="hidden">
-          <p class="emPreparo" style="font-weight:600;color:var(--text);">Da sua professora</p>
           <div id="listaProfessora"></div>
         </div>
         <div id="listaEixos"><p class="emPreparo">Buscando o material deste tema…</p></div>
@@ -1123,7 +1134,7 @@ async function carregarDaProfessora(){
   if (!TEMA_ID) return;
   try{
     var url = SUPABASE_URL + '/rest/v1/materiais?select=id,nome,tipo,conteudo,arquivo_url,origem,selo,estado,criado_em&tema_id=eq.' + TEMA_ID
-      + '&publicado=eq.true&or=(origem.neq.redaon,estado.eq.aprovado)&order=criado_em.desc';
+      + '&publicado=eq.true&tipo=not.in.(video,audio)&or=(origem.neq.redaon,estado.eq.aprovado)&order=criado_em.desc';
     var res = await dbFetch(url, {});
     if (!res.ok) return;
     var lista = await res.json();
@@ -1142,6 +1153,24 @@ async function carregarDaProfessora(){
         + '</div></div>';
     }).join('');
   }catch(e){ console.warn('[preparar] materiais', e); }
+}
+/* v2-19 · faixa do RedaCast: atalho para o episódio do tema na Você ON; ao voltar, cai de novo no Material de apoio */
+async function carregarRedaCast(){
+  if (!TEMA_ID) return;
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/materiais?select=id&tipo=eq.audio&origem=eq.redaon&publicado=eq.true&tema_id=eq.' + TEMA_ID + '&order=criado_em.desc&limit=1', {});
+    if (!res.ok) return;
+    var l = await res.json(); if (!l.length) return;
+    document.getElementById('faixaCast').innerHTML =
+      '<div class="faixaCast" role="button" tabindex="0" onclick="abrirRedaCast(\'' + l[0].id + '\')">'
+      + '<img class="seloCast" src="avatares/redacast-selo.webp?v=23" alt="">'
+      + '<div class="tx"><b>RedaCast</b><span>Descontra\u00eddo, leve e cheio de informa\u00e7\u00e3o sobre o tema</span><small>Escute antes de ler</small></div>'
+      + '<span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>';
+  }catch(e){ console.warn('[preparar] redacast', e); }
+}
+function abrirRedaCast(id){
+  var volta = 'hub-preparacao.html' + location.search + '#material';
+  location.href = 'voce-on.html?ep=' + encodeURIComponent(id) + '&volta=' + encodeURIComponent(volta);
 }
 function abrirDaProfessora(i){
   var g = document.getElementById('gavProf-'+i);
@@ -1469,7 +1498,9 @@ async function iniciarPreparar(){
   montarMaterial();
   montarAtividades();
   carregarDaProfessora();
+  carregarRedaCast();
   feHidratar(document);
+  if (location.hash === '#material') setTimeout(function(){ irEtapa(1); }, 150);
 }
 iniciarPreparar();
 </script>
