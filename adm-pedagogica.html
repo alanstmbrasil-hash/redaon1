@@ -119,6 +119,8 @@
   /* ===== GAVETA "MAIS" (padrão do mockup: sobe por trás da barra) ===== */
   #gavetaBg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:42; }
   #gavetaBg.open { display:block; }
+  /* ícones da seção ADM em SVG de traço (sem emoji) */
+  .icoAdm{ width:1.15em; height:1.15em; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; display:block; margin:0 auto; }
   #gavetaMais {
     position:fixed; left:0; right:0; bottom:0; z-index:43;
     background:var(--top); border-top:1px solid rgba(var(--borderRGB),.2);
@@ -706,8 +708,8 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
     <!-- ── ADM (só quem tem chave; preenchido por ligarMenuAdm) ── -->
     <div id="secAdmSide" style="display:none;">
       <p class="nav-section-label"><span>ADM</span></p>
-      <a class="nav-item ativo" id="navAdmPedag" href="adm-pedagogica.html" data-ativa="1" title="ADM Pedagógica" style="display:none;"><i class="em">&#128273;</i><span class="tx">ADM Pedagógica</span></a>
-      <a class="nav-item" id="navAdmFabrica" href="adm-fabrica.html" title="ADM Fábrica" style="display:none;"><i class="em">&#127981;</i><span class="tx">ADM Fábrica</span></a>
+      <a class="nav-item ativo" id="navAdmPedag" href="adm-pedagogica.html" data-ativa="1" title="ADM Pedagógica" style="display:none;"><i class="em"><svg class="icoAdm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></i><span class="tx">ADM Pedagógica</span></a>
+      <a class="nav-item" id="navAdmFabrica" href="adm-fabrica.html" title="ADM Fábrica" style="display:none;"><i class="em"><svg class="icoAdm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg></i><span class="tx">ADM Fábrica</span></a>
     </div>
 
     <!-- ── Conta ── -->
@@ -917,8 +919,8 @@ html[data-tema="claro"]{ --ambar:#96700a; } html[data-tema="escuro"]{ --ambar:#e
   <a class="pill" onclick="mostrarEmBreve('Enviar sugestão')"><i class="pemoji">&#128172;</i>Enviar sugestão<i class="fim">&#8250;</i></a>
   <div id="secAdmMais" style="display:none;">
     <p class="tit" style="margin-top:.9rem;">ADM</p>
-    <a class="pill" id="pillAdmPedag" href="adm-pedagogica.html" style="display:none;"><i class="pemoji">&#128273;</i>ADM Pedagógica<i class="fim">&#8250;</i></a>
-    <a class="pill" id="pillAdmFabrica" href="adm-fabrica.html" style="display:none;"><i class="pemoji">&#127981;</i>ADM Fábrica<i class="fim">&#8250;</i></a>
+    <a class="pill" id="pillAdmPedag" href="adm-pedagogica.html" style="display:none;"><i class="pemoji"><svg class="icoAdm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></i>ADM Pedagógica<i class="fim">&#8250;</i></a>
+    <a class="pill" id="pillAdmFabrica" href="adm-fabrica.html" style="display:none;"><i class="pemoji"><svg class="icoAdm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg></i>ADM Fábrica<i class="fim">&#8250;</i></a>
   </div>
   <p class="tit" style="margin-top:.9rem;">Conta</p>
   <a class="pill" onclick="alternarTema()"><i class="pemoji" id="iconeTemaMais">&#9728;&#65039;</i><span id="txtTemaMais">Aparência</span></a>
