@@ -4,7 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Você ON</title>
-<!-- v2-6 (23/09/2026): o player deixa o dock à vista; o episódio passa para as outras telas pelo mini-player do kit (v6-18) e volta a esta
+<!-- v2-7 (23/09/2026): player ocupa a tela inteira, com o dock flutuando por cima (sem o conteúdo vazando entre os dois).
+     v2-6 (23/09/2026): o player deixa o dock à vista; o episódio passa para as outras telas pelo mini-player do kit (v6-18) e volta a esta
      tela retomando do mesmo segundo.
      v2-5 (23/09/2026): player do RedaCast no estilo dos streamings: cena grande, barra larga para arrastar, voltar/avançar 10 s,
      play central, velocidade 1×–2×, ícone do microfone no topo; controles de pular também na tela de bloqueio.
@@ -86,9 +87,9 @@
 .telaVideo .quadro.v{ max-width:min(100vw, 56vh); aspect-ratio:9/16; }
 .telaVideo iframe{ width:100%; height:100%; border:0; display:block; }
 .telaVideo .desc{ color:rgba(255,255,255,.8); font-size:12.5px; padding:14px; max-width:900px; margin:0 auto; }
-.telaAudio{ position:fixed; top:0; left:0; right:0; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:43; background:var(--bg); display:none; flex-direction:column; }
+.telaAudio{ position:fixed; top:0; left:0; right:0; bottom:0; padding-bottom:calc(96px + env(safe-area-inset-bottom)); z-index:43; background:var(--bg); display:none; flex-direction:column; }
 .telaAudio.on{ display:flex; }
-@media(min-width:1024px){ .telaAudio{ bottom:0; left:232px; } #sidebar.mini ~ .telaAudio{ left:62px; } }
+@media(min-width:1024px){ .telaAudio{ padding-bottom:0; left:232px; } #sidebar.mini ~ .telaAudio{ left:62px; } }
 .telaAudio .tp{ display:flex; align-items:center; gap:10px; padding:12px 14px; color:var(--text); }
 .telaAudio .tp button{ background:transparent; border:0; color:var(--text); font-size:24px; line-height:1; font-family:inherit; }
 .telaAudio .tp img.fe{ width:24px; height:24px; }
@@ -112,7 +113,7 @@
 .pPlay{ width:78px; height:78px; border-radius:50%; border:0; background:var(--cyan); color:var(--onCyan); display:grid; place-items:center; cursor:pointer; }
 .pPlay svg{ width:32px; height:32px; fill:currentColor; }
 .pVel{ align-self:center; margin:10px 0 0; font:inherit; font-size:14px; font-weight:700; color:var(--text); background:var(--surface); border:1px solid rgba(var(--borderRGB),.3); border-radius:99px; padding:8px 20px; cursor:pointer; }
-.telaAudio .ia{ font-size:11px; color:var(--muted); padding:0 24px 22px; text-align:center; }
+.telaAudio .ia{ flex:none; font-size:11px; color:var(--muted); padding:10px 24px 12px; margin:0; text-align:center; }
 .mini{ position:fixed; left:12px; right:12px; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:70; display:none; align-items:center; gap:10px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:16px; padding:8px 10px; box-shadow:0 4px 16px rgba(0,0,0,.18); font-size:12.5px; color:var(--text); }
 .mini.on{ display:flex; }
 .mini img{ width:36px; height:36px; flex:none; border-radius:50%; object-fit:contain; background:rgba(253,251,244,.9); }
@@ -163,7 +164,7 @@
 <script src="aluno-base-v6.js?v=6-18"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-6' });
+montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-7' });
 
 /* ids de trilha são os do banco (base, correcao, aposta, rota); os nomes são os aprovados em 22/09/2026 */
 var TRILHAS=[
