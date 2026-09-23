@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-18 (22/09/2026): botão "Ouvir" no Entender o tema e no Resumo. O áudio é gerado por voz de IA (Gemini, uma voz), lendo o texto aprovado,
+     e fica no balde redacast com o nome <id do tema>-entender.<ext> e <id do tema>-resumo.<ext> (m4a, mp3 ou wav). Sem arquivo, o botão não aparece. -->
 <!-- v2-17 (21/09/2026, Fatia C): quiz só com as questões aprovadas pela Profa. Blanche e só a partir de 5; eixo em reposição continua mostrando o que já foi aprovado; ficha sem nome de fonte mostra o site da fonte, com "abrir fonte". -->
 <!-- v2-16 (21/09/2026): texto do Entender sem conteúdo (e, no mesmo padrão, o do Material de apoio sem fichas: "O material deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve."), aprovado pelo Alan: "O conteúdo deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve." -->
 <!-- v2-15 (21/09/2026): caixa de escrever padronizada centralizada, faltando etapa ou com 3 de 3. -->
@@ -306,6 +308,12 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .cabEtapa .fe{ width:22px; height:22px; vertical-align:0; }
 .cabEtapa b{ font-size:15px; color:var(--text); }
 .cabEtapa .fz{ margin-left:auto; font-size:11px; color:var(--muted); }
+/* v2-18 · ouvir */
+.btOuvir{ display:inline-flex; align-items:center; gap:7px; font:inherit; font-size:12.5px; font-weight:700; color:var(--cyan); background:rgba(var(--cyanRGB),.12); border:0; border-radius:99px; padding:7px 13px 7px 9px; margin:0 0 10px; cursor:pointer; }
+.btOuvir img.fe{ width:18px; height:18px; }
+.btOuvir.tocando{ background:var(--cyan); color:var(--onCyan); }
+.audOuvir{ display:none; width:100%; margin:0 0 12px; }
+.audOuvir.on{ display:block; }
 .cabEtapa .fz.ok{ color:var(--green); font-weight:600; }
 .cxPrep{ background:var(--surface); border-radius:16px; box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:14px; }
 .sinPrep{ margin:0 0 10px; font-size:13.5px; line-height:1.5; color:var(--text2); }
@@ -1021,13 +1029,46 @@ function montarEntender(){
   } else {
     corpo = '<p class="emPreparo">O conteúdo deste tema ainda está em preparação. A Professora Blanche vai disponibilizar em breve.</p>';
   }
-  box.innerHTML = '<div class="cxPrep">' + corpo
+  box.innerHTML = '<div class="cxPrep">' + (m && m.conteudo ? '<div id="ouvirEntender"></div>' : '') + corpo
     + (m && m.conteudo ? '<span class="fimEntender" id="fimEntender"></span>' + htmlSelo('entender') : '') + '</div>';
   pintarEtapas();
   /* v2-11 · abrir e ler: conclui quando o fim do texto aparece na tela */
   DISPONIVEL.entender = !!(m && m.conteudo);
   pintarEtapas();
   if (m && m.conteudo && !passosFeitos.entender) vigiarFimEntender();
+  if (m && m.conteudo) prepararOuvir('entender', 'ouvirEntender', 'Ouvir o Entender');
+}
+
+/* ─────────── v2-18 · Ouvir (Entender e Resumo) ─────────── */
+var OUVIR_BASE = 'https://fejlkxmjucnhdvgwtilo.supabase.co/storage/v1/object/public/redacast/';
+var OUVIR_ACHADO = {};
+async function acharAudio(parte){
+  if (!TEMA_ID) return null;
+  if (OUVIR_ACHADO[parte] !== undefined) return OUVIR_ACHADO[parte];
+  var exts = ['m4a','mp3','wav'];
+  for (var i=0;i<exts.length;i++){
+    var u = OUVIR_BASE + TEMA_ID + '-' + parte + '.' + exts[i];
+    try{ var r = await fetch(u, { method:'HEAD', cache:'no-store' }); if (r.ok){ OUVIR_ACHADO[parte]=u; return u; } }catch(e){}
+  }
+  OUVIR_ACHADO[parte] = null; return null;
+}
+async function prepararOuvir(parte, alvoId, rotulo){
+  var alvo = document.getElementById(alvoId); if (!alvo) return;
+  var url = await acharAudio(parte); if (!url) return;
+  var ico = (typeof feIcone === 'function') ? feIcone('fone') : '';
+  alvo.innerHTML = '<button class="btOuvir" id="bt-'+alvoId+'" onclick="alternarOuvir(\''+alvoId+'\')">' + ico + '<span>' + rotulo + '</span></button>'
+    + '<audio class="audOuvir" id="au-'+alvoId+'" controls preload="none" src="' + url + '"></audio>';
+  var au = document.getElementById('au-'+alvoId), bt = document.getElementById('bt-'+alvoId);
+  au.addEventListener('play', function(){ bt.classList.add('tocando');
+    if ('mediaSession' in navigator){ try{ navigator.mediaSession.metadata = new MediaMetadata({ title: rotulo.replace('Ouvir o ','') + ' · ' + TITULO, artist:'RedaON' }); }catch(x){} } });
+  au.addEventListener('pause', function(){ bt.classList.remove('tocando'); });
+  au.addEventListener('ended', function(){ bt.classList.remove('tocando'); });
+}
+function alternarOuvir(alvoId){
+  var au = document.getElementById('au-'+alvoId); if (!au) return;
+  var outros = document.querySelectorAll('.audOuvir'); for (var i=0;i<outros.length;i++){ if (outros[i]!==au) outros[i].pause(); }
+  au.classList.add('on');
+  if (au.paused) au.play().catch(function(){}); else au.pause();
 }
 
 /* ─────────── 2 · Material de apoio (só o que existe) ─────────── */
@@ -1149,7 +1190,8 @@ function abrirAtividade(id){
       /* v2-3 · o resumo pode vir como texto puro ou como objeto { texto } */
       var d = lerConteudo(MATERIAL['resumo'].conteudo);
       var txt = (d && typeof d === 'object') ? (d.texto || d.resumo || '') : String(d || '');
-      inn.innerHTML = '<div class="repItem"><p class="repDado">' + escapeHTML(txt) + '</p></div>';
+      inn.innerHTML = '<div id="ouvirResumo"></div><div class="repItem"><p class="repDado">' + escapeHTML(txt) + '</p></div>';
+      prepararOuvir('resumo', 'ouvirResumo', 'Ouvir o resumo');
     }
     if (id === 'flash')  { inn.innerHTML = htmlFlashcards(); pintarFcMeta(); }
     if (id === 'quiz')   inn.innerHTML = htmlQuiz();
