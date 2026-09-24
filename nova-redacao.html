@@ -313,6 +313,23 @@ html[data-tema="claro"] #barraInferior .fabWrap .fab{ background:#45edee; box-sh
 .modalCorpo { padding:1.25rem; }
 .btnFecharX { background:none; border:none; color:var(--muted); cursor:pointer; display:flex; }
 
+
+/* ===== v6-20 · RODAPÉ EM CÁPSULA (opção B, estilo Netflix) =====
+   Três botões juntos numa cápsula que flutua no centro; o Escrever é um círculo ciano
+   dentro dela, sem saltar para fora. O aceso vira uma cápsula menor em volta do botão. */
+@media(max-width:1023px){
+  #barraInferior{ width:auto; max-width:calc(100% - 24px); justify-content:center; align-items:center; gap:6px;
+    padding:6px; border-radius:999px; bottom:calc(12px + env(safe-area-inset-bottom, 0px)); }
+  #barraInferior a{ flex:0 0 auto; min-width:86px; justify-content:center; padding:6px 14px; border-radius:999px; }
+  #barraInferior .fabWrap{ min-width:0; width:auto; padding:0 2px; }
+  #barraInferior .fabWrap .fab{ width:52px; height:52px; margin-top:0; box-shadow:none; }
+  #barraInferior .fabCap{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  #main-content{ padding-bottom:92px; }
+}
+@media(max-width:359px){
+  #barraInferior a{ min-width:74px; padding:5px 10px; }
+  #barraInferior .fabWrap .fab{ width:48px; height:48px; }
+}
 </style>
 <style id="css-tela4">
 /* ═══════════ TELA 4 · NOVA REDAÇÃO · v9-4 · PRODUÇÃO (modo foco · E2) · v9-27 tema pela URL · v9-28 C2/C3 por passos, régua C3 (fecho contraditório 120), análise completa com diagnóstico · v9-29 trava de tangenciamento só com o C2 concordando · v9-30 OCR linha a linha no gemini-2.5-flash · v9-31 "Tirar foto" abre a câmera · v9-32 grava tema_id · v9-33 foto deitada vira retrato a 2000px, OCR em duas leituras · v9-34 passagem de conferência (foto + transcrição) · v9-35 gaveta e faixa "confira o texto da foto", Conferir e enviar · v9-40 rodapé Início · Escrever · Mais · v9-39 "Tirar foto" de volta na gaveta, \u2713 no último método, tema em trabalho do Preparar, Material de apoio só do banco (sem IA) ═══════════

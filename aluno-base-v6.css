@@ -1,4 +1,5 @@
-/* ============================================================
+/* v6-20 (24/09/2026): rodapé em cápsula, opção B.
+ ============================================================
    RedaON · Portal do Aluno · BASE COMPARTILHADA · v6
    Esqueleto e componentes usados por todas as telas do aluno.
    Mudou aqui → mudou em todas as telas.
@@ -400,3 +401,20 @@ body.aquarela{
 .lNota{ flex:0 0 auto; text-align:right; font-size:20px; font-weight:600; color:var(--cyan); line-height:1.1; }
 .lNota small{ display:block; font-size:11px; font-weight:500; color:var(--green); }
 @media(min-width:641px){ .hTema{ font-size:16px; } .lTxt p{ font-size:14px; } }
+
+/* ===== v6-20 · RODAPÉ EM CÁPSULA (opção B, estilo Netflix) =====
+   Três botões juntos numa cápsula que flutua no centro; o Escrever é um círculo ciano
+   dentro dela, sem saltar para fora. O aceso vira uma cápsula menor em volta do botão. */
+@media(max-width:1023px){
+  #barraInferior{ width:auto; max-width:calc(100% - 24px); justify-content:center; align-items:center; gap:6px;
+    padding:6px; border-radius:999px; bottom:calc(12px + env(safe-area-inset-bottom, 0px)); }
+  #barraInferior a{ flex:0 0 auto; min-width:86px; justify-content:center; padding:6px 14px; border-radius:999px; }
+  #barraInferior .fabWrap{ min-width:0; width:auto; padding:0 2px; }
+  #barraInferior .fabWrap .fab{ width:52px; height:52px; margin-top:0; box-shadow:none; }
+  #barraInferior .fabCap{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  #main-content{ padding-bottom:92px; }
+}
+@media(max-width:359px){
+  #barraInferior a{ min-width:74px; padding:5px 10px; }
+  #barraInferior .fabWrap .fab{ width:48px; height:48px; }
+}
