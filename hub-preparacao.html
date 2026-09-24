@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-24 (24/09/2026): a tela do tema se funde com o Preparar — cartão grande no topo (capa, nome no céu, classificação, lápis para escrever e disquete para salvar) e, abaixo, o "Prepare-se" com as três caixas. -->
 <!-- v2-23 (24/09/2026): o painel claro com "Preparar", o título e os selos sobe por cima da cena, com a borda arredondada, como na tela do tema. -->
 <!-- v2-22 (24/09/2026): a faixa da capa cresce para a proporção da tela do tema (5:4), mostrando a cena inteira. -->
 <!-- v2-21 (24/09/2026): opção B no cabeçalho — com capa, a faixa mostra só a cena e o título desce para a parte clara. -->
@@ -430,6 +431,34 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
   .cabTelaPrep, .trilhoEtapas, .seletorEtapas, .ctaPrep{ max-width:760px; margin-left:auto; margin-right:auto; }
   .fc{ flex:0 0 42%; }
 }
+
+/* v2-24 · tela do tema = Preparar */
+.faixaTema.tFundida{ display:block; min-height:0; padding:0; margin:-1rem -1rem 0; background:none; }
+.tCartao{ margin:12px 12px 0; border-radius:20px; overflow:hidden; background:var(--surface); box-shadow:0 2px 14px rgba(var(--borderRGB),.14); }
+.tPoster{ position:relative; width:100%; aspect-ratio:3/4; max-height:62vh; background-size:cover; background-position:center bottom; background-repeat:no-repeat; }
+.tVoltar{ position:absolute; top:12px; left:12px; width:36px; height:36px; border:0; border-radius:50%; background:rgba(0,0,0,.38);
+  color:#fff; font-size:22px; line-height:1; cursor:pointer; font-family:inherit; z-index:2; }
+.tTopo{ position:absolute; left:0; right:0; top:0; padding:58px 18px 0; }
+.tSelos{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+.tSelos span{ font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:99px;
+  background:#0a8c8d; color:#fff; }
+.tFundida .temaPrep{ margin:0; font-size:22px; font-weight:700; line-height:1.22; color:#0c3a3b; text-shadow:0 1px 10px rgba(255,255,255,.7); }
+.tTopo.longo .temaPrep{ font-size:18px; }
+.tFundida.semCapa .temaPrep{ color:#fff; text-shadow:0 1px 8px rgba(0,0,0,.35); }
+.tLinha{ display:flex; align-items:center; gap:8px; padding:12px 12px 14px 16px; }
+.tClass{ flex:1; min-width:0; font-size:12.5px; color:var(--muted); line-height:1.4; }
+.tClass b{ color:var(--text); font-weight:600; } .tClass b.campoTx{ color:var(--cyan); }
+.tIc{ flex:0 0 auto; width:46px; height:46px; border-radius:50%; display:grid; place-items:center; cursor:pointer; padding:0; }
+.tIc .fe{ width:24px; height:24px; vertical-align:0; }
+.tEsc{ border:0; background:var(--cyan); }
+html[data-tema="claro"] .tEsc{ background:#45edee; }
+.tSalvar{ border:1px solid rgba(var(--borderRGB),.18); background:var(--surface); }
+.tSalvar.on{ background:rgba(var(--cyanRGB),.16); border-color:transparent; }
+.tFundida .topoPrep{ margin:16px 16px 0; }
+.tFundida .topoPrep h1{ color:var(--text); font-size:18px; }
+.tFundida .contaEtapas{ color:var(--cyan); background:rgba(var(--cyanRGB),.12); }
+@media(min-width:641px){ .tCartao{ max-width:520px; margin:16px auto 0; } .tFundida .temaPrep{ font-size:26px; } .tTopo.longo .temaPrep{ font-size:21px; }
+  .tFundida .topoPrep{ max-width:760px; margin:18px auto 0; } }
 </style>
 </head>
 
@@ -446,20 +475,21 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
     </div>
 
     <!-- FAIXA COM A CAPA DO TEMA -->
-    <div class="faixaTema hidden" id="faixaTema">
-      <div class="faixaImg" id="faixaImg"></div>
-      <span class="scrim"></span>
-      <div class="faixaTxt">
-      <div class="topoPrep">
-        <h1>Preparar</h1>
-        <span class="contaEtapas" id="contaEtapas">0 de 3</span>
+    <!-- v2-24 · tela do tema fundida com o Preparar: cartão grande (capa, nome no céu,
+         classificação, lápis e disquete) e, abaixo, o "Prepare-se" com as três caixas -->
+    <div class="faixaTema tFundida hidden" id="faixaTema">
+      <div class="tCartao">
+        <div class="tPoster" id="faixaImg">
+          <button class="tVoltar" onclick="voltarHub()" aria-label="Voltar">&#8249;</button>
+          <div class="tTopo" id="tTopo"><div class="tSelos" id="tSelos"></div><p class="temaPrep" id="temaPrep"></p></div>
+        </div>
+        <div class="tLinha">
+          <span class="tClass" id="tClass"></span>
+          <button class="tIc tEsc" onclick="irEscreverHub()" aria-label="Escrever sobre este tema" title="Escrever"><i data-fe="lapis"></i></button>
+          <button class="tIc tSalvar" id="tSalvar" onclick="alternarSalvoHub()" aria-label="Salvar em Meus Temas" title="Salvar"><i data-fe="disquete"></i></button>
+        </div>
       </div>
-      <p class="temaPrep" id="temaPrep"></p>
-      <div class="linhaPrep">
-        <span class="tg" id="tgFonte"></span><span class="tg" id="tgCampo"></span>
-        <button class="troca" onclick="trocarTemaHub()">Trocar tema</button>
-      </div>
-      </div>
+      <div class="topoPrep"><h1>Prepare-se</h1><span class="contaEtapas" id="contaEtapas">0 de 3</span></div>
     </div>
 
     <div class="seletorEtapas" id="seletorEtapas"></div>
@@ -845,20 +875,21 @@ function preencherFaixa(){
   var faixa = document.getElementById('faixaTema');
   faixa.classList.remove('hidden');
   var cores = corDoCampo(TEMA.campo);
-  /* v2-21 · opção B: a capa vai para a faixa de imagem; sem capa, o degradê do campo segue atrás do texto */
+  /* v2-24 · cartão grande: capa (ou degradê do campo), selos e nome no céu, classificação e os botões */
   var fImg = document.getElementById('faixaImg');
-  if (TEMA.capa_url){
-    faixa.classList.add('comCapa'); faixa.style.background = '';
-    if (fImg) fImg.style.backgroundImage = 'url(' + TEMA.capa_url + ')';
-  } else {
-    faixa.classList.remove('comCapa'); if (fImg) fImg.style.backgroundImage = '';
-    faixa.style.background = 'linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ')';
-  }
+  faixa.classList.toggle('semCapa', !TEMA.capa_url);
+  if (fImg) fImg.style.background = TEMA.capa_url
+    ? 'center bottom/cover no-repeat url(' + TEMA.capa_url + ')'
+    : 'linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ')';
   document.getElementById('temaPrep').textContent = TITULO;
-  document.getElementById('tgFonte').textContent = TEMA_EH_SEMANA ? 'Tema da semana'
-    : (TEMA.ano_enem ? 'ENEM ' + TEMA.ano_enem : 'RedaON');
-  var tc = document.getElementById('tgCampo');
-  tc.textContent = TEMA.campo ? (NOME_CAMPO[TEMA.campo] || TEMA.campo) : 'Sem campo';
+  var topo = document.getElementById('tTopo'); if (topo) topo.classList.toggle('longo', (TITULO||'').length > 90);
+  document.getElementById('tSelos').innerHTML = TEMA_EH_SEMANA ? '<span>Tema da semana</span>' : '';
+  var campoNome = TEMA.campo ? (NOME_CAMPO[TEMA.campo] || TEMA.campo) : 'Sem campo';
+  var origem = TEMA.ano_enem ? ('ENEM ' + TEMA.ano_enem) : 'RedaON';
+  var grupo = !TEMA.ano_enem ? 'RedaON' : ((TEMA.aplicacao||'').toLowerCase()==='regular' ? 'Prova principal' : 'Outras aplica\u00e7\u00f5es');
+  document.getElementById('tClass').innerHTML = '<b>' + escH(origem) + '</b> \u00b7 ' + escH(grupo) + ' \u00b7 <b class="campoTx">' + escH(campoNome) + '</b>';
+  pintarSalvoHub();
+  try { feHidratar(faixa); } catch(e) {}
   document.getElementById('ctaPrep').classList.remove('hidden');
 }
 function pintarEtapas(){
@@ -1497,6 +1528,31 @@ function limparJogo(){
 function irEscreverHub(){
   if (TEMA) definirTemaSelecionado(TEMA);
   abrirMetodos();
+}
+function escH(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function voltarHub(){ if (history.length > 1) history.back(); else window.location.href = 'temas.html'; }
+/* v2-24 · salvar em Meus Temas, igual ao Temas: aparelho + banco (temas_salvos) */
+function _salvosHub(){ try { return JSON.parse(localStorage.getItem('redaon_temas_salvos') || '[]'); } catch(e) { return []; } }
+function pintarSalvoHub(){
+  var bt = document.getElementById('tSalvar'); if (!bt || !TEMA_ID) return;
+  bt.classList.toggle('on', _salvosHub().indexOf(TEMA_ID) >= 0);
+}
+async function alternarSalvoHub(){
+  if (!TEMA_ID) return;
+  var lista = _salvosHub(), tinha = lista.indexOf(TEMA_ID) >= 0;
+  lista = lista.filter(function(x){ return x !== TEMA_ID; });
+  if (!tinha) lista.push(TEMA_ID);
+  try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(lista)); } catch(e) {}
+  pintarSalvoHub();
+  toast(!tinha ? 'Tema salvo em Meus Temas' : 'Tema retirado de Meus Temas');
+  var uid = null; try { uid = authGetUserId(); } catch(e) {}
+  if (!uid || PREVIA) return;
+  try {
+    if (!tinha) await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos', { method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ aluno_id:uid, tema_id:TEMA_ID, origem:'aluno' }) });
+    else await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos?aluno_id=eq.' + uid + '&tema_id=eq.' + TEMA_ID + '&origem=eq.aluno', { method:'DELETE' });
+  } catch(e){ console.warn('[preparar] salvar', e); }
 }
 function trocarTemaHub(){
   try{ sessionStorage.removeItem('tema_selecionado'); }catch(e){}

@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <!-- v4-15 (24/09/2026): a capa do cartão do tema da semana cresce na proporção da tela do tema (5:4), mostrando a cena inteira. -->
+<!-- v4-17 (24/09/2026): tocar num tema abre direto o Preparar (a tela do tema se fundiu com ele). -->
 <!-- v4-16 (24/09/2026): tela do tema com capa vira cartão grande — capa inteira em pé, nome no céu (letra escura), Escrever e Preparar logo abaixo da imagem. -->
 <!-- v4-14 (24/09/2026): opção B — com capa, o cartão do tema da semana e a tela do tema mostram a cena limpa, sem camada escura, e selos + título ficam logo abaixo, na parte clara. -->
 <!-- v4-13 (20/09/2026): o ícone deixa de se separar do nome quando o texto quebra de linha. -->
@@ -613,6 +614,10 @@ body.semRolar{ overflow:hidden; }
   }
   async function abrirTema(id){
     var t = temaPorId(id); if (!t) return;
+    /* v4-17 · a tela do tema se fundiu com o Preparar: o toque leva direto para lá */
+    try { definirTemaSelecionado(t); } catch(e) {}
+    window.location.href = 'hub-preparacao.html?tema=' + encodeURIComponent(id);
+    return;
     var feito = MEUS_FEITOS[id];
     var fav = MEUS_TEMAS_IDS.indexOf(id) >= 0;
     var cores = coresCampo(t.campo);
