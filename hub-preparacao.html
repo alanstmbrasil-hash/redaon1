@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-25 (24/09/2026): a busca do tema passa a trazer campo e capa — quem chegava pelo endereço (?tema=) ficava sem capa e sem campo. -->
 <!-- v2-24 (24/09/2026): a tela do tema se funde com o Preparar — cartão grande no topo (capa, nome no céu, classificação, lápis para escrever e disquete para salvar) e, abaixo, o "Prepare-se" com as três caixas. -->
 <!-- v2-23 (24/09/2026): o painel claro com "Preparar", o título e os selos sobe por cima da cena, com a borda arredondada, como na tela do tema. -->
 <!-- v2-22 (24/09/2026): a faixa da capa cresce para a proporção da tela do tema (5:4), mostrando a cena inteira. -->
@@ -819,7 +820,7 @@ function gravarProgresso(){
    (1) indicação da professora quando existir [futuro — sem fonte no banco ainda]
    (2) ?tema=<id> na URL  (3) sessionStorage  (4) Tema da Semana  (5) convite
    ─────────────────────────────────────────────────────────────── */
-var SEL_TEMA = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de,eixos_relevantes';
+var SEL_TEMA = 'id,titulo,categoria,nivel,ano_enem,aplicacao,descricao,semana_de,eixos_relevantes,campo,capa_url'; /* v2-25: campo e capa_url entram — sem eles, quem chegava pelo endereço ficava sem capa */
 async function temaPorId(id){
   try{
     var filtroAtivo = PREVIA ? '' : '&ativo=eq.true';
