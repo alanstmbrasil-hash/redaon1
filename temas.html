@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-14 (24/09/2026): opção B — com capa, o cartão do tema da semana e a tela do tema mostram a cena limpa, sem camada escura, e selos + título ficam logo abaixo, na parte clara. -->
 <!-- v4-13 (20/09/2026): o ícone deixa de se separar do nome quando o texto quebra de linha. -->
 <!-- v4-12 (20/09/2026): ajuste do texto da chamada: "se Preparar ajuda a Entender o tema…". -->
 <!-- v4-11 (20/09/2026): a busca deixa de esconder o tema procurado. O cartão herói sai de cena quando
@@ -236,6 +237,17 @@ body.semRolar{ overflow:hidden; }
 .ttEixos span{ font-size:11px; font-weight:600; color:var(--cyan); background:rgba(var(--cyanRGB),.10);
   padding:3px 9px; border-radius:99px; }
 @media(min-width:641px){ .ttCapa{ min-height:400px; } .ttCapa .hTit{ font-size:24px; } .ttCx{ flex:0 0 42%; } }
+/* v4-14 · opção B: com capa, a imagem fica limpa (sem camada escura) e selos + título descem
+   para a parte clara, logo abaixo da cena. Sem capa, fica o degradê do campo com texto por cima. */
+.capaHeroi.soImg{ min-height:0; height:170px; padding:0; }
+.ttCapa.soImg{ min-height:0; height:36vh; max-height:340px; padding:0; }
+.hCab{ padding:14px 16px 0; }
+.hCab .hSelos span{ color:var(--cyan); background:rgba(var(--cyanRGB),.12); }
+.hCab .hSelos span.dest{ background:var(--cyan); color:var(--onCyan); }
+.hCab .hTit{ color:var(--text); text-shadow:none; }
+.ttCorpoInt .hCab{ padding:0 0 12px; }
+.ttCorpoInt .hCab .hTit{ font-size:20px; }
+@media(min-width:641px){ .capaHeroi.soImg{ height:220px; } .ttCorpoInt .hCab .hTit{ font-size:24px; } }
 </style>
 </head>
 <body class="aquarela">
@@ -531,12 +543,14 @@ body.semRolar{ overflow:hidden; }
     var fundo = t.capa_url
       ? 'background-image:url('+t.capa_url+');background-size:cover;background-position:center bottom;'
       : 'background:linear-gradient(140deg,'+cores[0]+','+cores[1]+');';
-    alvo.innerHTML='<div class="heroiTema" onclick="abrirTema(\''+t.id+'\')">'
-      + '<div class="capaHeroi" style="'+fundo+'"><span class="scrim"></span>'
-        + '<div class="hSelos"><span class="dest">'+h.selo+'</span>'
+    var cabH = '<div class="hSelos"><span class="dest">'+h.selo+'</span>'
           + (t.semana_de?'<span>'+semanaRotulo(t)+'</span>':'')
           + '<span>'+escapeHtmlSimples(nomeCampo(t.campo))+'</span></div>'
-        + '<p class="hTit">'+escapeHtmlSimples(t.titulo)+'</p></div>'
+        + '<p class="hTit">'+escapeHtmlSimples(t.titulo)+'</p>';
+    alvo.innerHTML='<div class="heroiTema" onclick="abrirTema(\''+t.id+'\')">'
+      + (t.capa_url
+          ? '<div class="capaHeroi soImg" style="'+fundo+'"></div><div class="hCab">' + cabH + '</div>'   /* v4-14 · opção B */
+          : '<div class="capaHeroi" style="'+fundo+'"><span class="scrim"></span>' + cabH + '</div>')
       + '<div class="hPe"><span>'+aplicacaoRotulo(t)+(t.nivel?(' \u00b7 n\u00edvel '+escapeHtmlSimples(String(t.nivel).toLowerCase())):'')+'</span>'
         + (feito?'<span class="jaFiz">j\u00e1 escrevi'+(feito.nota?' \u00b7 '+feito.nota:'')+'</span>':'')+'</div>'
       + '<div class="hAcoesT">'
@@ -596,14 +610,20 @@ body.semRolar{ overflow:hidden; }
     var tela = document.getElementById('telaTema');
     document.getElementById('ttCorpo').innerHTML =
       /* v4-4 · sobre a imagem, só o selo e o tema. O campo desceu para a linha de dados. */
-      '<div class="ttCapa" style="' + fundo + '"><span class="scrim"></span>'
-      + '<button class="ttVoltar" onclick="fecharTema()" aria-label="Voltar">\u2039</button>'
-      + ((t.semana_de || feito) ? ('<div class="hSelos">'
-        + (t.semana_de?'<span class="dest">Tema da semana</span><span>'+semanaRotulo(t)+'</span>':'')
-        + (feito?'<span>j\u00e1 escrevi' + (feito.nota?' \u00b7 '+feito.nota:'') + '</span>':'')
-        + '</div>') : '')
-      + '<p class="hTit">' + escapeHtmlSimples(t.titulo) + '</p></div>'
-      + '<div class="ttCorpoInt">'
+      (function(){
+        var cab = ((t.semana_de || feito) ? ('<div class="hSelos">'
+          + (t.semana_de?'<span class="dest">Tema da semana</span><span>'+semanaRotulo(t)+'</span>':'')
+          + (feito?'<span>j\u00e1 escrevi' + (feito.nota?' \u00b7 '+feito.nota:'') + '</span>':'')
+          + '</div>') : '')
+          + '<p class="hTit">' + escapeHtmlSimples(t.titulo) + '</p>';
+        var voltar = '<button class="ttVoltar" onclick="fecharTema()" aria-label="Voltar">\u2039</button>';
+        /* v4-14 · opção B: com capa, a cena abre limpa e selos + título ficam no topo do painel claro */
+        return t.capa_url
+          ? '<div class="ttCapa soImg" style="' + fundo + '">' + voltar + '</div>'
+            + '<div class="ttCorpoInt"><div class="hCab">' + cab + '</div>'
+          : '<div class="ttCapa" style="' + fundo + '"><span class="scrim"></span>' + voltar + cab + '</div>'
+            + '<div class="ttCorpoInt">';
+      })()
         + '<div class="ttDados"><span><b>' + aplicacaoRotulo(t) + '</b> \u00b7 ' + grupo
           + ' \u00b7 <b class="campoTx">' + escapeHtmlSimples(nomeCampo(t.campo)) + '</b></span>'
           + '<button class="btSalvar' + (fav?' on':'') + '" id="ttSalvar" onclick="alternarFavorito(\''+id+'\', this)"'

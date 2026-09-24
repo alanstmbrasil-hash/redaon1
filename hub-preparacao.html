@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-21 (24/09/2026): opção B no cabeçalho — com capa, a faixa mostra só a cena e o título desce para a parte clara. -->
 <!-- v2-20 (23/09/2026): o tema aberto aqui fica gravado no aparelho como "tema em trabalho"; a Nova redação abre com ele. -->
 <!-- v2-19 (23/09/2026): faixa do RedaCast no topo do Material de apoio (selo dos robôs, "Descontraído, leve e cheio de informação sobre o tema",
      "Escute antes de ler"), tocável inteira, abre o player na Você ON e volta para cá; não conta como ficha. Vídeos e áudios saem da lista
@@ -277,6 +278,19 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
   background:rgba(0,0,0,.32); padding:3px 9px; border-radius:99px; }
 .linhaPrep .troca{ font-size:11px; color:rgba(255,255,255,.9); background:none; border:0; font-family:inherit;
   text-decoration:underline; cursor:pointer; }
+/* v2-21 · opção B: com capa, a faixa mostra só a cena (sem camada escura) e o texto desce para a parte clara */
+.faixaTxt{ position:relative; }
+.faixaImg{ display:none; }
+.faixaTema.comCapa{ display:block; min-height:0; padding:0; background:none; }
+.faixaTema.comCapa .faixaImg{ display:block; height:150px; background-size:cover; background-position:center bottom; background-repeat:no-repeat; }
+.faixaTema.comCapa .scrim{ display:none; }
+.faixaTema.comCapa .faixaTxt{ padding:12px 16px 0; }
+.faixaTema.comCapa .topoPrep h1{ color:var(--text); }
+.faixaTema.comCapa .contaEtapas{ color:var(--cyan); background:rgba(var(--cyanRGB),.12); }
+.faixaTema.comCapa .temaPrep{ color:var(--text); text-shadow:none; }
+.faixaTema.comCapa .linhaPrep .tg{ color:var(--cyan); background:rgba(var(--cyanRGB),.12); }
+.faixaTema.comCapa .linhaPrep .troca{ color:var(--cyan); }
+@media(min-width:641px){ .faixaTema.comCapa .faixaImg{ height:200px; } }
 /* etapas */
 /* v2-1 · as três etapas viram caixas fixas, no estilo das caixas do Início. Só o cartão de
    baixo corre de lado; as caixas ficam paradas e servem de navegação e de estado. */
@@ -429,7 +443,9 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 
     <!-- FAIXA COM A CAPA DO TEMA -->
     <div class="faixaTema hidden" id="faixaTema">
+      <div class="faixaImg" id="faixaImg"></div>
       <span class="scrim"></span>
+      <div class="faixaTxt">
       <div class="topoPrep">
         <h1>Preparar</h1>
         <span class="contaEtapas" id="contaEtapas">0 de 3</span>
@@ -438,6 +454,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
       <div class="linhaPrep">
         <span class="tg" id="tgFonte"></span><span class="tg" id="tgCampo"></span>
         <button class="troca" onclick="trocarTemaHub()">Trocar tema</button>
+      </div>
       </div>
     </div>
 
@@ -824,9 +841,15 @@ function preencherFaixa(){
   var faixa = document.getElementById('faixaTema');
   faixa.classList.remove('hidden');
   var cores = corDoCampo(TEMA.campo);
-  faixa.style.background = TEMA.capa_url
-    ? 'center bottom/cover no-repeat url(' + TEMA.capa_url + ')'
-    : 'linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ')';
+  /* v2-21 · opção B: a capa vai para a faixa de imagem; sem capa, o degradê do campo segue atrás do texto */
+  var fImg = document.getElementById('faixaImg');
+  if (TEMA.capa_url){
+    faixa.classList.add('comCapa'); faixa.style.background = '';
+    if (fImg) fImg.style.backgroundImage = 'url(' + TEMA.capa_url + ')';
+  } else {
+    faixa.classList.remove('comCapa'); if (fImg) fImg.style.backgroundImage = '';
+    faixa.style.background = 'linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ')';
+  }
   document.getElementById('temaPrep').textContent = TITULO;
   document.getElementById('tgFonte').textContent = TEMA_EH_SEMANA ? 'Tema da semana'
     : (TEMA.ano_enem ? 'ENEM ' + TEMA.ano_enem : 'RedaON');
