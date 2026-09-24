@@ -4,7 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Início</title>
-<!-- RedaON · Portal do Aluno · Início · v5-4 · sobre aluno-base-v6 -->
+<!-- RedaON · Portal do Aluno · Início · v5-5 · sobre aluno-base-v6 -->
+<!-- v5-5 (24/09/2026): card Tema da Semana mostra a capa real do tema (temas.capa_url); sem capa ou se a imagem falhar, volta a card-tema.webp -->
 <!-- v5-4 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
 <!-- v4-23 (20/09/2026): renomeação — o apoio do card "Vamos lá!" passa a dizer "você já estudou o material de apoio". O nome da C2 ("Tema e repertório") não muda. -->
 <!-- v4-22 (17/09/2026): nenhuma versão aparece na tela (saiu do título da aba). -->
@@ -836,7 +837,7 @@
   async function cicloVazio(){
     var temaSem = null; try { temaSem = await temaDaSemanaInicio(); } catch(e) {}
     CICLO = [
-      { emo:'livros', img:'card-tema.webp', tt:'Tema da Semana',
+      { emo:'livros', img:'card-tema.webp', src: (temaSem && temaSem.capa_url) || null, tt:'Tema da Semana',
         frase: temaSem ? temaSem.titulo : 'Escolha um tema para come\u00e7ar',
         apoio:'material de apoio com fonte, para estudar antes de escrever',
         cta: temaSem ? 'Preparar' : 'Ver temas', rod:'15 minutos por dia',
@@ -864,7 +865,8 @@
   function cardCiclo(c, i, total){
     var pts = '';
     return '<div class="cardCiclo" onclick="window.location.href=\'' + c.url + '\'">'
-      + '<img class="bg" src="img/' + c.img + '" alt="" loading="' + (i === 0 ? 'eager' : 'lazy') + '"/>'
+      + '<img class="bg" src="' + escapeHtmlSimples(c.src || ('img/' + c.img)) + '" alt="" loading="' + (i === 0 ? 'eager' : 'lazy') + '"'
+      + (c.src ? ' onerror="this.onerror=null;this.src=\'img/' + c.img + '\'"' : '') + '/>'
       + '<span class="veu"></span>'
       + (c.selo ? '<span class="selo">' + escapeHtmlSimples(c.selo) + '</span>' : '')
       + '<div class="top"><span class="emo">' + feIcone(c.emo) + '</span><p class="tt">' + escapeHtmlSimples(c.tt).replace(/\bON\b/g, '<span class="onCard">ON</span>') + '</p></div>'
@@ -1051,7 +1053,7 @@
   /* \u2500\u2500 Grade "Para a sua melhoria": bebe das fontes reais \u2500\u2500 */
   async function temaDaSemanaInicio(){
     try{
-      var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=8', {});
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de,capa_url&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=8', {});
       if (!res.ok) return null;
       var rows = await res.json();
       var hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -1225,7 +1227,7 @@
       try { var ts = await dbGetMinhasTurmas(); semTurma = !(ts && ts.length); } catch(e) {}
 
       CICLO = [
-        { chave:'tema', emo:'livros', img:'card-tema.webp', tt:'Tema da Semana',
+        { chave:'tema', emo:'livros', img:'card-tema.webp', src: (temaSem && temaSem.capa_url) || null, tt:'Tema da Semana',
           frase: temaSem ? temaSem.titulo : 'Escolha um tema para come\u00e7ar',
           apoio: fichas ? (fichas + ' fichas com fonte para estudar antes de escrever') : 'material de apoio com fonte, para estudar antes de escrever',
           cta: temaSem ? 'Preparar' : 'Ver temas',
