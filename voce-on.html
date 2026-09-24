@@ -13,6 +13,7 @@
      v2-3 (22/09/2026): selo dos robôs no tamanho certo nos cartões médios; título do cartão grande em até 2 linhas.
      v2-2 (22/09/2026): capa do episódio usa a versão larga do tema (arquivo -larga) quando existe.
      v2-1 (22/09/2026): arte definitiva do RedaCast (os dois robôs da RedaON): cena no player e no cabeçalho do modo, selo no canto dos cartões e no mini-player.
+     v2-8 (24/09/2026): topo fixo — título, modos e chips ficam parados; o chip rola a faixa até logo abaixo do topo.
      v2-0 (22/09/2026): Você ON com dois modos, Vídeos (claquete) e RedaCast (microfone). Estrutura aprovada pelo Alan no mockup v3:
      "Para você agora" (cartões grandes pela necessidade do aluno: competência-foco → tema da semana → demais), "Continue de onde parou",
      Shorts em faixa própria, uma faixa por trilha (Bases da Redação, Correção Guiada, Tema da Semana, Rota 1.000), chips como atalho.
@@ -28,6 +29,14 @@
 <link href="aluno-base-v6.css?v=6-17" rel="stylesheet"/>
 <style>
 .modos{ display:flex; gap:8px; margin:0 0 12px; }
+/* v2-8 · topo fixo: do título "Você ON" até os chips fica parado; o resto corre por baixo.
+   overflow-x:clip no lugar de hidden, senão o body vira caixa de rolagem e o sticky não prende. */
+html, body{ overflow-x:clip; }
+.vFixo{ position:sticky; top:0; z-index:30; background:var(--bg); margin:-1rem -1rem 0; padding:1rem 1rem 8px;
+  border-bottom:1px solid rgba(var(--borderRGB),.10); }
+.vFixo .vChips{ margin-bottom:0; }
+@media(min-width:1024px){ .vFixo{ margin:-1.5rem -1.5rem 0; padding:1.5rem 1.5rem 8px; } }
+#corpo [id^="f-"]{ scroll-margin-top:calc(var(--altFixo, 150px) + 8px); }
 .modo{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font:inherit; font-size:13px; font-weight:700; padding:10px 8px; border-radius:14px; border:1px solid rgba(var(--borderRGB),.16); background:var(--surface); color:var(--text2); cursor:pointer; }
 .modo.on{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); border-color:transparent; }
 .modo img.fe{ width:22px; height:22px; display:block; }
@@ -161,10 +170,11 @@
 <div class="mini" id="mini"><img src="avatares/redacast-selo.webp?v=23" alt=""><span class="t" id="miniT"></span><button onclick="abrirAudioTela()">Abrir</button><button class="x" onclick="pararAudio()" aria-label="Parar">&#10005;</button></div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-19"></script>
+<script src="aluno-base-v6.js?v=6-20"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
-montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-7' });
+montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-8' });
+try{ montarTopoFixo(); }catch(e){}
 
 /* ids de trilha são os do banco (base, correcao, aposta, rota); os nomes são os aprovados em 22/09/2026 */
 var TRILHAS=[
@@ -234,6 +244,18 @@ function montar(){
 }
 function modo(m){ MODO=m; try{ localStorage.setItem('redaon-voceon-modo',m); }catch(e){} montar(); window.scrollTo({top:0,behavior:'smooth'}); }
 function irFaixa(id){ var el=document.getElementById('f-'+id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+/* v2-8 · junta o título da tela, os modos e os chips numa parte fixa; os chips rolam a faixa para logo abaixo dela */
+function montarTopoFixo(){
+  var cont=document.getElementById('conteudo'), modos=document.getElementById('modos'), chips=document.getElementById('chips');
+  if(!cont||!modos||!chips||document.getElementById('vFixo')) return;
+  var fx=document.createElement('div'); fx.className='vFixo'; fx.id='vFixo';
+  var ph=cont.querySelector('.pgHead');
+  cont.insertBefore(fx, ph||modos);
+  if(ph) fx.appendChild(ph);
+  fx.appendChild(modos); fx.appendChild(chips);
+  var medir=function(){ document.documentElement.style.setProperty('--altFixo', fx.offsetHeight+'px'); };
+  medir(); window.addEventListener('resize', medir);
+}
 
 function abrirVideo(i){ var v=VIDEOS[i];
   document.getElementById('vTit').textContent=v.tit; document.getElementById('vDesc').textContent=v.desc||'';

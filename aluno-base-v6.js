@@ -1,5 +1,6 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-19 (23/09/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-20 (24/09/2026)
+   v6-20: rodapé Início · Escrever · Mais (estilo streaming); Temas e Minhas redações sobem para o topo da gaveta Mais; o Mais acende nas telas que moram nele.
    v6-19: gaveta do Escrever volta a ter "Tirar foto" (câmera direto); "Enviar imagem" ganha o ícone de galeria; o último método usado vem marcado com \u2713.
    v6-18: mini-player do RedaCast em todas as telas do aluno (fora a Você ON, que tem o player, e o Escrever, que pausa):
           o episódio passa de uma tela para outra pela chave redaon-cast e retoma do segundo em que estava.
@@ -511,6 +512,8 @@ function montarEsqueleto(cfg) {
     '<div class="gv atrasBarra" id="gavetaMais">' +
       '<div class="grip"></div>' +
       '<p class="tit">Mais</p>' +
+      '<a class="pill" href="temas.html"><i class="pemoji">' + feIcone('prancheta') + '</i>Temas<i class="fim">\u203A</i></a>' +
+      '<a class="pill" href="minhas-redacoes.html"><i class="pemoji">' + feIcone('livros') + '</i>Minhas reda\u00e7\u00f5es<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="plano.html"><i class="pemoji">' + feIcone('bussola') + '</i>Meu Plano<i class="fim">\u203A</i></a>' +
       '<a class="pill" href="voce-on.html"><i class="pemoji">' + feIcone('play') + '</i>Voc\u00ea <span class="marcaON">ON</span><i class="fim">\u203A</i></a>' +
       '<a class="pill" href="configuracoes.html"><i class="pemoji">' + feIcone('engrenagem') + '</i>Configura\u00e7\u00f5es<i class="fim">\u203A</i></a>' +
@@ -529,10 +532,8 @@ function montarEsqueleto(cfg) {
     '</div>' +
     '<nav id="barraInferior">' +
       '<a' + barraClasse('inicio') + ' href="inicio.html"><i class="bEmoji">' + feIcone('casa') + '</i>In\u00edcio</a>' +
-      '<a' + barraClasse('temas') + ' href="temas.html"><i class="bEmoji">' + feIcone('prancheta') + '</i>Temas</a>' +
       '<a class="fabWrap" onclick="toggleMetodos()"><span class="fab"><i class="bEmoji" style="font-size:20px;">' + feIcone('lapis') + '</i></span><span class="fabCap">Escrever</span></a>' +
-      '<a' + barraClasse('redacoes') + ' href="minhas-redacoes.html"><i class="bEmoji">' + feIcone('livros') + '</i>Reda\u00e7\u00f5es</a>' +
-      '<a id="bMais" onclick="toggleMais()"><i class="bEmoji"><svg class="icoMais" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="2.6" rx="1.3"/><rect x="3" y="10.7" width="18" height="2.6" rx="1.3"/><rect x="3" y="16.4" width="18" height="2.6" rx="1.3"/></svg></i>Mais</a>' +
+      '<a id="bMais"' + (['inicio','escrever'].indexOf(ativo) < 0 && ativo ? ' class="on"' : '') + ' onclick="toggleMais()"><i class="bEmoji"><svg class="icoMais" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="2.6" rx="1.3"/><rect x="3" y="10.7" width="18" height="2.6" rx="1.3"/><rect x="3" y="16.4" width="18" height="2.6" rx="1.3"/></svg></i>Mais</a>' +
     '</nav>' +
     '<div id="toast"></div>';
   while (fim.firstChild) body.appendChild(fim.firstChild);

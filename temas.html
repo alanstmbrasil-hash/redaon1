@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v4-15 (24/09/2026): a capa do cartão do tema da semana cresce na proporção da tela do tema (5:4), mostrando a cena inteira. -->
+<!-- v4-16 (24/09/2026): tela do tema com capa vira cartão grande — capa inteira em pé, nome no céu (letra escura), Escrever e Preparar logo abaixo da imagem. -->
 <!-- v4-14 (24/09/2026): opção B — com capa, o cartão do tema da semana e a tela do tema mostram a cena limpa, sem camada escura, e selos + título ficam logo abaixo, na parte clara. -->
 <!-- v4-13 (20/09/2026): o ícone deixa de se separar do nome quando o texto quebra de linha. -->
 <!-- v4-12 (20/09/2026): ajuste do texto da chamada: "se Preparar ajuda a Entender o tema…". -->
@@ -239,7 +241,7 @@ body.semRolar{ overflow:hidden; }
 @media(min-width:641px){ .ttCapa{ min-height:400px; } .ttCapa .hTit{ font-size:24px; } .ttCx{ flex:0 0 42%; } }
 /* v4-14 · opção B: com capa, a imagem fica limpa (sem camada escura) e selos + título descem
    para a parte clara, logo abaixo da cena. Sem capa, fica o degradê do campo com texto por cima. */
-.capaHeroi.soImg{ min-height:0; height:170px; padding:0; }
+.capaHeroi.soImg{ min-height:0; height:auto; aspect-ratio:5/4; max-height:360px; padding:0; }  /* v4-15: mesma proporção da tela do tema, a cena inteira aparece */
 .ttCapa.soImg{ min-height:0; height:36vh; max-height:340px; padding:0; }
 .hCab{ padding:14px 16px 0; }
 .hCab .hSelos span{ color:var(--cyan); background:rgba(var(--cyanRGB),.12); }
@@ -247,7 +249,19 @@ body.semRolar{ overflow:hidden; }
 .hCab .hTit{ color:var(--text); text-shadow:none; }
 .ttCorpoInt .hCab{ padding:0 0 12px; }
 .ttCorpoInt .hCab .hTit{ font-size:20px; }
-@media(min-width:641px){ .capaHeroi.soImg{ height:220px; } .ttCorpoInt .hCab .hTit{ font-size:24px; } }
+@media(min-width:641px){ .ttCorpoInt .hCab .hTit{ font-size:24px; } }
+/* v4-16 · cartão grande do tema (com capa): capa em pé, nome no céu, botões logo abaixo */
+.ttCartao{ margin:12px 12px 0; border-radius:20px; overflow:hidden; background:var(--surface);
+  box-shadow:0 2px 14px rgba(var(--borderRGB),.14); }
+.ttPoster{ position:relative; width:100%; aspect-ratio:3/4; max-height:64vh; background-size:cover; background-position:center bottom; }
+.ttPosterTopo{ position:absolute; left:0; right:0; top:0; padding:60px 18px 0; }
+.ttPosterTopo .hSelos span{ color:#0c3a3b; background:rgba(255,255,255,.72); }
+.ttPosterTopo .hSelos span.dest{ background:#0a8c8d; color:#fff; }
+.ttPoster .hTit{ color:#0c3a3b; text-shadow:0 1px 10px rgba(255,255,255,.7); font-size:22px; line-height:1.22; }
+.ttPosterTopo.longo .hTit{ font-size:18px; }
+.telaTema .ttAcoes.ttAcoesCard{ margin:0; padding:14px 14px 16px; }
+.ttCorpoInt.semSobe{ margin-top:0; box-shadow:none; background:transparent; padding-bottom:110px; }
+@media(min-width:641px){ .ttPoster .hTit{ font-size:26px; } .ttPosterTopo.longo .hTit{ font-size:21px; } .ttCartao{ max-width:520px; margin:16px auto 0; } }
 </style>
 </head>
 <body class="aquarela">
@@ -306,7 +320,7 @@ body.semRolar{ overflow:hidden; }
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-19"></script>
+<script src="aluno-base-v6.js?v=6-20"></script>
 <script>
   if (typeof authGuard === 'function') { authGuard('aluno'); }
 
@@ -618,9 +632,15 @@ body.semRolar{ overflow:hidden; }
           + '<p class="hTit">' + escapeHtmlSimples(t.titulo) + '</p>';
         var voltar = '<button class="ttVoltar" onclick="fecharTema()" aria-label="Voltar">\u2039</button>';
         /* v4-14 · opção B: com capa, a cena abre limpa e selos + título ficam no topo do painel claro */
+        /* v4-16 · cartão grande: a capa inteira em pé, o nome no céu e Escrever/Preparar logo abaixo */
+        var botoes = '<div class="ttAcoes ttAcoesCard">'
+            + '<button class="bt" onclick="escreverTema(\''+id+'\')">Escrever</button>'
+            + '<button class="bt secundario" onclick="prepararTema(\''+id+'\')">Preparar</button></div>';
         return t.capa_url
-          ? '<div class="ttCapa soImg" style="' + fundo + '">' + voltar + '</div>'
-            + '<div class="ttCorpoInt"><div class="hCab">' + cab + '</div>'
+          ? '<div class="ttCartao"><div class="ttPoster" style="' + fundo + '">' + voltar
+              + '<div class="ttPosterTopo' + ((t.titulo||'').length > 90 ? ' longo' : '') + '">' + cab + '</div></div>'
+              + botoes + '</div>'
+            + '<div class="ttCorpoInt semSobe">'
           : '<div class="ttCapa" style="' + fundo + '"><span class="scrim"></span>' + voltar + cab + '</div>'
             + '<div class="ttCorpoInt">';
       })()
@@ -635,10 +655,10 @@ body.semRolar{ overflow:hidden; }
           + '<span class="junto">' + feIcone('alvo') + ' <b>Atividades</b></span>.</p>'
         + '<div class="ttCarr" id="ttCarr"></div>'
         /* v4-5 · os botões vêm DEPOIS dos materiais, para o aluno ver o que existe antes de decidir */
-        + '<div class="ttAcoes">'
+        + (t.capa_url ? '' : ('<div class="ttAcoes">'
           + '<button class="bt" onclick="escreverTema(\''+id+'\')">Escrever</button>'
           + '<button class="bt secundario" onclick="prepararTema(\''+id+'\')">Preparar</button>'
-        + '</div>'
+        + '</div>'))
       + '</div>';
     tela.classList.add('on');
     document.body.classList.add('semRolar');

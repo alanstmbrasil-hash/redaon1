@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Preparar</title>
+<!-- v2-23 (24/09/2026): o painel claro com "Preparar", o título e os selos sobe por cima da cena, com a borda arredondada, como na tela do tema. -->
+<!-- v2-22 (24/09/2026): a faixa da capa cresce para a proporção da tela do tema (5:4), mostrando a cena inteira. -->
 <!-- v2-21 (24/09/2026): opção B no cabeçalho — com capa, a faixa mostra só a cena e o título desce para a parte clara. -->
 <!-- v2-20 (23/09/2026): o tema aberto aqui fica gravado no aparelho como "tema em trabalho"; a Nova redação abre com ele. -->
 <!-- v2-19 (23/09/2026): faixa do RedaCast no topo do Material de apoio (selo dos robôs, "Descontraído, leve e cheio de informação sobre o tema",
@@ -282,15 +284,17 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 .faixaTxt{ position:relative; }
 .faixaImg{ display:none; }
 .faixaTema.comCapa{ display:block; min-height:0; padding:0; background:none; }
-.faixaTema.comCapa .faixaImg{ display:block; height:150px; background-size:cover; background-position:center bottom; background-repeat:no-repeat; }
+.faixaTema.comCapa .faixaImg{ display:block; aspect-ratio:5/4; max-height:340px; background-size:cover; background-position:center bottom; background-repeat:no-repeat; }  /* v2-22: a cena inteira, como na tela do tema */
 .faixaTema.comCapa .scrim{ display:none; }
-.faixaTema.comCapa .faixaTxt{ padding:12px 16px 0; }
+/* v2-23 · como a tela do tema: o painel claro sobe por cima da cena, com a borda arredondada */
+.faixaTema.comCapa .faixaTxt{ margin-top:-24px; padding:18px 16px 0; background:var(--bg); border-radius:24px 24px 0 0;
+  box-shadow:0 -6px 20px rgba(var(--borderRGB),.10); }
 .faixaTema.comCapa .topoPrep h1{ color:var(--text); }
 .faixaTema.comCapa .contaEtapas{ color:var(--cyan); background:rgba(var(--cyanRGB),.12); }
 .faixaTema.comCapa .temaPrep{ color:var(--text); text-shadow:none; }
 .faixaTema.comCapa .linhaPrep .tg{ color:var(--cyan); background:rgba(var(--cyanRGB),.12); }
 .faixaTema.comCapa .linhaPrep .troca{ color:var(--cyan); }
-@media(min-width:641px){ .faixaTema.comCapa .faixaImg{ height:200px; } }
+@media(min-width:641px){ .faixaTema.comCapa .faixaImg{ max-height:360px; } }
 /* etapas */
 /* v2-1 · as três etapas viram caixas fixas, no estilo das caixas do Início. Só o cartão de
    baixo corre de lado; as caixas ficam paradas e servem de navegação e de estado. */
@@ -494,7 +498,7 @@ html[data-tema="claro"] .veu{ background:rgba(40,38,25,.4); }
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-19"></script>
+<script src="aluno-base-v6.js?v=6-20"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 console.info('RedaON · preparar v2-16 · ' + new Date().toISOString().slice(0,10));
