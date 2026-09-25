@@ -1,5 +1,7 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-21 (25/09/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-23 (25/09/2026)
+   v6-23: descanso em qualquer dia da semana, até 2 (plano_config.descanso "6" ou "3,6"); valores antigos seguem valendo.
+   v6-22: aluno sem turma escolhe o próprio dia da redação (plano_config.dia_redacao); em turma vale o da turma (vazio = segunda) e fica travado.
    v6-21: Fatia A — ciclo do aluno pelo dia da redação da turma (cicloCalcular / cicloDoAluno), usado pelo Meu Plano e pelo Início.
    v6-20: rodapé Início · Escrever · Mais (estilo streaming); Temas e Minhas redações sobem para o topo da gaveta Mais; o Mais acende nas telas que moram nele.
    v6-19: gaveta do Escrever volta a ter "Tirar foto" (câmera direto); "Enviar imagem" ganha o ícone de galeria; o último método usado vem marcado com \u2713.
@@ -707,6 +709,7 @@ function iniciarDock(dockId, opts) {
 /* ─── Ciclo do aluno (v6-21 · Fatia A) ─────────────────────────────────────
    O ciclo gira em torno do dia da redação da turma (turmas.dia_redacao, 1=seg … 7=dom;
    vazio = segunda). Começa dois dias úteis antes da redação e dura 7 dias.
+   Aluno sem turma: o dia vem de plano_config.dia_redacao (ele escolhe no Meu Plano).
    Dia de descanso = o que o aluno marca no Meu Plano (plano_config.descanso); nele não
    há planejamento. O dia da turma nunca é descanso.
    O tema do ciclo é o tema da semana que vale no primeiro dia do ciclo e segue até o fim.
@@ -714,6 +717,7 @@ function iniciarDock(dockId, opts) {
 function cicloISO(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 function cicloDiaSemana(d){ var n = d.getDay(); return n === 0 ? 7 : n; }
 function cicloFolgas(descanso){
+  if (descanso && /^[1-7](,[1-7])?$/.test(descanso)) return descanso.split(',').map(Number);
   if (descanso === 'sab') return [6];
   if (descanso === 'dom') return [7];
   if (descanso === 'nenhum') return [];
@@ -742,19 +746,20 @@ function cicloDoAluno(opc){
   if (_cicloPromessa && !(opc && opc.recarregar)) return _cicloPromessa;
   _cicloPromessa = (async function(){
     var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
-    var diaRed = null, descanso = 'sab', tema = null;
+    var diaRed = null, descanso = 'sab', tema = null, emTurma = false, diaProprio = null;
     if (uid && typeof dbFetch === 'function' && typeof SUPABASE_URL !== 'undefined'){
       try{
         var rt = await dbFetch(SUPABASE_URL + '/rest/v1/alunos_turma?aluno_id=eq.' + uid + '&status=eq.ativo&select=turmas(dia_redacao)&order=entrou_em.desc&limit=1', {});
-        if (rt.ok){ var t = await rt.json(); if (t[0] && t[0].turmas) diaRed = t[0].turmas.dia_redacao; }
+        if (rt.ok){ var t = await rt.json(); if (t[0] && t[0].turmas) { emTurma = true; diaRed = t[0].turmas.dia_redacao; } }
       }catch(e){}
       try{
-        var rc = await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?aluno_id=eq.' + uid + '&select=descanso', {});
-        if (rc.ok){ var c = await rc.json(); if (c[0] && c[0].descanso) descanso = c[0].descanso; }
+        var rc = await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?aluno_id=eq.' + uid + '&select=descanso,dia_redacao', {});
+        if (rc.ok){ var c = await rc.json(); if (c[0]) { if (c[0].descanso) descanso = c[0].descanso; diaProprio = c[0].dia_redacao; } }
       }catch(e){}
     }
-    var ciclo = cicloCalcular(diaRed, descanso);
-    ciclo.descanso = descanso;
+    /* em turma vale o dia da turma (vazio = segunda); sem turma, o dia que o aluno escolheu */
+    var ciclo = cicloCalcular(emTurma ? diaRed : diaProprio, descanso);
+    ciclo.descanso = descanso; ciclo.emTurma = emTurma;
     if (typeof dbFetch === 'function' && typeof SUPABASE_URL !== 'undefined'){
       try{
         var r = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de,capa_url,campo&ativo=eq.true&semana_de=lte.' + cicloISO(ciclo.inicio) + '&order=semana_de.desc&limit=1', {});

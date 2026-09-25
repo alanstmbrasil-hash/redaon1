@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Meu Plano</title>
+<!-- v3-2 (25/09/2026): descanso em qualquer dia da semana, até 2, com o sábado pré-marcado (padrão); o dia da redação aparece travado na gaveta; botão Pronto salva e a semana se remonta. Kit v6-23. -->
+<!-- v3-1 (25/09/2026): aluno sem turma escolhe o dia da redação na gaveta do rodapé (plano_config.dia_redacao; troca na hora, a semana se remonta); em turma a linha mostra o dia da turma, "definido pela professora", sem ajuste. Kit v6-22. -->
 <!-- v3-0 (25/09/2026): Fatia A — a semana vira o ciclo da turma: começa dois dias úteis antes do dia da redação (turmas.dia_redacao; vazio = segunda) e dura 7 dias; o preparar ocupa dois dias; os dias de descanso aparecem na trilha no lugar em que caem; dia útil que sobra vira "Reforço à sua escolha" (Você ON); selo "dia da turma"; ícones sempre normais (sem esmaecer, sem halo). O tema é o do ciclo e a chave de plano_itens.semana_de é a data da redação. Conta no kit v6-21 (cicloCalcular/cicloDoAluno). -->
 <!-- v2-5 (21/09/2026): a competência-foco passa a ser a menor MÉDIA das últimas 4 redações, a mesma média do boletim (decisão do Alan). Empate: menor nota da última redação; persistindo, C1→C5. -->
 <!-- v2-4 (21/09/2026): regra A do passo 1 — o Entender só é exigido quando o tema tem Entender aprovado; sem ele, basta o Material de apoio (o aluno não fica travado por falta de conteúdo). -->
@@ -42,7 +44,7 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-<link href="aluno-base-v6.css?v=6-21" rel="stylesheet"/>
+<link href="aluno-base-v6.css?v=6-23" rel="stylesheet"/>
 
 <style>
 /* ══ Meu Plano ══ */
@@ -123,6 +125,7 @@ html[data-tema="escuro"] .btP.verm{ color:#2a0e0e; }
 .livre{ display:flex; gap:.7rem; align-items:center; margin-top:.75rem;
   border-top:1px solid rgba(var(--borderRGB),.12); padding-top:.7rem; }
 .livre .icoP{ width:26px; height:26px; }
+.livre.livre2{ margin-top:.55rem; border-top:0; padding-top:0; }
 .livre .nomeP{ margin:0; }
 .livre .link{ color:var(--cyan); cursor:pointer; text-decoration:underline; text-decoration-style:dotted; }
 
@@ -188,6 +191,9 @@ html[data-tema="claro"] .nv-ouro .vl, html[data-tema="claro"] .nv-ouro .chev{ co
 .opt .ck{ opacity:0; color:var(--cyan); font-weight:800; }
 .opt.sel{ border-color:var(--cyan); background:rgba(var(--cyanRGB),.08); }
 .opt.sel .ck{ opacity:1; }
+.opt.trava{ opacity:.55; cursor:default; }
+.opt .nt{ font-size:.7rem; color:var(--muted); font-weight:700; }
+.gvPronto{ width:100%; justify-content:center; min-height:44px; margin-top:.35rem; }
 
 @media(min-width:641px){
   .cartao{ flex:0 0 min(420px, 86%); }
@@ -212,16 +218,35 @@ html[data-tema="claro"] .nv-ouro .vl, html[data-tema="claro"] .nv-ouro .chev{ co
 </div>
 </div>
 
-<!-- gaveta: dias de descanso -->
+<!-- gaveta: dias de descanso (v3-2 · qualquer dia, até 2) -->
 <div class="gvBg" id="gvDiasBg" onclick="fecharGaveta('gvDias')"></div>
 <div class="gv" id="gvDias">
   <div class="gvGrip"></div>
   <p class="gvTit">Quais são os seus dias de descanso?</p>
-  <p class="gvSub">A RedaON sugere os dias respeitando o seu ritmo. Nenhuma tarefa é presa ao dia: você pode fazer tudo de uma vez.</p>
-  <button class="opt" data-v="sab"     onclick="escolherDescanso(this)"><span>Só sábado</span><span class="ck">✓</span></button>
-  <button class="opt" data-v="sab_dom" onclick="escolherDescanso(this)"><span>Sábado e domingo</span><span class="ck">✓</span></button>
-  <button class="opt" data-v="dom"     onclick="escolherDescanso(this)"><span>Só domingo</span><span class="ck">✓</span></button>
-  <button class="opt" data-v="nenhum"  onclick="escolherDescanso(this)"><span>Nenhum — estudo todos os dias</span><span class="ck">✓</span></button>
+  <p class="gvSub">Marque até 2 dias. Neles a RedaON não sugere nada. Nenhuma tarefa é presa ao dia: você pode fazer tudo de uma vez.</p>
+  <button class="opt" data-v="1" onclick="marcarFolga(this)"><span>Segunda</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="2" onclick="marcarFolga(this)"><span>Terça</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="3" onclick="marcarFolga(this)"><span>Quarta</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="4" onclick="marcarFolga(this)"><span>Quinta</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="5" onclick="marcarFolga(this)"><span>Sexta</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="6" onclick="marcarFolga(this)"><span>Sábado</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="7" onclick="marcarFolga(this)"><span>Domingo</span><span class="ck">✓</span></button>
+  <button class="btP gvPronto" onclick="salvarFolgas()">Pronto</button>
+</div>
+
+<!-- gaveta: dia da redação (aluno sem turma) -->
+<div class="gvBg" id="gvDiaRedBg" onclick="fecharGaveta('gvDiaRed')"></div>
+<div class="gv" id="gvDiaRed">
+  <div class="gvGrip"></div>
+  <p class="gvTit">Em que dia você escreve a redação?</p>
+  <p class="gvSub">A sua semana gira em torno desse dia. Ao trocar, ela é remontada a partir de hoje.</p>
+  <button class="opt" data-v="1" onclick="escolherDiaRed(this)"><span>Segunda</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="2" onclick="escolherDiaRed(this)"><span>Terça</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="3" onclick="escolherDiaRed(this)"><span>Quarta</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="4" onclick="escolherDiaRed(this)"><span>Quinta</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="5" onclick="escolherDiaRed(this)"><span>Sexta</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="6" onclick="escolherDiaRed(this)"><span>Sábado</span><span class="ck">✓</span></button>
+  <button class="opt" data-v="7" onclick="escolherDiaRed(this)"><span>Domingo</span><span class="ck">✓</span></button>
 </div>
 
 <!-- gaveta: trocar a competência do foco -->
@@ -234,13 +259,13 @@ html[data-tema="claro"] .nv-ouro .vl, html[data-tema="claro"] .nv-ouro .chev{ co
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-21"></script>
+<script src="aluno-base-v6.js?v=6-23"></script>
 <script>
 console.info('[RedaON] Meu Plano v2-5');
 document.documentElement.setAttribute('data-tela','meu-plano');
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v3-0' });
+montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v3-2' });
 
 var NOME_COMP = { C1:'Norma culta', C2:'Repertório', C3:'Argumentação', C4:'Coesão', C5:'Intervenção' };
 var NOME_DIA  = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex', 6:'sáb', 7:'dom' };
@@ -248,7 +273,7 @@ var DIA_LONGO = { 1:'segunda', 2:'terça', 3:'quarta', 4:'quinta', 5:'sexta', 6:
 
 var SEMANA_DE = null;      /* v3-0 · chave do ciclo = data da redação 'YYYY-MM-DD' */
 var CICLO     = null;      /* v3-0 · cicloCalcular() do kit */
-var DIA_TURMA = null;      /* turmas.dia_redacao (1..7) ou null */
+
 var DESCANSO  = 'sab';     /* padrão definido pela Profa. Blanche; o aluno troca na gaveta */
 var TEMA      = null;      /* tema da semana */
 var FOCO      = null;      /* 'C1'..'C5' */
@@ -345,7 +370,7 @@ function cardSemana(){
   var feitos = ps.filter(function(p){ return p.feito; }).length;
 
   var h = '<div class="cartao"><div class="cabCart"><h2>Sua semana</h2><span>' + periodoCiclo() + '</span></div>'
-    + '<p class="cicloTurma">' + (DIA_TURMA ? 'Redação da turma: ' : 'Dia da redação: ') + '<b>' + DIA_LONGO[CICLO.diaRedacao] + '</b></p>'
+    + '<p class="cicloTurma">' + (CICLO.emTurma ? 'Redação da turma: ' : 'Dia da redação: ') + '<b>' + DIA_LONGO[CICLO.diaRedacao] + '</b></p>'
     + '<p class="subCart">Os dias são sugestão. Pode adiantar e deixar o resto livre.</p>'
     + '<div class="prog"><span class="rot">Progresso</span>'
     + '<div class="pista"><i style="width:' + (feitos/ps.length*100) + '%"></i></div>'
@@ -433,7 +458,13 @@ function cardSemana(){
   var tituloFolga = folga.length
     ? ('Descanso: ' + folga.map(function(d){ return DIA_LONGO[d]; }).join(' e '))
     : 'Sem dia de descanso';
-  h += '<div class="livre">' + feIcone('sol').replace('class="fe"','class="fe icoP"')
+  h += '<div class="livre">' + feIcone('lapis').replace('class="fe"','class="fe icoP"')
+    +  '<div><p class="nomeP">' + (CICLO.emTurma ? 'Redação da turma: ' : 'Dia da redação: ') + DIA_LONGO[CICLO.diaRedacao] + '</p>'
+    +  (CICLO.emTurma
+         ? '<p class="ondeP">definido pela professora</p>'
+         : '<p class="ondeP"><span class="link" onclick="abrirGaveta(\'gvDiaRed\')">ajustar o dia da minha redação</span></p>')
+    +  '</div></div>';
+  h += '<div class="livre livre2">' + feIcone('sol').replace('class="fe"','class="fe icoP"')
     +  '<div><p class="nomeP">' + tituloFolga + '</p>'
     +  '<p class="ondeP"><span class="link" onclick="abrirGaveta(\'gvDias\')">ajustar meus dias de descanso</span></p></div></div>';
   return h + '</div>';
@@ -555,14 +586,6 @@ async function carregarTema(){
     }
     return linhas[0] || null;
   }catch(e){ console.warn('[meu plano] tema', e); return null; }
-}
-async function diaDaTurma(){
-  try{
-    var res = await dbFetch(SUPABASE_URL + '/rest/v1/alunos_turma?aluno_id=eq.' + UID + '&status=eq.ativo&select=turmas(dia_redacao)&order=entrou_em.desc&limit=1', {});
-    if (!res.ok) return null;
-    var r = await res.json();
-    return (r[0] && r[0].turmas) ? r[0].turmas.dia_redacao : null;
-  }catch(e){ return null; }
 }
 async function carregarConfig(){
   try{
@@ -702,9 +725,19 @@ window.marcarRevisei = async function(bt){
 };
 
 window.abrirGaveta = function(id){
+  if (id === 'gvDiaRed') {
+    document.querySelectorAll('#gvDiaRed .opt').forEach(function(o){
+      o.classList.toggle('sel', +o.getAttribute('data-v') === CICLO.diaRedacao);
+    });
+  }
   if (id === 'gvDias') {
+    FOLGAS_ED = CICLO.folgas.filter(function(d){ return d !== CICLO.diaRedacao; });
     document.querySelectorAll('#gvDias .opt').forEach(function(o){
-      o.classList.toggle('sel', o.getAttribute('data-v') === DESCANSO);
+      var v = +o.getAttribute('data-v');
+      var trava = (v === CICLO.diaRedacao);
+      o.classList.toggle('trava', trava);
+      o.classList.toggle('sel', FOLGAS_ED.indexOf(v) !== -1);
+      o.querySelector('.ck').outerHTML = trava ? '<span class="ck nt">dia da redação</span>' : '<span class="ck">\u2713</span>';
     });
   }
   document.getElementById(id + 'Bg').classList.add('open');
@@ -714,17 +747,48 @@ window.fecharGaveta = function(id){
   document.getElementById(id + 'Bg').classList.remove('open');
   document.getElementById(id).classList.remove('open');
 };
-window.escolherDescanso = async function(el){
-  DESCANSO = el.getAttribute('data-v');
-  document.querySelectorAll('#gvDias .opt').forEach(function(o){ o.classList.remove('sel'); });
+window.escolherDiaRed = async function(el){
+  if (CICLO.emTurma) return;
+  var v = +el.getAttribute('data-v');
+  document.querySelectorAll('#gvDiaRed .opt').forEach(function(o){ o.classList.remove('sel'); });
   el.classList.add('sel');
-  salvarConfig(DESCANSO);
-  var novo = cicloCalcular(DIA_TURMA, DESCANSO);
-  if (novo.chave !== SEMANA_DE) { setTimeout(function(){ window.location.reload(); }, 400); return; }
-  novo.tema = CICLO.tema; novo.descanso = DESCANSO;
+  if (v === CICLO.diaRedacao) { setTimeout(function(){ fecharGaveta('gvDiaRed'); }, 180); return; }
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?on_conflict=aluno_id', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Prefer':'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ aluno_id: UID, dia_redacao: v })
+    });
+    if (!res.ok) throw new Error('status ' + res.status);
+    if (typeof toast === 'function') toast('Pronto. Sua semana foi remontada.');
+    setTimeout(function(){ window.location.reload(); }, 600);
+  }catch(e){
+    console.warn('[meu plano] dia da redação', e);
+    if (typeof toast === 'function') toast('Não consegui trocar agora. Tente de novo.');
+  }
+};
+var FOLGAS_ED = [];
+window.marcarFolga = function(el){
+  var v = +el.getAttribute('data-v');
+  if (v === CICLO.diaRedacao) return;
+  var i = FOLGAS_ED.indexOf(v);
+  if (i !== -1) FOLGAS_ED.splice(i, 1);
+  else {
+    if (FOLGAS_ED.length >= 2) { if (typeof toast === 'function') toast('Escolha até 2 dias de descanso.'); return; }
+    FOLGAS_ED.push(v);
+  }
+  el.classList.toggle('sel', FOLGAS_ED.indexOf(v) !== -1);
+};
+window.salvarFolgas = async function(){
+  var valor = FOLGAS_ED.length ? FOLGAS_ED.slice().sort().join(',') : 'nenhum';
+  DESCANSO = valor;
+  await salvarConfig(DESCANSO);
+  var novo = cicloCalcular(CICLO.diaRedacao, DESCANSO);
+  if (novo.chave !== SEMANA_DE) { if (typeof toast === 'function') toast('Pronto. Sua semana foi remontada.'); setTimeout(function(){ window.location.reload(); }, 600); return; }
+  novo.tema = CICLO.tema; novo.descanso = DESCANSO; novo.emTurma = CICLO.emTurma;
   CICLO = novo;
   desenhar();
-  setTimeout(function(){ fecharGaveta('gvDias'); }, 180);
+  fecharGaveta('gvDias');
 };
 
 window.abrirFoco = async function(comp){
@@ -762,7 +826,6 @@ function mostrar(id){
     if (!UID) { mostrar('estadoErro'); return; }
     var cic = await cicloDoAluno();
     DESCANSO  = cic.descanso || DESCANSO;
-    DIA_TURMA = await diaDaTurma();
     CICLO     = cic;
     SEMANA_DE = cic.chave;
     TEMA      = cic.tema;
