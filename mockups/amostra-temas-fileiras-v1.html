@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Amostra · Temas em fileiras</title>
+<script>
+(function(){ var p='auto'; try{ p=localStorage.getItem('redaon-tema')||'auto'; }catch(e){}
+  var t=p==='auto'?(matchMedia('(prefers-color-scheme: light)').matches?'claro':'escuro'):p;
+  document.documentElement.setAttribute('data-tema',t); })();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{ --bg:#10131a; --surface:#1d2026; --surface2:#272a31; --text:#e1e2eb; --text2:#c8c4d7; --muted:#928ea0;
+  --borderRGB:71,69,84; --cyan:#45edee; --cyanRGB:69,237,238; --onCyan:#002020; --capaBg:#2b3a44; }
+html[data-tema="claro"]{ --bg:#fdfbf4; --surface:#ffffff; --surface2:#f6f2e6; --text:#0a4a4b; --text2:#3a5556; --muted:#8a8576;
+  --borderRGB:10,74,75; --cyan:#0a8c8d; --cyanRGB:10,140,141; --onCyan:#ffffff; --capaBg:#dfe9e4; }
+*{ box-sizing:border-box; }
+html,body{ margin:0; background:var(--bg); color:var(--text); font-family:Inter,system-ui,sans-serif; overflow-x:clip; }
+body{ padding:env(safe-area-inset-top,0) 0 calc(2rem + env(safe-area-inset-bottom,0)); max-width:40rem; margin:0 auto; }
+.pad{ padding:0 1rem; }
+.aviso{ font-size:.7rem; color:var(--muted); margin:.9rem 0 .4rem; line-height:1.45; }
+.aviso b{ color:var(--text2); }
+.ctrl{ display:flex; gap:.35rem; flex-wrap:wrap; align-items:center; margin:.3rem 0; font-size:.68rem; color:var(--muted); }
+.mini{ min-height:30px; padding:0 .6rem; border-radius:8px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.28);
+  color:var(--text2); font:600 .7rem Inter,sans-serif; cursor:pointer; }
+.mini.on{ background:var(--text2); color:var(--bg); border-color:var(--text2); }
+h1{ font-size:1.25rem; font-weight:800; margin:.9rem 0 .7rem; }
+.chips{ display:flex; gap:.4rem; overflow-x:auto; scrollbar-width:none; padding:0 1rem .15rem; }
+.chips::-webkit-scrollbar{ display:none; }
+.chip{ flex:0 0 auto; min-height:36px; padding:0 14px; border-radius:10px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.28);
+  color:var(--text2); font:600 .78rem Inter,sans-serif; cursor:pointer; }
+.chip.on{ background:var(--cyan); color:var(--onCyan); border-color:var(--cyan); }
+.sub{ display:flex; gap:.4rem; padding:.45rem 1rem 0; }
+.sub .chip{ min-height:32px; font-size:.72rem; }
+.sub .chip.on{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); border-color:rgba(var(--cyanRGB),.5); }
+.busca{ display:flex; gap:.5rem; padding:.7rem 1rem .2rem; }
+.campoBusca{ flex:1; min-height:42px; display:flex; align-items:center; gap:.5rem; padding:0 .8rem; border-radius:12px;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); color:var(--muted); font-size:.8rem; }
+.btCampo{ min-height:42px; padding:0 .8rem; border-radius:12px; background:var(--surface); border:1px solid rgba(var(--borderRGB),.3);
+  color:var(--text2); font:700 .78rem Inter,sans-serif; display:flex; align-items:center; gap:.35rem; }
+.fileira{ margin-top:1.1rem; }
+.cabF{ display:flex; align-items:baseline; justify-content:space-between; padding:0 1rem; margin-bottom:.5rem; }
+.cabF h2{ font-size:.92rem; font-weight:800; margin:0; }
+.cabF span{ font-size:.72rem; font-weight:700; color:var(--cyan); }
+.trilho{ display:flex; gap:.6rem; overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding:0 1rem; padding:0 1rem .2rem; scrollbar-width:none; }
+.trilho::-webkit-scrollbar{ display:none; }
+.card{ flex:0 0 var(--larg); scroll-snap-align:start; cursor:pointer; }
+body.medio{ --larg:clamp(112px, 34vw, 150px); }
+body.grande{ --larg:clamp(140px, 44vw, 190px); }
+.capa{ position:relative; aspect-ratio:3/4; border-radius:.8rem; overflow:hidden; background:var(--capaBg);
+  border:1px solid rgba(var(--borderRGB),.14); }
+.capa img{ width:100%; height:100%; object-fit:cover; display:block; }
+.capa .semArte{ position:absolute; inset:0; display:grid; place-items:center; font-size:.62rem; color:var(--muted); text-align:center; padding:.5rem; }
+.tt{ font-size:.76rem; font-weight:700; line-height:1.28; margin:.4rem 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.meta{ font-size:.66rem; color:var(--muted); margin:.15rem 0 0; }
+/* selo do tema da semana — três variantes */
+.pilula{ position:absolute; top:.4rem; left:.4rem; font-size:.58rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em;
+  background:var(--cyan); color:var(--onCyan); border-radius:99px; padding:3px 8px; }
+.linhaSem{ font-size:.66rem; font-weight:800; color:var(--cyan); margin:.15rem 0 0; }
+.icoSem{ position:absolute; top:.4rem; left:.4rem; width:26px; height:26px; border-radius:50%; background:var(--cyan); color:var(--onCyan);
+  display:grid; place-items:center; }
+.icoSem svg{ width:15px; height:15px; }
+.toast{ position:fixed; left:50%; bottom:1.2rem; transform:translateX(-50%); background:var(--surface2); color:var(--text);
+  border:1px solid rgba(var(--borderRGB),.3); border-radius:.7rem; padding:.55rem .9rem; font-size:.78rem; opacity:0; transition:opacity .2s; pointer-events:none; }
+.toast.on{ opacity:1; }
+</style>
+</head>
+<body class="medio">
+<div class="pad">
+  <p class="aviso"><b>Amostra · Temas em fileiras.</b> Os controles abaixo são só para você comparar; não fazem parte da tela.</p>
+  <div class="ctrl">Tamanho do cartão:
+    <button class="mini on" data-g="tam" data-v="medio" onclick="ctl(this)">Médio (≈2,7 na tela)</button>
+    <button class="mini" data-g="tam" data-v="grande" onclick="ctl(this)">Grande (≈2 na tela)</button></div>
+  <div class="ctrl">Tema da semana:
+    <button class="mini on" data-g="selo" data-v="pilula" onclick="ctl(this)">Pílula</button>
+    <button class="mini" data-g="selo" data-v="linha" onclick="ctl(this)">Linha</button>
+    <button class="mini" data-g="selo" data-v="icone" onclick="ctl(this)">Ícone</button></div>
+  <div class="ctrl">Tema: <button class="mini" onclick="tema('claro')">Claro</button><button class="mini" onclick="tema('escuro')">Escuro</button><button class="mini" onclick="tema('auto')">Auto</button></div>
+  <h1>Temas</h1>
+</div>
+<div class="chips" id="chips"></div>
+<div class="sub" id="sub"></div>
+<div class="busca">
+  <div class="campoBusca"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Buscar tema</div>
+  <div class="btCampo">Campo<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+</div>
+<div id="fileiras"></div>
+<div class="toast" id="toast"></div>
+<script>
+var TEMAS = [{"t": "[Teste] O estigma associado às doenças mentais na sociedade brasileira", "n": "redaon", "ano": null, "ap": null, "capa": "saude", "sem": "2026-09-21"}, {"t": "Perspectivas acerca do envelhecimento na sociedade brasileira", "n": "enem", "ano": 2025, "ap": "regular", "capa": "perspectivas-envelhecimento", "sem": null}, {"t": "Desafios para a proteção das populações atingidas por eventos climáticos extremos no Brasil", "n": "redaon", "ano": null, "ap": null, "capa": "meio_ambiente", "sem": null}, {"t": "[Teste] Manipulação do comportamento do usuário pelo controle de dados na internet", "n": "redaon", "ano": null, "ap": null, "capa": "tecnologia", "sem": null}, {"t": "[Teste] Desafios para a valorização da herança africana no Brasil", "n": "redaon", "ano": null, "ap": null, "capa": "cultura", "sem": null}, {"t": "[Teste] Desafios para a (re)inserção socioeconômica da população em situação de rua no Brasil", "n": "redaon", "ano": null, "ap": null, "capa": "cidadania", "sem": null}, {"t": "Desafios para a valorização da herança africana no Brasil", "n": "enem", "ano": 2024, "ap": "regular", "capa": "cultura", "sem": null}, {"t": "Desafios para o enfrentamento da invisibilidade do trabalho de cuidado realizado pela mulher no Brasil", "n": "enem", "ano": 2023, "ap": "regular", "capa": "trabalho", "sem": null}, {"t": "Desafios para a valorização de comunidades e povos tradicionais no Brasil", "n": "enem", "ano": 2022, "ap": "regular", "capa": "educacao", "sem": null}, {"t": "Invisibilidade e registro civil: garantia de acesso à cidadania no Brasil", "n": "enem", "ano": 2021, "ap": "regular", "capa": "cidadania", "sem": null}, {"t": "O estigma associado às doenças mentais na sociedade brasileira", "n": "enem", "ano": 2020, "ap": "regular", "capa": "saude", "sem": null}, {"t": "Democratização do acesso ao cinema no Brasil", "n": "enem", "ano": 2019, "ap": "regular", "capa": "cultura", "sem": null}, {"t": "Manipulação do comportamento do usuário pelo controle de dados na internet", "n": "enem", "ano": 2018, "ap": "regular", "capa": "tecnologia", "sem": null}, {"t": "Desafios para a formação educacional de surdos no Brasil", "n": "enem", "ano": 2017, "ap": "regular", "capa": "educacao", "sem": null}, {"t": "A valorização dos trabalhadores rurais no Brasil", "n": "enem", "ano": 2025, "ap": "especial", "capa": "trabalho", "sem": null}, {"t": "A idade mínima para o trabalho como forma de proteção à infância", "n": "enem", "ano": 2025, "ap": "ppl", "capa": "trabalho", "sem": null}, {"t": "Desafios para a valorização da arte de periferia no cenário cultural brasileiro", "n": "enem", "ano": 2024, "ap": "ppl", "capa": "cultura", "sem": null}, {"t": "Desafios para a (re)inserção socioeconômica da população em situação de rua no Brasil", "n": "enem", "ano": 2023, "ap": "ppl", "capa": "cidadania", "sem": null}, {"t": "Medidas para o enfrentamento da recorrência da insegurança alimentar no Brasil", "n": "enem", "ano": 2022, "ap": "ppl", "capa": "alimentacao", "sem": null}, {"t": "Reconhecimento da contribuição das mulheres nas ciências da saúde no Brasil", "n": "enem", "ano": 2021, "ap": "ppl", "capa": "saude", "sem": null}, {"t": "O desafio de reduzir as desigualdades entre as regiões do Brasil", "n": "enem", "ano": 2020, "ap": "digital", "capa": "cidadania", "sem": null}];
+var AP = { regular:'Prova principal', ppl:'PPL', especial:'Aplicação especial', digital:'Digital', segunda_aplicacao:'2ª aplicação', cancelada:'Prova cancelada' };
+var SALVOS = [3, 7, 11];
+var EST = { chip:'todos', sub:'principal', selo:'pilula' };
+var ICO_CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>';
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function tema(p){ try{ localStorage.setItem('redaon-tema',p); }catch(e){}
+  var t=p==='auto'?(matchMedia('(prefers-color-scheme: light)').matches?'claro':'escuro'):p;
+  document.documentElement.setAttribute('data-tema',t); }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(function(){ t.classList.remove('on'); },1600); }
+function card(t){
+  var daSemana = !!t.sem;
+  var meta = t.n==='redaon' ? 'RedaON' : ('ENEM ' + t.ano + (t.ap!=='regular' ? ' · ' + AP[t.ap] : ''));
+  var selo = '', linha = '';
+  if (daSemana && EST.selo==='pilula') selo = '<span class="pilula">da semana</span>';
+  if (daSemana && EST.selo==='icone')  selo = '<span class="icoSem" title="tema da semana">' + ICO_CAL + '</span>';
+  if (daSemana && EST.selo==='linha')  linha = '<p class="linhaSem">tema da semana</p>';
+  return '<div class="card" onclick="toast(\'Abre a tela do tema (Preparar)\')">'
+    + '<div class="capa"><span class="semArte">capa</span><img src="../img/capa-' + t.capa + '.webp" alt="" loading="lazy" onerror="this.remove()">' + selo + '</div>'
+    + '<p class="tt">' + esc(t.t) + '</p>' + linha + '<p class="meta">' + meta + '</p></div>';
+}
+function fileira(titulo, lista){
+  if (!lista.length) return '';
+  return '<section class="fileira"><div class="cabF"><h2>' + titulo + '</h2><span>ver todos ›</span></div>'
+    + '<div class="trilho">' + lista.map(card).join('') + '</div></section>';
+}
+function desenhar(){
+  var red = TEMAS.filter(function(t){ return t.n==='redaon'; });
+  var pri = TEMAS.filter(function(t){ return t.n==='enem' && t.ap==='regular'; });
+  var esp = TEMAS.filter(function(t){ return t.n==='enem' && t.ap!=='regular'; });
+  var meus = SALVOS.map(function(i){ return TEMAS[i]; });
+  var h = '';
+  if (EST.chip==='todos')  h = fileira('Da RedaON', red) + fileira('Seus temas salvos', meus) + fileira('ENEM · Prova principal', pri) + fileira('ENEM · Especiais', esp);
+  if (EST.chip==='redaon') h = fileira('Da RedaON', red);
+  if (EST.chip==='meus')   h = fileira('Seus temas salvos', meus);
+  if (EST.chip==='enem')   h = EST.sub==='principal' ? fileira('ENEM · Prova principal', pri) : fileira('ENEM · Especiais', esp);
+  document.getElementById('fileiras').innerHTML = h;
+  document.getElementById('chips').innerHTML = [['todos','Todos'],['redaon','RedaON'],['meus','Meus'],['enem','ENEM']].map(function(c){
+    return '<button class="chip' + (EST.chip===c[0]?' on':'') + '" onclick="EST.chip=\'' + c[0] + '\';desenhar()">' + c[1] + '</button>'; }).join('');
+  document.getElementById('sub').innerHTML = EST.chip!=='enem' ? '' : [['principal','Prova principal'],['especiais','Especiais']].map(function(c){
+    return '<button class="chip' + (EST.sub===c[0]?' on':'') + '" onclick="EST.sub=\'' + c[0] + '\';desenhar()">' + c[1] + '</button>'; }).join('');
+}
+function ctl(b){
+  var g=b.getAttribute('data-g'), v=b.getAttribute('data-v');
+  [].forEach.call(document.querySelectorAll('.mini[data-g="'+g+'"]'), function(x){ x.classList.toggle('on', x===b); });
+  if (g==='tam') document.body.className = v;
+  if (g==='selo') { EST.selo = v; desenhar(); }
+}
+desenhar();
+</script>
+</body>
+</html>
