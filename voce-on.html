@@ -26,7 +26,7 @@
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="aluno-base-v6.css?v=6-20" rel="stylesheet"/>
+<link href="aluno-base-v6.css?v=6-21" rel="stylesheet"/>
 <style>
 .modos{ display:flex; gap:8px; margin:0 0 12px; }
 /* v2-8 · topo fixo: do título "Você ON" até os chips fica parado; o resto corre por baixo.
@@ -170,7 +170,7 @@ html, body{ overflow-x:clip; }
 <div class="mini" id="mini"><img src="avatares/redacast-selo.webp?v=23" alt=""><span class="t" id="miniT"></span><button onclick="abrirAudioTela()">Abrir</button><button class="x" onclick="pararAudio()" aria-label="Parar">&#10005;</button></div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-20"></script>
+<script src="aluno-base-v6.js?v=6-21"></script>
 <script>
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 montarEsqueleto({ ativo:'voce-on', titulo:'Você ON', icone:'play', sino:true, versao:'aluno · você on · v2-8' });

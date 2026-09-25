@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Meu Plano</title>
+<!-- v3-0 (25/09/2026): Fatia A — a semana vira o ciclo da turma: começa dois dias úteis antes do dia da redação (turmas.dia_redacao; vazio = segunda) e dura 7 dias; o preparar ocupa dois dias; os dias de descanso aparecem na trilha no lugar em que caem; dia útil que sobra vira "Reforço à sua escolha" (Você ON); selo "dia da turma"; ícones sempre normais (sem esmaecer, sem halo). O tema é o do ciclo e a chave de plano_itens.semana_de é a data da redação. Conta no kit v6-21 (cicloCalcular/cicloDoAluno). -->
 <!-- v2-5 (21/09/2026): a competência-foco passa a ser a menor MÉDIA das últimas 4 redações, a mesma média do boletim (decisão do Alan). Empate: menor nota da última redação; persistindo, C1→C5. -->
 <!-- v2-4 (21/09/2026): regra A do passo 1 — o Entender só é exigido quando o tema tem Entender aprovado; sem ele, basta o Material de apoio (o aluno não fica travado por falta de conteúdo). -->
 <!-- v2-3 (21/09/2026): fatia 2 — o passo 1 só acende com as duas coisas: Entender o tema aberto E 3 fichas do material de apoio (entender_em && repertorio_em). -->
@@ -41,7 +42,7 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-<link href="aluno-base-v6.css?v=6-20" rel="stylesheet"/>
+<link href="aluno-base-v6.css?v=6-21" rel="stylesheet"/>
 
 <style>
 /* ══ Meu Plano ══ */
@@ -78,11 +79,11 @@
 
 /* ── trilha da semana ── */
 .passo{ display:flex; gap:.7rem; align-items:flex-start; padding-bottom:.75rem; }
-.passo:last-of-type{ padding-bottom:0; }
+.trilha .passo:last-child{ padding-bottom:0; }
 .marca{ flex:0 0 30px; display:flex; flex-direction:column; align-items:center; align-self:stretch; }
 .icoP{ width:30px; height:30px; display:block; flex:0 0 auto; }
 .linha{ flex:1; width:2px; background:rgba(var(--borderRGB),.18); margin:.2rem 0 -.75rem; min-height:13px; }
-.passo:last-of-type .linha{ display:none; }
+.trilha .passo:last-child .linha{ display:none; }
 .corpoP{ flex:1; min-width:0; padding-top:.2rem; }
 .dia{ font-size:.63rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
 .nomeP{ font-size:.86rem; font-weight:700; line-height:1.3; margin:.05rem 0 .1rem; }
@@ -97,11 +98,16 @@ html[data-tema="escuro"] .selo.atr{ color:#2a0e0e; }
 .passo.feito .nomeP{ color:var(--muted); font-weight:600; text-decoration:line-through; }
 .passo.feito .ondeP{ opacity:.7; }
 .passo.feito .dia{ color:var(--green); }
-.passo.agora .icoP{ border-radius:50%; box-shadow:0 0 0 3px rgba(var(--cyanRGB),.18); }
 .passo.agora .dia{ color:var(--cyan); }
 .passo.agora .corpoP{ background:rgba(var(--cyanRGB),.07); border:1px solid rgba(var(--cyanRGB),.32);
   border-radius:.8rem; padding:.55rem .7rem; margin-top:-.25rem; }
-.passo.depois .icoP{ opacity:.62; }
+.selo.turma{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); }
+.passo.folga{ padding-bottom:.55rem; }
+.passo.folga .icoP{ width:24px; height:24px; margin:3px; }
+.passo.folga .nomeP{ font-size:.8rem; font-weight:600; color:var(--muted); }
+.passo.extra .nomeP{ font-weight:600; }
+.cicloTurma{ font-size:.75rem; color:var(--text2); margin:.2rem 0 0; }
+.cicloTurma b{ color:var(--cyan); }
 .passo.atraso .linha{ background:rgba(var(--redRGB),.35); margin-top:.25rem; }
 .passo.atraso .dia, .passo.atraso .nomeP, .passo.atraso .ondeP{ color:var(--red); }
 .passo.atraso .nomeP{ font-weight:800; }
@@ -228,19 +234,21 @@ html[data-tema="claro"] .nv-ouro .vl, html[data-tema="claro"] .nv-ouro .chev{ co
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-20"></script>
+<script src="aluno-base-v6.js?v=6-21"></script>
 <script>
 console.info('[RedaON] Meu Plano v2-5');
 document.documentElement.setAttribute('data-tela','meu-plano');
 if (typeof authGuard === 'function') { authGuard('aluno'); }
 
-montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v2-5' });
+montarEsqueleto({ ativo:'', titulo:'Meu Plano', icone:'bussola', sino:true, versao:'aluno · meu plano · v3-0' });
 
 var NOME_COMP = { C1:'Norma culta', C2:'Repertório', C3:'Argumentação', C4:'Coesão', C5:'Intervenção' };
 var NOME_DIA  = { 1:'seg', 2:'ter', 3:'qua', 4:'qui', 5:'sex', 6:'sáb', 7:'dom' };
 var DIA_LONGO = { 1:'segunda', 2:'terça', 3:'quarta', 4:'quinta', 5:'sexta', 6:'sábado', 7:'domingo' };
 
-var SEMANA_DE = null;      /* 'YYYY-MM-DD' da segunda */
+var SEMANA_DE = null;      /* v3-0 · chave do ciclo = data da redação 'YYYY-MM-DD' */
+var CICLO     = null;      /* v3-0 · cicloCalcular() do kit */
+var DIA_TURMA = null;      /* turmas.dia_redacao (1..7) ou null */
 var DESCANSO  = 'sab';     /* padrão definido pela Profa. Blanche; o aluno troca na gaveta */
 var TEMA      = null;      /* tema da semana */
 var FOCO      = null;      /* 'C1'..'C5' */
@@ -311,70 +319,93 @@ function itemDoTipo(tipo){
   return null;
 }
 
-/* ── dias sugeridos: a ordem dos passos nos dias que não são de descanso ── */
-function diasSugeridos(){
-  var folga = diasDeDescanso();
-  var uteis = [1,2,3,4,5,6,7].filter(function(d){ return folga.indexOf(d) === -1; });
-  var mapa = {};
-  passos().forEach(function(p, i){ mapa[p.tipo] = uteis[i] || uteis[uteis.length-1]; });
-  return mapa;
+/* ── v3-0 · linhas do ciclo: cada dia do ciclo, na ordem; os passos vão nos dias úteis,
+      o que sobra de dia útil vira reforço, e o descanso aparece onde cai ── */
+function linhasDoCiclo(){
+  var ps = passos(), linhas = [], p = 0;
+  CICLO.dias.forEach(function(d){
+    if (!CICLO.util(d)) { linhas.push({ data:d, folga:true }); return; }
+    if (p < ps.length) { linhas.push({ data:d, passo:ps[p] }); p++; }
+    else linhas.push({ data:d, extra:true });
+  });
+  return linhas;
 }
-
-/* ══ CARD 1 · Sua semana ══ */
+/* ══ CARD 1 · Sua semana (v3-0 · ciclo da turma) ══ */
+var MES_C = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function periodoCiclo(){
+  var i = CICLO.inicio, f = CICLO.fim;
+  return (i.getMonth() === f.getMonth())
+    ? (i.getDate() + ' a ' + f.getDate() + ' de ' + MES_C[f.getMonth()])
+    : (i.getDate() + ' ' + MES_C[i.getMonth()] + ' a ' + f.getDate() + ' ' + MES_C[f.getMonth()]);
+}
 function cardSemana(){
   var ps = passos();
-  var sug = diasSugeridos();
-  var hoje = diaHoje();
+  var linhas = linhasDoCiclo();
+  var hojeISO = cicloISO(CICLO.hoje);
   var feitos = ps.filter(function(p){ return p.feito; }).length;
 
-  var ini = new Date(SEMANA_DE + 'T00:00:00');
-  var fim = new Date(ini); fim.setDate(fim.getDate() + 6);
-  var MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  var periodo = ini.getDate() + ' a ' + fim.getDate() + ' de ' + MES[fim.getMonth()];
-
-  var h = '<div class="cartao"><div class="cabCart"><h2>Sua semana</h2><span>' + periodo + '</span></div>'
-    + '<p class="subCart">Os dias são sugestão. Pode fazer tudo hoje e deixar o resto da semana livre.</p>'
+  var h = '<div class="cartao"><div class="cabCart"><h2>Sua semana</h2><span>' + periodoCiclo() + '</span></div>'
+    + '<p class="cicloTurma">' + (DIA_TURMA ? 'Redação da turma: ' : 'Dia da redação: ') + '<b>' + DIA_LONGO[CICLO.diaRedacao] + '</b></p>'
+    + '<p class="subCart">Os dias são sugestão. Pode adiantar e deixar o resto livre.</p>'
     + '<div class="prog"><span class="rot">Progresso</span>'
     + '<div class="pista"><i style="width:' + (feitos/ps.length*100) + '%"></i></div>'
     + '<b>' + feitos + '/' + ps.length + '</b></div>';
 
-  /* Estados, calculados antes de desenhar:
-     · feito
-     · em atraso: não feito e o dia sugerido já passou (regra da Profa. Blanche: no dia seguinte)
-     · agora: o primeiro não feito cujo dia é hoje; se os de hoje já estão feitos, o
-       primeiro pendente adiante vira o "agora" — o aluno pode adiantar quando quiser
-     · depois: o resto */
-  var estados = {};
+  /* Estados: feito · em atraso (dia já passou) · agora (primeiro pendente de hoje; se não
+     houver, o primeiro pendente adiante) · depois. O reforço é "agora" só quando cai hoje
+     e nenhum passo ficou com o "agora". */
   var achouAgora = false;
-  ps.forEach(function(p){
-    var d = sug[p.tipo];
-    if (p.feito) estados[p.tipo] = 'feito';
-    else if (d < hoje) estados[p.tipo] = 'atraso';
-    else if (!achouAgora && d <= hoje) { estados[p.tipo] = 'agora'; achouAgora = true; }
-    else estados[p.tipo] = 'depois';
+  linhas.forEach(function(l){
+    if (!l.passo) return;
+    var dISO = cicloISO(l.data);
+    if (l.passo.feito) l.estado = 'feito';
+    else if (dISO < hojeISO) l.estado = 'atraso';
+    else if (!achouAgora && dISO <= hojeISO) { l.estado = 'agora'; achouAgora = true; }
+    else l.estado = 'depois';
   });
   if (!achouAgora) {
-    for (var k=0; k<ps.length; k++){
-      if (estados[ps[k].tipo] === 'depois') { estados[ps[k].tipo] = 'agora'; break; }
+    for (var k=0; k<linhas.length; k++){
+      if (linhas[k].estado === 'depois') { linhas[k].estado = 'agora'; achouAgora = true; break; }
     }
   }
 
-  ps.forEach(function(p){
-    var d = sug[p.tipo];
-    var estado = estados[p.tipo];
+  h += '<div class="trilha">';
+  linhas.forEach(function(l){
+    var dSem = cicloDiaSemana(l.data);
+    var rotDia = NOME_DIA[dSem] + ' ' + l.data.getDate();
+    var dISO = cicloISO(l.data);
 
+    if (l.folga) {
+      h += '<div class="passo folga"><span class="marca">' + feIcone('sol').replace('class="fe"', 'class="fe icoP"') + '<span class="linha"></span></span>'
+        +  '<div class="corpoP"><p class="dia">' + rotDia + '</p><p class="nomeP">Descanso</p></div></div>';
+      return;
+    }
+    if (l.extra) {
+      var agoraX = (dISO === hojeISO) && !achouAgora;
+      var nomeFoco = FOCO ? (FOCO + ' · ' + NOME_COMP[FOCO]) : 'a sua competência mais fraca';
+      h += '<div class="passo extra ' + (agoraX ? 'agora' : 'depois') + '"><span class="marca">' + feIcone('play').replace('class="fe"', 'class="fe icoP"') + '<span class="linha"></span></span>'
+        +  '<div class="corpoP"><p class="dia">' + rotDia + (agoraX ? '<span class="selo hoje">hoje</span>' : '') + '</p>'
+        +  '<p class="nomeP">Reforço à sua escolha</p>'
+        +  '<p class="ondeP">sugestão: ' + nomeFoco + ' ou o tema, na Você ON</p>'
+        +  (agoraX ? '<button class="btP fantasma" onclick="irPara(\'voce-on.html\')">Ver sugestões<span class="fim">›</span></button>' : '')
+        +  '</div></div>';
+      return;
+    }
+
+    var p = l.passo, estado = l.estado;
     var marca = (estado === 'feito') ? feIcone('feitoBotao')
               : (estado === 'atraso') ? feIcone('despertador')
               : feIcone(p.ico);
     marca = marca.replace('class="fe"', 'class="fe icoP"');
 
-    var rot = NOME_DIA[d] || '';
+    var rot = rotDia;
     if (estado === 'feito')  rot += ' · feito';
     if (estado === 'agora')  rot += '<span class="selo hoje">hoje</span>';
     if (estado === 'atraso') rot += '<span class="selo atr">em atraso</span>';
+    if (p.tipo === 'redacao') rot += '<span class="selo turma">dia da turma</span>';
 
     var onde = (estado === 'atraso')
-      ? ('era para ' + DIA_LONGO[d] + ' · faça assim que puder')
+      ? ('era para ' + DIA_LONGO[dSem] + ' · faça assim que puder')
       : p.onde;
 
     var botao = '';
@@ -396,18 +427,15 @@ function cardSemana(){
       +      botao
       +    '</div></div>';
   });
+  h += '</div>';
 
-  var folga = diasDeDescanso();
-  if (folga.length) {
-    var nomes = folga.map(function(d){ return DIA_LONGO[d]; }).join(' e ');
-    h += '<div class="livre">' + feIcone('sol').replace('class="fe"','class="fe icoP"')
-      +  '<div><p class="nomeP">' + nomes.charAt(0).toUpperCase() + nomes.slice(1) + ' livre' + (folga.length > 1 ? 's' : '') + '</p>'
-      +  '<p class="ondeP"><span class="link" onclick="abrirGaveta(\'gvDias\')">ajustar meus dias de descanso</span></p></div></div>';
-  } else {
-    h += '<div class="livre">' + feIcone('sol').replace('class="fe"','class="fe icoP"')
-      +  '<div><p class="nomeP">Sem dia de descanso</p>'
-      +  '<p class="ondeP"><span class="link" onclick="abrirGaveta(\'gvDias\')">ajustar meus dias de descanso</span></p></div></div>';
-  }
+  var folga = CICLO.folgas.filter(function(d){ return d !== CICLO.diaRedacao; });
+  var tituloFolga = folga.length
+    ? ('Descanso: ' + folga.map(function(d){ return DIA_LONGO[d]; }).join(' e '))
+    : 'Sem dia de descanso';
+  h += '<div class="livre">' + feIcone('sol').replace('class="fe"','class="fe icoP"')
+    +  '<div><p class="nomeP">' + tituloFolga + '</p>'
+    +  '<p class="ondeP"><span class="link" onclick="abrirGaveta(\'gvDias\')">ajustar meus dias de descanso</span></p></div></div>';
   return h + '</div>';
 }
 
@@ -494,11 +522,7 @@ function cardBoletim(){
 
 /* ══ render ══ */
 function desenhar(){
-  var ini = new Date(SEMANA_DE + 'T00:00:00');
-  var fim = new Date(ini); fim.setDate(fim.getDate() + 6);
-  var MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  document.getElementById('rotSemana').textContent =
-    'Semana de ' + ini.getDate() + ' a ' + fim.getDate() + ' de ' + MES[fim.getMonth()];
+  document.getElementById('rotSemana').textContent = 'Semana de ' + periodoCiclo();
 
   var fr = document.getElementById('fraseFoco');
   if (FOCO) {
@@ -531,6 +555,14 @@ async function carregarTema(){
     }
     return linhas[0] || null;
   }catch(e){ console.warn('[meu plano] tema', e); return null; }
+}
+async function diaDaTurma(){
+  try{
+    var res = await dbFetch(SUPABASE_URL + '/rest/v1/alunos_turma?aluno_id=eq.' + UID + '&status=eq.ativo&select=turmas(dia_redacao)&order=entrou_em.desc&limit=1', {});
+    if (!res.ok) return null;
+    var r = await res.json();
+    return (r[0] && r[0].turmas) ? r[0].turmas.dia_redacao : null;
+  }catch(e){ return null; }
 }
 async function carregarConfig(){
   try{
@@ -600,7 +632,7 @@ function passo1Feito(){ return !!(PREP && PREP.repertorio_em && (PREP.entender_e
 async function escreveuNaSemana(){
   try{
     var url = SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + UID
-      + '&created_at=gte.' + SEMANA_DE + 'T00:00:00&select=id&limit=1';
+      + '&created_at=gte.' + cicloISO(CICLO.inicio) + 'T00:00:00&select=id&limit=1';
     var res = await dbFetch(url, {});
     if (!res.ok) return false;
     var r = await res.json();
@@ -687,6 +719,10 @@ window.escolherDescanso = async function(el){
   document.querySelectorAll('#gvDias .opt').forEach(function(o){ o.classList.remove('sel'); });
   el.classList.add('sel');
   salvarConfig(DESCANSO);
+  var novo = cicloCalcular(DIA_TURMA, DESCANSO);
+  if (novo.chave !== SEMANA_DE) { setTimeout(function(){ window.location.reload(); }, 400); return; }
+  novo.tema = CICLO.tema; novo.descanso = DESCANSO;
+  CICLO = novo;
   desenhar();
   setTimeout(function(){ fecharGaveta('gvDias'); }, 180);
 };
@@ -724,12 +760,12 @@ function mostrar(id){
   try{
     UID = (typeof authGetUserId === 'function') ? authGetUserId() : null;
     if (!UID) { mostrar('estadoErro'); return; }
-    SEMANA_DE = dataISO(segundaDaSemana());
-
-    var cfg = await carregarConfig();
-    if (cfg) DESCANSO = cfg;
-
-    TEMA = await carregarTema();
+    var cic = await cicloDoAluno();
+    DESCANSO  = cic.descanso || DESCANSO;
+    DIA_TURMA = await diaDaTurma();
+    CICLO     = cic;
+    SEMANA_DE = cic.chave;
+    TEMA      = cic.tema;
     HIST = (typeof dbGetHistoricoRedacoes === 'function') ? (await dbGetHistoricoRedacoes(4)) : [];
     FOCO = focoPelaMedia();
     TEM_EXERC = await temExercicio(FOCO);

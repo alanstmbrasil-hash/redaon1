@@ -1,5 +1,6 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-20 (24/09/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-21 (25/09/2026)
+   v6-21: Fatia A — ciclo do aluno pelo dia da redação da turma (cicloCalcular / cicloDoAluno), usado pelo Meu Plano e pelo Início.
    v6-20: rodapé Início · Escrever · Mais (estilo streaming); Temas e Minhas redações sobem para o topo da gaveta Mais; o Mais acende nas telas que moram nele.
    v6-19: gaveta do Escrever volta a ter "Tirar foto" (câmera direto); "Enviar imagem" ganha o ícone de galeria; o último método usado vem marcado com \u2713.
    v6-18: mini-player do RedaCast em todas as telas do aluno (fora a Você ON, que tem o player, e o Escrever, que pausa):
@@ -701,3 +702,67 @@ function iniciarDock(dockId, opts) {
   function iniciar(){ st = ler(); if (!st || !st.url || !st.id) return; montar(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 })();
+
+
+/* ─── Ciclo do aluno (v6-21 · Fatia A) ─────────────────────────────────────
+   O ciclo gira em torno do dia da redação da turma (turmas.dia_redacao, 1=seg … 7=dom;
+   vazio = segunda). Começa dois dias úteis antes da redação e dura 7 dias.
+   Dia de descanso = o que o aluno marca no Meu Plano (plano_config.descanso); nele não
+   há planejamento. O dia da turma nunca é descanso.
+   O tema do ciclo é o tema da semana que vale no primeiro dia do ciclo e segue até o fim.
+   A chave do ciclo (plano_itens.semana_de) é a data da redação. */
+function cicloISO(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function cicloDiaSemana(d){ var n = d.getDay(); return n === 0 ? 7 : n; }
+function cicloFolgas(descanso){
+  if (descanso === 'sab') return [6];
+  if (descanso === 'dom') return [7];
+  if (descanso === 'nenhum') return [];
+  return [6,7];
+}
+function cicloCalcular(diaRedacao, descanso, hoje){
+  var diaRed = (diaRedacao >= 1 && diaRedacao <= 7) ? diaRedacao : 1;
+  var folgas = cicloFolgas(descanso);
+  var h = hoje ? new Date(hoje) : new Date(); h.setHours(0,0,0,0);
+  function soma(d, n){ var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function util(d){ var w = cicloDiaSemana(d); return w === diaRed || folgas.indexOf(w) === -1; }
+  function inicioDe(red){ var x = new Date(red), n = 0; while (n < 2){ x = soma(x, -1); if (util(x)) n++; } return x; }
+  var red = null;
+  for (var i = -14; i <= 14; i++){
+    var d = soma(h, i);
+    if (cicloDiaSemana(d) !== diaRed) continue;
+    if (inicioDe(d) <= h) red = d;
+  }
+  var ini = inicioDe(red), dias = [];
+  for (var k = 0; k < 7; k++) dias.push(soma(ini, k));
+  return { diaRedacao: diaRed, folgas: folgas, redacao: red, inicio: ini, fim: dias[6], dias: dias,
+           chave: cicloISO(red), util: util, hoje: h };
+}
+var _cicloPromessa = null;
+function cicloDoAluno(opc){
+  if (_cicloPromessa && !(opc && opc.recarregar)) return _cicloPromessa;
+  _cicloPromessa = (async function(){
+    var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
+    var diaRed = null, descanso = 'sab', tema = null;
+    if (uid && typeof dbFetch === 'function' && typeof SUPABASE_URL !== 'undefined'){
+      try{
+        var rt = await dbFetch(SUPABASE_URL + '/rest/v1/alunos_turma?aluno_id=eq.' + uid + '&status=eq.ativo&select=turmas(dia_redacao)&order=entrou_em.desc&limit=1', {});
+        if (rt.ok){ var t = await rt.json(); if (t[0] && t[0].turmas) diaRed = t[0].turmas.dia_redacao; }
+      }catch(e){}
+      try{
+        var rc = await dbFetch(SUPABASE_URL + '/rest/v1/plano_config?aluno_id=eq.' + uid + '&select=descanso', {});
+        if (rc.ok){ var c = await rc.json(); if (c[0] && c[0].descanso) descanso = c[0].descanso; }
+      }catch(e){}
+    }
+    var ciclo = cicloCalcular(diaRed, descanso);
+    ciclo.descanso = descanso;
+    if (typeof dbFetch === 'function' && typeof SUPABASE_URL !== 'undefined'){
+      try{
+        var r = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de,capa_url,campo&ativo=eq.true&semana_de=lte.' + cicloISO(ciclo.inicio) + '&order=semana_de.desc&limit=1', {});
+        if (r.ok){ var ts = await r.json(); tema = ts[0] || null; }
+      }catch(e){}
+    }
+    ciclo.tema = tema;
+    return ciclo;
+  })();
+  return _cicloPromessa;
+}

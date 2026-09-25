@@ -4,7 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RedaON | Início</title>
-<!-- RedaON · Portal do Aluno · Início · v5-5 · sobre aluno-base-v6 -->
+<!-- RedaON · Portal do Aluno · Início · v5-6 · sobre aluno-base-v6 -->
+<!-- v5-6 (25/09/2026): Fatia A — o tema do card Tema da Semana e do "Vamos lá!" passa a ser o tema do ciclo do aluno (cicloDoAluno do kit v6-21); o card do plano lê a semana pela chave do ciclo. -->
 <!-- v5-5 (24/09/2026): card Tema da Semana mostra a capa real do tema (temas.capa_url); sem capa ou se a imagem falhar, volta a card-tema.webp -->
 <!-- v5-4 (07/09/2026): saudação com largura de volta (não corta "Boa tarde, Alan"); enquadramento do personagem da galeria (mover + zoom dentro do slot), salvo em usuarios.avatar_enq -->
 <!-- v4-23 (20/09/2026): renomeação — o apoio do card "Vamos lá!" passa a dizer "você já estudou o material de apoio". O nome da C2 ("Tema e repertório") não muda. -->
@@ -41,7 +42,7 @@
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="aluno-base-v6.css?v=6-20" rel="stylesheet"/>
+<link href="aluno-base-v6.css?v=6-21" rel="stylesheet"/>
 <style>
 /* ===== Só o que é próprio do INÍCIO ===== */
 
@@ -477,7 +478,7 @@
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-20"></script>
+<script src="aluno-base-v6.js?v=6-21"></script>
 <script>
   if (typeof authGuard === 'function') { authGuard('aluno'); }
 
@@ -1016,11 +1017,15 @@
     var g = d.getDay(); d.setDate(d.getDate() - ((g===0)?6:g-1));
     return d.getFullYear()+'-'+pad2i(d.getMonth()+1)+'-'+pad2i(d.getDate());
   }
+  async function chaveCicloInicio(){
+    try{ var c = await cicloDoAluno(); if (c && c.chave) return c.chave; }catch(e){}
+    return segundaISO();
+  }
   async function prepararCardPlano(){
     try{
       var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
       if (!uid || typeof dbFetch !== 'function' || typeof SUPABASE_URL === 'undefined') { _bioSemJornada = true; atualizarBio(); return; }
-      var url = SUPABASE_URL + '/rest/v1/plano_itens?aluno_id=eq.'+uid+'&semana_de=eq.'+segundaISO()+'&order=dia.asc&select=id,dia,tipo,rotulo,destino,feito_em';
+      var url = SUPABASE_URL + '/rest/v1/plano_itens?aluno_id=eq.'+uid+'&semana_de=eq.'+(await chaveCicloInicio())+'&order=dia.asc&select=id,dia,tipo,rotulo,destino,feito_em';
       var res = await dbFetch(url, {});
       if (!res.ok) return;
       var itens = await res.json();
@@ -1051,19 +1056,11 @@
     else if (_bioSemJornada) sub.textContent = 'sua jornada come\u00e7a hoje \u2728';
   }
   /* \u2500\u2500 Grade "Para a sua melhoria": bebe das fontes reais \u2500\u2500 */
+  /* v5-6 · o tema do ciclo do aluno (kit v6-21): o tema da semana que valia no primeiro dia do ciclo */
   async function temaDaSemanaInicio(){
     try{
-      var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas?select=id,titulo,semana_de,capa_url&ativo=eq.true&semana_de=not.is.null&order=semana_de.desc&limit=8', {});
-      if (!res.ok) return null;
-      var rows = await res.json();
-      var hoje = new Date(); hoje.setHours(0,0,0,0);
-      for (var i2=0;i2<rows.length;i2++){
-        var t = rows[i2];
-        var ini = new Date(t.semana_de + 'T00:00:00');
-        var fim = new Date(ini); fim.setDate(fim.getDate()+7);
-        if (hoje >= ini && hoje < fim) return t;
-      }
-      return null;
+      var c = (typeof cicloDoAluno === 'function') ? await cicloDoAluno() : null;
+      return (c && c.tema) ? c.tema : null;
     }catch(e){ return null; }
   }
   function focoDoHistorico(hist){
