@@ -1,5 +1,6 @@
 /* ============================================================
-   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-23 (25/09/2026)
+   RedaON · Portal do Aluno · BASE COMPARTILHADA · v6-24 (25/09/2026)
+   v6-24: Temas ganha a linha de voltar (.pgHead) com a prancheta, como as outras telas do Mais.
    v6-23: descanso em qualquer dia da semana, até 2 (plano_config.descanso "6" ou "3,6"); valores antigos seguem valendo.
    v6-22: aluno sem turma escolhe o próprio dia da redação (plano_config.dia_redacao); em turma vale o da turma (vazio = segunda) e fica travado.
    v6-21: Fatia A — ciclo do aluno pelo dia da redação da turma (cicloCalcular / cicloDoAluno), usado pelo Meu Plano e pelo Início.
@@ -474,12 +475,13 @@ function montarEsqueleto(cfg) {
        Telas que vêm do menu "Mais" (não têm aba no dock) ganham uma linha fina com
        seta de voltar (o Safari do iPhone não tem botão do sistema), o MESMO ícone do
        dock/menu e o título. Tema volta para o "Mais"; o sino sai até existir notificação. */
-    var ABAS_DOCK = ['inicio','temas','escrever','redacoes'];
+    var ABAS_DOCK = ['inicio','escrever','redacoes'];   /* v6-24: Temas saiu (mora no Mais e ganha a linha de voltar) */
     var noDock = ABAS_DOCK.indexOf(cfg.ativo || '') >= 0;
     var ICONE_TELA = { 'evolucao':'grafico', 'plano':'bussola', 'meu-plano':'bussola', 'voce-on':'play',
-                       'configuracoes':'engrenagem', 'preparacao':'livros' };
+                       'configuracoes':'engrenagem', 'preparacao':'livros', 'temas':'prancheta' };
     function chaveTela(){
       var t = (cfg.titulo || '').toLowerCase();
+      if (t.indexOf('temas') === 0) return 'temas';
       if (t.indexOf('evolu') === 0) return 'evolucao';
       if (t.indexOf('meu plano') === 0) return 'plano';
       if (t.indexOf('plano') === 0) return 'plano';

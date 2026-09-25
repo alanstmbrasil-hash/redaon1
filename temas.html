@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!-- v5-0 (25/09/2026): redesenho aprovado por Alan — fileiras estilo streaming (chips Todos · RedaON · Meus · ENEM › Prova principal/Especiais; capas 3:4 no tamanho médio; tema do ciclo com a pílula "da semana"); "ver todos" abre a fileira em grade; busca e Campo (gaveta) mostram lista; fileira de salvos vazia vira convite; linha de voltar do kit (v6-24). Saíram o herói, o cartão da semana com Escrever/Preparar e todo o código da antiga tela do tema. -->
 <!-- v4-15 (24/09/2026): a capa do cartão do tema da semana cresce na proporção da tela do tema (5:4), mostrando a cena inteira. -->
 <!-- v4-17 (24/09/2026): tocar num tema abre direto o Preparar (a tela do tema se fundiu com ele). -->
 <!-- v4-16 (24/09/2026): tela do tema com capa vira cartão grande — capa inteira em pé, nome no céu (letra escura), Escrever e Preparar logo abaixo da imagem. -->
@@ -67,202 +68,97 @@
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="aluno-base-v6.css?v=6-23" rel="stylesheet"/>
+<link href="aluno-base-v6.css?v=6-24" rel="stylesheet"/>
 <style>
-/* ===== Só o que é próprio de TEMAS ===== */
-.temaSemana{ margin-bottom:.875rem; background:linear-gradient(135deg,rgba(var(--cyanRGB),.10),rgba(var(--purpleRGB),.08)); border:1px solid var(--cyan); border-radius:14px; padding:13px 14px; }
-.tsTop{ display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
-.tsBadge{ font-size:10px; font-weight:700; color:var(--cyan); letter-spacing:.04em; }
-.tsData{ font-size:10px; color:var(--muted); font-weight:600; }
-.tsTitulo{ margin:0 0 11px; font-size:14.5px; font-weight:700; color:var(--text); line-height:1.35; }
-.tsBtns{ display:flex; gap:8px; }
-.tsBtns .btn{ flex:1; }
-
-#filtrosTopo{ display:none; }
-@media (min-width:1024px), (max-width:1023px) and (orientation:landscape){
-  #filtrosTopo{ display:flex; flex-direction:column; gap:.6rem; margin-bottom:.875rem; }
-  #filtrosTopo .linha2{ display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; }
-  #dockTemas{ display:none !important; }
-  .gv.atras{ z-index:47; padding-bottom:24px; }
-  .gvBg.atras{ z-index:46; }
-}
-
-.gridTemas { display:grid; grid-template-columns:1fr; gap:.7rem; }
-@media(min-width:641px){ .gridTemas{ grid-template-columns:repeat(2,1fr); } }
-@media(min-width:1024px){ .gridTemas{ grid-template-columns:repeat(3,1fr); } }
-.tCard { background:var(--surface); border:1px solid rgba(var(--borderRGB),.18); border-radius:13px; padding:12px 13px; display:flex; flex-direction:column; }
-.tCard .topo { display:flex; justify-content:space-between; align-items:center; gap:.5rem; }
-.tBadge { font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; }
-.tBadge.enem { color:var(--purpleSoft); background:rgba(var(--purpleRGB),.16); }
-.tBadge.redaon { color:var(--gold); background:rgba(var(--goldRGB),.14); }
-.tCard .dir { display:flex; align-items:center; gap:.4rem; }
-.tCard .cat { font-size:10.5px; color:var(--muted); font-weight:600; }
-.tPin { background:none; border:none; cursor:pointer; color:var(--muted); font-size:1rem; line-height:1; padding:.2rem; }
-.tPin.on { color:var(--gold); }
-.tCard .tit { margin:8px 0 10px; font-size:13.5px; font-weight:700; line-height:1.35; color:var(--text); flex:1; }
-.tCard .btns { display:flex; gap:8px; }
-.tCard .btns .btn{ flex:1; }
-.btnMais { width:100%; margin-top:.875rem; min-height:44px; border-radius:11px; background:var(--surface2); color:var(--purpleSoft); font-size:13px; font-weight:700; border:none; cursor:pointer; }
-.pillSugerir { display:flex; align-items:center; gap:.7rem; min-height:52px; padding:0 .875rem; border-radius:13px; background:var(--surface); border:1px dashed rgba(var(--purpleRGB),.45); color:var(--text); font-size:.85rem; font-weight:600; cursor:pointer; margin-top:.7rem; }
-.pillSugerir .fim { margin-left:auto; color:var(--muted); }
-
-#dockBusca{ display:none; }
-#dockBusca.aberta{ display:flex; }
-.vazio{ grid-column:1/-1; text-align:center; color:var(--muted); font-size:.85rem; padding:2rem 0; line-height:1.6; }
-.spinner { width:38px; height:38px; border:3px solid var(--surface2); border-top-color:var(--cyan); border-radius:50%; animation:girar .8s linear infinite; margin:2rem auto; }
-@keyframes girar { to { transform:rotate(360deg); } }
-
-.areaSugestao textarea { width:100%; min-height:5rem; padding:.75rem .875rem; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.3); border-radius:.7rem; color:var(--text); font-size:.9rem; font-family:inherit; resize:vertical; }
-.areaSugestao textarea:focus { outline:none; border-color:rgba(var(--cyanRGB),.6); }
-
-/* ═══ v4-0 · Temas com o kit do redesenho ═══
-   O que é só desta tela: ferramentas (Campo e Busca), capa do herói, miniatura em retrato
-   e a linha do tema. O resto (fundo, título, chips, botões, selos) vem do kit da base. */
-.ferrTemas{ display:flex; gap:8px; margin:0 auto .8rem; }
-.fbTema{ flex:1; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--text2);
-  background:var(--surface); border:1px solid rgba(var(--borderRGB),.14); border-radius:11px;
-  padding:9px 12px; text-align:left; cursor:pointer; }
-.fbTema .seta{ float:right; color:var(--muted); }
-.fbTema.busca{ color:var(--muted); font-weight:500; }
+/* ═══ Temas v5-0 · fileiras estilo streaming (amostra aprovada por Alan em 25/09/2026) ═══ */
+.cabTela h1{ font-size:1.25rem; font-weight:800; margin:.2rem 0 .7rem; }
+@media(max-width:1023px){ html.temPgHead .cabTela{ display:none; } }
+.chipsT{ display:flex; gap:.4rem; overflow-x:auto; scrollbar-width:none; margin:0 -1rem; padding:0 1rem .15rem; }
+.chipsT::-webkit-scrollbar{ display:none; }
+.chipT{ flex:0 0 auto; min-height:36px; padding:0 14px; border-radius:10px; background:var(--surface);
+  border:1px solid rgba(var(--borderRGB),.28); color:var(--text2); font:600 .78rem Inter,sans-serif; cursor:pointer; }
+.chipT.on{ background:var(--cyan); color:var(--onCyan); border-color:var(--cyan); }
+.subT{ display:flex; gap:.4rem; margin-top:.45rem; }
+.subT .chipT{ min-height:32px; font-size:.72rem; }
+.subT .chipT.on{ background:rgba(var(--cyanRGB),.14); color:var(--cyan); border-color:rgba(var(--cyanRGB),.5); }
+.ferrTemas{ display:flex; gap:8px; margin:.7rem 0 0; }
+.fbTema{ font-family:inherit; font-size:12.5px; font-weight:600; color:var(--text2); min-height:42px;
+  background:var(--surface); border:1px solid rgba(var(--borderRGB),.2); border-radius:12px;
+  padding:0 12px; text-align:left; cursor:pointer; display:flex; align-items:center; gap:.45rem; }
+.fbTema.busca{ flex:1; color:var(--muted); font-weight:500; }
 .fbTema.ativo{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); border-color:transparent; }
-.linhaBusca{ display:none; gap:8px; margin:0 auto .8rem; }
+.fbTema svg{ flex:none; }
+.linhaBusca{ display:none; gap:8px; margin:.7rem 0 0; }
 .linhaBusca.aberta{ display:flex; }
-.linhaBusca input{ flex:1; min-width:0; font-family:inherit; font-size:13.5px; padding:9px 12px;
-  border-radius:11px; border:1px solid rgba(var(--borderRGB),.14); background:var(--surface); color:var(--text); }
-.linhaBusca .fbTema{ flex:0 0 auto; }
-/* herói */
-.heroiTema{ background:var(--surface); border-radius:20px; overflow:hidden; cursor:pointer;
-  box-shadow:0 2px 12px rgba(var(--borderRGB),.10); margin-bottom:1rem; }
-.capaHeroi{ position:relative; min-height:200px; display:flex; flex-direction:column; justify-content:flex-end; padding:14px 16px 16px; }
-.capaHeroi .scrim{ position:absolute; left:0; right:0; bottom:0; top:25%;
-  background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.30) 45%, rgba(0,0,0,.68) 100%); }
-.hSelos{ position:relative; display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
-.hSelos span{ font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
-  color:#fff; background:rgba(0,0,0,.3); padding:3px 9px; border-radius:99px; }
-.hSelos span.dest{ background:#fff; color:#0a4a4b; }
-.hTit{ position:relative; margin:0; font-size:18px; font-weight:700; line-height:1.25; color:#fff;
-  text-shadow:0 1px 8px rgba(0,0,0,.4); }
-.hPe{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:12px 16px 0; font-size:12px; color:var(--muted); }
-.hPe .jaFiz{ font-weight:600; color:var(--green); }
-.hAcoesT{ display:flex; gap:10px; padding:14px 16px 16px; }
-.hAcoesT{ align-items:center; }
-.hAcoesT .bt{ flex:1 1 0; min-width:0; height:46px; padding:0; display:flex; align-items:center; justify-content:center;
-  font-family:inherit; font-size:13.5px; font-weight:600; line-height:1.2; border:0; border-radius:13px;
-  background:var(--cyan); color:var(--onCyan); cursor:pointer; }
-.hAcoesT .bt.secundario{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
-/* linha do tema */
-.gridTemas{ display:flex; flex-direction:column; gap:.6rem; }
+.linhaBusca input{ flex:1; min-width:0; font-family:inherit; font-size:14px; padding:0 12px; min-height:42px;
+  border-radius:12px; border:1px solid rgba(var(--cyanRGB),.5); background:var(--surface); color:var(--text); }
+.linhaBusca input:focus{ outline:none; }
+.ferrTemas.escondida{ display:none; }
+
+/* fileiras */
+.fileira{ margin-top:1.1rem; }
+.cabF{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:.5rem; }
+.cabF h2{ font-size:.92rem; font-weight:800; margin:0; color:var(--text); }
+.cabF button{ background:none; border:0; font:700 .74rem Inter,sans-serif; color:var(--cyan); cursor:pointer; padding:.2rem 0; }
+.trilhoT{ display:flex; gap:.6rem; overflow-x:auto; scroll-snap-type:x mandatory; scroll-padding:0 1rem;
+  margin:0 -1rem; padding:0 1rem .2rem; scrollbar-width:none; }
+.trilhoT::-webkit-scrollbar{ display:none; }
+.cardT{ --larg:clamp(112px, 34vw, 150px); flex:0 0 var(--larg); scroll-snap-align:start; cursor:pointer; min-width:0; }
+.capaT{ position:relative; aspect-ratio:3/4; border-radius:.8rem; overflow:hidden; background:var(--surface2);
+  border:1px solid rgba(var(--borderRGB),.14); }
+.capaT img{ width:100%; height:100%; object-fit:cover; display:block; }
+.capaT .grad, .capaMini .grad{ position:absolute; inset:0; }
+.capaT img, .capaMini img{ position:relative; }
+.pilulaSem{ position:absolute; top:.4rem; left:.4rem; font-size:.58rem; font-weight:800; text-transform:uppercase;
+  letter-spacing:.05em; background:var(--cyan); color:var(--onCyan); border-radius:99px; padding:3px 8px; }
+.ttT{ font-size:.76rem; font-weight:700; line-height:1.28; margin:.4rem 0 0; color:var(--text);
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.metaT{ font-size:.66rem; color:var(--muted); margin:.15rem 0 0; }
+/* convite da fileira de salvos vazia */
+.conviteT{ flex:0 0 min(78%, 300px); border:1px dashed rgba(var(--borderRGB),.35); border-radius:.8rem;
+  padding:.9rem; display:flex; gap:.7rem; align-items:center; color:var(--text2); font-size:.8rem; line-height:1.45; }
+.conviteT .fe{ width:30px; height:30px; flex:none; }
+
+/* ver todos: grade */
+.cabGrade{ display:flex; align-items:center; gap:.5rem; margin:.9rem 0 .8rem; }
+.cabGrade button{ width:34px; height:34px; flex:none; border:1px solid rgba(var(--borderRGB),.18); background:var(--surface);
+  color:var(--text); border-radius:50%; font-size:20px; line-height:1; cursor:pointer; display:grid; place-items:center; padding:0 2px 2px 0; font-family:inherit; }
+.cabGrade h2{ font-size:1rem; font-weight:800; margin:0; }
+.gradeT{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:.9rem .6rem; }
+@media(min-width:641px){ .gradeT{ grid-template-columns:repeat(4, minmax(0,1fr)); } }
+@media(min-width:1024px){ .gradeT{ grid-template-columns:repeat(6, minmax(0,1fr)); } }
+.gradeT .cardT{ --larg:auto; }
+
+/* lista (busca e campo) */
+.rotLista{ font-size:.75rem; color:var(--muted); margin:1rem 0 .5rem; }
+.rotLista b{ color:var(--text2); }
+.listaT{ display:flex; flex-direction:column; gap:.6rem; }
 .linhaTema{ display:flex; align-items:center; gap:.75rem; background:var(--surface); border-radius:16px;
-  box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:9px 12px; cursor:pointer; }
-.linhaTema.feito{ opacity:.78; }
-.capaMini{ width:46px; height:62px; border-radius:10px; overflow:hidden; flex:0 0 auto; }
+  border:1px solid rgba(var(--borderRGB),.12); padding:9px 12px; cursor:pointer; }
+.capaMini{ width:46px; height:62px; border-radius:10px; overflow:hidden; flex:0 0 auto; position:relative; background:var(--surface2); }
 .capaMini img{ width:100%; height:100%; object-fit:cover; display:block; }
 .linhaTema .lTxt{ flex:1; min-width:0; }
-.linhaTema .lTxt p{ margin:0 0 4px; font-size:13.5px; font-weight:500; line-height:1.3; color:var(--text);
+.linhaTema .lTxt p{ margin:0 0 4px; font-size:13.5px; font-weight:600; line-height:1.3; color:var(--text);
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .linhaTema .lPe{ font-size:11.5px; color:var(--muted); display:inline-flex; flex-wrap:wrap; align-items:center; gap:6px; }
-.linhaTema .lPe .eixo{ font-size:10.5px; padding:1px 8px; }
-.linhaTema .lPe .jaFiz{ font-size:10.5px; font-weight:600; color:var(--green);
-  background:rgba(var(--greenRGB),.12); padding:1px 8px; border-radius:99px; }
+.linhaTema .lPe .jaFiz{ font-size:10.5px; font-weight:600; color:var(--green); background:rgba(var(--greenRGB),.12); padding:1px 8px; border-radius:99px; }
+.linhaTema .lPe .semT{ font-size:10.5px; font-weight:800; color:var(--cyan); }
 .tPin{ flex:0 0 auto; width:34px; height:34px; border:0; border-radius:50%; background:transparent; cursor:pointer;
   display:grid; place-items:center; opacity:.45; }
 .tPin .fe{ width:20px; height:20px; vertical-align:0; }
 .tPin.on{ opacity:1; background:rgba(var(--cyanRGB),.12); }
-@media(min-width:641px){ .hTit{ font-size:20px; } .capaHeroi{ min-height:240px; } }
 
-/* v4-1 · capa cheia do tema */
-body.semRolar{ overflow:hidden; }
-.telaTema{ position:fixed; inset:0; z-index:43; background:var(--bg); overflow-y:auto;
-  transform:translateY(100%); transition:transform .28s ease; }
-/* v4-6 · no computador a capa cheia respeita o menu lateral; no celular deixa a barra de baixo à vista */
-@media(min-width:1024px){ .telaTema{ left:232px; } }
-@media(max-width:1023px){ .telaTema .ttAcoes{ margin-bottom:96px; } }
-.telaTema.on{ transform:translateY(0); }
-.telaTema #ttCorpo{ max-width:760px; margin:0 auto; width:100%; }
-.ttCapa{ position:relative; min-height:340px; display:flex; flex-direction:column; justify-content:flex-end;
-  padding:16px 18px 46px; }   /* v4-5: folga embaixo para o painel subir sem cobrir o título */
-.ttCapa .scrim{ position:absolute; left:0; right:0; top:20%; bottom:0;
-  background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.32) 45%, rgba(0,0,0,.70) 100%); }
-.ttVoltar{ position:absolute; top:14px; left:14px; width:36px; height:36px; border:0; border-radius:50%;
-  background:rgba(0,0,0,.38); color:#fff; font-size:22px; line-height:1; cursor:pointer; z-index:3; font-family:inherit; }
-/* v4-4 · Salvar é ícone, na linha dos dados, e fica marcado quando salvo */
-.ttDados{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12.5px; color:var(--muted); }
-.ttDados b{ color:var(--text); font-weight:600; }
-.ttDados b.campoTx{ color:var(--cyan); }
-.btSalvar{ flex:0 0 auto; width:40px; height:40px; border:1px solid rgba(var(--borderRGB),.14); border-radius:12px;
-  background:var(--surface); display:grid; place-items:center; cursor:pointer; }
-.btSalvar .fe{ width:22px; height:22px; vertical-align:0; }
-.btSalvar.on{ background:var(--cyan); border-color:transparent; }
-.ttCapa .hTit{ font-size:20px; }
-/* v4-5 · a imagem fica inteira e o painel sobe na frente dela */
-.ttCorpoInt{ position:relative; margin-top:-26px; padding:20px 18px 34px; background:var(--bg);
-  border-radius:24px 24px 0 0; box-shadow:0 -6px 20px rgba(var(--borderRGB),.10); }
-/* v4-4 · chamada e carrossel dos três cartões */
-.ttChamada{ margin:14px 0 0; font-size:13.5px; line-height:1.6; color:var(--text2); }
-.ttChamada b{ font-weight:700; color:var(--text); }
-.ttChamada .fe{ width:17px; height:17px; vertical-align:-.25em; }
-/* v4-13 · o ícone nunca se separa do nome na quebra de linha */
-.ttChamada .junto{ white-space:nowrap; }
-.ttCarr{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
-  margin:16px -18px 0; padding:2px 18px 4px; }
-.ttCarr::-webkit-scrollbar{ display:none; }
-.ttCx{ flex:0 0 63%; scroll-snap-align:start; background:var(--surface); border-radius:16px;
-  box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:12px 13px; cursor:pointer; }
-@media(min-width:641px){
-  /* v4-6: no computador e no tablet os três cabem na tela; o texto quebra e o cartão cresce para baixo */
-  .ttCarr{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; overflow:visible;
-    margin:16px 0 0; padding:0; }
-  .ttCx{ flex:none; }
-  .ttCx span{ font-size:12px; }
-}
-.ttCx .fe{ width:24px; height:24px; display:block; margin-bottom:7px; vertical-align:0; }
-.ttCx b{ display:block; font-size:13px; color:var(--text); margin-bottom:6px; }
-.ttCx span{ display:block; position:relative; padding-left:9px; font-size:11.5px; line-height:1.35;
-  color:var(--muted); margin-bottom:4px; }
-.ttCx span:before{ content:""; position:absolute; left:0; top:6px; width:3px; height:3px; border-radius:50%; background:var(--cyan); }
-/* v4-4 · os botões vão para o rodapé, para o aluno ver o material antes de decidir */
-.ttAcoes{ display:flex; align-items:stretch; gap:10px; margin-top:20px; }
-.ttAcoes .bt{ flex:1 1 0; min-width:0; height:48px; display:flex; align-items:center; justify-content:center;
-  border:0; border-radius:13px; background:var(--cyan); color:var(--onCyan); font-family:inherit;
-  font-size:14px; font-weight:600; line-height:1; cursor:pointer; }
-.ttAcoes .bt.secundario{ background:rgba(var(--cyanRGB),.12); color:var(--cyan); }
-.ttMeta{ margin:0 0 14px; font-size:12.5px; color:var(--muted); }
-.ttCarregando{ font-size:12.5px; color:var(--muted); }
-.ttSinopse{ margin:16px 0 12px; font-size:14px; line-height:1.5; color:var(--text2); }
-.ttSinopse.vazio{ color:var(--muted); }
-.briefing{ display:flex; gap:10px; align-items:flex-start; background:var(--surface); border-radius:14px;
-  box-shadow:0 1px 6px rgba(var(--borderRGB),.07); padding:11px 13px; margin-bottom:9px; }
-.briefing .fe{ width:20px; height:20px; flex:0 0 auto; vertical-align:0; }
-.briefing b{ display:block; font-size:12.5px; color:var(--text); margin-bottom:2px; }
-.briefing p{ margin:0; font-size:12.5px; line-height:1.45; color:var(--text2); }
-.ttRot{ margin:18px 0 8px; font-size:12.5px; color:var(--muted); }
-.ttEixos{ display:flex; flex-wrap:wrap; gap:6px; }
-.ttEixos span{ font-size:11px; font-weight:600; color:var(--cyan); background:rgba(var(--cyanRGB),.10);
-  padding:3px 9px; border-radius:99px; }
-@media(min-width:641px){ .ttCapa{ min-height:400px; } .ttCapa .hTit{ font-size:24px; } .ttCx{ flex:0 0 42%; } }
-/* v4-14 · opção B: com capa, a imagem fica limpa (sem camada escura) e selos + título descem
-   para a parte clara, logo abaixo da cena. Sem capa, fica o degradê do campo com texto por cima. */
-.capaHeroi.soImg{ min-height:0; height:auto; aspect-ratio:5/4; max-height:360px; padding:0; }  /* v4-15: mesma proporção da tela do tema, a cena inteira aparece */
-.ttCapa.soImg{ min-height:0; height:36vh; max-height:340px; padding:0; }
-.hCab{ padding:14px 16px 0; }
-.hCab .hSelos span{ color:var(--cyan); background:rgba(var(--cyanRGB),.12); }
-.hCab .hSelos span.dest{ background:var(--cyan); color:var(--onCyan); }
-.hCab .hTit{ color:var(--text); text-shadow:none; }
-.ttCorpoInt .hCab{ padding:0 0 12px; }
-.ttCorpoInt .hCab .hTit{ font-size:20px; }
-@media(min-width:641px){ .ttCorpoInt .hCab .hTit{ font-size:24px; } }
-/* v4-16 · cartão grande do tema (com capa): capa em pé, nome no céu, botões logo abaixo */
-.ttCartao{ margin:12px 12px 0; border-radius:20px; overflow:hidden; background:var(--surface);
-  box-shadow:0 2px 14px rgba(var(--borderRGB),.14); }
-.ttPoster{ position:relative; width:100%; aspect-ratio:3/4; max-height:64vh; background-size:cover; background-position:center bottom; }
-.ttPosterTopo{ position:absolute; left:0; right:0; top:0; padding:60px 18px 0; }
-.ttPosterTopo .hSelos span{ color:#0c3a3b; background:rgba(255,255,255,.72); }
-.ttPosterTopo .hSelos span.dest{ background:#0a8c8d; color:#fff; }
-.ttPoster .hTit{ color:#0c3a3b; text-shadow:0 1px 10px rgba(255,255,255,.7); font-size:22px; line-height:1.22; }
-.ttPosterTopo.longo .hTit{ font-size:18px; }
-.telaTema .ttAcoes.ttAcoesCard{ margin:0; padding:14px 14px 16px; }
-.ttCorpoInt.semSobe{ margin-top:0; box-shadow:none; background:transparent; padding-bottom:110px; }
-@media(min-width:641px){ .ttPoster .hTit{ font-size:26px; } .ttPosterTopo.longo .hTit{ font-size:21px; } .ttCartao{ max-width:520px; margin:16px auto 0; } }
+.vazio{ text-align:center; color:var(--muted); font-size:.85rem; padding:2rem 0; line-height:1.6; }
+.spinner{ width:38px; height:38px; border:3px solid var(--surface2); border-top-color:var(--cyan); border-radius:50%; animation:girar .8s linear infinite; margin:2rem auto; }
+@keyframes girar{ to{ transform:rotate(360deg); } }
+.pillSugerir{ display:flex; align-items:center; gap:.7rem; min-height:52px; padding:0 .875rem; border-radius:13px; background:var(--surface);
+  border:1px dashed rgba(var(--borderRGB),.35); color:var(--text); font-size:.85rem; font-weight:600; cursor:pointer; margin:1.6rem 0 .5rem; }
+.pillSugerir .fe{ width:22px; height:22px; }
+.pillSugerir .fim{ margin-left:auto; color:var(--muted); }
+.areaSugestao textarea{ width:100%; min-height:5rem; padding:.75rem .875rem; background:var(--surface2); border:1px solid rgba(var(--borderRGB),.3);
+  border-radius:.7rem; color:var(--text); font-size:.9rem; font-family:inherit; resize:vertical; }
+.areaSugestao textarea:focus{ outline:none; border-color:rgba(var(--cyanRGB),.6); }
+html, body{ overflow-x:clip; }
 </style>
 </head>
 <body class="aquarela">
@@ -270,43 +166,40 @@ body.semRolar{ overflow:hidden; }
 <div id="main-content" style="display:flex;flex-direction:column;min-height:100vh;">
   <div id="conteudo">
 
-    <div class="cabTela"><h1>Temas</h1><span class="conta" id="contTemas"></span></div>
-    <div id="chipsAbas"></div>
-    <div class="ferrTemas colunaTela">
-      <button class="fbTema" id="btCampo" onclick="toggleGvCampo()"><span id="lblCampo">Campo</span><span class="seta">&#9662;</span></button>
-      <button class="fbTema busca" onclick="abrirBusca()">&#128269; Buscar</button>
-    </div>
-    <div class="linhaBusca colunaTela" id="linhaBusca">
-      <input id="buscaTopo" type="search" enterkeyhint="search" placeholder="Buscar tema, ano ou campo"
-             oninput="sincronizarBusca(this.value)"
-             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"/>
-      <button class="fbTema" onclick="limparBusca()">Fechar</button>
-    </div>
-    <div class="pista colunaTela" id="pistaTemas">
-      <div id="heroiTema"></div>
-    <div class="gridTemas" id="gridTemas"><div class="spinner" id="loadingTemas" style="grid-column:1/-1;"></div></div>
+    <div class="cabTela"><h1>Temas</h1></div>
 
-      <button class="btnMais hidden" id="btnMais" onclick="mostrarMais()">Carregar mais</button>
+    <div id="topoT">
+      <div class="chipsT" id="chipsT"></div>
+      <div class="subT" id="subT"></div>
+      <div class="ferrTemas" id="ferrTemas">
+        <button class="fbTema busca" onclick="abrirBusca()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Buscar tema</button>
+        <button class="fbTema" id="btCampo" onclick="toggleGaveta('gvCampo')"><span id="lblCampo">Campo</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+      </div>
+      <div class="linhaBusca" id="linhaBusca">
+        <input id="buscaTopo" type="search" enterkeyhint="search" placeholder="Buscar tema, ano ou campo"
+               oninput="sincronizarBusca(this.value)"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"/>
+        <button class="fbTema" onclick="limparBusca()">Fechar</button>
+      </div>
     </div>
+
+    <div id="areaT"><div class="spinner"></div></div>
 
     <div class="pillSugerir" onclick="abrirGaveta('gvSugestao')">
-      <span style="font-size:1.1rem;">&#128161;</span> Sugerir um tema para a PROfa
+      <span id="icoSugerir"></span> Sugerir um tema para a PROfa
       <span class="fim">&#8250;</span>
     </div>
 
   </div>
 </div>
 
-<!-- GAVETA CANÔNICA: EIXO TEMÁTICO (sobe por trás da dock e da barra) -->
+<!-- GAVETA: CAMPO -->
 <div class="gvBg atras" id="gvCampoBg" onclick="fecharGaveta('gvCampo')"></div>
 <div class="gv atras" id="gvCampo">
   <div class="grip"></div>
   <p class="tit">Campo</p>
   <div id="gvCampoLista"></div>
 </div>
-
-<!-- v4-1 · CAPA CHEIA DO TEMA -->
-<div class="telaTema" id="telaTema"><div id="ttCorpo"></div></div>
 
 <!-- GAVETA: SUGERIR TEMA -->
 <div class="gvBg" id="gvSugestaoBg" onclick="fecharGaveta('gvSugestao')"></div>
@@ -321,15 +214,11 @@ body.semRolar{ overflow:hidden; }
 </div>
 
 <script src="supabase-auth.js"></script>
-<script src="aluno-base-v6.js?v=6-23"></script>
+<script src="aluno-base-v6.js?v=6-24"></script>
 <script>
   if (typeof authGuard === 'function') { authGuard('aluno'); }
-
-  /* v4-8 · marca de versão para conferir se o arquivo no ar é o novo, sem poluir a tela.
-     No computador: F12, aba Console. No celular: dá para ver em chrome://inspect ou pelo
-     nome das abas (Todos, RedaON, Meus Temas, ENEM Principal, ENEM Especiais). */
-  console.info('RedaON · temas v4-13 · ' + new Date().toISOString().slice(0,10));
-  document.documentElement.setAttribute('data-tela', 'temas v4-13');
+  console.info('RedaON · temas v5-0');
+  document.documentElement.setAttribute('data-tela', 'temas v5-0');
 
   // Professor que abrir esta página vai para o portal dele (decisão 6A)
   (function(){
@@ -339,43 +228,32 @@ body.semRolar{ overflow:hidden; }
     } catch(e) {}
   })();
 
-  montarEsqueleto({
-    ativo:  'temas',
-    titulo: 'Temas',
-    icone:  'library_books',
-    sino:   false
-  });
+  montarEsqueleto({ ativo:'temas', titulo:'Temas', icone:'library_books', sino:false });
+  (function(){ var s = document.getElementById('icoSugerir'); if (s) s.innerHTML = feIcone('lampada'); })();
 
   // ─── Estado ───
   var TEMAS = [];
-  var TEMA_SEMANA = null;
+  var SEMANA_ID = null;          /* tema do ciclo do aluno (o "da semana"), com a pílula */
   var MEUS_TEMAS_IDS = [];
-  /* v4-7 · Meus Temas agora mora no banco (tabela temas_salvos), então abre em qualquer
-     aparelho. O que estava só no navegador é levado para o banco na primeira abertura, e o
-     navegador segue como cópia local, para a tela responder na hora e funcionar sem rede. */
+  var MEUS_FEITOS = {};
+  var EST = { chip:'todos', sub:'principal', ver:null, campo:'todos', busca:'' };
+
+  /* Meus Temas mora no banco (temas_salvos); o navegador guarda uma cópia para responder na hora */
   try { MEUS_TEMAS_IDS = JSON.parse(localStorage.getItem('redaon_temas_salvos') || '[]'); } catch(e) {}
   (function(){
     var vistos = {}, limpa = [];
     (MEUS_TEMAS_IDS || []).forEach(function(id){ if (id && !vistos[id]) { vistos[id] = true; limpa.push(id); } });
     MEUS_TEMAS_IDS = limpa;
-    try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(limpa)); } catch(e) {}
   })();
-  function guardarLocal(){
-    try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS)); } catch(e) {}
-  }
+  function guardarLocal(){ try { localStorage.setItem('redaon_temas_salvos', JSON.stringify(MEUS_TEMAS_IDS)); } catch(e) {} }
   function alunoId(){ try { return (typeof authGetUserId === 'function') ? authGetUserId() : null; } catch(e) { return null; } }
-  /* v4-9 · quem manda é o banco. Antes eu juntava as duas listas, e o que estava só no
-     aparelho voltava para o banco — por isso o tema desmarcado num lugar ressuscitava no
-     outro. A subida do que existia no navegador acontece UMA vez, na migração. */
   var CHAVE_MIGRADO = 'redaon_salvos_migrados';
   async function carregarMeusTemas(){
     var uid = alunoId(); if (!uid) return;
     try {
-      var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos?aluno_id=eq.' + uid
-        + '&select=tema_id,origem&order=criado_em.desc', {});
-      if (!res.ok) return;                         /* sem rede: segue com a cópia local */
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos?aluno_id=eq.' + uid + '&select=tema_id,origem&order=criado_em.desc', {});
+      if (!res.ok) return;
       var doBanco = (await res.json()).map(function(r){ return r.tema_id; });
-
       var migrado = false;
       try { migrado = localStorage.getItem(CHAVE_MIGRADO) === '1'; } catch(e) {}
       if (!migrado) {
@@ -392,13 +270,10 @@ body.semRolar{ overflow:hidden; }
         }
         try { localStorage.setItem(CHAVE_MIGRADO, '1'); } catch(e) {}
       }
-
       var vistos = {}, lista = [];
       doBanco.forEach(function(id){ if (id && !vistos[id]) { vistos[id] = true; lista.push(id); } });
-      MEUS_TEMAS_IDS = lista;                      /* o banco é a verdade */
+      MEUS_TEMAS_IDS = lista;
       guardarLocal();
-      renderGvCampo();
-      renderTemas();
     } catch(e) { console.warn('[temas] meus temas', e); }
   }
   async function gravarSalvo(id, salvou){
@@ -411,25 +286,12 @@ body.semRolar{ overflow:hidden; }
           body: JSON.stringify({ aluno_id:uid, tema_id:id, origem:'aluno' })
         });
       } else {
-        await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos?aluno_id=eq.' + uid
-          + '&tema_id=eq.' + id + '&origem=eq.aluno', { method:'DELETE' });
+        await dbFetch(SUPABASE_URL + '/rest/v1/temas_salvos?aluno_id=eq.' + uid + '&tema_id=eq.' + id + '&origem=eq.aluno', { method:'DELETE' });
       }
     } catch(e) { console.warn('[temas] gravar salvo', e); }
   }
-  /* v4-0 · cinco abas. A aplicação de cada tema aparece como selo no próprio card. */
-  /* v4-5 · ordem e nomes decididos com o Alan. O RedaON leva a marca dentro da cápsula. */
-  var LOGO_R = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">'
-    + '<rect width="40" height="40" rx="11" fill="#0a8c8d"/>'
-    + '<text x="20" y="28" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="800" fill="#fff">R</text></svg>');
-  var ABAS = [
-    { id:'todos',     rotulo:'Todos' },
-    { id:'redaon',    rotulo:'RedaON', avatar:LOGO_R },
-    { id:'meus',      rotulo:'Meus Temas' },
-    { id:'principal', rotulo:'ENEM Principal' },
-    { id:'outras',    rotulo:'ENEM Especiais' }
-  ];
-  /* campos: id do banco, nome de tela e as duas cores da capa composta (a arte entra depois) */
+
+  /* campos: id do banco, nome de tela e as duas cores do degradê de quem ainda não tem capa */
   var CAMPOS = [
     { id:'trabalho',       nome:'Trabalho',       c:['#b07d10','#8a5a00'] },
     { id:'educacao',       nome:'Educa\u00e7\u00e3o',     c:['#1f6fb2','#0a8c8d'] },
@@ -445,16 +307,11 @@ body.semRolar{ overflow:hidden; }
     { id:'envelhecimento', nome:'Envelhecimento', c:['#b07d10','#0f8a4d'] },
     { id:'saneamento',     nome:'Saneamento',     c:['#1f6fb2','#0f8a4d'] }
   ];
-  var MEUS_FEITOS = {};   /* tema_id -> { nota } do que o aluno já escreveu */
-  var HEROI_ID = null;
-  var abaAtiva = 'todos';
-  var campoAtivo = 'todos';
-  var textoBusca = '';
-  var LIMITE = 12, mostrando = 12;
-
   function campoDe(id){ for (var i=0;i<CAMPOS.length;i++){ if (CAMPOS[i].id===id) return CAMPOS[i]; } return null; }
   function nomeCampo(id){ var c=campoDe(id); return c ? c.nome : 'Sem campo'; }
   function coresCampo(id){ var c=campoDe(id); return c ? c.c : ['#8a8576','#6f6c63']; }
+  function ehRedaON(t){ return !t.ano_enem; }
+  function ehPrincipal(t){ return !!t.ano_enem && (t.aplicacao||'').toLowerCase()==='regular'; }
   function aplicacaoRotulo(t){
     var a=(t.aplicacao||'').toLowerCase();
     if (!t.ano_enem) return 'RedaON';
@@ -462,441 +319,220 @@ body.semRolar{ overflow:hidden; }
     var nomes={ ppl:'PPL', segunda_aplicacao:'reaplica\u00e7\u00e3o', digital:'digital', especial:'especial', cancelada:'cancelada' };
     return 'ENEM ' + t.ano_enem + ' \u00b7 ' + (nomes[a] || a);
   }
-  function capaHtml(t, classe){
-    if (t.capa_url) return '<div class="'+classe+'"><img src="'+t.capa_url+'" alt="" loading="lazy"></div>';
-    var c=coresCampo(t.campo);
-    return '<div class="'+classe+'" style="background:linear-gradient(140deg,'+c[0]+','+c[1]+')"></div>';
+  function capaHtml(t, classe, comPilula){
+    var c = coresCampo(t.campo);
+    var grad = '<span class="grad" style="background:linear-gradient(140deg,'+c[0]+','+c[1]+')"></span>';
+    var img = t.capa_url ? '<img src="'+escapeHtmlSimples(t.capa_url)+'" alt="" loading="lazy" onerror="this.remove()">' : '';
+    var pil = (comPilula && t.id === SEMANA_ID) ? '<span class="pilulaSem">da semana</span>' : '';
+    return '<div class="'+classe+'">' + grad + img + pil + '</div>';
   }
 
-  // ─── Carga do banco ───
-  async function carregarTemas() {
+  // ─── Carga ───
+  async function carregarTemas(){
     try {
-      var url = SUPABASE_URL + '/rest/v1/temas?select=id,titulo,categoria,campo,capa_url,nivel,ano_enem,aplicacao,descricao,ativo,semana_de&ativo=eq.true&order=ano_enem.desc.nullsfirst&order=aplicacao.asc';
+      var url = SUPABASE_URL + '/rest/v1/temas?select=id,titulo,campo,capa_url,ano_enem,aplicacao,semana_de,created_at&ativo=eq.true&order=ano_enem.desc.nullsfirst&order=aplicacao.asc';
       var res = await dbFetch(url, {});
-      if (!res.ok) throw new Error('Erro ao buscar temas: ' + res.status);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       TEMAS = await res.json();
-      // Tema da Semana: semana_de <= hoje < semana_de + 7
-      var hoje = new Date(); hoje.setHours(0,0,0,0);
-      TEMA_SEMANA = TEMAS.find(function(t){
-        if (!t.semana_de) return false;
-        var ini = new Date(t.semana_de + 'T00:00:00');
-        var fim = new Date(ini); fim.setDate(fim.getDate() + 7);
-        return hoje >= ini && hoje < fim;
-      }) || null;
-      await carregarFeitos();
-      await carregarMeusTemas();
-      montarHeroi();
+      try { var c = await cicloDoAluno(); SEMANA_ID = (c && c.tema) ? c.tema.id : null; } catch(e) {}
+      await Promise.all([carregarFeitos(), carregarMeusTemas()]);
       renderGvCampo();
-      renderTemas();
+      desenhar();
     } catch(e) {
-      console.warn('Erro ao carregar temas:', e);
-      var g = document.getElementById('gridTemas');
-      if (g) g.innerHTML = '<p class="vazio">N\u00e3o consegui carregar os temas agora.<br>Verifique sua conex\u00e3o e recarregue.</p>';
+      console.warn('[temas] carregar', e);
+      document.getElementById('areaT').innerHTML = '<p class="vazio">N\u00e3o consegui carregar os temas agora.<br>Verifique sua conex\u00e3o e recarregue.</p>';
     }
   }
-
-  /* v4-0 · o que o aluno já escreveu: alimenta a regra do herói e o selo "já escrevi" */
   async function carregarFeitos(){
     MEUS_FEITOS = {};
     try {
-      var uid = (typeof authGetUserId === 'function') ? authGetUserId() : null;
-      if (!uid) return;
-      var res = await dbFetch(SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + uid
-        + '&tema_id=not.is.null&select=tema_id,nota_final,created_at&order=created_at.desc', {});
+      var uid = alunoId(); if (!uid) return;
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/redacoes?aluno_id=eq.' + uid + '&tema_id=not.is.null&select=tema_id,nota_final,created_at&order=created_at.desc', {});
       if (!res.ok) return;
-      (await res.json()).forEach(function(r){
-        if (!MEUS_FEITOS[r.tema_id]) MEUS_FEITOS[r.tema_id] = { nota: r.nota_final || null };
-      });
+      (await res.json()).forEach(function(r){ if (!MEUS_FEITOS[r.tema_id]) MEUS_FEITOS[r.tema_id] = { nota: r.nota_final || null }; });
     } catch(e) { console.warn('[temas] feitos', e); }
   }
-  function jaEscreveu(t){ return !!MEUS_FEITOS[t.id]; }
-  function semanaRotulo(t){
-    if (!t.semana_de) return '';
-    var ini=new Date(t.semana_de+'T00:00:00'), fim=new Date(ini); fim.setDate(fim.getDate()+6);
-    var MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-    return ini.getDate()+'\u2013'+fim.getDate()+' '+MES[fim.getMonth()];
-  }
-  /* v4-0 · qual tema vira o herói, na ordem combinada:
-     1) Tema da Semana que ele ainda não escreveu
-     2) o mais recente que ele ainda não escreveu, do campo em que ele vai pior
-     3) o mais recente que ele ainda não escreveu
-     4) se já escreveu tudo, o Tema da Semana mesmo assim */
-  function campoMaisFraco(){
-    var soma={}, qtd={};
-    TEMAS.forEach(function(t){
-      var f=MEUS_FEITOS[t.id];
-      if (!f || !f.nota || !t.campo) return;
-      soma[t.campo]=(soma[t.campo]||0)+f.nota; qtd[t.campo]=(qtd[t.campo]||0)+1;
+
+  // ─── Fileiras ───
+  /* RedaON: o da semana primeiro, depois os programados (mais recente antes), depois o resto */
+  function listaRedaON(){
+    return TEMAS.filter(ehRedaON).sort(function(a,b){
+      if (a.id === SEMANA_ID) return -1; if (b.id === SEMANA_ID) return 1;
+      var sa = a.semana_de || '', sb = b.semana_de || '';
+      if (sa !== sb) return sa < sb ? 1 : -1;
+      return (b.created_at||'') < (a.created_at||'') ? -1 : 1;
     });
-    var pior=null, menor=Infinity;
-    Object.keys(soma).forEach(function(k){ var m=soma[k]/qtd[k]; if (m<menor){ menor=m; pior=k; } });
-    return pior;
   }
-  function escolherHeroi(){
-    if (TEMA_SEMANA && !jaEscreveu(TEMA_SEMANA)) return { t:TEMA_SEMANA, selo:'Tema da semana' };
-    var novos = TEMAS.filter(function(t){ return !jaEscreveu(t); });
-    if (novos.length){
-      var fraco = campoMaisFraco();
-      if (fraco){
-        var doFraco = novos.filter(function(t){ return t.campo===fraco; });
-        if (doFraco.length) return { t:doFraco[0], selo:'Refor\u00e7ar ' + nomeCampo(fraco) };
-      }
-      return { t:novos[0], selo:'Novo para voc\u00ea' };
-    }
-    return TEMA_SEMANA ? { t:TEMA_SEMANA, selo:'Tema da semana' } : null;
+  function porAno(a,b){ return (b.ano_enem||0) - (a.ano_enem||0); }
+  var FILEIRAS = {
+    redaon:    { tit:'Da RedaON',              lista:function(){ return listaRedaON(); } },
+    meus:      { tit:'Seus temas salvos',      lista:function(){ return MEUS_TEMAS_IDS.map(temaPorId).filter(Boolean); } },
+    principal: { tit:'ENEM \u00b7 Prova principal', lista:function(){ return TEMAS.filter(ehPrincipal).sort(porAno); } },
+    especiais: { tit:'ENEM \u00b7 Especiais',       lista:function(){ return TEMAS.filter(function(t){ return t.ano_enem && !ehPrincipal(t); }).sort(porAno); } }
+  };
+  function fileirasDoChip(){
+    if (EST.chip === 'redaon') return ['redaon'];
+    if (EST.chip === 'meus')   return ['meus'];
+    if (EST.chip === 'enem')   return [EST.sub];
+    return ['redaon','meus','principal','especiais'];
   }
-  function heroiEscondido(){ return !!textoBusca || campoAtivo !== 'todos'; }
-  function montarHeroi(){
-    var alvo=document.getElementById('heroiTema'); if(!alvo) return;
-    if (heroiEscondido()){ alvo.innerHTML=''; return; }
-    var h=escolherHeroi();
-    if (!h){ alvo.innerHTML=''; HEROI_ID=null; return; }
-    var t=h.t, feito=MEUS_FEITOS[t.id];
-    HEROI_ID = t.id;
-    /* selos e título por cima da capa, como no desenho aprovado */
-    var cores=coresCampo(t.campo);
-    var fundo = t.capa_url
-      ? 'background-image:url('+t.capa_url+');background-size:cover;background-position:center bottom;'
-      : 'background:linear-gradient(140deg,'+cores[0]+','+cores[1]+');';
-    var cabH = '<div class="hSelos"><span class="dest">'+h.selo+'</span>'
-          + (t.semana_de?'<span>'+semanaRotulo(t)+'</span>':'')
-          + '<span>'+escapeHtmlSimples(nomeCampo(t.campo))+'</span></div>'
-        + '<p class="hTit">'+escapeHtmlSimples(t.titulo)+'</p>';
-    alvo.innerHTML='<div class="heroiTema" onclick="abrirTema(\''+t.id+'\')">'
-      + (t.capa_url
-          ? '<div class="capaHeroi soImg" style="'+fundo+'"></div><div class="hCab">' + cabH + '</div>'   /* v4-14 · opção B */
-          : '<div class="capaHeroi" style="'+fundo+'"><span class="scrim"></span>' + cabH + '</div>')
-      + '<div class="hPe"><span>'+aplicacaoRotulo(t)+(t.nivel?(' \u00b7 n\u00edvel '+escapeHtmlSimples(String(t.nivel).toLowerCase())):'')+'</span>'
-        + (feito?'<span class="jaFiz">j\u00e1 escrevi'+(feito.nota?' \u00b7 '+feito.nota:'')+'</span>':'')+'</div>'
-      + '<div class="hAcoesT">'
-        + '<button class="bt" onclick="event.stopPropagation();escreverTema(\''+t.id+'\')">Escrever</button>'
-        + '<button class="bt secundario" onclick="event.stopPropagation();prepararTema(\''+t.id+'\')">Preparar</button>'
-      + '</div></div>';
-  }
-  /* ─── v4-1 · capa cheia do tema (a "capa de filme") ─── */
-  var _apoioCache = {};
   function temaPorId(id){ for (var i=0;i<TEMAS.length;i++){ if (TEMAS[i].id===id) return TEMAS[i]; } return null; }
-  /* v4-2: o banco tem também 'argumentos' e 'intervencao' (fora dos nove eixos de repertório) */
-  var NOME_EIXO = { legislacao:'Legisla\u00e7\u00e3o', historia:'Hist\u00f3ria', especialistas:'Especialistas',
-    atualidades:'Atualidades e dados', literatura:'Literatura', filosofia:'Filosofia', cinema:'Cinema',
-    ciencia:'Ci\u00eancia', culturapop:'Cultura pop', argumentos:'Argumentos', intervencao:'Interven\u00e7\u00e3o',
-    entender:'Entender o tema' };
-  /* v4-3 · a coluna conteudo é TEXTO com JSON dentro, então precisa de JSON.parse.
-     Era por isso que a contagem de fichas e a fileira de eixos não apareciam. */
-  function lerConteudo(c){
-    if (c == null) return null;
-    if (typeof c === 'object') return c;
-    try { return JSON.parse(c); } catch(e) { return null; }
-  }
-  async function buscarApoio(temaId){
-    if (_apoioCache[temaId]) return _apoioCache[temaId];
-    var fora = { entender:null, fichas:0, eixos:[] };
-    try {
-      var res = await dbFetch(SUPABASE_URL + '/rest/v1/material_apoio?tema_id=eq.' + temaId
-        + '&select=eixo,conteudo,estado', {});
-      if (res.ok) {
-        (await res.json()).forEach(function(m){
-          var dado = lerConteudo(m.conteudo);
-          if (m.eixo === 'entender') { fora.entender = dado; return; }
-          var n = Array.isArray(dado) ? dado.length : (dado ? 1 : 0);
-          if (n) { fora.fichas += n; fora.eixos.push({ eixo:m.eixo, n:n }); }
-        });
-        fora.eixos.sort(function(a,b){ return b.n - a.n; });
-      }
-    } catch(e) { console.warn('[temas] apoio', e); }
-    _apoioCache[temaId] = fora;
-    return fora;
-  }
-  function blocoBriefing(ico, titulo, texto){
-    if (!texto) return '';
-    return '<div class="briefing">' + feIcone(ico) + '<div><b>' + titulo + '</b><p>'
-      + escapeHtmlSimples(String(texto)) + '</p></div></div>';
-  }
-  async function abrirTema(id){
-    var t = temaPorId(id); if (!t) return;
-    /* v4-17 · a tela do tema se fundiu com o Preparar: o toque leva direto para lá */
-    try { definirTemaSelecionado(t); } catch(e) {}
-    window.location.href = 'hub-preparacao.html?tema=' + encodeURIComponent(id);
-    return;
-    var feito = MEUS_FEITOS[id];
-    var fav = MEUS_TEMAS_IDS.indexOf(id) >= 0;
-    var cores = coresCampo(t.campo);
-    var fundo = t.capa_url
-      ? 'background-image:url(' + t.capa_url + ');background-size:cover;background-position:center bottom;'
-      : 'background:linear-gradient(140deg,' + cores[0] + ',' + cores[1] + ');';
-    var grupo = !t.ano_enem ? 'RedaON'
-      : ((t.aplicacao||'').toLowerCase()==='regular' ? 'Prova principal' : 'Outras aplica\u00e7\u00f5es');
-    var tela = document.getElementById('telaTema');
-    document.getElementById('ttCorpo').innerHTML =
-      /* v4-4 · sobre a imagem, só o selo e o tema. O campo desceu para a linha de dados. */
-      (function(){
-        var cab = ((t.semana_de || feito) ? ('<div class="hSelos">'
-          + (t.semana_de?'<span class="dest">Tema da semana</span><span>'+semanaRotulo(t)+'</span>':'')
-          + (feito?'<span>j\u00e1 escrevi' + (feito.nota?' \u00b7 '+feito.nota:'') + '</span>':'')
-          + '</div>') : '')
-          + '<p class="hTit">' + escapeHtmlSimples(t.titulo) + '</p>';
-        var voltar = '<button class="ttVoltar" onclick="fecharTema()" aria-label="Voltar">\u2039</button>';
-        /* v4-14 · opção B: com capa, a cena abre limpa e selos + título ficam no topo do painel claro */
-        /* v4-16 · cartão grande: a capa inteira em pé, o nome no céu e Escrever/Preparar logo abaixo */
-        var botoes = '<div class="ttAcoes ttAcoesCard">'
-            + '<button class="bt" onclick="escreverTema(\''+id+'\')">Escrever</button>'
-            + '<button class="bt secundario" onclick="prepararTema(\''+id+'\')">Preparar</button></div>';
-        return t.capa_url
-          ? '<div class="ttCartao"><div class="ttPoster" style="' + fundo + '">' + voltar
-              + '<div class="ttPosterTopo' + ((t.titulo||'').length > 90 ? ' longo' : '') + '">' + cab + '</div></div>'
-              + botoes + '</div>'
-            + '<div class="ttCorpoInt semSobe">'
-          : '<div class="ttCapa" style="' + fundo + '"><span class="scrim"></span>' + voltar + cab + '</div>'
-            + '<div class="ttCorpoInt">';
-      })()
-        + '<div class="ttDados"><span><b>' + aplicacaoRotulo(t) + '</b> \u00b7 ' + grupo
-          + ' \u00b7 <b class="campoTx">' + escapeHtmlSimples(nomeCampo(t.campo)) + '</b></span>'
-          + '<button class="btSalvar' + (fav?' on':'') + '" id="ttSalvar" onclick="alternarFavorito(\''+id+'\', this)"'
-            + ' aria-label="Salvar em Salvos" title="Salvar em Salvos">' + feIcone('disquete') + '</button>'
-        + '</div>'
-        + '<p class="ttChamada">Antes de <b>Escrever</b>, se <b>Preparar</b> ajuda a '
-          + '<span class="junto">' + feIcone('lampada') + ' <b>Entender o tema</b></span>, juntar argumentos no '
-          + '<span class="junto">' + feIcone('livros') + ' <b>Material de apoio</b></span> e treinar nas '
-          + '<span class="junto">' + feIcone('alvo') + ' <b>Atividades</b></span>.</p>'
-        + '<div class="ttCarr" id="ttCarr"></div>'
-        /* v4-5 · os botões vêm DEPOIS dos materiais, para o aluno ver o que existe antes de decidir */
-        + (t.capa_url ? '' : ('<div class="ttAcoes">'
-          + '<button class="bt" onclick="escreverTema(\''+id+'\')">Escrever</button>'
-          + '<button class="bt secundario" onclick="prepararTema(\''+id+'\')">Preparar</button>'
-        + '</div>'))
-      + '</div>';
-    tela.classList.add('on');
-    document.body.classList.add('semRolar');
-    tela.scrollTop = 0;
-    var ap = await buscarApoio(id);
-    montarCartoes(id, ap);
-  }
-  /* v4-4 · os três cartões rolam de lado e dizem o que tem dentro de cada parte */
-  function montarCartoes(id, ap){
-    var alvo = document.getElementById('ttCarr'); if (!alvo) return;
-    var e = ap.entender || {};
-    var temEntender = !!(e.recorte || e.banca || e.armadilhas);
-    var eixos = ap.eixos.slice(0,3).map(function(x){ return NOME_EIXO[x.eixo] || x.eixo; }).join(', ');
 
-    function cartao(ico, titulo, linhas, acao){
-      return '<div class="ttCx" onclick="' + acao + '">' + feIcone(ico)
-        + '<b>' + titulo + '</b>'
-        + linhas.filter(Boolean).map(function(l){ return '<span>' + l + '</span>'; }).join('')
-        + '</div>';
-    }
-    var abrir = 'prepararTema(\'' + id + '\')';
-    alvo.innerHTML =
-      cartao('lampada','Entender o tema', temEntender
-        ? [ 'Recorte: o que o tema pede e o que n\u00e3o pede',
-            e.banca ? 'O que a banca espera na corre\u00e7\u00e3o' : '',
-            e.armadilhas ? 'Armadilhas que fazem perder ponto' : '' ]
-        : [ 'Recorte: o que o tema pede e o que n\u00e3o pede',
-            'O que a banca espera na corre\u00e7\u00e3o',
-            'Armadilhas que fazem perder ponto' ], abrir)
-      + cartao('livros','Material de apoio', ap.fichas
-        ? [ ap.fichas + (ap.fichas===1?' ficha':' fichas') + ' em ' + ap.eixos.length + (ap.eixos.length===1?' eixo':' eixos'),
-            eixos, 'Cada uma com fonte e como usar' ]
-        : [ 'Reposit\u00f3rio de repert\u00f3rio do tema', 'Com fonte e como usar na reda\u00e7\u00e3o',
-            'Em prepara\u00e7\u00e3o pela PROfa' ], abrir)
-      + cartao('alvo','Atividades',
-        [ 'Flashcards do tema', 'Quiz das compet\u00eancias', 'Foco no que puxa sua nota para baixo' ], abrir);
+  function cardT(t){
+    return '<div class="cardT" onclick="abrirTema(\'' + t.id + '\')">'
+      + capaHtml(t, 'capaT', true)
+      + '<p class="ttT">' + escapeHtmlSimples(t.titulo) + '</p>'
+      + '<p class="metaT">' + aplicacaoRotulo(t) + '</p></div>';
   }
-  function fecharTema(){
-    document.getElementById('telaTema').classList.remove('on');
-    document.body.classList.remove('semRolar');
-  }
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape' && document.getElementById('telaTema').classList.contains('on')) fecharTema();
-  });
-
-  // ─── Abas: chips com carrossel, do kit da base ───
-  var _trilhoAbas = null;
-  function montarAbas(){
-    _trilhoAbas = trilhoFiltros({
-      alvo:'chipsAbas', pista:'pistaTemas', area:'conteudo',
-      itens: ABAS.map(function(a){ return { id:a.id, rotulo:a.rotulo, avatar:a.avatar }; }),
-      ativo: abaAtiva,
-      aoTrocar: function(id){ abaAtiva=id; mostrando=LIMITE; renderGvCampo(); renderTemas(); }
-    });
-  }
-  function irAba(a){ if(_trilhoAbas) _trilhoAbas.ir(a); }
-
-  // ─── Gaveta de Campo ───
-  function contarPorCampo(){
-    var base = obterFiltrados({ ignorarCampo:true, ignorarBusca:true });
-    var mapa = { todos: base.length };
-    base.forEach(function(t){ var k=t.campo||'sem'; mapa[k]=(mapa[k]||0)+1; });
-    return mapa;
-  }
-  function renderGvCampo(){
-    var cont = contarPorCampo();
-    var itens = [{ id:'todos', nome:'Todos os campos' }]
-      .concat(CAMPOS.map(function(c){ return { id:c.id, nome:c.nome }; }))
-      .concat([{ id:'sem', nome:'Sem campo' }]);
-    var alvo = document.getElementById('gvCampoLista');
-    if (!alvo) return;
-    alvo.innerHTML = itens.map(function(i){
-      var sel=(i.id===campoAtivo), n=cont[i.id]||0, vazio=(n===0 && !sel);
-      return '<a class="pill'+(sel?' sel':'')+'"'+(vazio?' style="opacity:.45;"':'')
-        + ' onclick="escolherCampo(\''+i.id+'\')">'+escapeHtmlSimples(i.nome)
-        + '<span style="font-size:.72rem;font-weight:600;color:'+(sel?'var(--cyan)':'var(--muted)')+';margin-left:.35rem;">('+n+')</span>'
-        + '<i class="fim"'+(sel?'':' style="opacity:0;"')+'>&#10003;</i></a>';
-    }).join('');
-  }
-  function escolherCampo(id){
-    campoAtivo = id; mostrando = LIMITE;
-    var nome = id==='todos' ? 'Campo' : (id==='sem' ? 'Sem campo' : nomeCampo(id));
-    document.getElementById('lblCampo').textContent = nome;
-    document.getElementById('btCampo').classList.toggle('ativo', id!=='todos');
-    renderGvCampo(); fecharGaveta('gvCampo'); montarHeroi(); renderTemas();
-  }
-  function toggleGvCampo(){ toggleGaveta('gvCampo'); }
-
-  // ─── Busca ───
-  function abrirBusca(){
-    var l=document.getElementById('linhaBusca'); l.classList.add('aberta');
-    var i=document.getElementById('buscaTopo'); if(i) i.focus();
-  }
-  function limparBusca(){
-    var l=document.getElementById('linhaBusca'); l.classList.remove('aberta');
-    var i=document.getElementById('buscaTopo'); if(i) i.value='';
-    textoBusca=''; mostrando=LIMITE; montarHeroi(); renderTemas();
-  }
-  function sincronizarBusca(v){
-    textoBusca = (v || '').toLowerCase().trim();
-    mostrando = LIMITE;
-    montarHeroi();
-    renderTemas();
+  function fileiraHtml(id){
+    var f = FILEIRAS[id], lista = f.lista();
+    if (!lista.length && id !== 'meus') return '';
+    var corpo = lista.length ? lista.map(cardT).join('')
+      : '<div class="conviteT">' + feIcone('disquete') + '<span>Salve temas pelo disquete na tela do tema. Eles aparecem aqui.</span></div>';
+    var ver = lista.length > 3 ? '<button onclick="verTodos(\'' + id + '\')">ver todos &#8250;</button>' : '';
+    return '<section class="fileira"><div class="cabF"><h2>' + f.tit + '</h2>' + ver + '</div><div class="trilhoT">' + corpo + '</div></section>';
   }
 
-  // ─── Filtragem (mesmas regras da produção) ───
-  function obterFiltrados(op){
-    op = op || {};
-    var lista = [];
-    switch (abaAtiva) {
-      case 'todos':     lista = TEMAS.slice(); break;
-      case 'redaon':    lista = TEMAS.filter(function(t){ return !t.ano_enem; }); break;
-      case 'principal': lista = TEMAS.filter(function(t){ return t.ano_enem && (t.aplicacao||'').toLowerCase()==='regular'; }); break;
-      case 'outras':    lista = TEMAS.filter(function(t){ return t.ano_enem && (t.aplicacao||'').toLowerCase()!=='regular'; }); break;
-      case 'meus':      lista = TEMAS.filter(function(t){ return MEUS_TEMAS_IDS.indexOf(t.id) >= 0; }); break;
-    }
-    if (!op.ignorarCampo && campoAtivo !== 'todos') {
-      lista = lista.filter(function(t){ return campoAtivo==='sem' ? !t.campo : t.campo===campoAtivo; });
-    }
-    if (textoBusca && !op.ignorarBusca) {
-      lista = lista.filter(function(t){
-        return (t.titulo || '').toLowerCase().indexOf(textoBusca) >= 0
-            || nomeCampo(t.campo).toLowerCase().indexOf(textoBusca) >= 0
-            || String(t.ano_enem || '').indexOf(textoBusca) >= 0
-            || (t.aplicacao || '').toLowerCase().indexOf(textoBusca) >= 0;
+  // ─── Lista (busca e campo) ───
+  function filtrarLista(){
+    var base = [];
+    fileirasDoChip().forEach(function(id){ FILEIRAS[id].lista().forEach(function(t){ if (base.indexOf(t) < 0) base.push(t); }); });
+    if (EST.campo !== 'todos') base = base.filter(function(t){ return EST.campo === 'sem' ? !t.campo : t.campo === EST.campo; });
+    if (EST.busca) {
+      var q = EST.busca;
+      base = base.filter(function(t){
+        return (t.titulo || '').toLowerCase().indexOf(q) >= 0
+            || nomeCampo(t.campo).toLowerCase().indexOf(q) >= 0
+            || String(t.ano_enem || '').indexOf(q) >= 0;
       });
     }
-    /* v4-11 · o herói só é retirado da lista quando ele está aparecendo. Ao buscar ou ao
-       filtrar por campo, o cartão grande sai de cena e a lista precisa mostrar tudo —
-       antes o tema buscado desaparecia justamente por ser o herói. */
-    if (!op.ignorarHeroi && HEROI_ID && !heroiEscondido()) lista = lista.filter(function(t){ return t.id !== HEROI_ID; });
-    lista.sort(function(a,b){
-      var fa = jaEscreveu(a)?1:0, fb = jaEscreveu(b)?1:0;
-      if (fa !== fb) return fa - fb;
-      return (b.ano_enem||0) - (a.ano_enem||0);
-    });
-    return lista;
+    return base;
+  }
+  function linhaHtml(t){
+    var fav = MEUS_TEMAS_IDS.indexOf(t.id) >= 0, feito = MEUS_FEITOS[t.id];
+    return '<div class="linhaTema" onclick="abrirTema(\'' + t.id + '\')">'
+      + capaHtml(t, 'capaMini', false)
+      + '<div class="lTxt"><p>' + escapeHtmlSimples(t.titulo) + '</p>'
+      + '<span class="lPe">' + aplicacaoRotulo(t) + ' \u00b7 ' + escapeHtmlSimples(nomeCampo(t.campo))
+        + (t.id === SEMANA_ID ? ' <b class="semT">da semana</b>' : '')
+        + (feito ? ' <b class="jaFiz">j\u00e1 escrevi' + (feito.nota ? ' \u00b7 ' + feito.nota : '') + '</b>' : '')
+      + '</span></div>'
+      + '<button class="tPin' + (fav ? ' on' : '') + '" onclick="event.stopPropagation();alternarFavorito(\'' + t.id + '\', this)" aria-label="Salvar em Meus Temas">' + feIcone('disquete') + '</button>'
+      + '</div>';
   }
 
-  // ─── Renderização ───
-  function renderTemas(){
-    var load = document.getElementById('loadingTemas');
-    if (load) load.remove();
-    var lista = obterFiltrados();
-    var total = lista.length + (HEROI_ID?1:0);
-    document.getElementById('contTemas').textContent = total + (total === 1 ? ' tema' : ' temas');
-    var grid = document.getElementById('gridTemas');
-    var btnMais = document.getElementById('btnMais');
-    if (lista.length === 0) {
-      var msgs = { meus: 'Voc\u00ea ainda n\u00e3o guardou nenhum tema.<br>Toque no disquete do tema para guardar em Meus Temas.' };
-      grid.innerHTML = '<p class="vazio">' + (msgs[abaAtiva] || 'Nenhum tema neste filtro.<br>Tente outro campo ou outra aba.') + '</p>';
-      btnMais.classList.add('hidden');
+  // ─── Desenho ───
+  function desenharChips(){
+    var CH = [['todos','Todos'],['redaon','RedaON'],['meus','Meus'],['enem','ENEM']];
+    document.getElementById('chipsT').innerHTML = CH.map(function(c){
+      return '<button class="chipT' + (EST.chip===c[0]?' on':'') + '" onclick="irChip(\'' + c[0] + '\')">' + c[1] + '</button>'; }).join('');
+    document.getElementById('subT').innerHTML = EST.chip !== 'enem' ? '' : [['principal','Prova principal'],['especiais','Especiais']].map(function(c){
+      return '<button class="chipT' + (EST.sub===c[0]?' on':'') + '" onclick="irSub(\'' + c[0] + '\')">' + c[1] + '</button>'; }).join('');
+  }
+  function desenhar(){
+    var area = document.getElementById('areaT');
+    document.getElementById('topoT').style.display = EST.ver ? 'none' : '';
+    if (EST.ver) {
+      var f = FILEIRAS[EST.ver];
+      area.innerHTML = '<div class="cabGrade"><button onclick="voltarFileiras()" aria-label="Voltar">\u2039</button><h2>' + f.tit + '</h2></div>'
+        + '<div class="gradeT">' + f.lista().map(cardT).join('') + '</div>';
       return;
     }
-    /* v4-0 · linha com miniatura em retrato (a capa), fonte, campo e o alfinete de salvar */
-    var visiveis = lista.slice(0, mostrando);
-    grid.innerHTML = visiveis.map(function(t){
-      var fav = MEUS_TEMAS_IDS.indexOf(t.id) >= 0;
-      var feito = MEUS_FEITOS[t.id];
-      return '<div class="linhaTema' + (feito?' feito':'') + '" onclick="abrirTema(\'' + t.id + '\')">'
-        + capaHtml(t,'capaMini')
-        + '<div class="lTxt"><p>' + escapeHtmlSimples(t.titulo) + '</p>'
-        + '<span class="lPe">' + aplicacaoRotulo(t)
-          + ' <b class="eixo' + (t.campo?'':' vazio') + '">' + escapeHtmlSimples(nomeCampo(t.campo)) + '</b>'
-          + (feito ? '<b class="jaFiz">j\u00e1 escrevi' + (feito.nota?' \u00b7 '+feito.nota:'') + '</b>' : '')
-        + '</span></div>'
-        + '<button class="tPin' + (fav ? ' on' : '') + '" onclick="event.stopPropagation();alternarFavorito(\'' + t.id + '\', this)" aria-label="Salvar em Meus Temas">'
-        + feIcone('disquete') + '</button>'
-        + '</div>';
+    desenharChips();
+    if (EST.busca || EST.campo !== 'todos') {
+      var lista = filtrarLista();
+      var rot = EST.busca ? ('Resultados para <b>\u201c' + escapeHtmlSimples(EST.busca) + '\u201d</b>') : ('Campo <b>' + escapeHtmlSimples(EST.campo==='sem' ? 'Sem campo' : nomeCampo(EST.campo)) + '</b>');
+      area.innerHTML = '<p class="rotLista">' + rot + ' \u00b7 ' + lista.length + (lista.length === 1 ? ' tema' : ' temas') + '</p>'
+        + (lista.length ? '<div class="listaT">' + lista.map(linhaHtml).join('') + '</div>'
+                        : '<p class="vazio">Nenhum tema encontrado.<br>Tente outra palavra ou outro campo.</p>');
+      return;
+    }
+    area.innerHTML = fileirasDoChip().map(fileiraHtml).join('') || '<p class="vazio">Nenhum tema aqui ainda.</p>';
+  }
+  window.irChip = function(c){ EST.chip = c; renderGvCampo(); desenhar(); };
+  window.irSub  = function(s){ EST.sub = s; renderGvCampo(); desenhar(); };
+  window.verTodos = function(id){
+    EST.ver = id;
+    try { history.pushState({ ver:id }, ''); } catch(e) {}
+    desenhar(); window.scrollTo(0, 0);
+  };
+  window.voltarFileiras = function(){ if (history.state && history.state.ver) history.back(); else { EST.ver = null; desenhar(); } };
+  window.addEventListener('popstate', function(){ if (EST.ver) { EST.ver = null; desenhar(); } });
+
+  // ─── Campo (gaveta) ───
+  function renderGvCampo(){
+    var salvaCampo = EST.campo, salvaBusca = EST.busca;
+    EST.campo = 'todos'; EST.busca = '';
+    var base = filtrarLista();
+    EST.campo = salvaCampo; EST.busca = salvaBusca;
+    var cont = { todos: base.length };
+    base.forEach(function(t){ var k = t.campo || 'sem'; cont[k] = (cont[k] || 0) + 1; });
+    var itens = [{ id:'todos', nome:'Todos os campos' }].concat(CAMPOS.map(function(c){ return { id:c.id, nome:c.nome }; })).concat([{ id:'sem', nome:'Sem campo' }]);
+    var alvo = document.getElementById('gvCampoLista'); if (!alvo) return;
+    alvo.innerHTML = itens.map(function(i){
+      var sel = (i.id === EST.campo), n = cont[i.id] || 0, vazio = (n === 0 && !sel);
+      return '<a class="pill' + (sel ? ' sel' : '') + '"' + (vazio ? ' style="opacity:.45;"' : '')
+        + ' onclick="escolherCampo(\'' + i.id + '\')">' + escapeHtmlSimples(i.nome)
+        + '<span style="font-size:.72rem;font-weight:600;color:' + (sel ? 'var(--cyan)' : 'var(--muted)') + ';margin-left:.35rem;">(' + n + ')</span>'
+        + '<i class="fim"' + (sel ? '' : ' style="opacity:0;"') + '>&#10003;</i></a>';
     }).join('');
-    btnMais.classList.toggle('hidden', lista.length <= mostrando);
   }
+  window.escolherCampo = function(id){
+    EST.campo = id;
+    document.getElementById('lblCampo').textContent = id === 'todos' ? 'Campo' : (id === 'sem' ? 'Sem campo' : nomeCampo(id));
+    document.getElementById('btCampo').classList.toggle('ativo', id !== 'todos');
+    renderGvCampo(); fecharGaveta('gvCampo'); desenhar();
+  };
 
-  function mostrarMais(){ mostrando += LIMITE; renderTemas(); }
+  // ─── Busca ───
+  window.abrirBusca = function(){
+    document.getElementById('ferrTemas').classList.add('escondida');
+    document.getElementById('linhaBusca').classList.add('aberta');
+    var i = document.getElementById('buscaTopo'); if (i) i.focus();
+  };
+  window.limparBusca = function(){
+    document.getElementById('linhaBusca').classList.remove('aberta');
+    document.getElementById('ferrTemas').classList.remove('escondida');
+    var i = document.getElementById('buscaTopo'); if (i) i.value = '';
+    EST.busca = ''; desenhar();
+  };
+  window.sincronizarBusca = function(v){ EST.busca = (v || '').toLowerCase().trim(); desenhar(); };
 
-  // ─── Ações (contrato de produção: sessionStorage tema_selecionado) ───
-  function acharTema(id){ return TEMAS.find(function(t){ return t.id === id; }); }
-  function escreverTema(id){
-    var t = acharTema(id);
-    if (!t) return;
-    definirTemaSelecionado(t);
-    abrirMetodos();
-  }
-  function prepararTema(id){
-    var t = acharTema(id);
-    if (!t) return;
-    definirTemaSelecionado(t);
-    window.location.href = 'hub-preparacao.html';
-  }
-  /* v4-1 · "Salvos" é do aluno. O que o professor destinar vira outra aba, quando existir. */
-  function alternarFavorito(id, el){
-    /* v4-5: antes era indexOf + splice, e um id duplicado ficava na lista para sempre.
-       Agora a lista é filtrada e nunca aceita repetido. */
+  // ─── Ações ───
+  window.abrirTema = function(id){
+    var t = temaPorId(id); if (!t) return;
+    try { definirTemaSelecionado(t); } catch(e) {}
+    window.location.href = 'hub-preparacao.html?tema=' + encodeURIComponent(id);
+  };
+  window.alternarFavorito = function(id, el){
     var tinha = MEUS_TEMAS_IDS.indexOf(id) >= 0;
     MEUS_TEMAS_IDS = MEUS_TEMAS_IDS.filter(function(x){ return x !== id; });
     var salvou = !tinha;
-    if (salvou) MEUS_TEMAS_IDS.push(id);
-    if (el){
-      el.classList.toggle('on', salvou);
-    }
-    var bt = document.getElementById('ttSalvar');
-    if (bt && bt !== el) bt.classList.toggle('on', salvou);
+    if (salvou) MEUS_TEMAS_IDS.unshift(id);
+    if (el) el.classList.toggle('on', salvou);
     toast(salvou ? 'Tema salvo em Meus Temas' : 'Tema retirado de Meus Temas');
     guardarLocal();
-    gravarSalvo(id, salvou);      /* o banco é atualizado em segundo plano */
-    renderTemas();
-  }
-
-  // ─── Sugerir tema ───
-  async function enviarSugestao(){
+    gravarSalvo(id, salvou);
+  };
+  window.enviarSugestao = async function(){
     var txt = (document.getElementById('txtSugestao').value || '').trim();
     if (txt.length < 10) { toast('Escreva a sugest\u00e3o com um pouco mais de detalhe.', 2400); return; }
     try {
-      var url = SUPABASE_URL + '/rest/v1/sugestoes_temas';
-      var res = await dbFetch(url, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+      var res = await dbFetch(SUPABASE_URL + '/rest/v1/sugestoes_temas', {
+        method:'POST', headers:{ 'Content-Type':'application/json', 'Prefer':'return=minimal' },
         body: JSON.stringify({ texto: txt })
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       document.getElementById('txtSugestao').value = '';
       fecharGaveta('gvSugestao');
-      toast('\u{1F4A1} Sugest\u00e3o enviada para a PROfa!');
+      toast('Sugest\u00e3o enviada para a PROfa!');
     } catch(e) {
-      console.warn('Erro ao enviar sugest\u00e3o:', e);
+      console.warn('[temas] sugestão', e);
       toast('N\u00e3o consegui enviar agora. Tente de novo.', 2600);
     }
-  }
+  };
 
-  /* v4-0 · a dock de filtros saiu: as abas moram no topo, em chips */
-  function acordarDock(){}
-
-  montarAbas();
+  desenharChips();
   carregarTemas();
 </script>
 </body>
